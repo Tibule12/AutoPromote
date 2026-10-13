@@ -3540,7 +3540,9 @@ body.dashboard-mode {
   margin: 0 !important;
   border: none !important;
   border-radius: 0 !important;
-  background: var(--studio-bg-deep) !important;
+  /* The legacy token is not always defined. Keep the full-screen workspace
+     opaque so the covered dashboard does not join every video composite. */
+  background: var(--studio-bg-deep, #02070e) !important;
   z-index: 9999 !important;
 }
 

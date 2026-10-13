@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
 import ViralClipStudioPanel from "../ViralClipStudioPanel";
 import * as projectStore from "../../components/viralStudioProjectStore";
+import { adaptStudioSnapshotToDocument } from "../../components/studioProjectDocument";
 
 const mockVideoEditor = jest.fn();
 const mockGetIdToken = jest.fn();
@@ -29,6 +30,22 @@ jest.mock("../../components/VideoEditor", () => props => {
 });
 
 describe("ViralClipStudioPanel", () => {
+  const backupFile = () => {
+    const id = "viral-project-backup-proof";
+    const snapshot = {
+      orderedClips: [{ id: "source", start: 0, end: 12, duration: 12 }], selectedClipId: "source",
+      timeline: [{ id: "main", sourceClipId: "source", storagePath: "uploads/videos/user/source.mp4",
+        url: "https://example.com/source.mp4", startRequest: 0, endRequest: 12, duration: 12 }],
+      projectMedia: [{ id: "source", storagePath: "uploads/videos/user/source.mp4", duration: 12 }],
+      soundEffects: [{ id: "cue", storagePath: "uploads/audio/user/sound.wav", name: "Impact", startTime: 2, duration: 1 }],
+      overlays: [], motionScenes: [], threeDScenes: [],
+    };
+    snapshot.studioDocument = adaptStudioSnapshotToDocument({ snapshot, projectId: id });
+    const project = { id, name: "Recovered edit", snapshot, versions: [] };
+    const file = new File([JSON.stringify(project)], "project.json", { type: "application/json" });
+    Object.defineProperty(file, "text", { value: async () => JSON.stringify(project) });
+    return { file, project };
+  };
   beforeEach(() => {
     mockSubscriptionLoading = false;
     mockStudioAllowed = true;
@@ -41,6 +58,47 @@ describe("ViralClipStudioPanel", () => {
       storagePath: "uploads/videos/user/source.mp4",
       size: 5,
     });
+  });
+
+  test("backup restore authorizes every owned media path before saving the unchanged canonical edit", async () => {
+    const { file, project } = backupFile();
+    const listing = jest.spyOn(projectStore, "listViralStudioProjects").mockResolvedValue([]);
+    const saving = jest.spyOn(projectStore, "saveViralStudioProject").mockResolvedValue(project);
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ url: "https://media.example.com/owned" }) });
+    try {
+      render(<ViralClipStudioPanel />);
+      fireEvent.change(screen.getByLabelText("Restore project backup"), { target: { files: [file] } });
+      await waitFor(() => expect(saving).toHaveBeenCalledWith(project));
+      expect(global.fetch.mock.calls.map(([, init]) => JSON.parse(init.body).storagePath).sort())
+        .toEqual(["uploads/audio/user/sound.wav", "uploads/videos/user/source.mp4"]);
+    } finally { listing.mockRestore(); saving.mockRestore(); global.fetch = originalFetch; }
+  });
+
+  test("backup restore rejects inaccessible media without writing any project", async () => {
+    const { file } = backupFile();
+    const listing = jest.spyOn(projectStore, "listViralStudioProjects").mockResolvedValue([]);
+    const saving = jest.spyOn(projectStore, "saveViralStudioProject").mockResolvedValue({});
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, json: async () => ({ message: "This source belongs to another account." }) });
+    try {
+      render(<ViralClipStudioPanel />);
+      fireEvent.change(screen.getByLabelText("Restore project backup"), { target: { files: [file] } });
+      await screen.findByText("This source belongs to another account.");
+      expect(saving).not.toHaveBeenCalled();
+    } finally { listing.mockRestore(); saving.mockRestore(); global.fetch = originalFetch; }
+  });
+
+  test("backup restore cannot overwrite a newer saved project", async () => {
+    const { file, project } = backupFile();
+    const listing = jest.spyOn(projectStore, "listViralStudioProjects").mockResolvedValue([project]);
+    const saving = jest.spyOn(projectStore, "saveViralStudioProject").mockResolvedValue({});
+    try {
+      render(<ViralClipStudioPanel />);
+      fireEvent.change(screen.getByLabelText("Restore project backup"), { target: { files: [file] } });
+      await screen.findByText("This project is already saved. Open its saved entry.");
+      expect(saving).not.toHaveBeenCalled();
+    } finally { listing.mockRestore(); saving.mockRestore(); }
   });
 
   test("a saved project waits for the paid profile instead of redirecting to Billing", async () => {
@@ -130,7 +188,7 @@ describe("ViralClipStudioPanel", () => {
     const third = new File(["third"], "camera-b.mp4", { type: "video/mp4" });
     const { container } = render(<ViralClipStudioPanel />);
 
-    fireEvent.change(container.querySelector('input[type="file"]'), {
+    fireEvent.change(container.querySelector('input[type="file"][accept="video/*"]'), {
       target: { files: [first, second, third] },
     });
 

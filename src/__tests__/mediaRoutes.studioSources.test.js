@@ -6,6 +6,7 @@ const mockFiles = new Map();
 const mockCopies = jest.fn();
 const mockStartProcessingJob = jest.fn();
 const mockStartMulticamRenderJob = jest.fn();
+const mockAssertRenderWorkerReady = jest.fn();
 
 const fileKey = (bucket, path) => `${bucket}/${path}`;
 const makeFile = (bucket, path) => ({
@@ -77,6 +78,7 @@ jest.mock("../services/videoEditingService", () =>
   jest.fn().mockImplementation(() => ({
     startProcessingJob: mockStartProcessingJob,
     startMulticamRenderJob: mockStartMulticamRenderJob,
+    assertRenderWorkerReady: mockAssertRenderWorkerReady,
   }))
 );
 jest.mock("../services/cloudRunJobService", () => ({
@@ -109,14 +111,15 @@ const buildApp = () => {
 };
 
 const putVideo = (path, ownerUid = "owner-1", metadata = {}) => {
+  const { contentType = "video/mp4", ...custom } = metadata;
   mockFiles.set(fileKey("test-bucket", path), {
     size: "4096",
-    contentType: "video/mp4",
+    contentType,
     generation: "12",
     metadata: {
       ownerUid,
       purpose: path.startsWith("studio/") ? "studio_project" : undefined,
-      ...metadata,
+      ...custom,
     },
   });
 };
@@ -140,6 +143,29 @@ const renderBody = (segments, extra = {}) => ({
 });
 
 describe("owned Studio project sources", () => {
+  it.each([
+    ["studio/sources/attacker/video.mp4", 403],
+    ["studio/sources/owner-1/missing.mp4", 404],
+    ["studio/sources/owner-1/forged.mp4", 403],
+  ])('denies an accurate paused frame for an unowned/missing source %s before decode or charge', async (storagePath, status) => {
+    if (storagePath.endsWith('forged.mp4')) putVideo(storagePath, 'attacker');
+    const response = await request(buildApp()).post('/api/media/studio-assets/source-frame').send({
+      storagePath, sourceContentHash: 'a'.repeat(64), start: .125, end: 1.125, fps: 24, frameIndex: 1,
+    });
+    expect(response.statusCode).toBe(status);
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+  });
+
+  it('rejects a supplied preview URL and invalid frame request before any storage/model job', async () => {
+    const response = await request(buildApp()).post('/api/media/studio-assets/source-frame').send({
+      storagePath: 'studio/sources/owner-1/scene-a.mp4', sourceContentHash: 'a'.repeat(64),
+      start: .125, end: 1.125, fps: 24, frameIndex: 1, url: 'file:///etc/passwd',
+    });
+    expect(response.statusCode).toBe(422);
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     jest.clearAllMocks();
     mockDocs.clear();
@@ -148,6 +174,7 @@ describe("owned Studio project sources", () => {
     deductCredits.mockResolvedValue({ success: true, deducted: 5, remaining: 95 });
     mockStartProcessingJob.mockResolvedValue({ jobId: "studio-render-1" });
     mockStartMulticamRenderJob.mockResolvedValue({ jobId: "cam-job-1", dispatchMode: "cloud_run_job" });
+    mockAssertRenderWorkerReady.mockResolvedValue({ ready: true });
     putVideo("studio/sources/owner-1/scene-a.mp4");
     putVideo("studio/sources/owner-1/scene-b.mp4");
   });
@@ -277,6 +304,32 @@ describe("owned Studio project sources", () => {
     expect(valid.body.url).toContain("small-scene.mp4");
     expect(forged.statusCode).toBe(403);
     expect(forged.body.code).toBe("STUDIO_SOURCE_FORBIDDEN");
+    expect(deductCredits).not.toHaveBeenCalled();
+  });
+
+  it("does not charge or dispatch when the selected render worker is unavailable", async () => {
+    mockAssertRenderWorkerReady.mockRejectedValueOnce(Object.assign(new Error("Worker offline"), { statusCode: 503 }));
+    const response = await request(buildApp()).post("/api/media/process")
+      .send(renderBody([clip("scene-a", "studio/sources/owner-1/scene-a.mp4")]));
+    expect(response.statusCode).toBe(503);
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+  });
+
+  it("reopens owned image/audio assets without allowing foreign owners or executable media", async () => {
+    for (const [type, name, contentType] of [["images", "logo.png", "image/png"], ["audios", "music.wav", "audio/wav"]]) {
+      const path = `uploads/${type}/owner-1/${name}`;
+      putVideo(path, "owner-1", { contentType });
+      const result = await request(buildApp()).post("/api/media/studio-assets/resolve").send({ storagePath: path });
+      expect(result.statusCode).toBe(200);
+      putVideo(path, "attacker", { contentType });
+      const forged = await request(buildApp()).post("/api/media/studio-assets/resolve").send({ storagePath: path });
+      expect(forged.statusCode).toBe(403);
+    }
+    putVideo("uploads/images/owner-1/page.html", "owner-1", { contentType: "text/html" });
+    const executable = await request(buildApp()).post("/api/media/studio-assets/resolve")
+      .send({ storagePath: "uploads/images/owner-1/page.html" });
+    expect(executable.statusCode).toBe(422);
     expect(deductCredits).not.toHaveBeenCalled();
   });
 

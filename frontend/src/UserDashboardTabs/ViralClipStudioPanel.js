@@ -6,7 +6,8 @@ import { sanitizeUrl } from "../utils/security";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import { getMediaAuthToken } from "../utils/mediaAuth";
 import { API_BASE_URL } from "../config";
-import { listViralStudioProjects } from "../components/viralStudioProjectStore";
+import { listViralStudioProjects, saveViralStudioProject } from "../components/viralStudioProjectStore";
+import { readStudioProjectBackup } from "../components/studioProjectBackup";
 
 const resolveSourceUrl = source => {
   if (typeof source === "string") return sanitizeUrl(source);
@@ -85,6 +86,37 @@ function ViralClipStudioPanel({
   const [savedProjectsError, setSavedProjectsError] = useState("");
   const [resumedProject, setResumedProject] = useState(null);
   const [resumingProject, setResumingProject] = useState(false);
+  const [restoringBackup, setRestoringBackup] = useState(false);
+
+  const restoreBackup = async file => {
+    if (!file || restoringBackup || subscriptionLoading) return;
+    if (!canUseFeature("viralClipStudio")) { onUpgrade?.(); return; }
+    setRestoringBackup(true);
+    setSavedProjectsError("");
+    try {
+      const { project, mediaPaths } = await readStudioProjectBackup(file);
+      const existing = await listViralStudioProjects();
+      if (existing.some(item => item.id === project.id)) throw new Error("This project is already saved. Open its saved entry.");
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Sign in to restore your project backup.");
+      // Bound parallel ownership checks so large saved projects do not wait
+      // for every independent Storage lookup in series. Save only after all pass.
+      for (let offset = 0; offset < mediaPaths.length; offset += 4) {
+        await Promise.all(mediaPaths.slice(offset, offset + 4).map(async storagePath => {
+          const response = await fetch(`${API_BASE_URL}/api/media/studio-assets/resolve`, {
+            method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ storagePath }),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || !result.url) throw new Error(result.message || "A backup source is unavailable to this account.");
+        }));
+      }
+      await saveViralStudioProject(project);
+      setSavedProjects(await listViralStudioProjects());
+    } catch (error) {
+      setSavedProjectsError(error.message || "Project backup could not be restored.");
+    } finally { setRestoringBackup(false); }
+  };
 
   useEffect(() => {
     let active = true;
@@ -280,6 +312,12 @@ function ViralClipStudioPanel({
         </button>
       ) : null}
       <div className="viral-clips-workspace creator-studio-entry">
+        <label className="btn-secondary">
+          {restoringBackup ? "Restoring project…" : "Restore project backup"}
+          <input type="file" accept="application/json,.json" aria-label="Restore project backup"
+            disabled={restoringBackup || subscriptionLoading}
+            onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; void restoreBackup(file); }} />
+        </label>
         {savedProjectsError && <div role="alert">
           <p>{savedProjectsError}</p>
           <button type="button" onClick={async () => {

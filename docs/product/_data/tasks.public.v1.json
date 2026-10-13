@@ -1,0 +1,928 @@
+{
+  "knowledge_version": "1.0.4",
+  "tasks": [
+    {
+      "task_id": "task.image_cinematic",
+      "title": "Turn an image into a cinematic scene",
+      "status": "PARTIAL",
+      "summary": "Use image-conditioned generation only when the owned image, job availability and cost checks permit it.",
+      "feature_ids": [
+        "system.costs",
+        "studio.media_ingest",
+        "generation.image_to_video",
+        "generation.scene_workflow",
+        "studio.render"
+      ],
+      "control_ids": [],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Import the owned conditioning image and verify it is usable.",
+          "feature_id": "studio.media_ingest",
+          "control_ids": []
+        },
+        {
+          "instruction": "Request an image-conditioned moving shot through the existing reviewed workflow; retain conditioning evidence.",
+          "feature_id": "generation.image_to_video",
+          "control_ids": []
+        },
+        {
+          "instruction": "Watch the returned motion, accept the usable shot and import it into the canonical project.",
+          "feature_id": "generation.scene_workflow",
+          "control_ids": []
+        },
+        {
+          "instruction": "Edit ordinary layers and sound, then render the current project.",
+          "feature_id": "studio.render",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [
+        "Can AutoPromote animate this image"
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.product_launch",
+      "title": "Create a product-launch promo",
+      "status": "PARTIAL",
+      "summary": "Apply the shared launch draft to owned footage and branding; distinguish your timeline cuts from cuts already inside sources.",
+      "feature_ids": [
+        "creative.story",
+        "studio.export",
+        "studio.media_ingest",
+        "studio.templates",
+        "studio.keyframes",
+        "studio.audio"
+      ],
+      "control_ids": [
+        "studio.keyframe.time",
+        "studio.keyframe.easing",
+        "studio.transform.scale"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Import owned product footage and logo inputs.",
+          "feature_id": "studio.media_ingest",
+          "control_ids": []
+        },
+        {
+          "instruction": "Select the exact draft launch definition and bind its footage/copy/music slots.",
+          "feature_id": "studio.templates",
+          "control_ids": []
+        },
+        {
+          "instruction": "Refine layer movement in the native timeline and inspect the actual cuts.",
+          "feature_id": "studio.keyframes",
+          "control_ids": [
+            "studio.keyframe.time",
+            "studio.keyframe.easing",
+            "studio.transform.scale"
+          ]
+        },
+        {
+          "instruction": "Place music and sound cues, listen, then export.",
+          "feature_id": "studio.audio",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [
+        "make product shot more cinematic"
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.text_behind",
+      "title": "Put text behind a person",
+      "status": "PARTIAL",
+      "summary": "Use the real reviewed mask-backed scene rather than the Creator placement study.",
+      "feature_ids": [
+        "studio.subject_cutout",
+        "studio.compositing.text_behind_subject",
+        "studio.masks",
+        "studio.cut"
+      ],
+      "control_ids": [
+        "studio.subject.range",
+        "studio.subject.seed_points",
+        "studio.subject.seed_labels",
+        "studio.subject.x",
+        "studio.subject.y",
+        "studio.subject.font_size"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Choose a source-bound 0.25–10 second range and place subject seed points.",
+          "feature_id": "studio.subject_cutout",
+          "control_ids": [
+            "studio.subject.range",
+            "studio.subject.seed_points",
+            "studio.subject.seed_labels"
+          ]
+        },
+        {
+          "instruction": "Add text, adjust its position/size and request the owned composite.",
+          "feature_id": "studio.compositing.text_behind_subject",
+          "control_ids": [
+            "studio.subject.x",
+            "studio.subject.y",
+            "studio.subject.font_size"
+          ]
+        },
+        {
+          "instruction": "Inspect occlusion in moving playback and review the current scene result.",
+          "feature_id": "studio.masks",
+          "control_ids": []
+        },
+        {
+          "instruction": "Split the timeline at effect range boundaries, then save and export the reviewed version.",
+          "feature_id": "studio.cut",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "New segmentation requires configured execution availability and cost/permission checks.",
+        "Mask-scene text parameters are static scene fields; do not invent generic property keyframes."
+      ],
+      "aliases": [
+        "How do I make text go behind this person"
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.tracked_text",
+      "title": "Track text to a moving object",
+      "status": "PARTIAL",
+      "summary": "Use a reviewed real track for the supported short tracked-callout scene.",
+      "feature_ids": [
+        "studio.tracking",
+        "studio.compositing.tracked_callout"
+      ],
+      "control_ids": [
+        "studio.subject.range",
+        "studio.subject.seed_points",
+        "studio.subject.offset_x",
+        "studio.subject.offset_y"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Choose the visible target and bounded source range.",
+          "feature_id": "studio.tracking",
+          "control_ids": [
+            "studio.subject.range",
+            "studio.subject.seed_points"
+          ]
+        },
+        {
+          "instruction": "Review the owned track/masks; unavailable workers require resolving availability, not drawing a fake track.",
+          "feature_id": "studio.tracking",
+          "control_ids": []
+        },
+        {
+          "instruction": "Adjust callout offsets, inspect the attachment across motion and export the reviewed scene.",
+          "feature_id": "studio.compositing.tracked_callout",
+          "control_ids": [
+            "studio.subject.offset_x",
+            "studio.subject.offset_y"
+          ]
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [
+        "Why cannot use object tracking"
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.background_replace",
+      "title": "Replace a background",
+      "status": "PROXY_ONLY",
+      "summary": "The existing browser placement study does not establish a supported final replace a background workflow.",
+      "feature_ids": [
+        "studio.creator.background_replacement"
+      ],
+      "control_ids": [],
+      "prerequisites": [],
+      "mode": "UNAVAILABLE",
+      "steps": [
+        {
+          "instruction": "Read the proxy limitation; no finished model-backed workflow is qualified. Do not export a placement study as proof of this capability.",
+          "feature_id": "studio.creator.background_replacement",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "No qualified finished workflow is available for this task.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.remove_object",
+      "title": "Remove an object",
+      "status": "PROXY_ONLY",
+      "summary": "The existing browser placement study does not establish a supported final remove an object workflow.",
+      "feature_ids": [
+        "studio.creator.object_cleanup"
+      ],
+      "control_ids": [],
+      "prerequisites": [],
+      "mode": "UNAVAILABLE",
+      "steps": [
+        {
+          "instruction": "Read the proxy limitation; no finished model-backed workflow is qualified. Do not export a placement study as proof of this capability.",
+          "feature_id": "studio.creator.object_cleanup",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "No qualified finished workflow is available for this task.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.screen_replace",
+      "title": "Replace a laptop/phone screen",
+      "status": "PROXY_ONLY",
+      "summary": "The existing browser placement study does not establish a supported final replace a laptop/phone screen workflow.",
+      "feature_ids": [
+        "studio.creator.screen_replacement"
+      ],
+      "control_ids": [],
+      "prerequisites": [],
+      "mode": "UNAVAILABLE",
+      "steps": [
+        {
+          "instruction": "Read the proxy limitation; no finished model-backed workflow is qualified. Do not export a placement study as proof of this capability.",
+          "feature_id": "studio.creator.screen_replacement",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "No qualified finished workflow is available for this task.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.cinematic_logo",
+      "title": "Create a cinematic logo reveal",
+      "status": "PARTIAL",
+      "summary": "Use owned branding and supported authored scene movement; no public-quality logo result is yet qualified.",
+      "feature_ids": [
+        "studio.export",
+        "creative.logo_brand",
+        "studio.three_d",
+        "studio.sfx"
+      ],
+      "control_ids": [
+        "studio.three_d.material",
+        "studio.three_d.focallength"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Import the owned logo and select a supported draft/preset.",
+          "feature_id": "creative.logo_brand",
+          "control_ids": []
+        },
+        {
+          "instruction": "Author ordinary layers or a bounded 3D scene; review unsupported final fields.",
+          "feature_id": "studio.three_d",
+          "control_ids": [
+            "studio.three_d.material",
+            "studio.three_d.focallength"
+          ]
+        },
+        {
+          "instruction": "Place deliberate sound cues and review the actual final movie.",
+          "feature_id": "studio.sfx",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.animate_person",
+      "title": "Animate a person from an image",
+      "status": "PARTIAL",
+      "summary": "Use the image-conditioned workflow and inspect identity/anatomy/motion; moving does not mean speaking.",
+      "feature_ids": [
+        "studio.media_ingest",
+        "generation.human_animation",
+        "generation.scene_workflow"
+      ],
+      "control_ids": [],
+      "prerequisites": [],
+      "mode": "INTERNAL_REVIEW_ONLY",
+      "steps": [
+        {
+          "instruction": "Import an owned or appropriately permitted image.",
+          "feature_id": "studio.media_ingest",
+          "control_ids": []
+        },
+        {
+          "instruction": "Request and review an image-conditioned moving scene if the capability is currently available.",
+          "feature_id": "generation.human_animation",
+          "control_ids": []
+        },
+        {
+          "instruction": "Import only an accepted owned video and continue native editing.",
+          "feature_id": "generation.scene_workflow",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An accepted owned image-conditioned moving shot, when execution is available; no speaking/lip synchronization claim.",
+      "limitations": [
+        "Image-conditioned motion is partial; talking/lip synchronization is unimplemented. No universal self-service person-animation availability is qualified."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.podcast_vertical",
+      "title": "Turn a podcast into a vertical promo",
+      "status": "PARTIAL",
+      "summary": "Select an owned conversation excerpt, prepare the authoritative audio and refine the vertical edit.",
+      "feature_ids": [
+        "studio.export",
+        "cam_combiner.synchronization",
+        "director.find_viral_clips",
+        "studio.crop_reframe",
+        "studio.captions"
+      ],
+      "control_ids": [],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "If there are multiple cameras, synchronize them and verify clean-audio speaker mapping.",
+          "feature_id": "cam_combiner.synchronization",
+          "control_ids": []
+        },
+        {
+          "instruction": "Select/review an excerpt or clip proposal; scores do not guarantee virality.",
+          "feature_id": "director.find_viral_clips",
+          "control_ids": []
+        },
+        {
+          "instruction": "Reframe to the intended vertical view and inspect faces across the selected range.",
+          "feature_id": "studio.crop_reframe",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use reviewed caption phrases and listen to voice/music before final export.",
+          "feature_id": "studio.captions",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Automatic-word caption repetition remains broken; reviewed phrases are a limited subset.",
+        "Camera synchronization and deterministic final rendering remain authoritative."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.cam_combiner",
+      "title": "Use Cam Combiner",
+      "status": "PARTIAL",
+      "summary": "Align owned cameras and master audio, review the heuristic edit plan and send the result into Studio.",
+      "feature_ids": [
+        "cam_combiner.master_audio",
+        "cam_combiner.reactions",
+        "cam_combiner.split_views",
+        "cam_combiner.export",
+        "cam_combiner.upload",
+        "cam_combiner.synchronization",
+        "cam_combiner.channel_mapping",
+        "cam_combiner.switching",
+        "cam_combiner.review",
+        "cam_combiner.drift"
+      ],
+      "control_ids": [
+        "cam_combiner.source_count",
+        "cam_combiner.sync_offset",
+        "cam_combiner.sync_rate",
+        "cam_combiner.swap_channels",
+        "cam_combiner.verify_channels",
+        "cam_combiner.switch_interval",
+        "cam_combiner.zoom"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Upload two or three camera sources and, when available, clean/master audio.",
+          "feature_id": "cam_combiner.upload",
+          "control_ids": [
+            "cam_combiner.source_count"
+          ]
+        },
+        {
+          "instruction": "Synchronize and check alignment near the beginning, middle and end.",
+          "feature_id": "cam_combiner.synchronization",
+          "control_ids": [
+            "cam_combiner.sync_offset"
+          ]
+        },
+        {
+          "instruction": "Review any estimated drift rate and recheck sync later in the recording; the automatic estimator is narrower than the time-mapping bounds.",
+          "feature_id": "cam_combiner.drift",
+          "control_ids": [
+            "cam_combiner.sync_rate"
+          ]
+        },
+        {
+          "instruction": "Listen to isolated channels; swap and confirm speaker mapping if needed.",
+          "feature_id": "cam_combiner.channel_mapping",
+          "control_ids": [
+            "cam_combiner.swap_channels",
+            "cam_combiner.verify_channels"
+          ]
+        },
+        {
+          "instruction": "Generate/edit the activity-based switching plan and its reaction/split views.",
+          "feature_id": "cam_combiner.switching",
+          "control_ids": [
+            "cam_combiner.switch_interval"
+          ]
+        },
+        {
+          "instruction": "Review reaction/split layouts and the selected source framing rather than relying on activity scores alone.",
+          "feature_id": "cam_combiner.split_views",
+          "control_ids": [
+            "cam_combiner.zoom"
+          ]
+        },
+        {
+          "instruction": "Watch/listen to the deterministic candidate, approve only a usable result and hand it into Studio.",
+          "feature_id": "cam_combiner.review",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [
+        "difference between Cam Combiner and Director"
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.reversed_channels",
+      "title": "Correct reversed clean-audio channels",
+      "status": "PARTIAL",
+      "summary": "Correct speaker association in the camera session before trusting suggested cuts.",
+      "feature_ids": [
+        "cam_combiner.master_audio",
+        "cam_combiner.channel_mapping",
+        "cam_combiner.switching"
+      ],
+      "control_ids": [
+        "cam_combiner.swap_channels",
+        "cam_combiner.verify_channels"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Listen to the left/right clean-audio channels and identify which camera shows each speaker.",
+          "feature_id": "cam_combiner.master_audio",
+          "control_ids": []
+        },
+        {
+          "instruction": "Toggle Swap left/right clean-audio channels when the association is reversed.",
+          "feature_id": "cam_combiner.channel_mapping",
+          "control_ids": [
+            "cam_combiner.swap_channels"
+          ]
+        },
+        {
+          "instruction": "Confirm I verified which speaker belongs to each channel for the current mapping.",
+          "feature_id": "cam_combiner.channel_mapping",
+          "control_ids": [
+            "cam_combiner.verify_channels"
+          ]
+        },
+        {
+          "instruction": "Rebuild/review the switching plan and inspect the actual rendered audio/video alignment.",
+          "feature_id": "cam_combiner.switching",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.captions_correct",
+      "title": "Create captions and correct transcription",
+      "status": "BROKEN",
+      "summary": "Automatic words are currently broken; use reviewed phrase correction and inspect the actual final subset.",
+      "feature_ids": [
+        "studio.captions"
+      ],
+      "control_ids": [],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Review source transcription and correct the selected phrase rather than trusting repeated automatic words.",
+          "feature_id": "studio.captions",
+          "control_ids": []
+        },
+        {
+          "instruction": "Inspect the current phrase at mapped source times in preview and final export.",
+          "feature_id": "studio.captions",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "The automatic-word repetition defect remains open. A successful reviewed phrase render does not qualify automatic captions."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.add_broll",
+      "title": "Add B-roll",
+      "status": "PARTIAL",
+      "summary": "Use owned source footage or an accepted real generated shot as editable material.",
+      "feature_ids": [
+        "studio.generated_video",
+        "studio.b_roll",
+        "studio.trim",
+        "studio.audio"
+      ],
+      "control_ids": [],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Import owned footage or review/accept a generated B-roll request.",
+          "feature_id": "studio.b_roll",
+          "control_ids": []
+        },
+        {
+          "instruction": "Place the shot on the native timeline, trim it and inspect its framing.",
+          "feature_id": "studio.trim",
+          "control_ids": []
+        },
+        {
+          "instruction": "Adjust sound, save the ordinary project and export.",
+          "feature_id": "studio.audio",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.three_d_title",
+      "title": "Create a 3D title/logo scene",
+      "status": "PARTIAL",
+      "summary": "Use supported bounded scene fields, then obtain and review a current owned final 3D result.",
+      "feature_ids": [
+        "system.costs",
+        "studio.three_d",
+        "studio.blender"
+      ],
+      "control_ids": [
+        "studio.three_d.material",
+        "studio.three_d.x",
+        "studio.three_d.rotationy",
+        "studio.three_d.focallength",
+        "studio.three_d.lightintensity"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Choose a scene preset and edit title/material plus supported transform values.",
+          "feature_id": "studio.three_d",
+          "control_ids": [
+            "studio.three_d.material",
+            "studio.three_d.x",
+            "studio.three_d.rotationy"
+          ]
+        },
+        {
+          "instruction": "Adjust camera focal length/light intensity; disabled fields do not gain final support.",
+          "feature_id": "studio.three_d",
+          "control_ids": [
+            "studio.three_d.focallength",
+            "studio.three_d.lightintensity"
+          ]
+        },
+        {
+          "instruction": "Request the existing final scene path only under its availability and cost checks, then review and compose the owned result.",
+          "feature_id": "studio.blender",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.use_template",
+      "title": "Use a creative template",
+      "status": "PARTIAL",
+      "summary": "Resolve an exact draft version and bind customer-owned inputs into the shared canonical project.",
+      "feature_ids": [
+        "studio.export",
+        "creative.shared_templates",
+        "studio.templates",
+        "studio.persistence"
+      ],
+      "control_ids": [],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Select the exact template identity/version and provide its required owned slots.",
+          "feature_id": "creative.shared_templates",
+          "control_ids": []
+        },
+        {
+          "instruction": "Apply it into ordinary layers, clips, keys and audio; edit with the same Studio controls.",
+          "feature_id": "studio.templates",
+          "control_ids": []
+        },
+        {
+          "instruction": "Save, reopen and inspect the native timeline before rendering the current project.",
+          "feature_id": "studio.persistence",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.director_manual",
+      "title": "Modify Director edits manually",
+      "status": "PARTIAL",
+      "summary": "Reviewed Director changes and manual controls share the same project graph.",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.audio",
+        "studio.undo_redo",
+        "director.evidence",
+        "director.review",
+        "studio.transforms",
+        "studio.revision"
+      ],
+      "control_ids": [
+        "studio.transform.x",
+        "studio.transform.scale",
+        "studio.transform.opacity"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Review source/evidence and the current revision-bound proposal.",
+          "feature_id": "director.evidence",
+          "control_ids": []
+        },
+        {
+          "instruction": "Apply only a valid reviewed proposal.",
+          "feature_id": "director.review",
+          "control_ids": []
+        },
+        {
+          "instruction": "Select ordinary clips/layers/audio and modify supported native controls; undo/redo stays available.",
+          "feature_id": "studio.transforms",
+          "control_ids": [
+            "studio.transform.x",
+            "studio.transform.scale",
+            "studio.transform.opacity"
+          ]
+        },
+        {
+          "instruction": "Save/reopen and export the current revision; stale proposals need fresh review.",
+          "feature_id": "studio.revision",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [
+        "What controls can I change after Director makes the edit"
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.final_export",
+      "title": "Export a final film",
+      "status": "PARTIAL",
+      "summary": "Compile the saved current project, review the completed exact output and download it through the normal flow.",
+      "feature_ids": [
+        "system.costs",
+        "system.unsupported_media",
+        "studio.preview",
+        "studio.revision",
+        "studio.export",
+        "studio.render"
+      ],
+      "control_ids": [],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Verify owned sources, current project revision and all scene reviews.",
+          "feature_id": "studio.revision",
+          "control_ids": []
+        },
+        {
+          "instruction": "Check unsupported/stale scenes, effects and current render estimate.",
+          "feature_id": "studio.export",
+          "control_ids": []
+        },
+        {
+          "instruction": "Request the existing deterministic final render; do not treat a log or queued job as output.",
+          "feature_id": "studio.render",
+          "control_ids": []
+        },
+        {
+          "instruction": "Play the entire downloaded movie with sound and compare relevant preview/cut/text/audio frames.",
+          "feature_id": "studio.export",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    }
+  ]
+}

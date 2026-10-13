@@ -45,7 +45,14 @@
     "build:studio-director-replay": "node ./scripts/build-studio-director-replay.js",
     "check:studio-director-replay": "node ./scripts/build-studio-director-replay.js --check",
     "build:frontend": "(npm --prefix frontend ci && npm --prefix frontend run build) || (npm --prefix frontend install && npm --prefix frontend run build)",
-    "test:model-runtime": "node --test test/model-runtime/*.test.js"
+    "test:model-runtime": "node --test test/model-runtime/*.test.js",
+    "test:creative-templates": "node --test test/creative-templates/*.test.js",
+    "knowledge:validate": "node scripts/product-knowledge.js validate",
+    "knowledge:build": "node scripts/product-knowledge.js build",
+    "knowledge:check": "node scripts/product-knowledge.js check",
+    "knowledge:test": "node --test test/product-knowledge/*.test.js",
+    "knowledge:review": "node scripts/product-knowledge.js review",
+    "assistance:test": "node --test test/product-assistance/*.test.js"
   },
   "engines": {
     "node": ">=20.18.1"

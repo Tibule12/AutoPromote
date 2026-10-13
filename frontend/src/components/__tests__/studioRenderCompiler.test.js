@@ -4,6 +4,7 @@ import {
   assertStudioExportTimelineMatchesDocument,
   assertStudioSpeedPlanMatchesDocument,
   compileStudioTimelineForRender,
+  compileStudioCompositionForRender,
 } from "../studioRenderCompiler";
 import { buildViralRenderData, mapCaptionSegmentsToTimeline } from "../viralRenderPayload";
 import { buildSpeedSegmentsFromKeyframes } from "../studioCreatorRecipes";
@@ -15,6 +16,31 @@ import {
 } from "../studioTime";
 import trimFixture from "./fixtures/trim-linked-timing.json";
 import endTrimFixture from "./fixtures/trim-end-linked-timing.json";
+
+test("image masks and crop keys survive the canonical composition boundary without sharing mutable settings", () => {
+  const document = adaptStudioSnapshotToDocument({ projectId: "mask-project", snapshot: {
+    orderedClips: [{ id: "source", start: 0, end: 2 }], selectedClipId: "source",
+    timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 2 }],
+    overlays: [{ id: "image", type: "image", x: 50, y: 50, width: 30, height: 40,
+      cropX: 12, cropY: 8, mask: { enabled: true, shape: "polygon", path: "polygon(0% 0%, 100% 0%, 0% 100%)", feather: 0, inverted: false } }],
+    motionKeyframes: [{ id: "crop", targetId: "image", property: "cropX", time: 1, value: 20, easing: "linear" }],
+  } });
+  const layer = compileStudioCompositionForRender(document).layers.find(item => item.id === "image");
+  expect(layer.effects.mask).toEqual({ enabled: true, shape: "polygon", path: "polygon(0% 0%, 100% 0%, 0% 100%)", feather: 0, inverted: false });
+  expect(layer.base_transform).toMatchObject({ crop_x: 12, crop_y: 8 });
+  expect(layer.motion_keyframes[0]).toMatchObject({ property: "cropX", value: 20, time: 1 });
+  layer.effects.mask.shape = "ellipse";
+  expect(compileStudioCompositionForRender(document).layers.find(item => item.id === "image").effects.mask.shape).toBe("polygon");
+});
+
+test("unimplemented geometric video masks stop compilation rather than dropping customer decisions", () => {
+  const document = adaptStudioSnapshotToDocument({ projectId: "video-mask", snapshot: {
+    orderedClips: [{ id: "source", start: 0, end: 2 }], selectedClipId: "source",
+    timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 2 }],
+    overlays: [{ id: "video", type: "video", x: 50, y: 50, mask: { enabled: true, feather: 20 } }],
+  } });
+  expect(() => compileStudioCompositionForRender(document)).toThrow(/Geometric masks/);
+});
 
 test("canonical programme timeline agrees with worker timing for duplicate source occurrences", () => {
   const document = adaptStudioSnapshotToDocument({

@@ -32,6 +32,7 @@ import {
 } from "firebase/firestore";
 import { API_ENDPOINTS, API_BASE_URL, PUBLIC_SITE_URL } from "./config";
 import { parseJsonSafe } from "./utils/parseJsonSafe";
+import { clearSessionPreservingRenderAttempts } from "./utils/viralRenderRecovery";
 import {
   ensureActiveWorkspace,
   setActiveWorkspaceId,
@@ -54,6 +55,7 @@ import LogoutConfirmDialog from "./components/LogoutConfirmDialog";
 import ForgotPasswordPage from "./ForgotPasswordPage";
 import ResetPasswordPage from "./ResetPasswordPage";
 import UserDashboard from "./UserDashboard_full";
+import ProductAssistance from "./components/ProductAssistance";
 
 // Static Pages — lazy loaded for bundle splitting
 const About = lazy(() => import("./About"));
@@ -213,6 +215,9 @@ function App() {
   const [mySchedules, setMySchedules] = useState([]);
   const [mySchedulesLoading, setMySchedulesLoading] = useState(true);
   const [mySchedulesError, setMySchedulesError] = useState("");
+  const [scheduleScope, setScheduleScope] = useState("week");
+  const [scheduleCursor, setScheduleCursor] = useState(null);
+  const [schedulesLoading, setSchedulesLoading] = useState(false);
   const [analytics, setAnalytics] = useState(null);
   const [userDefaults, setUserDefaults] = useState({
     timezone: "UTC",
@@ -272,7 +277,7 @@ function App() {
         }
         setUser(null);
         setIsAdmin(false);
-        localStorage.clear();
+        clearSessionPreservingRenderAttempts();
         setContent([]); // Clear content on logout
         try {
           if (Sentry && typeof Sentry.setUser === "function") Sentry.setUser(null);
@@ -318,7 +323,7 @@ function App() {
       } catch (error) {
         setUser(null);
         setIsAdmin(false);
-        localStorage.clear();
+        clearSessionPreservingRenderAttempts();
         setContent([]);
       }
     });
@@ -409,6 +414,9 @@ function App() {
           return;
         }
       }
+      // The owned publishing queue must not wait for workspace/content loading.
+      // Its authenticated endpoint handles its own errors and authorization.
+      void fetchMySchedules(token);
       const workspaceId = await ensureActiveWorkspace(WORKSPACE_ENDPOINTS.CURRENT, token);
       const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
         method: "GET",
@@ -457,16 +465,15 @@ function App() {
       const parsed = await parseJsonSafe(res);
       const data = parsed.json || null;
       setContent((data && data.content) || []);
-      // After content, also fetch schedules (reuse token)
-      await fetchMySchedules(token);
     } catch (error) {
       setMySchedulesLoading(false);
       setMySchedulesError("Schedule could not be loaded. Try again.");
     }
   };
 
-  const fetchMySchedules = async (providedToken = null) => {
+  const fetchMySchedules = async (providedToken = null, options = {}) => {
     setMySchedulesLoading(true);
+    setSchedulesLoading(true);
     setMySchedulesError("");
     try {
       let token = providedToken;
@@ -476,9 +483,15 @@ function App() {
         else if (user && user.token) token = user.token;
         else throw new Error("Sign in to load your schedule.");
       }
-      // The full owned schedule includes timezone and platform copy, which the
-      // summary response intentionally omits. This is still a read-only GET.
-      const res = await fetch(`${API_ENDPOINTS.MY_SCHEDULES}?limit=250`, {
+      const scope = options.scope || scheduleScope;
+      const query = new URLSearchParams({ limit: "250" });
+      if (scope === "week") {
+        const now = Date.now();
+        query.set("from", new Date(now).toISOString());
+        query.set("until", new Date(now + 7 * 86400000).toISOString());
+      }
+      if (options.cursor) query.set("cursor", options.cursor);
+      const res = await fetch(`${API_ENDPOINTS.MY_SCHEDULES}?${query}`, {
         method: "GET",
         headers: withWorkspaceHeaders({
           Authorization: `Bearer ${token}`,
@@ -490,12 +503,19 @@ function App() {
       const parsed = await parseJsonSafe(res);
       const data = parsed.json || null;
       if (!Array.isArray(data?.schedules)) throw new Error("Schedule response was incomplete.");
-      setMySchedules(data.schedules);
-      if (data?.meta?.hasMore) setMySchedulesError("Only the most recent 250 schedules are shown.");
+      const rows = data.schedules;
+      setMySchedules(previous =>
+        options.cursor
+          ? [...previous, ...rows.filter(row => !previous.some(old => old.id === row.id))]
+          : rows
+      );
+      setScheduleCursor(data?.meta?.nextCursor || null);
+      setScheduleScope(scope);
     } catch (error) {
       setMySchedulesError(error.message || "Schedule could not be loaded.");
     } finally {
       setMySchedulesLoading(false);
+      setSchedulesLoading(false);
     }
   };
 
@@ -813,7 +833,7 @@ function App() {
 
   const handleLogin = async userData => {
     try {
-      localStorage.clear();
+      clearSessionPreservingRenderAttempts();
       if (!userData || !userData.role) {
         setShowLogin(true);
         setUser(null);
@@ -991,7 +1011,7 @@ function App() {
       setShowLogin(false);
       setShowRegister(false);
       setShowAdminLogin(false);
-      localStorage.clear();
+      clearSessionPreservingRenderAttempts();
       setJustLoggedOut(true);
       setTermsRequired(false);
       setRequiredTermsVersion(null);
@@ -1339,7 +1359,8 @@ function App() {
       const monetization_settings = {
         niche: tiktokOps.niche || "general",
         is_sponsored: !!(
-          tiktokOps.commercialContent ||
+          tiktokOps.brandedContent ||
+          tiktokOps.commercial?.brandedContent ||
           youtubeOps.paidPromotion ||
           instaOps.isPaidPartnership
         ),
@@ -1773,6 +1794,11 @@ function App() {
                     mySchedulesLoading={mySchedulesLoading}
                     mySchedulesError={mySchedulesError}
                     onSchedulesChanged={refreshSchedules}
+                    scheduleScope={scheduleScope}
+                    schedulesLoading={schedulesLoading}
+                    hasMoreSchedules={!!scheduleCursor}
+                    onScheduleScopeChanged={scope => fetchMySchedules(null, { scope })}
+                    onLoadMoreSchedules={() => fetchMySchedules(null, { cursor: scheduleCursor })}
                     onWorkspaceChanged={async workspace => {
                       setActiveWorkspaceId(workspace?.id || null);
                       await fetchUserContent();
@@ -1914,6 +1940,7 @@ function App() {
       </Suspense>
 
       {/* AI Chat Widget - only show when user is logged in */}
+      {user && <ProductAssistance />}
       {user && <ChatWidget user={user} />}
     </div>
   );

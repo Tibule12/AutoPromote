@@ -1,0 +1,2131 @@
+{
+  "schemaVersion": 1,
+  "canonicalContractVersion": 1,
+  "principle": "Show the result before explaining the feature.",
+  "categories": [
+    {
+      "id": "image_to_cinematic_scene",
+      "label": "Image \u2192 cinematic moving scene",
+      "availability": "planned"
+    },
+    {
+      "id": "idea_to_finished_promo",
+      "label": "Idea \u2192 finished promo",
+      "availability": "planned"
+    },
+    {
+      "id": "founder_story",
+      "label": "Founder story",
+      "availability": "planned"
+    },
+    {
+      "id": "product_launch",
+      "label": "Product launch",
+      "availability": "planned"
+    },
+    {
+      "id": "cinematic_logo_reveal",
+      "label": "Cinematic logo reveal",
+      "availability": "planned"
+    },
+    {
+      "id": "motion_graphics",
+      "label": "Motion graphics",
+      "availability": "planned"
+    },
+    {
+      "id": "text_behind_subject",
+      "label": "Text behind subject",
+      "availability": "planned"
+    },
+    {
+      "id": "tracked_graphics",
+      "label": "Tracked graphics",
+      "availability": "planned"
+    },
+    {
+      "id": "background_replacement",
+      "label": "Background replacement",
+      "availability": "planned"
+    },
+    {
+      "id": "object_cleanup_replacement",
+      "label": "Object cleanup/replacement",
+      "availability": "planned"
+    },
+    {
+      "id": "generated_humans",
+      "label": "AI-generated humans moving/talking",
+      "availability": "planned"
+    },
+    {
+      "id": "three_d_product_logo",
+      "label": "3D product/logo scene",
+      "availability": "planned"
+    },
+    {
+      "id": "podcast_to_vertical_promo",
+      "label": "Podcast \u2192 vertical promo",
+      "availability": "planned"
+    },
+    {
+      "id": "long_video_to_short",
+      "label": "Long video \u2192 viral short",
+      "availability": "planned"
+    },
+    {
+      "id": "before_after_transformation",
+      "label": "Before/after creative transformation",
+      "availability": "planned"
+    },
+    {
+      "id": "screenplay_to_scene",
+      "label": "Script/screenplay \u2192 generated scene",
+      "availability": "planned"
+    },
+    {
+      "id": "cinematic_sound_design",
+      "label": "Cinematic sound design",
+      "availability": "planned"
+    },
+    {
+      "id": "brand_trailer",
+      "label": "Brand trailer",
+      "availability": "planned"
+    }
+  ],
+  "templates": [
+    {
+      "schemaVersion": 1,
+      "templateId": "product_launch_cinematic_v1",
+      "version": "1.0.0",
+      "label": "Cinematic product launch",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "product_launch"
+      ],
+      "inputSlots": [
+        {
+          "id": "logo",
+          "type": "image",
+          "required": true
+        },
+        {
+          "id": "brandColour",
+          "type": "colour",
+          "required": true
+        },
+        {
+          "id": "headline",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "featureOne",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "featureTwo",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "callToAction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "hookFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "productFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "detailFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "16:9",
+        "9:16"
+      ],
+      "durationTicks": 1800000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "clock": 90000,
+        "sequence": [
+          {
+            "slot": "detailFootage",
+            "offset": 0,
+            "duration": 0.5
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 0,
+            "duration": 1.5
+          },
+          {
+            "slot": "productFootage",
+            "offset": 0,
+            "duration": 2
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 1,
+            "duration": 1.5
+          },
+          {
+            "slot": "productFootage",
+            "offset": 2,
+            "duration": 2.5
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 2.5,
+            "duration": 2
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 1.5,
+            "duration": 1.5
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 0,
+            "duration": 1
+          },
+          {
+            "slot": "productFootage",
+            "offset": 0.5,
+            "duration": 0.75
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 0.5,
+            "duration": 0.75
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 1.5,
+            "duration": 1
+          },
+          {
+            "slot": "productFootage",
+            "offset": 0,
+            "duration": 5
+          }
+        ],
+        "titles": [
+          {
+            "id": "hook-kicker",
+            "literal": "A NEW STANDARD",
+            "start": 0.125,
+            "duration": 1.75,
+            "x": 8,
+            "y": 16,
+            "scale": 0.48,
+            "colour": "brand",
+            "weight": 600
+          },
+          {
+            "id": "hook-line-1",
+            "slot": "headline",
+            "line": 0,
+            "start": 0.25,
+            "duration": 1.65,
+            "x": 8,
+            "y": 39,
+            "scale": 2.35,
+            "colour": "white"
+          },
+          {
+            "id": "hook-line-2",
+            "slot": "headline",
+            "line": 1,
+            "start": 0.5,
+            "duration": 1.4,
+            "x": 8,
+            "y": 61,
+            "scale": 2.35,
+            "colour": "brand"
+          },
+          {
+            "id": "action-kicker",
+            "literal": "DESIGNED TO FEEL DIFFERENT",
+            "start": 2.25,
+            "duration": 2.9,
+            "x": 8,
+            "y": 87,
+            "scale": 0.55,
+            "colour": "white",
+            "weight": 600
+          },
+          {
+            "id": "feature-1-number",
+            "literal": "01 /",
+            "start": 8.125,
+            "duration": 1.7,
+            "x": 8,
+            "y": 29,
+            "scale": 0.55,
+            "colour": "brand",
+            "weight": 600
+          },
+          {
+            "id": "feature-1",
+            "slot": "featureOne",
+            "start": 8.25,
+            "duration": 1.6,
+            "x": 8,
+            "y": 51,
+            "scale": 1.45,
+            "colour": "white"
+          },
+          {
+            "id": "feature-2-number",
+            "literal": "02 /",
+            "start": 11.5,
+            "duration": 1.6,
+            "x": 8,
+            "y": 29,
+            "scale": 0.55,
+            "colour": "brand",
+            "weight": 600
+          },
+          {
+            "id": "feature-2",
+            "slot": "featureTwo",
+            "start": 11.625,
+            "duration": 1.45,
+            "x": 8,
+            "y": 51,
+            "scale": 1.45,
+            "colour": "white"
+          },
+          {
+            "id": "payoff",
+            "slot": "headline",
+            "line": 1,
+            "start": 14,
+            "duration": 0.85,
+            "x": 8,
+            "y": 51,
+            "scale": 2,
+            "colour": "brand"
+          },
+          {
+            "id": "ending-kicker",
+            "literal": "INTRODUCING",
+            "start": 15.375,
+            "duration": 3.75,
+            "x": 50,
+            "y": 29,
+            "scale": 0.5,
+            "colour": "brand",
+            "weight": 600,
+            "align": "center"
+          },
+          {
+            "id": "cta",
+            "slot": "callToAction",
+            "start": 17,
+            "duration": 2.75,
+            "x": 50,
+            "y": 73,
+            "scale": 0.75,
+            "colour": "white",
+            "weight": 600,
+            "align": "center"
+          },
+          {
+            "id": "credit",
+            "literal": "MADE WITH AUTOPROMOTE",
+            "start": 18.25,
+            "duration": 1.5,
+            "x": 50,
+            "y": 89,
+            "scale": 0.38,
+            "colour": "white",
+            "weight": 600,
+            "align": "center"
+          }
+        ],
+        "logo": {
+          "start": 15.5,
+          "duration": 4.5,
+          "x": 50,
+          "y": 50,
+          "width": 45,
+          "height": 22
+        },
+        "soundCues": [
+          {
+            "time": 0,
+            "tone": "impact",
+            "duration": 0.6,
+            "volume": 0.28
+          },
+          {
+            "time": 0.4,
+            "tone": "sweep",
+            "duration": 0.3,
+            "volume": 0.13
+          },
+          {
+            "time": 1.5,
+            "tone": "riser",
+            "duration": 0.5,
+            "volume": 0.14
+          },
+          {
+            "time": 2,
+            "tone": "subdrop",
+            "duration": 0.85,
+            "volume": 0.2
+          },
+          {
+            "time": 5.35,
+            "tone": "sweep",
+            "duration": 0.3,
+            "volume": 0.13
+          },
+          {
+            "time": 8,
+            "tone": "impact",
+            "duration": 0.45,
+            "volume": 0.2
+          },
+          {
+            "time": 11.45,
+            "tone": "click",
+            "duration": 0.15,
+            "volume": 0.13
+          },
+          {
+            "time": 12.5,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.12
+          },
+          {
+            "time": 13.25,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.12
+          },
+          {
+            "time": 14,
+            "tone": "riser",
+            "duration": 1,
+            "volume": 0.2
+          },
+          {
+            "time": 15.25,
+            "tone": "subdrop",
+            "duration": 1.3,
+            "volume": 0.22
+          },
+          {
+            "time": 17,
+            "tone": "chime",
+            "duration": 1.2,
+            "volume": 0.07
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.20833333333333334,
+          "settleSeconds": 0.375,
+          "exitSeconds": 0.125,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.66,
+          "fadeIn": 0.02,
+          "fadeOut": 0.75,
+          "ducking": false
+        }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "templateId": "cycling_rhythm_v1",
+      "version": "1.0.0",
+      "label": "Cycling rhythm",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "brand_trailer",
+        "motion_graphics",
+        "cinematic_sound_design"
+      ],
+      "inputSlots": [
+        {
+          "id": "logo",
+          "type": "image",
+          "required": true
+        },
+        {
+          "id": "brandColour",
+          "type": "colour",
+          "required": true
+        },
+        {
+          "id": "headline",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "featureOne",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "featureTwo",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "callToAction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "hookFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "productFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "detailFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "16:9",
+        "9:16"
+      ],
+      "durationTicks": 1800000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "clock": 90000,
+        "sequence": [
+          {
+            "slot": "detailFootage",
+            "offset": 0.25,
+            "duration": 0.75,
+            "scale": 1
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 0.125,
+            "duration": 1.25,
+            "scale": 1
+          },
+          {
+            "slot": "productFootage",
+            "offset": 5,
+            "duration": 2,
+            "scale": 1
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 1.5,
+            "duration": 1.5,
+            "scale": 1.06
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 0.875,
+            "duration": 1.5,
+            "scale": 1.04
+          },
+          {
+            "slot": "productFootage",
+            "offset": 2,
+            "duration": 2,
+            "scale": 1.02
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 0.375,
+            "duration": 1.5,
+            "scale": 1.1
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 1.875,
+            "duration": 1.5,
+            "scale": 1.08
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 1,
+            "duration": 0.5,
+            "scale": 1.02
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 0.75,
+            "duration": 0.5,
+            "scale": 1.12
+          },
+          {
+            "slot": "productFootage",
+            "offset": 3,
+            "duration": 0.5,
+            "scale": 1.03
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 2.25,
+            "duration": 1,
+            "scale": 1.06
+          },
+          {
+            "slot": "productFootage",
+            "offset": 4,
+            "duration": 5.5,
+            "scale": 1
+          }
+        ],
+        "titles": [
+          {
+            "id": "hook-kicker",
+            "start": 0.125,
+            "duration": 1.625,
+            "x": 8,
+            "y": 14,
+            "scale": 0.48,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 600,
+            "literal": "FIND YOUR PACE"
+          },
+          {
+            "id": "hook-line-1",
+            "start": 0.25,
+            "duration": 1.625,
+            "x": 8,
+            "y": 26,
+            "scale": 1.75,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "slot": "headline",
+            "line": 0
+          },
+          {
+            "id": "hook-line-2",
+            "start": 0.5,
+            "duration": 1.375,
+            "x": 8,
+            "y": 37,
+            "scale": 1.75,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "slot": "headline",
+            "line": 1
+          },
+          {
+            "id": "breathe",
+            "start": 2.25,
+            "duration": 1.5,
+            "x": 8,
+            "y": 20,
+            "scale": 1.65,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "BREATHE."
+          },
+          {
+            "id": "push",
+            "start": 4.125,
+            "duration": 1.25,
+            "x": 8,
+            "y": 20,
+            "scale": 2.1,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "literal": "PUSH."
+          },
+          {
+            "id": "go",
+            "start": 5.625,
+            "duration": 1.25,
+            "x": 8,
+            "y": 20,
+            "scale": 2.3,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "GO."
+          },
+          {
+            "id": "feature-1",
+            "start": 7.25,
+            "duration": 1.5,
+            "x": 8,
+            "y": 25,
+            "scale": 1,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "slot": "featureOne"
+          },
+          {
+            "id": "feature-2",
+            "start": 9.125,
+            "duration": 1.25,
+            "x": 8,
+            "y": 24,
+            "scale": 1,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "slot": "featureTwo"
+          },
+          {
+            "id": "faster",
+            "start": 10.625,
+            "duration": 1.125,
+            "x": 8,
+            "y": 22,
+            "scale": 1.45,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "FURTHER."
+          },
+          {
+            "id": "pulse-one",
+            "start": 12.0625,
+            "duration": 0.3125,
+            "x": 8,
+            "y": 24,
+            "scale": 1.8,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "MOVE."
+          },
+          {
+            "id": "pulse-two",
+            "start": 12.5625,
+            "duration": 0.3125,
+            "x": 8,
+            "y": 24,
+            "scale": 1.8,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "literal": "MOVE."
+          },
+          {
+            "id": "payoff",
+            "start": 13.0625,
+            "duration": 1.25,
+            "x": 8,
+            "y": 24,
+            "scale": 1.25,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "YOUR WAY."
+          },
+          {
+            "id": "ending-kicker",
+            "start": 15,
+            "duration": 4.375,
+            "x": 50,
+            "y": 21,
+            "scale": 0.42,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "center",
+            "weight": 600,
+            "literal": "THE NEXT RIDE IS YOURS"
+          },
+          {
+            "id": "cta",
+            "start": 17,
+            "duration": 2.625,
+            "x": 50,
+            "y": 72,
+            "scale": 0.55,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "center",
+            "weight": 600,
+            "slot": "callToAction"
+          },
+          {
+            "id": "credit",
+            "start": 18.25,
+            "duration": 1.375,
+            "x": 50,
+            "y": 83,
+            "scale": 0.3,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "center",
+            "weight": 600,
+            "literal": "MADE WITH AUTOPROMOTE"
+          }
+        ],
+        "logo": {
+          "start": 15.25,
+          "duration": 4.5,
+          "x": 50,
+          "y": 44,
+          "width": 76,
+          "height": 18
+        },
+        "soundCues": [
+          {
+            "time": 0,
+            "tone": "impact",
+            "duration": 0.35,
+            "volume": 0.22
+          },
+          {
+            "time": 0.65,
+            "tone": "sweep",
+            "duration": 0.35,
+            "volume": 0.12
+          },
+          {
+            "time": 1.75,
+            "tone": "riser",
+            "duration": 0.25,
+            "volume": 0.13
+          },
+          {
+            "time": 4,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.15
+          },
+          {
+            "time": 5.5,
+            "tone": "impact",
+            "duration": 0.35,
+            "volume": 0.2
+          },
+          {
+            "time": 6.85,
+            "tone": "sweep",
+            "duration": 0.25,
+            "volume": 0.1
+          },
+          {
+            "time": 9,
+            "tone": "subdrop",
+            "duration": 0.5,
+            "volume": 0.18
+          },
+          {
+            "time": 10.5,
+            "tone": "sweep",
+            "duration": 0.3,
+            "volume": 0.12
+          },
+          {
+            "time": 12,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.16
+          },
+          {
+            "time": 12.5,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.16
+          },
+          {
+            "time": 13,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.16
+          },
+          {
+            "time": 13.5,
+            "tone": "riser",
+            "duration": 1,
+            "volume": 0.16
+          },
+          {
+            "time": 14.5,
+            "tone": "subdrop",
+            "duration": 0.9,
+            "volume": 0.22
+          },
+          {
+            "time": 17,
+            "tone": "chime",
+            "duration": 0.7,
+            "volume": 0.08
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.20833333333333334,
+          "settleSeconds": 0.375,
+          "exitSeconds": 0.125,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.34,
+          "fadeIn": 0.05,
+          "fadeOut": 1,
+          "ducking": false
+        },
+        "defaultAspect": "9:16"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "templateId": "cycling_rhythm_v1",
+      "version": "1.0.1",
+      "label": "Cycling rhythm",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "brand_trailer",
+        "motion_graphics",
+        "cinematic_sound_design"
+      ],
+      "inputSlots": [
+        {
+          "id": "logo",
+          "type": "image",
+          "required": true
+        },
+        {
+          "id": "brandColour",
+          "type": "colour",
+          "required": true
+        },
+        {
+          "id": "headline",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "featureOne",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "featureTwo",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "callToAction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "hookFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "productFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "detailFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "16:9",
+        "9:16"
+      ],
+      "durationTicks": 1800000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "clock": 90000,
+        "sequence": [
+          {
+            "slot": "detailFootage",
+            "offset": 0.25,
+            "duration": 0.75,
+            "scale": 1
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 0.125,
+            "duration": 1.25,
+            "scale": 1
+          },
+          {
+            "slot": "productFootage",
+            "offset": 5,
+            "duration": 2,
+            "scale": 1
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 1.5,
+            "duration": 1.5,
+            "scale": 1.06
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 0.875,
+            "duration": 1.5,
+            "scale": 1.04
+          },
+          {
+            "slot": "productFootage",
+            "offset": 2,
+            "duration": 2,
+            "scale": 1.02
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 0.375,
+            "duration": 1.5,
+            "scale": 1.1
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 1.875,
+            "duration": 1.5,
+            "scale": 1.08
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 1,
+            "duration": 0.5,
+            "scale": 1.02
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 0.75,
+            "duration": 0.5,
+            "scale": 1.12
+          },
+          {
+            "slot": "productFootage",
+            "offset": 3,
+            "duration": 0.5,
+            "scale": 1.03
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 2.25,
+            "duration": 1,
+            "scale": 1.06
+          },
+          {
+            "slot": "productFootage",
+            "offset": 4,
+            "duration": 5.5,
+            "scale": 1
+          }
+        ],
+        "titles": [
+          {
+            "id": "hook-kicker",
+            "start": 0.125,
+            "duration": 1.625,
+            "x": 8,
+            "y": 14,
+            "scale": 0.4,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 600,
+            "literal": "YOUR PACE"
+          },
+          {
+            "id": "hook-line-1",
+            "start": 0.25,
+            "duration": 1.625,
+            "x": 8,
+            "y": 26,
+            "scale": 1.25,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "slot": "headline",
+            "line": 0
+          },
+          {
+            "id": "hook-line-2",
+            "start": 0.5,
+            "duration": 1.375,
+            "x": 8,
+            "y": 37,
+            "scale": 1.25,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "slot": "headline",
+            "line": 1
+          },
+          {
+            "id": "breathe",
+            "start": 2.25,
+            "duration": 1.5,
+            "x": 8,
+            "y": 20,
+            "scale": 1.65,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "BREATHE."
+          },
+          {
+            "id": "push",
+            "start": 4.125,
+            "duration": 1.25,
+            "x": 8,
+            "y": 20,
+            "scale": 2.1,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "literal": "PUSH."
+          },
+          {
+            "id": "go",
+            "start": 5.625,
+            "duration": 1.25,
+            "x": 8,
+            "y": 20,
+            "scale": 2.3,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "GO."
+          },
+          {
+            "id": "feature-1",
+            "start": 7.25,
+            "duration": 1.5,
+            "x": 8,
+            "y": 25,
+            "scale": 1,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "slot": "featureOne"
+          },
+          {
+            "id": "feature-2",
+            "start": 9.125,
+            "duration": 1.25,
+            "x": 8,
+            "y": 24,
+            "scale": 1,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "slot": "featureTwo"
+          },
+          {
+            "id": "faster",
+            "start": 10.625,
+            "duration": 1.125,
+            "x": 8,
+            "y": 22,
+            "scale": 1.1,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "FURTHER."
+          },
+          {
+            "id": "pulse-one",
+            "start": 12.0625,
+            "duration": 0.3125,
+            "x": 8,
+            "y": 24,
+            "scale": 1.8,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "MOVE."
+          },
+          {
+            "id": "pulse-two",
+            "start": 12.5625,
+            "duration": 0.3125,
+            "x": 8,
+            "y": 24,
+            "scale": 1.8,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "literal": "MOVE."
+          },
+          {
+            "id": "payoff",
+            "start": 13.0625,
+            "duration": 1.25,
+            "x": 8,
+            "y": 24,
+            "scale": 1.1,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "YOUR WAY."
+          },
+          {
+            "id": "ending-kicker",
+            "start": 15,
+            "duration": 4.375,
+            "x": 50,
+            "y": 21,
+            "scale": 0.38,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "center",
+            "weight": 600,
+            "literal": "THE NEXT RIDE"
+          },
+          {
+            "id": "cta",
+            "start": 17,
+            "duration": 2.625,
+            "x": 50,
+            "y": 72,
+            "scale": 0.55,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "center",
+            "weight": 600,
+            "slot": "callToAction"
+          },
+          {
+            "id": "credit",
+            "start": 18.25,
+            "duration": 1.375,
+            "x": 50,
+            "y": 83,
+            "scale": 0.3,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "center",
+            "weight": 600,
+            "literal": "MADE WITH AUTOPROMOTE"
+          }
+        ],
+        "logo": {
+          "start": 15.25,
+          "duration": 4.5,
+          "x": 50,
+          "y": 44,
+          "width": 76,
+          "height": 18
+        },
+        "soundCues": [
+          {
+            "time": 0,
+            "tone": "impact",
+            "duration": 0.35,
+            "volume": 0.22
+          },
+          {
+            "time": 0.65,
+            "tone": "sweep",
+            "duration": 0.35,
+            "volume": 0.12
+          },
+          {
+            "time": 1.75,
+            "tone": "riser",
+            "duration": 0.25,
+            "volume": 0.13
+          },
+          {
+            "time": 4,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.15
+          },
+          {
+            "time": 5.5,
+            "tone": "impact",
+            "duration": 0.35,
+            "volume": 0.2
+          },
+          {
+            "time": 6.85,
+            "tone": "sweep",
+            "duration": 0.25,
+            "volume": 0.1
+          },
+          {
+            "time": 9,
+            "tone": "subdrop",
+            "duration": 0.5,
+            "volume": 0.18
+          },
+          {
+            "time": 10.5,
+            "tone": "sweep",
+            "duration": 0.3,
+            "volume": 0.12
+          },
+          {
+            "time": 12,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.16
+          },
+          {
+            "time": 12.5,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.16
+          },
+          {
+            "time": 13,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.16
+          },
+          {
+            "time": 13.5,
+            "tone": "riser",
+            "duration": 1,
+            "volume": 0.16
+          },
+          {
+            "time": 14.5,
+            "tone": "subdrop",
+            "duration": 0.9,
+            "volume": 0.22
+          },
+          {
+            "time": 17,
+            "tone": "chime",
+            "duration": 0.7,
+            "volume": 0.08
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.20833333333333334,
+          "settleSeconds": 0.375,
+          "exitSeconds": 0.125,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.34,
+          "fadeIn": 0.05,
+          "fadeOut": 1,
+          "ducking": false
+        },
+        "defaultAspect": "9:16",
+        "framing": {
+          "mode": "speaker_track",
+          "positions": [
+            {
+              "id": "cycling-centre",
+              "time": 0,
+              "x": 50,
+              "y": 50,
+              "origin": "manual"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "templateId": "cycling_rhythm_v1",
+      "version": "1.0.2",
+      "label": "Cycling rhythm",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "brand_trailer",
+        "motion_graphics",
+        "cinematic_sound_design"
+      ],
+      "inputSlots": [
+        {
+          "id": "logo",
+          "type": "image",
+          "required": true
+        },
+        {
+          "id": "brandColour",
+          "type": "colour",
+          "required": true
+        },
+        {
+          "id": "headline",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "featureOne",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "featureTwo",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "callToAction",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "hookFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "productFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "detailFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "16:9",
+        "9:16"
+      ],
+      "durationTicks": 1800000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "clock": 90000,
+        "sequence": [
+          {
+            "slot": "detailFootage",
+            "offset": 0.25,
+            "duration": 0.75,
+            "scale": 1
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 0.125,
+            "duration": 1.25,
+            "scale": 1
+          },
+          {
+            "slot": "productFootage",
+            "offset": 5,
+            "duration": 2,
+            "scale": 1
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 1.5,
+            "duration": 1.5,
+            "scale": 1.06
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 1.75,
+            "duration": 1.5,
+            "scale": 1.04
+          },
+          {
+            "slot": "productFootage",
+            "offset": 2,
+            "duration": 2,
+            "scale": 1.02
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 0.375,
+            "duration": 1.5,
+            "scale": 1.1
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 1.875,
+            "duration": 1.5,
+            "scale": 1.08
+          },
+          {
+            "slot": "hookFootage",
+            "offset": 1,
+            "duration": 0.5,
+            "scale": 1.02
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 0.75,
+            "duration": 0.5,
+            "scale": 1.12
+          },
+          {
+            "slot": "productFootage",
+            "offset": 3,
+            "duration": 0.5,
+            "scale": 1.03
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 2.25,
+            "duration": 1,
+            "scale": 1.06
+          },
+          {
+            "slot": "productFootage",
+            "offset": 4,
+            "duration": 5.5,
+            "scale": 1
+          }
+        ],
+        "titles": [
+          {
+            "id": "hook-kicker",
+            "start": 0.125,
+            "duration": 1.625,
+            "x": 8,
+            "y": 14,
+            "scale": 0.4,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 600,
+            "literal": "YOUR PACE"
+          },
+          {
+            "id": "hook-line-1",
+            "start": 0.25,
+            "duration": 1.625,
+            "x": 8,
+            "y": 26,
+            "scale": 1.25,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "slot": "headline",
+            "line": 0
+          },
+          {
+            "id": "hook-line-2",
+            "start": 0.5,
+            "duration": 1.375,
+            "x": 8,
+            "y": 37,
+            "scale": 1.25,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "slot": "headline",
+            "line": 1
+          },
+          {
+            "id": "breathe",
+            "start": 2.25,
+            "duration": 1.5,
+            "x": 8,
+            "y": 20,
+            "scale": 1.65,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "BREATHE."
+          },
+          {
+            "id": "push",
+            "start": 4.125,
+            "duration": 1.25,
+            "x": 8,
+            "y": 20,
+            "scale": 2.1,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "literal": "PUSH."
+          },
+          {
+            "id": "go",
+            "start": 5.625,
+            "duration": 1.25,
+            "x": 8,
+            "y": 20,
+            "scale": 2.3,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "GO."
+          },
+          {
+            "id": "feature-1",
+            "start": 7.25,
+            "duration": 1.5,
+            "x": 8,
+            "y": 25,
+            "scale": 1,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "slot": "featureOne"
+          },
+          {
+            "id": "feature-2",
+            "start": 9.125,
+            "duration": 1.25,
+            "x": 8,
+            "y": 24,
+            "scale": 1,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "slot": "featureTwo"
+          },
+          {
+            "id": "faster",
+            "start": 10.625,
+            "duration": 1.125,
+            "x": 8,
+            "y": 22,
+            "scale": 1.1,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "FURTHER."
+          },
+          {
+            "id": "pulse-one",
+            "start": 12.0625,
+            "duration": 0.3125,
+            "x": 8,
+            "y": 24,
+            "scale": 1.8,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "MOVE."
+          },
+          {
+            "id": "pulse-two",
+            "start": 12.5625,
+            "duration": 0.3125,
+            "x": 8,
+            "y": 24,
+            "scale": 1.8,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "left",
+            "weight": 900,
+            "literal": "MOVE."
+          },
+          {
+            "id": "payoff",
+            "start": 13.0625,
+            "duration": 1.25,
+            "x": 8,
+            "y": 24,
+            "scale": 1.1,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "left",
+            "weight": 900,
+            "literal": "YOUR WAY."
+          },
+          {
+            "id": "ending-kicker",
+            "start": 15,
+            "duration": 4.375,
+            "x": 50,
+            "y": 21,
+            "scale": 0.38,
+            "portraitScale": 1,
+            "colour": "brand",
+            "align": "center",
+            "weight": 600,
+            "literal": "THE NEXT RIDE"
+          },
+          {
+            "id": "cta",
+            "start": 17,
+            "duration": 2.625,
+            "x": 50,
+            "y": 72,
+            "scale": 0.55,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "center",
+            "weight": 600,
+            "slot": "callToAction"
+          },
+          {
+            "id": "credit",
+            "start": 18.25,
+            "duration": 1.375,
+            "x": 50,
+            "y": 83,
+            "scale": 0.3,
+            "portraitScale": 1,
+            "colour": "white",
+            "align": "center",
+            "weight": 600,
+            "literal": "MADE WITH AUTOPROMOTE"
+          }
+        ],
+        "logo": {
+          "start": 15.25,
+          "duration": 4.5,
+          "x": 50,
+          "y": 44,
+          "width": 76,
+          "height": 18
+        },
+        "soundCues": [
+          {
+            "time": 0,
+            "tone": "impact",
+            "duration": 0.35,
+            "volume": 0.22
+          },
+          {
+            "time": 0.65,
+            "tone": "sweep",
+            "duration": 0.35,
+            "volume": 0.12
+          },
+          {
+            "time": 1.75,
+            "tone": "riser",
+            "duration": 0.25,
+            "volume": 0.13
+          },
+          {
+            "time": 4,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.15
+          },
+          {
+            "time": 5.5,
+            "tone": "impact",
+            "duration": 0.35,
+            "volume": 0.2
+          },
+          {
+            "time": 6.85,
+            "tone": "sweep",
+            "duration": 0.25,
+            "volume": 0.1
+          },
+          {
+            "time": 9,
+            "tone": "subdrop",
+            "duration": 0.5,
+            "volume": 0.18
+          },
+          {
+            "time": 10.5,
+            "tone": "sweep",
+            "duration": 0.3,
+            "volume": 0.12
+          },
+          {
+            "time": 12,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.16
+          },
+          {
+            "time": 12.5,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.16
+          },
+          {
+            "time": 13,
+            "tone": "click",
+            "duration": 0.12,
+            "volume": 0.16
+          },
+          {
+            "time": 13.5,
+            "tone": "riser",
+            "duration": 1,
+            "volume": 0.16
+          },
+          {
+            "time": 14.5,
+            "tone": "subdrop",
+            "duration": 0.9,
+            "volume": 0.22
+          },
+          {
+            "time": 17,
+            "tone": "chime",
+            "duration": 0.7,
+            "volume": 0.08
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.20833333333333334,
+          "settleSeconds": 0.375,
+          "exitSeconds": 0.125,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.34,
+          "fadeIn": 0.05,
+          "fadeOut": 1,
+          "ducking": false
+        },
+        "defaultAspect": "9:16",
+        "framing": {
+          "mode": "speaker_track",
+          "positions": [
+            {
+              "id": "cycling-frame-0",
+              "time": 0,
+              "x": 15,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-1",
+              "time": 0.25,
+              "x": 50,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-2",
+              "time": 0.5,
+              "x": 80,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-3",
+              "time": 0.7,
+              "x": 95,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-4",
+              "time": 0.75,
+              "x": 50,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-5",
+              "time": 2,
+              "x": 50,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-6",
+              "time": 4,
+              "x": 50,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-7",
+              "time": 5.5,
+              "x": 5,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-8",
+              "time": 5.75,
+              "x": 15,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-9",
+              "time": 6,
+              "x": 51,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-10",
+              "time": 6.25,
+              "x": 80,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-11",
+              "time": 6.5,
+              "x": 95,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-12",
+              "time": 7,
+              "x": 50,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-13",
+              "time": 9,
+              "x": 50,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-14",
+              "time": 10.5,
+              "x": 10,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-15",
+              "time": 10.75,
+              "x": 35,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-16",
+              "time": 11,
+              "x": 66,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-17",
+              "time": 11.25,
+              "x": 90,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-18",
+              "time": 11.5,
+              "x": 95,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-19",
+              "time": 12,
+              "x": 50,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-20",
+              "time": 12.5,
+              "x": 95,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-21",
+              "time": 13,
+              "x": 50,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-22",
+              "time": 13.5,
+              "x": 60,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            },
+            {
+              "id": "cycling-frame-23",
+              "time": 14,
+              "x": 95,
+              "y": 50,
+              "origin": "manual",
+              "cut": false
+            },
+            {
+              "id": "cycling-frame-24",
+              "time": 14.5,
+              "x": 50,
+              "y": 50,
+              "origin": "manual",
+              "cut": true
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

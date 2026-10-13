@@ -55,6 +55,30 @@
 .viral-studio-overlay .studio-pro-timeline .pro-track-row.is-video {
   min-height: 80px;
 }
+.viral-studio-overlay .studio-pro-timeline .pro-motion-target,
+.viral-studio-overlay .studio-pro-timeline .pro-motion-property { min-height: 32px; }
+.viral-studio-overlay .studio-pro-timeline .pro-motion-target .pro-track-header button {
+  border: 0; background: transparent; color: #d2d3db; text-align: left;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; min-width: 0;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-motion-target .pro-track-header button strong {
+  flex: 1; min-width: 0; width: auto; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; font-size: 11px; font-weight: 500;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-motion-target .pro-track-lane small {
+  display: block; padding: 8px; color: #9297a5; font-size: 11px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-motion-keyframe {
+  position: absolute; top: 4px; width: 24px; height: 24px; transform: translateX(-50%);
+  border: 0; background: transparent; color: #bd9ff2; padding: 0; cursor: ew-resize;
+  touch-action: none; z-index: 3; font-size: 14px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-motion-keyframe.is-selected { color: #ffe17a; }
+.viral-studio-overlay .studio-pro-timeline .pro-motion-keyframe:focus-visible {
+  outline: 1px solid #ffe17a; border-radius: 3px;
+}
+.viral-studio-overlay .studio-pro-timeline .is-locked .pro-motion-keyframe { cursor: pointer; }
 .viral-studio-overlay .studio-pro-timeline .pro-track-header {
   background: #191e29;
   padding: 7px 10px;
@@ -208,3 +232,12 @@
   .viral-studio-overlay .studio-pro-timeline .pro-track-row.is-video { min-height: 64px; }
   .viral-studio-overlay .studio-pro-timeline .pro-track-row.is-audio { min-height: 42px; }
 }
+.studio-keyframe-curve { padding: 12px; border: 1px solid var(--studio-border, #343044); border-radius: 8px; }
+.studio-keyframe-curve svg { display: block; width: 100%; max-height: 230px; touch-action: none; }
+.studio-keyframe-curve .curve-axis { fill: none; stroke: #686278; stroke-width: 1; }
+.studio-keyframe-curve .curve-values { fill: none; stroke: #c084fc; stroke-width: 2; }
+.studio-keyframe-curve .curve-handle-line { fill: none; stroke: #81738f; stroke-dasharray: 3 3; }
+.studio-keyframe-curve .curve-handle { fill: #c084fc; stroke: #241c31; stroke-width: 2; cursor: grab; }
+.studio-keyframe-curve .curve-handle:focus { outline: none; stroke: #fff; stroke-width: 3; }
+.studio-keyframe-curve .curve-handle[aria-disabled="true"] { opacity: .45; cursor: default; }
+.studio-keyframe-curve svg text { fill: #b9b3c5; font-size: 10px; }

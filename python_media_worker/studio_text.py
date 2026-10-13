@@ -98,8 +98,13 @@ def render_title_asset(overlay, output_path, width, height):
     image.alpha_composite(glyphs)
     anchor_x = (margin+box_width*float(overlay.get("anchorX", 50))/100)/image.width*100
     anchor_y = (margin+box_height*float(overlay.get("anchorY", 50))/100)/image.height*100
+    # Native clip-path uses the title's layout box, excluding our transparent
+    # shadow padding. Keep this derived geometry alongside the asset so the
+    # shared compositor cannot mistake padding for part of the mask region.
+    clip_box = {"x": margin / image.width, "y": margin / image.height,
+                "width": box_width / image.width, "height": box_height / image.height}
     image = image.resize((max(1, round(image.width*output_height/720)), max(1, round(image.height*output_height/720))), Image.Resampling.LANCZOS)
     image.save(output_path)
     return {"width": image.width/output_width*100, "height": image.height/output_height*100, "mediaFit": "stretch",
             "anchorX": anchor_x, "anchorY": anchor_y,
-            "lines": lines}
+            "lines": lines, "clipBox": clip_box}

@@ -9,8 +9,99 @@ from PIL import Image, ImageDraw
 from python_media_worker.studio_layer_motion import (
     composition_layer,
     interpolate_layer_value,
+    layer_clip_mask,
+    layer_pose,
+    _render_pose,
     render_image_layer_motion,
 )
+
+
+def test_geometric_masks_use_layer_box_and_native_shape_precedence():
+    ellipse = np.asarray(layer_clip_mask((100, 100), {"enabled": True, "shape": "ellipse"}, 45, 45))
+    assert ellipse[50, 50] == 255 and ellipse[0, 50] == 0 and ellipse[50, 0] == 0
+    assert ellipse[50, 10] == 255, "Ellipse uses its own native path rather than rectangular crop"
+    polygon = np.asarray(layer_clip_mask((100, 100), {"enabled": True, "shape": "polygon"}))
+    assert polygon[5, 5] == 0 and polygon[50, 50] == 255 and polygon[95, 10] == 0
+    custom = np.asarray(layer_clip_mask((100, 100), {"enabled": True, "shape": "polygon", "path": "polygon(0% 0%, 100% 0%, 0% 100%)"}))
+    assert custom[10, 10] == 255 and custom[90, 90] == 0
+
+
+def test_soft_mask_feathers_only_alpha_and_inversion_is_its_exact_complement():
+    settings = {"enabled": True, "shape": "ellipse", "feather": 10}
+    soft = np.asarray(layer_clip_mask((100, 100), settings))
+    inverse = np.asarray(layer_clip_mask((100, 100), {**settings, "inverted": True}))
+    assert soft[50, 50] > 250 and 30 < soft[50, 2] < 180
+    assert np.all(soft.astype(int) + inverse.astype(int) == 255)
+    sharper = np.asarray(layer_clip_mask((100, 100), settings, feather_scale=.5))
+    assert sharper[50, 10] > soft[50, 10], "Sigma scales with programme/layer geometry"
+
+
+def test_inverted_feathered_image_renders_a_hole_and_keeps_native_corner_rounding():
+    overlay = {"type": "image", "width": 100, "height": 100, "mediaFit": "stretch"}
+    layer = {"effects": {"mask": {"enabled": True, "shape": "ellipse", "inverted": True, "feather": 10}}}
+    frame = np.asarray(_render_pose(Image.new("RGBA", (100, 100), "magenta"), overlay, layer, layer_pose(layer, overlay, 0), (100, 100)))
+    assert frame[50, 50, 3] == 0
+    assert frame[5, 50, 3] > 0 and frame[0, 0, 3] == 0
+    assert np.all(frame[frame[..., 3] > 0, :3] == (255, 0, 255)), "Feather changes alpha rather than smearing artwork"
+
+
+def test_crop_interpolates_canonical_camel_case_keys_on_edit_clock():
+    layer = {"base_transform": {"crop_x": 5, "crop_y": 10}, "motion_keyframes": [
+        {"property": "cropX", "time": 0, "value": 0},
+        {"property": "cropX", "time": 2, "value": 40, "easing": "linear"},
+    ]}
+    assert layer_pose(layer, {}, 1)["crop_x"] == 20
+    assert layer_pose(layer, {}, 1)["crop_y"] == 10
+    frame = _render_pose(Image.new("RGBA", (20, 20), "white"), {"width": 50, "height": 50}, layer, layer_pose(layer, {}, 1), (200, 100))
+    alpha = np.asarray(frame)[..., 3]
+    assert alpha[50, 55] == 0 and alpha[50, 100] == 255 and alpha[50, 145] == 0
+
+
+def test_mask_clips_effect_group_before_rotation_and_contains_letterbox():
+    asset = Image.new("RGBA", (40, 20), "white")
+    layer = {"effects": {"mask": {"enabled": True, "shape": "ellipse"},
+                         "shadow": {"enabled": True, "x": 20, "blur": 0, "opacity": 1}}}
+    overlay = {"width": 50, "height": 50, "mediaFit": "contain"}
+    frame = np.asarray(_render_pose(asset, overlay, layer, layer_pose(layer, overlay, 0), (100, 100)))
+    assert frame[50, 50, 3] == 255 and frame[50, 80, 3] == 0, "The mask clips the offset shadow too"
+    assert frame[27, 50, 3] == 0, "Contain stays centered within the layer box"
+    rotated = _render_pose(asset, overlay, layer, {**layer_pose(layer, overlay, 0), "rotation": 90}, (100, 100))
+    assert np.asarray(rotated)[50, 27, 3] == 0
+
+
+def test_real_crop_movie_follows_retimed_output_clock(tmp_path):
+    source, output = tmp_path / "crop.png", tmp_path / "crop.mov"
+    Image.new("RGBA", (100, 100), "white").save(source)
+    overlay = {"start_time": 0, "duration": 2, "width": 100, "height": 100}
+    layer = {"base_transform": {"x": 50, "y": 50}, "motion_keyframes": [
+        {"property": "cropX", "time": 0, "value": 0},
+        {"property": "cropX", "time": 2, "value": 40, "easing": "linear"},
+    ]}
+    render_image_layer_motion(source, output, overlay, layer, 100, 100, 1,
+                              [{"start_time": 0, "end_time": 2, "rate": 2}], fps=4)
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output), "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    frames = np.frombuffer(raw, dtype=np.uint8).reshape(4, 100, 100, 4)
+    assert frames[0, 50, 5, 3] == 255
+    assert frames[2, 50, 15, 3] == 0 and frames[2, 50, 25, 3] == 255
+
+
+def test_title_masks_use_layout_box_excluding_shadow_asset_padding(tmp_path):
+    from python_media_worker.studio_text import render_title_asset
+    source = tmp_path / "title.png"
+    geometry = render_title_asset({"text": "MASK", "bg": "#ff00ff", "color": "#ff00ff", "shadow": "none"}, source, 720, 720)
+    asset = Image.open(source).convert("RGBA")
+    clip_box = geometry["clipBox"]
+    content_width = round(asset.width * clip_box["width"])
+    content_height = round(asset.height * clip_box["height"])
+    assert asset.width > content_width and asset.height > content_height
+    overlay = {**geometry, "type": "text", "mediaFit": "stretch"}
+    layer = {"anchor_x": geometry["anchorX"], "anchor_y": geometry["anchorY"],
+             "clip_box": clip_box, "base_transform": {"x": 50, "y": 50, "crop_x": 25}}
+    frame = np.asarray(_render_pose(asset, overlay, layer, layer_pose(layer, overlay, 0), (720, 720)))
+    ys, xs = np.where(frame[..., 3] > 200)
+    assert abs(xs.min() - (360 - content_width * .25)) <= 1
+    assert abs(xs.max() + 1 - (360 + content_width * .25)) <= 1
+    assert abs(ys.min() - (360 - content_height / 2)) <= 1
 
 
 def test_composition_layer_and_custom_curve_interpolation():
@@ -93,3 +184,51 @@ def test_layer_render_uses_identity_clock_without_speed_segments():
         assert receipt["start_time"] == .25
         assert receipt["duration"] == .5
         assert output.exists()
+
+
+def test_fullscreen_image_covers_stage_despite_inactive_pip_keys_and_retains_opacity():
+    with tempfile.TemporaryDirectory() as temp:
+        source, output = Path(temp) / "shot.png", Path(temp) / "full.mov"
+        Image.new("RGBA", (32, 64), (3, 120, 230, 255)).save(source)
+        overlay = {"start_time": 0, "duration": .2, "bRollMode": "fullscreen",
+                   "width": 20, "height": 10, "mediaFit": "contain"}
+        layer = {"anchor_x": 0, "anchor_y": 100,
+                 "base_transform": {"x": 10, "y": 20, "rotation": 45, "scale": .25},
+                 "motion_keyframes": [{"property": "x", "time": 0, "value": 80},
+                                      {"property": "opacity", "time": 0, "value": .5}]}
+        render_image_layer_motion(source, output, overlay, layer, 160, 90, .2, [], fps=10)
+        raw = subprocess.check_output([
+            "ffmpeg", "-v", "error", "-i", str(output), "-f", "rawvideo", "-pix_fmt", "rgba", "-",
+        ])
+        frames = np.frombuffer(raw, dtype=np.uint8).reshape(-1, 90, 160, 4)
+        assert len(frames) == 2
+        assert np.all(frames[..., 3] == 128), "Full-stage coverage and authored opacity must survive"
+        assert np.all(frames[..., :3] == (3, 120, 230))
+
+
+def test_real_effect_layer_fades_as_one_group_including_shadow_and_glow(tmp_path):
+    source, output = tmp_path / "subject.png", tmp_path / "fade.mov"
+    Image.new("RGBA", (16, 16), "white").save(source)
+    overlay = {"start_time": 0, "duration": 1, "width": 25, "height": 25}
+    layer = {
+        "base_transform": {"x": 50, "y": 50, "scale": 1},
+        "effects": {
+            "shadow": {"enabled": True, "x": 8, "y": 0, "blur": 0, "opacity": .55},
+            "glow": {"enabled": True, "radius": 4, "intensity": .5},
+        },
+        "motion_keyframes": [
+            {"property": "opacity", "time": 0, "value": 0},
+            {"property": "opacity", "time": 1, "value": 1, "easing": "linear"},
+        ],
+    }
+    render_image_layer_motion(source, output, overlay, layer, 64, 64, 1, [], fps=4)
+    raw = subprocess.check_output([
+        "ffmpeg", "-v", "error", "-i", str(output), "-f", "rawvideo", "-pix_fmt", "rgba", "-",
+    ])
+    frames = np.frombuffer(raw, dtype=np.uint8).reshape(4, 64, 64, 4)
+    assert frames[0, ..., 3].max() == 0, "An invisible layer must not leave its effects visible"
+    assert frames[2, ..., 3].max() == 128, "Opacity belongs to the complete filtered group"
+    shadow_alpha = frames[2, 32, 46, 3]
+    # This pixel includes the soft glow as well as the offset shadow. Its
+    # combined alpha must remain below the half-opacity opaque artwork.
+    assert 0 < shadow_alpha < 128, "Offset effects must fade with their parent group"

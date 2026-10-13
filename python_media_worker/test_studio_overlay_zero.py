@@ -1,5 +1,7 @@
 """Production-handler regressions for zero-valued overlay controls."""
 import asyncio
+import builtins
+import io
 import shutil
 import subprocess
 import tempfile
@@ -8,12 +10,115 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+from PIL import Image, ImageDraw
 from python_media_worker import main_media_server as worker
+
+
+def test_high_resolution_graphics_keep_detail_when_small_footage_is_exported_at_720p(tmp_path):
+    source, picture, delivery = [tmp_path / name for name in ["small.mp4", "detail.png", "delivered.mp4"]]
+    run("-f", "lavfi", "-i", "color=blue:s=320x240:r=24:d=1",
+        "-c:v", "libx264", "-threads", "1", "-n", str(source))
+    image = Image.new("RGB", (480, 144), "black")
+    draw = ImageDraw.Draw(image)
+    for x in range(0, 480, 6): draw.rectangle((x, 0, x + 1, 143), fill="white")
+    image.save(picture)
+    async def ingest(url, destination, **kwargs):
+        shutil.copyfile(source, destination); return destination
+    def deliver(path):
+        shutil.copyfile(path, delivery); return str(delivery)
+    request = worker.RenderViralRequest(video_url="test-source", start_time=0, end_time=1,
+        smart_crop=False, auto_captions=False, professional_cleanup=False, brand_watermark=False,
+        overlays=[worker.ViralOverlay(id="detail", type="image", src="https://test.invalid/detail.png",
+                 x=50, y=50, width=50, height=20, mediaFit="stretch", start_time=0, duration=1)],
+        composition_plan={"layers": [{"id": "detail", "effects": {"mask": {"enabled": True, "shape": "rectangle"}}}]},
+        output_settings={"resolution": "720p", "fps": "24", "codec": "h264", "quality": "high"})
+    with patch.object(worker, "materialize_video_input", ingest), patch.object(worker, "upload_file_to_firebase", deliver), \
+         patch("urllib.request.urlopen", lambda *args, **kwargs: io.BytesIO(picture.read_bytes())):
+        asyncio.run(worker.render_viral_clip(request))
+    raw = run("-ss", "0.5", "-i", str(delivery), "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1")
+    frame = np.frombuffer(raw, np.uint8).reshape(720, 960, 3)
+    assert frame[360, 270:690, 0].std() > 100, "Composition must retain fine graphic contrast rather than upscale a blurred low-res layer"
 
 
 def run(*args):
     return subprocess.run(["ffmpeg", "-v", "error", *args], check=True,
                           capture_output=True, timeout=60).stdout
+
+
+def test_unsupported_geometric_video_mask_fails_before_source_ingest():
+    request = worker.RenderViralRequest(video_url="test", start_time=0, end_time=1,
+        composition_plan={"layers": [{"id": "main-video", "type": "video", "effects": {"mask": {"enabled": True, "feather": 20}}}]})
+    with patch.object(worker, "materialize_video_input") as ingest:
+        with pytest.raises(worker.HTTPException) as error:
+            asyncio.run(worker.render_viral_clip(request))
+    assert error.value.status_code == 422
+    ingest.assert_not_called()
+
+
+@pytest.mark.parametrize("interrupted", [False, True])
+def test_sequence_render_releases_only_owned_scratch(tmp_path, monkeypatch, interrupted):
+    # Exercise real segment/finish FFmpeg stages and the production finally
+    # block, including a download interrupted after it has written bytes.
+    source = tmp_path / "original.mp4"
+    second = tmp_path / "second-original.mp4"
+    delivery = tmp_path / "delivered.mp4"
+    scratch = tmp_path / "tmp"
+    scratch.mkdir()
+    sentinel = scratch / "another-job_segment_src_1.mp4"
+    sentinel.write_bytes(b"Unrelated job must survive")
+    monkeypatch.setattr(worker, "__file__", str(tmp_path / "worker" / "main_media_server.py"))
+    run("-f", "lavfi", "-i", "color=blue:s=128x72:r=24:d=1",
+        "-c:v", "libx264", "-threads", "1", "-n", str(source))
+    run("-f", "lavfi", "-i", "color=red:s=128x72:r=24:d=1",
+        "-c:v", "libx264", "-threads", "1", "-n", str(second))
+    original = source.read_bytes()
+    second_original = second.read_bytes()
+    generated = []
+
+    async def ingest(url, destination, **kwargs):
+        generated.append(Path(destination))
+        shutil.copyfile(second if url == "second" else source, destination)
+        if interrupted and url == "second":
+            raise RuntimeError("Second sequence download interrupted")
+        return destination
+
+    def deliver(path):
+        shutil.copyfile(path, delivery)
+        return str(delivery)
+
+    request = worker.RenderViralRequest(video_url="main", start_time=0, end_time=0.75,
+        smart_crop=False, auto_captions=False, professional_cleanup=False, brand_watermark=False,
+        finish_plan={"contrast": 1.1},
+        output_settings={"resolution": "source", "fps": "24", "codec": "h264", "quality": "high"},
+        timeline_segments=[worker.ViralTimelineSegment(url=name, start_time=0, end_time=0.25)
+                           for name in ["first", "second", "first"]])
+    with patch.object(worker, "materialize_video_input", ingest), \
+         patch.object(worker, "upload_file_to_firebase", side_effect=deliver) as upload:
+        if interrupted:
+            with pytest.raises(worker.HTTPException, match="Second sequence download interrupted"):
+                asyncio.run(worker.render_viral_clip_impl(request))
+            upload.assert_not_called()
+        else:
+            result = asyncio.run(worker.render_viral_clip_impl(request))
+            assert result["status"] == "completed"
+            assert delivery.is_file() and Path(result["output_path"]).is_file()
+            pixels = run("-i", str(delivery), "-map", "0:v:0", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1")
+            # Independently declared original source size; do not accept the
+            # general helper's 320px floor as though it were source geometry.
+            width, height = 128, 72
+            assert len(pixels) == 18 * width * height * 3
+            frames = np.frombuffer(pixels, np.uint8).reshape(18, height, width, 3)
+            for index, channel in [(3, 2), (9, 0), (15, 2)]:
+                assert frames[index, height // 2, width // 2, channel] > 200
+    assert len(generated) == 3
+    assert all(not path.exists() for path in generated)
+    assert not list(scratch.glob("*_segment_v_*.mp4"))
+    assert not list(scratch.glob("*_segment_a_*.m4a"))
+    assert not list(scratch.glob("*_finish.mp4"))
+    assert not list(scratch.glob("*_concat.txt"))
+    assert sentinel.read_bytes() == b"Unrelated job must survive"
+    assert source.read_bytes() == original
+    assert second.read_bytes() == second_original
 
 
 @pytest.mark.parametrize("kind", ["image", "video"])
@@ -48,13 +153,30 @@ def test_unavailable_media_stops_export_and_cleans_intermediates(kind):
                 raise RuntimeError("Media download interrupted")
             return destination
 
-        def download(url, destination):
-            generated.append(Path(destination))
-            shutil.copyfile(source, destination)
-            raise RuntimeError("Media download interrupted")
+        class InterruptedImage:
+            def __enter__(self):
+                self.sent = False
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self, size):
+                if self.sent:
+                    raise RuntimeError("Media download interrupted")
+                self.sent = True
+                return source.read_bytes()
+
+        original_open = builtins.open
+
+        def track_image_write(path, mode="r", *args, **kwargs):
+            if "w" in mode and "_img_" in str(path) and Path(path) not in generated:
+                generated.append(Path(path))
+            return original_open(path, mode, *args, **kwargs)
 
         with patch.object(worker, "materialize_video_input", ingest), \
-             patch("urllib.request.urlretrieve", download), \
+             patch("urllib.request.urlopen", side_effect=lambda *args, **kwargs: InterruptedImage()), \
+             patch("builtins.open", side_effect=track_image_write), \
              patch.object(worker, "upload_file_to_firebase") as deliver:
             with pytest.raises(worker.HTTPException) as error:
                 asyncio.run(worker.render_viral_clip(request))
@@ -173,19 +295,21 @@ def test_mixed_media_layer_order_is_not_replaced_by_media_type(front):
         layers.sort(key=lambda layer: layer.id == front)
         request = worker.RenderViralRequest(video_url="test-source", start_time=0, end_time=1,
             smart_crop=False, auto_captions=False, professional_cleanup=False, brand_watermark=False,
-            overlays=layers, output_settings={"resolution": "source", "fps": "30"})
+            overlays=layers, output_settings={"resolution": "source", "fps": "30"},
+            timeline_segments=[worker.ViralTimelineSegment(url="test-source", start_time=0, end_time=1)])
         async def ingest(url, destination, **kwargs):
             assert url in {"test-source", "test-video"}
             shutil.copyfile(source if url == "test-source" else video, destination)
             return destination
-        def download(url, destination):
+        def download(url, timeout):
             assert url == "https://test.invalid/image.png"
-            shutil.copyfile(picture, destination)
+            assert timeout == 30
+            return io.BytesIO(picture.read_bytes())
         def deliver(path):
             shutil.copyfile(path, delivery)
             return str(delivery)
         with patch.object(worker, "materialize_video_input", ingest), patch.object(worker, "upload_file_to_firebase", deliver), \
-             patch("urllib.request.urlretrieve", download):
+             patch("urllib.request.urlopen", download):
             asyncio.run(worker.render_viral_clip(request))
         raw = run("-ss", "0.5", "-i", str(delivery), "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1")
         red, green, blue = np.frombuffer(raw, np.uint8).reshape(240, 320, 3)[120, 160]

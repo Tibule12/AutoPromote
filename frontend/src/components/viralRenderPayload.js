@@ -317,6 +317,7 @@ export const buildViralRenderData = ({
   addDefined(payload, "audio_track_states", extraOptions.audioTrackStates);
   addDefined(payload, "editor_timeline", extraOptions.editorTimeline);
   addDefined(payload, "composition_plan", extraOptions.compositionPlan);
+  addDefined(payload, "creative_template_instance", extraOptions.creativeTemplateInstance);
 
   if (isDefined(extraOptions.speedSegments)) {
     payload.speed_segments = normalizeSpeedSegmentsForRender(extraOptions.speedSegments);

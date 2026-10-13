@@ -1,0 +1,381 @@
+{
+  "schemaVersion": 1,
+  "templateId": "product_launch_cinematic_v1",
+  "version": "1.0.0",
+  "label": "Cinematic product launch",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "product_launch"
+  ],
+  "inputSlots": [
+    {
+      "id": "logo",
+      "type": "image",
+      "required": true
+    },
+    {
+      "id": "brandColour",
+      "type": "colour",
+      "required": true
+    },
+    {
+      "id": "headline",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureOne",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureTwo",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "callToAction",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "hookFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "productFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "detailFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": true
+    }
+  ],
+  "supportedAspects": [
+    "16:9",
+    "9:16"
+  ],
+  "durationTicks": 1800000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "sequence": [
+      {
+        "slot": "detailFootage",
+        "offset": 0,
+        "duration": 0.5
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 0,
+        "duration": 1.5
+      },
+      {
+        "slot": "productFootage",
+        "offset": 0,
+        "duration": 2
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 1,
+        "duration": 1.5
+      },
+      {
+        "slot": "productFootage",
+        "offset": 2,
+        "duration": 2.5
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 2.5,
+        "duration": 2
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 1.5,
+        "duration": 1.5
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 0,
+        "duration": 1
+      },
+      {
+        "slot": "productFootage",
+        "offset": 0.5,
+        "duration": 0.75
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 0.5,
+        "duration": 0.75
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 1.5,
+        "duration": 1
+      },
+      {
+        "slot": "productFootage",
+        "offset": 0,
+        "duration": 5
+      }
+    ],
+    "titles": [
+      {
+        "id": "hook-kicker",
+        "literal": "A NEW STANDARD",
+        "start": 0.125,
+        "duration": 1.75,
+        "x": 8,
+        "y": 16,
+        "scale": 0.48,
+        "colour": "brand",
+        "weight": 600
+      },
+      {
+        "id": "hook-line-1",
+        "slot": "headline",
+        "line": 0,
+        "start": 0.25,
+        "duration": 1.65,
+        "x": 8,
+        "y": 39,
+        "scale": 2.35,
+        "colour": "white"
+      },
+      {
+        "id": "hook-line-2",
+        "slot": "headline",
+        "line": 1,
+        "start": 0.5,
+        "duration": 1.4,
+        "x": 8,
+        "y": 61,
+        "scale": 2.35,
+        "colour": "brand"
+      },
+      {
+        "id": "action-kicker",
+        "literal": "DESIGNED TO FEEL DIFFERENT",
+        "start": 2.25,
+        "duration": 2.9,
+        "x": 8,
+        "y": 87,
+        "scale": 0.55,
+        "colour": "white",
+        "weight": 600
+      },
+      {
+        "id": "feature-1-number",
+        "literal": "01 /",
+        "start": 8.125,
+        "duration": 1.7,
+        "x": 8,
+        "y": 29,
+        "scale": 0.55,
+        "colour": "brand",
+        "weight": 600
+      },
+      {
+        "id": "feature-1",
+        "slot": "featureOne",
+        "start": 8.25,
+        "duration": 1.6,
+        "x": 8,
+        "y": 51,
+        "scale": 1.45,
+        "colour": "white"
+      },
+      {
+        "id": "feature-2-number",
+        "literal": "02 /",
+        "start": 11.5,
+        "duration": 1.6,
+        "x": 8,
+        "y": 29,
+        "scale": 0.55,
+        "colour": "brand",
+        "weight": 600
+      },
+      {
+        "id": "feature-2",
+        "slot": "featureTwo",
+        "start": 11.625,
+        "duration": 1.45,
+        "x": 8,
+        "y": 51,
+        "scale": 1.45,
+        "colour": "white"
+      },
+      {
+        "id": "payoff",
+        "slot": "headline",
+        "line": 1,
+        "start": 14,
+        "duration": 0.85,
+        "x": 8,
+        "y": 51,
+        "scale": 2,
+        "colour": "brand"
+      },
+      {
+        "id": "ending-kicker",
+        "literal": "INTRODUCING",
+        "start": 15.375,
+        "duration": 3.75,
+        "x": 50,
+        "y": 29,
+        "scale": 0.5,
+        "colour": "brand",
+        "weight": 600,
+        "align": "center"
+      },
+      {
+        "id": "cta",
+        "slot": "callToAction",
+        "start": 17,
+        "duration": 2.75,
+        "x": 50,
+        "y": 73,
+        "scale": 0.75,
+        "colour": "white",
+        "weight": 600,
+        "align": "center"
+      },
+      {
+        "id": "credit",
+        "literal": "MADE WITH AUTOPROMOTE",
+        "start": 18.25,
+        "duration": 1.5,
+        "x": 50,
+        "y": 89,
+        "scale": 0.38,
+        "colour": "white",
+        "weight": 600,
+        "align": "center"
+      }
+    ],
+    "logo": {
+      "start": 15.5,
+      "duration": 4.5,
+      "x": 50,
+      "y": 50,
+      "width": 45,
+      "height": 22
+    },
+    "soundCues": [
+      {
+        "time": 0,
+        "tone": "impact",
+        "duration": 0.6,
+        "volume": 0.28
+      },
+      {
+        "time": 0.4,
+        "tone": "sweep",
+        "duration": 0.3,
+        "volume": 0.13
+      },
+      {
+        "time": 1.5,
+        "tone": "riser",
+        "duration": 0.5,
+        "volume": 0.14
+      },
+      {
+        "time": 2,
+        "tone": "subdrop",
+        "duration": 0.85,
+        "volume": 0.2
+      },
+      {
+        "time": 5.35,
+        "tone": "sweep",
+        "duration": 0.3,
+        "volume": 0.13
+      },
+      {
+        "time": 8,
+        "tone": "impact",
+        "duration": 0.45,
+        "volume": 0.2
+      },
+      {
+        "time": 11.45,
+        "tone": "click",
+        "duration": 0.15,
+        "volume": 0.13
+      },
+      {
+        "time": 12.5,
+        "tone": "click",
+        "duration": 0.12,
+        "volume": 0.12
+      },
+      {
+        "time": 13.25,
+        "tone": "click",
+        "duration": 0.12,
+        "volume": 0.12
+      },
+      {
+        "time": 14,
+        "tone": "riser",
+        "duration": 1,
+        "volume": 0.2
+      },
+      {
+        "time": 15.25,
+        "tone": "subdrop",
+        "duration": 1.3,
+        "volume": 0.22
+      },
+      {
+        "time": 17,
+        "tone": "chime",
+        "duration": 1.2,
+        "volume": 0.07
+      }
+    ],
+    "animation": {
+      "enterSeconds": 0.20833333333333334,
+      "settleSeconds": 0.375,
+      "exitSeconds": 0.125,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 0.66,
+      "fadeIn": 0.02,
+      "fadeOut": 0.75,
+      "ducking": false
+    }
+  }
+}

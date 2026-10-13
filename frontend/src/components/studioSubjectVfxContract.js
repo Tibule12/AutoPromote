@@ -125,7 +125,7 @@ function validateSubjectVfxScene(scene) {
       (typeof effect.text !== "string" ||
         effect.text.length < 1 ||
         effect.text.length > 120 ||
-        /[\x00-\x1f]/.test(effect.text))
+        [...effect.text].some(character => character.charCodeAt(0) <= 31))
     )
       fail("Use a single line of effect text, up to 120 characters.");
     const bounds = {

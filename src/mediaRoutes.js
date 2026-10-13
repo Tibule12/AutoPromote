@@ -10,7 +10,28 @@ const { buildWorkerRequestConfig } = require("./utils/cloudRunAuth");
 // The service file exports an instance by default? No, let's check.
 const VideoEditingService = require("./services/videoEditingService");
 const videoEditingService = new VideoEditingService(); // Instantiate for general use
-const { refreshOwnedStudioOutput } = require("./services/studioWorkerOutputService");
+const { refreshOwnedStudioOutput, persistWorkerBucketOutput } = require("./services/studioWorkerOutputService");
+
+async function refreshCompletedStudioOutput(data,userId,jobId,docRef) {
+  if (data.status !== "completed" || data.options?.renderViral !== true) return;
+  let storagePath = data.outputStoragePath || data.result?.outputStoragePath;
+  if (!storagePath?.startsWith("studio/exports/")) {
+    const adopted = await persistWorkerBucketOutput({userId,jobId,legacy:true,
+      url:data.outputUrl || data.result?.url || data.result?.output_url,
+      expectedSha256:data.result?.outputSha256 || data.result?.output_sha256});
+    if (adopted) {
+      storagePath=adopted.storagePath;
+      const result={...data.result,url:adopted.url,outputStoragePath:storagePath,
+        outputSha256:adopted.sha256,outputBytes:adopted.bytes,outputGeneration:adopted.generation};
+      await docRef.set({outputStoragePath:storagePath,outputUrl:adopted.url,result},{merge:true});
+      Object.assign(data,{outputStoragePath:storagePath,outputUrl:adopted.url,result});
+    }
+  }
+  if (storagePath?.startsWith("studio/exports/")) {
+    data.outputUrl=await refreshOwnedStudioOutput({storagePath,userId,jobId});
+    data.downloadUrl=await refreshOwnedStudioOutput({storagePath,userId,jobId,download:true});
+  }
+}
 
 const authMiddleware = require("./authMiddleware");
 const { deductCredits, refundCredits, getCreditBreakdown } = require("./creditSystem");
@@ -40,7 +61,7 @@ const {
   startMulticamUpload,
   verifyMulticamRenderInputs,
 } = require("./services/multicamUploadService");
-const { getStudioSourceBucket, resolveOwnedStudioVideoSource } = require("./services/studioSourceService");
+const { getStudioSourceBucket, resolveOwnedStudioVideoSource, resolveOwnedStudioMediaSource } = require("./services/studioSourceService");
 const { assertOwnedStudioSourceBinding } = require("./services/studioDirectorProjectBinding");
 const {
   persistSourceShotArtifact,
@@ -303,7 +324,12 @@ const viralRenderAttemptResponse = (jobId, data) => {
     error: data.status === "failed" ? data.error || "Rendering failed" : null,
     outputUrl,
     downloadUrl: completed ? data.downloadUrl || null : null,
-    result: outputUrl ? { url: outputUrl } : null,
+    result: outputUrl ? {
+      url: outputUrl,
+      ...(typeof (data.result?.outputSha256 || data.outputSha256) === "string" &&
+          /^[a-f0-9]{64}$/.test(data.result?.outputSha256 || data.outputSha256)
+        ? { outputSha256: data.result?.outputSha256 || data.outputSha256 } : {}),
+    } : null,
     creditsRefunded: Boolean(data.creditsRefunded),
   };
 };
@@ -1018,7 +1044,7 @@ router.delete("/studio-subject-vfx/:jobId", requireTesterEditingFeature("clipRen
 
 router.post("/studio-assets/resolve", requireTesterEditingFeature("clipRender"), async (req, res) => {
   try {
-    const source = await resolveOwnedStudioVideoSource({
+    const source = await resolveOwnedStudioMediaSource({
       storagePath: req.body?.storagePath,
       userId: req.user.uid,
     });
@@ -1036,6 +1062,41 @@ router.post("/studio-assets/resolve", requireTesterEditingFeature("clipRender"),
       message: error.message || "Could not reopen this Studio video",
     });
   }
+});
+
+router.post("/studio-assets/source-frame", requireTesterEditingFeature("clipRender"), async (req, res) => {
+  const controller = new AbortController();
+  const cancel = () => { if (!res.writableEnded) controller.abort(); };
+  res.once('close', cancel);
+  try {
+    const { getOwnedSourceFrame } = require('./services/studioSourceFrameService');
+    const result = await getOwnedSourceFrame({ ownerUid: req.user.uid, input: req.body, signal: controller.signal });
+    if (res.destroyed) return;
+    res.set('Cache-Control', 'private, no-store');
+    return res.json(result);
+  } catch (error) {
+    if (res.destroyed) return;
+    return res.status(error.statusCode || 503).json({
+      code: error.code || 'STUDIO_FRAME_UNAVAILABLE',
+      message: error.statusCode ? error.message : 'Accurate paused preview is temporarily unavailable',
+    });
+  } finally { res.removeListener('close', cancel); }
+});
+
+router.post('/studio-assets/voice-bus-preview', requireTesterEditingFeature('clipRender'), async (req, res) => {
+  const controller = new AbortController();
+  const cancel = () => { if (!res.writableEnded) controller.abort(); };
+  res.once('close', cancel);
+  try {
+    const { getOwnedVoiceBusPreview } = require('./services/studioVoiceBusPreviewService');
+    const result = await getOwnedVoiceBusPreview({ ownerUid: req.user.uid, input: req.body, signal: controller.signal });
+    if (!res.destroyed) { res.set('Cache-Control', 'private, no-store'); return res.json(result); }
+  } catch (error) {
+    if (!res.destroyed) return res.status(error.statusCode || 503).json({
+      code: error.code || 'STUDIO_VOICE_PREVIEW_UNAVAILABLE',
+      message: error.statusCode ? error.message : 'Recorded-speech preview is temporarily unavailable',
+    });
+  } finally { res.removeListener('close', cancel); }
 });
 
 router.post("/studio-assets/import-render", requireTesterEditingFeature("clipRender"), async (req, res) => {
@@ -1663,6 +1724,25 @@ router.post(
       }
     }
 
+    if (isViralClipRender) {
+      // Validate supported composition decisions before source lookups, worker
+      // allocation or charging. Existing attempt recovery above stays authoritative.
+      const supportedBlendModes = new Set(["normal", "multiply", "screen", "difference", "overlay", "soft-light", "hard-light", "color-dodge", "luminosity"]);
+      const overlays = Array.isArray(options?.viralData?.overlays) ? options.viralData.overlays : [];
+      const layers = Array.isArray(options?.viralData?.composition_plan?.layers)
+        ? options.viralData.composition_plan.layers : [];
+      const unsupportedOverlay = overlays.some(layer => !supportedBlendModes.has(layer?.blendMode || "normal"));
+      const unsupportedLayer = layers.some(layer => !supportedBlendModes.has(layer?.blend_mode || "normal") ||
+        (layer?.id === "main-video" && (layer.blend_mode || "normal") !== "normal"));
+      const conflictingLayer = layers.some(layer => layer?.id !== "main-video" &&
+        overlays.some(overlay => overlay?.id === layer?.id &&
+          (overlay.blendMode || "normal") !== (layer.blend_mode || "normal")));
+      if (unsupportedOverlay || unsupportedLayer || conflictingLayer) {
+        return res.status(400).json({ code: "UNSUPPORTED_STUDIO_BLEND",
+          message: "This Studio blend is unavailable or conflicts with its layer. Use Normal for main video and a supported blend mode for visual overlays." });
+      }
+    }
+
     if (!requestedFileUrl && !renderJobId && !(isViralClipRender && sourceStoragePath)) {
       return res.status(400).json({ message: "No file provided" });
     }
@@ -1888,12 +1968,8 @@ router.get("/viral-render-attempt/:requestId", async (req, res) => {
     }
     const data = doc.data();
     const refundResult = await refundViralRenderJobIfNeeded(userId, jobId, data);
-    const durablePath = data.outputStoragePath || data.result?.outputStoragePath;
-    if (data.status === "completed" && typeof durablePath === "string" &&
-        durablePath.startsWith("studio/exports/")) {
-      data.outputUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId });
-      data.downloadUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId, download: true });
-    }
+    await refreshCompletedStudioOutput(data,userId,jobId,
+      admin.firestore().collection("video_edits").doc(jobId));
     return res.json({
       ...viralRenderAttemptResponse(jobId, data),
       creditsRefunded: Boolean(data.creditsRefunded || refundResult?.success),
@@ -3145,12 +3221,8 @@ router.get("/status/:jobId", async (req, res) => {
 
     // Refresh private download access from the durable owner-bound object,
     // independently of the worker's availability or the old signed URL expiry.
-    const durablePath = data.outputStoragePath || data.result?.outputStoragePath;
-    if (data.status === "completed" && data.options?.renderViral === true &&
-        typeof durablePath === "string" && durablePath.startsWith("studio/exports/")) {
-      data.outputUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId });
-      data.downloadUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId, download: true });
-    }
+    await refreshCompletedStudioOutput(data,userId,jobId,
+      admin.firestore().collection("video_edits").doc(jobId));
 
     await refundCleanAudioSyncJobIfNeeded(userId, jobId, data, "worker_failed");
     await refundMulticamRenderJobIfNeeded(userId, jobId, data, "status_poll_failed_job");
@@ -3230,6 +3302,9 @@ router.get("/status/:jobId", async (req, res) => {
     res.json({
       success: true,
       status,
+      ...(data.options?.renderViral === true ? { jobId,
+        renderRequestId: data.renderRequestId || null,
+        brandWatermark: data.options?.viralData?.brand_watermark } : {}),
       stage: data.stage,
       progress: data.progress,
       detail: data.detail || data.result?.detail || null,

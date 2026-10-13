@@ -34,6 +34,14 @@ export const saveViralStudioProject = async project => {
     updatedAt: now,
   };
   await database.put(PROJECT_STORE, record);
+  // Local timelines and Firebase's session share this origin's browser storage.
+  // Ask the browser to protect them from storage-pressure eviction. A denied
+  // request is not a promise of cloud durability and must not block saving.
+  try {
+    if (typeof navigator !== "undefined" && navigator.storage?.persist) {
+      await navigator.storage.persist();
+    }
+  } catch (_error) { /* Persistence is a best-effort browser decision. */ }
   return record;
 };
 

@@ -3,11 +3,10 @@
 // Bridges Node.js backend with Python Media Worker
 
 const axios = require("axios");
-const admin = require("firebase-admin");
+const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
-const db = admin.firestore();
 const fs = require("fs");
-const { isTransientWorkerOutput, persistWorkerOutput } = require("./studioWorkerOutputService");
+const { isTransientWorkerOutput, persistWorkerOutput, persistWorkerBucketOutput } = require("./studioWorkerOutputService");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 const { deductCredits, refundCredits } = require("../creditSystem");
 const { buildWorkerRequestConfig } = require("../utils/cloudRunAuth");
@@ -1218,18 +1217,33 @@ class VideoEditingService {
             }
           }
         }
+        if (!durableOutput && options.renderViral) {
+          durableOutput = await persistWorkerBucketOutput({url:outputUrl,userId,jobId,
+            expectedSha256:result.output_sha256 || result.outputSha256});
+          if (durableOutput) { outputUrl=durableOutput.url; outputStoragePath=durableOutput.storagePath; }
+        }
         console.log("[VideoEditing] Worker output ready", { durable: Boolean(durableOutput) });
+        const workerOutputHash = result.output_sha256 || result.outputSha256;
+        const outputIntegrity = durableOutput
+          ? { outputSha256: durableOutput.sha256, outputBytes: durableOutput.bytes }
+          : typeof workerOutputHash === "string" && /^[a-f0-9]{64}$/.test(workerOutputHash)
+            ? { outputSha256: workerOutputHash,
+                ...(Number.isSafeInteger(result.output_bytes) && result.output_bytes > 0
+                  ? { outputBytes: result.output_bytes } : {}) }
+            : {};
         return {
           success: true,
           url: outputUrl,
           outputStoragePath,
-          ...(durableOutput ? { outputSha256: durableOutput.sha256, outputBytes: durableOutput.bytes } : {}),
+          ...outputIntegrity,
+          ...(durableOutput?.generation ? { outputGeneration: durableOutput.generation } : {}),
           thumbnailUrl,
           coverFrame: result.cover_frame || result.coverFrame || null,
           thumbnailFrame: result.thumbnail_frame || result.thumbnailFrame || null,
           duration: result.duration || 0,
           audioProof: result.audio_proof || result.audioProof || null,
           captionReviewCopy: result.caption_review_copy === true,
+          creativeTemplateInstance: result.creative_template_instance || null,
           message: "Processing completed (Remote Worker)",
         };
       }
@@ -1307,6 +1321,7 @@ class VideoEditingService {
         success: true,
         url: publicUrl,
         message: "Video processed successfully",
+        creativeTemplateInstance: result.creative_template_instance || null,
       };
     } catch (error) {
       console.error("[VideoEditing] Error:", error.message);

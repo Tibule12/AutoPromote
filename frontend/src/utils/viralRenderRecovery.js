@@ -1,6 +1,18 @@
 const KEY_PREFIX = "autopromote-viral-render-attempt:";
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
+// Recovery receipts contain owner-scoped request IDs, never tokens or media
+// URLs. A transient signed-out auth event must not erase a paid/completed job.
+// Access to that job is checked again by the server after authentication.
+export const clearSessionPreservingRenderAttempts = () => {
+  if (typeof window === "undefined") return;
+  try {
+    const storage = window.localStorage;
+    const keys = Array.from({ length: storage.length }, (_, index) => storage.key(index));
+    keys.filter(key => key && !key.startsWith(KEY_PREFIX)).forEach(key => storage.removeItem(key));
+  } catch (_error) { /* Browser storage may be unavailable. */ }
+};
+
 const storageFor = uid => {
   if (typeof window === "undefined" || !uid) return null;
   try {

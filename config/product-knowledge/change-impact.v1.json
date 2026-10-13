@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "changes": [
+    {
+      "feature_id": "studio.keyframes",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioAdvancedInspectors.js",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+        "frontend/src/components/studioAutomation.js"
+      ],
+      "reason": "First documentation qualification against actual implementation and retained evidence. No product readiness status is promoted."
+    },
+    {
+      "feature_id": "cam_combiner.switching",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/multicamUtils.js",
+        "frontend/src/components/MultiCamCombiner.js"
+      ],
+      "reason": "First documentation qualification against actual implementation and retained evidence. No product readiness status is promoted."
+    },
+    {
+      "feature_id": "studio.compositing.text_behind_subject",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/studioSubjectVfxContract.js",
+        "src/services/studioSubjectVfxService.js",
+        "test/e2e/studio-capability-matrix.json",
+        "frontend/src/components/StudioCreatorWorkbench.js",
+        "contracts/model-capabilities-v1.json"
+      ],
+      "reason": "First documentation qualification against actual implementation and retained evidence. No product readiness status is promoted."
+    },
+    {
+      "feature_id": "publishing.connections",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/routes/platformRoutes.js",
+        "src/middlewares/platformStatusPolicy.js",
+        "src/services/redditService.js",
+        "frontend/src/features/publishing/utils/publishingUtils.js",
+        "src/server.js"
+      ],
+      "reason": "Review actual Publisher scheduling/account flow and local owned status, Page selection, Reddit identity/video repairs. Retain PARTIAL; pending queue is not external publication or creative readiness."
+    },
+    {
+      "feature_id": "publishing.schedule",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/features/publishing/UnifiedPublisher.js",
+        "src/services/viralOptimizationService.js",
+        "src/promotionService.js",
+        "frontend/src/UserDashboardTabs/SchedulesPanel.js",
+        "frontend/src/App.js",
+        "src/services/publishingScheduleQuery.js"
+      ],
+      "reason": "Review next-seven-days/all queue periods and owned cursor pagination, account checks and pending-versus-published distinction. No readiness promotion."
+    },
+    {
+      "feature_id": "publishing.export",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/features/publishing/UnifiedPublisher.js"
+      ],
+      "reason": "Review actual Publisher scheduling/account flow and local owned status, Page selection, Reddit identity/video repairs. Retain PARTIAL; pending queue is not external publication or creative readiness."
+    },
+    {
+      "feature_id": "publishing.publish",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/features/publishing/UnifiedPublisher.js",
+        "src/contentRoutes.js",
+        "src/services/platformPoster.js",
+        "src/services/publishingIntent.js",
+        "frontend/src/App.js"
+      ],
+      "reason": "Review actual Publisher scheduling/account flow and local owned status, Page selection, Reddit identity/video repairs. Retain PARTIAL; pending queue is not external publication or creative readiness. Correct own-brand commercial versus sponsored classification; preserve exact selected media by explicitly disabling unrequested enhancement."
+    },
+    {
+      "feature_id": "studio.persistence",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/studioProjectDocument.js"
+      ],
+      "reason": "Preserve legacy full-source duration metadata on unchanged owned occurrence hydration; meaningful source-range edits still increment revision. Native recovery remains subject to exact-project receipt checks."
+    },
+    {
+      "feature_id": "studio.keyframes",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "cam_combiner.switching",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "studio.compositing.text_behind_subject",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "studio.captions",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "BROKEN",
+      "status_after": "BROKEN",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "generation.idea_to_video",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "studio.templates",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "studio.three_d",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "system.model_runtime",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "studio.tracking",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "studio.revision",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "src/productAssistance/index.js",
+        "src/routes/productAssistanceRoutes.js",
+        "frontend/src/components/ProductAssistance.js"
+      ],
+      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
+    },
+    {
+      "feature_id": "studio.blender",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/services/studio3DService.js",
+        "src/productAssistance/index.js"
+      ],
+      "reason": "Map actual existing 3D/caption messages and provider reason codes to reviewed documentation. No new features, execution authority or readiness promotion."
+    },
+    {
+      "feature_id": "studio.captions",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "BROKEN",
+      "status_after": "BROKEN",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "src/productAssistance/index.js"
+      ],
+      "reason": "Map actual existing 3D/caption messages and provider reason codes to reviewed documentation. No new features, execution authority or readiness promotion."
+    },
+    {
+      "feature_id": "publishing.publish",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/services/platformPoster.js",
+        "src/productAssistance/index.js"
+      ],
+      "reason": "Map actual existing 3D/caption messages and provider reason codes to reviewed documentation. No new features, execution authority or readiness promotion."
+    },
+    {
+      "feature_id": "studio.compositing",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/studioRenderCompiler.js",
+        "python_media_worker/studio_layer_motion.py",
+        "python_media_worker/studio_text.py",
+        "python_media_worker/main_media_server.py"
+      ],
+      "reason": "Review actual native geometric-mask/crop/title-layout and delivery-resolution repairs with owned CPU exports. Keep PARTIAL: feather/inversion, arbitrary nesting, full raster/audio and creative/public qualification are open."
+    },
+    {
+      "feature_id": "publishing.connections",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "src/routes/platformRoutes.js",
+        "src/middlewares/platformStatusPolicy.js",
+        "src/services/redditService.js",
+        "frontend/src/features/publishing/utils/publishingUtils.js",
+        "src/server.js"
+      ],
+      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
+    },
+    {
+      "feature_id": "publishing.schedule",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/features/publishing/UnifiedPublisher.js",
+        "src/services/viralOptimizationService.js",
+        "src/promotionService.js",
+        "frontend/src/UserDashboardTabs/SchedulesPanel.js",
+        "frontend/src/App.js",
+        "src/services/publishingScheduleQuery.js"
+      ],
+      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
+    },
+    {
+      "feature_id": "publishing.export",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/features/publishing/UnifiedPublisher.js"
+      ],
+      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
+    },
+    {
+      "feature_id": "publishing.publish",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/features/publishing/UnifiedPublisher.js",
+        "src/contentRoutes.js",
+        "src/services/platformPoster.js",
+        "src/services/publishingIntent.js",
+        "frontend/src/App.js",
+        "src/services/redditPublication.js",
+        "src/services/redditVideoPoster.js",
+        "src/services/promotionTaskQueue.js",
+        "src/services/linkedinService.js"
+      ],
+      "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
+    }
+  ]
+}

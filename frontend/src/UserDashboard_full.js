@@ -349,6 +349,11 @@ const UserDashboard = ({
   mySchedulesLoading = false,
   mySchedulesError = "",
   onSchedulesChanged,
+  scheduleScope,
+  schedulesLoading,
+  hasMoreSchedules,
+  onScheduleScopeChanged,
+  onLoadMoreSchedules,
   onWorkspaceChanged,
 }) => {
   const hasPendingWorkspaceInvite =
@@ -864,7 +869,9 @@ const UserDashboard = ({
                 Authorization: `Bearer ${token}`,
                 ...(action === "reschedule" ? { "Content-Type": "application/json" } : {}),
               }),
-              ...(action === "reschedule" ? { body: JSON.stringify({ time: when, timezone }) } : {}),
+              ...(action === "reschedule"
+                ? { body: JSON.stringify({ time: when, timezone }) }
+                : {}),
             });
             if (!response.ok) throw new Error(`${id}: ${response.status}`);
           })
@@ -1860,11 +1867,17 @@ const UserDashboard = ({
             loadError={mySchedulesError}
             defaultTimezone={userDefaults?.timezone}
             contentList={contentList}
+            scheduleScope={scheduleScope}
+            hasMore={hasMoreSchedules}
+            onScopeChanged={onScheduleScopeChanged}
+            onLoadMore={onLoadMoreSchedules}
             onPause={doPause}
             onResume={doResume}
             onReschedule={doReschedule}
             onEditCopy={doEditScheduleCopy}
-            onRescheduleMany={(ids, when, timezone) => doReleaseAction(ids, "reschedule", when, timezone)}
+            onRescheduleMany={(ids, when, timezone) =>
+              doReleaseAction(ids, "reschedule", when, timezone)
+            }
             onPauseMany={ids => doReleaseAction(ids, "pause")}
             onResumeMany={ids => doReleaseAction(ids, "resume")}
             onDelete={doDelete}

@@ -18,6 +18,7 @@ import { useSubscription } from "../hooks/useSubscription";
 import { playMediaSafely } from "../utils/mediaPlayback";
 import { buildViralRenderData } from "./viralRenderPayload";
 import { getMediaAuthToken } from "../utils/mediaAuth";
+import { readStudioRenderReceipt, validateRecoveredStudioRender } from "../utils/studioRenderReceipt";
 import {
   RENDER_STATUS_MAX_WAIT_MS,
   RENDER_STATUS_TIMEOUT_MS,
@@ -1270,13 +1271,43 @@ function VideoEditor({
     setRenderRecovery(null);
   };
 
+  const restoreStudioExport = async (file, document) => {
+    const revision = studioEditRevisionRef.current;
+    try {
+      const receipt = await readStudioRenderReceipt(file, document);
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Sign in to restore your finished export.");
+      const response = await fetchWithRenderTimeout(
+        `${API_BASE_URL}/api/media/status/${encodeURIComponent(receipt.submittedJobId)}`,
+        { headers: { Authorization: `Bearer ${token}` } }, { timeoutMs: RENDER_STATUS_TIMEOUT_MS }
+      );
+      if (!response.ok) throw new Error(`Finished export is unavailable (${response.status}).`);
+      const job = await response.json();
+      const url = sanitizeUrl(validateRecoveredStudioRender(receipt, job));
+      if (!url) throw new Error("The completed export has no playable video.");
+      if (studioEditRevisionRef.current !== revision) throw new Error("The project changed while recovering. Restore the matching edit first.");
+      saveViralRenderAttempt(getAuth().currentUser?.uid, {
+        requestId: job.renderRequestId, studioProjectId: receipt.projectId,
+        brandWatermark: false, captionReviewCopy: false,
+      });
+      recoveryDismissedRef.current = true;
+      setViralRenderedFile({ name: "viral_clip_rendered.mp4", type: "video/mp4", url,
+        previewUrl: url, downloadUrl: job.result?.downloadUrl || job.downloadUrl || null,
+        isRemote: true, captionReviewCopy: false });
+      setRenderRecovery({ status: "completed", requestId: job.renderRequestId,
+        jobId: receipt.submittedJobId, outputUrl: url });
+      setStatusMessage("Finished export restored.");
+    } catch (error) { setStatusMessage(error.message || "Finished export could not be restored."); }
+  };
+
   const handleViralRender = async (selectedClip, overlays, extraOptions = {}) => {
     const submittedEditRevision = studioEditRevisionRef.current;
     if (["checking", "processing", "unavailable", "missing"].includes(renderRecovery?.status)) {
-      setStatusMessage(
-        "Your previous render may still be processing. Check its status or dismiss recovery before starting another render."
-      );
-      return null;
+      const message = "Your previous render may still be processing. Check its status or dismiss recovery before starting another render.";
+      setStatusMessage(message);
+      // Studio owns the visible export feedback. Returning null silently left
+      // its creator waiting even though no request could be submitted.
+      throw new Error(message);
     }
     setStatusMessage("Rendering your viral clip with overlays...");
     setViralRenderedFile(null);
@@ -1970,6 +2001,20 @@ function VideoEditor({
             onStatusChange={setStatusMessage}
             renderStatus={statusMessage}
             renderedOutput={viralRenderedFile}
+            onRestoreExport={restoreStudioExport}
+            onRenderedPreviewError={() => {
+              // The job/receipt remains available for recovery. A failed URL
+              // must not keep the ready badge or hide the recovery controls.
+              setViralRenderedFile(null);
+              const attempt = loadViralRenderAttempt(getAuth().currentUser?.uid, recoveryProjectId);
+              setRenderRecovery({
+                status: "unavailable",
+                requestId: attempt?.requestId,
+                jobId: attempt?.jobId,
+                error: "The finished preview could not load. Retry access to this completed job; no new render is requested.",
+              });
+              setStatusMessage("Finished preview unavailable. The completed render is retained for recovery and download.");
+            }}
             onProjectOpened={id => {
               studioEditRevisionRef.current += 1;
               setViralRenderedFile(null);
@@ -1979,16 +2024,16 @@ function VideoEditor({
             }}
             onEditInvalidated={() => {
               studioEditRevisionRef.current += 1;
-              if (viralRenderedFile || renderRecovery?.status === "completed") {
-                clearViralRenderAttempt(getAuth().currentUser?.uid, undefined, recoveryProjectId);
-                recoveryDismissedRef.current = true;
-                setRenderRecovery(null);
-              }
+              // Invalidate the saved mapping even while status is checking.
+              // Otherwise a later reopen can recover a movie for an old graph.
+              clearViralRenderAttempt(getAuth().currentUser?.uid, undefined, recoveryProjectId);
+              recoveryDismissedRef.current = true;
               setViralRenderedFile(null);
-              setRenderRecovery(current => current?.status === "completed" ? null : current);
+              setRenderRecovery(null);
               if (!processing) setStatusMessage("");
             }}
             renderRecoveryPanel={renderRecovery ? recoveryPanel : null}
+            renderRecoveryNeedsAttention={Boolean(renderRecovery && renderRecovery.status !== "completed")}
             onDownloadRendered={() => handleDownloadVideo(viralRenderedFile?.url, viralRenderedFile?.downloadUrl)}
             onUseRendered={() => {
               if (!viralRenderedFile || viralRenderedFile.captionReviewCopy) return;

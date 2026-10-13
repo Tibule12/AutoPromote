@@ -1,0 +1,2714 @@
+{
+  "schema_version": 1,
+  "knowledge_version": "1.0.4",
+  "product_version": "1.2.0",
+  "nodes": [
+    {
+      "id": "studio.timeline",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.cut",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.trim",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.ripple",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.layers",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transforms",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.keyframes",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.easing",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.crop_reframe",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.captions",
+      "kind": "feature",
+      "status": "BROKEN"
+    },
+    {
+      "id": "studio.titles",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.motion",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.effects",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.compositing",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.masks",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.tracking",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.subject_cutout",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transitions",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.speed",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.voiceover",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.music",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.sfx",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio_restoration",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.audio_automation",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.ducking",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.color",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.three_d",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.blender",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d_audio",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.generated_video",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.generated_image",
+      "kind": "feature",
+      "status": "UNIMPLEMENTED"
+    },
+    {
+      "id": "studio.generated_raw",
+      "kind": "feature",
+      "status": "UNIMPLEMENTED"
+    },
+    {
+      "id": "studio.templates",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.preview",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.render",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.export",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.persistence",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.undo_redo",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.revision",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.b_roll",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.media_ingest",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.stabilization",
+      "kind": "feature",
+      "status": "UNIMPLEMENTED"
+    },
+    {
+      "id": "studio.compositing.text_behind_subject",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.compositing.tracked_callout",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.compositing.background_grade",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.compositing.mask_depth",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.compositing.depth_estimation",
+      "kind": "feature",
+      "status": "UNIMPLEMENTED"
+    },
+    {
+      "id": "studio.creator.text_behind_subject",
+      "kind": "feature",
+      "status": "PROXY_ONLY"
+    },
+    {
+      "id": "studio.creator.background_replacement",
+      "kind": "feature",
+      "status": "PROXY_ONLY"
+    },
+    {
+      "id": "studio.creator.screen_replacement",
+      "kind": "feature",
+      "status": "PROXY_ONLY"
+    },
+    {
+      "id": "studio.creator.object_cleanup",
+      "kind": "feature",
+      "status": "PROXY_ONLY"
+    },
+    {
+      "id": "studio.creator.tracking",
+      "kind": "feature",
+      "status": "PROXY_ONLY"
+    },
+    {
+      "id": "cam_combiner.upload",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.synchronization",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.master_audio",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.drift",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.channel_mapping",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.active_speaker",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.switching",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.reactions",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.split_views",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.review",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.export",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "director.proposals",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "director.evidence",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "director.review",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "director.template_selection",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "director.find_viral_clips",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "director.scene_understanding",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "director.object_detection",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "system.model_runtime",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "system.gpu_jobs",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "system.processing_states",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "system.retries",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "system.cancellation",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "system.generation_failure",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "system.account",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "system.costs",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "system.unsupported_media",
+      "kind": "feature",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "generation.idea_to_video",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "generation.idea_recommendations",
+      "kind": "feature",
+      "status": "PROXY_ONLY"
+    },
+    {
+      "id": "generation.image_to_video",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "generation.text_to_video",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "generation.human_animation",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "generation.speech_video",
+      "kind": "feature",
+      "status": "UNIMPLEMENTED"
+    },
+    {
+      "id": "generation.scene_workflow",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "creative.shared_templates",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "creative.motion_graphics",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "creative.logo_brand",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "creative.vfx",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "creative.three_d",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "creative.audio",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "creative.story",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "creative.showroom",
+      "kind": "feature",
+      "status": "UNIMPLEMENTED"
+    },
+    {
+      "id": "publishing.connections",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.schedule",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.export",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.publish",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.analytics",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.transform.x",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transform.y",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transform.scale",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transform.rotation",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transform.opacity",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transform.anchorx",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transform.anchory",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transform.cropx",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.transform.cropy",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.layer.start",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.layer.duration",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.layer.width",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.layer.height",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.time",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.keyframe.easing",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.keyframe.curve",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.composite.blend",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.effect.blur",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.effect.glow_radius",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.effect.glow_intensity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.effect.layershadow_blur",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.effect.layershadow_opacity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.effect.motionblur_samples",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.effect.motionblur_shutter",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.x",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.y",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.font_size",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.tracking",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.offset_x",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.offset_y",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.range",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.seed_points",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.seed_labels",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.depth_amount",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.mask_feather",
+      "kind": "control",
+      "status": "UNIMPLEMENTED"
+    },
+    {
+      "id": "studio.subject.mask_expansion",
+      "kind": "control",
+      "status": "UNIMPLEMENTED"
+    },
+    {
+      "id": "cam_combiner.source_count",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.sync_offset",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.sync_rate",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.switch_interval",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.zoom",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.swap_channels",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.verify_channels",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "cam_combiner.clean_audio_mode",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.denoise",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.deesser",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.compressor",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.limiter",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.loudness",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.eq_low",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.eq_mid",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.eq_high",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.hum",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.gain_key",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.audio.automation_source",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.ducking",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.grade.exposurestops",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.grade.lift",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.grade.gamma",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.grade.gain",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.grade.tint",
+      "kind": "control",
+      "status": "FUNCTIONAL"
+    },
+    {
+      "id": "studio.three_d.x",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.y",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.z",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.scale",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.rotationx",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.rotationy",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.rotationz",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.extrusiondepth",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.bevel",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.focallength",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.lightintensity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.cameramotion",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.bloom",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.material",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.fontfamily",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.fontweight",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.easing",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.audioreactiveintensity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.lightdirection",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.shadows",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.reflections",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.background",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.three_d.quality",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.music.volume",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.music.fadein",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.music.fadeout",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.ducking_strength",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.audio.ducking_mode",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.sfx.volume",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.sfx.duration",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.sfx.trim",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.voiceover.volume",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.voiceover.duration",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.speed.rate",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.transition.duration",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.text",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.scale",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.color",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.exposure",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.saturation",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.subject.contrast",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "generation.max_cutaways",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.queue.period",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.queue.load_more",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.image_cinematic",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.product_launch",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.text_behind",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.tracked_text",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.background_replace",
+      "kind": "task",
+      "status": "PROXY_ONLY"
+    },
+    {
+      "id": "task.remove_object",
+      "kind": "task",
+      "status": "PROXY_ONLY"
+    },
+    {
+      "id": "task.screen_replace",
+      "kind": "task",
+      "status": "PROXY_ONLY"
+    },
+    {
+      "id": "task.cinematic_logo",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.animate_person",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.podcast_vertical",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.cam_combiner",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.reversed_channels",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.captions_correct",
+      "kind": "task",
+      "status": "BROKEN"
+    },
+    {
+      "id": "task.add_broll",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.three_d_title",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.use_template",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.director_manual",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.final_export",
+      "kind": "task",
+      "status": "PARTIAL"
+    }
+  ],
+  "edges": [
+    {
+      "from": "studio.timeline",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.cut",
+      "type": "requires",
+      "to": "studio.timeline"
+    },
+    {
+      "from": "studio.cut",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.trim",
+      "type": "requires",
+      "to": "studio.timeline"
+    },
+    {
+      "from": "studio.trim",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.ripple",
+      "type": "requires",
+      "to": "studio.timeline"
+    },
+    {
+      "from": "studio.ripple",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.layers",
+      "type": "editable_with",
+      "to": "studio.layer.start"
+    },
+    {
+      "from": "studio.layers",
+      "type": "editable_with",
+      "to": "studio.layer.duration"
+    },
+    {
+      "from": "studio.layers",
+      "type": "editable_with",
+      "to": "studio.layer.width"
+    },
+    {
+      "from": "studio.layers",
+      "type": "editable_with",
+      "to": "studio.layer.height"
+    },
+    {
+      "from": "studio.layers",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "requires",
+      "to": "studio.layers"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "editable_with",
+      "to": "studio.transform.x"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "editable_with",
+      "to": "studio.transform.y"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "editable_with",
+      "to": "studio.transform.scale"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "editable_with",
+      "to": "studio.transform.rotation"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "editable_with",
+      "to": "studio.transform.opacity"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "editable_with",
+      "to": "studio.transform.anchorx"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "editable_with",
+      "to": "studio.transform.anchory"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "editable_with",
+      "to": "studio.transform.cropx"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "editable_with",
+      "to": "studio.transform.cropy"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "requires",
+      "to": "studio.transforms"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "requires",
+      "to": "studio.timeline"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.transform.x"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.transform.y"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.transform.scale"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.transform.rotation"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.transform.opacity"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.transform.anchorx"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.transform.anchory"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.transform.cropx"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.transform.cropy"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.time"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.easing"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.easing",
+      "type": "requires",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.easing"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.curve"
+    },
+    {
+      "from": "studio.easing",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.crop_reframe",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.captions",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.titles",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.motion",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.effects",
+      "type": "editable_with",
+      "to": "studio.effect.blur"
+    },
+    {
+      "from": "studio.effects",
+      "type": "editable_with",
+      "to": "studio.effect.glow_radius"
+    },
+    {
+      "from": "studio.effects",
+      "type": "editable_with",
+      "to": "studio.effect.glow_intensity"
+    },
+    {
+      "from": "studio.effects",
+      "type": "editable_with",
+      "to": "studio.effect.layershadow_blur"
+    },
+    {
+      "from": "studio.effects",
+      "type": "editable_with",
+      "to": "studio.effect.layershadow_opacity"
+    },
+    {
+      "from": "studio.effects",
+      "type": "editable_with",
+      "to": "studio.effect.motionblur_samples"
+    },
+    {
+      "from": "studio.effects",
+      "type": "editable_with",
+      "to": "studio.effect.motionblur_shutter"
+    },
+    {
+      "from": "studio.effects",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "requires",
+      "to": "studio.layers"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.blend"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.masks",
+      "type": "requires",
+      "to": "studio.subject_cutout"
+    },
+    {
+      "from": "studio.masks",
+      "type": "editable_with",
+      "to": "studio.subject.mask_feather"
+    },
+    {
+      "from": "studio.masks",
+      "type": "editable_with",
+      "to": "studio.subject.mask_expansion"
+    },
+    {
+      "from": "studio.masks",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.tracking",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "studio.tracking",
+      "type": "editable_with",
+      "to": "studio.subject.range"
+    },
+    {
+      "from": "studio.tracking",
+      "type": "editable_with",
+      "to": "studio.subject.seed_points"
+    },
+    {
+      "from": "studio.tracking",
+      "type": "editable_with",
+      "to": "studio.subject.seed_labels"
+    },
+    {
+      "from": "studio.tracking",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.subject_cutout",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "studio.subject_cutout",
+      "type": "editable_with",
+      "to": "studio.subject.range"
+    },
+    {
+      "from": "studio.subject_cutout",
+      "type": "editable_with",
+      "to": "studio.subject.seed_points"
+    },
+    {
+      "from": "studio.subject_cutout",
+      "type": "editable_with",
+      "to": "studio.subject.seed_labels"
+    },
+    {
+      "from": "studio.subject_cutout",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.transitions",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.speed",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.audio",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "requires",
+      "to": "studio.audio"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.music",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.sfx",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "editable_with",
+      "to": "studio.audio.denoise"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "editable_with",
+      "to": "studio.audio.deesser"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "editable_with",
+      "to": "studio.audio.compressor"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "editable_with",
+      "to": "studio.audio.limiter"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "editable_with",
+      "to": "studio.audio.loudness"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "editable_with",
+      "to": "studio.audio.eq_low"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "editable_with",
+      "to": "studio.audio.eq_mid"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "editable_with",
+      "to": "studio.audio.eq_high"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "editable_with",
+      "to": "studio.audio.hum"
+    },
+    {
+      "from": "studio.audio_restoration",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.audio_automation",
+      "type": "requires",
+      "to": "studio.audio"
+    },
+    {
+      "from": "studio.audio_automation",
+      "type": "editable_with",
+      "to": "studio.audio.gain_key"
+    },
+    {
+      "from": "studio.audio_automation",
+      "type": "editable_with",
+      "to": "studio.audio.automation_source"
+    },
+    {
+      "from": "studio.audio_automation",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.ducking",
+      "type": "editable_with",
+      "to": "studio.audio.ducking"
+    },
+    {
+      "from": "studio.ducking",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.color",
+      "type": "editable_with",
+      "to": "studio.grade.exposurestops"
+    },
+    {
+      "from": "studio.color",
+      "type": "editable_with",
+      "to": "studio.grade.lift"
+    },
+    {
+      "from": "studio.color",
+      "type": "editable_with",
+      "to": "studio.grade.gamma"
+    },
+    {
+      "from": "studio.color",
+      "type": "editable_with",
+      "to": "studio.grade.gain"
+    },
+    {
+      "from": "studio.color",
+      "type": "editable_with",
+      "to": "studio.grade.tint"
+    },
+    {
+      "from": "studio.color",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "requires",
+      "to": "studio.layers"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.x"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.y"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.z"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.scale"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.rotationx"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.rotationy"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.rotationz"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.extrusiondepth"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.bevel"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.focallength"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.lightintensity"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.cameramotion"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.bloom"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.material"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.fontfamily"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.fontweight"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.easing"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.audioreactiveintensity"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.lightdirection"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.shadows"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.reflections"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.background"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "editable_with",
+      "to": "studio.three_d.quality"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.blender",
+      "type": "requires",
+      "to": "studio.three_d"
+    },
+    {
+      "from": "studio.blender",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.three_d_audio",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.generated_video",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "studio.generated_video",
+      "type": "requires",
+      "to": "system.costs"
+    },
+    {
+      "from": "studio.generated_video",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.templates",
+      "type": "requires",
+      "to": "studio.layers"
+    },
+    {
+      "from": "studio.templates",
+      "type": "requires",
+      "to": "studio.audio"
+    },
+    {
+      "from": "studio.templates",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.preview",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.render",
+      "type": "requires",
+      "to": "studio.revision"
+    },
+    {
+      "from": "studio.export",
+      "type": "requires",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.export",
+      "type": "requires",
+      "to": "studio.revision"
+    },
+    {
+      "from": "studio.export",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.b_roll",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.media_ingest",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "studio.media_ingest",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "requires",
+      "to": "studio.subject_cutout"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "requires",
+      "to": "studio.masks"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "optionally_uses",
+      "to": "studio.compositing.depth_estimation"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "optionally_uses",
+      "to": "studio.tracking"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "editable_with",
+      "to": "studio.subject.x"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "editable_with",
+      "to": "studio.subject.y"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "editable_with",
+      "to": "studio.subject.font_size"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "editable_with",
+      "to": "studio.subject.tracking"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "editable_with",
+      "to": "studio.subject.range"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.compositing.tracked_callout",
+      "type": "requires",
+      "to": "studio.tracking"
+    },
+    {
+      "from": "studio.compositing.tracked_callout",
+      "type": "requires",
+      "to": "studio.masks"
+    },
+    {
+      "from": "studio.compositing.tracked_callout",
+      "type": "editable_with",
+      "to": "studio.subject.offset_x"
+    },
+    {
+      "from": "studio.compositing.tracked_callout",
+      "type": "editable_with",
+      "to": "studio.subject.offset_y"
+    },
+    {
+      "from": "studio.compositing.tracked_callout",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.compositing.background_grade",
+      "type": "requires",
+      "to": "studio.masks"
+    },
+    {
+      "from": "studio.compositing.background_grade",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.compositing.mask_depth",
+      "type": "requires",
+      "to": "studio.masks"
+    },
+    {
+      "from": "studio.compositing.mask_depth",
+      "type": "editable_with",
+      "to": "studio.subject.depth_amount"
+    },
+    {
+      "from": "studio.compositing.mask_depth",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "cam_combiner.upload",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "cam_combiner.upload",
+      "type": "editable_with",
+      "to": "cam_combiner.source_count"
+    },
+    {
+      "from": "cam_combiner.synchronization",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "cam_combiner.synchronization",
+      "type": "editable_with",
+      "to": "cam_combiner.sync_offset"
+    },
+    {
+      "from": "cam_combiner.master_audio",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "cam_combiner.master_audio",
+      "type": "editable_with",
+      "to": "cam_combiner.clean_audio_mode"
+    },
+    {
+      "from": "cam_combiner.drift",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "cam_combiner.drift",
+      "type": "editable_with",
+      "to": "cam_combiner.sync_rate"
+    },
+    {
+      "from": "cam_combiner.channel_mapping",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "cam_combiner.channel_mapping",
+      "type": "editable_with",
+      "to": "cam_combiner.swap_channels"
+    },
+    {
+      "from": "cam_combiner.channel_mapping",
+      "type": "editable_with",
+      "to": "cam_combiner.verify_channels"
+    },
+    {
+      "from": "cam_combiner.active_speaker",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "cam_combiner.switching",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "cam_combiner.switching",
+      "type": "editable_with",
+      "to": "cam_combiner.switch_interval"
+    },
+    {
+      "from": "cam_combiner.reactions",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "cam_combiner.split_views",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "cam_combiner.split_views",
+      "type": "editable_with",
+      "to": "cam_combiner.zoom"
+    },
+    {
+      "from": "cam_combiner.review",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "cam_combiner.export",
+      "type": "requires",
+      "to": "cam_combiner.upload"
+    },
+    {
+      "from": "director.proposals",
+      "type": "requires",
+      "to": "studio.revision"
+    },
+    {
+      "from": "director.evidence",
+      "type": "requires",
+      "to": "studio.revision"
+    },
+    {
+      "from": "director.review",
+      "type": "requires",
+      "to": "director.proposals"
+    },
+    {
+      "from": "director.template_selection",
+      "type": "requires",
+      "to": "studio.templates"
+    },
+    {
+      "from": "director.template_selection",
+      "type": "requires",
+      "to": "director.review"
+    },
+    {
+      "from": "director.find_viral_clips",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "director.scene_understanding",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "director.object_detection",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "system.model_runtime",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "system.gpu_jobs",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "system.processing_states",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "system.retries",
+      "type": "requires",
+      "to": "system.processing_states"
+    },
+    {
+      "from": "system.cancellation",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "system.generation_failure",
+      "type": "requires",
+      "to": "system.processing_states"
+    },
+    {
+      "from": "system.costs",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "system.unsupported_media",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "generation.idea_to_video",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "generation.image_to_video",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "generation.image_to_video",
+      "type": "requires",
+      "to": "studio.generated_video"
+    },
+    {
+      "from": "generation.text_to_video",
+      "type": "requires",
+      "to": "system.model_runtime"
+    },
+    {
+      "from": "generation.text_to_video",
+      "type": "requires",
+      "to": "studio.generated_video"
+    },
+    {
+      "from": "generation.human_animation",
+      "type": "requires",
+      "to": "generation.image_to_video"
+    },
+    {
+      "from": "generation.scene_workflow",
+      "type": "requires",
+      "to": "studio.generated_video"
+    },
+    {
+      "from": "generation.scene_workflow",
+      "type": "requires",
+      "to": "studio.revision"
+    },
+    {
+      "from": "creative.shared_templates",
+      "type": "requires",
+      "to": "studio.templates"
+    },
+    {
+      "from": "creative.motion_graphics",
+      "type": "requires",
+      "to": "studio.motion"
+    },
+    {
+      "from": "creative.motion_graphics",
+      "type": "requires",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "creative.logo_brand",
+      "type": "requires",
+      "to": "studio.templates"
+    },
+    {
+      "from": "creative.logo_brand",
+      "type": "requires",
+      "to": "studio.layers"
+    },
+    {
+      "from": "creative.vfx",
+      "type": "requires",
+      "to": "studio.effects"
+    },
+    {
+      "from": "creative.three_d",
+      "type": "requires",
+      "to": "studio.three_d"
+    },
+    {
+      "from": "creative.audio",
+      "type": "requires",
+      "to": "studio.audio"
+    },
+    {
+      "from": "creative.story",
+      "type": "requires",
+      "to": "studio.templates"
+    },
+    {
+      "from": "publishing.connections",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "publishing.schedule",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "publishing.export",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "publishing.publish",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "publishing.analytics",
+      "type": "requires",
+      "to": "system.account"
+    },
+    {
+      "from": "system.costs",
+      "type": "usable_in",
+      "to": "task.image_cinematic"
+    },
+    {
+      "from": "studio.media_ingest",
+      "type": "usable_in",
+      "to": "task.image_cinematic"
+    },
+    {
+      "from": "generation.image_to_video",
+      "type": "usable_in",
+      "to": "task.image_cinematic"
+    },
+    {
+      "from": "generation.scene_workflow",
+      "type": "usable_in",
+      "to": "task.image_cinematic"
+    },
+    {
+      "from": "studio.render",
+      "type": "usable_in",
+      "to": "task.image_cinematic"
+    },
+    {
+      "from": "creative.story",
+      "type": "usable_in",
+      "to": "task.product_launch"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.product_launch"
+    },
+    {
+      "from": "studio.media_ingest",
+      "type": "usable_in",
+      "to": "task.product_launch"
+    },
+    {
+      "from": "studio.templates",
+      "type": "usable_in",
+      "to": "task.product_launch"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "usable_in",
+      "to": "task.product_launch"
+    },
+    {
+      "from": "studio.audio",
+      "type": "usable_in",
+      "to": "task.product_launch"
+    },
+    {
+      "from": "studio.subject_cutout",
+      "type": "usable_in",
+      "to": "task.text_behind"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "usable_in",
+      "to": "task.text_behind"
+    },
+    {
+      "from": "studio.masks",
+      "type": "usable_in",
+      "to": "task.text_behind"
+    },
+    {
+      "from": "studio.cut",
+      "type": "usable_in",
+      "to": "task.text_behind"
+    },
+    {
+      "from": "studio.tracking",
+      "type": "usable_in",
+      "to": "task.tracked_text"
+    },
+    {
+      "from": "studio.compositing.tracked_callout",
+      "type": "usable_in",
+      "to": "task.tracked_text"
+    },
+    {
+      "from": "studio.creator.background_replacement",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.creator.object_cleanup",
+      "type": "usable_in",
+      "to": "task.remove_object"
+    },
+    {
+      "from": "studio.creator.screen_replacement",
+      "type": "usable_in",
+      "to": "task.screen_replace"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.cinematic_logo"
+    },
+    {
+      "from": "creative.logo_brand",
+      "type": "usable_in",
+      "to": "task.cinematic_logo"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "usable_in",
+      "to": "task.cinematic_logo"
+    },
+    {
+      "from": "studio.sfx",
+      "type": "usable_in",
+      "to": "task.cinematic_logo"
+    },
+    {
+      "from": "studio.media_ingest",
+      "type": "usable_in",
+      "to": "task.animate_person"
+    },
+    {
+      "from": "generation.human_animation",
+      "type": "usable_in",
+      "to": "task.animate_person"
+    },
+    {
+      "from": "generation.scene_workflow",
+      "type": "usable_in",
+      "to": "task.animate_person"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.podcast_vertical"
+    },
+    {
+      "from": "cam_combiner.synchronization",
+      "type": "usable_in",
+      "to": "task.podcast_vertical"
+    },
+    {
+      "from": "director.find_viral_clips",
+      "type": "usable_in",
+      "to": "task.podcast_vertical"
+    },
+    {
+      "from": "studio.crop_reframe",
+      "type": "usable_in",
+      "to": "task.podcast_vertical"
+    },
+    {
+      "from": "studio.captions",
+      "type": "usable_in",
+      "to": "task.podcast_vertical"
+    },
+    {
+      "from": "cam_combiner.master_audio",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "cam_combiner.reactions",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "cam_combiner.split_views",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "cam_combiner.export",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "cam_combiner.upload",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "cam_combiner.synchronization",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "cam_combiner.channel_mapping",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "cam_combiner.switching",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "cam_combiner.review",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "cam_combiner.master_audio",
+      "type": "usable_in",
+      "to": "task.reversed_channels"
+    },
+    {
+      "from": "cam_combiner.channel_mapping",
+      "type": "usable_in",
+      "to": "task.reversed_channels"
+    },
+    {
+      "from": "cam_combiner.switching",
+      "type": "usable_in",
+      "to": "task.reversed_channels"
+    },
+    {
+      "from": "studio.captions",
+      "type": "usable_in",
+      "to": "task.captions_correct"
+    },
+    {
+      "from": "studio.generated_video",
+      "type": "usable_in",
+      "to": "task.add_broll"
+    },
+    {
+      "from": "studio.b_roll",
+      "type": "usable_in",
+      "to": "task.add_broll"
+    },
+    {
+      "from": "studio.trim",
+      "type": "usable_in",
+      "to": "task.add_broll"
+    },
+    {
+      "from": "studio.audio",
+      "type": "usable_in",
+      "to": "task.add_broll"
+    },
+    {
+      "from": "system.costs",
+      "type": "usable_in",
+      "to": "task.three_d_title"
+    },
+    {
+      "from": "studio.three_d",
+      "type": "usable_in",
+      "to": "task.three_d_title"
+    },
+    {
+      "from": "studio.blender",
+      "type": "usable_in",
+      "to": "task.three_d_title"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.use_template"
+    },
+    {
+      "from": "creative.shared_templates",
+      "type": "usable_in",
+      "to": "task.use_template"
+    },
+    {
+      "from": "studio.templates",
+      "type": "usable_in",
+      "to": "task.use_template"
+    },
+    {
+      "from": "studio.persistence",
+      "type": "usable_in",
+      "to": "task.use_template"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "usable_in",
+      "to": "task.director_manual"
+    },
+    {
+      "from": "studio.audio",
+      "type": "usable_in",
+      "to": "task.director_manual"
+    },
+    {
+      "from": "studio.undo_redo",
+      "type": "usable_in",
+      "to": "task.director_manual"
+    },
+    {
+      "from": "director.evidence",
+      "type": "usable_in",
+      "to": "task.director_manual"
+    },
+    {
+      "from": "director.review",
+      "type": "usable_in",
+      "to": "task.director_manual"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "usable_in",
+      "to": "task.director_manual"
+    },
+    {
+      "from": "studio.revision",
+      "type": "usable_in",
+      "to": "task.director_manual"
+    },
+    {
+      "from": "system.costs",
+      "type": "usable_in",
+      "to": "task.final_export"
+    },
+    {
+      "from": "system.unsupported_media",
+      "type": "usable_in",
+      "to": "task.final_export"
+    },
+    {
+      "from": "studio.preview",
+      "type": "usable_in",
+      "to": "task.final_export"
+    },
+    {
+      "from": "studio.revision",
+      "type": "usable_in",
+      "to": "task.final_export"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.final_export"
+    },
+    {
+      "from": "studio.render",
+      "type": "usable_in",
+      "to": "task.final_export"
+    },
+    {
+      "from": "studio.creator.text_behind_subject",
+      "type": "proxy_for",
+      "to": "studio.compositing.text_behind_subject"
+    },
+    {
+      "from": "studio.creator.tracking",
+      "type": "proxy_for",
+      "to": "studio.tracking"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "related_to",
+      "to": "studio.transforms"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "related_to",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "related_to",
+      "to": "studio.easing"
+    },
+    {
+      "from": "cam_combiner.switching",
+      "type": "related_to",
+      "to": "director.proposals"
+    },
+    {
+      "from": "studio.music",
+      "type": "editable_with",
+      "to": "studio.music.volume"
+    },
+    {
+      "from": "studio.music",
+      "type": "editable_with",
+      "to": "studio.music.fadein"
+    },
+    {
+      "from": "studio.music",
+      "type": "editable_with",
+      "to": "studio.music.fadeout"
+    },
+    {
+      "from": "studio.ducking",
+      "type": "editable_with",
+      "to": "studio.audio.ducking_strength"
+    },
+    {
+      "from": "studio.ducking",
+      "type": "editable_with",
+      "to": "studio.audio.ducking_mode"
+    },
+    {
+      "from": "studio.sfx",
+      "type": "editable_with",
+      "to": "studio.sfx.volume"
+    },
+    {
+      "from": "studio.sfx",
+      "type": "editable_with",
+      "to": "studio.sfx.duration"
+    },
+    {
+      "from": "studio.sfx",
+      "type": "editable_with",
+      "to": "studio.sfx.trim"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.volume"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.duration"
+    },
+    {
+      "from": "studio.speed",
+      "type": "editable_with",
+      "to": "studio.speed.rate"
+    },
+    {
+      "from": "studio.transitions",
+      "type": "editable_with",
+      "to": "studio.transition.duration"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.text"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.scale"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.color"
+    },
+    {
+      "from": "studio.compositing.background_grade",
+      "type": "editable_with",
+      "to": "studio.subject.exposure"
+    },
+    {
+      "from": "studio.compositing.background_grade",
+      "type": "editable_with",
+      "to": "studio.subject.saturation"
+    },
+    {
+      "from": "studio.compositing.background_grade",
+      "type": "editable_with",
+      "to": "studio.subject.contrast"
+    },
+    {
+      "from": "studio.generated_video",
+      "type": "editable_with",
+      "to": "generation.max_cutaways"
+    },
+    {
+      "from": "studio.compositing.text_behind_subject",
+      "type": "related_to",
+      "to": "studio.creator.text_behind_subject"
+    },
+    {
+      "from": "studio.compositing.tracked_callout",
+      "type": "related_to",
+      "to": "studio.creator.tracking"
+    },
+    {
+      "from": "cam_combiner.drift",
+      "type": "usable_in",
+      "to": "task.cam_combiner"
+    },
+    {
+      "from": "publishing.schedule",
+      "type": "editable_with",
+      "to": "publishing.queue.period"
+    },
+    {
+      "from": "publishing.schedule",
+      "type": "editable_with",
+      "to": "publishing.queue.load_more"
+    }
+  ]
+}

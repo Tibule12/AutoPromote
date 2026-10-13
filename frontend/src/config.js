@@ -146,6 +146,7 @@ export const API_ENDPOINTS = {
 
   REDDIT_AUTH_START: `${API_BASE_URL}/api/reddit/auth/start`,
   REDDIT_STATUS: `${API_BASE_URL}/api/reddit/status`,
+  REDDIT_PROFILE: `${API_BASE_URL}/api/reddit/profile`,
 
   DISCORD_AUTH_START: `${API_BASE_URL}/api/discord/auth/start`,
   DISCORD_STATUS: `${API_BASE_URL}/api/discord/status`,

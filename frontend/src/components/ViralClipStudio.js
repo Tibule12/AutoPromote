@@ -7,6 +7,14 @@ import {
 } from "../utils/security";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
+import StudioLaunchTemplatePanel from "./StudioLaunchTemplatePanel";
+import ProductHelpButton from "./ProductHelpButton";
+import StudioLayerMask from "./StudioLayerMask";
+import { hasSoftStudioMask } from "./studioMaskGeometry";
+import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey } from "./studioSourcePreview";
+import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity } from "./studioMusicBufferClock";
+import { loadStudioVoiceBus, scheduleStudioPreparedDuck } from './studioPreparedVoiceBus';
+import { studioCueSourceKey, createStudioCueBuffer, prepareStudioCuePlayback, prepareStudioBuiltInCue } from "./studioCueBuffer";
 import {
   MAX_STUDIO_ANGLES,
   createStudioAngleGroup,
@@ -14,7 +22,7 @@ import {
   getStudioAngleSharedRange,
   setStudioAngleOffset,
 } from "./studioAngleGroups";
-import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback } from "react";
 import { createPortal, flushSync } from "react-dom";
 import { useSubscription } from "../hooks/useSubscription";
 import { storage } from "../firebaseClient";
@@ -80,7 +88,7 @@ import {
   sliceMultipleTimeRanges,
   retimeCaptionsAfterCut,
 } from "./studioScriptSlicer";
-import { uploadVoiceoversForRender, voiceoverTrackAudible, voiceoverGain } from "./studioVoiceover";
+import { uploadVoiceoversForRender, voiceoverTrackAudible, voiceoverGain, readVoiceoverDuration, constantMusicDuckGain } from "./studioVoiceover";
 import { isStudioAudioTrackAudible } from "./studioAudioTracks";
 import { mapStudioOverlayTiming } from "./studioOverlayTiming";
 import {
@@ -105,7 +113,7 @@ import { historyMediaIdentity, historySubjectVfxIdentity } from "./studioHistory
 import { titleAnimationPose } from "./studioTitleLayout";
 import { validateSubjectVfxExport, resolveSubjectVfxProgrammePreview, subjectVfxRevision } from "./studioSubjectVfxContract";
 import { cutStudio3DScenes, normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
-import { DESIGN_SOUNDS, synthesizeEffect } from "./motion/soundDesign";
+import { SOUND_EFFECT_PRESETS, synthesizeEffect } from "./motion/soundDesign";
 import VideoScopes from "./VideoScopes";
 import {
   STUDIO_EASINGS,
@@ -121,7 +129,7 @@ import {
   mergeCreatorRecipe,
   findCreatorBeat,
 } from "./studioCreatorRecipes";
-import { rippleTimedItems, rippleTimelineKeys } from "./studioTimelineEdits";
+import { rippleTimedItems, rippleTimelineKeys, applyStudioClipMetadata } from "./studioTimelineEdits";
 import {
   reconcileStudioDocument,
   buildStudioOutputTimeMap,
@@ -140,7 +148,9 @@ import { describeStudioDirectorReview } from "./studioDirectorReviewDiff";
 import { postStudioDirectorReviewDecision } from "./studioDirectorReviewClient";
 import { registerStudioDirectorProjectRevision } from "./studioDirectorProjectRevisionClient";
 import { buildSourceShotDirectorSplitRequest } from "./studioDirectorEvidenceProposals";
-import { secondsToTicks, ticksToSeconds } from "./studioTime";
+import { secondsToTicks, ticksToSeconds, mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick } from "./studioTime";
+import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan } from "./studioCueGain";
+import { bindStudioAudioSource, bindStudioAudioSources, studioUploadedAudioBinding } from "./studioAudioSourceBindings";
 import {
   assertStudioExportTimelineMatchesDocument,
   assertStudioSpeedPlanMatchesDocument,
@@ -229,6 +239,7 @@ const getOverlayFrameRadius = overlay => {
 };
 
 const getOverlayMaskClipPath = overlay => {
+  if (hasSoftStudioMask(overlay?.mask)) return undefined;
   const cropX = clampNumber(overlay?.cropX, 0, 45, 0);
   const cropY = clampNumber(overlay?.cropY, 0, 45, 0);
   if (!overlay?.mask?.enabled) {
@@ -491,14 +502,6 @@ const DEFAULT_HOOK_TEXT = "THIS CHANGES FAST";
 
 const HOOK_MIN_SEGMENT_DURATION = 2;
 const HOOK_MAX_SEGMENT_DURATION = 5;
-
-const SOUND_EFFECT_PRESETS = [
-  { id: "whoosh", name: "Whoosh", emoji: "💨", duration: 0.8, tone: "sweep" },
-  { id: "impact", name: "Impact", emoji: "💥", duration: 0.65, tone: "impact" },
-  { id: "pop", name: "Pop", emoji: "🫧", duration: 0.28, tone: "pop" },
-  { id: "click", name: "Click", emoji: "🖱️", duration: 0.16, tone: "click" },
-  { id: "riser", name: "Riser", emoji: "🚀", duration: 1.5, tone: "riser" },
-];
 
 const GENERIC_HOOK_TEXTS = new Set([
   "WAIT FOR IT...",
@@ -2587,9 +2590,12 @@ const ViralClipStudio = ({
   renderStatus,
   renderedOutput,
   onEditInvalidated,
+  onRenderedPreviewError,
   onProjectOpened,
   renderRecoveryPanel,
+  renderRecoveryNeedsAttention = false,
   onDownloadRendered,
+  onRestoreExport,
   onUseRendered,
   onOpenCameraAngles,
   importedCameraMaster,
@@ -2732,6 +2738,8 @@ const ViralClipStudio = ({
   const [projectName, setProjectName] = useState("Untitled viral edit");
   const [savedProjects, setSavedProjects] = useState([]);
   const [projectSaveState, setProjectSaveState] = useState("unsaved");
+  const [projectSourcesRefreshing, setProjectSourcesRefreshing] = useState(false);
+  const projectSourceRefreshVersionRef = useRef(0);
   const [projectSavedAt, setProjectSavedAt] = useState(null);
   const [directorReview, setDirectorReview] = useState(null);
   const [directorReviewState, setDirectorReviewState] = useState("idle");
@@ -2740,7 +2748,9 @@ const ViralClipStudio = ({
   const [timelineDockExpanded, setTimelineDockExpanded] = useState(true);
   const [timelineDockHeight, setTimelineDockHeight] = useState(280);
   const [studioViewportHeight, setStudioViewportHeight] = useState(() => window.innerHeight);
-  const timelineHeightLimit = Math.max(148, Math.min(480, studioViewportHeight - 350));
+  // Preserve space for the programme monitor, but let a taller workspace show
+  // all edited sound/layer lanes through the existing native resize control.
+  const timelineHeightLimit = Math.max(148, studioViewportHeight - 350);
   const displayedTimelineHeight = Math.min(timelineDockHeight, timelineHeightLimit);
   useEffect(() => {
     const updateHeight = () => setStudioViewportHeight(window.innerHeight);
@@ -2770,6 +2780,7 @@ const ViralClipStudio = ({
   useEffect(() => () => clearTimeout(threeDPreviewPollRef.current), []);
   const [motionWorkspace, setMotionWorkspace] = useState("design");
   const [motionTargetId, setMotionTargetId] = useState("main-video");
+  const [focusedMotionKeyframeId, setFocusedMotionKeyframeId] = useState(null);
   const [showMotionPath, setShowMotionPath] = useState(true);
   const [compositeTargetId, setCompositeTargetId] = useState("main-video");
   const [mainTransform, setMainTransform] = useState({
@@ -2855,6 +2866,7 @@ const ViralClipStudio = ({
   });
   const [creatorPreview, setCreatorPreview] = useState(DEFAULT_CREATOR_PREVIEW);
   const [editTemplates, setEditTemplates] = useState([]);
+  const [creativeTemplateInstance, setCreativeTemplateInstance] = useState(null);
   const [showSafeZones, setShowSafeZones] = useState(false);
   const [showCompositionGrid, setShowCompositionGrid] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -2953,6 +2965,8 @@ const ViralClipStudio = ({
   const soundEffectFileInputRef = useRef(null);
   const speechAnalyserRef = useRef(null);
   const speechDetectionRafRef = useRef(null);
+  const voiceoverSpeechAnalyserRef = useRef(null);
+  const failedSpeechSourcesRef = useRef(new WeakSet());
 
   const MUSIC_PRESETS = [
     { name: "Upbeat Pop", file: "upbeat_pop.mp3", category: "pop", emoji: "🎉" },
@@ -3010,7 +3024,15 @@ const ViralClipStudio = ({
     colorSpace: "rec709",
   });
   const loggedScannerEntryRef = useRef(new Set());
-  const renderedOutputUrl = getSafeMediaSource(renderedOutput?.previewUrl || renderedOutput?.url);
+  const [previewFinishedFile, setPreviewFinishedFile] = useState(true);
+  const completedOutputUrl = getSafeMediaSource(renderedOutput?.previewUrl || renderedOutput?.url);
+  const renderedOutputUrl = previewFinishedFile ? completedOutputUrl : "";
+  const hasCompletedOutput = Boolean(completedOutputUrl);
+  // Access recovery can clear and restore a completed URL. Preserve the
+  // editor's explicit monitor choice through that transport transition.
+  // A different project starts in its finished view; a successful explicit
+  // export below also selects its newly rendered result.
+  useEffect(() => { setPreviewFinishedFile(true); }, [projectId]);
 
   useEffect(() => {
     if (!isExporting || !renderStatus) return;
@@ -3058,7 +3080,9 @@ const ViralClipStudio = ({
   ]);
 
   const videoRef = useRef(null);
+  const programmeVideoSlotsRef = useRef([null, null, null]);
   const afterCanvasRef = useRef(null);
+  const [pausedSourceFrame, setPausedSourceFrame] = useState(null);
   const adjustmentScratchRef = useRef(null);
   const beforeVideoRef = useRef(null);
   const beforeCanvasRef = useRef(null);
@@ -3081,6 +3105,13 @@ const ViralClipStudio = ({
   const soundEffectAudioRefsRef = useRef(new Map());
   const soundEffectAudioContextRef = useRef(null);
   const soundEffectNodesRef = useRef(new Set());
+  const soundEffectTimelineGainsRef = useRef(new Map());
+  const soundEffectGainTimeMapRef = useRef(null);
+  const soundEffectDecodedSourcesRef = useRef(new Map());
+  const soundEffectDecodePromisesRef = useRef(new Map());
+  const soundEffectBuiltInBuffersRef = useRef(new Map());
+  const programmeSoundEffectRoutesRef = useRef(new Map());
+  const soundEffectStartVersionRef = useRef(0);
   const triggeredSoundEffectsRef = useRef(new Set());
   const soundEffectPreviewTimeoutRef = useRef(null);
   const soundEffectObjectUrlsRef = useRef(new Set());
@@ -3088,7 +3119,19 @@ const ViralClipStudio = ({
   const musicPreviewObjectUrlRef = useRef(null);
   const musicPreviewAudioContextRef = useRef(null);
   const musicPreviewGainNodeRef = useRef(null);
+  const musicPreviewDuckGainNodeRef = useRef(null);
+  const preparedVoiceBusRef = useRef(null);
+  const preparedSpeechDuckRef = useRef(null);
+  const preparedSpeechDuckClockRef = useRef('');
+  const preparedSpeechDuckSourceRef = useRef(null);
   const musicPreviewBufferRef = useRef(null);
+  const musicPreviewBufferUrlRef = useRef("");
+  const musicPreviewBufferIdentityRef = useRef("");
+  const [decodedMusicPreviewUrl, setDecodedMusicPreviewUrl] = useState("");
+  const musicPreviewStartVersionRef = useRef(0);
+  const musicPreviewDecodePromiseRef = useRef(null);
+  const programmeMusicRouteRef = useRef({ sourceUrl: "", decoded: false });
+  const isolatedMusicPreviewIntentRef = useRef(false);
   const musicPreviewSourceRef = useRef(null);
   const musicPreviewSourceStateRef = useRef({ offset: 0, playbackRate: 1 });
   const backgroundSoundPreviewSuppressedRef = useRef(false);
@@ -3119,6 +3162,10 @@ const ViralClipStudio = ({
   const pendingHistoryBaselineRef = useRef(null);
   const cutHistoryTransactionRef = useRef(null);
   const previewPlaybackIntentRef = useRef(true);
+  const previewPlaybackStartRef = useRef(0);
+  const previewPlaybackPreparingRef = useRef(null);
+  const preparedCutHandoffRef = useRef(null);
+  const retiringMusicSourcesRef = useRef(new Set());
   const previewWindowRef = useRef(null);
   const programmeSeekIntentRef = useRef({ version: 0 });
   const phoneFrameRef = useRef(null);
@@ -3204,22 +3251,30 @@ const ViralClipStudio = ({
     return objectUrl;
   };
 
-  const stopMusicPreviewBufferPlayback = () => {
+  const stopMusicPreviewBufferPlayback = stopAt => {
+    musicPreviewStartVersionRef.current++;
+    const deferred = Number.isFinite(stopAt) && stopAt > musicPreviewAudioContextRef.current?.currentTime;
+    if (!deferred) {
+      retiringMusicSourcesRef.current.forEach(source => { try { source.stop(); source.disconnect(); } catch (_) {} });
+      retiringMusicSourcesRef.current.clear();
+    }
     if (!musicPreviewSourceRef.current) return;
 
     try {
-      musicPreviewSourceRef.current.stop();
+      musicPreviewSourceRef.current.stop(deferred ? stopAt : undefined);
     } catch (error) {
       console.log("Music preview buffer stop skipped", error);
     }
 
     try {
-      musicPreviewSourceRef.current.disconnect();
+      if (deferred) retiringMusicSourcesRef.current.add(musicPreviewSourceRef.current);
+      else musicPreviewSourceRef.current.disconnect();
     } catch (error) {
       console.log("Music preview buffer disconnect skipped", error);
     }
 
     musicPreviewSourceRef.current = null;
+    setIsBackgroundSoundPreviewing(false);
   };
 
   useEffect(() => {
@@ -3241,49 +3296,138 @@ const ViralClipStudio = ({
     }
 
     if (!musicPreviewAudioContextRef.current) {
-      const audioContext = new AudioContextCtor();
+      const audioContext = soundEffectAudioContextRef.current || new AudioContextCtor();
       const gainNode = audioContext.createGain();
-      gainNode.connect(audioContext.destination);
+      const duckGainNode = audioContext.createGain();
+      gainNode.connect(duckGainNode);
+      duckGainNode.connect(audioContext.destination);
       musicPreviewAudioContextRef.current = audioContext;
       musicPreviewGainNodeRef.current = gainNode;
+      musicPreviewDuckGainNodeRef.current = duckGainNode;
     }
 
     return musicPreviewAudioContextRef.current;
   };
 
-  const syncMusicPreviewGain = () => {
+  const syncMusicPreviewGain = (programmeTime = getPreviewTimelineTime(videoRef.current?.currentTime || 0)) => {
     const gainNode = musicPreviewGainNodeRef.current;
     if (!gainNode) return;
-
-    const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+    if (!(musicTrack?.ducking && musicTrack.duckingMode === "speech") && musicPreviewDuckGainNodeRef.current)
+      musicPreviewDuckGainNodeRef.current.gain.value = 1;
+    const preparedDuck = preparedSpeechDuckRef.current;
+    const musicClock = musicPreviewSourceRef.current && musicPreviewSourceStateRef.current;
+    if (preparedDuck && musicClock && musicTrack?.ducking && musicTrack.duckingMode === 'speech') {
+      const identity = JSON.stringify([preparedDuck.key, musicClock.startedAt, musicClock.offset]);
+      if (preparedSpeechDuckClockRef.current !== identity) {
+        const contextTime = musicPreviewAudioContextRef.current.currentTime;
+        const when = Math.max(contextTime, musicClock.startedAt);
+        const old = preparedSpeechDuckSourceRef.current;
+        if (old) { try { old.stop(); } catch (_) {} old.disconnect(); }
+        preparedSpeechDuckSourceRef.current = scheduleStudioPreparedDuck(musicPreviewAudioContextRef.current,
+          musicPreviewDuckGainNodeRef.current.gain, preparedDuck, { when, offset: musicBufferPosition(musicClock, when) });
+        if (preparedSpeechDuckSourceRef.current) preparedSpeechDuckClockRef.current = identity;
+      }
+    }
+    const previewGain = previewMuted || !isStudioAudioTrackAudible(trackStates, "music")
+      ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
     const effectiveVol = musicTrack?.volume ?? musicVolume;
-    gainNode.gain.value = clampAudioControl(effectiveVol, 0.05, 0.6, 0.15) * previewGain;
+    // The fade applies to the samples actually leaving the music decoder.
+    // Picture-frame callbacks can trail its audio clock by tens of milliseconds;
+    // using that lagging position makes a one-second tail audibly too quiet/loud.
+    const musicTime = musicPreviewSourceRef.current && musicPreviewSourceStateRef.current
+      ? musicBufferPosition(musicPreviewSourceStateRef.current, musicPreviewAudioContextRef.current.currentTime)
+      : getPreviewMusicTime(programmeTime);
+    const fadeGain = getAudioFadeGain(musicTime, outputPlaybackDuration,
+      musicTrack?.fadeIn, musicTrack?.fadeOut);
+    const automationGain = interpolateAutomationValue({ keyframes: audioKeyframes.music,
+      property: "volume", time: programmeTime, fallback: 100 }) / 100;
+    const baseGain = clampAudioControl(effectiveVol, 0, 0.6, 0.15) * previewGain * automationGain * constantMusicDuckGain(musicTrack);
+    const parameter = gainNode.gain;
+    const contextTime = musicPreviewAudioContextRef.current.currentTime;
+    const fadeIn = Math.max(0, Number(musicTrack?.fadeIn || 0));
+    const fadeOut = Math.max(0, Number(musicTrack?.fadeOut || 0));
+    // Schedule ordinary non-overlapping fades on the audio thread. Holding a
+    // gain until the next picture frame leaves a measurable staircase tail.
+    // Edited bus curves/overlapping fades retain their existing frame consumer.
+    if (!(audioKeyframes.music || []).length && fadeIn + fadeOut <= outputPlaybackDuration &&
+        parameter.cancelScheduledValues && parameter.setValueAtTime && parameter.linearRampToValueAtTime) {
+      parameter.cancelScheduledValues(contextTime);
+      parameter.setValueAtTime(baseGain * fadeGain, contextTime);
+      if (musicTime < fadeIn) parameter.linearRampToValueAtTime(baseGain, contextTime + fadeIn - musicTime);
+      const fadeStart = outputPlaybackDuration - fadeOut;
+      if (fadeOut > 0 && musicTime < outputPlaybackDuration) {
+        if (musicTime < fadeStart) parameter.setValueAtTime(baseGain, contextTime + fadeStart - musicTime);
+        parameter.linearRampToValueAtTime(0, contextTime + outputPlaybackDuration - musicTime);
+      }
+    } else {
+      parameter.cancelScheduledValues?.(contextTime);
+      parameter.value = baseGain * fadeGain;
+    }
   };
 
   const startMusicPreviewBufferPlayback = async (targetOffset, playbackRate = 1) => {
     const audioBuffer = musicPreviewBufferRef.current;
     if (!audioBuffer) return;
-
+    musicPreviewStartVersionRef.current++;
+    const startVersion = musicPreviewStartVersionRef.current;
+    const sourceKey = musicPreviewBufferUrlRef.current;
+    const video = videoRef.current;
+    const projectId = activeProjectIdRef.current;
     const audioContext = ensureMusicPreviewAudioContext();
     if (audioContext.state === "suspended") {
       await audioContext.resume();
     }
-
-    stopMusicPreviewBufferPlayback();
-    syncMusicPreviewGain();
+    // An asynchronous browser resume must not start another project's song or
+    // resurrect audio after Pause, a seek, source replacement or unmount.
+    if (startVersion !== musicPreviewStartVersionRef.current ||
+        sourceKey !== musicPreviewBufferUrlRef.current || audioBuffer !== musicPreviewBufferRef.current ||
+        projectId !== activeProjectIdRef.current || video !== videoRef.current || video?.paused || video?.seeking) return;
+    const clip = timeline[activeTimelineIndex];
+    const window = getTimelineClipWindow(clip);
+    if (!isStudioSourceClockCurrent(video, { activeVideo: videoRef.current, url: clip?.url,
+      start: window.start, end: window.end, hasNext: activeTimelineIndex < timeline.length - 1 })) return;
+    const programmeTime = getPreviewTimelineTime(video.currentTime || 0);
+    // Schedule beyond the current audio quantum. A timestamp that has already
+    // passed starts immediately but leaves a false song/cue phase anchor.
+    const startedAt = audioContext.currentTime + .01;
+    targetOffset = getPreviewMusicTime(programmeTime) + .01;
+    // BufferSource rounds offsets to a decoded sample. Keep the shared music/
+    // cue clock anchored to that actual sample, especially for noisy whooshes.
+    const decodedSampleRate = Number(audioBuffer.sampleRate || audioContext.sampleRate);
+    if (Number.isFinite(decodedSampleRate) && decodedSampleRate > 0)
+      targetOffset = Math.round(targetOffset * decodedSampleRate) / decodedSampleRate;
+    const loop = musicTrack?.loop !== false;
+    if (!loop && targetOffset >= audioBuffer.duration) return;
+    syncMusicPreviewGain(programmeTime);
 
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    source.loop = true;
+    source.loop = loop;
     source.playbackRate.value = Number.isFinite(Number(playbackRate)) ? Number(playbackRate) : 1;
     source.connect(musicPreviewGainNodeRef.current);
-    source.start(0, targetOffset % Math.max(audioBuffer.duration, 0.001));
-
+    stopMusicPreviewBufferPlayback(startedAt);
     musicPreviewSourceRef.current = source;
     musicPreviewSourceStateRef.current = {
       offset: targetOffset,
       playbackRate: source.playbackRate.value,
+      startedAt,
+      sourceKey,
     };
+    source.start(startedAt, loop ? targetOffset % Math.max(audioBuffer.duration, 0.001) : targetOffset);
+    syncMusicPreviewGain(programmeTime);
+    // A picture stall/cut can require a new song anchor. Overlapping cues must
+    // move to that same clock, rather than retaining an earlier phase while
+    // only the music jumps. This is a transport event, not a project edit.
+    video.dispatchEvent(new Event("studio-audio-clock-resync"));
+    source.onended = () => {
+      if (musicPreviewSourceRef.current === source) {
+        musicPreviewSourceRef.current = null;
+        setIsBackgroundSoundPreviewing(false);
+      }
+      source.disconnect();
+      retiringMusicSourcesRef.current.delete(source);
+    };
+    setIsBackgroundSoundPreviewing(true);
     setMusicPreviewNeedsGesture(false);
     setMusicPreviewStatus("ready");
     setMusicPreviewStatusMessage(`Preview audio is playing for ${currentMusicLabel}.`);
@@ -3346,6 +3490,7 @@ const ViralClipStudio = ({
     const snapshot = {
     orderedClips,
     projectMedia,
+    creativeTemplateInstance,
     angleGroups,
     activeAngleGroupId,
     selectedClipId: selectedClip?.id || null,
@@ -3547,9 +3692,13 @@ const ViralClipStudio = ({
       });
       if (duplicate) {
         studioDocumentRef.current = savedSnapshot.studioDocument || null;
+        activeProjectIdRef.current = saved.id;
         setProjectId(saved.id);
         setProjectName(saved.name);
         projectCreatedAtRef.current = saved.createdAt;
+        // A pending refresh belongs to the previous project. Start the owned
+        // duplicate's refresh so the stale finally cannot leave Play disabled.
+        void refreshStoredSourceUrls(savedSnapshot);
       }
       setProjectSaveState("saved");
       setProjectSavedAt(saved.updatedAt);
@@ -3635,13 +3784,11 @@ const ViralClipStudio = ({
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.url) throw new Error(result.message || result.error || "Saved video is unavailable.");
       if (activeProjectIdRef.current !== expectedProjectId) return false;
-      setProjectMedia(current => current.map(item => item.storagePath === storagePath
-        ? { ...item, url: result.url, status: "ready", error: "" }
-        : item));
-      setTimeline(current => current.map(clip =>
-        (clip.sourceStoragePath || clip.storagePath) === storagePath
-          ? { ...clip, url: result.url }
-          : clip));
+      setProjectMedia(current => mapStudioSourceAccess(current, storagePath, item =>
+        item.url === result.url && item.status === "ready" && !item.error
+          ? item : { ...item, url: result.url, status: "ready", error: "" }));
+      setTimeline(current => mapStudioSourceAccess(current, storagePath, clip =>
+        clip.url === result.url ? clip : { ...clip, url: result.url }));
       setOrderedClips(current => current.map(clip =>
         (clip.sourceStoragePath || clip.storagePath) === storagePath ||
         (storagePath === sourceStoragePath && clip.url === videoUrl)
@@ -3651,12 +3798,11 @@ const ViralClipStudio = ({
         (current.sourceStoragePath || current.storagePath) === storagePath ||
         (storagePath === sourceStoragePath && current.url === videoUrl)
       ) ? { ...current, url: result.url } : current);
-      setOverlays(current => current.map(overlay =>
-        (overlay.sourceStoragePath || overlay.storagePath) === storagePath
-          ? { ...overlay, src: result.url, ...(overlay.url ? { url: result.url } : {}) }
-          : overlay));
-      const refresh = current => current.map(item => (item.sourceStoragePath || item.storagePath) === storagePath
-        ? { ...item, url: result.url } : item);
+      setOverlays(current => mapStudioSourceAccess(current, storagePath, overlay =>
+        overlay.src === result.url && (!overlay.url || overlay.url === result.url)
+          ? overlay : { ...overlay, src: result.url, ...(overlay.url ? { url: result.url } : {}) }));
+      const refresh = current => mapStudioSourceAccess(current, storagePath, item =>
+        item.url === result.url ? item : { ...item, url: result.url });
       setSpeakerStackSources(refresh);
       setVoiceovers(refresh);
       setSoundEffects(refresh);
@@ -3675,8 +3821,9 @@ const ViralClipStudio = ({
     }
   };
 
-  const refreshStoredSourceUrls = snapshot => {
+  const refreshStoredSourceUrls = async snapshot => {
     const expectedProjectId = activeProjectIdRef.current;
+    const version = ++projectSourceRefreshVersionRef.current;
     const paths = new Set([
       ...(snapshot?.projectMedia || []).map(item => item.storagePath || item.sourceStoragePath),
       ...(snapshot?.timeline || []).map(item => item.sourceStoragePath || item.storagePath),
@@ -3687,7 +3834,17 @@ const ViralClipStudio = ({
       snapshot?.musicTrack?.sourceStoragePath || snapshot?.musicTrack?.storagePath,
       snapshot?.extractedAudio?.sourceStoragePath || snapshot?.extractedAudio?.storagePath,
     ].filter(Boolean));
-    paths.forEach(path => { void refreshSourceUrlByPath(path, expectedProjectId); });
+    setProjectSourcesRefreshing(true);
+    try {
+      const pending = [...paths];
+      for (let offset = 0; offset < pending.length; offset += 4) {
+        await Promise.all(pending.slice(offset, offset + 4).map(path =>
+          refreshSourceUrlByPath(path, expectedProjectId)));
+      }
+    } finally {
+      if (version === projectSourceRefreshVersionRef.current &&
+          activeProjectIdRef.current === expectedProjectId) setProjectSourcesRefreshing(false);
+    }
   };
 
   const openSavedProject = (project, { initialRestore = false } = {}) => {
@@ -3877,6 +4034,7 @@ const ViralClipStudio = ({
 
   const applyEditorSnapshot = snapshot => {
     setExportErrorMessage("");
+    setCreativeTemplateInstance(snapshot.creativeTemplateInstance || snapshot.studioDocument?.editGraph?.settings?.creativeTemplateInstance || null);
     if (isRestoringHistoryRef.current && studioDocumentRef.current) {
       try {
         studioDocumentRef.current = rebaseStudioHistoryRestore({
@@ -4285,6 +4443,7 @@ const ViralClipStudio = ({
         musicPreviewAudioContextRef.current.close().catch(() => {});
       }
       soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
+      soundEffectStartVersionRef.current += 1;
       soundEffectNodesRef.current.forEach(node => {
         try {
           node.stop?.();
@@ -4294,7 +4453,8 @@ const ViralClipStudio = ({
         }
       });
       soundEffectNodesRef.current.clear();
-      if (soundEffectAudioContextRef.current) {
+      soundEffectTimelineGainsRef.current.clear();
+      if (soundEffectAudioContextRef.current && soundEffectAudioContextRef.current !== musicPreviewAudioContextRef.current) {
         soundEffectAudioContextRef.current.close().catch(() => {});
       }
       if (speechAnalyserRef.current?.ctx) {
@@ -4777,6 +4937,9 @@ const ViralClipStudio = ({
   };
 
   const pauseSynchronizedPreview = () => {
+    previewPlaybackStartRef.current += 1;
+    previewPlaybackPreparingRef.current = null;
+    preparedCutHandoffRef.current = null;
     previewPlaybackIntentRef.current = false;
     setIsPreviewPaused(true);
     videoRef.current?.pause();
@@ -4800,6 +4963,10 @@ const ViralClipStudio = ({
     // the decoder while the operator's playback intention is still Play.
     if (isPreviewPaused) {
       backgroundSoundPreviewSuppressedRef.current = false;
+      isolatedMusicPreviewIntentRef.current = false;
+      programmeMusicRouteRef.current = { sourceUrl: effectiveMusicPreviewUrl,
+        decoded: Boolean(musicPreviewBufferRef.current && musicPreviewBufferUrlRef.current === effectiveMusicPreviewUrl) };
+      setIsBackgroundSoundPreviewing(false);
       previewPlaybackIntentRef.current = true;
       setIsPreviewPaused(false);
       safePlayMediaElement(video);
@@ -5625,6 +5792,11 @@ const ViralClipStudio = ({
 
   const safePlayMediaElement = mediaElement => {
     if (!mediaElement || typeof mediaElement.play !== "function") return Promise.resolve(false);
+    // Source readiness can fire while the transport is resuming its audio
+    // context. Keep the picture stationary until the same request is ready.
+    if (mediaElement === videoRef.current && previewPlaybackPreparingRef.current !== null) {
+      return Promise.resolve(false);
+    }
     const rawSource =
       (typeof mediaElement.currentSrc === "string" && mediaElement.currentSrc) ||
       (typeof mediaElement.src === "string" && mediaElement.src) ||
@@ -5673,7 +5845,9 @@ const ViralClipStudio = ({
         previewPlaybackIntentRef.current = false;
         setIsPreviewPaused(true);
       }
-      const time = clampNumber(Number(outputTime || 0) / Math.max(0.01, previewSpeed), 0, video.duration || Infinity, 0);
+      const programmeTick = Math.min(previewOutputTimeMap.at(-1)?.programmeRange.endTick || 0,
+        secondsToTicks(Math.max(0, Number(outputTime || 0))));
+      const time = ticksToSeconds(mapProgrammeTickToOutputTick(previewOutputTimeMap, programmeTick) || 0);
       video.currentTime = time;
       setVideoTime(time);
       return;
@@ -6040,7 +6214,11 @@ const ViralClipStudio = ({
   };
 
   const getPreviewTimelineTime = sourceTime => {
-    if (renderedOutputUrl) return Math.max(0, Number(sourceTime || 0)) * Math.max(0.01, previewSpeed);
+    if (renderedOutputUrl) {
+      const outputTick = Math.min(previewOutputTimeMap.at(-1)?.outputRange.endTick || 0,
+        secondsToTicks(Math.max(0, Number(sourceTime || 0))));
+      return ticksToSeconds(mapOutputTickToProgrammeTick(previewOutputTimeMap, outputTick) || 0);
+    }
     let elapsed = 0;
     for (let index = 0; index < activeTimelineIndex; index += 1) {
       elapsed += Math.max(0, Number(getTimelineClipWindow(timeline[index]).duration || 0));
@@ -6060,6 +6238,30 @@ const ViralClipStudio = ({
       (total, clip) => total + Math.max(0, Number(getTimelineClipWindow(clip).duration || 0)),
       0
     );
+
+  const previewOutputTimeMap = useMemo(() => buildStudioOutputTimeMap({
+    durationTick: secondsToTicks(Math.max(.1, getTimelineDuration())),
+    fallbackSpeed: previewSpeed,
+    programmeSpeedKeys: speedKeyframes.filter(key => key.property === "speed").map(key => ({
+      atProgrammeTick: secondsToTicks(Number(key.time || 0)),
+      rate: Number(key.value ?? key.rate ?? 1), easing: key.easing || "linear",
+    })),
+  }), [timeline, previewSpeed, speedKeyframes]);
+  soundEffectGainTimeMapRef.current = previewOutputTimeMap;
+  // The renderer lays the music bed over the finished output clock at 1x.
+  // Picture ramps change its seek position/fade window, not its tempo or pitch.
+  const getPreviewMusicTime = programmeTime => ticksToSeconds(mapProgrammeTickToOutputTick(
+    previewOutputTimeMap, Math.min(previewOutputTimeMap.at(-1)?.programmeRange.endTick || 0,
+      secondsToTicks(Math.max(0, Number(programmeTime || 0))))) || 0);
+
+  const getSoundEffectProgrammeTime = sourceTime => studioCueProgrammeTime({
+    sourceProgrammeTime: getPreviewTimelineTime(sourceTime),
+    musicState: musicPreviewSourceStateRef.current,
+    contextTime: musicPreviewAudioContextRef.current?.currentTime,
+    trimStart: Number(musicTrack?.trimStart || 0), outputTimeMap: soundEffectGainTimeMapRef.current,
+    musicClockActive: Boolean(musicPreviewSourceRef.current && !isolatedMusicPreviewIntentRef.current &&
+      musicPreviewAudioContextRef.current === soundEffectAudioContextRef.current),
+  });
 
   const getTimelineOffsetForIndex = index =>
     timeline
@@ -6206,16 +6408,19 @@ const ViralClipStudio = ({
   const getSoundEffectDuration = effect =>
     clampAudioControl(effect?.duration, 0.05, 15, effect?.builtIn ? 0.6 : 2);
 
-  const stopSynthesizedSoundEffects = () => {
+  const stopSynthesizedSoundEffects = stopAt => {
+    soundEffectStartVersionRef.current += 1;
+    const deferred = Number.isFinite(stopAt) && stopAt > soundEffectAudioContextRef.current?.currentTime;
     soundEffectNodesRef.current.forEach(node => {
       try {
-        node.stop?.();
-        node.disconnect?.();
+        node.stop?.(deferred ? stopAt : undefined);
+        if (!deferred) node.disconnect?.();
       } catch (error) {
         // A scheduled Web Audio node can finish before the UI asks it to stop.
       }
     });
-    soundEffectNodesRef.current.clear();
+    if (!deferred) soundEffectNodesRef.current.clear();
+    soundEffectTimelineGainsRef.current.clear();
   };
 
   const stopSoundEffectPlayback = (clearPreviewState = true) => {
@@ -6236,27 +6441,49 @@ const ViralClipStudio = ({
     if (soundEffectAudioContextRef.current) return soundEffectAudioContextRef.current;
     const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextCtor) return null;
-    soundEffectAudioContextRef.current = new AudioContextCtor();
+    // Decoded music and synthesized cues share one audio-thread clock. Separate
+    // contexts have independent output latency, even at the same sample rate.
+    soundEffectAudioContextRef.current = musicPreviewAudioContextRef.current || new AudioContextCtor();
     return soundEffectAudioContextRef.current;
   };
 
-  const playBuiltInSoundEffect = async (effect, elapsed = 0) => {
+  const playBuiltInSoundEffect = async (effect, elapsed = 0, playbackRate = 1, timelinePlayback = false, decodedCue = null) => {
+    const startVersion = soundEffectStartVersionRef.current;
+    const projectId = activeProjectIdRef.current;
+    const seekVersion = programmeSeekIntentRef.current.version;
+    const video = videoRef.current;
     const audioContext = ensureSoundEffectAudioContext();
     if (!audioContext) {
       setStudioActionMessage("This browser cannot preview synthesized sound effects.");
       return false;
     }
     if (audioContext.state === "suspended") await audioContext.resume();
+    if (startVersion !== soundEffectStartVersionRef.current || projectId !== activeProjectIdRef.current ||
+        seekVersion !== programmeSeekIntentRef.current.version) return false;
 
-    const duration = Math.max(0.05, getSoundEffectDuration(effect) - Math.max(0, elapsed));
-    const startAt = audioContext.currentTime + 0.01;
+    let automationGain = 1;
+    if (timelinePlayback) {
+      const clip = timeline[activeTimelineIndex];
+      const window = getTimelineClipWindow(clip);
+      if (video !== videoRef.current || video?.paused || video?.seeking || video?.readyState < 2 ||
+          !isStudioAudioTrackAudible(trackStates, "sfx") ||
+          !isStudioSourceClockCurrent(video, { activeVideo: videoRef.current, url: clip?.url,
+            start: window.start, end: window.end, hasNext: activeTimelineIndex < timeline.length - 1 })) return false;
+      const outputTime = getSoundEffectProgrammeTime(video.currentTime || 0);
+      elapsed = outputTime - Number(effect.startTime || 0);
+      playbackRate = video.playbackRate || 1;
+      automationGain = interpolateAutomationValue({ keyframes: audioKeyframes.sfx,
+        property: "volume", time: outputTime, fallback: 100 }) / 100;
+    }
+
+    const fullDuration = getSoundEffectDuration(effect);
+    const offset = Math.max(0, elapsed);
+    if (offset >= fullDuration) return false;
+    const rate = clampAudioControl(playbackRate, 0.1, 16, 1);
     const volume =
       clampAudioControl(effect.volume, 0, 1, 0.8) *
-      (previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1));
+      (previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1)) * automationGain;
     const gain = audioContext.createGain();
-    gain.gain.setValueAtTime(0.0001, startAt);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), startAt + 0.018);
-    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
     gain.connect(audioContext.destination);
 
     const registerNode = node => {
@@ -6267,51 +6494,77 @@ const ViralClipStudio = ({
       return node;
     };
 
-    if (effect.tone === "sweep" || effect.tone === "riser") {
-      const frameCount = Math.max(1, Math.floor(audioContext.sampleRate * duration));
-      const buffer = audioContext.createBuffer(1, frameCount, audioContext.sampleRate);
-      const channel = buffer.getChannelData(0);
-      for (let index = 0; index < frameCount; index += 1) {
-        channel[index] = (Math.random() * 2 - 1) * (1 - index / frameCount);
-      }
-      const noise = registerNode(audioContext.createBufferSource());
-      const filter = audioContext.createBiquadFilter();
-      noise.buffer = buffer;
-      filter.type = "bandpass";
-      filter.Q.value = effect.tone === "riser" ? 2.5 : 1.2;
-      const low = effect.tone === "riser" ? 180 : 1200;
-      const high = effect.tone === "riser" ? 4200 : 350;
-      filter.frequency.setValueAtTime(low, startAt);
-      filter.frequency.exponentialRampToValueAtTime(high, startAt + duration);
-      noise.connect(filter);
-      filter.connect(gain);
-      noise.start(startAt);
-      noise.stop(startAt + duration);
-    } else {
-      const oscillator = registerNode(audioContext.createOscillator());
-      oscillator.type =
-        effect.tone === "impact" ? "sine" : effect.tone === "click" ? "square" : "triangle";
-      const startFrequency = effect.tone === "impact" ? 150 : effect.tone === "click" ? 1100 : 620;
-      const endFrequency = effect.tone === "impact" ? 42 : effect.tone === "click" ? 420 : 240;
-      oscillator.frequency.setValueAtTime(startFrequency, startAt);
-      oscillator.frequency.exponentialRampToValueAtTime(endFrequency, startAt + duration);
-      oscillator.connect(gain);
-      oscillator.start(startAt);
-      oscillator.stop(startAt + duration);
+    let buffer = decodedCue || prepareStudioBuiltInCue(audioContext,
+      { ...effect,duration:fullDuration },soundEffectBuiltInBuffersRef.current,projectId);
+    if (!buffer) {
+      const samples = synthesizeEffect({ ...effect, duration: fullDuration }, audioContext.sampleRate);
+      buffer = audioContext.createBuffer(1, samples.length, audioContext.sampleRate);
+      buffer.getChannelData(0).set(samples);
+    }
+    let startAt = audioContext.currentTime;
+    if (timelinePlayback && musicPreviewSourceRef.current &&
+        audioContext === musicPreviewAudioContextRef.current && !isolatedMusicPreviewIntentRef.current) {
+      startAt = Math.max(startAt, musicPreviewSourceStateRef.current?.startedAt || startAt);
+    }
+    let sourceOffset = timelinePlayback
+      ? getSoundEffectProgrammeTime(video.currentTime || 0) - Number(effect.startTime || 0) : offset;
+    // The same helper selects and validates the sample clock both before and
+    // after preparation. A second programme-seconds tolerance here previously
+    // disagreed with the song's output-seconds tolerance during speed ramps.
+    // getSoundEffectProgrammeTime retains source time for audition/discontinuity.
+    let cueStartPlan;
+    if (timelinePlayback) {
+      const plan = studioCueStartPlan({ contextTime: startAt,
+        programmeTime: Number(effect.startTime || 0) + sourceOffset,
+        cueStart: Number(effect.startTime || 0), duration: fullDuration,
+        outputTimeMap: previewOutputTimeMap });
+      if (!plan) { gain.disconnect(); return false; }
+      startAt = plan.when;
+      sourceOffset = plan.offset;
+      cueStartPlan = plan;
+    }
+    gain.gain.setValueAtTime(volume, startAt);
+    const scheduledGain = timelinePlayback && scheduleStudioCueGain({
+      param: gain.gain, contextTime: startAt,
+      programmeStart: Number(effect.startTime || 0) + sourceOffset,
+      programmeEnd: Number(effect.startTime || 0) + fullDuration,
+      outputTimeMap: previewOutputTimeMap, keyframes: audioKeyframes.sfx,
+      baseGain: clampAudioControl(effect.volume, 0, 1, 0.8) *
+        (previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1)),
+    });
+    const source = registerNode(audioContext.createBufferSource());
+    source.buffer = buffer;
+    source.playbackRate.setValueAtTime(rate, startAt);
+    const scheduledRate = timelinePlayback && scheduleStudioCueRate({ param: source.playbackRate,
+      contextTime: startAt, programmeStart: Number(effect.startTime || 0) + sourceOffset,
+      programmeEnd: Number(effect.startTime || 0) + fullDuration, outputTimeMap: previewOutputTimeMap });
+    source.connect(gain);
+    if (cueStartPlan) {
+      const readyPlan = advanceStudioCueStartPlan(cueStartPlan, audioContext.currentTime,
+        previewOutputTimeMap, fullDuration);
+      if (!readyPlan) { source.disconnect(); gain.disconnect(); return false; }
+      startAt = readyPlan.when;
+      sourceOffset = readyPlan.offset;
+    }
+    if (sourceOffset >= buffer.duration) { source.disconnect(); gain.disconnect(); return false; }
+    source.start(startAt, sourceOffset);
+    if (timelinePlayback) {
+      soundEffectTimelineGainsRef.current.set(effect.id, { source, gain, scheduledGain, scheduledRate,
+        outputTimeMap: previewOutputTimeMap });
+      source.addEventListener?.("ended", () => {
+        if (soundEffectTimelineGainsRef.current.get(effect.id)?.source === source) {
+          soundEffectTimelineGainsRef.current.delete(effect.id);
+        }
+      }, { once: true });
     }
 
     soundEffectNodesRef.current.add(gain);
-    window.setTimeout(
-      () => {
-        soundEffectNodesRef.current.delete(gain);
-        try {
-          gain.disconnect();
-        } catch (error) {
-          // Already disconnected.
-        }
-      },
-      Math.ceil(duration * 1000) + 100
-    );
+    // A live ramp can extend a cue beyond its initial rate/duration. Release
+    // gain with the actual source ending rather than an obsolete wall timer.
+    source.addEventListener("ended", () => {
+      soundEffectNodesRef.current.delete(gain);
+      try { gain.disconnect(); } catch (_) {}
+    }, { once: true });
     return true;
   };
 
@@ -6331,7 +6584,7 @@ const ViralClipStudio = ({
       startTime,
       duration: preset.duration,
       trimStart: 0,
-      volume: 0.8,
+      volume: preset.volume ?? 0.8,
       fadeIn: 0.02,
       fadeOut: Math.min(0.18, preset.duration / 3),
       enabled: true,
@@ -6410,6 +6663,17 @@ const ViralClipStudio = ({
     setStudioActionMessage(`${effect?.name || "Sound effect"} removed. Undo restores it.`);
   };
 
+  const duplicateSoundEffect = effect => {
+    pendingHistoryBaselineRef.current = cloneSnapshot(getEditorSnapshot());
+    const copy = { ...effect, id: createSecureId("sfx"),
+      startTime: clampNumber(Number(effect.startTime || 0) + getSoundEffectDuration(effect),
+        0, Math.max(0, outputTimelineDuration - getSoundEffectDuration(effect)), 0) };
+    setSoundEffects(previous => [...previous, copy]);
+    setActiveSoundEffectId(copy.id);
+    seekLiveEditTimelineItem(copy.startTime, "sound");
+    setStudioActionMessage(`${effect.name} duplicated at ${formatPreviewTimePrecise(copy.startTime)}. Edit this cue independently; Undo removes the copy.`);
+  };
+
   const toggleSoundEffectPreview = async effect => {
     if (!effect) return;
     if (previewingSoundEffectId === effect.id) {
@@ -6452,16 +6716,18 @@ const ViralClipStudio = ({
 
   // ── Speech-aware auto-ducking (Web Audio API) ──
   const startSpeechDetection = () => {
-    if (speechAnalyserRef.current?.analyser) {
+    if (muteOriginalAudio || !isStudioAudioTrackAudible(trackStates, "originalAudio")) return null;
+    if (speechAnalyserRef.current?.analyser && speechAnalyserRef.current.media === videoRef.current) {
       speechAnalyserRef.current.ctx?.resume?.().catch(() => {});
       return speechAnalyserRef.current.analyser;
     }
     if (!videoRef.current) return null;
     const remixGraph = ensureAudioRemixPreview(videoRef.current);
     if (remixGraph?.analyser) {
-      speechAnalyserRef.current = { ctx: remixGraph.context, analyser: remixGraph.analyser, source: remixGraph.source };
+      speechAnalyserRef.current = { ctx: remixGraph.context, analyser: remixGraph.analyser, source: remixGraph.source, media: videoRef.current };
       return remixGraph.analyser;
     }
+    if (failedSpeechSourcesRef.current.has(videoRef.current)) return null;
     try {
       const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextCtor) return null;
@@ -6476,12 +6742,12 @@ const ViralClipStudio = ({
         const source = audioCtx.createMediaElementSource(videoRef.current);
         source.connect(analyser);
         analyser.connect(audioCtx.destination);
-        speechAnalyserRef.current = { ctx: audioCtx, analyser, source };
+        speechAnalyserRef.current = { ctx: audioCtx, analyser, source, media: videoRef.current };
       } catch (_connectErr) {
-        // Video already connected — use a workaround: create a silent stream analyser
-        // that reads from the video's volume indirectly via a gain node
-        analyser.connect(audioCtx.destination);
-        speechAnalyserRef.current = { ctx: audioCtx, analyser, source: null };
+        // An unconnected analyser cannot establish speech energy.
+        failedSpeechSourcesRef.current.add(videoRef.current);
+        audioCtx.close()?.catch(() => {});
+        return null;
       }
       return analyser;
     } catch (e) {
@@ -6491,14 +6757,16 @@ const ViralClipStudio = ({
   };
 
   const getSpeechEnergyLevel = () => {
-    const analyser = speechAnalyserRef.current?.analyser;
-    if (!analyser) return 0;
-    const data = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(data);
-    // Focus on speech range: ~85Hz–3000Hz (bins ~0–30 for 256 FFT at 44.1kHz)
-    const speechBins = data.slice(0, 18);
-    const avg = speechBins.reduce((s, v) => s + v, 0) / speechBins.length;
-    return Math.min(1, avg / 128); // normalize 0–1
+    const analysers = [!muteOriginalAudio && isStudioAudioTrackAudible(trackStates, "originalAudio") &&
+      speechAnalyserRef.current?.media === videoRef.current
+      ? speechAnalyserRef.current?.analyser : null, voiceoverSpeechAnalyserRef.current].filter(Boolean);
+    const energy = analysers.reduce((sum, analyser) => {
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(data);
+      const speechBins = data.slice(0, 18);
+      return sum + speechBins.reduce((s, v) => s + v, 0) / speechBins.length / 128;
+    }, 0);
+    return Math.min(1, energy);
   };
 
   const currentTimelineClip = timeline[activeTimelineIndex] || null;
@@ -6769,8 +7037,11 @@ const ViralClipStudio = ({
     0.1,
     outputTimelineDuration - activeOverlayStartTime
   );
-  const outputPlaybackDuration = outputTimelineDuration / Math.max(0.01, previewSpeed);
-  const previewPlaybackTime = previewTimelineTime / Math.max(0.01, previewSpeed);
+  const outputPlaybackDuration = ticksToSeconds(previewOutputTimeMap.at(-1)?.outputRange.endTick || 0);
+  const previewPlaybackTime = renderedOutputUrl ? Math.max(0, videoTime)
+    : ticksToSeconds(mapProgrammeTickToOutputTick(previewOutputTimeMap,
+        Math.min(previewOutputTimeMap.at(-1)?.programmeRange.endTick || 0,
+          secondsToTicks(Math.max(0, previewTimelineTime)))) || 0);
   const currentTimelineOffset = getTimelineOffsetForIndex(activeTimelineIndex);
   const activeContentProfile =
     CREATOR_CONTENT_PROFILES.find(profile => profile.id === contentProfile) ||
@@ -7082,43 +7353,10 @@ const ViralClipStudio = ({
   const hookPlayheadLeft = currentTimelineWindow.duration
     ? (trimAwareCurrentTime / Math.max(0.0001, currentTimelineWindow.duration)) * 100
     : 0;
-  const previewJoinTransition = String(
-    currentTimelineClip?.transitionIn || currentTimelineClip?.transitionOut || ""
-  ).trim();
-  const previewJoinDuration = Math.max(
-    0.02,
-    Number(currentTimelineClip?.transitionDuration || 0.02)
-  );
-  const previewJoinInOpacity = currentTimelineClip?.transitionIn
-    ? clampNumber(1 - trimAwareCurrentTime / previewJoinDuration, 0, 1, 0)
-    : 0;
-  const previewJoinOutOpacity = currentTimelineClip?.transitionOut
-    ? clampNumber(
-        (trimAwareCurrentTime - Math.max(0, trimAwareDuration - previewJoinDuration)) /
-          previewJoinDuration,
-        0,
-        1,
-        0
-      )
-    : 0;
-  const previewJoinOpacity = Math.max(previewJoinInOpacity, previewJoinOutOpacity);
-
-  useEffect(() => {
-    const nextDuration = Number(hookEnd - resolvedHookStart || 0);
-    if (Math.abs(Number(hookIntroSeconds || 0) - nextDuration) > 0.05) {
-      setHookIntroSeconds(Number(nextDuration.toFixed(2)));
-    }
-  }, [hookEnd, hookIntroSeconds, resolvedHookStart]);
-
-  useEffect(() => {
-    if (Math.abs(Number(hookStartTime || 0) - resolvedHookStart) > 0.05) {
-      setHookStartTime(Number(resolvedHookStart.toFixed(2)));
-    }
-
-    if (Math.abs(Number(hookEndTime || 0) - hookEnd) > 0.05) {
-      setHookEndTime(Number(hookEnd.toFixed(2)));
-    }
-  }, [hookEnd, hookEndTime, hookStartTime, resolvedHookStart]);
+  // hookEnd/resolvedHookStart bound the current source's preview window.
+  // Navigating or playing a different occurrence must not write those derived
+  // bounds back into authored hook settings, history or the render revision.
+  // Explicit hook edits use setHookSegmentRange to clamp and persist the range.
 
   useEffect(() => {
     setHookSuggestedRange(null);
@@ -7128,7 +7366,6 @@ const ViralClipStudio = ({
     setHookSelectionMode(false);
     setHookPickMode(false);
     setHookFocusMode(false);
-    setHookFocusPoint(DEFAULT_HOOK_FOCUS_POINT);
     hookPreviewSequenceRef.current = { active: false };
   }, [activeTimelineIndex]);
 
@@ -7211,6 +7448,14 @@ const ViralClipStudio = ({
     (effectiveSmartCropMode === "group_stack" || (effectiveSmartCropMode === "center" && reframeAspect !== "16:9"));
   const speakerStackPreviewIsLive =
     effectiveSmartCrop && effectiveSmartCropMode === "group_stack" && speakerStackIsReady;
+  const prepareSpeakerStackMedia = !renderedOutputUrl && smartCrop &&
+    (smartCropMode === "group_stack" || reframeModeCuts.some(cut => cut.mode === "group_stack"));
+  const prepareSourceAlternateMedia = !renderedOutputUrl && (
+    reframeModeCuts.some(cut => Math.abs(Number(cut.sourceTimeOffsetSeconds || 0)) > .001) ||
+    [speakerStackFraming.top, speakerStackFraming.bottom].some(frame =>
+      Math.abs(Number(frame?.sourceTimeOffsetSeconds || frame?.source_time_offset_seconds || 0)) > .001 ||
+      (frame?.sourceTimeOffsetKeyframes || frame?.source_time_offset_keyframes || []).some(key =>
+        Math.abs(Number(key.offsetSeconds ?? key.offset_seconds ?? key.value ?? 0)) > .001)));
   const activeReframePosition = interpolateReframeKeyframes(reframeKeyframes, previewTimelineTime);
   const activeReframeKeyframe =
     reframeKeyframes.find(keyframe => keyframe.id === activeReframeKeyframeId) || null;
@@ -7226,7 +7471,8 @@ const ViralClipStudio = ({
   const [previewAspectWidth = 9, previewAspectHeight = 16] = String(reframeAspect)
     .split(":")
     .map(value => Math.max(1, Number(value) || 1));
-  const previewAspectRatio = previewAspectWidth / previewAspectHeight;
+  const previewAspectRatio = !renderedOutputUrl && smartCrop
+    ? previewAspectWidth / previewAspectHeight : programmeMediaAspectRatio;
   // The renderer defines frame inset as a percentage of output width on all
   // four sides. Convert that same physical inset to a CSS height percentage so
   // a portrait preview does not get almost twice the top/bottom margin.
@@ -7337,14 +7583,7 @@ const ViralClipStudio = ({
     captionPreviewSegmentIndex >= 0
       ? resolveCaptionStoryPreviewTreatment(captionPreviewState.currentChunk, captionPosition)
       : null;
-  const captionPreviewTimeMap = useMemo(() => buildStudioOutputTimeMap({
-    durationTick: secondsToTicks(outputTimelineDuration),
-    fallbackSpeed: previewSpeed,
-    programmeSpeedKeys: speedKeyframes.filter(key => key.property === "speed").map(key => ({
-      atProgrammeTick: secondsToTicks(Number(key.time || 0)),
-      rate: Number(key.value ?? key.rate ?? 1), easing: key.easing || "linear",
-    })),
-  }), [outputTimelineDuration, previewSpeed, speedKeyframes]);
+  const captionPreviewTimeMap = previewOutputTimeMap;
   const captionRenderPreviewStyles = getCaptionPreviewStyles(
     captionStyle, captionScale, captionStoryPreviewTreatment?.accent || "#ffb33d",
     { hasIcon: !!captionStoryPreviewTreatment?.icon,
@@ -7379,7 +7618,8 @@ const ViralClipStudio = ({
   });
   const liveTimelineBRoll = overlays.filter(
     overlay =>
-      overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
+      (overlay.bRollMode || overlay.type === 'image' || overlay.type === 'video') &&
+      overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
   );
   const fallbackTimelineCaptionDuration = captionPreviewState.chunks.length
     ? Math.max(0.1, Number(captionTrackDuration || 0)) / captionPreviewState.chunks.length
@@ -7474,6 +7714,22 @@ const ViralClipStudio = ({
     : activeSideBySideOverlay
       ? "cover"
       : effectiveVideoFit;
+  // Prepare two cuts ahead with three bounded native decoders. A half-second
+  // insert must not be the entire seek budget for the following source. Complex camera/audio
+  // modes retain their established programme element and synchronization.
+  // Voiceover ducking on the shared audio bus does not need a video speech
+  // source. Keep prepared cuts when original-video dialogue is muted.
+  const sourceSequenceDoubleBuffer = timeline.length > 1 && !renderedOutputUrl &&
+    !speakerStackPreviewIsLive && !directorModeActive && !audioRemix.enabled &&
+    !(musicTrack?.ducking && musicTrack.duckingMode === "speech" &&
+      !muteOriginalAudio && isStudioAudioTrackAudible(trackStates, "originalAudio"));
+  const activeProgrammeSlot = sourceSequenceDoubleBuffer ? activeTimelineIndex % 3 : 0;
+  useLayoutEffect(() => {
+    const previous = videoRef.current;
+    const next = programmeVideoSlotsRef.current[activeProgrammeSlot];
+    videoRef.current = next;
+    if (previous && previous !== next) { previous.pause(); previous.muted = true; }
+  }, [activeProgrammeSlot]);
   const previewProgrammePosition = renderedOutputUrl
     ? "center center"
     : activeSideBySideOverlay
@@ -7569,7 +7825,9 @@ const ViralClipStudio = ({
         applySafeMediaSource(afterVideo, afterSource);
       }
       afterVideo.currentTime = renderedOutputUrl
-        ? clampNumber(Number(target.outputTime || 0) / Math.max(0.01, previewSpeed), 0, afterVideo.duration || Infinity, 0)
+        ? ticksToSeconds(mapProgrammeTickToOutputTick(previewOutputTimeMap,
+            Math.min(previewOutputTimeMap.at(-1)?.programmeRange.endTick || 0,
+              secondsToTicks(Math.max(0, Number(target.outputTime || 0))))) || 0)
         : target.sourceTime;
       if (beforeVideo) {
         applySafeMediaSource(beforeVideo, target.clip?.url);
@@ -7582,15 +7840,105 @@ const ViralClipStudio = ({
     if (play) safePlayMediaElement(afterVideo);
   };
 
-  const toggleComparisonPlayback = () => {
+  const toggleComparisonPlayback = async () => {
+    const playRequest = ++previewPlaybackStartRef.current;
+    // Pause must remain available while owned media links are being refreshed.
+    if (!isPreviewPaused) {
+      pauseSynchronizedPreview();
+      return;
+    }
+    if (projectSourcesRefreshing) {
+      setStudioActionMessage("Reopening saved media. Playback will be available when source links are ready.");
+      return;
+    }
     const video = videoRef.current;
     if (!video) return;
     const windowEnd = Number(currentTimelineWindow.end || video.duration || 0);
     if (isPreviewPaused) {
+      if (!renderedOutputUrl) {
+        const expectedProject = activeProjectIdRef.current, expectedSeek = programmeSeekIntentRef.current.version;
+        try { const pendingVoice = preparedVoiceBusRef.current?.prepare(); if (pendingVoice) await pendingVoice; }
+        catch (error) { if (playRequest === previewPlaybackStartRef.current) setStudioActionMessage(error.message); return; }
+        if (playRequest !== previewPlaybackStartRef.current || video !== videoRef.current ||
+            expectedProject !== activeProjectIdRef.current || expectedSeek !== programmeSeekIntentRef.current.version) return;
+      }
+      if (!renderedOutputUrl && addMusic && !musicSearchMode && effectiveMusicPreviewUrl) {
+        const expectedProject = activeProjectIdRef.current;
+        const expectedSeek = programmeSeekIntentRef.current.version;
+        const expectedMusic = new URL(getSafeMediaSource(effectiveMusicPreviewUrl), window.location.href).href;
+        previewPlaybackIntentRef.current = false;
+        try {
+          if (musicPreviewRef.current?.readyState < 3) setStudioActionMessage("Loading background sound before playback…");
+          await prepareStudioMusicPlayback({ media: musicPreviewRef.current,
+            decodePromise: musicPreviewDecodePromiseRef.current,
+            hasDecodedBuffer: () => Boolean(musicPreviewBufferRef.current &&
+              musicPreviewBufferUrlRef.current === effectiveMusicPreviewUrl) });
+        } catch (error) {
+          if (playRequest === previewPlaybackStartRef.current) setStudioActionMessage(error.message);
+          return;
+        }
+        if (playRequest !== previewPlaybackStartRef.current || video !== videoRef.current ||
+            expectedProject !== activeProjectIdRef.current || expectedSeek !== programmeSeekIntentRef.current.version ||
+            musicPreviewRef.current?.src !== expectedMusic) return;
+      }
       if (windowEnd > 0 && Number(video.currentTime || 0) >= windowEnd - 0.1) {
         focusComparisonPreview(studioInspectorTab, false);
       }
+      if (!renderedOutputUrl && !previewMuted) {
+        const expectedProject = activeProjectIdRef.current;
+        const expectedSeek = programmeSeekIntentRef.current.version;
+        const pendingCues = soundEffects.filter(effect => effect.enabled !== false)
+          .map(effect => soundEffectDecodePromisesRef.current.get(studioCueSourceKey(expectedProject, effect)))
+          .filter(Boolean);
+        if (pendingCues.length) {
+          previewPlaybackPreparingRef.current = playRequest;
+          previewPlaybackIntentRef.current = true;
+          setIsPreviewPaused(false);
+          await prepareStudioCuePlayback(pendingCues);
+          if (previewPlaybackPreparingRef.current === playRequest) previewPlaybackPreparingRef.current = null;
+          if (playRequest !== previewPlaybackStartRef.current || !previewPlaybackIntentRef.current ||
+              expectedProject !== activeProjectIdRef.current || expectedSeek !== programmeSeekIntentRef.current.version ||
+              video !== videoRef.current) return;
+        }
+        const contexts = [];
+        if (addMusic && musicPreviewBufferRef.current) contexts.push(ensureMusicPreviewAudioContext());
+        if (soundEffects.some(effect => effect.enabled !== false && (effect.builtIn ||
+            soundEffectDecodedSourcesRef.current.has(studioCueSourceKey(activeProjectIdRef.current, effect)))) &&
+            isStudioAudioTrackAudible(trackStates, "sfx")) contexts.push(ensureSoundEffectAudioContext());
+        if (isStudioAudioTrackAudible(trackStates,"sfx")) {
+          const cueContext = soundEffectAudioContextRef.current;
+          for (const effect of soundEffects.filter(effect => effect.builtIn && effect.enabled !== false))
+            prepareStudioBuiltInCue(cueContext,{ ...effect,duration:getSoundEffectDuration(effect) },
+              soundEffectBuiltInBuffersRef.current,expectedProject);
+        }
+        const suspended = [...new Set(contexts)].filter(context => context?.state === "suspended");
+        if (suspended.length) {
+          // Pause represents transport intent and remains available while the
+          // browser prepares its audio threads. No picture advances yet.
+          previewPlaybackPreparingRef.current = playRequest;
+          previewPlaybackIntentRef.current = true;
+          setIsPreviewPaused(false);
+          try { await Promise.all(suspended.map(context => context.resume())); }
+          catch (error) {
+            if (previewPlaybackPreparingRef.current === playRequest) previewPlaybackPreparingRef.current = null;
+            if (playRequest === previewPlaybackStartRef.current) {
+              pauseSynchronizedPreview(); setStudioActionMessage("Preview audio could not start. Try playback again.");
+            }
+            return;
+          }
+          if (previewPlaybackPreparingRef.current === playRequest) previewPlaybackPreparingRef.current = null;
+          if (playRequest !== previewPlaybackStartRef.current || !previewPlaybackIntentRef.current ||
+              expectedProject !== activeProjectIdRef.current || expectedSeek !== programmeSeekIntentRef.current.version ||
+              video !== videoRef.current) return;
+        }
+      }
       backgroundSoundPreviewSuppressedRef.current = false;
+      programmeSoundEffectRoutesRef.current = new Map(soundEffects.map(effect => [effect.id,
+        soundEffectDecodedSourcesRef.current.get(studioCueSourceKey(activeProjectIdRef.current, effect)) || null]));
+      programmeMusicRouteRef.current = { sourceUrl: effectiveMusicPreviewUrl,
+        decoded: Boolean(musicPreviewBufferRef.current && musicPreviewBufferUrlRef.current === effectiveMusicPreviewUrl) };
+      isolatedMusicPreviewIntentRef.current = false;
+      setIsBackgroundSoundPreviewing(false);
       previewPlaybackIntentRef.current = true;
       setIsPreviewPaused(false);
       safePlayMediaElement(video);
@@ -9566,9 +9914,22 @@ const ViralClipStudio = ({
   };
 
   const updateMotionKeyframe = (keyframeId, changes) => {
+    const key = motionKeyframes.find(item => item.id === keyframeId);
+    if (!key || !allowTimelineTimingEdit(motionKeyframeTrack(key.targetId))) return;
     setMotionKeyframes(current =>
       current.map(keyframe => (keyframe.id === keyframeId ? { ...keyframe, ...changes } : keyframe))
     );
+  };
+
+  const motionKeyframeTrack = targetId => {
+    if (targetId === "main-video") return "video";
+    const layer = overlays.find(item => item.id === targetId);
+    return layer?.bRollMode || ["image", "video"].includes(layer?.type) ? "broll" : "graphics";
+  };
+  const removeMotionKeyframe = id => {
+    const key = motionKeyframes.find(item => item.id === id);
+    if (!key || !allowTimelineTimingEdit(motionKeyframeTrack(key.targetId))) return;
+    setMotionKeyframes(current => current.filter(item => item.id !== id));
   };
 
   const autoGeneratePunchIns = () => {
@@ -10052,19 +10413,16 @@ const ViralClipStudio = ({
 
   const addAudioAutomationKeyframe = () => {
     const source = audioAutomationSource;
+    if (!allowTimelineTimingEdit(source)) return;
     const resolved = timelineSnapping
       ? resolveMagneticTimelineTime(previewTimelineTime)
       : { time: previewTimelineTime, snapped: false };
-    const currentValue =
-      source === "music"
-        ? Math.round(Number(musicTrack?.volume ?? musicVolume) * 100)
-        : source === "sfx" && activeSoundEffect
-          ? Math.round(Number(activeSoundEffect.volume ?? 0.8) * 100)
-          : source === "originalAudio"
-            ? muteOriginalAudio
-              ? 0
-              : 100
-            : 100;
+    // Bus automation multiplies the existing clip/track fader. A new key
+    // preserves the envelope here; copying the fader would apply it twice.
+    const currentValue = Math.round(interpolateAutomationValue({
+      keyframes: audioKeyframes[source] || [], property: "volume",
+      time: Number(resolved.time || 0), fallback: 100,
+    }));
     setAudioKeyframes(current => ({
       ...current,
       [source]: upsertAutomationKeyframe(current[source] || [], {
@@ -10082,6 +10440,7 @@ const ViralClipStudio = ({
   };
 
   const removeAudioAutomationKeyframe = keyframeId => {
+    if (!allowTimelineTimingEdit(audioAutomationSource)) return;
     setAudioKeyframes(current => ({
       ...current,
       [audioAutomationSource]: (current[audioAutomationSource] || []).filter(
@@ -10154,6 +10513,23 @@ const ViralClipStudio = ({
     next.volume = voiceoverGain(next.volume);
     return next;
   }));
+
+  const importVoiceoverRecording = async file => {
+    if (!file) return;
+    const importingProject = activeProjectIdRef.current;
+    const startTime = Number(previewTimelineTime || 0);
+    const url = URL.createObjectURL(file);
+    try {
+      const duration = await readVoiceoverDuration(file, url);
+      if (!voiceoverMountedRef.current || activeProjectIdRef.current !== importingProject) return;
+      soundEffectObjectUrlsRef.current.add(url);
+      setVoiceovers(current => [...current, { id: createSecureId("voiceover"), name: file.name,
+        file, url, startTime, duration, sourceDuration: duration, trimStart: 0, volume: 1,
+        fadeIn: 0, fadeOut: 0 }]);
+      setStudioActionMessage("Recording imported onto the editable voice-over track.");
+    } catch (error) { setStudioActionMessage(error.message); }
+    finally { if (!soundEffectObjectUrlsRef.current.has(url)) URL.revokeObjectURL(url); }
+  };
 
   const toggleVoiceoverRecording = async () => {
     if (isVoiceoverRecording) {
@@ -10434,6 +10810,7 @@ const ViralClipStudio = ({
     const activeVideos = activeSpeakerStackSlots.map(slot => videosBySlot[slot]);
     if (
       !programmeVideo ||
+      !prepareSpeakerStackMedia ||
       activeVideos.some(video => !video) ||
       !speakerStackIsReady
     ) {
@@ -10538,6 +10915,7 @@ const ViralClipStudio = ({
     speakerStackOffsets.fourth,
     speakerStackOffsets.top,
     speakerStackPreviewIsLive,
+    prepareSpeakerStackMedia,
     speakerStackTopSource,
   ]);
 
@@ -10643,29 +11021,31 @@ const ViralClipStudio = ({
     speakerStackFraming,
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     const syncAutomationRate = () => {
+      // The completed movie already contains the canonical speed plan.
+      if (renderedOutputUrl) { video.playbackRate = 1; return; }
       const outputTime = getPreviewTimelineTime(video.currentTime || 0);
-      const rate = speedKeyframes.length
-        ? interpolateAutomationValue({
-            keyframes: speedKeyframes,
-            property: "speed",
-            time: outputTime,
-            fallback: previewSpeed,
-          })
-        : previewSpeed;
+      const tick = secondsToTicks(Math.max(0, outputTime));
+      const segment = previewOutputTimeMap.find(item => tick >= item.programmeRange.startTick &&
+        tick < item.programmeRange.endTick) || previewOutputTimeMap.at(-1);
+      const rate = segment ? segment.rateNumerator / segment.rateDenominator : previewSpeed;
       video.playbackRate = clampNumber(rate, 0.25, 4, 1);
     };
     syncAutomationRate();
     video.addEventListener("timeupdate", syncAutomationRate);
     video.addEventListener("seeking", syncAutomationRate);
+    const stopRateClock = !renderedOutputUrl ? watchStudioAudioClock(video, () => {
+      if (video === videoRef.current) syncAutomationRate();
+    }) : () => {};
     return () => {
+      stopRateClock();
       video.removeEventListener("timeupdate", syncAutomationRate);
       video.removeEventListener("seeking", syncAutomationRate);
     };
-  }, [activeTimelineIndex, currentTimelineClip, previewSpeed, speedKeyframes]);
+  }, [activeTimelineIndex, currentTimelineClip, previewSpeed, previewOutputTimeMap, renderedOutputUrl]);
 
   useEffect(() => {
     if (!addHook) return;
@@ -10688,7 +11068,9 @@ const ViralClipStudio = ({
     if (!music) return undefined;
 
     const markPlaying = () => setIsBackgroundSoundPreviewing(true);
-    const markStopped = () => setIsBackgroundSoundPreviewing(false);
+    const markStopped = () => {
+      if (!musicPreviewSourceRef.current) setIsBackgroundSoundPreviewing(false);
+    };
 
     music.addEventListener("play", markPlaying);
     music.addEventListener("playing", markPlaying);
@@ -10967,7 +11349,20 @@ const ViralClipStudio = ({
   }, [addMusic, effectiveMusicPreviewUrl, musicSearchMode]);
 
   useEffect(() => {
-    const beatSourceUrl = musicSearchMode ? musicPreviewUrl : effectiveMusicPreviewUrl;
+    const beatSourceUrl = effectiveMusicPreviewUrl;
+    // Private link refreshes change access, not the owned audio bytes. Reuse
+    // only an exact project/owner/path/hash match; arbitrary URLs never qualify.
+    const bufferIdentity = studioMusicBufferIdentity(projectId, musicTrack);
+    musicPreviewDecodePromiseRef.current = null;
+    if (addMusic && beatSourceUrl && bufferIdentity && musicPreviewBufferRef.current &&
+        bufferIdentity === musicPreviewBufferIdentityRef.current) {
+      musicPreviewBufferUrlRef.current = beatSourceUrl;
+      setDecodedMusicPreviewUrl(beatSourceUrl);
+      return undefined;
+    }
+    musicPreviewBufferIdentityRef.current = "";
+    musicPreviewBufferUrlRef.current = "";
+    setDecodedMusicPreviewUrl("");
     if (!addMusic || !beatSourceUrl) {
       stopMusicPreviewBufferPlayback();
       musicPreviewBufferRef.current = null;
@@ -10995,6 +11390,9 @@ const ViralClipStudio = ({
         if (isCancelled) return;
 
         musicPreviewBufferRef.current = decodedBuffer;
+        musicPreviewBufferIdentityRef.current = bufferIdentity;
+        musicPreviewBufferUrlRef.current = beatSourceUrl;
+        setDecodedMusicPreviewUrl(beatSourceUrl);
         const rhythmAnalysis = detectAudioBeats(analyzeAudioBufferBeats(decodedBuffer));
         setMusicBeatMarkers(rhythmAnalysis.beats.slice(0, 160));
         setMusicPreviewStatus("ready");
@@ -11016,14 +11414,49 @@ const ViralClipStudio = ({
       }
     };
 
-    decodeMusicPreview();
+    musicPreviewDecodePromiseRef.current = decodeMusicPreview();
 
     return () => {
       isCancelled = true;
       abortController.abort();
       stopMusicPreviewBufferPlayback();
     };
-  }, [addMusic, musicSearchMode, musicPreviewUrl, effectiveMusicPreviewUrl, currentMusicLabel]);
+  }, [addMusic, musicSearchMode, musicPreviewUrl, effectiveMusicPreviewUrl, currentMusicLabel,
+    projectId, musicTrack?.ownerUid, musicTrack?.storagePath, musicTrack?.contentHash]);
+
+  const importedCueBindings = JSON.stringify(soundEffects.filter(effect =>
+    !effect.builtIn && effect.kind !== "voiceover" && effect.url && effect.enabled !== false)
+    .map(effect => [studioCueSourceKey(projectId, effect), effect.url]));
+  useEffect(() => {
+    if (!(window.AudioContext || window.webkitAudioContext)) return undefined;
+    const bindings = JSON.parse(importedCueBindings), keys = new Set(bindings.map(([key]) => key));
+    const cache = soundEffectDecodedSourcesRef.current;
+    for (const key of cache.keys()) if (!keys.has(key)) cache.delete(key);
+    soundEffectDecodePromisesRef.current.clear();
+    const controller = new AbortController();
+    const lifecycle = { cancelled: false };
+    for (const [key, url] of new Map(bindings)) {
+      if (!key || cache.has(key)) continue;
+      const promise = (async () => {
+        try {
+          const response = await fetch(url, { signal: controller.signal });
+          if (!response.ok || Number(response.headers?.get('content-length') || 0) > 32 * 1024 * 1024) return null;
+          const bytes = await response.arrayBuffer();
+          if (bytes.byteLength > 32 * 1024 * 1024 || lifecycle.cancelled) return null;
+          const context = ensureSoundEffectAudioContext();
+          const decoded = await context.decodeAudioData(bytes.slice(0));
+          const memory = decoded.length * decoded.numberOfChannels * 4;
+          if (lifecycle.cancelled || decoded.numberOfChannels > 2 || memory > 32 * 1024 * 1024 ||
+              [...cache.values()].reduce((sum, entry) => sum + entry.memory, 0) + memory > 96 * 1024 * 1024) return null;
+          const entry = { key, decoded, memory, cues: new Map() };
+          cache.set(key, entry);
+          return entry;
+        } catch (_) { return null; } // The real native decoder remains the fallback.
+      })();
+      soundEffectDecodePromisesRef.current.set(key, promise);
+    }
+    return () => { lifecycle.cancelled = true; controller.abort(); };
+  }, [importedCueBindings]);
 
   useEffect(() => {
     const music = musicPreviewRef.current;
@@ -11903,6 +12336,7 @@ const ViralClipStudio = ({
 
       const musicTrackAudible = isStudioAudioTrackAudible(trackStates, "music");
       let exportedMusicUrl = musicTrackAudible ? exportEditState.musicTrack?.url || null : null;
+      let uploadedMusicBinding = null;
       if (
         addMusic &&
         musicTrackAudible &&
@@ -11921,9 +12355,7 @@ const ViralClipStudio = ({
           },
         });
         exportedMusicUrl = musicUpload.url;
-        setMusicTrack(previous => (previous ? { ...previous, url: exportedMusicUrl,
-          ...(musicUpload.storagePath ? { sourceStoragePath: musicUpload.storagePath, file: null } : {}),
-        } : previous));
+        uploadedMusicBinding = studioUploadedAudioBinding(exportEditState.musicTrack, musicUpload);
       }
 
       const uploadedSoundMedia = new Map();
@@ -11945,9 +12377,7 @@ const ViralClipStudio = ({
                 },
               });
               effectUrl = upload.url;
-              uploadedSoundMedia.set(String(effect.id), {
-                priorUrl: effect.url, url: upload.url, sourceStoragePath: upload.storagePath,
-              });
+              uploadedSoundMedia.set(String(effect.id), studioUploadedAudioBinding(effect, upload));
             }
             return {
               id: effect.id,
@@ -11965,15 +12395,23 @@ const ViralClipStudio = ({
             };
           })
       );
-      if (uploadedSoundMedia.size) {
-        setSoundEffects(current => current.map(effect => {
-          const uploaded = uploadedSoundMedia.get(String(effect.id));
-          return uploaded && effect.url === uploaded.priorUrl
-            ? { ...effect, url: uploaded.url,
-                ...(uploaded.sourceStoragePath ? { sourceStoragePath: uploaded.sourceStoragePath, file: null } : {}),
-              }
-            : effect;
-        }));
+      if (uploadedMusicBinding || uploadedSoundMedia.size) {
+        const bindings = { music: uploadedMusicBinding, effects: uploadedSoundMedia };
+        const materialized = bindStudioAudioSources(exportEditState, bindings);
+        exportEditState.musicTrack = materialized.musicTrack;
+        exportEditState.soundEffects = materialized.soundEffects;
+        flushSync(() => {
+          if (uploadedMusicBinding) setMusicTrack(current => bindStudioAudioSource(current, uploadedMusicBinding));
+          if (uploadedSoundMedia.size) setSoundEffects(current =>
+            current.map(effect => bindStudioAudioSource(effect, uploadedSoundMedia.get(String(effect.id)))));
+        });
+        // Reconcile the frozen decisions against the committed revision. When
+        // only uploads changed, request and saved project now share one digest.
+        // Concurrent creative edits stay in the live project, not this render.
+        const committed = latestEditorSnapshotRef.current();
+        exportEditState.studioDocument = reconcileStudioDocument({
+          snapshot: exportEditState, projectId, storedDocument: committed.studioDocument,
+        });
       }
 
       setExportStatusLabel("Preparing voice-over recordings");
@@ -11989,13 +12427,16 @@ const ViralClipStudio = ({
         audible: voiceoverTrackAudible(trackStates),
       });
       if (exportedVoiceovers.length) {
-        const uploadedById = new Map(exportedVoiceovers.map(take => [String(take.id), take]));
-        setVoiceovers(current => current.map(take => {
-          const uploaded = uploadedById.get(String(take.id));
-          return uploaded ? { ...take, url: uploaded.url,
-            ...(uploaded.sourceStoragePath ? { sourceStoragePath: uploaded.sourceStoragePath, file: null } : {}),
-          } : take;
-        }));
+        const uploadedById = new Map(exportedVoiceovers.map(take => [String(take.id), {
+          priorUrl: take.priorUrl, url: take.url, sourceStoragePath: take.sourceStoragePath,
+          storagePath: take.storagePath, ownerUid: take.ownerUid, contentHash: take.contentHash,
+        }]));
+        const materialized = bindStudioAudioSources(exportEditState, { voices: uploadedById });
+        exportEditState.voiceovers = materialized.voiceovers;
+        flushSync(() => setVoiceovers(current => current.map(take =>
+          bindStudioAudioSource(take, uploadedById.get(String(take.id))))));
+        exportEditState.studioDocument = reconcileStudioDocument({ snapshot: exportEditState, projectId,
+          storedDocument: latestEditorSnapshotRef.current().studioDocument });
       }
       const normalizedOverlays = normalizeOverlaysForExport(exportTimeline, newOverlays);
       const exportCaptionSegments = mapCaptionSegmentsToTimeline({
@@ -12042,7 +12483,7 @@ const ViralClipStudio = ({
       // Upload bindings are part of the edit. Commit their pending state and
       // history invalidation before the parent captures its render revision.
       flushSync(() => setExportStatusLabel("Submitting render…"));
-      await onSave(selectedClip, normalizedOverlays, {
+      const completedRender = await onSave(selectedClip, normalizedOverlays, {
         autoCaptions,
         captionReviewCopy,
         captionCoverageMode,
@@ -12141,6 +12582,7 @@ const ViralClipStudio = ({
           voiceovers,
         },
         compositionPlan: compileStudioCompositionForRender(exportEditState.studioDocument),
+        creativeTemplateInstance: exportEditState.creativeTemplateInstance,
         audioRestoration,
         audioAutomation: audioKeyframes,
         audioTrackStates: trackStates,
@@ -12229,6 +12671,9 @@ const ViralClipStudio = ({
         exportDestination: destination || "general",
         outputSettings: exportSettings,
       });
+      if (completedRender?.url || completedRender?.outputUrl || completedRender?.output_url) {
+        setPreviewFinishedFile(true);
+      }
     } catch (err) {
       const exportFailureMessage = `Export failed: ${err?.message || "Unknown render error"}`;
       if (scanSessionId) {
@@ -12274,14 +12719,7 @@ const ViralClipStudio = ({
       setTimeline(prev =>
         prev.map((item, idx) =>
           idx === activeTimelineIndex
-            ? {
-                ...item,
-                duration: dur,
-                endRequest:
-                  item.endRequest ?? (item.id === "main" ? selectedClip?.end : null) ?? dur,
-                startRequest:
-                  item.startRequest ?? (item.id === "main" ? selectedClip?.start : null) ?? 0,
-              }
+            ? applyStudioClipMetadata(item, dur, item.id === "main" ? selectedClip : {})
             : item
         )
       );
@@ -12365,7 +12803,14 @@ const ViralClipStudio = ({
 
     // A finished file represents the edit that was submitted. Once the edit
     // changes, return the monitor to the current editable programme.
-    onEditInvalidated?.();
+    // Refreshing/materializing transport fields may change the legacy snapshot
+    // while retaining exactly the same canonical decisions and revision.
+    const previousDocument = lastSnapshotRef.current?.studioDocument;
+    const currentDocument = snapshot.studioDocument;
+    if (!previousDocument || !currentDocument ||
+        serializeSnapshot(previousDocument) !== serializeSnapshot(currentDocument)) {
+      onEditInvalidated?.();
+    }
 
     if (pendingHistoryBaselineRef.current) {
       const baseline = pendingHistoryBaselineRef.current;
@@ -12413,6 +12858,7 @@ const ViralClipStudio = ({
   }, [
     orderedClips,
     projectMedia,
+    creativeTemplateInstance,
     angleGroups,
     activeAngleGroupId,
     selectedClip,
@@ -12600,6 +13046,7 @@ const ViralClipStudio = ({
     if (!activeOverlayId) return undefined;
 
     const handleKeyDown = event => {
+      if (event.defaultPrevented) return;
       const targetTag = event.target?.tagName;
       const isTypingTarget =
         event.target?.isContentEditable ||
@@ -12675,6 +13122,7 @@ const ViralClipStudio = ({
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+    let boundaryPending = false;
 
     const handlePlay = () => {
       const currentClip = timeline[activeTimelineIndex];
@@ -12719,6 +13167,7 @@ const ViralClipStudio = ({
     };
 
     const handleTimeUpdate = event => {
+      if (boundaryPending) return;
       const expectedSource = getSafeMediaSource(renderedOutputUrl || timeline[activeTimelineIndex]?.url);
       if (video.readyState < 2 || video.currentSrc !== expectedSource) return;
       setVideoTime(video.currentTime);
@@ -12822,7 +13271,9 @@ const ViralClipStudio = ({
       }
 
       // If we reach the end of this clip's designated playtime
-      if (video.currentTime >= endTime) {
+      const decodedBoundaryReached = event?.type === "frame-boundary" &&
+        Number.isFinite(event.mediaTime) && event.mediaTime >= endTime;
+      if (video.currentTime >= endTime || decodedBoundaryReached) {
         if (trimPreviewLoop) {
           video.currentTime = startTime;
           if (previewPlaybackIntentRef.current) {
@@ -12834,7 +13285,26 @@ const ViralClipStudio = ({
         // If there is a NEXT clip in timeline, play it
         if (activeTimelineIndex < timeline.length - 1) {
           const nextIndex = activeTimelineIndex + 1;
-          setActiveTimelineIndex(nextIndex);
+          const nextVideo = sourceSequenceDoubleBuffer
+            ? programmeVideoSlotsRef.current[nextIndex % 3] : null;
+          const nextClip = timeline[nextIndex];
+          const nextStart = getTimelineClipWindow(nextClip).start;
+          const ready = nextVideo && nextVideo.currentSrc === getSafeMediaSource(nextClip.url) &&
+            nextVideo.readyState >= 3 && !nextVideo.seeking &&
+            Math.abs(nextVideo.currentTime - nextStart) <= .001;
+          preparedCutHandoffRef.current = ready && previewPlaybackIntentRef.current
+            ? { from: video, to: nextVideo } : null;
+          boundaryPending = true;
+          // Start the prepared decoder before the expensive editor commit.
+          // Waiting until layout effects run leaves the picture clock paused
+          // while the continuous song/cues advance through every hard cut.
+          if (preparedCutHandoffRef.current) safePlayMediaElement(nextVideo);
+          video.pause();
+          // Native frame/media events occur outside React's commit. Promote
+          // the already prepared decoder now instead of leaving a paused
+          // programme visible until a later batched render/passive effect.
+          try { flushSync(() => setActiveTimelineIndex(nextIndex)); }
+          finally { preparedCutHandoffRef.current = null; }
         } else {
           // Sequence finished: Loop back to START of the sequence (Clip 1 / Main Video)
           if (activeTimelineIndex === 0) {
@@ -12853,7 +13323,13 @@ const ViralClipStudio = ({
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("ended", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    const stopBoundaryWatch = watchStudioClipBoundary(video, {
+      end: getTimelineClipWindow(timeline[activeTimelineIndex]).end,
+      enabled: !renderedOutputUrl && !trimPreviewLoop && !hookPreviewLoop && !addHook,
+      onBoundary: mediaTime => handleTimeUpdate({ type: "frame-boundary", mediaTime }),
+    });
     return () => {
+      stopBoundaryWatch();
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("ended", handleTimeUpdate);
@@ -12873,8 +13349,25 @@ const ViralClipStudio = ({
     renderedOutputUrl,
   ]);
 
-  // Effect: Switch video Source when activeTimelineIndex changes OR Jump when selecting a viral clip
   useEffect(() => {
+    const cleanups = [];
+    for (let ahead = 1; ahead <= 2; ahead++) {
+      const standby = programmeVideoSlotsRef.current[(activeProgrammeSlot + ahead) % 3];
+      if (!standby) continue;
+      standby.pause(); standby.muted = true;
+      const next = timeline[activeTimelineIndex + ahead];
+      if (!sourceSequenceDoubleBuffer || !next || navigator.connection?.saveData || isWorkflowPaused) {
+        applySafeMediaSource(standby, null);
+        continue;
+      }
+      cleanups.push(primeStudioSourceVideo(standby, { url: next.url, start: getTimelineClipWindow(next).start }));
+    }
+    return () => cleanups.forEach(cleanup => cleanup());
+  }, [timeline, activeTimelineIndex, activeProgrammeSlot, sourceSequenceDoubleBuffer, isWorkflowPaused]);
+
+  // Effect: Switch video Source when activeTimelineIndex changes OR Jump when selecting a viral clip
+  useLayoutEffect(() => {
+    let removePendingSourceSeek;
     if (videoRef.current && timeline[activeTimelineIndex]) {
       const clip = timeline[activeTimelineIndex];
       const clipWindow = getTimelineClipWindow(clip);
@@ -12902,7 +13395,8 @@ const ViralClipStudio = ({
         const switchingVideo = videoRef.current;
         const seekVersion = programmeSeekIntentRef.current.version;
         const restoreSeek = () => {
-          if (switchingVideo.src !== afterSource) return;
+          if (videoRef.current !== switchingVideo || switchingVideo.src !== afterSource ||
+              previewWindowRef.current?.clipId !== clip.id) return;
           const latestSeek = programmeSeekIntentRef.current;
           const restoredTime = !renderedOutputUrl && latestSeek.version !== seekVersion &&
             latestSeek.sourceId === (clip.sourceClipId || clip.id)
@@ -12912,6 +13406,7 @@ const ViralClipStudio = ({
           if (previewPlaybackIntentRef.current) safePlayMediaElement(switchingVideo);
         };
         switchingVideo.addEventListener("loadedmetadata", restoreSeek, { once: true });
+        removePendingSourceSeek = () => switchingVideo.removeEventListener("loadedmetadata", restoreSeek);
         applySafeMediaSource(videoRef.current, afterSource);
         videoRef.current.currentTime = refreshedTime;
         setVideoTime(refreshedTime);
@@ -12922,7 +13417,9 @@ const ViralClipStudio = ({
       // 2. Handle JUMP within the same file when the active timeline window changes
       else {
         // Metadata and unrelated timeline edits must not rewind the monitor.
-        const nextTime = sameClip && !hasPendingSeek
+        const advancingHandoff = !hasPendingSeek && previewPlaybackIntentRef.current &&
+          preparedCutHandoffRef.current?.to === videoRef.current;
+        const nextTime = (sameClip && !hasPendingSeek) || advancingHandoff
           ? clampNumber(videoRef.current.currentTime, clipWindow.start, clipWindow.end, targetStart)
           : targetStart;
         if (windowChanged && Math.abs(videoRef.current.currentTime - nextTime) > 0.001 && !isDragging) {
@@ -12945,7 +13442,12 @@ const ViralClipStudio = ({
       if (!isDragging) previewWindowRef.current = {
         clipId: clip.id, start: clipWindow.start, end: clipWindow.end, renderedOutputUrl,
       };
+      if (videoRef.current.videoWidth > 0 && videoRef.current.videoHeight > 0) {
+        setProgrammeMediaAspectRatio(videoRef.current.videoWidth / videoRef.current.videoHeight);
+      }
+      if (previewPlaybackIntentRef.current && videoRef.current.paused) safePlayMediaElement(videoRef.current);
     }
+    return () => removePendingSourceSeek?.();
   }, [activeTimelineIndex, timeline, selectedClip, isDragging, renderedOutputUrl]);
 
   useEffect(() => {
@@ -12982,14 +13484,69 @@ const ViralClipStudio = ({
       subject.removeEventListener("seeked", confirm);
       subject.pause();
     };
-  }, [subjectProgrammePreview]);
+  }, [subjectProgrammePreview, activeTimelineIndex, renderedOutputUrl]);
+
+  // Exact paused pictures on the shared continuous delivery clock. Source/audio
+  // playback remains native; reviewed subject/composition decoders retain their
+  // own authority. A late response must never replace a newer seek/project.
+  const pausedFrameRequestKey = !renderedOutputUrl && isPreviewPaused && !projectSourcesRefreshing &&
+    !subjectProgrammePreview && !activeSideBySideOverlay && !speakerStackPreviewIsLive &&
+    smartCrop && smartCropMode === "speaker_track"
+      ? pausedStudioFrameKey(pausedStudioMappedFrameRequest(currentTimelineClip, Number(videoTime),
+        exportSettings.fps, timeline, previewOutputTimeMap))
+      : "";
+  useEffect(() => {
+    if (!pausedFrameRequestKey) { setPausedSourceFrame(null); return undefined; }
+    const key = pausedFrameRequestKey;
+    const request = JSON.parse(key);
+    const controller = new AbortController();
+    let disposed = false;
+    setPausedSourceFrame({ key, status: "loading" });
+    const deadline = setTimeout(() => {
+      controller.abort();
+      if (!disposed) setPausedSourceFrame({ key, status: "unavailable" });
+    }, 30000);
+    const timer = setTimeout(async () => {
+      try {
+        const token = await getMediaAuthToken();
+        if (disposed) return;
+        if (!token) throw new Error("Sign in to prepare this frame");
+        let response, result;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          response = await fetch(`${API_BASE_URL}/api/media/studio-assets/source-frame`, {
+            method: "POST", signal: controller.signal,
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify(request),
+          });
+          result = await response.json();
+          if (disposed || controller.signal.aborted) return;
+          if (response.status !== 429 || attempt === 2) break;
+          // An abandoned older seek may still be finishing its bounded CPU
+          // decode. Retry the current identity without starting parallel work.
+          await new Promise(resolve => setTimeout(resolve, 500));
+          if (disposed || controller.signal.aborted) return;
+        }
+        if (!response.ok || result.sourceContentHash !== request.sourceContentHash ||
+            result.frameIndex !== request.frameIndex || result.start !== request.start ||
+            result.end !== request.end || result.fps !== request.fps || result.contentType !== "image/png")
+          throw new Error("Paused frame unavailable");
+        const image = new Image();
+        image.onload = () => { clearTimeout(deadline); if (!disposed && !controller.signal.aborted) setPausedSourceFrame({ key, image, status: "accurate", receipt: {
+          sampler: result.sampler, sourceGeneration: result.sourceGeneration, imageContentHash: result.imageContentHash,
+        } }); };
+        image.onerror = () => { clearTimeout(deadline); if (!disposed) setPausedSourceFrame({ key, status: "unavailable" }); };
+        image.src = `data:image/png;base64,${result.image}`;
+      } catch (_) { clearTimeout(deadline); if (!disposed) setPausedSourceFrame({ key, status: "unavailable" }); }
+    }, 200);
+    return () => { disposed = true; clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
+  }, [pausedFrameRequestKey, projectId]);
 
   useEffect(() => {
     const video = videoRef.current;
     const canvas = afterCanvasRef.current;
     if (!video || !canvas) return undefined;
 
-    let animationFrame = 0;
+    let stopProgrammeFrames = null;
     const paintProgrammeFrame = () => {
       // CSS effects do not alter drawImage's decoded pixels. Use the actual
       // programme element, not the lagging Before comparison clock: a 100 ms
@@ -13010,7 +13567,18 @@ const ViralClipStudio = ({
       if (!context) return;
       // Use the decoded programme's clock for its crop and Director cut. React
       // state can arrive a frame later than the video at a hard source edit.
-      const frameOutputTime = getPreviewTimelineTime(programmeVideo.currentTime || 0);
+      const pausedRequest = programmeVideo.paused && !programmeVideo.seeking && !renderedOutputUrl &&
+        !subjectProgrammePreview && !activeSideBySideOverlay && !speakerStackPreviewIsLive && pausedSourceFrame?.image
+        ? pausedStudioMappedFrameRequest(currentTimelineClip, Number(programmeVideo.currentTime),
+          exportSettings.fps, timeline, previewOutputTimeMap) : null;
+      const pausedClockIsCurrent = pausedRequest && pausedSourceFrame.key === pausedStudioFrameKey(pausedRequest);
+      const sampledSourceTime = pausedClockIsCurrent
+        ? pausedRequest.start + pausedRequest.frameIndex / pausedRequest.fps
+        : Number(programmeVideo.currentTime || 0);
+      // Crop/finish automation was applied to this input picture before final
+      // retiming. Evaluate it on that picture's sampled clock, rather than
+      // the fractional seek position between it and the next source frame.
+      const frameOutputTime = getPreviewTimelineTime(sampledSourceTime);
       const frameCropMode = resolveReframeModeAtTime(
         reframeModeCuts, frameOutputTime, smartCrop ? smartCropMode : "off"
       );
@@ -13040,7 +13608,14 @@ const ViralClipStudio = ({
       // Show the loading state rather than silently replacing valid effect pixels
       // with the original source while its decoder catches up to an edit.
       if (reviewedSubject && !subjectIsCurrent) return;
-      const sourceVideo = subjectIsCurrent ? subjectVideo : alternateIsCurrent
+      const pausedFrameIsCurrent = programmeVideo.paused && !programmeVideo.seeking && !renderedOutputUrl &&
+        frameCropMode === "speaker_track" && Math.abs(frameSoloOffset) <= .001 &&
+        !reviewedSubject && !alternateIsCurrent && !cachedAlternateIsCurrent &&
+        pausedSourceFrame?.image && pausedSourceFrame.key === pausedStudioFrameKey(
+          pausedStudioMappedFrameRequest(currentTimelineClip, Number(programmeVideo.currentTime),
+            exportSettings.fps, timeline, previewOutputTimeMap));
+      canvas.dataset.sourceSampling = pausedFrameIsCurrent ? "accurate-paused" : "native";
+      const sourceVideo = subjectIsCurrent ? subjectVideo : pausedFrameIsCurrent ? pausedSourceFrame.image : alternateIsCurrent
         ? alternateVideo
         : cachedAlternateIsCurrent ? cachedSoloFrame.canvas : programmeVideo;
       const frameProgrammeFit = renderedOutputUrl || activeSideBySideOverlay
@@ -13434,6 +14009,28 @@ const ViralClipStudio = ({
         }
       }
       context.restore();
+      const joinWindow = getTimelineClipWindow(currentTimelineClip);
+      const joinFade = studioJoinFade({
+        duration: joinWindow.duration,
+        localTime: (pausedFrameIsCurrent ? sampledSourceTime : Number(programmeVideo.currentTime || 0)) - Number(joinWindow.start || 0),
+        transitionIn: currentTimelineClip?.transitionIn,
+        transitionOut: currentTimelineClip?.transitionOut,
+        transitionDuration: currentTimelineClip?.transitionDuration,
+        renderedOutput: Boolean(renderedOutputUrl),
+      });
+      canvas.dataset.joinTransition = joinFade.mode;
+      canvas.dataset.joinOpacity = String(joinFade.opacity);
+      if (joinFade.opacity > 0) {
+        // Fade the underlying shot. Editable graphics stay above it, as they do
+        // in the deterministic render composition; finished exports are exempt.
+        context.save();
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.filter = "none";
+        context.globalAlpha = joinFade.opacity;
+        context.fillStyle = joinFade.mode === "energy_flash" ? "#ffffff" : "#000000";
+        context.fillRect(0, 0, canvasWidth, canvasHeight);
+        context.restore();
+      }
       if (precisionPreviewGrade || (finishPreviewIsLive && advancedColorCube)) {
         const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
         if (precisionPreviewGrade) applyPrecisionGrade(pixels.data, precisionPreviewGrade);
@@ -13461,20 +14058,12 @@ const ViralClipStudio = ({
         }
       }
     };
-    const paintProgrammeLoop = () => {
-      paintProgrammeFrame();
-      if (!video.paused && !video.ended) {
-        animationFrame = window.requestAnimationFrame(paintProgrammeLoop);
-      } else {
-        animationFrame = 0;
-      }
-    };
     const startProgrammeLoop = () => {
-      if (!animationFrame) animationFrame = window.requestAnimationFrame(paintProgrammeLoop);
+      if (!stopProgrammeFrames) stopProgrammeFrames = watchStudioProgrammeFrames(video, paintProgrammeFrame);
     };
     const stopProgrammeLoop = () => {
-      if (animationFrame) window.cancelAnimationFrame(animationFrame);
-      animationFrame = 0;
+      stopProgrammeFrames?.();
+      stopProgrammeFrames = null;
       paintProgrammeFrame();
     };
 
@@ -13546,9 +14135,12 @@ const ViralClipStudio = ({
       });
       previewResizeObserver?.disconnect();
       window.removeEventListener("resize", paintProgrammeFrame);
-      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      stopProgrammeFrames?.();
     };
   }, [
+    pausedSourceFrame,
+    timeline,
+    previewOutputTimeMap,
     smartCrop,
     smartCropMode,
     speakerTrackZoom,
@@ -13595,6 +14187,13 @@ const ViralClipStudio = ({
     const beforeVideo = beforeVideoRef.current;
     const beforeCanvas = beforeCanvasRef.current;
     if (!afterVideo || !beforeVideo || !beforeCanvas || !currentTimelineClip) return undefined;
+    // The hidden comparison decoder otherwise plays and paints a second copy
+    // of every source during After-only review, competing with the programme.
+    if (comparisonMode === "after") {
+      beforeVideo.pause();
+      applySafeMediaSource(beforeVideo, null);
+      return undefined;
+    }
 
     let beforeAnimationFrame = 0;
     const paintBeforeFrame = () => {
@@ -13704,7 +14303,7 @@ const ViralClipStudio = ({
       if (beforeAnimationFrame) window.cancelAnimationFrame(beforeAnimationFrame);
       beforeVideo.pause();
     };
-  }, [activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start]);
+  }, [activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start, comparisonMode]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -14007,8 +14606,11 @@ const ViralClipStudio = ({
       smartCropForegroundVideoRef.current,
       smartCrop ? currentTimelineClip?.url : null
     );
-    applySafeMediaSource(hookBackdropVideoRef.current, currentTimelineClip?.url);
-    applySafeMediaSource(hookFreezeVideoRef.current, currentTimelineClip?.url);
+    // Unused hidden decoders must not compete with the programme's byte ranges.
+    // Prepare a hook source only on its actual first occurrence and treatment.
+    const prepareHook = !renderedOutputUrl && addHook && activeTimelineIndex === 0;
+    applySafeMediaSource(hookBackdropVideoRef.current, prepareHook && hookBlurBackground ? currentTimelineClip?.url : null);
+    applySafeMediaSource(hookFreezeVideoRef.current, prepareHook && hookFreezeFrame ? currentTimelineClip?.url : null);
     beatEchoVideoRefsRef.current.forEach(element =>
       applySafeMediaSource(element, temporalPreviewIsLive ? currentTimelineClip?.url : null)
     );
@@ -14019,6 +14621,11 @@ const ViralClipStudio = ({
     );
   }, [
     currentTimelineClip,
+    activeTimelineIndex,
+    renderedOutputUrl,
+    addHook,
+    hookBlurBackground,
+    hookFreezeFrame,
     effectiveMusicPreviewUrl,
     extractedAudio,
     musicSearchMode,
@@ -14120,7 +14727,7 @@ const ViralClipStudio = ({
         video.currentTime >= absoluteHookStart &&
         video.currentTime <= absoluteHookEnd + hookLeadOut;
 
-      if (backdrop) {
+      if (backdrop && addHook && activeTimelineIndex === 0 && hookBlurBackground && !renderedOutputUrl) {
         backdrop.playbackRate = video.playbackRate || 1;
         if (Math.abs((backdrop.currentTime || 0) - (video.currentTime || 0)) > 0.08) {
           try {
@@ -14137,7 +14744,7 @@ const ViralClipStudio = ({
         }
       }
 
-      if (freezeVideo) {
+      if (freezeVideo && addHook && activeTimelineIndex === 0 && hookFreezeFrame && !renderedOutputUrl) {
         const freezeTarget = Number(currentTimelineWindow.start || 0) + resolvedHookStart;
         if (Math.abs((freezeVideo.currentTime || 0) - freezeTarget) > 0.08) {
           try {
@@ -14177,6 +14784,7 @@ const ViralClipStudio = ({
     hookBlurBackground,
     hookEnd,
     hookFreezeFrame,
+    renderedOutputUrl,
     hookLeadOut,
     normalizedHookText,
     resolvedHookStart,
@@ -14295,19 +14903,20 @@ const ViralClipStudio = ({
     return () => window.removeEventListener("keydown", handleExpandedPreviewKey);
   }, [isPreviewFullscreen]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const video = videoRef.current;
     const music = musicPreviewRef.current;
     if (!music && !musicSearchMode) return;
 
-    if (!addMusic || !effectiveMusicPreviewUrl) {
+    if (!addMusic || !effectiveMusicPreviewUrl || renderedOutputUrl) {
       stopMusicPreviewBufferPlayback();
       music?.pause();
       return;
     }
 
+    let buffering = video?.readyState < 3;
     const syncMusicPreview = () => {
-      if (!video || !effectiveMusicPreviewUrl) return;
+      if (!video || video !== videoRef.current || !effectiveMusicPreviewUrl) return;
 
       if (backgroundSoundPreviewSuppressedRef.current) {
         stopMusicPreviewBufferPlayback();
@@ -14315,34 +14924,47 @@ const ViralClipStudio = ({
         return;
       }
 
-      if (musicSearchMode) {
-        syncMusicPreviewGain();
-
+      if (!isolatedMusicPreviewIntentRef.current && musicPreviewBufferRef.current &&
+          programmeMusicRouteRef.current.decoded && programmeMusicRouteRef.current.sourceUrl === effectiveMusicPreviewUrl &&
+          decodedMusicPreviewUrl === effectiveMusicPreviewUrl &&
+          musicPreviewBufferUrlRef.current === effectiveMusicPreviewUrl) {
+        music?.pause(); // The same selected song has one programme audio path.
         const previewTimelineTime = clampAudioControl(
           getPreviewTimelineTime(video.currentTime || 0),
           0,
           36000,
           0
         );
-        const bufferDuration = Number(musicPreviewBufferRef.current?.duration || 0);
-        const targetTime =
-          Number.isFinite(bufferDuration) && bufferDuration > 0.25
-            ? previewTimelineTime % bufferDuration
-            : previewTimelineTime;
-
-        if (video.paused || !musicPreviewBufferRef.current) {
+        const clip = timeline[activeTimelineIndex];
+        const window = getTimelineClipWindow(clip);
+        const musicTime = getPreviewMusicTime(previewTimelineTime);
+        if (video.paused || video.seeking || buffering || renderedOutputUrl ||
+            previewTimelineTime >= outputTimelineDuration ||
+            !isStudioSourceClockCurrent(video, { activeVideo: videoRef.current, url: clip?.url,
+              start: window.start, end: window.end, hasNext: activeTimelineIndex < timeline.length - 1 }) ||
+            (musicTrack?.loop === false && musicTime >= musicPreviewBufferRef.current.duration)) {
           stopMusicPreviewBufferPlayback();
           return;
         }
-
-        const sourceState = musicPreviewSourceStateRef.current;
+        if (musicPreviewSourceRef.current) musicPreviewSourceRef.current.loop = musicTrack?.loop !== false;
+        syncMusicPreviewGain(previewTimelineTime);
+        // During synchronous promotion, the prepared decoder's play request
+        // has started but its first advancing media-clock sample may still be
+        // queued behind the editor commit. Keep the matching running song for
+        // this one transition sample. Ordinary playing/frame events below
+        // still enforce the same drift limit, and waiting/seek/Pause stop it.
+        const preparedPromotion = preparedCutHandoffRef.current?.to === video &&
+          musicPreviewSourceStateRef.current?.sourceKey === musicPreviewBufferUrlRef.current;
         const needsResync =
           !musicPreviewSourceRef.current ||
-          Math.abs(Number(sourceState.offset || 0) - targetTime) > 0.35 ||
-          Math.abs(Number(sourceState.playbackRate || 1) - Number(video.playbackRate || 1)) > 0.01;
+          (!preparedPromotion && musicBufferNeedsResync(musicPreviewSourceStateRef.current, {
+            contextTime: musicPreviewAudioContextRef.current.currentTime,
+            programmeTime: musicTime, playbackRate: 1,
+            sourceKey: musicPreviewBufferUrlRef.current,
+          }));
 
         if (needsResync) {
-          startMusicPreviewBufferPlayback(targetTime, video.playbackRate || 1).catch(error => {
+          startMusicPreviewBufferPlayback(musicTime, 1).catch(error => {
             console.log("Music preview buffer play prevented", error);
             setMusicPreviewNeedsGesture(true);
             setMusicPreviewStatus("failed");
@@ -14354,7 +14976,8 @@ const ViralClipStudio = ({
         return;
       }
 
-      const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+      const previewGain = previewMuted || !isStudioAudioTrackAudible(trackStates, "music")
+        ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
       const previewTimelineTime = clampAudioControl(
         getPreviewTimelineTime(video.currentTime || 0),
         0,
@@ -14362,28 +14985,31 @@ const ViralClipStudio = ({
         0
       );
       const fadeGain = getAudioFadeGain(
-        previewTimelineTime,
-        outputTimelineDuration,
+        getPreviewMusicTime(previewTimelineTime),
+        outputPlaybackDuration,
         musicTrack?.fadeIn,
         musicTrack?.fadeOut
       );
+      const automationGain = interpolateAutomationValue({ keyframes: audioKeyframes.music,
+        property: "volume", time: previewTimelineTime, fallback: 100 }) / 100;
       music.muted = false;
       music.defaultMuted = false;
       music.loop = musicTrack?.loop !== false;
       music.volume =
-        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) *
+        clampAudioControl(musicTrack?.volume ?? musicVolume, 0, 0.6, 0.15) *
         previewGain *
-        fadeGain;
-      music.playbackRate = video.playbackRate || 1;
+        fadeGain * automationGain * constantMusicDuckGain(musicTrack);
+      music.playbackRate = 1;
+      music.preservesPitch = true;
 
       const musicDuration = Number(music.duration || 0);
       const targetTime =
         Number.isFinite(musicDuration) && musicDuration > 0.25
           ? musicTrack?.loop !== false
-            ? previewTimelineTime % musicDuration
-            : Math.min(previewTimelineTime, Math.max(0, musicDuration - 0.05))
-          : previewTimelineTime;
-      if (Number.isFinite(targetTime) && Math.abs((music.currentTime || 0) - targetTime) > 0.35) {
+            ? getPreviewMusicTime(previewTimelineTime) % musicDuration
+            : Math.min(getPreviewMusicTime(previewTimelineTime), Math.max(0, musicDuration - 0.05))
+          : getPreviewMusicTime(previewTimelineTime);
+      if (Number.isFinite(targetTime) && Math.abs((music.currentTime || 0) - targetTime) > .35) {
         try {
           music.currentTime = targetTime;
         } catch (error) {
@@ -14395,7 +15021,7 @@ const ViralClipStudio = ({
         music.pause();
       } else {
         try {
-          const playResult = music.play();
+          const playResult = music.paused ? music.play() : null;
           if (playResult && typeof playResult.catch === "function") {
             playResult.catch(error => {
               console.log("Music preview play prevented", error);
@@ -14418,12 +15044,22 @@ const ViralClipStudio = ({
     };
 
     const pauseMusicPreview = () => {
+      // A prepared hard cut is a picture handoff, not a programme pause.
+      // Keep the same decoded bed through its synchronous commit. Waiting,
+      // seeking, operator Pause and an unprepared next source still stop it.
+      const handoff = preparedCutHandoffRef.current;
+      if (previewPlaybackIntentRef.current && handoff?.from === video) return;
       stopMusicPreviewBufferPlayback();
       music?.pause();
     };
+    const waitForSource = () => { buffering = true; pauseMusicPreview(); };
+    const sourceReady = () => { buffering = false; syncMusicPreview(); };
 
     if (video) {
       video.addEventListener("play", syncMusicPreview);
+      video.addEventListener("playing", sourceReady);
+      video.addEventListener("canplay", sourceReady);
+      video.addEventListener("waiting", waitForSource);
       video.addEventListener("pause", pauseMusicPreview);
       video.addEventListener("seeking", syncMusicPreview);
       video.addEventListener("seeked", syncMusicPreview);
@@ -14432,11 +15068,30 @@ const ViralClipStudio = ({
       video.addEventListener("ratechange", syncMusicPreview);
     }
 
+    // Speech ducking already updates its gain per animation frame. Ordinary
+    // music fades/automation need the decoded frame clock, not 4 Hz timeupdate.
+    const stopMusicFrameClock = video && !renderedOutputUrl
+      ? watchStudioAudioClock(video, () => {
+          const decodedProgramme = !isolatedMusicPreviewIntentRef.current &&
+            programmeMusicRouteRef.current.decoded && programmeMusicRouteRef.current.sourceUrl === effectiveMusicPreviewUrl &&
+            musicPreviewBufferRef.current && decodedMusicPreviewUrl === effectiveMusicPreviewUrl;
+          if (!decodedProgramme && (musicSearchMode || (musicTrack?.ducking && musicTrack.duckingMode === "speech"))) return;
+          const clip = timeline[activeTimelineIndex];
+          const window = getTimelineClipWindow(clip);
+          if (isStudioSourceClockCurrent(video, { activeVideo: videoRef.current, url: clip?.url,
+            start: window.start, end: window.end, hasNext: activeTimelineIndex < timeline.length - 1 })) {
+            syncMusicPreview();
+          }
+        }) : () => {};
     syncMusicPreview();
 
     return () => {
+      stopMusicFrameClock();
       if (video) {
         video.removeEventListener("play", syncMusicPreview);
+        video.removeEventListener("playing", sourceReady);
+        video.removeEventListener("canplay", sourceReady);
+        video.removeEventListener("waiting", waitForSource);
         video.removeEventListener("pause", pauseMusicPreview);
         video.removeEventListener("seeking", syncMusicPreview);
         video.removeEventListener("seeked", syncMusicPreview);
@@ -14444,7 +15099,15 @@ const ViralClipStudio = ({
         video.removeEventListener("loadedmetadata", syncMusicPreview);
         video.removeEventListener("ratechange", syncMusicPreview);
       }
-      stopMusicPreviewBufferPlayback();
+      const preparedCut = previewPlaybackIntentRef.current && preparedCutHandoffRef.current?.from === video;
+      const samePlayingSource = previewPlaybackIntentRef.current && video === videoRef.current &&
+        !video?.paused && !video?.seeking;
+      // Fader/fade/bus edits replace listeners, not the running song. The new
+      // listener still validates source identity/readiness and the 80ms clock
+      // guard; Pause, seeking, replacement and unmount retain their stop paths.
+      if (!preparedCut && !samePlayingSource) {
+        stopMusicPreviewBufferPlayback();
+      }
       music?.pause();
     };
   }, [
@@ -14461,22 +15124,36 @@ const ViralClipStudio = ({
     activeTimelineIndex,
     timeline,
     selectedClip,
+    renderedOutputUrl,
+    trackStates,
+    audioKeyframes.music,
+    decodedMusicPreviewUrl,
+    previewOutputTimeMap,
+    outputPlaybackDuration,
   ]);
 
   // Keep the SFX lane locked to the edited output timeline during After/Split playback.
-  useEffect(() => {
+  useLayoutEffect(() => {
     const video = videoRef.current;
     if (!video || renderedOutputUrl) return undefined;
 
     const pauseTimelineEffects = () => {
+      if (previewPlaybackIntentRef.current && preparedCutHandoffRef.current?.from === video) return;
       soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
       stopSynthesizedSoundEffects();
       triggeredSoundEffectsRef.current.clear();
     };
 
     const syncSoundEffects = () => {
+      if (video !== videoRef.current) return;
+      const clip = timeline[activeTimelineIndex];
+      const window = getTimelineClipWindow(clip);
+      // An outgoing decoder can present a frame past its trim before React
+      // promotes the prepared next decoder. Do not start next-shot cues early.
+      if (!isStudioSourceClockCurrent(video, { activeVideo: videoRef.current, url: clip?.url,
+        start: window.start, end: window.end, hasNext: activeTimelineIndex < timeline.length - 1 })) return;
       const outputTime = clampNumber(
-        getPreviewTimelineTime(video.currentTime || 0),
+        getSoundEffectProgrammeTime(video.currentTime || 0),
         0,
         outputTimelineDuration,
         0
@@ -14494,25 +15171,76 @@ const ViralClipStudio = ({
         const start = Number(effect.startTime || 0);
         const duration = getSoundEffectDuration(effect);
         const elapsed = outputTime - start;
+        const route = programmeSoundEffectRoutesRef.current.get(effect.id);
+        const decoded = route?.key === studioCueSourceKey(activeProjectIdRef.current, effect) ? route : null;
+        const nearbyOnset = (effect.builtIn || decoded) && elapsed < 0 && studioCueStartPlan({
+          contextTime: soundEffectAudioContextRef.current?.currentTime || 0,
+          programmeTime: outputTime, cueStart: start, duration,
+          outputTimeMap: soundEffectGainTimeMapRef.current,
+        });
         const isActive =
           isStudioAudioTrackAudible(trackStates, "sfx") &&
-          effect.enabled !== false && elapsed >= 0 && elapsed < duration;
+          effect.enabled !== false && (elapsed >= 0 || nearbyOnset) && elapsed < duration;
         const audio = soundEffectAudioRefsRef.current.get(effect.id);
 
-        if (!isActive || video.paused) {
+        if (!isActive || video.paused || video.seeking || video.readyState < 2) {
           audio?.pause();
           if (!isActive) triggeredSoundEffectsRef.current.delete(effect.id);
           return;
         }
 
         const fadeGain = getAudioFadeGain(elapsed, duration, effect.fadeIn, effect.fadeOut);
-        if (effect.builtIn) {
+        if (effect.builtIn || decoded) {
+          audio?.pause(); // One route per cue; never double-play the HTML decoder.
+          const playing = soundEffectTimelineGainsRef.current.get(effect.id);
+          if (playing) {
+            const timeMap = soundEffectGainTimeMapRef.current;
+            if (playing.scheduledGain && playing.outputTimeMap !== timeMap) {
+              playing.scheduledGain = scheduleStudioCueGain({
+                param: playing.gain.gain, contextTime: soundEffectAudioContextRef.current.currentTime,
+                programmeStart: outputTime, programmeEnd: start + duration,
+                outputTimeMap: timeMap, keyframes: audioKeyframes.sfx,
+                baseGain: clampAudioControl(effect.volume, 0, 1, 0.8) * previewGain,
+              });
+              playing.outputTimeMap = timeMap;
+              playing.scheduledRate = scheduleStudioCueRate({ param: playing.source.playbackRate,
+                contextTime: soundEffectAudioContextRef.current.currentTime, programmeStart: outputTime,
+                programmeEnd: start + duration, outputTimeMap: timeMap });
+              if (!playing.scheduledGain) playing.gain.gain.cancelScheduledValues?.(
+                soundEffectAudioContextRef.current.currentTime);
+            }
+            // The cue's own fades are already embedded in its shared PCM.
+            // Apply only the live bus/fader gain, once, on each decoded frame.
+            if (!playing.scheduledGain) {
+              playing.gain.gain.value = clampAudioControl(effect.volume, 0, 1, 0.8) *
+                previewGain * sfxAutomationGain;
+            }
+            if (!playing.scheduledRate) playing.source.playbackRate.setValueAtTime(video.playbackRate || 1,
+              soundEffectAudioContextRef.current?.currentTime || 0);
+          }
           if (!triggeredSoundEffectsRef.current.has(effect.id)) {
+            let cueBuffer = null;
+            if (decoded) {
+              const key = JSON.stringify([effect.trimStart, duration, effect.fadeIn, effect.fadeOut]);
+              cueBuffer = decoded.cues.get(key);
+              if (!cueBuffer) {
+                cueBuffer = createStudioCueBuffer(ensureSoundEffectAudioContext(), decoded.decoded, effect);
+                if (!cueBuffer) return;
+                if (decoded.cues.size >= 8) decoded.cues.clear();
+                decoded.cues.set(key, cueBuffer);
+              }
+            }
             triggeredSoundEffectsRef.current.add(effect.id);
             void playBuiltInSoundEffect(
-              { ...effect, volume: Number(effect.volume || 0.8) * sfxAutomationGain },
-              elapsed
-            ).catch(error => {
+              effect,
+              elapsed,
+              video.playbackRate || 1,
+              true,
+              cueBuffer
+            ).then(started => {
+              if (!started) triggeredSoundEffectsRef.current.delete(effect.id);
+            }).catch(error => {
+              triggeredSoundEffectsRef.current.delete(effect.id);
               console.log("Sound effect playback prevented", error);
             });
           }
@@ -14527,7 +15255,13 @@ const ViralClipStudio = ({
           fadeGain *
           sfxAutomationGain;
         audio.playbackRate = video.playbackRate || 1;
-        if (Math.abs(Number(audio.currentTime || 0) - targetTime) > 0.18) {
+        // Export resamples SFX against programme time; recorded voiceover
+        // uses pitch-preserving time stretch instead.
+        audio.preservesPitch = effect.kind === "voiceover";
+        // A paused cue is starting a new source-clock anchor (including a shot
+        // boundary). The continuous-play drift allowance must not retain its
+        // old offset on resume.
+        if (Math.abs(Number(audio.currentTime || 0) - targetTime) > (audio.paused ? .001 : .18)) {
           try {
             audio.currentTime = targetTime;
           } catch (error) {
@@ -14538,20 +15272,42 @@ const ViralClipStudio = ({
       });
     };
 
+    const restartTimelineEffects = () => {
+      pauseTimelineEffects();
+      syncSoundEffects();
+    };
+    const reanchorTimelineEffects = () => {
+      if (video !== videoRef.current || video.paused || video.seeking ||
+          isolatedMusicPreviewIntentRef.current) return;
+      // Cancel pending starts and resume audible cues from the new anchor,
+      // including imported buffers. Keep their original PCM/fades/envelopes.
+      soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
+      stopSynthesizedSoundEffects(musicPreviewSourceStateRef.current?.startedAt);
+      triggeredSoundEffectsRef.current.clear();
+      syncSoundEffects();
+    };
+    video.addEventListener("studio-audio-clock-resync", reanchorTimelineEffects);
     video.addEventListener("play", syncSoundEffects);
     video.addEventListener("timeupdate", syncSoundEffects);
-    video.addEventListener("seeking", syncSoundEffects);
-    video.addEventListener("seeked", syncSoundEffects);
+    video.addEventListener("seeking", pauseTimelineEffects);
+    video.addEventListener("waiting", pauseTimelineEffects);
+    video.addEventListener("playing", syncSoundEffects);
+    video.addEventListener("seeked", restartTimelineEffects);
     video.addEventListener("ratechange", syncSoundEffects);
     video.addEventListener("pause", pauseTimelineEffects);
     video.addEventListener("ended", pauseTimelineEffects);
+    const stopFrameClock = watchStudioAudioClock(video, syncSoundEffects);
     syncSoundEffects();
 
     return () => {
+      stopFrameClock();
+      video.removeEventListener("studio-audio-clock-resync", reanchorTimelineEffects);
       video.removeEventListener("play", syncSoundEffects);
       video.removeEventListener("timeupdate", syncSoundEffects);
-      video.removeEventListener("seeking", syncSoundEffects);
-      video.removeEventListener("seeked", syncSoundEffects);
+      video.removeEventListener("seeking", pauseTimelineEffects);
+      video.removeEventListener("waiting", pauseTimelineEffects);
+      video.removeEventListener("playing", syncSoundEffects);
+      video.removeEventListener("seeked", restartTimelineEffects);
       video.removeEventListener("ratechange", syncSoundEffects);
       video.removeEventListener("pause", pauseTimelineEffects);
       video.removeEventListener("ended", pauseTimelineEffects);
@@ -14584,8 +15340,8 @@ const ViralClipStudio = ({
         0
       );
       const fadeGain = getAudioFadeGain(
-        previewTimelineTime,
-        outputTimelineDuration,
+        getPreviewMusicTime(previewTimelineTime),
+        outputPlaybackDuration,
         musicTrack?.fadeIn,
         musicTrack?.fadeOut
       );
@@ -14597,24 +15353,32 @@ const ViralClipStudio = ({
           fallback: 100,
         }) / 100;
       music.volume =
-        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) *
+        clampAudioControl(musicTrack?.volume ?? musicVolume, 0, 0.6, 0.15) *
         baseGain *
         fadeGain *
-        automationGain;
+        automationGain * constantMusicDuckGain(musicTrack);
       return;
     }
 
-    const analyser = speechAnalyserRef.current?.analyser || startSpeechDetection();
-    if (!analyser) return;
+    const analyser = startSpeechDetection();
+    if (!analyser && !voiceovers.length) return;
 
-    let lastDuckedVolume = music.volume;
+    let lastDuckGain = 1;
     const duckingStrength = musicTrack.duckingStrength ?? 0.4;
-    const baseVolume = clampAudioControl(musicTrack.volume ?? musicVolume, 0.05, 0.6, 0.15);
+    const baseVolume = clampAudioControl(musicTrack.volume ?? musicVolume, 0, 0.6, 0.15);
     const baseGain = previewMuted || !isStudioAudioTrackAudible(trackStates, "music")
       ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
     const maxMusicVol = baseVolume * baseGain;
 
     const duckLoop = () => {
+      if (preparedSpeechDuckRef.current) {
+        // The verified post-retime voice bus supplies the final compressor's
+        // sample-clock gain. Do not overwrite it with the legacy FFT estimate.
+        syncMusicPreviewGain();
+        speechDetectionRafRef.current = requestAnimationFrame(duckLoop);
+        return;
+      }
+      if (speechAnalyserRef.current?.media !== videoRef.current) startSpeechDetection();
       const speechEnergy = getSpeechEnergyLevel();
       const previewTimelineTime = clampAudioControl(
         getPreviewTimelineTime(videoRef.current?.currentTime || 0),
@@ -14623,8 +15387,10 @@ const ViralClipStudio = ({
         0
       );
       const fadeGain = getAudioFadeGain(
-        previewTimelineTime,
-        outputTimelineDuration,
+        musicPreviewSourceRef.current && musicPreviewSourceStateRef.current
+          ? musicBufferPosition(musicPreviewSourceStateRef.current, musicPreviewAudioContextRef.current.currentTime)
+          : getPreviewMusicTime(previewTimelineTime),
+        outputPlaybackDuration,
         musicTrack?.fadeIn,
         musicTrack?.fadeOut
       );
@@ -14636,12 +15402,18 @@ const ViralClipStudio = ({
           fallback: 100,
         }) / 100;
       // Smooth transition: target volume inversely proportional to speech energy
-      const targetVolume =
-        maxMusicVol * fadeGain * automationGain * (1 - speechEnergy * duckingStrength);
-      // Smooth ramp (0.08 = ~60ms smoothing)
-      const smoothed = lastDuckedVolume + (targetVolume - lastDuckedVolume) * 0.08;
-      music.volume = clampAudioControl(smoothed, 0, 0.6, 0.02);
-      lastDuckedVolume = music.volume;
+      // Smooth only speech detection. Smoothing the whole mix delays faders,
+      // automation and the output-clock fade, even when no speech is present.
+      const targetDuckGain = 1 - speechEnergy * duckingStrength;
+      const smoothedDuckGain = lastDuckGain + (targetDuckGain - lastDuckGain) * 0.08;
+      music.volume = clampAudioControl(maxMusicVol * fadeGain * automationGain * smoothedDuckGain, 0, 0.6, 0);
+      if (musicPreviewSourceRef.current && musicPreviewDuckGainNodeRef.current) {
+        // Keep the scheduled sample-clock fade independent of frame-driven
+        // speech attenuation. Updating one parameter must not cancel the other.
+        musicPreviewDuckGainNodeRef.current.gain.value = smoothedDuckGain;
+        syncMusicPreviewGain(previewTimelineTime);
+      }
+      lastDuckGain = smoothedDuckGain;
       speechDetectionRafRef.current = requestAnimationFrame(duckLoop);
     };
 
@@ -14662,11 +15434,14 @@ const ViralClipStudio = ({
     musicTrack?.fadeIn,
     musicTrack?.fadeOut,
     outputTimelineDuration,
+    outputPlaybackDuration,
     musicVolume,
     previewMuted,
     previewVolume,
     audioKeyframes.music,
+    muteOriginalAudio,
     trackStates,
+    voiceovers,
   ]);
 
   const addTextOverlay = (preset = "headline", content = "") => {
@@ -15310,6 +16085,30 @@ const ViralClipStudio = ({
     setComparisonMode("after");
     setTimelineDockExpanded(true);
     setStudioActionMessage(`“${asset.name}” added to the end of your sequence. Select it to trim or split.`);
+  };
+
+  const replaceActiveTimelineSource = asset => {
+    const occurrence = timeline[activeTimelineIndex];
+    const duration = getTimelineClipWindow(occurrence).duration;
+    if (!occurrence || !asset?.storagePath || !asset.url ||
+        asset.status !== "ready" ||
+        !["", "video"].includes(asset.mediaType || asset.type || "") || Number(asset.duration) < duration) {
+      setMediaImportMessage("Choose a saved video long enough for the selected clip.");
+      return;
+    }
+    const start = Math.max(0, Math.min(Number(occurrence.startRequest || 0), Number(asset.duration) - duration));
+    const replace = clip => clip.id === occurrence.id ? {
+      ...clip, sourceClipId: asset.id, sourceMediaId: asset.id, name: asset.name,
+      url: asset.url, storagePath: asset.storagePath, sourceStoragePath: asset.storagePath,
+      contentHash: asset.contentHash || null, startRequest: start, endRequest: start + duration,
+      start, end: start + duration, duration,
+    } : clip;
+    pendingHistoryBaselineRef.current = cloneSnapshot(getEditorSnapshot());
+    setTimeline(current => current.map(replace));
+    setOrderedClips(current => current.map(replace));
+    setSelectedClip(current => current ? replace(current) : current);
+    setProjectSaveState("unsaved");
+    setStudioActionMessage(`Selected clip now uses “${asset.name}”. Its timeline duration and effects are preserved.`);
   };
 
   const addProjectMediaAsBRoll = asset => {
@@ -16102,6 +16901,7 @@ const ViralClipStudio = ({
     }
 
     if (isBackgroundSoundPreviewing || !music.paused) {
+      isolatedMusicPreviewIntentRef.current = false;
       backgroundSoundPreviewSuppressedRef.current = true;
       stopMusicPreviewBufferPlayback();
       music.pause();
@@ -16113,6 +16913,8 @@ const ViralClipStudio = ({
     }
 
     backgroundSoundPreviewSuppressedRef.current = false;
+    isolatedMusicPreviewIntentRef.current = true;
+    stopMusicPreviewBufferPlayback();
 
     const sourceApplied = applySafeMediaSource(music, effectiveMusicPreviewUrl);
     if (!sourceApplied) {
@@ -16142,7 +16944,7 @@ const ViralClipStudio = ({
     );
     music.loop = musicTrack?.loop !== false;
     music.volume =
-      clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) *
+      clampAudioControl(musicTrack?.volume ?? musicVolume, 0, 0.6, 0.15) *
       clampAudioControl(previewVolume, 0, 1, 1) *
       fadeGain;
 
@@ -16701,10 +17503,39 @@ const ViralClipStudio = ({
 
   return createPortal(
     <div className="viral-studio-overlay ap-dashboard-redesign">
-      <StudioVoiceoverPreview takes={voiceovers} videoRef={videoRef}
-        getTimelineTime={getPreviewTimelineTime} activeClip={activeTimelineIndex}
+      <StudioVoiceoverPreview ref={preparedVoiceBusRef} takes={voiceovers} videoRef={videoRef}
+        getTimelineTime={getSoundEffectProgrammeTime} activeClip={activeTimelineIndex}
+        getAudioContext={ensureSoundEffectAudioContext}
+        projectId={projectId} outputTimeMap={previewOutputTimeMap}
+        loadPreparedBus={!addHook && !silenceRemoval && !speakerStackPreviewIsLive
+          ? (input, context, signal) => loadStudioVoiceBus({ input, context, signal,
+            apiBase: API_BASE_URL, getToken: getMediaAuthToken }) : undefined}
+        onPreparation={status => {
+          if (status === 'loading') {
+            if (previewPlaybackIntentRef.current) pauseSynchronizedPreview();
+            setStudioActionMessage('Preparing recorded speech for this edit…');
+          } else if (status === 'ready') setStudioActionMessage('Recorded-speech preview is ready.');
+        }}
+        preparedDucking={{ enabled: !!(musicTrack?.ducking && musicTrack.duckingMode === 'speech' &&
+          muteOriginalAudio && voiceoverTrackAudible(trackStates)), strength: musicTrack?.duckingStrength ?? .4 }}
+        onPreparedDucking={value => {
+          preparedSpeechDuckRef.current = value; preparedSpeechDuckClockRef.current = '';
+          const control = preparedSpeechDuckSourceRef.current;
+          if (control) { try { control.stop(); } catch (_) {} control.disconnect(); preparedSpeechDuckSourceRef.current = null; }
+          const param = musicPreviewDuckGainNodeRef.current?.gain;
+          if (param) { param.cancelScheduledValues(musicPreviewAudioContextRef.current.currentTime); param.value = 1; }
+          if (value) syncMusicPreviewGain();
+        }}
+        getOutputPlan={(context, programmeTime) => {
+          const state = musicPreviewSourceRef.current && musicPreviewSourceStateRef.current;
+          if (addMusic && programmeMusicRouteRef.current.decoded && !state) return null;
+          const when = Math.max(context.currentTime + .01, state?.startedAt || 0);
+          const offset = state ? musicBufferPosition(state, when) : getPreviewMusicTime(programmeTime) + .01;
+          return { when, offset: Math.round(offset*context.sampleRate)/context.sampleRate };
+        }}
         muted={previewMuted || !voiceoverTrackAudible(trackStates)} volume={previewVolume}
         automationKeyframes={audioKeyframes.voiceover}
+        onAnalyser={analyser => { voiceoverSpeechAnalyserRef.current = analyser; }}
         renderedOutputUrl={renderedOutputUrl} onError={setStudioActionMessage} />
       <div
         className={`viral-studio-container hook-broll-only-mode studio-mode-${workspaceMode} ${
@@ -16736,7 +17567,7 @@ const ViralClipStudio = ({
               onCancel();
           }}
         />
-        {!renderedOutput?.url && renderRecoveryPanel}
+        {(!renderedOutput?.url || renderRecoveryNeedsAttention) && renderRecoveryPanel}
 
         {commandPaletteOpen ? (
           <div className="studio-command-backdrop" onMouseDown={() => setCommandPaletteOpen(false)}>
@@ -16870,6 +17701,21 @@ const ViralClipStudio = ({
                 >
                   Duplicate
                 </button>
+              <button type="button" className="studio-project-backup" disabled={projectSaveState === "saving"}
+                onClick={async () => {
+                  const saved = await persistProjectSnapshot();
+                  if (!saved) return;
+                  // Export only this ordinary editable record. Authentication,
+                  // other projects and render-recovery session state stay out.
+                  const backup = { id: saved.id, name: saved.name, createdAt: saved.createdAt,
+                    snapshot: saved.snapshot, versions: saved.versions || [] };
+                  const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], {type:"application/json"}));
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = `${saved.name.replace(/[^a-zA-Z0-9_-]+/g, "-")}.autopromote.json`;
+                  document.body.appendChild(link); link.click(); link.remove();
+                  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                }}>Download project backup</button>
               </div>
               <small className={`studio-project-save-state is-${projectSaveState}`}>
                 {projectSaveState === "saved"
@@ -17135,7 +17981,8 @@ const ViralClipStudio = ({
               ) : null}
               <div className="studio-media-bin__library" data-testid="project-media-library">
                 {visibleProjectMedia.map(item => {
-                  const ready = item.status === "ready" && !!item.storagePath && Number(item.duration) > 0;
+                  const ready = ["", "video"].includes(item.mediaType || item.type || "") &&
+                    item.status === "ready" && !!item.storagePath && Number(item.duration) > 0;
                   const selectedAsCamera = selectedCameraMediaIds.includes(item.id);
                   return (
                     <article key={item.id} className={`studio-media-card is-${item.status || "existing"}`}>
@@ -17151,7 +17998,8 @@ const ViralClipStudio = ({
                       <div className="studio-media-card__body">
                         <strong title={item.name}>{item.name}</strong>
                         <small>
-                          {item.duration > 0 ? `${Number(item.duration).toFixed(1)}s` : "Duration loading"}
+                          {(item.mediaType || item.type) === "image" ? "Image" :
+                            item.duration > 0 ? `${Number(item.duration).toFixed(1)}s` : "Duration loading"}
                           {item.isPrimary ? " · Original" : ""}
                         </small>
                         <small className={`studio-media-card__status is-${item.status || "existing"}`}>
@@ -17183,6 +18031,10 @@ const ViralClipStudio = ({
                         </button>
                         <button type="button" disabled={!ready} onClick={() => addProjectMediaAsBRoll(item)}>
                           Add as B-roll
+                        </button>
+                        <button type="button" disabled={!ready || Number(item.duration) < getTimelineClipWindow(timeline[activeTimelineIndex]).duration}
+                          onClick={() => replaceActiveTimelineSource(item)}>
+                          Replace selected clip
                         </button>
                         <button
                           type="button"
@@ -17456,6 +18308,20 @@ const ViralClipStudio = ({
                   </button>
                 ))}
               </details>
+              <StudioLaunchTemplatePanel projectId={projectId} media={projectMedia} instance={creativeTemplateInstance} onApply={snapshot => {
+                // A new authored graph must immediately stop displaying the
+                // preceding finished movie, including recovery still in flight.
+                onEditInvalidated?.();
+                previewPlaybackIntentRef.current = false;
+                videoRef.current?.pause();
+                setIsPreviewPaused(true);
+                pendingHistoryBaselineRef.current = cloneSnapshot(getEditorSnapshot());
+                applyEditorSnapshot(snapshot);
+                setProjectSaveState("unsaved");
+                setComparisonMode("after");
+                setTimelineDockExpanded(true);
+                setStudioActionMessage("Cinematic launch applied as editable clips, titles, keyframes and sound.");
+              }} />
             </section>
 
             <div className="studio-project-rail__footer">
@@ -17514,6 +18380,7 @@ const ViralClipStudio = ({
                   className="comparison-play-button"
                   onClick={toggleComparisonPlayback}
                   aria-label={isPreviewPaused ? "Play comparison" : "Pause comparison"}
+                  disabled={isPreviewPaused && projectSourcesRefreshing}
                 >
                   <span aria-hidden="true">{isPreviewPaused ? "▶" : "Ⅱ"}</span>
                 </button>
@@ -17771,22 +18638,38 @@ const ViralClipStudio = ({
                     <span className="preview-version-label is-after">
                       {renderedOutputUrl ? "Rendered" : "After"}
                     </span>
-                    <video
-                      ref={videoRef}
+                    {[0, 1, 2].map(slot => <video
+                      key={slot}
+                      ref={element => { programmeVideoSlotsRef.current[slot] = element; }}
                       crossOrigin="anonymous"
-                      data-testid="studio-after-video"
+                      data-testid={slot === activeProgrammeSlot ? "studio-after-video"
+                        : slot === (activeProgrammeSlot + 1) % 3 ? "studio-next-video" : "studio-later-video"}
+                      muted={slot !== activeProgrammeSlot}
                       className="studio-video main-video-frame-preview"
                       playsInline
                       preload="auto"
-                      onLoadStart={() => setIsAfterPreviewReady(false)}
+                      onLoadStart={event => {
+                        if (event.currentTarget === videoRef.current) setIsAfterPreviewReady(false);
+                      }}
                       onLoadedMetadata={event => {
                         const media = event.currentTarget;
+                        if (media !== videoRef.current) return;
                         if (media.videoWidth > 0 && media.videoHeight > 0) {
                           setProgrammeMediaAspectRatio(media.videoWidth / media.videoHeight);
                         }
                       }}
-                      onLoadedData={() => setIsAfterPreviewReady(true)}
-                      onCanPlay={() => {
+                      onLoadedData={event => {
+                        const media = event.currentTarget;
+                        if (media !== videoRef.current) return;
+                        if (media.videoWidth > 0 && media.videoHeight > 0)
+                          setProgrammeMediaAspectRatio(media.videoWidth / media.videoHeight);
+                        setIsAfterPreviewReady(true);
+                      }}
+                      onCanPlay={event => {
+                        if (event.currentTarget !== videoRef.current) return;
+                        const media = event.currentTarget;
+                        if (media.videoWidth > 0 && media.videoHeight > 0)
+                          setProgrammeMediaAspectRatio(media.videoWidth / media.videoHeight);
                         setIsAfterPreviewReady(true);
                         // A source switch can reject play() while its decoder loads.
                         // Retry once playable, unless the creator has paused.
@@ -17794,10 +18677,11 @@ const ViralClipStudio = ({
                           safePlayMediaElement(videoRef.current);
                         }
                       }}
-                      onError={() => {
+                      onError={event => {
+                        if (event.currentTarget !== videoRef.current) return;
                         if (renderedOutputUrl) {
-                          onEditInvalidated?.();
-                          setStudioActionMessage("The finished preview is unavailable. Your editable source is still loaded; render again to create a new export.");
+                          onRenderedPreviewError?.();
+                          setStudioActionMessage("The finished preview could not load. Retry access to the completed render; your edit and finished job are retained.");
                           return;
                         }
                         const path = currentTimelineClip?.sourceStoragePath || currentTimelineClip?.storagePath;
@@ -17806,7 +18690,9 @@ const ViralClipStudio = ({
                           void refreshSourceUrlByPath(path);
                         }
                       }}
-                      onSeeked={confirmAfterPreviewFrame}
+                      onSeeked={event => {
+                        if (event.currentTarget === videoRef.current) confirmAfterPreviewFrame(event);
+                      }}
                       style={{
                         display: "none",
                         objectFit: previewProgrammeFit,
@@ -17840,7 +18726,7 @@ const ViralClipStudio = ({
                         transition:
                           "width 180ms ease, transform 150ms linear, opacity 160ms linear, filter 160ms linear",
                       }}
-                    />
+                    />)}
                     <SafeVideo
                       ref={subjectProgrammeVideoRef}
                       src={getSafeMediaSource(subjectProgrammePreview?.preview.url)}
@@ -17856,7 +18742,7 @@ const ViralClipStudio = ({
                     />
                     <SafeVideo
                       ref={speakerStackTopVideoRef}
-                      src={speakerStackTopSource?.source}
+                      src={prepareSpeakerStackMedia ? speakerStackTopSource?.source : undefined}
                       muted
                       playsInline
                       preload="auto"
@@ -17867,7 +18753,7 @@ const ViralClipStudio = ({
                     />
                     <SafeVideo
                       ref={speakerStackBottomVideoRef}
-                      src={speakerStackBottomSource?.source}
+                      src={prepareSpeakerStackMedia ? speakerStackBottomSource?.source : undefined}
                       muted
                       playsInline
                       preload="auto"
@@ -17878,7 +18764,7 @@ const ViralClipStudio = ({
                     />
                     <SafeVideo
                       ref={speakerStackThirdVideoRef}
-                      src={speakerStackThirdSource?.source}
+                      src={prepareSpeakerStackMedia ? speakerStackThirdSource?.source : undefined}
                       muted
                       playsInline
                       preload="auto"
@@ -17889,7 +18775,7 @@ const ViralClipStudio = ({
                     />
                     <SafeVideo
                       ref={speakerStackFourthVideoRef}
-                      src={speakerStackFourthSource?.source}
+                      src={prepareSpeakerStackMedia ? speakerStackFourthSource?.source : undefined}
                       muted
                       playsInline
                       preload="auto"
@@ -17900,7 +18786,7 @@ const ViralClipStudio = ({
                     />
                     <SafeVideo
                       ref={sourceSplitAlternateVideoRef}
-                      src={getSafeMediaSource(currentTimelineClip?.url || videoUrl)}
+                      src={prepareSourceAlternateMedia ? getSafeMediaSource(currentTimelineClip?.url || videoUrl) : undefined}
                       muted
                       playsInline
                       preload="auto"
@@ -17917,6 +18803,7 @@ const ViralClipStudio = ({
                         creatorPreview
                       )}`}
                       aria-label="Edited programme monitor"
+                      aria-busy={pausedSourceFrame?.status === "loading"}
                       style={{
                         position: "absolute",
                         top:
@@ -17960,6 +18847,12 @@ const ViralClipStudio = ({
                             : "0",
                       }}
                     />
+                    {isPreviewPaused && pausedSourceFrame && pausedSourceFrame.status !== "accurate" && (
+                      <small role="status" style={{ position: "absolute", bottom: 8, left: 8, zIndex: 12,
+                        padding: "3px 6px", background: "#08080ddd", color: "#ddd", pointerEvents: "none" }}>
+                        {pausedSourceFrame.status === "loading" ? "Preparing paused frame…" : "Accurate paused frame unavailable"}
+                      </small>
+                    )}
                     {comparisonMode !== "before" && !renderedOutputUrl ? (
                       <StudioCreatorPreviewLayer
                         value={creatorPreview}
@@ -18077,20 +18970,6 @@ const ViralClipStudio = ({
                         <span />
                         <span />
                       </div>
-                    ) : null}
-                    {previewJoinOpacity > 0 &&
-                    ["soft_dip", "energy_flash"].includes(previewJoinTransition) ? (
-                      <div
-                        className={`join-transition-preview is-${previewJoinTransition}`}
-                        style={{
-                          opacity: Math.min(
-                            previewJoinOpacity,
-                            previewJoinTransition === "soft_dip" ? 0.42 : 0.58
-                          ),
-                        }}
-                        aria-hidden="true"
-                        data-testid="join-transition-preview"
-                      />
                     ) : null}
                     {shouldShowWatermarkCleanupOnVideo ? (
                       <img
@@ -18486,16 +19365,18 @@ const ViralClipStudio = ({
                                     : overlay.shadow === "strong"
                                       ? "0 4px 14px rgba(0,0,0,.95), 0 1px 2px rgba(0,0,0,1)"
                                       : "0 3px 10px rgba(0,0,0,.72)",
-                                zIndex: isFullscreen ? 300 + index : 100 + index,
+                                // Canvas coverage changes geometry, not layer
+                                // priority. Export uses this same saved stack.
+                                zIndex: 100 + index,
                                 opacity: overlayMotion.opacity * titlePose.opacity,
                                 mixBlendMode: overlay.blendMode || "normal",
                                 filter: isMediaOverlay
                                   ? [
                                       overlay.layerShadow?.enabled
-                                        ? `drop-shadow(${Number(overlay.layerShadow.x || 0)}px ${Number(overlay.layerShadow.y || 10)}px ${Number(overlay.layerShadow.blur || 18)}px color-mix(in srgb, ${overlay.layerShadow.color || "#000000"} ${Math.round(Number(overlay.layerShadow.opacity ?? 0.55) * 100)}%, transparent))`
+                                        ? `drop-shadow(${Number(overlay.layerShadow.x || 0)}px ${Number(overlay.layerShadow.y ?? 10)}px ${Number(overlay.layerShadow.blur ?? 18)}px color-mix(in srgb, ${overlay.layerShadow.color || "#000000"} ${Math.round(Number(overlay.layerShadow.opacity ?? 0.55) * 100)}%, transparent))`
                                         : "",
                                       overlay.glow?.enabled
-                                        ? `drop-shadow(0 0 ${Number(overlay.glow.radius || 16)}px color-mix(in srgb, ${overlay.glow.color || "#8b5cf6"} ${Math.round(Number(overlay.glow.intensity ?? 0.5) * 100)}%, transparent))`
+                                        ? `drop-shadow(0 0 ${Number(overlay.glow.radius ?? 16)}px color-mix(in srgb, ${overlay.glow.color || "#8b5cf6"} ${Math.round(Number(overlay.glow.intensity ?? 0.5) * 100)}%, transparent))`
                                         : "",
                                       Number(overlay.blur || 0) > 0
                                         ? `blur(${Number(overlay.blur)}px)`
@@ -18541,6 +19422,8 @@ const ViralClipStudio = ({
                                 if (comparisonMode !== "split") setActiveOverlayId(overlay.id);
                               }}
                             >
+                              <StudioLayerMask mask={overlay.mask} cropX={overlayMotion.cropX}
+                                cropY={overlayMotion.cropY} title={isStyledTitle} stageRef={phoneFrameRef} />
                               {overlay.type === "text" ? (
                                 overlay.bRollPlaceholder ? (
                                   <div
@@ -18582,10 +19465,10 @@ const ViralClipStudio = ({
                                         ? "fill"
                                         : overlay.mediaFit || (isFullscreen ? "cover" : "contain"),
                                     borderRadius: isFullscreen ? "0" : frameRadius,
-                                    boxShadow:
-                                      !isFullscreen && overlay.shadow !== "none"
-                                        ? "0 16px 36px rgba(0, 0, 0, 0.42)"
-                                        : "none",
+                                    // Authored media shadows use layerShadow above.
+                                    // An absent text-shadow choice must not paint a
+                                    // rectangular backing behind transparent media.
+                                    boxShadow: "none",
                                     pointerEvents: "none",
                                   }}
                                 />
@@ -18793,6 +19676,7 @@ const ViralClipStudio = ({
                           aria-label={
                             isPreviewPaused ? "Play edited preview" : "Pause edited preview"
                           }
+                          disabled={isPreviewPaused && projectSourcesRefreshing}
                         >
                           {isPreviewPaused ? "▶" : "❚❚"}
                         </button>
@@ -18801,7 +19685,7 @@ const ViralClipStudio = ({
                           type="range"
                           min={0}
                           max={Math.max(0.1, outputPlaybackDuration)}
-                          step={0.05}
+                          step={1 / Math.max(1, Number(exportSettings.fps) || 30)}
                           value={clampNumber(
                             previewPlaybackTime,
                             0,
@@ -18810,7 +19694,9 @@ const ViralClipStudio = ({
                           )}
                           onChange={event =>
                             jumpToOutputTimelineTime(
-                              Number(event.target.value || 0) * Math.max(0.01, previewSpeed)
+                              ticksToSeconds(mapOutputTickToProgrammeTick(previewOutputTimeMap,
+                                Math.min(previewOutputTimeMap.at(-1)?.outputRange.endTick || 0,
+                                  secondsToTicks(Math.max(0, Number(event.target.value || 0))))) || 0)
                             )
                           }
                           aria-label="Edited output position"
@@ -20005,7 +20891,7 @@ const ViralClipStudio = ({
                     <input
                       type="range"
                       min={0}
-                      max={(timeline[activeTimelineIndex].duration || 10) - 0.5}
+                      max={(timeline[activeTimelineIndex].sourceDuration || timeline[activeTimelineIndex].duration || 10) - 0.5}
                       step={0.1}
                       value={
                         timeline[activeTimelineIndex].startRequest !== null &&
@@ -20148,7 +21034,7 @@ const ViralClipStudio = ({
                           ? timeline[activeTimelineIndex].startRequest
                           : 0) + 0.5
                       }
-                      max={timeline[activeTimelineIndex].duration || 100}
+                      max={timeline[activeTimelineIndex].sourceDuration || timeline[activeTimelineIndex].duration || 100}
                       step={0.1}
                       value={
                         timeline[activeTimelineIndex].endRequest !== null &&
@@ -21963,6 +22849,7 @@ const ViralClipStudio = ({
                   <div className="inspector-heading-row">
                     <div>
                       <span className="panel-kicker">Live captions</span>
+                      <ProductHelpButton featureId="studio.captions" label="Captions" workspaceType="STUDIO" />
                       <h4>Make every word land before you render</h4>
                     </div>
                     <span className={`inspector-status-dot ${autoCaptions ? "is-ready" : ""}`}>
@@ -23404,6 +24291,7 @@ const ViralClipStudio = ({
                 <div className="motion-workspace-switch" role="group" aria-label="Motion workspace">
                   <button type="button" aria-pressed={motionWorkspace === "design"} onClick={() => setMotionWorkspace("design")}>Motion + sound</button>
                   <button type="button" aria-pressed={motionWorkspace === "3d"} onClick={() => setMotionWorkspace("3d")}>3D Motion</button>
+                  <ProductHelpButton featureId="studio.three_d" label="3D Motion" workspaceType="STUDIO" />
                   <button type="button" aria-pressed={motionWorkspace === "logo"} onClick={() => setMotionWorkspace("logo")}>Logo & layers</button>
                   <button type="button" aria-pressed={motionWorkspace === "smart_zoom"} onClick={() => setMotionWorkspace("smart_zoom")}>🎯 Viral Punch-Ins {activePunchZones.length ? `(${activePunchZones.length})` : ""}</button>
                   <button type="button" aria-pressed={motionWorkspace === "transform"} onClick={() => setMotionWorkspace("transform")}>Transform keyframes</button>
@@ -23637,6 +24525,8 @@ const ViralClipStudio = ({
                     overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}
                     playhead={previewTimelineTime}
                     keyframes={motionKeyframes}
+                    focusKeyframeId={focusedMotionKeyframeId}
+                    keyframesLocked={Boolean(trackStates[motionKeyframeTrack(motionTargetId)]?.locked)}
                     onSelectOverlay={setMotionTargetId}
                     onUpdateOverlay={(field, value) => {
                       if (!motionInspectorTarget) return;
@@ -23646,7 +24536,7 @@ const ViralClipStudio = ({
                     }}
                     onAddKeyframe={addMotionKeyframesAtPlayhead}
                     onUpdateKeyframe={updateMotionKeyframe}
-                    onRemoveKeyframe={id => setMotionKeyframes(current => current.filter(key => key.id !== id))}
+                    onRemoveKeyframe={removeMotionKeyframe}
                     onSeek={jumpToOutputTimelineTime}
                     showMotionPath={showMotionPath}
                     onToggleMotionPath={() => setShowMotionPath(current => !current)}
@@ -24801,25 +25691,36 @@ const ViralClipStudio = ({
                       setAudioRestoration(current => ({ ...current, [field]: value }))
                     }
                     source={audioAutomationSource}
+                    keyframesLocked={Boolean(trackStates[audioAutomationSource]?.locked)}
                     onSourceChange={setAudioAutomationSource}
                     keyframes={audioKeyframes}
                     playhead={previewTimelineTime}
                     onAddKeyframe={addAudioAutomationKeyframe}
-                    onUpdateKeyframe={(keyframeId, changes) =>
+                    onUpdateKeyframe={(keyframeId, changes) => {
+                      if (!allowTimelineTimingEdit(audioAutomationSource)) return;
                       setAudioKeyframes(current => ({
                         ...current,
                         [audioAutomationSource]: (current[audioAutomationSource] || []).map(
                           keyframe =>
                             keyframe.id === keyframeId ? { ...keyframe, ...changes } : keyframe
                         ),
-                      }))
-                    }
+                      }));
+                    }}
                     onRemoveKeyframe={removeAudioAutomationKeyframe}
                     onSeek={time => jumpToOutputTimelineTime(Number(time || 0))}
                     recording={isVoiceoverRecording}
                     onToggleRecording={() => void toggleVoiceoverRecording()}
                     voiceoverCount={voiceovers.length}
                   />
+
+                  <label className="inspector-upload-card">
+                    <strong>Import voice-over recording</strong>
+                    <input type="file" accept="audio/*" aria-label="Import voice-over recording"
+                      data-testid="voiceover-recording-input" onChange={event => {
+                        const file = event.target.files?.[0]; event.target.value = "";
+                        void importVoiceoverRecording(file);
+                      }} />
+                  </label>
 
                   {voiceovers.length > 0 && <section className="advanced-tool-section" aria-label="Voice-over takes">
                     <h5>Voice-over takes</h5>
@@ -24878,7 +25779,7 @@ const ViralClipStudio = ({
                         </span>
                         <input
                           type="range"
-                          min={5}
+                          min={0}
                           max={60}
                           step={1}
                           value={Math.round((musicTrack.volume ?? musicVolume) * 100)}
@@ -24903,6 +25804,15 @@ const ViralClipStudio = ({
                       </label>
 
                       {musicTrack.ducking ? (
+                        <>
+                        <label className="inspector-select-field">
+                          <span>Music ducking mode</span>
+                          <select aria-label="Music ducking mode" value={musicTrack.duckingMode || "speech"}
+                            onChange={event => setMusicTrackField("duckingMode", event.target.value)}>
+                            <option value="speech">Speech-aware</option>
+                            <option value="constant">Constant reduction</option>
+                          </select>
+                        </label>
                         <label className="inspector-range">
                           <span>
                             <b>Speech ducking</b>
@@ -24925,6 +25835,7 @@ const ViralClipStudio = ({
                             }
                           />
                         </label>
+                        </>
                       ) : null}
 
                       <div className="inspector-dual-range">
@@ -25080,6 +25991,21 @@ const ViralClipStudio = ({
                           </label>
                         </div>
 
+                        {activeSoundEffect.builtIn ? (
+                          <label className="inspector-select">
+                            <span>Effect sound</span>
+                            <select aria-label="Effect sound" value={activeSoundEffect.tone}
+                              onChange={event => {
+                                const preset = SOUND_EFFECT_PRESETS.find(item => item.tone === event.target.value);
+                                if (preset) updateSoundEffect(activeSoundEffect.id,
+                                  { tone: preset.tone, name: preset.name, emoji: preset.emoji });
+                              }}>
+                              {SOUND_EFFECT_PRESETS.map(preset => (
+                                <option key={preset.id} value={preset.tone}>{preset.name}</option>
+                              ))}
+                            </select>
+                          </label>
+                        ) : null}
                         <div className="inspector-time-grid sound-effect-time-grid">
                           <label>
                             <span>Start</span>
@@ -25220,6 +26146,10 @@ const ViralClipStudio = ({
                           >
                             Remove SFX
                           </button>
+                          <button type="button" data-testid="sound-effect-duplicate"
+                            onClick={() => duplicateSoundEffect(activeSoundEffect)}>
+                            Duplicate SFX
+                          </button>
                         </div>
                       </div>
                     ) : null}
@@ -25352,7 +26282,8 @@ const ViralClipStudio = ({
                           0.05,
                           Number(event.currentTarget.duration || 0) - Number(effect.trimStart || 0)
                         );
-                        if (Number.isFinite(availableDuration) && availableDuration > 0) {
+                        if (Number.isFinite(availableDuration) && availableDuration > 0 &&
+                            availableDuration < getSoundEffectDuration(effect)) {
                           updateSoundEffect(effect.id, {
                             duration: Math.min(getSoundEffectDuration(effect), availableDuration),
                           });
@@ -27324,7 +28255,7 @@ const ViralClipStudio = ({
                             </span>
                             <input
                               type="range"
-                              min={1}
+                              min={0}
                               max={60}
                               step={1}
                               value={Math.round((musicTrack?.volume ?? musicVolume) * 100)}
@@ -27565,7 +28496,17 @@ const ViralClipStudio = ({
                   </div>
                 ) : null}
               </section>
-              {renderedOutputUrl ? (
+              {onRestoreExport && !isExporting ? (
+                <label className="inspector-check-row">
+                  <span>Restore export receipt</span>
+                  <input type="file" accept="application/json,.json" aria-label="Restore export receipt"
+                    onChange={event => {
+                      const file = event.target.files?.[0]; event.target.value = "";
+                      if (file) void onRestoreExport(file, getEditorSnapshot().studioDocument);
+                    }} />
+                </label>
+              ) : null}
+              {completedOutputUrl ? (
                 <div
                   className="rendered-output-ready"
                   role="status"
@@ -27573,11 +28514,17 @@ const ViralClipStudio = ({
                 >
                   <div>
                     <strong>{renderedOutput?.captionReviewCopy ? "Caption review copy ready" : "Rendered video ready"}</strong>
-                    <span>{renderedOutput?.captionReviewCopy
+                    <span>{!previewFinishedFile ? "After is showing your editable project. The finished download is retained." : renderedOutput?.captionReviewCopy
                       ? "Draft captions are burned in for review. Correct and approve the timeline before publishing."
                       : "The finished file is loaded in After above."}</span>
                   </div>
                   <div className="rendered-output-actions">
+                    <button type="button" aria-pressed={!previewFinishedFile} onClick={() => {
+                      pauseSynchronizedPreview();
+                      setPreviewFinishedFile(current => !current);
+                    }}>
+                      {previewFinishedFile ? "Show Live Edit" : "Show Finished Video"}
+                    </button>
                     <button type="button" onClick={onDownloadRendered}>
                       Download Rendered Clip
                     </button>
@@ -28286,6 +29233,7 @@ const ViralClipStudio = ({
               onKeyDown={event => {
                 if (!["ArrowUp", "ArrowDown"].includes(event.key)) return;
                 event.preventDefault();
+                event.stopPropagation();
                 setTimelineDockHeight(current => Math.max(148, Math.min(timelineHeightLimit,
                   Math.min(current, timelineHeightLimit) + (event.key === "ArrowUp" ? 24 : -24))));
               }}
@@ -28374,6 +29322,16 @@ const ViralClipStudio = ({
                   )]
               }
               motionKeyframes={motionKeyframes}
+              frameRate={Number(exportSettings.fps) || 30}
+              onSelectMotionKeyframe={(keyId, targetId) => {
+                setFocusedMotionKeyframeId(keyId);
+                setMotionTargetId(targetId);
+                selectCreativeTool("motion");
+                setMotionWorkspace("transform");
+                setComparisonMode("after");
+              }}
+              onUpdateMotionKeyframe={updateMotionKeyframe}
+              onRemoveMotionKeyframe={removeMotionKeyframe}
               audioKeyframes={audioKeyframes}
               speedKeyframes={speedKeyframes}
               onSeek={(event, exactTime = null) => {

@@ -9,8 +9,11 @@
   margin: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(2, 6, 23, 0.96);
-  backdrop-filter: blur(10px);
+  /* This workspace covers the viewport. Sampling and blurring the dashboard
+     behind it recomposites the whole screen for every programme frame, which
+     starves software graphics. Keep the same dark chrome on an opaque surface. */
+  background: #020617;
+  backdrop-filter: none;
 }
 
 /* Creator-first frontend preview workbench. Heavy AI treatments are intentionally
@@ -2089,6 +2092,8 @@ body.dashboard-mode.viral-studio-open {
   height: min(60vh, 620px);
   flex-shrink: 0;
   position: relative;
+  /* Blend against this programme's footage, never the surrounding editor. */
+  isolation: isolate;
   overflow: hidden;
   border-radius: 20px;
   border: none !important;
@@ -2209,8 +2214,20 @@ body.dashboard-mode.viral-studio-open {
 .overlays-layer {
   position: absolute;
   inset: 0;
-  z-index: 20;
+  /* A positioned stacking group would give mixed children a transparent
+     backdrop, so their blend modes could not see the source canvas. Keep the
+     existing per-layer z order on the shared programme stacking context. */
+  z-index: auto;
   pointer-events: none;
+}
+
+.overlays-layer > .hook-preview-shade,
+.overlays-layer > .hook-preview-accent,
+.overlays-layer > .hook-preview-bars,
+.overlays-layer > .hook-preview-banner,
+.overlays-layer > .watermark-preview-cleanup,
+.overlays-layer > .silence-preview-indicator {
+  z-index: 20;
 }
 
 .hook-focus-target {
@@ -2967,11 +2984,18 @@ body.dashboard-mode.viral-studio-open {
 
 .draggable-overlay.is-media-overlay {
   padding: 0;
+  border: 0;
   background: transparent;
+  box-shadow: none;
   text-shadow: none;
   transform: translate(var(--layer-translate-x, -50%), var(--layer-translate-y, -50%))
     rotate(var(--title-rotation, 0deg)) scale(var(--title-scale, 1));
   transform-origin: var(--layer-anchor-x, 50%) var(--layer-anchor-y, 50%);
+}
+
+/* Editor selection must not subtract pixels from the authored media box. */
+.draggable-overlay.is-media-overlay.active {
+  outline: 2px solid #fb7185;
 }
 
 .draggable-overlay.is-media-overlay:active {
@@ -4940,8 +4964,9 @@ body.dashboard-mode.viral-studio-open {
   background:
     radial-gradient(circle at 8% 0%, rgba(121, 87, 255, 0.24), transparent 34rem),
     radial-gradient(circle at 94% 10%, rgba(32, 200, 222, 0.1), transparent 30rem),
-    rgba(2, 7, 14, 0.95);
-  backdrop-filter: blur(18px);
+    #02070e;
+  /* Keep the authored gradients, with no full-screen backdrop sampling. */
+  backdrop-filter: none;
 }
 
 .viral-studio-container {
@@ -7195,6 +7220,10 @@ body.dashboard-mode.viral-studio-open {
   border-color: rgba(152, 93, 255, 0.48);
   color: #fff;
   background: linear-gradient(145deg, rgba(126, 63, 237, 0.8), rgba(74, 42, 166, 0.8));
+}
+
+.studio-project-actions .studio-project-backup {
+  grid-column: 1 / -1;
 }
 
 .studio-project-save-state.is-saved {

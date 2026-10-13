@@ -13,8 +13,16 @@ vertical, square and ultrawide videos share the same geometry checks.
 Each scene can own a synthesized sound cue. Moving, duplicating, removing or
 cutting a scene also updates its cue. Standalone sounds retain their existing
 upload, trim, volume, fade and enable controls. The Sound inspector and linked
-cue editor display waveforms with seeking. The built-in palette includes sweep,
-impact, pop, click, riser, chime, reverse pull, glitch and sub drop.
+cue editor display waveforms with seeking. The standalone Sound inspector now
+exposes fifteen presets: sweep, impact, pop, click, riser, chime, reverse pull,
+glitch, sub drop, cinematic hit, airy whoosh, bass punch, metallic hit, tape stop
+and sparkle tail. Standalone built-in cues can change type while retaining their
+identity/timing/gain/fades and be duplicated as independent cues. Six new sounds
+are original deterministic synthesis, not recorded or model-generated assets.
+Preview SFX uses the worker's PCM formula and envelope. Linked motion sound
+choices retain their earlier nine-sound contract. Native history, cold recovery
+and completed-output delivery remain unqualified for this expanded scope;
+see [actual timeline, film, listening reel and limits](../reports/model-capability-runtime-v1-20261009/SOUND-EDITING-20261010.md).
 
 ## Timing and export
 

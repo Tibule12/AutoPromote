@@ -48,3 +48,11 @@ export const rippleTimelineKeys = (keys, from, to, { preserveRightState = false 
     ? [...retained, { ...lastRemoved, time: from, cut: true }].sort((left, right) => Number(left.time) - Number(right.time))
     : retained;
 };
+// Decoder metadata describes the complete source, never the edited occurrence.
+export function applyStudioClipMetadata(clip, sourceDuration, fallback = {}) {
+  if (!Number.isFinite(sourceDuration) || sourceDuration <= 0) return clip;
+  const start = clip.startRequest ?? fallback.start ?? 0;
+  const end = clip.endRequest ?? fallback.end ?? sourceDuration;
+  return { ...clip, sourceDuration, startRequest: start, endRequest: end,
+    duration: Math.max(0, end - start) };
+}

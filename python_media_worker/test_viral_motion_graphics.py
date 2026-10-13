@@ -18,11 +18,63 @@ from viral_motion_graphics import (
     PRESETS, SOUNDS, draw_motion_frame, edit_clock, motion_pose, motion_primitives,
     normalize_motion, probe, render_motion_and_sound, run, synthesize_effect, validate_design,
     generate_transparent_motion_overlay,
+    prepare_voiceover_samples,
 )
 from studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
 
 
 class MotionContractTests(unittest.TestCase):
+    def test_unit_speed_recording_preserves_the_exact_source_samples(self):
+        # A no-speed-change edit must not acquire WSOLA phase shifts.
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / 'speech-reference.wav'
+            pcm = (np.random.default_rng(19).normal(0, .08, 3 * 48000) * 32767).astype('<i2')
+            with wave.open(str(source), 'wb') as output:
+                output.setnchannels(1); output.setsampwidth(2); output.setframerate(48000); output.writeframes(pcm.tobytes())
+            effect = dict(startTime=.75, trimStart=.25, duration=2, fadeIn=0, fadeOut=0)
+            actual, start = prepare_voiceover_samples(effect, source,
+                [dict(start_time=0, end_time=3, rate=1)])
+            self.assertEqual(start, .75)
+            np.testing.assert_array_equal(actual, pcm[12000:108000].astype(np.float32) / 32768)
+
+    def test_retimed_recording_preserves_pitch_and_its_output_duration(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / 'pitch-reference.wav'
+            samples = np.arange(3 * 48000) / 48000
+            pcm = (.2 * np.sin(2 * np.pi * 440 * samples) * 32767).astype('<i2')
+            with wave.open(str(source), 'wb') as output:
+                output.setnchannels(1); output.setsampwidth(2); output.setframerate(48000); output.writeframes(pcm.tobytes())
+            effect = dict(startTime=.5, trimStart=.25, duration=2, fadeIn=0, fadeOut=0)
+            actual, start = prepare_voiceover_samples(effect, source,
+                [dict(start_time=0, end_time=3, rate=2)])
+            self.assertEqual(start, .25); self.assertEqual(len(actual), 48000)
+            spectrum = abs(np.fft.rfft(actual[2400:-2400]))
+            frequency = np.fft.rfftfreq(len(actual[2400:-2400]), 1 / 48000)[np.argmax(spectrum)]
+            self.assertLess(abs(frequency - 440), 2)
+
+    @unittest.skipUnless(shutil.which("node"), "Node required for browser audio parity")
+    def test_full_length_sound_palette_matches_worker_at_delivery_sample_rate(self):
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as temp:
+            module = Path(temp)/"sound.mjs"
+            module.write_text((root/"frontend/src/components/motion/soundDesign.js").read_text())
+            code = f'''import {{SOUND_EFFECT_PRESETS,synthesizeEffect}} from {json.dumps(module.as_uri())};
+process.stdout.write(JSON.stringify(SOUND_EFFECT_PRESETS.map(p=>{{
+const effect={{...p,fadeIn:.02,fadeOut:Math.min(.18,p.duration/3)}};
+return {{effect,pcm:Array.from(synthesizeEffect(effect,48000))}};}})));'''
+            palette = json.loads(subprocess.check_output(["node", "--input-type=module", "-e", code]))
+        self.assertEqual({p["effect"]["tone"] for p in palette}, set(SOUNDS))
+        self.assertEqual(len(palette), len(SOUNDS))
+        for preset in palette:
+            with self.subTest(tone=preset["effect"]["tone"]):
+                actual = synthesize_effect(preset["effect"], 48000)
+                np.testing.assert_allclose(actual, preset["pcm"], atol=1e-7)
+                self.assertTrue(np.isfinite(actual).all())
+                self.assertLessEqual(float(np.max(np.abs(actual))), 1)
+                self.assertGreater(float(np.mean(actual**2)), .00001)
+                self.assertEqual(actual[0], 0)
+                self.assertLess(abs(actual[-1]), .005)
+
     def test_render_endpoint_rejects_unknown_designs_before_queueing(self):
         # Execute the real HTTP handler without importing heavyweight ML models.
         tree = ast.parse((Path(__file__).parent / "main_media_server.py").read_text())

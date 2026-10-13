@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
+import ProductHelpButton from "../components/ProductHelpButton";
 import { auth } from "../firebaseClient";
 import { deleteVideo, getAllVideos, saveVideoToLocal } from "../utils/indexedDB";
 import "./IdeaVideoPanel.css";
@@ -421,6 +422,7 @@ const IdeaVideoPanel = ({ onPublish }) => {
     <div className="idea-video-panel">
       <div className="iv-header">
         <h2>Idea-to-Video Studio</h2>
+        <ProductHelpButton featureId="generation.idea_to_video" label="Idea-to-Video" workspaceType="IDEA_VIDEO" />
         <p>Draft creator-style scenes with voiceover, visuals, and captions.</p>
       </div>
 

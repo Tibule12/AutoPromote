@@ -130,6 +130,52 @@ const AutomationDots = ({ items, duration, type }) =>
     />
   ));
 
+const MotionKeyframe = ({ item, duration, frameRate, displayRate, snapping, snapTargets,
+  locked, selected, onSelect, onUpdate, onRemove }) => {
+  const drag = React.useRef(null);
+  const [pendingTime, setPendingTime] = React.useState(null);
+  const frame = displayRate / frameRate;
+  const boundedTime = (time, allowSnap = true) => {
+    let next = Math.max(0, Math.min(duration, time));
+    if (snapping && allowSnap) {
+      const nearest = (snapTargets || []).reduce((best, point) =>
+        Math.abs(point-next) < Math.abs(best-next) ? point : best, Infinity);
+      if (Math.abs(nearest-next) <= Math.max(frame, .08 * displayRate)) next = nearest;
+    }
+    return Math.max(0, Math.min(duration, Math.round(next / frame) * frame));
+  };
+  const label = `${item.property}: ${Number(item.value).toFixed(2)} at ${(item.time/displayRate).toFixed(3)}s`;
+  return <button type="button" className={`pro-motion-keyframe ${selected ? 'is-selected' : ''}`}
+    data-testid={`motion-timeline-key-${item.id}`} data-time={pendingTime ?? item.time}
+    style={{ left: percentAt(pendingTime ?? item.time, duration) }}
+    aria-label={label} aria-pressed={selected} title={`${label} · ${item.easing || 'ease_in_out'}${locked ? ' · Track locked' : ''}`}
+    onClick={event => { event.stopPropagation(); onSelect?.(item, event); }}
+    onPointerDown={event => {
+      event.stopPropagation(); if (locked || event.button !== 0) return;
+      drag.current = { x: event.clientX, time: Number(item.time), width: event.currentTarget.parentElement.getBoundingClientRect().width };
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+    }}
+    onPointerMove={event => {
+      if (!drag.current || locked) return;
+      const next = boundedTime(drag.current.time + (event.clientX-drag.current.x) / Math.max(1, drag.current.width) * duration);
+      drag.current.next = next; setPendingTime(next);
+    }}
+    onPointerUp={event => {
+      event.stopPropagation();
+      const next = drag.current?.next; drag.current = null; setPendingTime(null);
+      if (!locked && next !== undefined && Math.abs(next-Number(item.time)) > .000001) onUpdate?.(item.id, { time: next });
+      if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    }}
+    onPointerCancel={() => { drag.current = null; setPendingTime(null); }}
+    onKeyDown={event => {
+      if (!['ArrowLeft', 'ArrowRight', 'Delete', 'Backspace'].includes(event.key)) return;
+      event.preventDefault(); event.stopPropagation(); if (locked) return;
+      if (event.key === 'Delete' || event.key === 'Backspace') { onRemove?.(item.id); return; }
+      const direction = event.key === 'ArrowRight' ? 1 : -1;
+      onUpdate?.(item.id, { time: boundedTime(Number(item.time) + direction * frame * (event.shiftKey ? 10 : 1), false) });
+    }}>◆</button>;
+};
+
 const BrollClip = ({
   item,
   index,
@@ -778,6 +824,10 @@ export default function StudioProTimeline({
   adjustmentLayers,
   creativeEffects,
   motionKeyframes,
+  onSelectMotionKeyframe,
+  onUpdateMotionKeyframe,
+  onRemoveMotionKeyframe,
+  frameRate = 30,
   motionScenes = [],
   onSelectMotion,
   audioKeyframes,
@@ -827,6 +877,9 @@ export default function StudioProTimeline({
 }) {
   const scrollRef = React.useRef(null);
   const [showEmptyTracks, setShowEmptyTracks] = React.useState(false);
+  const [showMotionKeys, setShowMotionKeys] = React.useState(false);
+  const [expandedMotionTargets, setExpandedMotionTargets] = React.useState(new Set());
+  const [selectedMotionKey, setSelectedMotionKey] = React.useState(null);
   const focusedTrack = {
     reframe: "framing",
     captions: "captions",
@@ -843,6 +896,7 @@ export default function StudioProTimeline({
     moments: "video",
   }[activeTool];
   React.useEffect(() => {
+    if (showMotionKeys && selectedMotionKey) return;
     const scroll = scrollRef.current;
     const row = scroll?.querySelector(`[data-testid="pro-track-row-${focusedTrack}"]`);
     if (!row) return;
@@ -852,11 +906,14 @@ export default function StudioProTimeline({
     const top =
       row.getBoundingClientRect().top - scroll.getBoundingClientRect().top + scroll.scrollTop;
     scroll.scrollTop = Math.max(0, top - 29);
-  }, [focusedTrack]);
+  }, [focusedTrack, showMotionKeys, selectedMotionKey]);
   const safeDuration = Math.max(0.1, Number(duration || 0.1));
   // Authored edits retain their source coordinates. Only the displayed clock
   // changes with global playback speed, matching the programme and export.
   const displayRate = Number.isFinite(Number(playbackRate)) && Number(playbackRate) > 0 ? Number(playbackRate) : 1;
+  const motionTargets = ['main-video', ...(overlays || []).filter(layer => !layer.isCaption).map(layer => layer.id)]
+    .map(id => ({ id, layer: (overlays || []).find(layer => layer.id === id),
+      keys: (motionKeyframes || []).filter(key => key.targetId === id) })).filter(target => target.keys.length);
   const safeZoom = Math.max(1, Math.min(32, Number(zoom || 1)));
   const playheadRef = React.useRef(0);
   playheadRef.current = Number(playhead || 0);
@@ -884,8 +941,10 @@ export default function StudioProTimeline({
     ) * displayRate || Math.ceil(safeDuration / displayRate / safeZoom / 10 / 3600) * 3600 * displayRate;
   const tickCount = Math.min(500, Math.floor(safeDuration / tickInterval) + 1);
   const visibleWidth = `${safeZoom * 100}%`;
-  const titles = (overlays || []).filter(item => item.type === "text" && !item.isCaption);
-  const broll = (overlays || []).filter(item => item.bRollMode);
+  const isBRollLayer = item => Boolean(item.bRollMode) ||
+    (!item.isCaption && (item.type === 'image' || item.type === 'video'));
+  const titles = (overlays || []).filter(item => item.type === "text" && !item.isCaption && !isBRollLayer(item));
+  const broll = (overlays || []).filter(isBRollLayer);
   const framingItems = [...(framingCuts || [])]
     .sort((left, right) => Number(left.time || 0) - Number(right.time || 0))
     .map((cut, index, ordered) => ({
@@ -1366,6 +1425,8 @@ export default function StudioProTimeline({
             </button>
             <output aria-label="Timeline zoom level">{safeZoom}×</output>
           </div>
+          <button type="button" aria-label={showMotionKeys ? 'Hide motion keyframes' : 'Show motion keyframes'}
+            aria-pressed={showMotionKeys} onClick={() => setShowMotionKeys(current => !current)}>◆ Keyframes</button>
         </div>
       </div>
 
@@ -1684,6 +1745,36 @@ export default function StudioProTimeline({
                 </div>
               </div>
             );
+          })}
+          {showMotionKeys && motionTargets.map(target => {
+            const label = target.id === 'main-video' ? 'Source video' : target.layer?.name || target.layer?.text || 'Visual layer';
+            const track = target.id === 'main-video' ? 'video' : isBRollLayer(target.layer || {}) ? 'broll' : 'graphics';
+            const locked = !!trackStates?.[track]?.locked;
+            const expanded = expandedMotionTargets.has(target.id);
+            const properties = [...new Set(target.keys.map(key => key.property))];
+            return <React.Fragment key={target.id}>
+              <div className="pro-track-row pro-motion-target">
+                <div className="pro-track-header"><button type="button" aria-expanded={expanded}
+                  aria-label={`${expanded ? 'Collapse' : 'Expand'} ${label} keyframes`}
+                  onClick={() => setExpandedMotionTargets(current => {
+                    const next = new Set(current); next.has(target.id) ? next.delete(target.id) : next.add(target.id); return next;
+                  })}>{expanded ? '▾' : '▸'} <strong>{label}</strong></button></div>
+                <div className="pro-track-lane"><small>{target.keys.length} keys · {properties.join(', ')}</small></div>
+              </div>
+              {expanded && properties.map(property => <div key={property} className={`pro-track-row pro-motion-property ${locked ? 'is-locked' : ''}`}>
+                <div className="pro-track-header"><span>◆</span><strong>{property}</strong>{locked ? <small>Locked</small> : null}</div>
+                <div className="pro-track-lane" role="group" aria-label={`${label} ${property} keyframes`}>
+                  <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
+                  {target.keys.filter(key => key.property === property).map(key => <MotionKeyframe key={key.id}
+                    item={key} duration={safeDuration} displayRate={displayRate} frameRate={Math.max(1, Number(frameRate) || 30)}
+                    snapping={snapping} snapTargets={snapTargets} locked={locked} selected={selectedMotionKey === key.id}
+                    onUpdate={onUpdateMotionKeyframe} onRemove={onRemoveMotionKeyframe} onSelect={(item, event) => {
+                      setSelectedMotionKey(item.id); onSelectMotionKeyframe?.(item.id, item.targetId);
+                      onSeek?.(event, Number(item.time));
+                    }} />)}
+                </div>
+              </div>)}
+            </React.Fragment>;
           })}
         </div>
       </div>

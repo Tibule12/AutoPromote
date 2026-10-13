@@ -3098,6 +3098,15 @@ test("Per-platform card: TikTok blocks upload when posting cap reached", async (
   };
   await page.route("**/api/tiktok/creator_info", fulfillCreatorInfo);
   await page.route("https://api.autopromote.org/api/tiktok/creator_info", fulfillCreatorInfo);
+  await page.route("**/api/platform/status", route => route.fulfill({
+    status: 200, contentType: "application/json",
+    body: JSON.stringify({ raw: { tiktok: { connected: true } }, summary: { tiktok: { connected: true, publishReady: true } } }),
+  }));
+  let publishingRequests = 0;
+  await page.route("**/api/content/upload", route => {
+    publishingRequests += 1;
+    return route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: "Unexpected publication while capped" }) });
+  });
 
   await page.addInitScript(() => {
     try {
@@ -3111,14 +3120,19 @@ test("Per-platform card: TikTok blocks upload when posting cap reached", async (
   });
   await page.goto(getBase() + "/#/dashboard", { waitUntil: "domcontentloaded" });
   await openDashboardPublishTab(page);
-  await page.locator(".publisher-upload-dropzone input[type=file]").setInputFiles(
+  await page.getByRole("tab", { name: "Upload", exact: true }).click();
+  await page.getByLabel("Upload release media", { exact: true }).setInputFiles(
     "test/e2e/playwright/test-assets/test.mp4"
   );
-  await page.getByRole("button", { name: /Customize posts/ }).click();
+  await page.getByRole("button", { name: /Choose destinations/ }).click();
+  await page.getByRole("checkbox", { name: /TikTok/ }).check();
+  await page.getByRole("button", { name: /Customize destinations/ }).click();
   await page.waitForSelector('text=Posting cap: 2 per 24h', { timeout: 10000 });
   await page.waitForSelector('text=Posting cap reached', { timeout: 10000 });
-  await page.getByRole("button", { name: /Review publishing/ }).click();
-  await expect(page.getByRole("button", { name: /Publish now/ })).toBeDisabled();
+  await expect(page.getByRole("button", { name: /Continue to Delivery/ })).toBeDisabled();
+  await page.getByRole("button", { name: /^5\s*Review$/ }).click();
+  await expect(page.getByRole("region", { name: "Review release", exact: true })).toHaveCount(0);
+  expect(publishingRequests).toBe(0);
 });
 
 test("Per-platform card: TikTok preview and upload", async ({ page }) => {

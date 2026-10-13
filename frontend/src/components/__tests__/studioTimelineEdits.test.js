@@ -1,4 +1,4 @@
-import { rippleTimedItems, rippleTimelineKeys } from "../studioTimelineEdits";
+import { rippleTimedItems, rippleTimelineKeys, applyStudioClipMetadata } from "../studioTimelineEdits";
 import { interpolateReframeKeyframes } from "../studioReframeInterpolation";
 
 test("ripple cuts move later media without mutating the originals", () => {
@@ -71,4 +71,20 @@ test("multi-gap reverse rippling accurately shifts items past multiple dead-air 
     current = rippleTimedItems(current, gap.from, gap.to, () => "copy");
   }
   expect(current).toEqual([{ ...item, startTime: 6 }]);
+});
+
+
+test("source metadata preserves authored occurrence length across load and reload", () => {
+  const cut = { id: "jump-cut", startRequest: 2.25, endRequest: 3.25, duration: 1 };
+  const hydrated = applyStudioClipMetadata(cut, 7.424083);
+  expect(hydrated).toEqual({ ...cut, sourceDuration: 7.424083 });
+  expect(applyStudioClipMetadata(hydrated, 7.424083)).toEqual(hydrated);
+  expect(cut.duration).toBe(1);
+});
+
+test("source metadata initializes a missing selected range and ignores non-finite duration", () => {
+  const clip = { id: "main", duration: 0 };
+  expect(applyStudioClipMetadata(clip, 30, { start: 4, end: 10 })).toEqual({ ...clip,
+    sourceDuration: 30, startRequest: 4, endRequest: 10, duration: 6 });
+  expect(applyStudioClipMetadata(clip, Infinity)).toBe(clip);
 });

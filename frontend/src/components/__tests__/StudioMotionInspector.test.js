@@ -5,6 +5,28 @@ import { MotionInspector } from "../StudioAdvancedInspectors";
 const noop = () => {};
 
 describe("MotionInspector logo layer controls", () => {
+  test('zero effect radii and offsets survive edits and toggling the effects off/on', () => {
+    function Editor() {
+      const [layer, setLayer] = React.useState({ id:'artwork',type:'image',name:'Transparent artwork',
+        glow:{enabled:true,radius:16,intensity:.5},layerShadow:{enabled:true,blur:18,y:10,opacity:.55} });
+      return <MotionInspector activeOverlay={layer} overlays={[layer]} playhead={0} keyframes={[]}
+        onUpdateOverlay={(key,value)=>setLayer(current=>({...current,[key]:value}))}
+        onSelectOverlay={noop} onAddKeyframe={noop} onUpdateKeyframe={noop} onRemoveKeyframe={noop}
+        onSeek={noop} onToggleMotionPath={noop} onResetMotion={noop} />;
+    }
+    render(<Editor />);
+    fireEvent.change(screen.getByRole('slider',{name:/Glow radius/}),{target:{value:'0'}});
+    fireEvent.change(screen.getByRole('slider',{name:/Shadow blur/}),{target:{value:'0'}});
+    fireEvent.change(screen.getByLabelText('Layer shadow Y offset'),{target:{value:'0'}});
+    expect(screen.getByRole('slider',{name:/Glow radius/})).toHaveValue('0');
+    expect(screen.getByRole('slider',{name:/Shadow blur/})).toHaveValue('0');
+    for(const name of ['Enable layer glow','Enable layer shadow']) {
+      fireEvent.click(screen.getByLabelText(name)); fireEvent.click(screen.getByLabelText(name));
+    }
+    expect(screen.getByRole('slider',{name:/Glow radius/})).toHaveValue('0');
+    expect(screen.getByRole('slider',{name:/Shadow blur/})).toHaveValue('0');
+    expect(screen.getByLabelText('Layer shadow Y offset')).toHaveValue(0);
+  });
   test("edits geometry, timing, alpha-aware effects and motion blur on image layers", () => {
     const onUpdateOverlay = jest.fn();
     const logo = {

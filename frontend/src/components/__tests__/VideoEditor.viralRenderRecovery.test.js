@@ -36,6 +36,7 @@ jest.mock("../../hooks/useCinematicEffects", () => () => ({
 jest.mock("../ViralClipStudio", () => props => (
   <div data-testid="mock-viral-studio">
     <button onClick={props.onEditInvalidated}>Edit current project</button>
+    <button onClick={props.onRenderedPreviewError}>Report finished preview error</button>
     <button onClick={() => props.onProjectOpened('project-b')}>Open another saved project</button>
     {props.renderRecoveryPanel}
     {props.renderedOutput?.url ? (
@@ -106,6 +107,23 @@ describe("VideoEditor viral render recovery", () => {
     expect(loadViralRenderAttempt("creator-a")).toBeNull();
   });
 
+  test("a failed finished-file URL clears ready state and exposes recovery without losing its receipt", async () => {
+    saveViralRenderAttempt("creator-a", { requestId: "render-request-a123" });
+    global.fetch = jest.fn(url => String(url).includes("/viral-render-attempt/")
+      ? Promise.resolve({ ok: true, status: 200, json: async () => ({ status: "completed",
+        jobId: "job-a", result: { url: "https://media.example.com/completed.mp4" } }) })
+      : Promise.resolve(creditResponse));
+    render(<VideoEditor file={source} onSave={jest.fn()} onCancel={jest.fn()} />);
+    await screen.findByTestId("recovered-studio-output");
+    fireEvent.click(screen.getByRole("button", { name: "Report finished preview error" }));
+    expect(screen.queryByTestId("recovered-studio-output")).not.toBeInTheDocument();
+    expect(screen.getByTestId("viral-render-recovery")).toHaveTextContent("Retry access");
+    expect(screen.getByRole("button", { name: "Dismiss", exact: true })).toBeVisible();
+    expect(loadViralRenderAttempt("creator-a").requestId).toBe("render-request-a123");
+    expect(global.fetch.mock.calls.some(([url,options]) =>
+      String(url).includes('/api/media/process') && options?.method === 'POST')).toBe(false);
+  });
+
   test("a late recovery response cannot cover a newer edit", async () => {
     saveViralRenderAttempt("creator-a", { requestId: "render-request-a123" });
     let finish;
@@ -115,6 +133,8 @@ describe("VideoEditor viral render recovery", () => {
     render(<VideoEditor file={source} onSave={jest.fn()} onCancel={jest.fn()} />);
     await screen.findByText("Checking your previous render…");
     fireEvent.click(screen.getByRole("button", { name: "Edit current project" }));
+    // A reopen must not restore the old mapping while its lookup is still pending.
+    expect(loadViralRenderAttempt("creator-a")).toBeNull();
     finish({ ok: true, status: 200, json: async () => ({ status: "completed", jobId: "job-a",
       result: { url: "https://media.example.com/completed.mp4" } }) });
     await waitFor(() => expect(screen.queryByText("Checking your previous render…")).not.toBeInTheDocument());

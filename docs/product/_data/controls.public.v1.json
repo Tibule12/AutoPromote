@@ -1,0 +1,3590 @@
+{
+  "knowledge_version": "1.0.4",
+  "controls": [
+    {
+      "control_id": "studio.transform.x",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "label": "Position X",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts position x on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "percent of stage",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.transform.y",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "label": "Position Y",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts position y on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "percent of stage",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.transform.scale",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "label": "Scale",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts scale on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 5,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "multiplier",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.transform.rotation",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "label": "Rotation",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts rotation on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "constraints": {
+        "type": "number",
+        "minimum": -360,
+        "maximum": 360,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "degrees",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.transform.opacity",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "label": "Opacity",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts opacity on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "fraction",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.transform.anchorx",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "label": "Anchor X",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts anchor x on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "percent of layer",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "Anchor is editable static geometry; the current motion-key builder animates x/y/scale/rotation/opacity/crop, not anchor."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.transform.anchory",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "label": "Anchor Y",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts anchor y on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "percent of layer",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "Anchor is editable static geometry; the current motion-key builder animates x/y/scale/rotation/opacity/crop, not anchor."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.transform.cropx",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "label": "Horizontal crop",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts horizontal crop on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 45,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "image overlays",
+        "video overlays"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.transform.cropy",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "label": "Vertical crop",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts vertical crop on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 45,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "image overlays",
+        "video overlays"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.layer.start",
+      "feature_ids": [
+        "studio.layers"
+      ],
+      "label": "Layer start",
+      "status": "PARTIAL",
+      "meaning": "Adjusts layer start of an image/video overlay; timing remains linked to its owned occurrence.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": null,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "image/video overlays"
+      ],
+      "dependencies": [
+        "studio.layers"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.layer.duration",
+      "feature_ids": [
+        "studio.layers"
+      ],
+      "label": "Layer duration",
+      "status": "PARTIAL",
+      "meaning": "Adjusts layer duration of an image/video overlay; timing remains linked to its owned occurrence.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 60,
+        "values": [],
+        "default": 3,
+        "default_known": true
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "image/video overlays"
+      ],
+      "dependencies": [
+        "studio.layers"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.layer.width",
+      "feature_ids": [
+        "studio.layers"
+      ],
+      "label": "Layer width",
+      "status": "PARTIAL",
+      "meaning": "Adjusts layer width of an image/video overlay; timing remains linked to its owned occurrence.",
+      "constraints": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 100,
+        "values": [],
+        "default": 35,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "image/video overlays"
+      ],
+      "dependencies": [
+        "studio.layers"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.layer.height",
+      "feature_ids": [
+        "studio.layers"
+      ],
+      "label": "Layer height",
+      "status": "PARTIAL",
+      "meaning": "Adjusts layer height of an image/video overlay; timing remains linked to its owned occurrence.",
+      "constraints": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 100,
+        "values": [],
+        "default": 35,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "image/video overlays"
+      ],
+      "dependencies": [
+        "studio.layers"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.time",
+      "feature_ids": [
+        "studio.keyframes"
+      ],
+      "label": "Keyframe time",
+      "status": "FUNCTIONAL",
+      "meaning": "Places a property key on the programme clock; timeline nudges use the output frame grid.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "The current programme/layer range supplies the upper bound; no universal fixed duration is claimed."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.easing",
+      "feature_ids": [
+        "studio.easing",
+        "studio.keyframes"
+      ],
+      "label": "Keyframe easing",
+      "status": "FUNCTIONAL",
+      "meaning": "Selects the interpolation between property poses. Hold retains the prior value until the next key.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "linear",
+          "ease_in",
+          "ease_out",
+          "ease_in_out",
+          "hold",
+          "bezier"
+        ],
+        "default": "ease_in_out",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.easing",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.curve",
+      "feature_ids": [
+        "studio.easing"
+      ],
+      "label": "Cubic curve handles",
+      "status": "FUNCTIONAL",
+      "meaning": "Sets the bounded cubic interpolation curve; X handles stay 0–1 and Y handles may overshoot -2–2 in the shared contract.",
+      "constraints": {
+        "type": "array",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": [
+          0.33,
+          0,
+          0.67,
+          1
+        ],
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.easing"
+      ],
+      "limitations": [
+        "Array contains exactly four handles. Shared contract permits Y overshoot; some inspector widgets show narrower Y bounds."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.blend",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Layer blend mode",
+      "status": "PARTIAL",
+      "meaning": "Chooses how an ordinary overlay blends with the underlying image.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "normal",
+          "multiply",
+          "screen",
+          "difference",
+          "overlay",
+          "soft-light",
+          "hard-light",
+          "color-dodge",
+          "luminosity"
+        ],
+        "default": "normal",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Main programme video currently supports normal only; unsupported main-video modes are rejected at export."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.effect.blur",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "label": "Layer blur",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the supported ordinary-layer layer blur. These controls are distinct from mask-scene glow.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 30,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.effect.glow_radius",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "label": "Glow radius",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the supported ordinary-layer glow radius. These controls are distinct from mask-scene glow.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 60,
+        "values": [],
+        "default": 16,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.effect.glow_intensity",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "label": "Glow intensity",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the supported ordinary-layer glow intensity. These controls are distinct from mask-scene glow.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0.5,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.effect.layershadow_blur",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "label": "Shadow blur",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the supported ordinary-layer shadow blur. These controls are distinct from mask-scene glow.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 80,
+        "values": [],
+        "default": 18,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.effect.layershadow_opacity",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "label": "Shadow opacity",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the supported ordinary-layer shadow opacity. These controls are distinct from mask-scene glow.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0.55,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.effect.motionblur_samples",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "label": "Motion blur samples",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the supported ordinary-layer motion blur samples. These controls are distinct from mask-scene glow.",
+      "constraints": {
+        "type": "integer",
+        "minimum": 2,
+        "maximum": 8,
+        "values": [],
+        "default": 4,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.effect.motionblur_shutter",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "label": "Motion blur shutter",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the supported ordinary-layer motion blur shutter. These controls are distinct from mask-scene glow.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 1,
+        "values": [],
+        "default": 0.5,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.x",
+      "feature_ids": [
+        "studio.compositing.text_behind_subject"
+      ],
+      "label": "Subject text X",
+      "status": "PARTIAL",
+      "meaning": "Places or styles editable text inside the reviewed mask-backed scene.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned reviewed subject scene"
+      ],
+      "dependencies": [
+        "studio.compositing.text_behind_subject"
+      ],
+      "limitations": [
+        "Scene parameter; arbitrary native per-property keyframe support is not implemented."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.y",
+      "feature_ids": [
+        "studio.compositing.text_behind_subject"
+      ],
+      "label": "Subject text Y",
+      "status": "PARTIAL",
+      "meaning": "Places or styles editable text inside the reviewed mask-backed scene.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 43,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned reviewed subject scene"
+      ],
+      "dependencies": [
+        "studio.compositing.text_behind_subject"
+      ],
+      "limitations": [
+        "Scene parameter; arbitrary native per-property keyframe support is not implemented."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.font_size",
+      "feature_ids": [
+        "studio.compositing.text_behind_subject"
+      ],
+      "label": "Subject text size",
+      "status": "PARTIAL",
+      "meaning": "Places or styles editable text inside the reviewed mask-backed scene.",
+      "constraints": {
+        "type": "number",
+        "minimum": 12,
+        "maximum": 320,
+        "values": [],
+        "default": 100,
+        "default_known": true
+      },
+      "unit": "pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned reviewed subject scene"
+      ],
+      "dependencies": [
+        "studio.compositing.text_behind_subject"
+      ],
+      "limitations": [
+        "Scene parameter; arbitrary native per-property keyframe support is not implemented."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.tracking",
+      "feature_ids": [
+        "studio.compositing.text_behind_subject"
+      ],
+      "label": "Subject letter spacing",
+      "status": "PARTIAL",
+      "meaning": "Places or styles editable text inside the reviewed mask-backed scene.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 40,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned reviewed subject scene"
+      ],
+      "dependencies": [
+        "studio.compositing.text_behind_subject"
+      ],
+      "limitations": [
+        "Scene parameter; arbitrary native per-property keyframe support is not implemented."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.offset_x",
+      "feature_ids": [
+        "studio.compositing.tracked_callout"
+      ],
+      "label": "Tracked callout X offset",
+      "status": "PARTIAL",
+      "meaning": "Offsets the supported callout relative to its real tracked subject.",
+      "constraints": {
+        "type": "number",
+        "minimum": -500,
+        "maximum": 500,
+        "values": [],
+        "default": -150,
+        "default_known": true
+      },
+      "unit": "pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned reviewed tracking scene"
+      ],
+      "dependencies": [
+        "studio.compositing.tracked_callout"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.offset_y",
+      "feature_ids": [
+        "studio.compositing.tracked_callout"
+      ],
+      "label": "Tracked callout Y offset",
+      "status": "PARTIAL",
+      "meaning": "Offsets the supported callout relative to its real tracked subject.",
+      "constraints": {
+        "type": "number",
+        "minimum": -500,
+        "maximum": 500,
+        "values": [],
+        "default": -130,
+        "default_known": true
+      },
+      "unit": "pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned reviewed tracking scene"
+      ],
+      "dependencies": [
+        "studio.compositing.tracked_callout"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.range",
+      "feature_ids": [
+        "studio.subject_cutout",
+        "studio.compositing.text_behind_subject",
+        "studio.tracking"
+      ],
+      "label": "Subject source range",
+      "status": "PARTIAL",
+      "meaning": "Selects one owned source-bound span to segment and composite.",
+      "constraints": {
+        "type": "array",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.subject_cutout",
+        "studio.compositing.text_behind_subject",
+        "studio.tracking"
+      ],
+      "limitations": [
+        "Two source times; duration must be 0.25–10 seconds. Source bounds and frame count are validated."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.seed_points",
+      "feature_ids": [
+        "studio.subject_cutout",
+        "studio.tracking"
+      ],
+      "label": "Subject seed points",
+      "status": "PARTIAL",
+      "meaning": "Selects the visible subject with positive and optional negative points.",
+      "constraints": {
+        "type": "array",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.subject_cutout",
+        "studio.tracking"
+      ],
+      "limitations": [
+        "1–16 coordinate pairs; normalized coordinates 0–0.999999. At least one positive label is required."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.seed_labels",
+      "feature_ids": [
+        "studio.subject_cutout",
+        "studio.tracking"
+      ],
+      "label": "Subject point labels",
+      "status": "PARTIAL",
+      "meaning": "Labels each seed as positive foreground or negative background.",
+      "constraints": {
+        "type": "array",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.subject_cutout",
+        "studio.tracking"
+      ],
+      "limitations": [
+        "One 0 or 1 label per seed point; at least one 1."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.depth_amount",
+      "feature_ids": [
+        "studio.compositing.mask_depth"
+      ],
+      "label": "Mask parallax amount",
+      "status": "PARTIAL",
+      "meaning": "Changes the restrained 2.5D subject/background parallax amount.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 0.06,
+        "values": [],
+        "default": 0.015,
+        "default_known": true
+      },
+      "unit": "fraction",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.compositing.mask_depth"
+      ],
+      "limitations": [
+        "Mask-based effect; does not estimate metric depth."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.mask_feather",
+      "feature_ids": [
+        "studio.masks"
+      ],
+      "label": "Mask feather",
+      "status": "UNIMPLEMENTED",
+      "meaning": "No exposed supported subject-scene mask feather field is established in the current scene contract.",
+      "constraints": {
+        "type": "number",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "UNSUPPORTED",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.masks"
+      ],
+      "limitations": [
+        "No valid range or default is documented because this field is not implemented."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.mask_expansion",
+      "feature_ids": [
+        "studio.masks"
+      ],
+      "label": "Mask expansion",
+      "status": "UNIMPLEMENTED",
+      "meaning": "No exposed supported subject-scene mask expansion field is established in the current scene contract.",
+      "constraints": {
+        "type": "number",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "UNSUPPORTED",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.masks"
+      ],
+      "limitations": [
+        "No valid range or default is documented because this field is not implemented."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "cam_combiner.source_count",
+      "feature_ids": [
+        "cam_combiner.upload"
+      ],
+      "label": "Camera count",
+      "status": "PARTIAL",
+      "meaning": "Two or three source cameras are accepted by the combiner.",
+      "constraints": {
+        "type": "integer",
+        "minimum": 2,
+        "maximum": 3,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "cameras",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "camera video",
+        "master audio"
+      ],
+      "dependencies": [
+        "cam_combiner.upload"
+      ],
+      "limitations": [
+        "Applies only to the camera session. Speaker mapping must be reviewed before relying on suggested cuts."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "cam_combiner.sync_offset",
+      "feature_ids": [
+        "cam_combiner.synchronization"
+      ],
+      "label": "Camera sync offset",
+      "status": "PARTIAL",
+      "meaning": "Maps programme time to the selected source using the reviewed offset.",
+      "constraints": {
+        "type": "number",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "camera video",
+        "master audio"
+      ],
+      "dependencies": [
+        "cam_combiner.synchronization"
+      ],
+      "limitations": [
+        "Applies only to the camera session. Speaker mapping must be reviewed before relying on suggested cuts."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "cam_combiner.sync_rate",
+      "feature_ids": [
+        "cam_combiner.drift"
+      ],
+      "label": "Camera clock rate",
+      "status": "PARTIAL",
+      "meaning": "Multiplies mapped source time to compensate for drift. Normal automatic estimation is narrower than the mapping clamp.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.95,
+        "maximum": 1.05,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "multiplier",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "camera video",
+        "master audio"
+      ],
+      "dependencies": [
+        "cam_combiner.drift"
+      ],
+      "limitations": [
+        "Automatic drift estimation is normally clamped to 0.99–1.01; source time mapping clamps to 0.95–1.05."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "cam_combiner.switch_interval",
+      "feature_ids": [
+        "cam_combiner.switching"
+      ],
+      "label": "Switch interval",
+      "status": "PARTIAL",
+      "meaning": "Sets the baseline hold interval used by the heuristic planner.",
+      "constraints": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 10,
+        "values": [],
+        "default": 3,
+        "default_known": true
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "camera video",
+        "master audio"
+      ],
+      "dependencies": [
+        "cam_combiner.switching"
+      ],
+      "limitations": [
+        "Applies only to the camera session. Speaker mapping must be reviewed before relying on suggested cuts."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "cam_combiner.zoom",
+      "feature_ids": [
+        "cam_combiner.split_views"
+      ],
+      "label": "Camera framing zoom",
+      "status": "PARTIAL",
+      "meaning": "Crops the selected source within the normalized segment framing.",
+      "constraints": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 2.4,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "multiplier",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "camera video",
+        "master audio"
+      ],
+      "dependencies": [
+        "cam_combiner.split_views"
+      ],
+      "limitations": [
+        "Applies only to the camera session. Speaker mapping must be reviewed before relying on suggested cuts."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "cam_combiner.swap_channels",
+      "feature_ids": [
+        "cam_combiner.channel_mapping"
+      ],
+      "label": "Swap left/right clean-audio channels",
+      "status": "PARTIAL",
+      "meaning": "Reverses speaker/camera channel association; listen to the master and verify the intended camera.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "camera video",
+        "master audio"
+      ],
+      "dependencies": [
+        "cam_combiner.channel_mapping"
+      ],
+      "limitations": [
+        "Applies only to the camera session. Speaker mapping must be reviewed before relying on suggested cuts."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "cam_combiner.verify_channels",
+      "feature_ids": [
+        "cam_combiner.channel_mapping"
+      ],
+      "label": "I verified which speaker belongs to each channel",
+      "status": "PARTIAL",
+      "meaning": "Confirms the current mapping after listening. Changing mapping requires confirming it again.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "camera video",
+        "master audio"
+      ],
+      "dependencies": [
+        "cam_combiner.channel_mapping"
+      ],
+      "limitations": [
+        "Applies only to the camera session. Speaker mapping must be reviewed before relying on suggested cuts."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "cam_combiner.clean_audio_mode",
+      "feature_ids": [
+        "cam_combiner.master_audio"
+      ],
+      "label": "Clean audio mode",
+      "status": "PARTIAL",
+      "meaning": "Selects external-only, low-camera-bed or muted-camera mix policy.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "external_only",
+          "low_camera",
+          "mute_camera"
+        ],
+        "default": "external_only",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "camera video",
+        "master audio"
+      ],
+      "dependencies": [
+        "cam_combiner.master_audio"
+      ],
+      "limitations": [
+        "Applies only to the camera session. Speaker mapping must be reviewed before relying on suggested cuts."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.denoise",
+      "feature_ids": [
+        "studio.audio_restoration"
+      ],
+      "label": "Denoise",
+      "status": "PARTIAL",
+      "meaning": "Adjusts deterministic denoise in the voice-repair bus. The documented default is the natural repair preset.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 22,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_restoration"
+      ],
+      "limitations": [
+        "Preset default; the selected project may retain different values. Preview and final repaired-bus agreement is qualified only for retained subsets."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.deesser",
+      "feature_ids": [
+        "studio.audio_restoration"
+      ],
+      "label": "De-esser",
+      "status": "PARTIAL",
+      "meaning": "Adjusts deterministic de-esser in the voice-repair bus. The documented default is the natural repair preset.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 18,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_restoration"
+      ],
+      "limitations": [
+        "Preset default; the selected project may retain different values. Preview and final repaired-bus agreement is qualified only for retained subsets."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.compressor",
+      "feature_ids": [
+        "studio.audio_restoration"
+      ],
+      "label": "Compressor",
+      "status": "PARTIAL",
+      "meaning": "Adjusts deterministic compressor in the voice-repair bus. The documented default is the natural repair preset.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 35,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_restoration"
+      ],
+      "limitations": [
+        "Preset default; the selected project may retain different values. Preview and final repaired-bus agreement is qualified only for retained subsets."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.limiter",
+      "feature_ids": [
+        "studio.audio_restoration"
+      ],
+      "label": "Limiter ceiling",
+      "status": "PARTIAL",
+      "meaning": "Adjusts deterministic limiter ceiling in the voice-repair bus. The documented default is the natural repair preset.",
+      "constraints": {
+        "type": "number",
+        "minimum": -6,
+        "maximum": -0.1,
+        "values": [],
+        "default": -1,
+        "default_known": true
+      },
+      "unit": "dB",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_restoration"
+      ],
+      "limitations": [
+        "Preset default; the selected project may retain different values. Preview and final repaired-bus agreement is qualified only for retained subsets."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.loudness",
+      "feature_ids": [
+        "studio.audio_restoration"
+      ],
+      "label": "Loudness target",
+      "status": "PARTIAL",
+      "meaning": "Adjusts deterministic loudness target in the voice-repair bus. The documented default is the natural repair preset.",
+      "constraints": {
+        "type": "number",
+        "minimum": -24,
+        "maximum": -9,
+        "values": [],
+        "default": -14,
+        "default_known": true
+      },
+      "unit": "LUFS",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_restoration"
+      ],
+      "limitations": [
+        "Preset default; the selected project may retain different values. Preview and final repaired-bus agreement is qualified only for retained subsets."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.eq_low",
+      "feature_ids": [
+        "studio.audio_restoration"
+      ],
+      "label": "EQ low",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the low band of the deterministic voice repair EQ.",
+      "constraints": {
+        "type": "number",
+        "minimum": -12,
+        "maximum": 12,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "dB",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_restoration"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.eq_mid",
+      "feature_ids": [
+        "studio.audio_restoration"
+      ],
+      "label": "EQ mid",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the mid band of the deterministic voice repair EQ.",
+      "constraints": {
+        "type": "number",
+        "minimum": -12,
+        "maximum": 12,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "dB",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_restoration"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.eq_high",
+      "feature_ids": [
+        "studio.audio_restoration"
+      ],
+      "label": "EQ high",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the high band of the deterministic voice repair EQ.",
+      "constraints": {
+        "type": "number",
+        "minimum": -12,
+        "maximum": 12,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "dB",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_restoration"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.hum",
+      "feature_ids": [
+        "studio.audio_restoration"
+      ],
+      "label": "Hum removal",
+      "status": "PARTIAL",
+      "meaning": "Selects the power-line hum frequency for the deterministic audio filter.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          50,
+          60
+        ],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "Hz",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_restoration"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.gain_key",
+      "feature_ids": [
+        "studio.audio_automation"
+      ],
+      "label": "Bus volume key",
+      "status": "FUNCTIONAL",
+      "meaning": "Changes the selected audio bus gain over programme time; 100% means unity.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 200,
+        "values": [],
+        "default": 100,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_automation"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.automation_source",
+      "feature_ids": [
+        "studio.audio_automation"
+      ],
+      "label": "Automation source",
+      "status": "PARTIAL",
+      "meaning": "Selects which programme audio bus the volume keys affect.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "originalAudio",
+          "masterPodcast",
+          "voiceover",
+          "music",
+          "broll",
+          "sfx"
+        ],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.audio_automation"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.ducking",
+      "feature_ids": [
+        "studio.ducking"
+      ],
+      "label": "Speech-aware ducking",
+      "status": "PARTIAL",
+      "meaning": "Use the existing music automation/ducking workflow and review its audible result; no universal ducking threshold range is asserted here.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.ducking"
+      ],
+      "limitations": [
+        "Music also exposes strength and mode. This is not neural speech separation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.grade.exposurestops",
+      "feature_ids": [
+        "studio.color"
+      ],
+      "label": "Exposure stops",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts the selected deterministic finish grade parameter.",
+      "constraints": {
+        "type": "number",
+        "minimum": -2,
+        "maximum": 2,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.color"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.grade.lift",
+      "feature_ids": [
+        "studio.color"
+      ],
+      "label": "Lift",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts the selected deterministic finish grade parameter.",
+      "constraints": {
+        "type": "number",
+        "minimum": -0.15,
+        "maximum": 0.15,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.color"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.grade.gamma",
+      "feature_ids": [
+        "studio.color"
+      ],
+      "label": "Gamma",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts the selected deterministic finish grade parameter.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.6,
+        "maximum": 1.6,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.color"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.grade.gain",
+      "feature_ids": [
+        "studio.color"
+      ],
+      "label": "Grade gain",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts the selected deterministic finish grade parameter.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.6,
+        "maximum": 1.4,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.color"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.grade.tint",
+      "feature_ids": [
+        "studio.color"
+      ],
+      "label": "Tint",
+      "status": "FUNCTIONAL",
+      "meaning": "Adjusts the selected deterministic finish grade parameter.",
+      "constraints": {
+        "type": "number",
+        "minimum": -1,
+        "maximum": 1,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.color"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.x",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "X",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene x.",
+      "constraints": {
+        "type": "number",
+        "minimum": 5,
+        "maximum": 95,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.y",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Y",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene y.",
+      "constraints": {
+        "type": "number",
+        "minimum": 5,
+        "maximum": 95,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.z",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Z",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene z.",
+      "constraints": {
+        "type": "number",
+        "minimum": -4,
+        "maximum": 4,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "scene units",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.scale",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Scale",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene scale.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.2,
+        "maximum": 3,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "multiplier",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.rotationx",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Rotation X",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene rotationX.",
+      "constraints": {
+        "type": "number",
+        "minimum": -180,
+        "maximum": 180,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "degrees",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.rotationy",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Rotation Y",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene rotationY.",
+      "constraints": {
+        "type": "number",
+        "minimum": -180,
+        "maximum": 180,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "degrees",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.rotationz",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Rotation Z",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene rotationZ.",
+      "constraints": {
+        "type": "number",
+        "minimum": -180,
+        "maximum": 180,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "degrees",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.extrusiondepth",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Extrusion Depth",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene extrusionDepth.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.01,
+        "maximum": 1.5,
+        "values": [],
+        "default": 0.28,
+        "default_known": true
+      },
+      "unit": "scene units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.bevel",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Bevel",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene bevel.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 0.2,
+        "values": [],
+        "default": 0.04,
+        "default_known": true
+      },
+      "unit": "scene units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.focallength",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Focal Length",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene focalLength.",
+      "constraints": {
+        "type": "number",
+        "minimum": 24,
+        "maximum": 85,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "mm",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.lightintensity",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Light Intensity",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene lightIntensity.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5,
+        "values": [],
+        "default": 2.2,
+        "default_known": true
+      },
+      "unit": "multiplier",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.cameramotion",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Camera Motion",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene cameraMotion.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0.28,
+        "default_known": true
+      },
+      "unit": "fraction",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser/final parity is approximate. This field does not grant arbitrary imported-model control."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.bloom",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Bloom",
+      "status": "PARTIAL",
+      "meaning": "Adjusts the bounded authored 3D scene bloom.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0.32,
+        "default_known": true
+      },
+      "unit": "fraction",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Browser and final 3D scene behavior is approximate; inspect the current owned final scene.",
+        "Bloom default is 0.7 for neon logo, 0.32 for other presets."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.material",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "3D material",
+      "status": "PARTIAL",
+      "meaning": "Selects a supported preset material for the authored scene.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "chrome",
+          "glass",
+          "neon",
+          "gold",
+          "matte",
+          "holographic"
+        ],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Default depends on the chosen scene preset. Metalness/roughness are not documented as exposed editable controls."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.fontfamily",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "3D font family",
+      "status": "PARTIAL",
+      "meaning": "Legacy/browser scene field; the final 3D contract does not support this control.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "studio",
+          "sans",
+          "serif"
+        ],
+        "default": "studio",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Displayed legacy field is disabled for final rendering; the authored-scene default is not a supported export setting."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.fontweight",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "3D font weight",
+      "status": "PARTIAL",
+      "meaning": "Legacy/browser scene field; the final 3D contract does not support this control.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "regular",
+          "bold",
+          "black"
+        ],
+        "default": "bold",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Displayed legacy field is disabled for final rendering; the authored-scene default is not a supported export setting."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.easing",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "3D scene easing",
+      "status": "PARTIAL",
+      "meaning": "Legacy/browser scene field; the final 3D contract does not support this control.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "ease_out",
+          "ease_in_out",
+          "spring",
+          "linear"
+        ],
+        "default": "ease_out",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Disabled in the final-capable inspector; do not promise exported support.",
+        "Scene-level easing is distinct from supported per-key interpolation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.audioreactiveintensity",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "Audio-reactive intensity",
+      "status": "PARTIAL",
+      "meaning": "Legacy/browser scene field; the final 3D contract does not support this control.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Displayed legacy field is disabled for final rendering; the authored-scene default is not a supported export setting."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.lightdirection",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "3D light direction",
+      "status": "PARTIAL",
+      "meaning": "Legacy/browser scene field; the final 3D contract does not support this control.",
+      "constraints": {
+        "type": "number",
+        "minimum": -180,
+        "maximum": 180,
+        "values": [],
+        "default": 35,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Displayed legacy field is disabled for final rendering; the authored-scene default is not a supported export setting."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.shadows",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "3D shadows",
+      "status": "PARTIAL",
+      "meaning": "Legacy/browser scene field; the final 3D contract does not support this control.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": true,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Displayed legacy field is disabled for final rendering; the authored-scene default is not a supported export setting."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.reflections",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "3D reflections",
+      "status": "PARTIAL",
+      "meaning": "Legacy/browser scene field; the final 3D contract does not support this control.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": true,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Displayed legacy field is disabled for final rendering; the authored-scene default is not a supported export setting."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.background",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "3D background",
+      "status": "PARTIAL",
+      "meaning": "Legacy/browser scene field; the final 3D contract does not support this control.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "transparent",
+          "dark",
+          "light"
+        ],
+        "default": "transparent",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Displayed legacy field is disabled for final rendering; the authored-scene default is not a supported export setting."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.three_d.quality",
+      "feature_ids": [
+        "studio.three_d"
+      ],
+      "label": "3D quality",
+      "status": "PARTIAL",
+      "meaning": "Legacy/browser scene field; the final 3D contract does not support this control.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "draft",
+          "preview",
+          "high"
+        ],
+        "default": "preview",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "authored 3D scene"
+      ],
+      "dependencies": [
+        "studio.three_d"
+      ],
+      "limitations": [
+        "Displayed legacy field is disabled for final rendering; the authored-scene default is not a supported export setting."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.music.volume",
+      "feature_ids": [
+        "studio.music"
+      ],
+      "label": "Music volume",
+      "status": "PARTIAL",
+      "meaning": "Sets the music base gain independently of bus automation.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 0.6,
+        "default": 0.15,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "multiplier",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.music"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.music.fadein",
+      "feature_ids": [
+        "studio.music"
+      ],
+      "label": "Music fadeIn",
+      "status": "PARTIAL",
+      "meaning": "Fades the music cue at its boundaries.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 3,
+        "default": 0.5,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.music"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.music.fadeout",
+      "feature_ids": [
+        "studio.music"
+      ],
+      "label": "Music fadeOut",
+      "status": "PARTIAL",
+      "meaning": "Fades the music cue at its boundaries.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 3,
+        "default": 0.5,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.music"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.ducking_strength",
+      "feature_ids": [
+        "studio.ducking"
+      ],
+      "label": "Duck strength",
+      "status": "PARTIAL",
+      "meaning": "Sets how strongly music is reduced in the selected ducking mode.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 0.9,
+        "default": 0.4,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "fraction",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.ducking"
+      ],
+      "limitations": [
+        "UI slider is 10–90%; other internal prepared-mix paths use their own bounded contract.",
+        "Default shown in this music inspector is 0.4, not a universal render/provider default."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.audio.ducking_mode",
+      "feature_ids": [
+        "studio.ducking"
+      ],
+      "label": "Ducking mode",
+      "status": "PARTIAL",
+      "meaning": "Chooses speech-aware music reduction or a constant reduction.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "default": "speech",
+        "default_known": true,
+        "values": [
+          "speech",
+          "constant"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.ducking"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.sfx.volume",
+      "feature_ids": [
+        "studio.sfx"
+      ],
+      "label": "Effect volume",
+      "status": "PARTIAL",
+      "meaning": "Sets the individual sound cue gain before the SFX bus envelope.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "default": 0.8,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "multiplier",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.sfx"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.sfx.duration",
+      "feature_ids": [
+        "studio.sfx"
+      ],
+      "label": "Sound cue duration",
+      "status": "PARTIAL",
+      "meaning": "Sets the duration of the selected cue.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.05,
+        "maximum": 15,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.sfx"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.sfx.trim",
+      "feature_ids": [
+        "studio.sfx"
+      ],
+      "label": "Sound source trim start",
+      "status": "PARTIAL",
+      "meaning": "Moves the starting sample of an owned external sound cue.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": null,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.sfx"
+      ],
+      "limitations": [
+        "Disabled for built-in synthesized cues; external sources remain bounded by their actual duration."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.volume",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take volume",
+      "status": "PARTIAL",
+      "meaning": "Sets an owned voice take gain; unity is 1.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "default": 1,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "multiplier",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.duration",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take duration",
+      "status": "PARTIAL",
+      "meaning": "Bounds the placed voice take and decoded source checks.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.05,
+        "maximum": 7200,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "Import also enforces a 128 MB size limit. Supported PCM preview uses a narrower short-take subset; longer/retimed speech uses the media path."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.speed.rate",
+      "feature_ids": [
+        "studio.speed"
+      ],
+      "label": "Clip/programme speed",
+      "status": "PARTIAL",
+      "meaning": "Sets the native speed rate; keys and linked content use the shared time map.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.5,
+        "maximum": 2,
+        "default": 1,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "multiplier",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.speed"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.transition.duration",
+      "feature_ids": [
+        "studio.transitions"
+      ],
+      "label": "Join transition duration",
+      "status": "PARTIAL",
+      "meaning": "Sets a supported join duration after a removed source range.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.04,
+        "maximum": 2,
+        "default": 0.18,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.transitions"
+      ],
+      "limitations": [
+        "Clean cut uses 0.02 seconds; the 0.04–2 range describes non-clean joins in this operation.",
+        "Other occurrence transitions retain their own contract."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.text",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Title text",
+      "status": "PARTIAL",
+      "meaning": "Edits the ordinary title copy.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.titles"
+      ],
+      "limitations": [
+        "Current title editor maxLength is 180 characters. Long copy still needs layout review."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.scale",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Title size",
+      "status": "PARTIAL",
+      "meaning": "Sets title size in the title typography inspector.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.5,
+        "maximum": 2,
+        "default": 1,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "multiplier",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.titles"
+      ],
+      "limitations": [
+        "Title size widget is 0.5–2; ordinary motion inspector scale is a different 0.1–5 range."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.color",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Title text color",
+      "status": "PARTIAL",
+      "meaning": "Sets a supported title color.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.titles"
+      ],
+      "limitations": [
+        "Use a valid color from the existing picker; contrast must be reviewed over the actual footage."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.exposure",
+      "feature_ids": [
+        "studio.compositing.background_grade"
+      ],
+      "label": "Background exposure",
+      "status": "PARTIAL",
+      "meaning": "Grades the original background around the mask.",
+      "constraints": {
+        "type": "number",
+        "minimum": -3,
+        "maximum": 1,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.compositing.background_grade"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.saturation",
+      "feature_ids": [
+        "studio.compositing.background_grade"
+      ],
+      "label": "Background saturation",
+      "status": "PARTIAL",
+      "meaning": "Grades the original background around the mask.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 2,
+        "default": 1,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.compositing.background_grade"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.subject.contrast",
+      "feature_ids": [
+        "studio.compositing.background_grade"
+      ],
+      "label": "Background contrast",
+      "status": "PARTIAL",
+      "meaning": "Grades the original background around the mask.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.5,
+        "maximum": 2,
+        "default": 1,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.compositing.background_grade"
+      ],
+      "limitations": [
+        "This is the exposed control range; other inspector or worker bounds may be narrower for a specific operation."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "generation.max_cutaways",
+      "feature_ids": [
+        "studio.generated_video"
+      ],
+      "label": "Maximum generated cutaways",
+      "status": "PARTIAL",
+      "meaning": "Bounds the requested B-roll planning batch.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "default": 2,
+        "default_known": true,
+        "values": [
+          1,
+          2,
+          3
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.generated_video"
+      ],
+      "limitations": [
+        "UI batch choice; server allowance and provider availability remain authoritative."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "publishing.queue.period",
+      "feature_ids": [
+        "publishing.schedule"
+      ],
+      "label": "Queue period",
+      "status": "PARTIAL",
+      "meaning": "Shows schedules in the next seven days or the full stored queue.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "default": "week",
+        "default_known": true,
+        "values": [
+          "week",
+          "all"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "SUPPORTED",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "publishing.schedule"
+      ],
+      "limitations": [
+        "Loading account-owned schedules does not confirm external delivery.",
+        "Queue navigation does not control movie rendering."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "publishing.queue.load_more",
+      "feature_ids": [
+        "publishing.schedule"
+      ],
+      "label": "Load more schedules",
+      "status": "PARTIAL",
+      "meaning": "Loads another owned queue page when more entries are available.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "default": false,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "SUPPORTED",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "publishing.schedule"
+      ],
+      "limitations": [
+        "Results remain limited to the selected period.",
+        "Queue navigation does not control movie rendering."
+      ],
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    }
+  ]
+}

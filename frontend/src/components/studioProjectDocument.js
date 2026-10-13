@@ -620,6 +620,18 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       parameters: cloneParameters(clip, STUDIO_OCCURRENCE_PARAMETER_FIELDS),
       playback: { direction: "forward", freeze: false, rate: { numerator: 1, denominator: 1 } },
     };
+    // Older native projects stored full-source duration in these parameters.
+    // Hydration can supply occurrence duration instead. Preserve the existing
+    // value when the owned source and authored range did not change; merely
+    // opening the same project must not invalidate its completed export.
+    const previousOccurrence = previousDocument?.clipOccurrences?.find(item=>item.occurrenceId===occurrence.occurrenceId);
+    const previousAsset = previousDocument?.assets?.find(item=>item.assetId===asset.assetId);
+    if (previousOccurrence?.assetId === asset.assetId &&
+        previousAsset?.contentHash === asset.contentHash && previousAsset?.storagePath === asset.storagePath &&
+        stableStringify(previousOccurrence.sourceRange) === stableStringify(occurrence.sourceRange) &&
+        Number.isFinite(previousOccurrence.parameters?.duration)) {
+      occurrence.parameters.duration = previousOccurrence.parameters.duration;
+    }
     programmeTick += durationTick;
     return occurrence;
   });

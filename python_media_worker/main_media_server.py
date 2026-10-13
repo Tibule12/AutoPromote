@@ -790,6 +790,16 @@ def probe_media_stream_summary(input_path):
         return {"error": str(probe_error)}
 
 
+def get_studio_picture_dimensions(input_path):
+    """Authoritative decoded picture dimensions for Studio, without sizing floors."""
+    picture = next((stream for stream in probe_media_stream_summary(input_path).get("streams", [])
+                    if stream.get("codec_type") == "video"), {})
+    width, height = int(picture.get("width") or 0), int(picture.get("height") or 0)
+    if width <= 0 or height <= 0:
+        raise RuntimeError("Studio picture dimensions could not be verified")
+    return width, height
+
+
 def media_has_audio_stream(input_path):
     try:
         result = subprocess.run(
@@ -8708,7 +8718,15 @@ def reviewed_axis_expression(keyframes, axis, fallback=.5):
     return f"if(lt(t,{ordered[0][0]:.6f}),{ordered[0][1]:.8f},{branch(0, len(segments)-1)})"
 
 
-def build_reviewed_reframe_filter(keyframes, target_width, target_height, zoom=1):
+def build_studio_sequence_video_filters(normalize_filter, fps, source_framing=False):
+    # Framing keys are evaluated on the delivery clock, after resetting a
+    # trimmed source's first timestamp. Resampling an already-cropped 30fps
+    # source chooses a different pan position for a 24fps output frame.
+    clock = [f"fps={float(fps):g}", "setpts=PTS-STARTPTS"]
+    return clock + [normalize_filter] if source_framing else [normalize_filter] + clock
+
+
+def build_reviewed_reframe_filter(keyframes, target_width, target_height, zoom=1, programme_offset=0):
     """Interpolate editor object-position marks without substituting face detection."""
     points = {}
     for keyframe in keyframes or []:
@@ -8721,9 +8739,14 @@ def build_reviewed_reframe_filter(keyframes, target_width, target_height, zoom=1
         raise ValueError("Reviewed framing requires at least one valid framing mark")
 
     def position(axis):
-        return reviewed_axis_expression([
+        expression = reviewed_axis_expression([
             {"time": time, "value": value[axis]*100, "cut": value[2]}
             for time, value in ordered], "value")
+        # An extracted source occurrence starts at local zero; framing keys
+        # remain on the authoritative programme clock.
+        if programme_offset:
+            expression = re.sub(r"\bt\b", f"(t+{float(programme_offset):.6f})", expression)
+        return expression
 
     zoom = clamp_float(float(zoom), 1.0, 3.0)
     scaled_width = math.ceil(target_width * zoom / 2) * 2
@@ -30916,7 +30939,7 @@ class ViralOverlay(BaseModel):
     glow: Optional[Dict[str, Any]] = None
     layerShadow: Optional[Dict[str, Any]] = None
     motionBlur: Optional[Dict[str, Any]] = None
-    blendMode: Optional[str] = "normal"
+    blendMode: Optional[Literal["normal", "multiply", "screen", "difference", "overlay", "soft-light", "hard-light", "color-dodge", "luminosity"]] = "normal"
     coverMainVideo: bool = False
     muteMainAudio: bool = False
     useOverlayAudio: bool = False
@@ -31515,6 +31538,8 @@ class RenderViralRequest(BaseModel):
     audio_track_states: Optional[Dict[str, Any]] = None
     editor_timeline: Optional[Dict[str, Any]] = None
     composition_plan: Optional[Dict[str, Any]] = None
+    # Provenance only; this client-supplied record never grants authorization.
+    creative_template_instance: Optional[Dict[str, Any]] = None
     smart_crop: bool = False
     smart_crop_mode: str = "center"  # "center", "speaker_track", "group_stack", "ai_director"
     visual_enhance: bool = False  # Use Smart Promo dynamic visual pipeline (face zoom, movement tracking, reframing)
@@ -31604,6 +31629,10 @@ async def render_viral_clip(request: RenderViralRequest):
         for segment in request.timeline_segments or []:
             match_subject_vfx(subject_items, segment.source_clip_id, segment.start_time, segment.end_time)
         normalize_audio_remix(getattr(request, "audio_remix", None) or getattr(request, "audioRemix", None))
+        for layer in (request.composition_plan or {}).get("layers") or []:
+            mask = (layer.get("effects") or {}).get("mask") or {}
+            if mask.get("enabled") and (layer.get("id") == "main-video" or layer.get("type") == "video"):
+                raise ValueError("Geometric masks currently export on image and ordinary title layers. Use the reviewed subject-mask workflow for source video.")
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if request.async_mode:
@@ -31701,6 +31730,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     color_cube_path = None
     sound_effect_paths = []
     overlay_temp_paths = []
+    # Register only this invocation's scratch destinations, before work starts,
+    # so successful exports and interrupted downloads both release them.
+    sequence_temp_paths = set()
     subject_render_paths = {}
     verified_subject_sources = set()
     speed_adjusted_path = None
@@ -31744,12 +31776,18 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
     try:
         # 1. Download/Prepare Main Video (Async)
+        sequence_reframe = (request.finish_plan or {}).get("reframe") or {}
+        sequence_framing_keys = sequence_reframe.get("keyframes") or []
+        source_framing = bool(request.timeline_segments and request.smart_crop
+            and request.smart_crop_mode == "speaker_track" and sequence_framing_keys
+            and not sequence_reframe.get("timeline_cuts")
+            and float(sequence_reframe.get("zoom", 1)) == 1)
         try:
             input_path = await materialize_video_input(
                 request.video_url,
                 input_path,
                 keep_audio=True,
-                preserve_source_bytes=bool(request.subjectVfx),
+                preserve_source_bytes=bool(request.subjectVfx) or source_framing,
             )
         except Exception as e:
              err_msg = f"Failed to load video: {str(e)}"
@@ -31781,27 +31819,56 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if normalized_segments:
             segment_paths = []
             segment_audio_paths = []
+            # Exact URL identity is private to this job; repeated occurrences
+            # share one materialized source, never another owner's/job's cache.
+            sequence_source_paths = {request.video_url: input_path}
             concat_list_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_concat.txt")
-            timeline_canvas_width, timeline_canvas_height = get_video_dimensions(input_path)
+            sequence_temp_paths.add(concat_list_path)
+            timeline_canvas_width, timeline_canvas_height = get_studio_picture_dimensions(input_path)
             timeline_canvas_width = max(2, int(timeline_canvas_width or 1920))
             timeline_canvas_height = max(2, int(timeline_canvas_height or 1080))
             timeline_canvas_width -= timeline_canvas_width % 2
             timeline_canvas_height -= timeline_canvas_height % 2
+            sequence_reframe = (request.finish_plan or {}).get("reframe") or {}
+            sequence_framing_keys = sequence_reframe.get("keyframes") or []
+            # Cover each raw source before concat. Padding unlike source
+            # aspects first bakes black bars into an already-portrait master,
+            # which a later whole-sequence crop cannot recover.
+            source_framing = (request.smart_crop and request.smart_crop_mode == "speaker_track"
+                              and sequence_framing_keys and not sequence_reframe.get("timeline_cuts")
+                              and float(sequence_reframe.get("zoom", 1)) == 1)
+            if source_framing:
+                timeline_canvas_width, timeline_canvas_height = get_reframe_output_dimensions(
+                    sequence_reframe.get("aspect") or "9:16")
+            programme_segment_start = 0.0
+            # Author fractional cuts on the selected delivery clock. At 30fps
+            # a .75s cut becomes 23 frames, accumulating an extra frame across
+            # a 24fps edit and shifting every later title/sound boundary.
+            selected_timeline_fps = (request.output_settings or {}).get("fps", 30)
+            try:
+                selected_timeline_fps = float(selected_timeline_fps)
+                if not math.isfinite(selected_timeline_fps) or selected_timeline_fps <= 0 or selected_timeline_fps > 120:
+                    selected_timeline_fps = 30
+            except (TypeError, ValueError):
+                selected_timeline_fps = 30
             for index, segment in enumerate(normalized_segments):
                 segment_source_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_src_{index}.mp4")
                 segment_video_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_v_{index}.mp4")
                 segment_audio_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_a_{index}.m4a")
+                sequence_temp_paths.update((segment_video_path, segment_audio_path))
                 segment_duration = float(segment.end_time) - float(segment.start_time)
 
-                if segment.url == request.video_url:
-                    segment_source_path = input_path
+                if segment.url in sequence_source_paths:
+                    segment_source_path = sequence_source_paths[segment.url]
                 else:
+                    sequence_temp_paths.add(segment_source_path)
                     segment_source_path = await materialize_video_input(
                         segment.url,
                         segment_source_path,
                         keep_audio=True,
-                        preserve_source_bytes=bool(request.subjectVfx),
+                        preserve_source_bytes=bool(request.subjectVfx) or source_framing,
                     )
+                    sequence_source_paths[segment.url] = segment_source_path
 
                 segment_picture_path, segment_picture_start = segment_source_path, float(segment.start_time)
                 if request.subjectVfx:
@@ -31819,6 +31886,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "force_original_aspect_ratio=decrease,"
                     f"pad={timeline_canvas_width}:{timeline_canvas_height}:(ow-iw)/2:(oh-ih)/2"
                 )
+                if source_framing:
+                    normalize_vf = build_reviewed_reframe_filter(sequence_framing_keys,
+                        timeline_canvas_width, timeline_canvas_height,
+                        programme_offset=programme_segment_start)
+                programme_segment_start += segment_duration
                 transition_filters = build_segment_transition_filters(
                     segment_duration,
                     segment.transition_in,
@@ -31829,7 +31901,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 # Reviewed subject frames are 24 fps; ordinary sources can use
                 # another clock. Concat-copy needs a common time base or the
                 # following clip's timestamps stretch the exported sequence.
-                video_filters = [normalize_vf, "fps=30", "setpts=PTS-STARTPTS"]
+                video_filters = build_studio_sequence_video_filters(
+                    normalize_vf, selected_timeline_fps, source_framing)
                 video_filters.extend(transition_filters["video_filters"])
                 
                 # 1. Render Video (No Audio)
@@ -32455,6 +32528,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         )
         if finish_filter or adjustment_graph:
             finish_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_finish.mp4")
+            sequence_temp_paths.add(finish_path)
             finish_has_audio = has_audio_stream(working_path)
             finish_source_path = working_path
             report_progress(49, "Applying creator color and finish")
@@ -33007,11 +33081,23 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 raise RuntimeError("Reviewed captions could not be rendered; the incomplete export was stopped") from e
         
         # Use working_path (either original trimmed or cropped version) as base for overlays
-        base_width, base_height = get_video_dimensions(working_path)
+        # Compose on the actual picture, including small imported media. The
+        # general sizing helper floors each axis to 320px for other workflows;
+        # using that floor here displaces native layers on a 320x240 picture.
+        base_width, base_height = get_studio_picture_dimensions(working_path)
+        delivery_profile = resolve_viral_export_profile(request.output_settings, base_width, base_height)
         inputs = ["-i", working_path]
         filter_chain = []
         current_v_label = "0:v"
         input_idx = 1
+        if delivery_profile["width"] > base_width or delivery_profile["height"] > base_height:
+            # Upscaling a completed low-resolution composite softens authored
+            # lettering/masks even when the customer's graphic is high quality.
+            # Scale the source once, then rasterize ordinary layers at delivery
+            # resolution. Source-sized exports retain their exact native size.
+            base_width, base_height = delivery_profile["width"], delivery_profile["height"]
+            filter_chain.append(f"[0:v]scale={base_width}:{base_height}:flags=lanczos,setsar=1[studio_composition_canvas];")
+            current_v_label = "studio_composition_canvas"
 
         if request.add_hook and request.hook_text:
             rendered_hook_start = rendered_timeline_time(request.hook_start_time)
@@ -33164,7 +33250,19 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         overlay_base_label = current_v_label
         overlay_filter_blocks = []
         def remember_overlay_block(overlay, start, input_label):
-            overlay_filter_blocks.append((str(overlay.id), list(filter_chain[start:]), input_label, current_v_label))
+            try:
+                from .studio_composition import blend_layer_block
+            except ImportError:
+                from studio_composition import blend_layer_block
+            time_window = None
+            if overlay.start_time is not None and overlay.duration is not None:
+                first = rendered_timeline_time(max(0.0, float(overlay.start_time)))
+                last = rendered_timeline_time(max(0.0, float(overlay.start_time)) + max(0.05, float(overlay.duration)))
+                time_window = (first, max(first + .05, last))
+            block = blend_layer_block(list(filter_chain[start:]), input_label, current_v_label,
+                                      overlay.blendMode, base_width, base_height,
+                                      rendered_timeline_duration, f"studio_blend_{len(overlay_filter_blocks)}", time_window)
+            overlay_filter_blocks.append((str(overlay.id), block, input_label, current_v_label))
 
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
         overlay_audio_specs = []
@@ -33233,7 +33331,21 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                  import urllib.request
                  loop = asyncio.get_running_loop()
                  try:
-                     await loop.run_in_executor(None, lambda: urllib.request.urlretrieve(ov.src, ov_dl_path))
+                     def download_image():
+                         # Retain the exact source across bounded transport
+                         # retries. A transient storage disconnect must not
+                         # drop the customer's brand layer or hang the job.
+                         for attempt in range(3):
+                             try:
+                                 with urllib.request.urlopen(ov.src, timeout=30) as response, open(ov_dl_path, "wb") as target:
+                                     shutil.copyfileobj(response, target)
+                                 return
+                             except OSError:
+                                 if attempt == 2:
+                                     raise
+                                 import time
+                                 time.sleep(.25 * (attempt + 1))
+                     await loop.run_in_executor(None, download_image)
                      ov_path = ov_dl_path
                  except Exception as e:
                      raise RuntimeError(f"Image layer {ov.id} could not be loaded; export stopped") from e
@@ -33248,6 +33360,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     layer_plan
                     and (
                         layer_plan.get("motion_keyframes")
+                        or (layer_effects.get("mask") or {}).get("enabled")
+                        or float((layer_plan.get("base_transform") or {}).get("crop_x") or 0) > 0
+                        or float((layer_plan.get("base_transform") or {}).get("crop_y") or 0) > 0
                         or float(layer_effects.get("blur") or 0) > 0
                         or (layer_effects.get("glow") or {}).get("enabled")
                         or (layer_effects.get("shadow") or {}).get("enabled")
@@ -33441,7 +33556,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             geometry = render_title_asset(txt.model_dump(), text_asset, base_width, base_height)
             layer_plan = dict(composition_layer(request.composition_plan, txt.id) or {})
             layer_plan.update(anchor_x=geometry["anchorX"], anchor_y=geometry["anchorY"])
-            rendered_title = txt.model_copy(update={key: value for key, value in geometry.items() if key != "lines"})
+            layer_plan["clip_box"] = geometry["clipBox"]
+            rendered_title = txt.model_copy(update={key: value for key, value in geometry.items() if key not in {"lines", "clipBox"}})
             receipt = await asyncio.to_thread(render_image_layer_motion, text_asset, text_motion,
                                              rendered_title, layer_plan, base_width, base_height,
                                              rendered_timeline_duration, speed_plan, 30)
@@ -33551,16 +33667,16 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         audio_filter_chain = []
         try:
-            from .studio_audio import audio_track_audible, build_volume_filter
+            from .studio_audio import audio_track_audible, build_volume_filter, build_audio_bus_mix
         except ImportError:
-            from studio_audio import audio_track_audible, build_volume_filter
+            from studio_audio import audio_track_audible, build_volume_filter, build_audio_bus_mix
         audio_track_states = request.audio_track_states or {}
         audio_automation = request.audio_automation or {}
         audio_automation_receipt = {}
 
         def bus_automation(bus):
             graph, points = build_volume_filter(
-                audio_automation.get(bus), rendered_timeline_duration
+                audio_automation.get(bus), rendered_timeline_duration, speed_plan=speed_plan
             )
             if points:
                 audio_automation_receipt[bus] = points
@@ -33652,6 +33768,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             )
             audio_mix_labels.append(f"[{output_label}]")
 
+        voiceover_music_sidechain = False
         if (studio_music_source and os.path.exists(studio_music_source)
                 and audio_track_audible(audio_track_states, "music")):
             if request.music_loop:
@@ -33661,6 +33778,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             input_idx += 1
             music_duration = max(0.1, float(rendered_timeline_duration or 0.1))
             music_volume = clamp_float(request.music_volume, 0.0, 1.5)
+            duck_mode = str(request.music_ducking_mode or "speech")
+            if request.music_ducking and duck_mode not in {"speech", "constant"}:
+                raise ValueError("Unsupported Studio music ducking mode")
+            duck_strength = clamp_float(request.music_ducking_strength, 0.05, 0.95)
+            if request.music_ducking and duck_mode == "constant":
+                music_volume *= 1.0 - duck_strength
             fade_in = clamp_float(request.music_fade_in, 0.0, min(5.0, music_duration))
             fade_out = clamp_float(request.music_fade_out, 0.0, min(5.0, music_duration))
             music_filters = [
@@ -33694,22 +33817,35 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     f"[{studio_music_idx}:a]{','.join(music_filters)}[studio_music_raw]"
                 )
             studio_music_label = "[studio_music_raw]"
-            if request.music_ducking and main_audio_mix_token:
-                audio_filter_chain.append(
-                    f"{main_audio_mix_token}asplit=2[main_music_mix][music_sidechain]"
-                )
-                audio_mix_labels = [
-                    "[main_music_mix]" if label == main_audio_mix_token else label
-                    for label in audio_mix_labels
-                ]
-                main_audio_mix_token = "[main_music_mix]"
-                duck_strength = clamp_float(request.music_ducking_strength, 0.05, 0.95)
-                ratio = 2.0 + duck_strength * 14.0
-                audio_filter_chain.append(
-                    "[studio_music_raw][music_sidechain]sidechaincompress="
-                    f"threshold=0.025:ratio={ratio:.2f}:attack=18:release=280[music_ducked]"
-                )
-                studio_music_label = "[music_ducked]"
+            if request.music_ducking and duck_mode == "speech":
+                sidechains = []
+                if main_audio_mix_token:
+                    audio_filter_chain.append(f"{main_audio_mix_token}asplit=2[main_music_mix][music_sidechain]")
+                    audio_mix_labels = ["[main_music_mix]" if label == main_audio_mix_token else label
+                                        for label in audio_mix_labels]
+                    main_audio_mix_token = "[main_music_mix]"
+                    sidechains.append("[music_sidechain]")
+                # FFmpeg resolves this forward label after the voiceover bus
+                # has been trimmed, faded, retimed and automated below. SFX
+                # must not be mistaken for speech; muted/zero takes do not duck.
+                voiceover_music_sidechain = audio_track_audible(audio_track_states, "voiceover") and any(
+                    effect.kind == "voiceover" and effect.enabled and effect.volume > 0
+                    for effect in request.sound_effects or [])
+                if voiceover_music_sidechain:
+                    sidechains.append("[voiceover_music_sidechain]")
+                if sidechains:
+                    sidechain = sidechains[0]
+                    if len(sidechains) == 2:
+                        audio_filter_chain.append(
+                            "[music_sidechain]aresample=48000[music_sidechain_48k];"
+                            "[music_sidechain_48k][voiceover_music_sidechain]amix=inputs=2:"
+                            "duration=longest:dropout_transition=0:normalize=0[music_dialogue_sidechain]")
+                        sidechain = "[music_dialogue_sidechain]"
+                    ratio = 2.0 + duck_strength * 14.0
+                    audio_filter_chain.append(
+                        f"[studio_music_raw]{sidechain}sidechaincompress="
+                        f"threshold=0.025:ratio={ratio:.2f}:attack=18:release=280[music_ducked]")
+                    studio_music_label = "[music_ducked]"
             audio_mix_labels.append(studio_music_label)
 
         if request.sound_effects:
@@ -33744,9 +33880,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 if automation:
                     automated_label = f"{bus}_automated"
                     audio_filter_chain.append(f"[{input_idx}:a]{automation}[{automated_label}]")
-                    audio_mix_labels.append(f"[{automated_label}]")
+                    bus_label = f"[{automated_label}]"
                 else:
-                    audio_mix_labels.append(f"[{input_idx}:a]")
+                    bus_label = f"[{input_idx}:a]"
+                if bus == "voiceover" and voiceover_music_sidechain:
+                    audio_filter_chain.append(f"{bus_label}asplit=2[voiceover_mix][voiceover_music_sidechain]")
+                    bus_label = "[voiceover_mix]"
+                audio_mix_labels.append(bus_label)
                 input_idx += 1
 
         if background_audio and background_audio.url:
@@ -33825,13 +33965,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     audio_mix_labels.append("[bg_track]")
 
         if audio_mix_labels:
-            if len(audio_mix_labels) == 1:
-                audio_filter_chain.append(f"{audio_mix_labels[0]}anull[a_mix_unpadded]")
-            else:
-                audio_filter_chain.append(
-                    f"{''.join(audio_mix_labels)}amix=inputs={len(audio_mix_labels)}:"
-                    f"duration=first:dropout_transition=2:normalize=0[a_mix_unpadded]"
-                )
+            audio_filter_chain.append(build_audio_bus_mix(audio_mix_labels))
             audio_filter_chain.append(
                 f"[a_mix_unpadded]{build_studio_audio_delivery_filter(rendered_timeline_duration)}[a_mix]"
             )
@@ -34042,6 +34176,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "job_id": job_id, 
                 "output_path": output_path,
                 "output_url": public_url,
+                "output_sha256": sha256_file(output_path),
+                "output_bytes": os.path.getsize(output_path),
                 "thumbnail_url": thumbnail_url,
                 "cover_frame": cover_frame_result,
                 "thumbnail_frame": thumbnail_frame_result,
@@ -34062,6 +34198,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "duration": get_media_duration(output_path) or rendered_timeline_duration,
                 "speed_plan": speed_plan,
                 "creative_receipt": creative_receipt,
+                "creative_template_instance": request.creative_template_instance,
                 "professional_cleanup": cleanup_receipt,
                 "audio_restoration": restoration_receipt if has_main_audio else None,
                 "audio_automation": audio_automation_receipt,
@@ -34091,6 +34228,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     finally:
         # Cleanup inputs
         if os.path.exists(input_path): os.remove(input_path)
+        for sequence_temp_path in sequence_temp_paths:
+            try:
+                if os.path.exists(sequence_temp_path):
+                    os.remove(sequence_temp_path)
+            except OSError as cleanup_error:
+                logger.warning("Could not remove sequence scratch %s: %s", sequence_temp_path, cleanup_error)
         for overlay_temp_path in set(overlay_temp_paths):
             if os.path.exists(overlay_temp_path):
                 os.remove(overlay_temp_path)

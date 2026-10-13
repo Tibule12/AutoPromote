@@ -16,7 +16,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 PRESETS = ("brand_reveal", "title", "kinetic", "counter", "comparison", "lower_third", "callout", "watermark", "badge", "progress", "quote", "cta")
-SOUNDS = ("sweep", "impact", "pop", "click", "riser", "chime", "reverse", "glitch", "subdrop")
+SOUNDS = ("sweep", "impact", "pop", "click", "riser", "chime", "reverse", "glitch", "subdrop",
+          "cinematic_hit", "airy_whoosh", "bass_punch", "metal_hit", "tape_stop", "sparkle")
 FONT = Path(__file__).parent / "assets/fonts/StudioMotion-Bold.ttf"
 SAMPLE_RATE = 48000
 
@@ -428,12 +429,37 @@ def synthesize_effect(effect, sample_rate=SAMPLE_RATE):
     samples = np.empty(count, dtype=np.float32)
     fade_in, fade_out = max(.001, effect.get("fadeIn", 0)), max(.005, effect.get("fadeOut", 0))
     tone, seed, phase, tau = effect.get("tone"), 123456789, 0, 2*math.pi
+    filtered_noise = 0
     for i in range(count):
         t = i/sample_rate
         p = t/duration
         seed = (seed*1664525+1013904223) & 0xffffffff
         noise = seed/4294967296*2-1
-        if tone in ("sweep", "riser", "reverse"):
+        previous_noise = filtered_noise
+        filtered_noise += min(1, 2400/sample_rate)*(noise-filtered_noise)
+        if tone == "cinematic_hit":
+            phase += tau*(42+105*math.exp(-32*t))/sample_rate
+            value = (.62*math.sin(phase)*math.exp(-3.6*p) +
+                     .26*filtered_noise*math.exp(-12*p) + .10*math.sin(tau*196*t)*math.exp(-6*p))
+        elif tone == "airy_whoosh":
+            phase += tau*(900+2800*math.sin(math.pi*p))/sample_rate
+            value = (.62*(noise-previous_noise)+.09*math.sin(phase))*math.sin(math.pi*p)**2
+        elif tone == "bass_punch":
+            phase += tau*(48+160*math.exp(-42*t))/sample_rate
+            value = .82*math.sin(phase)*math.exp(-7*p)+.15*noise*math.exp(-70*p)
+        elif tone == "metal_hit":
+            value = (.34*math.sin(tau*340*t)+.23*math.sin(tau*731*t)+
+                     .16*math.sin(tau*1193*t)+.09*math.sin(tau*1877*t))*math.exp(-5*p)+.12*noise*math.exp(-65*p)
+        elif tone == "tape_stop":
+            phase += tau*(45+950*(1-p)**3)/sample_rate
+            value = (.48*math.sin(phase)+.18*math.sin(2*phase)+.12*math.sin(3*phase))*(1-p)**.65
+        elif tone == "sparkle":
+            value = 0
+            for k in range(6):
+                local = t-k*duration*.075
+                if local >= 0:
+                    value += .16*math.sin(tau*880*2**(k/3)*local)*(1-math.exp(-120*local))*math.exp(-9*local/duration)
+        elif tone in ("sweep", "riser", "reverse"):
             rise = tone != "sweep"
             frequency = 2600-2300*p if tone == "reverse" else 180+3200*p if rise else 1800-1450*p
             phase += tau*frequency/sample_rate
@@ -499,9 +525,13 @@ def prepare_voiceover_samples(effect, source, speed_plan):
             tempos.append("atempo=0.5"); remaining /= .5
         while remaining > 2:
             tempos.append("atempo=2"); remaining /= 2
-        tempos.append(f"atempo={remaining}")
+        # WSOLA atempo=1 still shifts/changes source samples. An unchanged
+        # rate must retain the exact trimmed recording and its sample phase.
+        if abs(remaining - 1) > 1e-9:
+            tempos.append(f"atempo={remaining}")
         chain.append(f"[vo{index}]atrim=start={first-start}:end={last-start},asetpts=PTS-STARTPTS,"
-                     + ",".join(tempos) + f",apad,atrim=duration={(last-first)/rate}[vot{index}]")
+                     + (",".join(tempos) + "," if tempos else "")
+                     + f"apad,atrim=duration={(last-first)/rate}[vot{index}]")
     chain.append("".join(f"[vot{i}]" for i in range(len(ranges))) + f"concat=n={len(ranges)}:v=0:a=1[out]")
     raw = run(["ffmpeg", "-v", "error", "-nostdin", "-i", str(source), "-filter_complex", ";".join(chain),
                "-map", "[out]", "-ac", "1", "-ar", str(SAMPLE_RATE), "-f", "f32le", "pipe:1"])

@@ -1,5 +1,7 @@
 import { uploadSourceFileViaBackend, uploadTemporaryVideoSource } from "../sourceUpload";
-import { uploadBytesResumable, ref } from "firebase/storage";
+import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
+import { auth } from '../../firebaseClient';
+import { createHash } from 'crypto';
 import { uploadMulticamSourceResumable } from "../multicamResumableUpload";
 
 jest.mock("../../firebaseClient", () => ({
@@ -20,6 +22,8 @@ jest.mock("../multicamResumableUpload", () => ({
 describe("temporary source uploads", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    auth.currentUser = { uid: 'secure-user' };
+    getDownloadURL.mockResolvedValue('https://example.com/audio.wav');
     ref.mockImplementation((_storage, path) => ({ fullPath: path }));
     uploadBytesResumable.mockImplementation((_fileRef, file, metadata) => {
       const task = {
@@ -32,6 +36,25 @@ describe("temporary source uploads", () => {
       task.uploadMetadata = metadata;
       return task;
     });
+  });
+
+  it('binds imported audio to its actual bytes and owner in upload metadata and returned identity', async () => {
+    const file = new File(['actual sound bytes'], 'sound.wav', { type: 'audio/wav' });
+    const digest = createHash('sha256').update('actual sound bytes').digest('hex');
+    const result = await uploadSourceFileViaBackend({ file, token: 'token', mediaType: 'audio' });
+    expect(result).toMatchObject({ ownerUid: 'secure-user', contentHash: digest });
+    expect(result.storagePath).toMatch(/^uploads\/audios\/secure-user\//);
+    expect(uploadBytesResumable.mock.calls[0][2].customMetadata).toMatchObject({ ownerUid: 'secure-user', contentHash: digest });
+  });
+
+  it('rejects an account switch during upload without attributing bytes to the new account or falling back', async () => {
+    const file = new File(['actual sound bytes'], 'sound.wav', { type: 'audio/wav' });
+    const fetchSpy = jest.spyOn(global, 'fetch');
+    getDownloadURL.mockImplementation(async () => { auth.currentUser = { uid: 'other-user' }; return 'https://example.com/audio.wav'; });
+    try {
+      await expect(uploadSourceFileViaBackend({ file, token: 'token', mediaType: 'audio' })).rejects.toThrow('sign-in changed');
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally { fetchSpy.mockRestore(); }
   });
 
   it("uploads a viral scan to the signed-in user's temporary path with owner metadata", async () => {

@@ -401,6 +401,7 @@ function slowRequestLogger(req, res, next) {
 // -------------------------------------------------
 const MICRO_CACHE_TTL_MS = parseInt(process.env.MICRO_STATUS_CACHE_TTL_MS || "300", 10); // 300ms default (override via env)
 const __microCache = new Map(); // key -> { expiry, payload, contentType }
+const { statusRequestCacheKey } = require("./middlewares/platformStatusPolicy");
 function microCache(req, res, next) {
   if (MICRO_CACHE_TTL_MS <= 0) return next();
   if (req.method !== "GET") return next();
@@ -417,7 +418,8 @@ function microCache(req, res, next) {
     "/api/status/aggregate",
   ];
   if (!allow.includes(req.path)) return next();
-  const entry = __microCache.get(req.path);
+  const cacheKey = statusRequestCacheKey(req);
+  const entry = __microCache.get(cacheKey);
   if (entry && entry.expiry > Date.now()) {
     res.setHeader("x-micro-cache", "HIT");
     res.setHeader("x-micro-cache-ttl-ms", MICRO_CACHE_TTL_MS.toString());
@@ -427,11 +429,14 @@ function microCache(req, res, next) {
   const originalSend = res.send.bind(res);
   res.send = body => {
     try {
-      __microCache.set(req.path, {
-        expiry: Date.now() + MICRO_CACHE_TTL_MS,
-        payload: body,
-        contentType: res.get("Content-Type"),
-      });
+      if (res.statusCode < 400) {
+        if (__microCache.size >= 200) __microCache.delete(__microCache.keys().next().value);
+        __microCache.set(cacheKey, {
+          expiry: Date.now() + MICRO_CACHE_TTL_MS,
+          payload: body,
+          contentType: res.get("Content-Type"),
+        });
+      }
     } catch (_) {}
     res.setHeader("x-micro-cache", "MISS");
     res.setHeader("x-micro-cache-ttl-ms", MICRO_CACHE_TTL_MS.toString());
@@ -1291,6 +1296,10 @@ try {
   // Apply helmet (relaxed CSP off for React inline styles) & compression if available
   // Note: Second helmet call removed to avoid conflicts with the first comprehensive configuration
   if (compression) app.use(compression());
+  // Public documentation has its own 8kb parser and 30/minute limiter. Mount it
+  // before the media-sized parser and remote account/API limiter: help requires
+  // neither project payloads nor remote billing/worker infrastructure.
+  app.use('/api/product-assistance', require('./routes/productAssistanceRoutes')());
   // Discord interactions require the raw body for signature verification, so parse them before the global JSON middleware.
   app.use(
     "/api/discord/interactions",

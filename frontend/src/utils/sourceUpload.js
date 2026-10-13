@@ -3,6 +3,7 @@ import { auth, storage } from "../firebaseClient";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { getRuntimeE2EToken } from "./mediaAuth";
 import { uploadMulticamSourceResumable } from "./multicamResumableUpload";
+import { hashStudioSourceBlob } from "./studioSourceHash";
 
 export const STORAGE_UPLOAD_LIMIT_MB = 500;
 const TEMPORARY_SOURCE_PREFIXES = Object.freeze({
@@ -111,6 +112,7 @@ async function uploadSourceFileViaFirebase({
   fileName,
   onProgress,
   timeoutMs,
+  contentHash,
 }) {
   const user = auth.currentUser;
   if (!user?.uid) {
@@ -128,6 +130,7 @@ async function uploadSourceFileViaFirebase({
       customMetadata: {
         ownerUid: user.uid,
         source: "unified_publisher_client_upload",
+        ...(contentHash ? { contentHash } : {}),
       },
     });
 
@@ -242,6 +245,24 @@ export async function uploadSourceFileViaBackend({
   }
 
   const normalizedMediaType = mediaType || inferUploadMediaType(file);
+  const audioOwnerUid = normalizedMediaType === 'audio' && !getRuntimeE2EToken()
+    ? auth.currentUser?.uid : null;
+  const assertAudioOwner = () => {
+    if (normalizedMediaType === 'audio' && !getRuntimeE2EToken() &&
+        (!audioOwnerUid || auth.currentUser?.uid !== audioOwnerUid)) {
+      throw new Error('Your sign-in changed during the audio upload. Sign in again and retry.');
+    }
+  };
+  assertAudioOwner();
+  const contentHash = normalizedMediaType === 'audio' ? await hashStudioSourceBlob(file) : null;
+  assertAudioOwner();
+  const bindAudioSource = result => {
+    assertAudioOwner();
+    if (!contentHash) return result;
+    if (result.contentHash && result.contentHash !== contentHash)
+      throw new Error('Uploaded audio does not match the selected source bytes.');
+    return { ...result, contentHash, ...(audioOwnerUid ? { ownerUid: audioOwnerUid } : {}) };
+  };
   if (["studio_source", "studio_project"].includes(purpose) && file.size > STORAGE_UPLOAD_LIMIT_MB * 1024 * 1024) {
     const uploaded = await uploadMulticamSourceResumable({
       apiBaseUrl: API_BASE_URL,
@@ -254,32 +275,34 @@ export async function uploadSourceFileViaBackend({
     return { ...uploaded, uploadMode: "studio_resumable" };
   }
   if (getRuntimeE2EToken()) {
-    return uploadSourceFileViaBackendRequest({
+    return bindAudioSource(await uploadSourceFileViaBackendRequest({
       file,
       token: token || getRuntimeE2EToken(),
       mediaType: normalizedMediaType,
       fileName,
       onProgress,
       timeoutMs,
-    });
+    }));
   }
   try {
-    return await uploadSourceFileViaFirebase({
+    return bindAudioSource(await uploadSourceFileViaFirebase({
       file,
       mediaType: normalizedMediaType,
       fileName,
       onProgress,
       timeoutMs,
-    });
+      contentHash,
+    }));
   } catch (firebaseError) {
+    assertAudioOwner();
     console.warn("Firebase resumable upload failed, falling back to backend upload:", firebaseError);
-    return uploadSourceFileViaBackendRequest({
+    return bindAudioSource(await uploadSourceFileViaBackendRequest({
       file,
       token,
       mediaType: normalizedMediaType,
       fileName,
       onProgress,
       timeoutMs,
-    });
+    }));
   }
 }

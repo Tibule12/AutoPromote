@@ -1,0 +1,589 @@
+{
+  "schema_version": 1,
+  "product_version": "1.2.0",
+  "knowledge_version": "1.0.4",
+  "updated_at": "2026-10-13",
+  "release_channel": "development",
+  "catalogue": "knowledge.public.v1.json",
+  "controls": "controls.public.v1.json",
+  "task_guides": "tasks.public.v1.json",
+  "relationships": "graph.public.v1.json",
+  "canonical_documentation": "../README.md",
+  "features": [
+    {
+      "feature_id": "studio.timeline",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.cut",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.trim",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.ripple",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.layers",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.transforms",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.keyframes",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.easing",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.crop_reframe",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.captions",
+      "status": "BROKEN",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.titles",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.motion",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.effects",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.compositing",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.masks",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.tracking",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.subject_cutout",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.transitions",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.speed",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.audio",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.voiceover",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.music",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.sfx",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.audio_restoration",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.audio_automation",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.ducking",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.color",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.three_d",
+      "status": "PARTIAL",
+      "documentation": "../3d/index.md"
+    },
+    {
+      "feature_id": "studio.blender",
+      "status": "PARTIAL",
+      "documentation": "../3d/index.md"
+    },
+    {
+      "feature_id": "studio.three_d_audio",
+      "status": "PARTIAL",
+      "documentation": "../3d/index.md"
+    },
+    {
+      "feature_id": "studio.generated_video",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.generated_image",
+      "status": "UNIMPLEMENTED",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.generated_raw",
+      "status": "UNIMPLEMENTED",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.templates",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.preview",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.render",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.export",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.persistence",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.undo_redo",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.revision",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.b_roll",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.media_ingest",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.stabilization",
+      "status": "UNIMPLEMENTED",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.compositing.text_behind_subject",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.compositing.tracked_callout",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.compositing.background_grade",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.compositing.mask_depth",
+      "status": "FUNCTIONAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.compositing.depth_estimation",
+      "status": "UNIMPLEMENTED",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.creator.text_behind_subject",
+      "status": "PROXY_ONLY",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.creator.background_replacement",
+      "status": "PROXY_ONLY",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.creator.screen_replacement",
+      "status": "PROXY_ONLY",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.creator.object_cleanup",
+      "status": "PROXY_ONLY",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.creator.tracking",
+      "status": "PROXY_ONLY",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.upload",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.synchronization",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.master_audio",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.drift",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.channel_mapping",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.active_speaker",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.switching",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.reactions",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.split_views",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.review",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "cam_combiner.export",
+      "status": "PARTIAL",
+      "documentation": "../cam-combiner/index.md"
+    },
+    {
+      "feature_id": "director.proposals",
+      "status": "FUNCTIONAL",
+      "documentation": "../director/index.md"
+    },
+    {
+      "feature_id": "director.evidence",
+      "status": "FUNCTIONAL",
+      "documentation": "../director/index.md"
+    },
+    {
+      "feature_id": "director.review",
+      "status": "FUNCTIONAL",
+      "documentation": "../director/index.md"
+    },
+    {
+      "feature_id": "director.template_selection",
+      "status": "PARTIAL",
+      "documentation": "../director/index.md"
+    },
+    {
+      "feature_id": "director.find_viral_clips",
+      "status": "PARTIAL",
+      "documentation": "../director/index.md"
+    },
+    {
+      "feature_id": "director.scene_understanding",
+      "status": "PARTIAL",
+      "documentation": "../director/index.md"
+    },
+    {
+      "feature_id": "director.object_detection",
+      "status": "PARTIAL",
+      "documentation": "../director/index.md"
+    },
+    {
+      "feature_id": "system.model_runtime",
+      "status": "PARTIAL",
+      "documentation": "../troubleshooting/index.md"
+    },
+    {
+      "feature_id": "system.gpu_jobs",
+      "status": "PARTIAL",
+      "documentation": "../troubleshooting/index.md"
+    },
+    {
+      "feature_id": "system.processing_states",
+      "status": "PARTIAL",
+      "documentation": "../troubleshooting/index.md"
+    },
+    {
+      "feature_id": "system.retries",
+      "status": "PARTIAL",
+      "documentation": "../troubleshooting/index.md"
+    },
+    {
+      "feature_id": "system.cancellation",
+      "status": "PARTIAL",
+      "documentation": "../troubleshooting/index.md"
+    },
+    {
+      "feature_id": "system.generation_failure",
+      "status": "PARTIAL",
+      "documentation": "../troubleshooting/index.md"
+    },
+    {
+      "feature_id": "system.account",
+      "status": "FUNCTIONAL",
+      "documentation": "../troubleshooting/index.md"
+    },
+    {
+      "feature_id": "system.costs",
+      "status": "PARTIAL",
+      "documentation": "../troubleshooting/index.md"
+    },
+    {
+      "feature_id": "system.unsupported_media",
+      "status": "FUNCTIONAL",
+      "documentation": "../troubleshooting/index.md"
+    },
+    {
+      "feature_id": "generation.idea_to_video",
+      "status": "PARTIAL",
+      "documentation": "../generated-media/index.md"
+    },
+    {
+      "feature_id": "generation.idea_recommendations",
+      "status": "PROXY_ONLY",
+      "documentation": "../generated-media/index.md"
+    },
+    {
+      "feature_id": "generation.image_to_video",
+      "status": "PARTIAL",
+      "documentation": "../generated-media/index.md"
+    },
+    {
+      "feature_id": "generation.text_to_video",
+      "status": "PARTIAL",
+      "documentation": "../generated-media/index.md"
+    },
+    {
+      "feature_id": "generation.human_animation",
+      "status": "PARTIAL",
+      "documentation": "../generated-media/index.md"
+    },
+    {
+      "feature_id": "generation.speech_video",
+      "status": "UNIMPLEMENTED",
+      "documentation": "../generated-media/index.md"
+    },
+    {
+      "feature_id": "generation.scene_workflow",
+      "status": "PARTIAL",
+      "documentation": "../generated-media/index.md"
+    },
+    {
+      "feature_id": "creative.shared_templates",
+      "status": "PARTIAL",
+      "documentation": "../templates/index.md"
+    },
+    {
+      "feature_id": "creative.motion_graphics",
+      "status": "PARTIAL",
+      "documentation": "../templates/index.md"
+    },
+    {
+      "feature_id": "creative.logo_brand",
+      "status": "PARTIAL",
+      "documentation": "../templates/index.md"
+    },
+    {
+      "feature_id": "creative.vfx",
+      "status": "PARTIAL",
+      "documentation": "../templates/index.md"
+    },
+    {
+      "feature_id": "creative.three_d",
+      "status": "PARTIAL",
+      "documentation": "../templates/index.md"
+    },
+    {
+      "feature_id": "creative.audio",
+      "status": "PARTIAL",
+      "documentation": "../templates/index.md"
+    },
+    {
+      "feature_id": "creative.story",
+      "status": "PARTIAL",
+      "documentation": "../templates/index.md"
+    },
+    {
+      "feature_id": "creative.showroom",
+      "status": "UNIMPLEMENTED",
+      "documentation": "../templates/index.md"
+    },
+    {
+      "feature_id": "publishing.connections",
+      "status": "PARTIAL",
+      "documentation": "../publishing/index.md"
+    },
+    {
+      "feature_id": "publishing.schedule",
+      "status": "PARTIAL",
+      "documentation": "../publishing/index.md"
+    },
+    {
+      "feature_id": "publishing.export",
+      "status": "PARTIAL",
+      "documentation": "../publishing/index.md"
+    },
+    {
+      "feature_id": "publishing.publish",
+      "status": "PARTIAL",
+      "documentation": "../publishing/index.md"
+    },
+    {
+      "feature_id": "publishing.analytics",
+      "status": "PARTIAL",
+      "documentation": "../publishing/index.md"
+    }
+  ],
+  "guides": [
+    {
+      "task_id": "task.image_cinematic",
+      "documentation": "../task-guides/task-image_cinematic.md"
+    },
+    {
+      "task_id": "task.product_launch",
+      "documentation": "../task-guides/task-product_launch.md"
+    },
+    {
+      "task_id": "task.text_behind",
+      "documentation": "../task-guides/task-text_behind.md"
+    },
+    {
+      "task_id": "task.tracked_text",
+      "documentation": "../task-guides/task-tracked_text.md"
+    },
+    {
+      "task_id": "task.background_replace",
+      "documentation": "../task-guides/task-background_replace.md"
+    },
+    {
+      "task_id": "task.remove_object",
+      "documentation": "../task-guides/task-remove_object.md"
+    },
+    {
+      "task_id": "task.screen_replace",
+      "documentation": "../task-guides/task-screen_replace.md"
+    },
+    {
+      "task_id": "task.cinematic_logo",
+      "documentation": "../task-guides/task-cinematic_logo.md"
+    },
+    {
+      "task_id": "task.animate_person",
+      "documentation": "../task-guides/task-animate_person.md"
+    },
+    {
+      "task_id": "task.podcast_vertical",
+      "documentation": "../task-guides/task-podcast_vertical.md"
+    },
+    {
+      "task_id": "task.cam_combiner",
+      "documentation": "../task-guides/task-cam_combiner.md"
+    },
+    {
+      "task_id": "task.reversed_channels",
+      "documentation": "../task-guides/task-reversed_channels.md"
+    },
+    {
+      "task_id": "task.captions_correct",
+      "documentation": "../task-guides/task-captions_correct.md"
+    },
+    {
+      "task_id": "task.add_broll",
+      "documentation": "../task-guides/task-add_broll.md"
+    },
+    {
+      "task_id": "task.three_d_title",
+      "documentation": "../task-guides/task-three_d_title.md"
+    },
+    {
+      "task_id": "task.use_template",
+      "documentation": "../task-guides/task-use_template.md"
+    },
+    {
+      "task_id": "task.director_manual",
+      "documentation": "../task-guides/task-director_manual.md"
+    },
+    {
+      "task_id": "task.final_export",
+      "documentation": "../task-guides/task-final_export.md"
+    }
+  ],
+  "policy": "Dated, read-only product documentation. Preserve readiness and limitations. Not project execution authority or a guarantee of external AI ingestion."
+}

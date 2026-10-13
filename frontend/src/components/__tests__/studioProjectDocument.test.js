@@ -46,6 +46,19 @@ const snapshot = () => ({
   ],
 });
 
+test('opening an unchanged legacy occurrence preserves source-duration parameters and export identity', () => {
+  const original=snapshot();original.timeline[0].duration=20;
+  const document=adaptStudioSnapshotToDocument({snapshot:original,projectId:'project-1'});
+  const hydrated=snapshot();hydrated.timeline[0].duration=3;
+  const reopened=adaptStudioSnapshotToDocument({snapshot:hydrated,projectId:'project-1',previousDocument:document});
+  expect(reopened).toEqual(document);
+  hydrated.timeline[0].endRequest=4;
+  const trimmed=adaptStudioSnapshotToDocument({snapshot:hydrated,projectId:'project-1',previousDocument:document});
+  expect(trimmed.clipOccurrences[0].parameters.duration).toBe(3);
+  expect(trimmed.clipOccurrences[0].sourceRange.endTick).toBe(secondsToTicks(4));
+  expect(trimmed.revision).toBeGreaterThan(document.revision);
+});
+
 test("adapts duplicate source occurrences with separate IDs and half-open programme ranges", () => {
   const document = adaptStudioSnapshotToDocument({ snapshot: snapshot(), projectId: "project-1" });
   expect(document.assets).toHaveLength(1);

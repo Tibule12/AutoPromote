@@ -809,41 +809,7 @@ router.post(
       // -------------------------------------------------
 
       // Helper function to determine content intent based on platform flags
-      function determineContentIntent(platformOptions) {
-        if (!platformOptions) return "organic";
-        let tier = "organic";
-
-        // Check each platform's options
-        const platforms = Object.keys(platformOptions);
-        for (const p of platforms) {
-          const opts = platformOptions[p];
-          if (!opts) continue;
-
-          // SPONSORED SIGNS (Highest Priority)
-          if (
-            (p === "tiktok" &&
-              opts.commercial &&
-              (opts.commercial.yourBrand || opts.commercial.brandedContent)) || // TikTok Brand (Updated structure)
-            (p === "instagram" && opts.isPaidPartnership) || // IG Paid Partnership
-            (p === "facebook" && opts.isPaidPartnership) || // Facebook Paid Partnership
-            (p === "pinterest" && opts.isPaidPartnership) || // Pinterest Paid Partnership
-            (p === "youtube" && opts.paidPromotion) // YT Paid Promotion usually implies sponsorship
-          ) {
-            return "sponsored";
-          }
-
-          // COMMERCIAL SIGNS (Medium Priority)
-          if (
-            (p === "tiktok" &&
-              (opts.commercialContent || (opts.commercial && opts.commercial.isCommercial))) || // TikTok Commercial flag
-            (p === "linkedin" && opts.isPromotional) || // LinkedIn Promotional
-            (p === "reddit" && opts.isPromotional) // Reddit Promotional
-          ) {
-            tier = "commercial";
-          }
-        }
-        return tier;
-      }
+      const { determineContentIntent } = require('./services/publishingIntent');
 
       const detectedIntent = determineContentIntent(platform_options);
 
@@ -1321,11 +1287,9 @@ router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const schedulesRef = db
-      .collection("promotion_schedules")
-      .where("user_id", "==", userId)
-      .orderBy("startTime", "desc")
-      .limit(limit);
+    const schedulesRef = await require('./services/publishingScheduleQuery').ownedScheduleQuery(db,userId,{
+      limit,from:req.query.from,until:req.query.until,cursor:req.query.cursor
+    });
     const snapshot = await schedulesRef.get();
     const schedules = snapshot.docs.map(doc =>
       summaryOnly ? summarizeSchedule(doc) : { id: doc.id, ...doc.data() }
@@ -1350,9 +1314,11 @@ router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
         limit,
         summary: summaryOnly,
         hasMore: snapshot.size >= limit,
+        nextCursor: snapshot.size >= limit ? snapshot.docs.at(-1)?.id || null : null,
       },
     });
   } catch (error) {
+    if (error.status === 400 || error.status === 404) return res.status(error.status).json({error:error.message});
     console.error("[GET /my-promotion-schedules] Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }

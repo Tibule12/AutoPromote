@@ -1,0 +1,678 @@
+{
+  "schema_version": 1,
+  "scope": "V1 minimum product areas; explicit deferred adjacent surfaces. Not every internal helper.",
+  "surfaces": [
+    {
+      "feature_id": "studio.timeline",
+      "path": "frontend/src/components/StudioProTimeline.js",
+      "anchor": "buildTimelineCaptionRegions",
+      "required": true
+    },
+    {
+      "feature_id": "studio.cut",
+      "path": "frontend/src/components/studioCommands.js",
+      "anchor": "validateStudioCommandBatch",
+      "required": true
+    },
+    {
+      "feature_id": "studio.trim",
+      "path": "frontend/src/components/studioCommands.js",
+      "anchor": "validateStudioCommandBatch",
+      "required": true
+    },
+    {
+      "feature_id": "studio.ripple",
+      "path": "frontend/src/components/studioCommands.js",
+      "anchor": "validateStudioCommandBatch",
+      "required": true
+    },
+    {
+      "feature_id": "studio.layers",
+      "path": "frontend/src/components/studioProjectDocument.js",
+      "anchor": "STUDIO_DOCUMENT_VERSION",
+      "required": true
+    },
+    {
+      "feature_id": "studio.transforms",
+      "path": "frontend/src/components/StudioAdvancedInspectors.js",
+      "anchor": "MotionInspector",
+      "required": true
+    },
+    {
+      "feature_id": "studio.keyframes",
+      "path": "frontend/src/components/studioAutomation.js",
+      "anchor": "STUDIO_EASINGS",
+      "required": true
+    },
+    {
+      "feature_id": "studio.easing",
+      "path": "frontend/src/components/studioAutomation.js",
+      "anchor": "STUDIO_EASINGS",
+      "required": true
+    },
+    {
+      "feature_id": "studio.crop_reframe",
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+      "required": true
+    },
+    {
+      "feature_id": "studio.captions",
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+      "required": true
+    },
+    {
+      "feature_id": "studio.titles",
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+      "required": true
+    },
+    {
+      "feature_id": "studio.motion",
+      "path": "frontend/src/components/StudioAdvancedInspectors.js",
+      "anchor": "MotionInspector",
+      "required": true
+    },
+    {
+      "feature_id": "studio.effects",
+      "path": "frontend/src/components/StudioAdvancedInspectors.js",
+      "anchor": "MotionInspector",
+      "required": true
+    },
+    {
+      "feature_id": "studio.compositing",
+      "path": "frontend/src/components/studioBlendModes.js",
+      "anchor": "STUDIO_EXPORT_BLEND_MODES",
+      "required": true
+    },
+    {
+      "feature_id": "studio.masks",
+      "path": "frontend/src/components/studioSubjectVfxContract.js",
+      "anchor": "validatePoints",
+      "required": true
+    },
+    {
+      "feature_id": "studio.tracking",
+      "path": "src/services/studioSubjectVfxService.js",
+      "anchor": "workerConfig",
+      "required": true
+    },
+    {
+      "feature_id": "studio.subject_cutout",
+      "path": "src/services/studioSubjectVfxService.js",
+      "anchor": "workerConfig",
+      "required": true
+    },
+    {
+      "feature_id": "studio.transitions",
+      "path": "frontend/src/components/studioRenderCompiler.js",
+      "anchor": "compileStudioOverlaysForRender",
+      "required": true
+    },
+    {
+      "feature_id": "studio.speed",
+      "path": "frontend/src/components/studioCreatorRecipes.js",
+      "anchor": "buildCreatorMotionRecipe",
+      "required": true
+    },
+    {
+      "feature_id": "studio.audio",
+      "path": "frontend/src/components/StudioAdvancedInspectors.js",
+      "anchor": "MotionInspector",
+      "required": true
+    },
+    {
+      "feature_id": "studio.voiceover",
+      "path": "frontend/src/components/studioVoiceover.js",
+      "anchor": "voiceoverGain",
+      "required": true
+    },
+    {
+      "feature_id": "studio.music",
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+      "required": true
+    },
+    {
+      "feature_id": "studio.sfx",
+      "path": "frontend/src/components/motion/soundDesign.js",
+      "anchor": "DESIGN_SOUNDS",
+      "required": true
+    },
+    {
+      "feature_id": "studio.audio_restoration",
+      "path": "frontend/src/components/StudioAdvancedInspectors.js",
+      "anchor": "MotionInspector",
+      "required": true
+    },
+    {
+      "feature_id": "studio.audio_automation",
+      "path": "frontend/src/components/StudioAdvancedInspectors.js",
+      "anchor": "MotionInspector",
+      "required": true
+    },
+    {
+      "feature_id": "studio.ducking",
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+      "required": true
+    },
+    {
+      "feature_id": "studio.color",
+      "path": "frontend/src/components/StudioFinishRack.js",
+      "anchor": "StudioFinishRack",
+      "required": true
+    },
+    {
+      "feature_id": "studio.three_d",
+      "path": "frontend/src/components/threeD/studio3DModel.js",
+      "anchor": "STUDIO_3D_TEMPLATES",
+      "required": true
+    },
+    {
+      "feature_id": "studio.blender",
+      "path": "frontend/src/components/threeD/studio3DParity.js",
+      "anchor": "STUDIO_3D_FIELD_PARITY_VERSION",
+      "required": true
+    },
+    {
+      "feature_id": "studio.three_d_audio",
+      "path": "frontend/src/components/threeD/studio3DParity.js",
+      "anchor": "STUDIO_3D_FIELD_PARITY_VERSION",
+      "required": true
+    },
+    {
+      "feature_id": "studio.generated_video",
+      "path": "frontend/src/components/StudioGeneratedBRollPanel.js",
+      "anchor": "StudioGeneratedBRollPanel",
+      "required": true
+    },
+    {
+      "feature_id": "studio.generated_image",
+      "path": "test/e2e/studio-capability-matrix.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "studio.generated_raw",
+      "path": "test/e2e/studio-capability-matrix.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "studio.templates",
+      "path": "config/creative-templates/registry.v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "studio.preview",
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+      "required": true
+    },
+    {
+      "feature_id": "studio.render",
+      "path": "frontend/src/components/studioRenderCompiler.js",
+      "anchor": "compileStudioOverlaysForRender",
+      "required": true
+    },
+    {
+      "feature_id": "studio.export",
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+      "required": true
+    },
+    {
+      "feature_id": "studio.persistence",
+      "path": "frontend/src/components/studioProjectDocument.js",
+      "anchor": "STUDIO_DOCUMENT_VERSION",
+      "required": true
+    },
+    {
+      "feature_id": "studio.undo_redo",
+      "path": "frontend/src/components/studioCommandHistory.js",
+      "anchor": "createStudioCommandInverse",
+      "required": true
+    },
+    {
+      "feature_id": "studio.revision",
+      "path": "frontend/src/components/studioProjectDocument.js",
+      "anchor": "STUDIO_DOCUMENT_VERSION",
+      "required": true
+    },
+    {
+      "feature_id": "studio.b_roll",
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+      "required": true
+    },
+    {
+      "feature_id": "studio.media_ingest",
+      "path": "src/services/studioSourceService.js",
+      "anchor": "resolveOwnedStudioSource",
+      "required": true
+    },
+    {
+      "feature_id": "studio.stabilization",
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+      "required": true
+    },
+    {
+      "feature_id": "studio.compositing.text_behind_subject",
+      "path": "frontend/src/components/studioSubjectVfxContract.js",
+      "anchor": "validatePoints",
+      "required": true
+    },
+    {
+      "feature_id": "studio.compositing.tracked_callout",
+      "path": "frontend/src/components/studioSubjectVfxContract.js",
+      "anchor": "validatePoints",
+      "required": true
+    },
+    {
+      "feature_id": "studio.compositing.background_grade",
+      "path": "frontend/src/components/studioSubjectVfxContract.js",
+      "anchor": "validatePoints",
+      "required": true
+    },
+    {
+      "feature_id": "studio.compositing.mask_depth",
+      "path": "frontend/src/components/studioSubjectVfxContract.js",
+      "anchor": "validatePoints",
+      "required": true
+    },
+    {
+      "feature_id": "studio.compositing.depth_estimation",
+      "path": "contracts/model-capabilities-v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "studio.creator.text_behind_subject",
+      "path": "frontend/src/components/StudioCreatorWorkbench.js",
+      "anchor": "CREATOR_PREVIEW_SECTIONS",
+      "required": true
+    },
+    {
+      "feature_id": "studio.creator.background_replacement",
+      "path": "frontend/src/components/StudioCreatorWorkbench.js",
+      "anchor": "CREATOR_PREVIEW_SECTIONS",
+      "required": true
+    },
+    {
+      "feature_id": "studio.creator.screen_replacement",
+      "path": "frontend/src/components/StudioCreatorWorkbench.js",
+      "anchor": "CREATOR_PREVIEW_SECTIONS",
+      "required": true
+    },
+    {
+      "feature_id": "studio.creator.object_cleanup",
+      "path": "frontend/src/components/StudioCreatorWorkbench.js",
+      "anchor": "CREATOR_PREVIEW_SECTIONS",
+      "required": true
+    },
+    {
+      "feature_id": "studio.creator.tracking",
+      "path": "frontend/src/components/StudioCreatorWorkbench.js",
+      "anchor": "CREATOR_PREVIEW_SECTIONS",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.upload",
+      "path": "frontend/src/components/multicamUtils.js",
+      "anchor": "MULTICAM_MAX_SOURCES",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.synchronization",
+      "path": "frontend/src/components/MultiCamCombiner.js",
+      "anchor": "isRecoverableMediaUrl",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.master_audio",
+      "path": "frontend/src/components/MultiCamCombiner.js",
+      "anchor": "isRecoverableMediaUrl",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.drift",
+      "path": "frontend/src/components/multicamUtils.js",
+      "anchor": "MULTICAM_MAX_SOURCES",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.channel_mapping",
+      "path": "frontend/src/components/MultiCamCombiner.js",
+      "anchor": "isRecoverableMediaUrl",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.active_speaker",
+      "path": "frontend/src/components/multicamUtils.js",
+      "anchor": "MULTICAM_MAX_SOURCES",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.switching",
+      "path": "frontend/src/components/multicamUtils.js",
+      "anchor": "MULTICAM_MAX_SOURCES",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.reactions",
+      "path": "frontend/src/components/multicamUtils.js",
+      "anchor": "MULTICAM_MAX_SOURCES",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.split_views",
+      "path": "frontend/src/components/multicamUtils.js",
+      "anchor": "MULTICAM_MAX_SOURCES",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.review",
+      "path": "frontend/src/components/MultiCamCombiner.js",
+      "anchor": "isRecoverableMediaUrl",
+      "required": true
+    },
+    {
+      "feature_id": "cam_combiner.export",
+      "path": "frontend/src/components/MultiCamCombiner.js",
+      "anchor": "isRecoverableMediaUrl",
+      "required": true
+    },
+    {
+      "feature_id": "director.proposals",
+      "path": "frontend/src/components/studioDirectorProposals.js",
+      "anchor": "STUDIO_DIRECTOR_PROPOSAL_VERSION",
+      "required": true
+    },
+    {
+      "feature_id": "director.evidence",
+      "path": "frontend/src/components/studioDirectorEvidenceProposals.js",
+      "anchor": "SOURCE_SHOT_DIRECTOR_ENGINE",
+      "required": true
+    },
+    {
+      "feature_id": "director.review",
+      "path": "frontend/src/components/studioDirectorProposals.js",
+      "anchor": "STUDIO_DIRECTOR_PROPOSAL_VERSION",
+      "required": true
+    },
+    {
+      "feature_id": "director.template_selection",
+      "path": "config/creative-templates/registry.v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "director.find_viral_clips",
+      "path": "frontend/src/UserDashboardTabs/FindViralClipsPanel.js",
+      "anchor": "import React, { useEffect, useMemo, useRef, useState } from \"react\";",
+      "required": true
+    },
+    {
+      "feature_id": "director.scene_understanding",
+      "path": "src/services/studioModelCapabilityService.js",
+      "anchor": "ownedModelArtifact",
+      "required": true
+    },
+    {
+      "feature_id": "director.object_detection",
+      "path": "src/services/studioModelCapabilityService.js",
+      "anchor": "ownedModelArtifact",
+      "required": true
+    },
+    {
+      "feature_id": "system.model_runtime",
+      "path": "src/modelRuntime/router.js",
+      "anchor": "ModelCapabilityRuntime",
+      "required": true
+    },
+    {
+      "feature_id": "system.gpu_jobs",
+      "path": "src/modelRuntime/router.js",
+      "anchor": "ModelCapabilityRuntime",
+      "required": true
+    },
+    {
+      "feature_id": "system.processing_states",
+      "path": "src/modelRuntime/router.js",
+      "anchor": "ModelCapabilityRuntime",
+      "required": true
+    },
+    {
+      "feature_id": "system.retries",
+      "path": "src/modelRuntime/router.js",
+      "anchor": "ModelCapabilityRuntime",
+      "required": true
+    },
+    {
+      "feature_id": "system.cancellation",
+      "path": "src/modelRuntime/router.js",
+      "anchor": "ModelCapabilityRuntime",
+      "required": true
+    },
+    {
+      "feature_id": "system.generation_failure",
+      "path": "src/modelRuntime/router.js",
+      "anchor": "ModelCapabilityRuntime",
+      "required": true
+    },
+    {
+      "feature_id": "system.account",
+      "path": "src/services/studioSourceService.js",
+      "anchor": "resolveOwnedStudioSource",
+      "required": true
+    },
+    {
+      "feature_id": "system.costs",
+      "path": "frontend/src/components/StudioGeneratedBRollPanel.js",
+      "anchor": "StudioGeneratedBRollPanel",
+      "required": true
+    },
+    {
+      "feature_id": "system.unsupported_media",
+      "path": "src/services/studioSourceService.js",
+      "anchor": "resolveOwnedStudioSource",
+      "required": true
+    },
+    {
+      "feature_id": "generation.idea_to_video",
+      "path": "frontend/src/UserDashboardTabs/IdeaVideoPanel.js",
+      "anchor": "cleanIdeaText",
+      "required": true
+    },
+    {
+      "feature_id": "generation.idea_recommendations",
+      "path": "src/services/contentIdeaEngine.js",
+      "anchor": "generateContentIdeas",
+      "required": true
+    },
+    {
+      "feature_id": "generation.image",
+      "path": "src/services/contentFactoryProviders.js",
+      "anchor": "createNvidiaFactoryProviders",
+      "required": true
+    },
+    {
+      "feature_id": "generation.image_to_video",
+      "path": "contracts/model-capabilities-v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "generation.text_to_video",
+      "path": "contracts/model-capabilities-v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "generation.human_animation",
+      "path": "contracts/model-capabilities-v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "generation.speech_video",
+      "path": "contracts/model-capabilities-v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "generation.scene_workflow",
+      "path": "frontend/src/components/StudioGeneratedBRollPanel.js",
+      "anchor": "StudioGeneratedBRollPanel",
+      "required": true
+    },
+    {
+      "feature_id": "generation.narration",
+      "path": "src/services/contentFactoryProviders.js",
+      "anchor": "createNvidiaFactoryProviders",
+      "required": true
+    },
+    {
+      "feature_id": "creative.shared_templates",
+      "path": "config/creative-templates/registry.v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "creative.motion_graphics",
+      "path": "config/creative-templates/registry.v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "creative.logo_brand",
+      "path": "config/creative-templates/registry.v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "creative.vfx",
+      "path": "config/creative-templates/registry.v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "creative.three_d",
+      "path": "frontend/src/components/threeD/studio3DModel.js",
+      "anchor": "STUDIO_3D_TEMPLATES",
+      "required": true
+    },
+    {
+      "feature_id": "creative.audio",
+      "path": "config/creative-templates/registry.v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "creative.story",
+      "path": "config/creative-templates/registry.v1.json",
+      "anchor": "{",
+      "required": true
+    },
+    {
+      "feature_id": "creative.showroom",
+      "path": "src/creativeTemplates/showcase.js",
+      "anchor": "validateMedia",
+      "required": true
+    },
+    {
+      "feature_id": "publishing.connections",
+      "path": "src/routes/platformRoutes.js",
+      "anchor": "normalize",
+      "required": true
+    },
+    {
+      "feature_id": "publishing.schedule",
+      "path": "src/services/repostSchedulerService.js",
+      "anchor": "isExternalPlatformPageUrl",
+      "required": true
+    },
+    {
+      "feature_id": "publishing.export",
+      "path": "frontend/src/features/publishing/UnifiedPublisher.js",
+      "anchor": "to",
+      "required": true
+    },
+    {
+      "feature_id": "publishing.publish",
+      "path": "frontend/src/features/publishing/UnifiedPublisher.js",
+      "anchor": "to",
+      "required": true
+    },
+    {
+      "feature_id": "publishing.analytics",
+      "path": "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
+      "anchor": "import React, { useState, useEffect, useCallback } from \"react\";",
+      "required": true
+    },
+    {
+      "feature_id": "workspace.team",
+      "path": "frontend/src/UserDashboardTabs/TeamPanel.js",
+      "anchor": "TeamPanel",
+      "required": false
+    },
+    {
+      "feature_id": "workspace.rewards",
+      "path": "frontend/src/UserDashboardTabs/RewardsPanel.js",
+      "anchor": "RewardsPanel",
+      "required": false
+    },
+    {
+      "feature_id": "workspace.notifications",
+      "path": "frontend/src/UserDashboardTabs/NotificationsPanel.js",
+      "anchor": "NotificationsPanel",
+      "required": false
+    },
+    {
+      "feature_id": "workspace.profile",
+      "path": "frontend/src/UserDashboardTabs/ProfilePanel.js",
+      "anchor": "ProfilePanel",
+      "required": false
+    },
+    {
+      "feature_id": "workspace.security",
+      "path": "frontend/src/UserDashboardTabs/SecurityPanel.js",
+      "anchor": "SecurityPanel",
+      "required": false
+    },
+    {
+      "feature_id": "workspace.earnings",
+      "path": "frontend/src/UserDashboardTabs/EarningsPanel.js",
+      "anchor": "EarningsPanel",
+      "required": false
+    },
+    {
+      "feature_id": "workspace.mission_control",
+      "path": "frontend/src/UserDashboardTabs/MissionControlPanel.js",
+      "anchor": "MissionControlPanel",
+      "required": false
+    },
+    {
+      "feature_id": "workspace.smart_promo",
+      "path": "frontend/src/UserDashboardTabs/SmartPromoPanel.js",
+      "anchor": "SmartPromoPanel",
+      "required": false
+    },
+    {
+      "feature_id": "workspace.memetic",
+      "path": "frontend/src/UserDashboardTabs/MemeticComposerPanel.js",
+      "anchor": "MemeticComposerPanel",
+      "required": false
+    },
+    {
+      "feature_id": "assistant.existing_chat",
+      "path": "src/routes/assistantRoutes.js",
+      "anchor": "router",
+      "required": false
+    }
+  ]
+}
