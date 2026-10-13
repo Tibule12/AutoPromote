@@ -757,6 +757,17 @@
   padding-right: 24px;
   padding-left: 24px;
 }
+@media (min-width: 769px) {
+  body:has(.schedules-panel) .chat-widget-container {
+    right: 8px;
+    bottom: 8px;
+  }
+  body:has(.schedules-panel) .chat-widget-button {
+    width: 42px;
+    height: 42px;
+    padding: 10px;
+  }
+}
 .schedule-kpis {
   gap: 16px;
   margin-bottom: 14px;
