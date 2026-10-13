@@ -122,6 +122,7 @@ const SchedulesPanel = ({
   const previewTitle =
     firstCopy.title && firstCopy.title !== selected?.title ? firstCopy.title : "";
   const origin = originLabel(selected?.content);
+  const historyLimitNotice = loadError.startsWith("Only the most recent");
 
   const selectRelease = release => {
     setSelectedId(release.id);
@@ -364,7 +365,7 @@ const SchedulesPanel = ({
           Loading your scheduled releases…
         </div>
       )}
-      {loadError && !loading && (
+      {loadError && !loading && (!historyLimitNotice || showHistory) && (
         <div className="schedule-alert" role="alert">
           {loadError}
         </div>
@@ -487,7 +488,7 @@ const SchedulesPanel = ({
                   </div>
                   <div className="schedule-overview">
                     <div className="schedule-copy">
-                      <strong>{previewTitle || "Post title unavailable"}</strong>
+                      <strong>{previewTitle || selected.title}</strong>
                       <p>{firstCopy.caption || "No caption stored for this release."}</p>
                     </div>
                     <dl className="schedule-timing">
