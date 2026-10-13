@@ -7,6 +7,7 @@ module.exports = {
   timeout: 3 * 60 * 1000,
   use: {
     headless: process.env.PW_HEADFUL !== "1",
+    channel: process.env.PW_CHANNEL || undefined,
     viewport: { width: 1280, height: 800 },
     launchOptions: {
       // Video surfaces can be promoted to an overlay plane that Chromium's
@@ -14,8 +15,8 @@ module.exports = {
       // footage in screenshots and retained test recordings.
       args:
         process.env.PW_HEADFUL === "1"
-          ? ["--ozone-platform=x11"]
-          : ["--disable-gpu"],
+          ? ["--ozone-platform=x11", "--mute-audio"]
+          : ["--disable-gpu", "--mute-audio"],
     },
     actionTimeout: 60000,
     extraHTTPHeaders: { "x-playwright-e2e": "1" },
