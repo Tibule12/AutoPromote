@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "CI-only dependency review: upgrade the pinned Firebase CLI to support the retained patched stream-json major; no feature availability or readiness change.",
-  "reviewed_at": "2026-10-13T18:17:29.234Z",
-  "catalog_sha256": "9a1ae0868cc99f489d80b2b9f305887470d3332753d207ed60bf12a8762c8fe9",
+  "reason": "Professional Studio image-effect review: preserve transparent edge color and shared shadow/glow/blur scale and ordering, with two native CPU films and eight bounded paired frames. Existing readiness and all broader mask/media/sound/nesting limits remain unchanged.",
+  "reviewed_at": "2026-10-13T19:06:24.837Z",
+  "catalog_sha256": "eeac4bceb52935c8fd2356bf69d7810e72af1ba1f03f2f0721d3bc4903beb835",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -95,7 +95,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "1c44507f33fe9b15c8ce21ab5232b02be468904feb5ce8afbb9bdced99590dc3"
+      "sha256": "9a167875346aa951b71c9160bbdaf2ed9985dd404274e52a9d4183888fc6b510"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -132,6 +132,10 @@
     {
       "path": "frontend/src/components/studioDirectorProposals.js",
       "sha256": "21e0a9eb112ff847ad2295de122d68c1c41313b98b6f531648a1aa312df20efe"
+    },
+    {
+      "path": "frontend/src/components/studioMediaEffects.js",
+      "sha256": "d85f3cc0df0b794eca4a413c28ee4b7bf8de38d671a61ddbe2b76433ef286a1b"
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
@@ -171,7 +175,7 @@
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
-      "sha256": "dab0969a18476746c7a6e4317c1b43c4ba522b33d4938a2adad7b8cf38ef31d4"
+      "sha256": "8232c6613a4641d7f82b7b519430e69711bea3d45f1fc9e12302534634b48958"
     },
     {
       "path": "python_media_worker/studio_text.py",
@@ -287,11 +291,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "fba5cd751ba561da6443d52fceff0084570e7a489e684ce4ec708b323259e172"
+      "sha256": "cd87e48b0af3a885fcf161fa4083413c4f6a9668bcbed9f2153525b45fa30753"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "f6ee39ef6343283d8567564f17a2c55ae03da018473c197dca20737e447159a8"
+      "sha256": "74616bcdccc84370024210b08b49ff7e8ba46505a7df2df296610f75e33d0183"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

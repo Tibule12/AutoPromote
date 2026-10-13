@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Compare real Studio soft edges with the owned completed movie.
+
+The existing programme canvas provides the background at each declared time.
+Use whole soft-edge regions, no fitted shifts or temporal offsets. The worker
+matte is a diagnostic reference, not a replacement for the native movie.
+"""
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+import numpy as np
+from PIL import Image, ImageDraw
+
+root = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(root))
+from python_media_worker.studio_layer_motion import _render_pose, layer_pose
+
+combined = "--combined" in sys.argv[1:]
+folder = root / "reports/studio-professional-continuation-20261013/proof"
+if combined:
+    folder /= "combined"
+movie = folder / "blur-animation/final.mp4"
+request = json.loads((folder / "blur-animation-render-request.private.json").read_text())["options"]["viralData"]
+receipt = json.loads((folder / "blur-animation/render-receipt.json").read_text())
+binding = json.loads((folder / "native-preview-binding.json").read_text())
+assert binding["projectId"] == receipt["projectId"]
+assert binding["canonicalHash"] == receipt["projectHash"], "Live preview must bind the exact delivered graph"
+samples = json.loads((folder / "native-preview.json").read_text())
+size = (720, 1280)
+asset = Image.open(folder / "alpha-marker.png").convert("RGBA")
+overlay = next(o for o in request["overlays"] if o["type"] == "image")
+layer = next(l for l in request["composition_plan"]["layers"] if l["id"] == overlay["id"])
+assert layer["effects"]["blur"] == 12
+assert bool(layer["effects"]["shadow"]["enabled"]) == combined
+assert bool(layer["effects"]["glow"]["enabled"]) == combined
+foreground = np.array([255., 0., 255.])
+rows = []
+sheet = Image.new("RGB", (1440, 1304 * len(samples)))
+for index, sample in enumerate(samples):
+    time = sample["time"]
+    assert time * 24 == round(time * 24), "Only declared delivery-frame clocks qualify"
+    delivered = folder / f"final-{index}.png"
+    subprocess.run(["ffmpeg", "-v", "error", "-threads", "1", "-i", str(movie),
+                    "-vf", f"select=eq(n\\,{round(time * 24)})", "-frames:v", "1", "-y", str(delivered)], check=True)
+    native_image = Image.open(folder / f"preview-{index}.png").convert("RGB")
+    background_image = Image.open(folder / f"background-{index}.png").convert("RGB")
+    assert max(abs(a-b) for a,b in zip(native_image.size, background_image.size)) <= 1
+    native = np.asarray(native_image.resize(size, Image.Resampling.LANCZOS), dtype=float)
+    before = np.asarray(background_image.resize(size, Image.Resampling.LANCZOS), dtype=float)
+    final = np.asarray(Image.open(delivered).convert("RGB"), dtype=float)
+    direction = foreground - before
+    denominator = np.maximum(1, np.sum(direction ** 2, axis=2))
+    rendered_reference = np.asarray(_render_pose(asset, overlay, layer, layer_pose(layer, overlay, time), size))
+    reference = rendered_reference[..., 3] / 255.
+    edge = (reference > .05) & (reference < .95)
+    assert edge.sum() > 100
+    if combined:
+        # Multiple authored colors cannot be treated as one magenta matte.
+        # Compare the entire softened effect region in RGB, including the
+        # actual gold shadow and cyan glow, under the same 4-code-value bound.
+        expected = before * (1 - reference[..., None]) + rendered_reference[..., :3] * reference[..., None]
+        pair = float(np.sqrt(np.mean((native[edge] - final[edge]) ** 2)))
+        native_rmse = float(np.sqrt(np.mean((native[edge] - expected[edge]) ** 2)))
+        final_rmse = float(np.sqrt(np.mean((final[edge] - expected[edge]) ** 2)))
+        rows.append({"time": time, "softEdgePixels": int(edge.sum()), "nativeFinalRgbRmse": pair,
+                     "nativeReferenceRgbRmse": native_rmse, "finalReferenceRgbRmse": final_rmse,
+                     "passed": max(pair, native_rmse, final_rmse) <= 4})
+    else:
+        alphas, residuals = [], []
+        for picture in (native, final):
+            alpha = np.clip(np.sum((picture - before) * direction, axis=2) / denominator, 0, 1)
+            expected = before + alpha[..., None] * direction
+            alphas.append(alpha)
+            residuals.append(float(np.sqrt(np.mean((picture[edge] - expected[edge]) ** 2))))
+        pair = float(np.sqrt(np.mean((alphas[0][edge] - alphas[1][edge]) ** 2)))
+        native_rmse = float(np.sqrt(np.mean((alphas[0][edge] - reference[edge]) ** 2)))
+        final_rmse = float(np.sqrt(np.mean((alphas[1][edge] - reference[edge]) ** 2)))
+        rows.append({"time": time, "softEdgePixels": int(edge.sum()), "nativeFinalAlphaRmse": pair,
+                     "nativeReferenceAlphaRmse": native_rmse, "finalReferenceAlphaRmse": final_rmse,
+                     "nativeColorResidualRgbRmse": residuals[0], "finalColorResidualRgbRmse": residuals[1],
+                     "passed": max(pair, native_rmse, final_rmse) <= .04 and max(residuals) <= 4})
+    sheet.paste(Image.fromarray(native.astype(np.uint8)), (0, 1304 * index + 24))
+    sheet.paste(Image.fromarray(final.astype(np.uint8)), (720, 1304 * index + 24))
+    ImageDraw.Draw(sheet).text((5, 1304 * index + 5), f"Native Studio {time}s | owned CPU final", fill="white")
+sheet.save(folder / "paired-blur.jpg", quality=90)
+result = {"projectId": receipt["projectId"], "canonicalHash": receipt["projectHash"],
+          "outputSha256": hashlib.sha256(movie.read_bytes()).hexdigest(), "comparisons": rows,
+          "alphaRmseTolerance": .04, "colorResidualRgbRmseTolerance": 4,
+          "passed": all(row["passed"] for row in rows),
+          "scope": "Four mapped frames of one native transparent image with X animation and " + ("gold shadow, cyan glow and blur." if combined else "blur.") + " No fitted alignment; no full effects/mask, audio, broad media or readiness qualification."}
+assert result["outputSha256"] == receipt["outputSha256"]
+(folder / "paired-blur.json").write_text(json.dumps(result, indent=2) + "\n")
+print(json.dumps(result, indent=2))
+assert result["passed"], "Actual native/final transparent blur exceeds the declared bounds"

@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 
 import numpy as np
+import pytest
 from PIL import Image, ImageDraw
 
 from python_media_worker.studio_layer_motion import (
@@ -43,6 +44,45 @@ def test_inverted_feathered_image_renders_a_hole_and_keeps_native_corner_roundin
     assert frame[50, 50, 3] == 0
     assert frame[5, 50, 3] > 0 and frame[0, 0, 3] == 0
     assert np.all(frame[frame[..., 3] > 0, :3] == (255, 0, 255)), "Feather changes alpha rather than smearing artwork"
+
+
+def test_blurred_transparent_artwork_preserves_color_at_partial_alpha():
+    # CSS blur filters premultiplied color. Filtering straight RGBA multiplies
+    # edge color by coverage twice when it is composited over the footage.
+    asset = Image.new("RGBA", (100, 100))
+    ImageDraw.Draw(asset).rectangle((25, 25, 74, 74), fill="magenta")
+    overlay = {"type": "image", "width": 100, "height": 100,
+               "mediaFit": "stretch", "frameShape": "edge"}
+    layer = {"effects": {"blur": 12}}
+    frame = np.asarray(_render_pose(asset, overlay, layer, layer_pose(layer, overlay, 0), (100, 100)))
+    edge = (frame[..., 3] >= 32) & (frame[..., 3] <= 224)
+    assert edge.sum() > 100
+    assert np.all(frame[edge, :3] == (255, 0, 255)), "Transparent pixels must not add a dark fringe"
+    on_white = Image.new("RGBA", (100, 100), "white")
+    on_white.alpha_composite(Image.fromarray(frame))
+    assert np.all(np.asarray(on_white)[edge][:, [0, 2]] == 255)
+
+
+@pytest.mark.parametrize("effects", [
+    {"blur": 12},
+    {"shadow": {"enabled": True, "x": 20, "y": 12, "blur": 8, "opacity": .8}},
+    {"glow": {"enabled": True, "radius": 16, "intensity": .7}},
+    {"blur": 8, "shadow": {"enabled": True, "x": 20, "y": 12, "blur": 8, "opacity": .8},
+     "glow": {"enabled": True, "radius": 16, "intensity": .7}},
+])
+def test_image_effects_keep_the_same_coverage_when_delivery_resolution_doubles(effects):
+    asset = Image.new("RGBA", (100, 100))
+    ImageDraw.Draw(asset).rectangle((25, 25, 74, 74), fill="magenta")
+    overlay = {"type": "image", "width": 40, "height": 40,
+               "mediaFit": "stretch", "frameShape": "edge"}
+    layer = {"effects": effects}
+    pose = layer_pose(layer, overlay, 0)
+    standard = _render_pose(asset, overlay, layer, pose, (720, 720))
+    doubled = _render_pose(asset, overlay, layer, pose, (1440, 1440)).resize((720, 720), Image.Resampling.LANCZOS)
+    a = np.asarray(standard.getchannel("A"), dtype=float) / 255
+    b = np.asarray(doubled.getchannel("A"), dtype=float) / 255
+    edge = (a > .05) & (a < .95)
+    assert np.sqrt(np.mean((a[edge] - b[edge]) ** 2)) < .02
 
 
 def test_crop_interpolates_canonical_camel_case_keys_on_edit_clock():

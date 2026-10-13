@@ -10,6 +10,7 @@ import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import StudioLaunchTemplatePanel from "./StudioLaunchTemplatePanel";
 import ProductHelpButton from "./ProductHelpButton";
 import StudioLayerMask from "./StudioLayerMask";
+import { studioMediaEffectFilter } from "./studioMediaEffects";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey } from "./studioSourcePreview";
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity } from "./studioMusicBufferClock";
@@ -19397,19 +19398,7 @@ const ViralClipStudio = ({
                                 zIndex: 100 + index,
                                 opacity: overlayMotion.opacity * titlePose.opacity,
                                 mixBlendMode: overlay.blendMode || "normal",
-                                filter: isMediaOverlay
-                                  ? [
-                                      overlay.layerShadow?.enabled
-                                        ? `drop-shadow(${Number(overlay.layerShadow.x || 0)}px ${Number(overlay.layerShadow.y ?? 10)}px ${Number(overlay.layerShadow.blur ?? 18)}px color-mix(in srgb, ${overlay.layerShadow.color || "#000000"} ${Math.round(Number(overlay.layerShadow.opacity ?? 0.55) * 100)}%, transparent))`
-                                        : "",
-                                      overlay.glow?.enabled
-                                        ? `drop-shadow(0 0 ${Number(overlay.glow.radius ?? 16)}px color-mix(in srgb, ${overlay.glow.color || "#8b5cf6"} ${Math.round(Number(overlay.glow.intensity ?? 0.5) * 100)}%, transparent))`
-                                        : "",
-                                      Number(overlay.blur || 0) > 0
-                                        ? `blur(${Number(overlay.blur)}px)`
-                                        : "",
-                                    ].filter(Boolean).join(" ") || "none"
-                                  : undefined,
+                                filter: isMediaOverlay ? studioMediaEffectFilter(overlay) : undefined,
                                 clipPath: getOverlayMaskClipPath({
                                   ...overlay,
                                   cropX: overlayMotion.cropX,

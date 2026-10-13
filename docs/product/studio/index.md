@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
+Development documentation • product 1.2.0 • knowledge 1.0.6 • 2026-10-13T19:00:52.939796Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -485,11 +485,12 @@ Applies the supported deterministic visual effects and source-bound subject scen
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** Ordinary image effects preserve colour at transparent blur edges and share programme/layer scaling with preview. Shadow, glow and blur follow the same ordered filter chain. Inspect the exact final film; broad effect, media and combination agreement remains unqualified.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The image-effect repairs do not qualify video effects, every masked stack, full picture/sound or arbitrary composition nesting.
 
 **Common errors**
 

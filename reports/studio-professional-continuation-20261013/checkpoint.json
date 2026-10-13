@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-13T19:05:50.737008Z",
+  "branch": "agent/studio-professional-continuation-v2",
+  "baseMainCommit": "858d538b51879c718d49f9b4a233a75daaf29348",
+  "capabilitiesImproved": [
+    "Transparent image blur preserves color at alpha edges",
+    "Image shadow/glow/blur share programme units across preview, delivery and layer scale",
+    "Ordered shadow/glow/blur filters process the same whole group"
+  ],
+  "implementationFiles": [
+    "frontend/src/components/ViralClipStudio.js",
+    "frontend/src/components/studioMediaEffects.js",
+    "python_media_worker/studio_layer_motion.py"
+  ],
+  "validation": {
+    "workerCasesPassed": 19,
+    "focusedNativeComponentCasesPassed": 1,
+    "nativeComponentCasesSkipped": 122,
+    "strictLocalAppBuild": "PASS",
+    "fullStudioSuiteQualified": false
+  },
+  "nativeRuns": [
+    {
+      "variant": "transparent-blur",
+      "projectId": "viral-project-12217f04-7c8c-4388-9245-4952c28d2720",
+      "canonicalHash": "d345250eb57bc4372a40c4f9f49412c30699f92b37e6f5824282b8c949895d55",
+      "renderJobId": "viral_524379e0f21570db44c7442af5248f23b76c015038b7b2166c8682e3c5ce0efc",
+      "outputSha256": "53ed1bca967af41844b37aa8091f8ecf28c7b05cd8e1387e4dd98c50257bc6fd",
+      "studioRecordingSha256": "bf19603d62b6d1dbb26500f8181187964f38a0ab2607288d321202252750e2e0",
+      "sourceSha256": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+      "graphicSha256": "a6674eb929304a93a9042c1514393bcc419b45ec9a4883e32dfef5aab2d09fd5",
+      "nativeRenderAndDownloadSeconds": 46.909,
+      "nativeHistorySaveColdReopen": true,
+      "nativeDownloadFullDecodeAndCompleteStudioPlayback": true,
+      "dimensions": [
+        720,
+        1280
+      ],
+      "pictureFrames": 72,
+      "pictureFps": 24,
+      "parity": {
+        "projectId": "viral-project-12217f04-7c8c-4388-9245-4952c28d2720",
+        "canonicalHash": "d345250eb57bc4372a40c4f9f49412c30699f92b37e6f5824282b8c949895d55",
+        "outputSha256": "53ed1bca967af41844b37aa8091f8ecf28c7b05cd8e1387e4dd98c50257bc6fd",
+        "comparisons": [
+          {
+            "time": 0.5,
+            "softEdgePixels": 54832,
+            "nativeFinalAlphaRmse": 0.014763878128449502,
+            "nativeReferenceAlphaRmse": 0.011258985927339732,
+            "finalReferenceAlphaRmse": 0.011324895251173861,
+            "nativeColorResidualRgbRmse": 0.41610561903893,
+            "finalColorResidualRgbRmse": 1.8480354019291585,
+            "passed": true
+          },
+          {
+            "time": 1,
+            "softEdgePixels": 54832,
+            "nativeFinalAlphaRmse": 0.01328207702670698,
+            "nativeReferenceAlphaRmse": 0.011143988311472045,
+            "finalReferenceAlphaRmse": 0.011394066836253354,
+            "nativeColorResidualRgbRmse": 0.4116587332791171,
+            "finalColorResidualRgbRmse": 1.7628012452657713,
+            "passed": true
+          },
+          {
+            "time": 1.5,
+            "softEdgePixels": 54832,
+            "nativeFinalAlphaRmse": 0.014611117997369737,
+            "nativeReferenceAlphaRmse": 0.010856293892020141,
+            "finalReferenceAlphaRmse": 0.011742545037045355,
+            "nativeColorResidualRgbRmse": 0.4160656031494396,
+            "finalColorResidualRgbRmse": 1.851389959786357,
+            "passed": true
+          },
+          {
+            "time": 2.5,
+            "softEdgePixels": 54832,
+            "nativeFinalAlphaRmse": 0.013914388497493237,
+            "nativeReferenceAlphaRmse": 0.011671555912102918,
+            "finalReferenceAlphaRmse": 0.01088238798113164,
+            "nativeColorResidualRgbRmse": 0.4212934888414688,
+            "finalColorResidualRgbRmse": 1.7476197528158406,
+            "passed": true
+          }
+        ],
+        "alphaRmseTolerance": 0.04,
+        "colorResidualRgbRmseTolerance": 4,
+        "passed": true,
+        "scope": "Four mapped frames of one native transparent image with X animation and blur. No fitted alignment; no full effects/mask, audio, broad media or readiness qualification."
+      },
+      "gpuJobs": 0,
+      "gpuRuntimeSeconds": 0,
+      "gpuCost": 0,
+      "movie": "reports/studio-professional-continuation-20261013/proof/blur-animation/final.mp4",
+      "studioRecording": "reports/studio-professional-continuation-20261013/proof/blur-animation/edited-in-studio.mp4"
+    },
+    {
+      "variant": "shadow-glow-blur",
+      "projectId": "viral-project-311b2f65-b034-4e8a-9c96-b15338dd7ac0",
+      "canonicalHash": "58e4ce6b50edbf0ca0f0f467f8d6ef0236637d6bdb51b887bac877139d97741d",
+      "renderJobId": "viral_6de2df2c2a7b850eb0153a2470bab227b33156fdcb4adb3e4a12c75fdc624db1",
+      "outputSha256": "243a1896da89d9818ff7aab99a7e1b7ab4ba0c4042beb5508ef70da8df805ec7",
+      "studioRecordingSha256": "265c91848ba8302f8ec5d7fe7b7f78bc6a8b81c9f8ca680df3c04a4e418ac24a",
+      "sourceSha256": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+      "graphicSha256": "a6674eb929304a93a9042c1514393bcc419b45ec9a4883e32dfef5aab2d09fd5",
+      "nativeRenderAndDownloadSeconds": 50.9,
+      "nativeHistorySaveColdReopen": true,
+      "nativeDownloadFullDecodeAndCompleteStudioPlayback": true,
+      "dimensions": [
+        720,
+        1280
+      ],
+      "pictureFrames": 72,
+      "pictureFps": 24,
+      "parity": {
+        "projectId": "viral-project-311b2f65-b034-4e8a-9c96-b15338dd7ac0",
+        "canonicalHash": "58e4ce6b50edbf0ca0f0f467f8d6ef0236637d6bdb51b887bac877139d97741d",
+        "outputSha256": "243a1896da89d9818ff7aab99a7e1b7ab4ba0c4042beb5508ef70da8df805ec7",
+        "comparisons": [
+          {
+            "time": 0.5,
+            "softEdgePixels": 83742,
+            "nativeFinalRgbRmse": 2.6515312274350626,
+            "nativeReferenceRgbRmse": 2.277188986146603,
+            "finalReferenceRgbRmse": 2.727827387653211,
+            "passed": true
+          },
+          {
+            "time": 1,
+            "softEdgePixels": 83742,
+            "nativeFinalRgbRmse": 2.6179004778866153,
+            "nativeReferenceRgbRmse": 2.3659872890998135,
+            "finalReferenceRgbRmse": 2.7153955668344505,
+            "passed": true
+          },
+          {
+            "time": 1.5,
+            "softEdgePixels": 83742,
+            "nativeFinalRgbRmse": 2.7574445477420375,
+            "nativeReferenceRgbRmse": 2.2960550669154243,
+            "finalReferenceRgbRmse": 2.8144842153133895,
+            "passed": true
+          },
+          {
+            "time": 2.5,
+            "softEdgePixels": 83742,
+            "nativeFinalRgbRmse": 2.8107558929982024,
+            "nativeReferenceRgbRmse": 2.537925123198852,
+            "finalReferenceRgbRmse": 2.779643622656645,
+            "passed": true
+          }
+        ],
+        "alphaRmseTolerance": 0.04,
+        "colorResidualRgbRmseTolerance": 4,
+        "passed": true,
+        "scope": "Four mapped frames of one native transparent image with X animation and gold shadow, cyan glow and blur. No fitted alignment; no full effects/mask, audio, broad media or readiness qualification."
+      },
+      "gpuJobs": 0,
+      "gpuRuntimeSeconds": 0,
+      "gpuCost": 0,
+      "movie": "reports/studio-professional-continuation-20261013/proof/combined/blur-animation/final.mp4",
+      "studioRecording": "reports/studio-professional-continuation-20261013/proof/combined/blur-animation/edited-in-studio.mp4"
+    }
+  ],
+  "nativeCpuExports": 2,
+  "newGpuJobs": 0,
+  "paidGpuRuntimeSeconds": 0,
+  "paidGpuCost": 0,
+  "readinessPromotion": false,
+  "creativeApproval": false,
+  "publicRelease": false,
+  "productionDeployment": false,
+  "remainingDefects": [
+    "Strict whole-box feather/inverse outer-edge alpha failures remain retained",
+    "Full glyph/matte/grade/effect-mask order and continuous/cold/broad media parity",
+    "Video effects and masks remain outside this image proof",
+    "Global ordering/nesting and further professional controls",
+    "Ordinary-account runtime lifecycle and human sound/creative review"
+  ],
+  "nextHighestPriorityTaskId": "S02",
+  "nextTaskIds": [
+    "S02",
+    "S03",
+    "S04"
+  ]
+}

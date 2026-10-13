@@ -192,33 +192,45 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     )
     alpha = transform_surface.getchannel("A")
     effects = (layer or {}).get("effects") or {}
-    composed = Image.new("RGBA", transform_surface.size)
+    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") == "image" else 1
+    composed = transform_surface
     shadow = effects.get("shadow") or {}
     if shadow.get("enabled"):
         shadow_layer = _effect_layer(
             alpha,
             shadow.get("color", "#000000"),
             finite(shadow.get("opacity"), .55),
-            finite(shadow.get("blur"), 18),
+            finite(shadow.get("blur"), 18) * effect_units,
         )
-        composed.alpha_composite(
+        shadow_group = Image.new("RGBA", composed.size)
+        shadow_group.alpha_composite(
             shadow_layer,
-            (round(finite(shadow.get("x"), 0)), round(finite(shadow.get("y"), 10))),
+            (round(finite(shadow.get("x"), 0) * effect_units),
+             round(finite(shadow.get("y"), 10) * effect_units)),
         )
+        shadow_group.alpha_composite(composed)
+        composed = shadow_group
     glow = effects.get("glow") or {}
     if glow.get("enabled"):
-        composed.alpha_composite(
-            _effect_layer(
-                alpha,
-                glow.get("color", "#8b5cf6"),
-                finite(glow.get("intensity"), .75),
-                finite(glow.get("radius"), 16),
-            )
+        # CSS applies the next drop-shadow to the preceding filtered group.
+        # The glow therefore includes the authored shadow's coverage and sits
+        # behind the whole group, rather than covering or ignoring that shadow.
+        glow_group = _effect_layer(
+            composed.getchannel("A"), glow.get("color", "#8b5cf6"),
+            finite(glow.get("intensity"), .75),
+            finite(glow.get("radius"), 16) * effect_units,
         )
+        glow_group.alpha_composite(composed)
+        composed = glow_group
     blur = max(0, finite(effects.get("blur"), 0))
+    blur *= effect_units
     if blur > 0:
-        transform_surface = transform_surface.filter(ImageFilter.GaussianBlur(blur))
-    composed.alpha_composite(transform_surface)
+        # Match CSS filtering: blur associated color and alpha together, then
+        # restore straight RGBA for alpha_composite. Otherwise transparent black
+        # contributes to RGB and creates a dark fringe around soft artwork.
+        composed = composed.convert("RGBa").filter(
+            ImageFilter.GaussianBlur(blur)
+        ).convert("RGBA")
     clip_box = (layer or {}).get("clip_box") or {"x": 0, "y": 0, "width": 1, "height": 1}
     clip_size = (max(1, round(box_width * clip_box["width"])), max(1, round(box_height * clip_box["height"])))
     clip = layer_clip_mask(clip_size, effects.get("mask") or {}, pose.get("crop_x", 0), pose.get("crop_y", 0), canvas_height / 720 * pose["scale"])

@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
+Development documentation • product 1.2.0 • knowledge 1.0.6 • 2026-10-13T19:00:52.939796Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -25,10 +25,10 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.keyframe.easing | Keyframe easing | enum | linear, ease_in, ease_out, ease_in_out, hold, bezier | none | "ease_in_out" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.keyframe.curve | Cubic curve handles | array | source-dependent … source-dependent | none | [0.33,0,0.67,1] | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.blend | Layer blend mode | enum | normal, multiply, screen, difference, overlay, soft-light, hard-light, color-dodge, luminosity | none | "normal" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
-| studio.effect.blur | Layer blur | number | 0 … 30 | none | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
-| studio.effect.glow_radius | Glow radius | number | 0 … 60 | none | 16 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.effect.blur | Layer blur | number | 0 … 30 | pixels | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.effect.glow_radius | Glow radius | number | 0 … 60 | pixels | 16 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.effect.glow_intensity | Glow intensity | number | 0 … 1 | none | 0.5 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
-| studio.effect.layershadow_blur | Shadow blur | number | 0 … 80 | none | 18 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.effect.layershadow_blur | Shadow blur | number | 0 … 80 | pixels | 18 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.effect.layershadow_opacity | Shadow opacity | number | 0 … 1 | none | 0.55 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.effect.motionblur_samples | Motion blur samples | integer | 2 … 8 | none | 4 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.effect.motionblur_shutter | Motion blur shutter | number | 0.1 … 1 | none | 0.5 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
@@ -331,6 +331,7 @@ Adjusts the supported ordinary-layer layer blur. These controls are distinct fro
 Applies to: ordinary layers. Requires: studio.effects.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Image-layer pixel values use a 720px programme reference and scale with the layer, preview and delivery size. Broader effects remain unqualified.
 
 <a id="studio-effect-glow_radius"></a>
 
@@ -343,6 +344,7 @@ Adjusts the supported ordinary-layer glow radius. These controls are distinct fr
 Applies to: ordinary layers. Requires: studio.effects.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Image-layer pixel values use a 720px programme reference and scale with the layer, preview and delivery size. Broader effects remain unqualified.
 
 <a id="studio-effect-glow_intensity"></a>
 
@@ -367,6 +369,7 @@ Adjusts the supported ordinary-layer shadow blur. These controls are distinct fr
 Applies to: ordinary layers. Requires: studio.effects.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Image-layer pixel values use a 720px programme reference and scale with the layer, preview and delivery size. Broader effects remain unqualified.
 
 <a id="studio-effect-layershadow_opacity"></a>
 

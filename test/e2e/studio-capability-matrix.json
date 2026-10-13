@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-13T17:38:36.879Z",
+  "updatedAt": "2026-10-13T19:05:50.817138Z",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -4047,7 +4047,9 @@
       "latestNativeBlendEvidence": "reports/model-capability-runtime-v1-20261009/NATIVE-LAYER-BLENDS-20261011.md",
       "latestNativeBlendScope": "Normal/Multiply/Screen/Difference for ordinary flat overlays; one native Difference export/recovery. Five other modes/main-video blending unavailable. Whole stage order/nesting and pre-final paired parity remain unqualified.",
       "latestCompleteBlendCueClockEvidence": "reports/model-capability-runtime-v1-20261009/CUE-CLOCK-AND-COMPLETE-BLENDS-20261011.md",
-      "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified."
+      "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified.",
+      "latestProfessionalImageEffectsEvidence": "reports/studio-professional-continuation-20261013/README.md",
+      "latestProfessionalImageEffectsScope": "Two native transparent-image edits: blur and ordered gold-shadow/cyan-glow/blur with X keys, history, save/cold reopen, owned CPU export/native download/full decode and complete editable Studio playback. Eight mapped alpha/color pairs pass. Whole picture/sound, masks/broad media and readiness remain unqualified."
     },
     {
       "id": "vfx",
@@ -4293,7 +4295,9 @@
         "reports/studio-canonical-completion-20261008/native-worker-unavailable-ui/receipt.json",
         "reports/studio-canonical-completion-20261008/subject-programme-history-tests.log",
         "reports/studio-canonical-completion-20261008/programme-export-component-retest.log"
-      ]
+      ],
+      "latestProfessionalImageEffectsEvidence": "reports/studio-professional-continuation-20261013/README.md",
+      "latestProfessionalImageEffectsScope": "Two native transparent-image edits: blur and ordered gold-shadow/cyan-glow/blur with X keys, history, save/cold reopen, owned CPU export/native download/full decode and complete editable Studio playback. Eight mapped alpha/color pairs pass. Whole picture/sound, masks/broad media and readiness remain unqualified."
     },
     {
       "id": "audio",
@@ -7905,24 +7909,25 @@
   },
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "NATIVE_MASK_CROP_TITLE_AND_DELIVERY_RESOLUTION",
+    "lastSessionKind": "NATIVE_IMAGE_ALPHA_AND_ORDERED_EFFECT_COMPOSITING",
     "lastSessionRealCapabilityRuns": 2,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/model-capability-runtime-v1-20261009/STUDIO-S02-MASKS-TITLES-20261013.md",
+    "exactBlockersSource": "reports/studio-professional-continuation-20261013/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/model-capability-runtime-v1-20261009/STUDIO-S02-MASKS-TITLES-20261013.md",
+    "lastSessionEvidence": "reports/studio-professional-continuation-20261013/README.md",
     "lastSessionAutomatedChecks": {
-      "workerCasesPassed": 36,
-      "canonicalCompilerCasesPassed": 5,
+      "workerCasesPassed": 19,
+      "focusedNativeComponentCasesPassed": 1,
+      "focusedNativeComponentCasesSkipped": 122,
       "strictLocalAppBuild": "PASS",
       "fullStudioSuite": false
     },
-    "nextSlice": "S02 actual feather/inversion, glyph/alpha/matte, grade/effect-order, continuous/cold/broad-media and listening checks; then S03 global composition/nesting and S04 AE controls.",
+    "nextSlice": "S02 strict mask/alpha and image effect-mask order, full stage/picture/sound, continuous/cold/broad-media conformance; then S03 global composition/nesting and S04 controls.",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -8581,7 +8586,7 @@
         "readinessPromotion": false
       }
     ],
-    "lastSessionRealCapabilityScope": "Three actual native prepared replays of the unchanged retimed speech project; final19.392s/one music start/zero waits/all eight lanes visible. Tail PCM improves; retimed speech and speech-ducking DSP remain unqualified. No new final render.",
+    "lastSessionRealCapabilityScope": "Two native transparent-image edits: blur and ordered gold-shadow/cyan-glow/blur with X keys, history, save/cold reopen, owned CPU export/native download/full decode and complete editable Studio playback. Eight mapped alpha/color pairs pass. Whole picture/sound, masks/broad media and readiness remain unqualified.",
     "history": [
       {
         "at": "2026-10-12T23:29:14.460Z",
@@ -11508,5 +11513,34 @@
       "S03",
       "S04"
     ]
+  },
+  "professionalImageEffects20261013": {
+    "evidence": "reports/studio-professional-continuation-20261013/README.md",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Two native transparent-image edits: blur and ordered gold-shadow/cyan-glow/blur with X keys, history, save/cold reopen, owned CPU export/native download/full decode and complete editable Studio playback. Eight mapped alpha/color pairs pass. Whole picture/sound, masks/broad media and readiness remain unqualified.",
+    "nativeProjects": 2,
+    "nativeCpuExports": 2,
+    "nativeHistorySaveColdReopen": true,
+    "completeStudioRecordings": 2,
+    "pairedBlurFrames": 4,
+    "pairedBlurPassed": true,
+    "combinedEffectsQualified": true,
+    "workerChecksPassed": 19,
+    "gpuJobs": 0,
+    "gpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "readinessPromotion": false,
+    "combinationGatesPromoted": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ],
+    "checkpoint": "reports/studio-professional-continuation-20261013/checkpoint.json",
+    "qualificationScope": "One bounded ordinary-image shadow/glow/blur chain; broader effects remain unqualified.",
+    "pairedCombinedFrames": 4,
+    "pairedCombinedPassed": true,
+    "focusedNativeComponentChecksPassed": 1,
+    "focusedNativeComponentChecksSkipped": 122
   }
 }
