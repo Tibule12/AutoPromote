@@ -3,9 +3,8 @@
 // Bridges Node.js backend with Python Media Worker
 
 const axios = require("axios");
-const admin = require("firebase-admin");
+const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
-const db = admin.firestore();
 const fs = require("fs");
 const { isTransientWorkerOutput, persistWorkerOutput } = require("./studioWorkerOutputService");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
