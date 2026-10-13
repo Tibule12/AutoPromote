@@ -52,9 +52,31 @@ export function isValidTimezone(timezone) {
   }
 }
 
-export function displayTimezone(schedule, fallback = "UTC") {
-  if (isValidTimezone(schedule?.timezone)) return { value: schedule.timezone, recorded: true };
-  return { value: isValidTimezone(fallback) ? fallback : "UTC", recorded: false };
+export function browserTimezone() {
+  try {
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return isValidTimezone(zone) ? zone : "UTC";
+  } catch (_) {
+    return "UTC";
+  }
+}
+
+// A viewing zone changes formatting, never the persisted timestamp or its meaning.
+export function displayTimezone(schedule, viewingTimezone) {
+  const storedValue = isValidTimezone(schedule?.timezone) ? schedule.timezone : "";
+  const value = isValidTimezone(viewingTimezone) ? viewingTimezone : storedValue || "UTC";
+  return { value, recorded: value === storedValue, storedValue };
+}
+
+export function timezoneLabel(timezone, instant) {
+  const zone = isValidTimezone(timezone) ? timezone : "UTC";
+  const date = new Date(instant);
+  if (!Number.isFinite(date.getTime())) return zone;
+  const offset = new Intl.DateTimeFormat("en-US", {
+    timeZone: zone,
+    timeZoneName: "longOffset",
+  }).formatToParts(date).find(part => part.type === "timeZoneName")?.value || "GMT";
+  return `${zone} (${offset.replace(/^GMT$/, "GMT+00:00").replace("GMT", "UTC").replace(/:00$/, "")})`;
 }
 
 export function formatScheduleTime(value, timezone, options = {}) {
@@ -234,44 +256,64 @@ export function aggregateStatus(destinations) {
     .join(" · ");
 }
 
-export function scheduleCopy(schedule, content) {
+export function destinationHasOwnSchedule(schedule, platform) {
+  const platforms = uniquePlatforms(schedule);
+  return platforms.length === 1 && platforms[0] === platform;
+}
+
+function destinationOptions(content, platform) {
+  return content?.platform_options?.[platform] || content?.platformOptions?.[platform] || {};
+}
+
+export function scheduleCopy(schedule, content, platform = schedule?.platform) {
   const settings = schedule?.platformSpecificSettings || {};
+  const options = destinationOptions(content, platform);
+  // The scheduler resolves these aliases in this order before dispatching.
+  const text = value => value?.text || value?.commentary || value?.message ||
+    value?.caption || value?.description;
   return {
-    title:
-      settings.title ||
-      content?.platformOptions?.[schedule?.platform]?.title ||
-      content?.title ||
-      schedule?.title ||
-      "",
-    caption:
-      settings.caption ||
-      settings.description ||
-      content?.platformOptions?.[schedule?.platform]?.caption ||
-      content?.description ||
-      content?.caption ||
-      "",
+    title: settings.title || options.title || content?.title || schedule?.title || "",
+    caption: schedule?.message || schedule?.caption || text(settings) ||
+      text(options) || content?.description || content?.caption || "",
+  };
+}
+
+const firstMediaUrl = (...values) =>
+  values.find(value => typeof value === "string" && /^https?:\/\//i.test(value)) || "";
+
+export function scheduleMedia(schedule, content, platform = schedule?.platform) {
+  const settings = schedule?.platformSpecificSettings || {};
+  const options = destinationOptions(content, platform);
+  const base = releaseMedia(content);
+  const mediaUrl = value => firstMediaUrl(value.media_url, value.mediaUrl, value.videoUrl, value.imageUrl);
+  const posterUrl = value => firstMediaUrl(value.posterUrl, value.thumbnailUrl, value.thumbnail_url, value.coverImage);
+  const url = mediaUrl(settings) || mediaUrl(options) || base.url;
+  const poster = posterUrl(settings) || posterUrl(options) || base.poster;
+  const type = settings.media_type || options.media_type || content?.type || content?.mediaType || "";
+  return {
+    url,
+    poster,
+    kind: /image|photo/i.test(type) || /\.(png|jpe?g|webp)(\?|$)/i.test(url) ? "image" : "video",
   };
 }
 
 export function releaseMedia(content) {
   if (!content) return { poster: "", url: "", kind: "" };
-  const firstUrl = (...values) =>
-    values.find(value => typeof value === "string" && /^https?:\/\//i.test(value)) || "";
-  const poster = firstUrl(
+  const poster = firstMediaUrl(
     content.posterUrl,
     content.thumbnailUrl,
     content.selectedThumbnailUrl,
     content.thumbnail
   );
-  const url = firstUrl(
-    content.processedUrl,
+  const url = firstMediaUrl(
     content.persistentMediaUrl,
+    content.url,
     content.downloadInfo?.url,
     content.mediaUrl,
     content.media_url,
     content.video_url,
     content.file_url,
-    content.url
+    content.processedUrl
   );
   const kind = String(content.type || content.mediaType || "").toLowerCase();
   return {

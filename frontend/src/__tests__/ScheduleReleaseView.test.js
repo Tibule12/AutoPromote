@@ -167,7 +167,7 @@ test("post copy editor targets one destination and does not write until saved", 
 test("reschedule dialog submits an instant and its selected timezone", async () => {
   const actions = callbacks();
   actions.onRescheduleMany.mockResolvedValue(true);
-  render(<SchedulesPanel schedulesList={schedules} contentList={[]} {...actions} />);
+  render(<SchedulesPanel schedulesList={schedules} contentList={[]} defaultTimezone="UTC" {...actions} />);
   fireEvent.click(screen.getByRole("button", { name: "Reschedule release" }));
   const dialog = screen.getByRole("dialog", { name: "Reschedule" });
   expect(actions.onRescheduleMany).not.toHaveBeenCalled();

@@ -993,32 +993,6 @@ const UserDashboard = ({
     [withAuth, triggerSchedulesRefresh]
   );
 
-  const createSchedule = useCallback(
-    async ({ contentId, time, frequency, platforms = [], platformOptions = {} }) => {
-      const toastId = toast.loading("Creating schedule...");
-      try {
-        await withAuth(async token => {
-          if (!contentId) throw new Error("Missing contentId");
-          const res = await fetch(`${API_BASE_URL}/api/content/${contentId}/promotion-schedules`, {
-            method: "POST",
-            headers: withWorkspaceHeaders({
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            }),
-            body: JSON.stringify({ time, frequency, platforms, platformOptions }),
-          });
-          if (!res.ok) throw new Error("Failed to create schedule");
-          triggerSchedulesRefresh();
-          toast.success("Schedule created successfully!", { id: toastId });
-        });
-      } catch (e) {
-        console.warn(e);
-        toast.error("Failed to create schedule", { id: toastId });
-      }
-    },
-    [withAuth, triggerSchedulesRefresh]
-  );
-
   const refreshAllStatus = loadAllPlatformStatusesUnified;
 
   useEffect(() => {
@@ -1878,7 +1852,6 @@ const UserDashboard = ({
             loadError={mySchedulesError}
             defaultTimezone={userDefaults?.timezone}
             contentList={contentList}
-            onCreate={createSchedule}
             onPause={doPause}
             onResume={doResume}
             onReschedule={doReschedule}

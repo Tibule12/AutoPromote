@@ -1,10 +1,12 @@
 import { useMemo, useRef, useState } from "react";
-import { toast } from "react-hot-toast";
 import {
   PLATFORM_NAMES,
-  PLATFORM_ORDER,
   aggregateStatus,
   displayTimezone,
+  browserTimezone,
+  timezoneLabel,
+  destinationHasOwnSchedule,
+  scheduleMedia,
   formatScheduleTime,
   groupSchedules,
   isValidTimezone,
@@ -37,7 +39,7 @@ function originLabel(content) {
   ).toLowerCase();
   if (["viral_clip_studio", "viral-clip-studio", "studio"].includes(source))
     return "Created in Studio";
-  const template = content.templateName || content.template?.name;
+  const template = content.templateName || content.template?.name || content.meta?.template?.name;
   return typeof template === "string" && template.trim() ? `Template: ${template.trim()}` : "";
 }
 
@@ -52,9 +54,8 @@ const SchedulesPanel = ({
   contentList,
   loading = false,
   loadError = "",
-  defaultTimezone = "UTC",
+  defaultTimezone,
   currentTime = Date.now(),
-  onCreate,
   onPause,
   onResume,
   onReschedule,
@@ -75,14 +76,10 @@ const SchedulesPanel = ({
   const [copySaving, setCopySaving] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [mediaFailed, setMediaFailed] = useState(false);
-  const [showCreate, setShowCreate] = useState(false);
   const detailRef = useRef(null);
-  const [createData, setCreateData] = useState({
-    contentId: "",
-    date: "",
-    time: "12:00",
-    platforms: [],
-  });
+  const [viewTimezone, setViewTimezone] = useState("");
+  const viewingTimezone = viewTimezone ||
+    (isValidTimezone(defaultTimezone) ? defaultTimezone : browserTimezone());
 
   const allReleases = useMemo(
     () => groupSchedules(schedulesList, contentList),
@@ -116,17 +113,17 @@ const SchedulesPanel = ({
     releases.flatMap(release => release.destinations.map(item => item.platform))
   ).size;
   const timezoneInfo = selected
-    ? displayTimezone(selected.destinations[0]?.schedule, defaultTimezone)
-    : { value: isValidTimezone(defaultTimezone) ? defaultTimezone : "UTC", recorded: false };
+    ? displayTimezone(selected.destinations[0]?.schedule, viewingTimezone)
+    : { value: viewingTimezone, recorded: false };
   const timezone = timezoneInfo.value;
   const mixedTimezones =
     selected &&
     selected.destinations.some(
-      item => displayTimezone(item.schedule, defaultTimezone).value !== timezone
+      item => displayTimezone(item.schedule).storedValue !== timezoneInfo.storedValue
     );
   const media = releaseMedia(selected?.content);
   const firstCopy = selected
-    ? scheduleCopy(selected.destinations[0]?.schedule, selected.content)
+    ? scheduleCopy(selected.destinations[0]?.schedule, selected.content, selected.destinations[0]?.platform)
     : { title: "", caption: "" };
   const previewTitle =
     firstCopy.title && firstCopy.title !== selected?.title ? firstCopy.title : "";
@@ -140,16 +137,17 @@ const SchedulesPanel = ({
   };
 
   const editable = item => ["Ready", "Scheduled", "Paused"].includes(item.status);
+  const canControlDestination = item => destinationHasOwnSchedule(item.schedule, item.platform);
   const releaseEditable = selected?.destinations.every(editable);
   const openCopyEditor = (release, item) => {
     if (!item || !editable(item)) return;
-    const copy = scheduleCopy(item.schedule, release.content);
+    const copy = scheduleCopy(item.schedule, item.content || release.content, item.platform);
     setCopyEditor({
       releaseId: release.id,
       scheduleId: item.schedule.id,
       platform: item.platform,
       releaseTitle: release.title,
-      title: copy.title === release.title ? "" : copy.title,
+      title: copy.title,
       caption: copy.caption,
       error: "",
     });
@@ -177,7 +175,7 @@ const SchedulesPanel = ({
   const openReschedule = (release, destination = null) => {
     const zone = displayTimezone(
       destination?.schedule || release.destinations[0]?.schedule,
-      defaultTimezone
+      viewingTimezone
     ).value;
     const fields = localFields(destination?.schedule?.startTime || release.time, zone);
     setReschedule({
@@ -235,31 +233,11 @@ const SchedulesPanel = ({
     await onResumeMany(actionIds(selected));
   };
 
-  const createSchedule = async event => {
-    event.preventDefault();
-    if (!createData.contentId || !createData.platforms.length || !createData.date) return;
-    try {
-      const time = zonedFieldsToIso(
-        createData.date,
-        createData.time,
-        isValidTimezone(defaultTimezone) ? defaultTimezone : "UTC"
-      );
-      await onCreate?.({
-        contentId: createData.contentId,
-        time,
-        frequency: "once",
-        platforms: createData.platforms,
-      });
-      setShowCreate(false);
-    } catch (error) {
-      toast.error(error.message || "Could not schedule post.");
-    }
-  };
-
   const timezoneOptions = Array.from(
     new Set(
       [
         reschedule?.timezone,
+        viewingTimezone,
         defaultTimezone,
         typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "",
         "UTC",
@@ -270,69 +248,6 @@ const SchedulesPanel = ({
 
   return (
     <section className="schedules-panel" aria-label="Schedule releases">
-      {showCreate && !onNavigate && (
-        <form className="schedule-create-form" onSubmit={createSchedule}>
-          <label>
-            Content
-            <select
-              aria-label="Select Content"
-              value={createData.contentId}
-              onChange={e => setCreateData({ ...createData, contentId: e.target.value })}
-              required
-            >
-              <option value="">Select content</option>
-              {(contentList || []).map(content => (
-                <option key={content.id} value={content.id}>
-                  {content.title || "Untitled"}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Date
-            <input
-              aria-label="Schedule Date"
-              type="date"
-              value={createData.date}
-              onChange={e => setCreateData({ ...createData, date: e.target.value })}
-              required
-            />
-          </label>
-          <label>
-            Time
-            <input
-              aria-label="Schedule Time"
-              type="time"
-              value={createData.time}
-              onChange={e => setCreateData({ ...createData, time: e.target.value })}
-              required
-            />
-          </label>
-          <span>Timezone: {isValidTimezone(defaultTimezone) ? defaultTimezone : "UTC"}</span>
-          <fieldset>
-            <legend>Destinations</legend>
-            {PLATFORM_ORDER.map(platform => (
-              <label key={platform}>
-                <input
-                  type="checkbox"
-                  checked={createData.platforms.includes(platform)}
-                  onChange={() =>
-                    setCreateData(current => ({
-                      ...current,
-                      platforms: current.platforms.includes(platform)
-                        ? current.platforms.filter(value => value !== platform)
-                        : [...current.platforms, platform],
-                    }))
-                  }
-                />
-                {PLATFORM_NAMES[platform]}
-              </label>
-            ))}
-          </fieldset>
-          <button type="submit">Schedule post</button>
-        </form>
-      )}
-
       {loading && (
         <div className="schedule-loading" role="status">
           Loading your scheduled releases…
@@ -347,12 +262,12 @@ const SchedulesPanel = ({
         <div className="schedule-empty">
           No scheduled releases yet. Choose a finished file in Publisher to schedule your first
           post.
-          <button
+          {onNavigate && <button
             className="schedule-primary"
-            onClick={() => (onNavigate ? onNavigate("upload") : setShowCreate(!showCreate))}
+            onClick={() => onNavigate("upload")}
           >
-            + Schedule post
-          </button>
+            + New release
+          </button>}
         </div>
       )}
 
@@ -381,16 +296,23 @@ const SchedulesPanel = ({
             </article>
           </div>
 
+          <label className="schedule-view-timezone">
+            View times in
+            <select value={viewingTimezone} onChange={event => setViewTimezone(event.target.value)}>
+              {timezoneOptions.map(zone => <option key={zone} value={zone}>{zone}</option>)}
+            </select>
+            <small>Changes the display only.</small>
+          </label>
           <div className="schedule-workspace">
             <nav className="schedule-release-list" aria-label="Releases">
               <div className="schedule-list-heading">
                 <h3>Releases</h3>
-                <button
+                {onNavigate && <button
                   className="schedule-primary"
-                  onClick={() => (onNavigate ? onNavigate("upload") : setShowCreate(!showCreate))}
+                  onClick={() => onNavigate("upload")}
                 >
                   + New release
-                </button>
+                </button>}
               </div>
               {subjects.map(([subject, items]) => (
                 <div className="schedule-subject" key={subject}>
@@ -398,7 +320,7 @@ const SchedulesPanel = ({
                   {items.map(release => {
                     const zone = displayTimezone(
                       release.destinations[0]?.schedule,
-                      defaultTimezone
+                      viewingTimezone
                     ).value;
                     return (
                       <button
@@ -501,9 +423,12 @@ const SchedulesPanel = ({
                       <div>
                         <dt>Timezone</dt>
                         <dd>
-                          {timezone}
+                          {timezoneLabel(timezone, selected.time)}
+                          {timezoneInfo.storedValue && !timezoneInfo.recorded && (
+                            <small>Stored timezone: {timezoneInfo.storedValue}</small>
+                          )}
                           {!timezoneInfo.recorded && (
-                            <small>Viewing timezone; not recorded on this schedule</small>
+                            <small>Viewing timezone; stored publish instant unchanged</small>
                           )}
                         </dd>
                       </div>
@@ -517,10 +442,11 @@ const SchedulesPanel = ({
                     <div className="schedule-destinations">
                   <h4>Destinations ({selected.destinations.length})</h4>
                   {selected.destinations.map(item => {
-                    const copy = scheduleCopy(item.schedule, item.content || selected.content);
-                    const destinationMedia = releaseMedia(item.content);
+                    const copy = scheduleCopy(item.schedule, item.content, item.platform);
+                    const destinationMedia = scheduleMedia(item.schedule, item.content, item.platform);
+                    const ownSchedule = canControlDestination(item);
                     const expanded = expandedPlatform === `${item.platform}:${item.schedule.id}`;
-                    const zone = displayTimezone(item.schedule, defaultTimezone);
+                    const zone = displayTimezone(item.schedule, viewingTimezone);
                     return (
                       <div
                         key={`${item.platform}:${item.schedule.id}`}
@@ -547,60 +473,60 @@ const SchedulesPanel = ({
                             <div>
                               <span>Post title</span>
                               <p>
-                                {copy.title && copy.title !== selected.title
-                                  ? copy.title
-                                  : "No platform-specific title stored"}
+                                {copy.title || "No title stored for this destination"}
                               </p>
                             </div>
                             <div>
                               <span>Caption</span>
                               <p>{copy.caption || "No platform-specific caption stored"}</p>
                             </div>
-                            {item.content?.id !== selected.content?.id &&
-                              (destinationMedia.url || destinationMedia.poster) && (
+                            {(destinationMedia.url || destinationMedia.poster) ? (
                                 <div className="schedule-platform-media">
                                   <span>Media for this destination</span>
-                                  {destinationMedia.poster || destinationMedia.kind === "image" ? (
+                                  {destinationMedia.kind === "image" || !destinationMedia.url ? (
                                     <img
-                                      src={destinationMedia.poster || destinationMedia.url}
+                                      src={destinationMedia.kind === "image" ? destinationMedia.url || destinationMedia.poster : destinationMedia.poster}
                                       alt={`${PLATFORM_NAMES[item.platform]} scheduled media`}
                                     />
                                   ) : (
                                     <video
                                       src={destinationMedia.url}
+                                      poster={destinationMedia.poster || undefined}
                                       controls
                                       preload="metadata"
                                       aria-label={`${PLATFORM_NAMES[item.platform]} scheduled video`}
                                     />
                                   )}
                                 </div>
-                              )}
+                              ) : <p>Media unavailable for this destination.</p>}
                             <p className="schedule-destination-time">
                               {formatScheduleTime(
                                 item.schedule.startTime || item.schedule.time,
                                 zone.value
                               )}{" "}
-                              · {zone.value}
+                              · {timezoneLabel(zone.value, item.schedule.startTime || item.schedule.time)}
                               {!zone.recorded ? " (viewing timezone)" : ""}
+                              {zone.storedValue && !zone.recorded && <small>Stored timezone: {zone.storedValue}</small>}
                             </p>
-                            <div className="schedule-destination-actions">
-                              <button
+                            {!ownSchedule && <p>This schedule is shared by multiple destinations. Use release controls.</p>}
+                            {ownSchedule && <div className="schedule-destination-actions">
+                              {onEditCopy && <button
                                 onClick={() => openCopyEditor(selected, item)}
                                 disabled={!editable(item)}
                               >
                                 Edit {PLATFORM_NAMES[item.platform] || item.platform} copy
-                              </button>
-                              <button
+                              </button>}
+                              {onReschedule && <button
                                 onClick={() => openReschedule(selected, item)}
                                 disabled={!editable(item)}
                               >
                                 Reschedule {PLATFORM_NAMES[item.platform] || item.platform}
-                              </button>
-                              {item.status === "Paused" ? (
+                              </button>}
+                              {item.status === "Paused" && onResume ? (
                                 <button onClick={() => onResume?.(item.schedule.id)}>
                                   Resume destination
                                 </button>
-                              ) : editable(item) ? (
+                              ) : editable(item) && item.status !== "Paused" && onPause ? (
                                 <button
                                   onClick={() => {
                                     if (
@@ -614,14 +540,14 @@ const SchedulesPanel = ({
                                   Pause destination
                                 </button>
                               ) : null}
-                              <button
+                              {onDelete && <button
                                 className="danger"
-                                onClick={() => onDelete?.(item.schedule.id)}
+                                onClick={() => onDelete(item.schedule.id)}
                                 disabled={!editable(item)}
                               >
                                 Cancel destination
-                              </button>
-                            </div>
+                              </button>}
+                            </div>}
                           </div>
                         )}
                       </div>
@@ -638,8 +564,8 @@ const SchedulesPanel = ({
                     Preview
                   </button>
                   <button
-                    onClick={() => openCopyEditor(selected, selected.destinations.find(editable))}
-                    disabled={!selected.destinations.some(editable)}
+                    onClick={() => openCopyEditor(selected, selected.destinations.find(item => editable(item) && canControlDestination(item)))}
+                    disabled={!onEditCopy || !selected.destinations.some(item => editable(item) && canControlDestination(item))}
                   >
                     Edit post/copy
                   </button>
@@ -686,7 +612,7 @@ const SchedulesPanel = ({
               {releases.map(release => {
                 const zone = displayTimezone(
                   release.destinations[0]?.schedule,
-                  defaultTimezone
+                  viewingTimezone
                 ).value;
                 return (
                   <button
@@ -709,7 +635,7 @@ const SchedulesPanel = ({
                           : "RELEASE"}
                     </span>
                     <strong>{release.subject}{release.variant ? ` — ${release.variant}` : ""}</strong>
-                    <em>{release.destinations.length} destinations · {clockLabel(release.time, zone)} {zone}</em>
+                    <em>{release.destinations.length} destinations · {clockLabel(release.time, zone)} {timezoneLabel(zone, release.time)}</em>
                     <span className="schedule-calendar-platforms">
                       {release.destinations.map(item => (
                         <span

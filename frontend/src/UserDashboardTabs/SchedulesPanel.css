@@ -1028,3 +1028,29 @@
   .schedule-calendar-date .schedule-status { display: table; margin-top: 2px; }
   .schedule-release-actions button { flex: 1 1 44%; }
 }
+
+/* Display preference only; this control never changes stored schedules. */
+.schedule-view-timezone {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 14px;
+  color: #bac1d7;
+  font-size: 0.82rem;
+}
+.schedule-view-timezone select {
+  background: #15162b;
+  color: #e5edf8;
+  border: 1px solid #45405f;
+  border-radius: 8px;
+  padding: 7px 10px;
+  max-width: 100%;
+}
+.schedule-view-timezone small,
+.schedule-destination-time small {
+  color: #a5abc3;
+}
+.schedule-destination-time small {
+  display: block;
+}
