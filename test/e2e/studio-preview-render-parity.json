@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-13T19:05:50.817138Z",
+  "updatedAt": "2026-10-13T19:37:47.936156Z",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -292,7 +292,9 @@
         "reports/studio-canonical-completion-20261008/native-worker-unavailable-ui/receipt.json",
         "reports/studio-canonical-completion-20261008/subject-programme-history-tests.log",
         "reports/studio-canonical-completion-20261008/programme-export-component-retest.log"
-      ]
+      ],
+      "latestProfessionalMaskAuthoringEvidence": "reports/studio-professional-mask-authoring-20261013/README.md",
+      "latestProfessionalMaskAuthoringScope": "Native geometric polygon path and zero-radius rectangle controls: invalid draft rejected, Escape, path change/undo/redo/save/cold reopen, one owned CPU export/download/full decode and complete editable Studio playback. Eight paired whole-box alpha/boundary checks pass. Historical landscape edge failures, broad masks/effect stacks/full picture/sound and readiness remain unqualified."
     },
     {
       "id": "track_cuts",
@@ -823,25 +825,24 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "NATIVE_IMAGE_ALPHA_AND_ORDERED_EFFECT_COMPOSITING",
-    "lastSessionRealCapabilityRuns": 2,
+    "lastSessionKind": "NATIVE_GEOMETRIC_MASK_PATH_AND_ZERO_RADIUS_AUTHORING",
+    "lastSessionRealCapabilityRuns": 1,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-continuation-20261013/README.md",
+    "exactBlockersSource": "reports/studio-professional-mask-authoring-20261013/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-continuation-20261013/README.md",
+    "lastSessionEvidence": "reports/studio-professional-mask-authoring-20261013/README.md",
     "lastSessionAutomatedChecks": {
-      "workerCasesPassed": 19,
-      "focusedNativeComponentCasesPassed": 1,
-      "focusedNativeComponentCasesSkipped": 122,
+      "frontendMaskCompilerCasesPassed": 12,
+      "workerCasesPassed": 18,
       "strictLocalAppBuild": "PASS",
       "fullStudioSuite": false
     },
-    "nextSlice": "S02 strict mask/alpha and image effect-mask order, full stage/picture/sound, continuous/cold/broad-media conformance; then S03 global composition/nesting and S04 controls.",
+    "nextSlice": "S02 historical strict mask edge and combined mask/effect-stack conformance, whole mapped picture/sound and broad/cold media; then S03 global composition/nesting and S04 controls.",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -1500,7 +1501,7 @@
         "readinessPromotion": false
       }
     ],
-    "lastSessionRealCapabilityScope": "Two native transparent-image edits: blur and ordered gold-shadow/cyan-glow/blur with X keys, history, save/cold reopen, owned CPU export/native download/full decode and complete editable Studio playback. Eight mapped alpha/color pairs pass. Whole picture/sound, masks/broad media and readiness remain unqualified.",
+    "lastSessionRealCapabilityScope": "Native geometric polygon path and zero-radius rectangle controls: invalid draft rejected, Escape, path change/undo/redo/save/cold reopen, one owned CPU export/download/full decode and complete editable Studio playback. Eight paired whole-box alpha/boundary checks pass. Historical landscape edge failures, broad masks/effect stacks/full picture/sound and readiness remain unqualified.",
     "history": [
       {
         "at": "2026-10-12T23:29:14.460Z",
@@ -4427,5 +4428,34 @@
     "pairedCombinedPassed": true,
     "focusedNativeComponentChecksPassed": 1,
     "focusedNativeComponentChecksSkipped": 122
+  },
+  "professionalMaskAuthoring20261013": {
+    "evidence": "reports/studio-professional-mask-authoring-20261013/README.md",
+    "checkpoint": "reports/studio-professional-mask-authoring-20261013/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Native geometric polygon path and zero-radius rectangle controls: invalid draft rejected, Escape, path change/undo/redo/save/cold reopen, one owned CPU export/download/full decode and complete editable Studio playback. Eight paired whole-box alpha/boundary checks pass. Historical landscape edge failures, broad masks/effect stacks/full picture/sound and readiness remain unqualified.",
+    "nativeProjects": 1,
+    "nativeCpuExports": 1,
+    "invalidDraftIsolation": true,
+    "nativeEscapeHistorySaveColdReopen": true,
+    "completeStudioRecordings": 1,
+    "pairedFrames": 4,
+    "pairedMaskComparisons": 8,
+    "wholeBoxAlphaPassed": true,
+    "boundaryPassed": true,
+    "priorStrictSoftMaskFailuresRetained": true,
+    "frontendChecksPassed": 12,
+    "workerChecksPassed": 18,
+    "strictAppBuild": "PASS",
+    "fullStudioSuiteQualified": false,
+    "gpuJobs": 0,
+    "paidGpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "readinessPromotion": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ]
   }
 }

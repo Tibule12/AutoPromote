@@ -106,7 +106,7 @@ def layer_clip_mask(size, mask, crop_x=0, crop_y=0, feather_scale=1):
     elif shape == "rectangle":
         left, top = w * crop_x / 100, h * crop_y / 100
         right, bottom = w - left, h - top
-        radius = max(0, min(50, finite(mask.get("radius") or 6, 6))) if enabled else 0
+        radius = max(0, min(50, finite(mask.get("radius", 6), 6))) if enabled else 0
         rx, ry = min(w * radius / 100, (right - left) / 2), min(h * radius / 100, (bottom - top) / 2)
         if rx and ry:
             draw.rectangle((left + rx, top, right - rx, bottom), fill=255)

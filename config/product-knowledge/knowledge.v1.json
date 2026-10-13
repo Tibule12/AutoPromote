@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.6",
+  "knowledge_version": "1.0.7",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-13T19:00:52.939796Z",
+  "updated_at": "2026-10-13T19:32:31.748101Z",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -992,18 +992,24 @@
       ],
       "optional_capabilities": [],
       "controls": [
-        "studio.composite.blend"
+        "studio.composite.blend",
+        "studio.geometric_mask.path",
+        "studio.geometric_mask.radius"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Select an owned image or ordinary title in Studio Composite.",
+        "Enable its geometric mask and choose rectangle, ellipse or polygon.",
+        "For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.",
+        "For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.",
+        "Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "The shared composition compiler carries geometric image masks and crop keyframes. Ordinary title masks use the title layout box rather than shadow padding. When delivery is larger than the source, graphics are composed at delivery resolution. Inspect the exact final movie; full preview/render raster agreement remains unqualified.",
       "limitations": [
         "Rectangle, ellipse and percentage-polygon image masks and crop animation have scoped native/export boundary evidence. This is deterministic geometry, not AI subject segmentation.",
         "Feathered/inverted masks, animated video-layer masks, arbitrary nesting and full alpha/text/effect-order parity remain incomplete.",
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Editable percentage-polygon paths and rectangle radius use the canonical mask object. This adds no animated path, neural segmentation, mask expansion or video-mask support."
       ],
       "common_errors": [
         {
@@ -10916,6 +10922,109 @@
           "kind": "IMPLEMENTATION"
         }
       ]
+    },
+    {
+      "control_id": "studio.geometric_mask.path",
+      "label": "Mask polygon path",
+      "meaning": "Authors the local polygon of an ordinary geometric layer mask. Incomplete or invalid text stays outside the saved graph until a valid Enter/blur commit.",
+      "field": "mask.path",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+        "default_known": true,
+        "values": []
+      },
+      "unit": "percent",
+      "limitations": [
+        "Percentage polygon with3–64 points and at most2048 characters inside its parentheses. Each point contains finite X/Y percentages.",
+        "Path animation, arbitrary SVG paths and neural subject masks are unsupported."
+      ],
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioMaskPathEditor.js",
+          "anchor": "Mask polygon path",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioMaskGeometry.js",
+          "anchor": "parseStudioMaskPolygon",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_layer_motion.py",
+          "anchor": "draw.polygon",
+          "kind": "IMPLEMENTATION"
+        }
+      ],
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "image overlays",
+        "ordinary title layers"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-13",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC"
+    },
+    {
+      "control_id": "studio.geometric_mask.radius",
+      "label": "Mask corner radius",
+      "meaning": "Sets the local rectangle mask corner radius, independently of the artwork frame. An explicit zero preserves square mask corners.",
+      "field": "mask.radius",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 50,
+        "default": 6,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "percent",
+      "limitations": [
+        "Rectangle masks only; artwork frame rounding and feathering are separate.",
+        "Radius animation is unsupported."
+      ],
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "Mask corner radius",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_layer_motion.py",
+          "anchor": "mask.get(\"radius\", 6)",
+          "kind": "IMPLEMENTATION"
+        }
+      ],
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "image overlays",
+        "ordinary title layers"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-13",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC"
     }
   ],
   "tasks": [
@@ -13787,6 +13896,16 @@
       "from": "publishing.schedule",
       "type": "editable_with",
       "to": "publishing.queue.load_more"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.geometric_mask.path"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.geometric_mask.radius"
     }
   ],
   "template_bindings": [

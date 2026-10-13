@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.6 • 2026-10-13T19:00:52.939796Z
+Development documentation • product 1.2.0 • knowledge 1.0.7 • 2026-10-13T19:32:31.748101Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -113,6 +113,8 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | generation.max_cutaways | Maximum generated cutaways | enum | 1, 2, 3 | none | 2 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | publishing.queue.period | Queue period | enum | week, all | none | "week" | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
 | publishing.queue.load_more | Load more schedules | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
+| studio.geometric_mask.path | Mask polygon path | string | source-dependent … source-dependent | percent | "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.geometric_mask.radius | Mask corner radius | number | 0 … 50 | percent | 6 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -1384,3 +1386,29 @@ Applies to: video. Requires: publishing.schedule.
 
 - Results remain limited to the selected period.
 - Queue navigation does not control movie rendering.
+
+<a id="studio-geometric_mask-path"></a>
+
+## Mask polygon path
+
+ID: `studio.geometric_mask.path` • **PARTIAL**
+
+Authors the local polygon of an ordinary geometric layer mask. Incomplete or invalid text stays outside the saved graph until a valid Enter/blur commit.
+
+Applies to: image overlays, ordinary title layers. Requires: studio.compositing.
+
+- Percentage polygon with3–64 points and at most2048 characters inside its parentheses. Each point contains finite X/Y percentages.
+- Path animation, arbitrary SVG paths and neural subject masks are unsupported.
+
+<a id="studio-geometric_mask-radius"></a>
+
+## Mask corner radius
+
+ID: `studio.geometric_mask.radius` • **PARTIAL**
+
+Sets the local rectangle mask corner radius, independently of the artwork frame. An explicit zero preserves square mask corners.
+
+Applies to: image overlays, ordinary title layers. Requires: studio.compositing.
+
+- Rectangle masks only; artwork frame rounding and feathering are separate.
+- Radius animation is unsupported.

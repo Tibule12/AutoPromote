@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Professional Studio image-effect review: preserve transparent edge color and shared shadow/glow/blur scale and ordering, with two native CPU films and eight bounded paired frames. Existing readiness and all broader mask/media/sound/nesting limits remain unchanged.",
-  "reviewed_at": "2026-10-13T19:06:24.837Z",
-  "catalog_sha256": "eeac4bceb52935c8fd2356bf69d7810e72af1ba1f03f2f0721d3bc4903beb835",
+  "reason": "Professional mask authoring review: expose canonical percentage-polygon paths and rectangle radius, preserve explicit zero and reject invalid drafts/saved exports. One native CPU film/timeline and eight bounded portrait comparisons; historical landscape edge failures and all broader mask/effect/sound/readiness limits remain open.",
+  "reviewed_at": "2026-10-13T19:37:48.599Z",
+  "catalog_sha256": "75dc589f2ae6d49fadff2222f351c71f5853393221c9f15dc706dfee2b0cc8db",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -71,7 +71,7 @@
     },
     {
       "path": "frontend/src/components/StudioAdvancedInspectors.js",
-      "sha256": "9522848d929ca7ce2d8b12e4dc8941fc07ae04024709bac726987730b467f0a0"
+      "sha256": "f1a265611954ebe9bc82c23fd1351cb7f7703efe13882a9b380565f4a25ead30"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -86,6 +86,10 @@
       "sha256": "3a0714845f710972eeca2c1f3705035ef93d0281cb9c474d137c05747e561022"
     },
     {
+      "path": "frontend/src/components/StudioMaskPathEditor.js",
+      "sha256": "ab08d6f2c59b09d8c174527827f4e117c16a6c3869bd948162d34e993cd525f9"
+    },
+    {
       "path": "frontend/src/components/StudioProTimeline.js",
       "sha256": "611dac847c2b8adc9d952f7f6d955ce39b5cc27b90b077b54475a6257d2a8f1e"
     },
@@ -95,7 +99,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "9a167875346aa951b71c9160bbdaf2ed9985dd404274e52a9d4183888fc6b510"
+      "sha256": "4d3c4de9e5e6758251ad001e9aa4a6c401e1757bc3efe0dd236734e2fe5ab4e9"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -134,6 +138,10 @@
       "sha256": "21e0a9eb112ff847ad2295de122d68c1c41313b98b6f531648a1aa312df20efe"
     },
     {
+      "path": "frontend/src/components/studioMaskGeometry.js",
+      "sha256": "8c3f68d948b4b335fbfa29e7e89dc9ae456ee3ec492891808f952b9fcbf109ae"
+    },
+    {
       "path": "frontend/src/components/studioMediaEffects.js",
       "sha256": "d85f3cc0df0b794eca4a413c28ee4b7bf8de38d671a61ddbe2b76433ef286a1b"
     },
@@ -143,7 +151,7 @@
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
-      "sha256": "fa9ecaccd9b92e15108cde6dfa3693a6684eb827dc66b2279c0b460e48977c95"
+      "sha256": "756a3db1b0e698d0094f245de8089d5d8f8098a3d348dd15a7f576f6885ed8d4"
     },
     {
       "path": "frontend/src/components/studioSubjectVfxContract.js",
@@ -175,7 +183,7 @@
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
-      "sha256": "8232c6613a4641d7f82b7b519430e69711bea3d45f1fc9e12302534634b48958"
+      "sha256": "ca8b1992e515d64fa431e23695f31011cc53fdb1520fba2c16b7bcb3ad1e79f2"
     },
     {
       "path": "python_media_worker/studio_text.py",
@@ -291,11 +299,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "cd87e48b0af3a885fcf161fa4083413c4f6a9668bcbed9f2153525b45fa30753"
+      "sha256": "cc70355fa7b02efc5927e7efdb181973e7ed2b3d1d1dc8694b0e1c76aa06fe03"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "74616bcdccc84370024210b08b49ff7e8ba46505a7df2df296610f75e33d0183"
+      "sha256": "22a449115e13c68693e033a7a52078b1de12cb1d86695cd5887e1d351faa0428"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

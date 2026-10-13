@@ -3,6 +3,7 @@ import { STUDIO_EASINGS, groupMotionKeyframesByTime } from "./studioAutomation";
 import StudioKeyframeCurveEditor from "./StudioKeyframeCurveEditor";
 import ProductHelpButton from "./ProductHelpButton";
 import { STUDIO_EXPORT_BLEND_MODES } from "./studioBlendModes";
+import StudioMaskPathEditor from "./StudioMaskPathEditor";
 
 const Range = ({ label, valueLabel, ...props }) => (
   <label className="inspector-range">
@@ -567,6 +568,17 @@ export function CompositeInspector({
                     </button>
                   ))}
                 </div>
+                {(activeOverlay.mask?.shape || "rectangle") === "polygon" ? (
+                  <StudioMaskPathEditor key={activeOverlay.id} mask={activeOverlay.mask}
+                    onChange={mask => onUpdateOverlay("mask", mask)} />
+                ) : null}
+                {(activeOverlay.mask?.shape || "rectangle") === "rectangle" ? (
+                  <Range label="Mask corner radius" valueLabel={`${Number(activeOverlay.mask?.radius ?? 6)}%`}
+                    min={0} max={50} step={1} value={Number(activeOverlay.mask?.radius ?? 6)}
+                    onChange={event => onUpdateOverlay("mask", {
+                      ...activeOverlay.mask, radius: Number(event.target.value),
+                    })} />
+                ) : null}
                 <Range
                   label="Feather"
                   valueLabel={`${Number(activeOverlay.mask?.feather || 0)}px`}

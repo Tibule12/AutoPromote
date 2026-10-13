@@ -251,7 +251,7 @@ const getOverlayMaskClipPath = overlay => {
   if (overlay.mask.shape === "polygon") {
     return overlay.mask.path || "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)";
   }
-  return `inset(${cropY}% ${cropX}% ${cropY}% ${cropX}% round ${Number(overlay.mask.radius || 6)}%)`;
+  return `inset(${cropY}% ${cropX}% ${cropY}% ${cropX}% round ${Number(overlay.mask.radius ?? 6)}%)`;
 };
 
 const CAPTION_LANGUAGE_OPTIONS = [

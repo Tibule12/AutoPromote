@@ -37,6 +37,17 @@ def test_soft_mask_feathers_only_alpha_and_inversion_is_its_exact_complement():
     assert sharper[50, 10] > soft[50, 10], "Sigma scales with programme/layer geometry"
 
 
+def test_rectangle_zero_radius_preserves_square_corners_and_inverse_coverage():
+    settings = {"enabled": True, "shape": "rectangle", "radius": 0}
+    square = np.asarray(layer_clip_mask((100, 100), settings))
+    assert square[0, 0] == 255 and square[-1, -1] == 255
+    rounded = np.asarray(layer_clip_mask((100, 100), {**settings, "radius": 6}))
+    assert rounded[0, 0] <= 1  # antialiasing may retain one alpha code value
+    inverse = np.asarray(layer_clip_mask((100, 100), {**settings, "feather": 8, "inverted": True}))
+    soft = np.asarray(layer_clip_mask((100, 100), {**settings, "feather": 8}))
+    assert np.all(soft.astype(int) + inverse.astype(int) == 255)
+
+
 def test_inverted_feathered_image_renders_a_hole_and_keeps_native_corner_rounding():
     overlay = {"type": "image", "width": 100, "height": 100, "mediaFit": "stretch"}
     layer = {"effects": {"mask": {"enabled": True, "shape": "ellipse", "inverted": True, "feather": 10}}}

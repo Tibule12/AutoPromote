@@ -2,6 +2,7 @@ import { createOutputTimeMap, createTimeRange, secondsToTicks, ticksToSeconds } 
 import { projectStudioLinkedTimingToSnapshot, projectStudioEditableStateToSnapshot, validateStudioProjectDocument } from "./studioProjectDocument";
 import { buildAdvancedColorCube } from "./studioColorCube";
 import { assertStudioLayerBlendMode, assertStudioMainBlendMode } from "./studioBlendModes";
+import { parseStudioMaskPolygon } from "./studioMaskGeometry";
 
 export const compileStudioOverlaysForRender = (document, transportSnapshot = {}) =>
   projectStudioEditableStateToSnapshot(document, transportSnapshot).overlays
@@ -82,6 +83,10 @@ export const compileStudioCompositionForRender = document => {
   for (const layer of [state.mainTransform, ...state.overlays]) {
     if (layer?.mask?.enabled && (layer.id === "main-video" || layer.type === "video" || layer.bRollPlaceholder || (layer.bRollMode === "fullscreen" && layer.type === "text")))
       fail("UNSUPPORTED_GEOMETRIC_VIDEO_MASK", "Geometric masks currently export on image and ordinary title layers. Use the reviewed subject-mask workflow for source video.");
+    if (layer?.mask?.enabled && layer.mask.shape === "polygon") {
+      try { parseStudioMaskPolygon(layer.mask.path || undefined); }
+      catch (error) { fail("INVALID_GEOMETRIC_MASK_PATH", `Mask polygon path: ${error.message}`); }
+    }
   }
   return { version: 1, coordinate_space: "canvas_percent", preview_timebase: "output_timeline_seconds",
     layers: [state.mainTransform || { id: "main-video", type: "video" },

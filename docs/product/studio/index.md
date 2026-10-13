@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.6 • 2026-10-13T19:00:52.939796Z
+Development documentation • product 1.2.0 • knowledge 1.0.7 • 2026-10-13T19:32:31.748101Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -518,8 +518,11 @@ Combines ordinary layers with supported blend modes and masks. Global stage orde
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Select an owned image or ordinary title in Studio Composite.
+2. Enable its geometric mask and choose rectangle, ellipse or polygon.
+3. For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.
+4. For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.
+5. Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -530,12 +533,13 @@ Combines ordinary layers with supported blend modes and masks. Global stage orde
 - Rectangle, ellipse and percentage-polygon image masks and crop animation have scoped native/export boundary evidence. This is deterministic geometry, not AI subject segmentation.
 - Feathered/inverted masks, animated video-layer masks, arbitrary nesting and full alpha/text/effect-order parity remain incomplete.
 - This dated development snapshot does not establish professional or production readiness.
+- Editable percentage-polygon paths and rectangle radius use the canonical mask object. This adds no animated path, neural segmentation, mask expansion or video-mask support.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend)
+**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius)
 
 **Guides:** No task guide in V1.
 

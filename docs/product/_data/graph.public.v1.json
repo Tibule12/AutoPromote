@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.6",
+  "knowledge_version": "1.0.7",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1025,6 +1025,16 @@
     },
     {
       "id": "publishing.queue.load_more",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.geometric_mask.path",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.geometric_mask.radius",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -2709,6 +2719,16 @@
       "from": "publishing.schedule",
       "type": "editable_with",
       "to": "publishing.queue.load_more"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.geometric_mask.path"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.geometric_mask.radius"
     }
   ]
 }
