@@ -111,6 +111,7 @@ import StudioSubjectVfxPanel from "./StudioSubjectVfxPanel";
 import { findUncoveredCaptionSpeechRanges, mapCaptionSilencesToProgramme } from "./studioCaptionCoverage";
 import { historyMediaIdentity, historySubjectVfxIdentity } from "./studioHistoryMedia";
 import { titleAnimationPose } from "./studioTitleLayout";
+import { STUDIO_MOTION_PROPERTIES, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
 import { validateSubjectVfxExport, resolveSubjectVfxProgrammePreview, subjectVfxRevision } from "./studioSubjectVfxContract";
 import { cutStudio3DScenes, normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
 import { SOUND_EFFECT_PRESETS, synthesizeEffect } from "./motion/soundDesign";
@@ -9882,18 +9883,13 @@ const ViralClipStudio = ({
       setStudioActionMessage("Select a visual or graphic layer before adding motion keys.");
       return;
     }
+    if (!allowTimelineTimingEdit(motionKeyframeTrack(target.id))) return;
     const resolved = timelineSnapping
       ? resolveMagneticTimelineTime(previewTimelineTime)
       : { time: previewTimelineTime, snapped: false };
-    const values = {
-      x: Number(target.x ?? 50),
-      y: Number(target.y ?? 50),
-      scale: Number(target.scale ?? 1),
-      rotation: Number(target.rotation ?? 0),
-      opacity: Number(target.opacity ?? 1),
-      cropX: Number(target.cropX ?? 0),
-      cropY: Number(target.cropY ?? 0),
-    };
+    const values = buildMotionAutomationStyle(
+      motionKeyframes.filter(key => key.targetId === target.id), resolved.time, target
+    );
     setMotionKeyframes(current =>
       Object.entries(values).reduce(
         (next, [property, value]) =>
@@ -9904,7 +9900,7 @@ const ViralClipStudio = ({
             value,
             time: Number(resolved.time || 0),
             easing: "ease_in_out",
-          }),
+          }, motionKeyframeTolerance(exportSettings.fps, previewSpeed)),
         current
       )
     );
@@ -9930,6 +9926,37 @@ const ViralClipStudio = ({
     const key = motionKeyframes.find(item => item.id === id);
     if (!key || !allowTimelineTimingEdit(motionKeyframeTrack(key.targetId))) return;
     setMotionKeyframes(current => current.filter(item => item.id !== id));
+  };
+
+  const editMotionPropertyAtPlayhead = (targetId, property, requestedValue, toggle = false) => {
+    const descriptor = STUDIO_MOTION_PROPERTIES.find(item => item.id === property);
+    const target = targetId === "main-video" ? mainTransform : overlays.find(item => item.id === targetId);
+    if (!target || !descriptor || (descriptor.mediaOnly && !["image", "video"].includes(target.type)) ||
+        !allowTimelineTimingEdit(motionKeyframeTrack(targetId))) return;
+    if (!toggle && !Number.isFinite(Number(requestedValue))) return;
+    // The visible playhead is the authoring location. Beat snapping remains a
+    // gesture aid, rather than silently moving a value edit to a different pose.
+    const time = Number(previewTimelineTime || 0);
+    const tolerance = motionKeyframeTolerance(exportSettings.fps, previewSpeed);
+    const keys = motionKeyframes.filter(key => key.targetId === targetId && key.property === property);
+    const existing = motionKeyAtPlayhead(keys, targetId, property, time, tolerance);
+    const evaluated = buildMotionAutomationStyle(keys, time, target)[property];
+    const value = toggle ? evaluated : Math.max(descriptor.min, Math.min(descriptor.max, Number(requestedValue)));
+    if (toggle && existing) {
+      removeMotionKeyframe(existing.id);
+    } else if (toggle || keys.length) {
+      setMotionKeyframes(current => upsertAutomationKeyframe(current, {
+        id: existing?.id || createSecureId("motion-key"), targetId, property,
+        time: existing?.time ?? time, value, easing: existing?.easing || "ease_in_out",
+        ...(existing?.curve ? { curve: existing.curve } : {}),
+      }, tolerance));
+    } else if (targetId === "main-video") {
+      setMainTransform(current => ({ ...current, [property]: value }));
+    } else {
+      setOverlayStyleOption(targetId, property, value);
+    }
+    setComparisonMode("after");
+    setStudioActionMessage(`${descriptor.label} ${toggle && existing ? "key removed" : toggle || keys.length ? "key saved" : "value updated"} at ${(time / Math.max(0.01, Number(previewSpeed) || 1)).toFixed(2)}s.`);
   };
 
   const autoGeneratePunchIns = () => {
@@ -29322,6 +29349,9 @@ const ViralClipStudio = ({
                   )]
               }
               motionKeyframes={motionKeyframes}
+              mainTransform={mainTransform}
+              onUpdateMotionProperty={(targetId, property, value) => editMotionPropertyAtPlayhead(targetId, property, value)}
+              onToggleMotionPropertyKeyframe={(targetId, property) => editMotionPropertyAtPlayhead(targetId, property, undefined, true)}
               frameRate={Number(exportSettings.fps) || 30}
               onSelectMotionKeyframe={(keyId, targetId) => {
                 setFocusedMotionKeyframeId(keyId);

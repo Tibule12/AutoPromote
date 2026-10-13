@@ -79,6 +79,27 @@
   outline: 1px solid #ffe17a; border-radius: 3px;
 }
 .viral-studio-overlay .studio-pro-timeline .is-locked .pro-motion-keyframe { cursor: pointer; }
+.viral-studio-overlay .studio-pro-timeline .pro-motion-property { min-height: 58px; }
+.viral-studio-overlay .studio-pro-timeline .pro-motion-property .pro-track-header {
+  grid-template-columns: minmax(0, 1fr) 60px; padding: 4px 8px; gap: 2px 4px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-motion-property .pro-track-header input {
+  width: 60px; min-width: 0; height: 24px; padding: 2px 4px; box-sizing: border-box;
+  border: 1px solid #535365; border-radius: 3px; background: #131720; color: #ece3ff;
+  font-size: 11px; font-variant-numeric: tabular-nums;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-motion-property-actions {
+  grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 3px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-motion-property-actions button {
+  width: 25px; height: 22px; padding: 0; border: 1px solid #454252; border-radius: 3px;
+  color: #c5addf; background: #211d2d;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-motion-property-actions button[aria-pressed="true"] {
+  color: #ffe17a; border-color: #796640;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-motion-property-actions button:disabled,
+.viral-studio-overlay .studio-pro-timeline .pro-motion-property input:disabled { opacity: .4; }
 .viral-studio-overlay .studio-pro-timeline .pro-track-header {
   background: #191e29;
   padding: 7px 10px;

@@ -1,6 +1,56 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import StudioProTimeline, {buildTimelineCaptionRegions} from "../StudioProTimeline";
+import { motionKeyAtPlayhead, motionKeyframeTolerance } from "../studioMotionProperties";
+
+test('unanimated layers expose supported properties; value entry commits once and Escape cancels', () => {
+  const update = jest.fn(), toggle = jest.fn();
+  render(<StudioProTimeline duration={3} playhead={1} mainTransform={{ scale: 1.2 }} trackStates={{}}
+    overlays={[{ id: 'title', type: 'text', name: 'Title', x: 35, scale: 1 }]}
+    onUpdateMotionProperty={update} onToggleMotionPropertyKeyframe={toggle} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Expand Source video keyframes' }));
+  const scale = screen.getByLabelText('Source video scale value');
+  expect(scale).toHaveValue(1.2);
+  fireEvent.focus(scale); fireEvent.change(scale, { target: { value: '1.45' } });
+  expect(update).not.toHaveBeenCalled(); fireEvent.blur(scale);
+  expect(update).toHaveBeenCalledTimes(1); expect(update).toHaveBeenCalledWith('main-video', 'scale', 1.45);
+  fireEvent.focus(scale); fireEvent.change(scale, { target: { value: '4' } });
+  fireEvent.keyDown(scale, { key: 'Escape' }); fireEvent.blur(scale);
+  expect(update).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Add Source video scale keyframe at playhead' }));
+  expect(toggle).toHaveBeenCalledWith('main-video', 'scale');
+  fireEvent.click(screen.getByRole('button', { name: 'Expand Title keyframes' }));
+  expect(screen.getByLabelText('Title x value')).toHaveValue(35);
+  expect(screen.queryByLabelText('Title cropX value')).toBeNull();
+});
+
+test('property values evaluate the playhead; locks block edits but permit neighbouring key navigation', () => {
+  const seek = jest.fn();
+  render(<StudioProTimeline duration={3} playhead={1} frameRate={60} trackStates={{ video: { locked: true } }}
+    onSeek={seek} onUpdateMotionProperty={jest.fn()} onToggleMotionPropertyKeyframe={jest.fn()}
+    motionKeyframes={[{ id: 'a', targetId: 'main-video', property: 'x', time: 0, value: 20 },
+      { id: 'b', targetId: 'main-video', property: 'x', time: 2, value: 80, easing: 'linear' }]} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Expand Source video keyframes' }));
+  expect(screen.getByLabelText('Source video x value')).toHaveValue(50);
+  expect(screen.getByLabelText('Source video x value')).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Add Source video x keyframe at playhead' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Previous Source video x keyframe' }));
+  expect(seek.mock.lastCall[1]).toBe(0);
+  fireEvent.click(screen.getByRole('button', { name: 'Next Source video x keyframe' }));
+  expect(seek.mock.lastCall[1]).toBe(2);
+});
+
+test('adjacent delivery frames at 60fps or double speed remain distinct property keys', () => {
+  for (const rate of [1, 2]) {
+    const time = rate / 60, tolerance = motionKeyframeTolerance(60, rate);
+    const keys = [{ id: 'a', targetId: 'main-video', property: 'scale', time: 0 },
+      { id: 'b', targetId: 'main-video', property: 'scale', time }];
+    expect(motionKeyAtPlayhead(keys, 'main-video', 'scale', time, tolerance).id).toBe('b');
+    expect(motionKeyAtPlayhead(keys.slice(0, 1), 'main-video', 'scale', time, tolerance)).toBeUndefined();
+  }
+});
 
 test('motion property lanes select the actual authored key and support precise frame nudges and deletion', () => {
   const select = jest.fn(), update = jest.fn(), remove = jest.fn(), seek = jest.fn();

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-13T04:22:54.526669+00:00",
+  "updatedAt": "2026-10-13T17:38:36.879Z",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -557,7 +557,9 @@
       "latestCompleteBlendCueClockEvidence": "reports/model-capability-runtime-v1-20261009/CUE-CLOCK-AND-COMPLETE-BLENDS-20261011.md",
       "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified.",
       "latestNativeVoiceoverDuckingEvidence": "reports/model-capability-runtime-v1-20261009/VOICEOVER-DUCKING-AND-RECOVERY-20261012.md",
-      "latestNativeVoiceoverDuckingScope": "Real import/trim/gain/history/owned save/cold-reopen/CPU export/full Studio timeline; short1x voice phase corrected. Full retimed sound/picture, speech DSP and human review remain unqualified."
+      "latestNativeVoiceoverDuckingScope": "Real import/trim/gain/history/owned save/cold-reopen/CPU export/full Studio timeline; short1x voice phase corrected. Full retimed sound/picture, speech DSP and human review remain unqualified.",
+      "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
     },
     {
       "id": "multi_source_vo_captions",
@@ -1388,7 +1390,9 @@
       "latestNativeBlendEvidence": "reports/model-capability-runtime-v1-20261009/NATIVE-LAYER-BLENDS-20261011.md",
       "latestNativeBlendScope": "Normal/Multiply/Screen/Difference for ordinary flat overlays; one native Difference export/recovery. Five other modes/main-video blending unavailable. Whole stage order/nesting and pre-final paired parity remain unqualified.",
       "latestCompleteBlendCueClockEvidence": "reports/model-capability-runtime-v1-20261009/CUE-CLOCK-AND-COMPLETE-BLENDS-20261011.md",
-      "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified."
+      "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified.",
+      "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
     }
   ],
   "continuity": {
@@ -3935,17 +3939,17 @@
             "directMusicCorrelation": 0.9999981844021308
           },
           {
-            "outputSeconds": 5.0,
+            "outputSeconds": 5,
             "mixCorrelation": 0.9999243683929694,
             "directMusicCorrelation": 0.9999983175744565
           },
           {
-            "outputSeconds": 8.0,
+            "outputSeconds": 8,
             "mixCorrelation": 0.9998174444354015,
             "directMusicCorrelation": 0.9999987635748782
           },
           {
-            "outputSeconds": 11.0,
+            "outputSeconds": 11,
             "mixCorrelation": 0.9999024505366461,
             "directMusicCorrelation": 0.9999988865148498
           },
@@ -3965,17 +3969,17 @@
             "directMusicCorrelation": 0.999961281987245
           },
           {
-            "outputSeconds": 14.0,
+            "outputSeconds": 14,
             "mixCorrelation": 0.9993659120594115,
             "directMusicCorrelation": 0.9997649083206257
           },
           {
-            "outputSeconds": 17.0,
+            "outputSeconds": 17,
             "mixCorrelation": 0.9998987927441082,
             "directMusicCorrelation": 0.9999981134746954
           },
           {
-            "outputSeconds": 19.0,
+            "outputSeconds": 19,
             "mixCorrelation": 0.9995476789507627,
             "directMusicCorrelation": 0.9999800266867385
           }
@@ -4063,28 +4067,28 @@
           {
             "outputSeconds": 2,
             "identical": true,
-            "meanAbsoluteChannelDifference": 0.0,
+            "meanAbsoluteChannelDifference": 0,
             "maximumChannelDifference": 0,
             "pixelsDifferentOver8": 0
           },
           {
             "outputSeconds": 8,
             "identical": true,
-            "meanAbsoluteChannelDifference": 0.0,
+            "meanAbsoluteChannelDifference": 0,
             "maximumChannelDifference": 0,
             "pixelsDifferentOver8": 0
           },
           {
             "outputSeconds": 15,
             "identical": true,
-            "meanAbsoluteChannelDifference": 0.0,
+            "meanAbsoluteChannelDifference": 0,
             "maximumChannelDifference": 0,
             "pixelsDifferentOver8": 0
           },
           {
             "outputSeconds": 19,
             "identical": true,
-            "meanAbsoluteChannelDifference": 0.0,
+            "meanAbsoluteChannelDifference": 0,
             "maximumChannelDifference": 0,
             "pixelsDifferentOver8": 0
           }
@@ -4982,5 +4986,19 @@
     "fullSoundPictureParityQualified": false,
     "readinessPromotion": false,
     "nextHighestPriorityTaskId": "S02"
+  },
+  "professionalPropertyEditing20261013": {
+    "evidence": "reports/studio-professional-editing-20261013/README.md",
+    "checkpoint": "reports/studio-professional-editing-20261013/checkpoint.json",
+    "branch": "agent/studio-professional-editing-v1",
+    "scope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+    "gpuJobs": 0,
+    "readinessPromotion": false,
+    "paidCost": 0,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ]
   }
 }

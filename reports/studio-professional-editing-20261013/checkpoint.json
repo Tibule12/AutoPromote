@@ -1,0 +1,293 @@
+{
+  "at": "2026-10-13T17:38:36.879Z",
+  "branch": "agent/studio-professional-editing-v1",
+  "capability": "Property-level transform animation on ordinary canonical layers",
+  "readinessPromotion": false,
+  "userVisible": "Expand any visual layer, including an unanimated layer; inspect/edit its evaluated values; add/remove one property key; navigate neighbouring keys. Animated numeric edits create/update one playhead key. Locks block changes; adjacent 60fps keys remain distinct.",
+  "sourceFiles": [
+    "frontend/src/components/StudioProTimeline.js",
+    "frontend/src/components/StudioTimeline.css",
+    "frontend/src/components/ViralClipStudio.js",
+    "frontend/src/components/studioMotionProperties.js",
+    "frontend/src/components/__tests__/StudioProTimeline.test.js"
+  ],
+  "evidenceFiles": [
+    "scripts/studio-professional/build-local.js",
+    "scripts/studio-professional/serve-local.js",
+    "scripts/studio-professional/property-proof.js",
+    "scripts/studio-professional/measure-property-pair.py"
+  ],
+  "verification": {
+    "frontendFocusedSuites": 3,
+    "frontendFocusedPassed": 37,
+    "strictNormalAppBuild": "PASS",
+    "nativeLifecycle": {
+      "at": "2026-10-13T17:29:19.322Z",
+      "projectId": "viral-project-a67cf692-f75d-4c5b-8af7-58d4b45d5b82",
+      "canonicalHash": "344b5c808b589551b9bc57d2b3748bf0b1decebe9a76856c8063368940ba750c",
+      "layerId": "overlay-2386906d-4d80-4da0-bb9b-38f6f55a13e1",
+      "label": "Visual layer",
+      "nativeBaseValue": true,
+      "singlePropertyKeys": [
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-cb8ceb2d-e637-49b9-948a-2c71748b9c29",
+          "targetId": "overlay-2386906d-4d80-4da0-bb9b-38f6f55a13e1",
+          "property": "x",
+          "value": 25,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-65c94f4f-1574-4dd0-a511-ecc38d3ae088",
+          "targetId": "overlay-2386906d-4d80-4da0-bb9b-38f6f55a13e1",
+          "property": "x",
+          "value": 75,
+          "time": 2
+        }
+      ],
+      "evaluatedMidpoint": 50,
+      "undo": true,
+      "redo": true,
+      "removeAndUndo": true,
+      "saveColdReopen": true,
+      "renderJobs": 0,
+      "gpuJobs": 0,
+      "mocks": false,
+      "authBypass": false
+    },
+    "pairedProperty": {
+      "scope": "Single-property X easing/position in independent live preview versus final decoded frames. No whole-picture, audio, other-property or composition parity claim.",
+      "projectId": "viral-project-a67cf692-f75d-4c5b-8af7-58d4b45d5b82",
+      "renderJobId": "viral_0b0915f704d68e186daba8c31fe8ce82d6aa7d945752273e0a71dc68cf243a83",
+      "finalSha256": "5d73efaf36fe4ade80c301acb78232b3acd50f328946c6ca9d4a4d32fdcff68f",
+      "identicalMotionKeys": true,
+      "displayPixelTolerance": 2,
+      "samples": [
+        {
+          "outputSeconds": 0.5,
+          "deliveryFrame": 12,
+          "preview": {
+            "size": [
+              288,
+              510
+            ],
+            "bbox": [
+              21,
+              215,
+              141,
+              357
+            ],
+            "center": [
+              81,
+              286
+            ],
+            "cyanPixels": 11839
+          },
+          "final": {
+            "size": [
+              288,
+              510
+            ],
+            "bbox": [
+              21,
+              214,
+              140,
+              357
+            ],
+            "center": [
+              80.5,
+              285.5
+            ],
+            "cyanPixels": 11828
+          },
+          "centerDeltaPixels": [
+            0.5,
+            0.5
+          ],
+          "passed": true
+        },
+        {
+          "outputSeconds": 1,
+          "deliveryFrame": 24,
+          "preview": {
+            "size": [
+              288,
+              510
+            ],
+            "bbox": [
+              84,
+              215,
+              203,
+              357
+            ],
+            "center": [
+              143.5,
+              286
+            ],
+            "cyanPixels": 11702
+          },
+          "final": {
+            "size": [
+              288,
+              510
+            ],
+            "bbox": [
+              84,
+              214,
+              203,
+              357
+            ],
+            "center": [
+              143.5,
+              285.5
+            ],
+            "cyanPixels": 11796
+          },
+          "centerDeltaPixels": [
+            0,
+            0.5
+          ],
+          "passed": true
+        },
+        {
+          "outputSeconds": 1.5,
+          "deliveryFrame": 36,
+          "preview": {
+            "size": [
+              288,
+              510
+            ],
+            "bbox": [
+              147,
+              215,
+              266,
+              357
+            ],
+            "center": [
+              206.5,
+              286
+            ],
+            "cyanPixels": 11643
+          },
+          "final": {
+            "size": [
+              288,
+              510
+            ],
+            "bbox": [
+              147,
+              214,
+              266,
+              357
+            ],
+            "center": [
+              206.5,
+              285.5
+            ],
+            "cyanPixels": 11794
+          },
+          "centerDeltaPixels": [
+            0,
+            0.5
+          ],
+          "passed": true
+        },
+        {
+          "outputSeconds": 2.5,
+          "deliveryFrame": 60,
+          "preview": {
+            "size": [
+              288,
+              510
+            ],
+            "bbox": [
+              156,
+              215,
+              275,
+              357
+            ],
+            "center": [
+              215.5,
+              286
+            ],
+            "cyanPixels": 11643
+          },
+          "final": {
+            "size": [
+              288,
+              510
+            ],
+            "bbox": [
+              156,
+              214,
+              275,
+              357
+            ],
+            "center": [
+              215.5,
+              285.5
+            ],
+            "cyanPixels": 11795
+          },
+          "centerDeltaPixels": [
+            0,
+            0.5
+          ],
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    "nativeRender": {
+      "projectId": "viral-project-a67cf692-f75d-4c5b-8af7-58d4b45d5b82",
+      "jobId": "viral_0b0915f704d68e186daba8c31fe8ce82d6aa7d945752273e0a71dc68cf243a83",
+      "canonicalHash": "080c6a11f8d98556c8d781727ac98d3188ae5357a0559b39e4e676cdb249c81c",
+      "sha256": "5d73efaf36fe4ade80c301acb78232b3acd50f328946c6ca9d4a4d32fdcff68f",
+      "seconds": 3,
+      "width": 720,
+      "height": 1280,
+      "fps": 24,
+      "frames": 72,
+      "fullVideoAudioDecode": true,
+      "noMocks": true,
+      "authBypass": false
+    },
+    "fullViralClipStudioSuite": "Interrupted after five minutes without a result; no full-suite pass claim.",
+    "nativePlayback": {
+      "projectId": "viral-project-a67cf692-f75d-4c5b-8af7-58d4b45d5b82",
+      "canonicalHash": "080c6a11f8d98556c8d781727ac98d3188ae5357a0559b39e4e676cdb249c81c",
+      "outputSha256": "5d73efaf36fe4ade80c301acb78232b3acd50f328946c6ca9d4a4d32fdcff68f",
+      "ended": true,
+      "seconds": 3,
+      "propertyLanesVisible": true,
+      "screencastFrames": 81,
+      "recordingSha256": "e9c5df1507d32b525ab38770494109de52c4527349165db6562d4be09a3d0a28",
+      "sparseCapture": false,
+      "fullRecordingDecode": true,
+      "authBypass": false,
+      "noMocks": true
+    },
+    "contractValidation": "PASS: 29 capabilities, 13 combinations, 17 parity checks; readiness unchanged."
+  },
+  "gpu": {
+    "jobs": 0,
+    "paidRuntimeSeconds": 0,
+    "paidCost": 0,
+    "encoder": "local libx264 CPU"
+  },
+  "artifacts": {
+    "finalMovie": "reports/studio-professional-editing-20261013/proof/property-animation/final.mp4",
+    "studioRecording": "reports/studio-professional-editing-20261013/proof/property-animation/edited-in-studio.mp4",
+    "propertyControls": "reports/studio-professional-editing-20261013/proof/native-properties.png"
+  },
+  "qualification": "Representative single-property X/ease-in-out motion and normal lifecycle. All other properties/easings, whole picture/audio, nesting, generated media and full AE equivalence remain unqualified.",
+  "recoveredQaIssues": [
+    "Stale B-Roll selector corrected to the actual B-roll control.",
+    "Playwright JSON storageState dropped local File bytes; rerun using real persistent IndexedDB.",
+    "Persistent profile origin must be visited before inspecting retained auth.",
+    "The general 5GiB creative-proof guard was retained. This exact 3s CPU proof uses a process-local 1GiB headroom and 64MiB recording cap."
+  ],
+  "remaining": "Shared S02 full stage/raster/matte/audio conformance; S03 canonical global ordering/nesting; remaining S04 controls; ordinary-account model/runtime, durability and billing qualification.",
+  "next": "Continue S02 paired moving-picture/matte/audio conformance, then S03 global composition/nesting. No readiness, creative/public, production or main-merge claim."
+}

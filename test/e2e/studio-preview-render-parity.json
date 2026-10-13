@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-13T04:22:54.526669+00:00",
+  "updatedAt": "2026-10-13T17:38:36.879Z",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -236,7 +236,9 @@
         "motionModel",
         "worker"
       ],
-      "automatedGuardFiles": [],
+      "automatedGuardFiles": [
+        "frontend/src/components/__tests__/StudioProTimeline.test.js"
+      ],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "NOT_RUN",
       "measurement": null,
@@ -251,7 +253,9 @@
       "latestNativeStateEvidence": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
       "latestNativeEvidence": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r9/visual-review.json",
       "latestNativeKeyframeSoundEvidence": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
-      "latestNativeKeyframeSoundScope": "Native editable keyframes/export/full finished-file playback, retimed bus audio correction and bounded composition repairs. Whole product/creative parity remains unqualified."
+      "latestNativeKeyframeSoundScope": "Native editable keyframes/export/full finished-file playback, retimed bus audio correction and bounded composition repairs. Whole product/creative parity remains unqualified.",
+      "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
     },
     {
       "id": "mask_subject",
@@ -625,7 +629,9 @@
       "latestNativeStateEvidence": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
       "latestFoundationEvidence": "reports/studio-canonical-visual-20261008/README.md",
       "latestNativeKeyframeSoundEvidence": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
-      "latestNativeKeyframeSoundScope": "Native editable keyframes/export/full finished-file playback, retimed bus audio correction and bounded composition repairs. Whole product/creative parity remains unqualified."
+      "latestNativeKeyframeSoundScope": "Native editable keyframes/export/full finished-file playback, retimed bus audio correction and bounded composition repairs. Whole product/creative parity remains unqualified.",
+      "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
     },
     {
       "id": "generated_asset_equivalence",
@@ -3328,17 +3334,17 @@
             "directMusicCorrelation": 0.9999981844021308
           },
           {
-            "outputSeconds": 5.0,
+            "outputSeconds": 5,
             "mixCorrelation": 0.9999243683929694,
             "directMusicCorrelation": 0.9999983175744565
           },
           {
-            "outputSeconds": 8.0,
+            "outputSeconds": 8,
             "mixCorrelation": 0.9998174444354015,
             "directMusicCorrelation": 0.9999987635748782
           },
           {
-            "outputSeconds": 11.0,
+            "outputSeconds": 11,
             "mixCorrelation": 0.9999024505366461,
             "directMusicCorrelation": 0.9999988865148498
           },
@@ -3358,17 +3364,17 @@
             "directMusicCorrelation": 0.999961281987245
           },
           {
-            "outputSeconds": 14.0,
+            "outputSeconds": 14,
             "mixCorrelation": 0.9993659120594115,
             "directMusicCorrelation": 0.9997649083206257
           },
           {
-            "outputSeconds": 17.0,
+            "outputSeconds": 17,
             "mixCorrelation": 0.9998987927441082,
             "directMusicCorrelation": 0.9999981134746954
           },
           {
-            "outputSeconds": 19.0,
+            "outputSeconds": 19,
             "mixCorrelation": 0.9995476789507627,
             "directMusicCorrelation": 0.9999800266867385
           }
@@ -3456,28 +3462,28 @@
           {
             "outputSeconds": 2,
             "identical": true,
-            "meanAbsoluteChannelDifference": 0.0,
+            "meanAbsoluteChannelDifference": 0,
             "maximumChannelDifference": 0,
             "pixelsDifferentOver8": 0
           },
           {
             "outputSeconds": 8,
             "identical": true,
-            "meanAbsoluteChannelDifference": 0.0,
+            "meanAbsoluteChannelDifference": 0,
             "maximumChannelDifference": 0,
             "pixelsDifferentOver8": 0
           },
           {
             "outputSeconds": 15,
             "identical": true,
-            "meanAbsoluteChannelDifference": 0.0,
+            "meanAbsoluteChannelDifference": 0,
             "maximumChannelDifference": 0,
             "pixelsDifferentOver8": 0
           },
           {
             "outputSeconds": 19,
             "identical": true,
-            "meanAbsoluteChannelDifference": 0.0,
+            "meanAbsoluteChannelDifference": 0,
             "maximumChannelDifference": 0,
             "pixelsDifferentOver8": 0
           }
@@ -4375,5 +4381,19 @@
     "fullSoundPictureParityQualified": false,
     "readinessPromotion": false,
     "nextHighestPriorityTaskId": "S02"
+  },
+  "professionalPropertyEditing20261013": {
+    "evidence": "reports/studio-professional-editing-20261013/README.md",
+    "checkpoint": "reports/studio-professional-editing-20261013/checkpoint.json",
+    "branch": "agent/studio-professional-editing-v1",
+    "scope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+    "gpuJobs": 0,
+    "readinessPromotion": false,
+    "paidCost": 0,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ]
   }
 }
