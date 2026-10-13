@@ -3,21 +3,34 @@ import { mapStudioContinuousSeconds } from './studioTime';
 
 // This transient identity does not change an edit, source trim or asset. Keep
 // it separate from the native audio clock and from persisted project data.
-export function pausedStudioFrameRequest(clip, sourceTime, fps) {
+export function pausedStudioFrameRequest(clip, sourceTime, fps, resolvedGeneration) {
   const storagePath = clip?.sourceStoragePath || clip?.storagePath;
-  const sourceContentHash = clip?.contentHash;
+  const sourceContentHash = clip?.contentHash || clip?.sha256;
+  // Older saved uploads have no digest. Access refresh can bind their exact
+  // owned generation transiently without changing the canonical edit/asset.
+  const identity = sourceContentHash
+    ? /^[a-f0-9]{64}$/.test(sourceContentHash) ? { sourceContentHash } : null
+    : typeof resolvedGeneration === 'string' && /^[1-9]\d{0,31}$/.test(resolvedGeneration)
+      ? { sourceGeneration: resolvedGeneration } : null;
   const start = Number(clip?.startRequest ?? clip?.start ?? 0);
   const end = Number(clip?.endRequest ?? clip?.end);
   const rate = Number(fps);
-  if (!storagePath || !/^[a-f0-9]{64}$/.test(sourceContentHash || '') ||
+  if (!storagePath || !identity ||
       ![start, end, rate, sourceTime].every(Number.isFinite) || end <= start || end-start > 90 ||
       rate < 1 || rate > 120 || sourceTime < start || sourceTime >= end) return null;
   const frameIndex = Math.min(Math.ceil((end-start)*rate)-1,
     Math.max(0, Math.round((sourceTime-start)*rate)));
-  return { storagePath, sourceContentHash, start, end, fps: rate, frameIndex };
+  return { storagePath, ...identity, start, end, fps: rate, frameIndex };
 }
 export function pausedStudioFrameKey(request) {
   return request ? JSON.stringify(request) : '';
+}
+export function studioPausedFrameReceiptMatches(request, result) {
+  return !!request && /^[a-f0-9]{64}$/.test(result?.sourceContentHash || '') &&
+    (request.sourceContentHash ? result.sourceContentHash === request.sourceContentHash
+      : result.sourceGeneration === request.sourceGeneration) &&
+    result.frameIndex === request.frameIndex && result.start === request.start &&
+    result.end === request.end && result.fps === request.fps && result.contentType === 'image/png';
 }
 
 // The sequence worker first makes frame-aligned clips, maps their timestamps
@@ -25,8 +38,8 @@ export function pausedStudioFrameKey(request) {
 // for a paused ramp instead of the browser's nearest arbitrary source time.
 // Fractional clip lengths and a frame that belongs to another occurrence stay
 // on the native fallback until their concat boundary semantics are qualified.
-export function pausedStudioMappedFrameRequest(clip, sourceTime, fps, timeline, timeMap) {
-  const request = pausedStudioFrameRequest(clip, sourceTime, fps);
+export function pausedStudioMappedFrameRequest(clip, sourceTime, fps, timeline, timeMap, resolvedGeneration) {
+  const request = pausedStudioFrameRequest(clip, sourceTime, fps, resolvedGeneration);
   if (!request || !Array.isArray(timeline) || !timeMap?.length) return null;
   let offset = 0, total = 0, found = false;
   for (const row of timeline) {

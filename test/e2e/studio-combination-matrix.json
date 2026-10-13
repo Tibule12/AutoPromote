@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-13T20:04:30.101472Z",
+  "updatedAt": "2026-10-13T21:44:18.983227Z",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -1397,26 +1397,24 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "NATIVE_MASKED_IMAGE_MOTION_AND_CSS_OPACITY_PRECEDENCE_REPAIR",
+    "lastSessionKind": "LEGACY_OWNED_SOURCE_GENERATION_SAMPLING_AND_BOUNDED_COMPOSITION_AUDIT",
     "lastSessionRealCapabilityRuns": 2,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-masked-effects-20261013/README.md",
+    "exactBlockersSource": "reports/studio-professional-source-sampling-20261013/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-masked-effects-20261013/README.md",
+    "lastSessionEvidence": "reports/studio-professional-source-sampling-20261013/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendHelperCasesPassed": 21,
-      "nativePreviewComponentCasesPassed": 1,
-      "nativePreviewComponentCasesSkipped": 123,
-      "workerCasesPassed": 20,
+      "frontendCasesPassed": 31,
+      "serverCasesPassed": 24,
       "strictLocalAppBuild": "PASS",
       "fullStudioSuite": false
     },
-    "nextSlice": "S02 source/graphic raster separation and retained ellipse/landscape edge failures, complete moving/cold/broad picture and sound; then S03 global composition/nesting and S04 controls.",
+    "nextSlice": "S03 global composition order across ordinary layers, motion scenes and 3D; keep S02 strict ellipse raster, moving/cold/broad picture and sound open",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -5092,6 +5090,38 @@
       "S02",
       "S03",
       "S04"
-    ]
+    ],
+    "followUpEvidence": "reports/studio-professional-source-sampling-20261013/README.md"
+  },
+  "professionalLegacySourceSampling20261013": {
+    "evidence": "reports/studio-professional-source-sampling-20261013/README.md",
+    "checkpoint": "reports/studio-professional-source-sampling-20261013/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Two unchanged native saved masked-image/key projects now use exact paused source sampling through an owned generation when no digest exists. All8 source identities pass; strict image pairs remain7/8 with ellipse1.5s4.26944 above unchanged4.0 limit. Two complete Studio timeline recordings renewed. Source-only S03 stage-order audit; broad continuous picture/sound/nesting/readiness remain open.",
+    "nativeProjectsReopened": 2,
+    "canonicalEditsChanged": false,
+    "accuratePausedSourceSamplesPassed": 8,
+    "newCpuExports": 0,
+    "existingMoviesReused": 2,
+    "completeStudioRecordingsRenewed": 2,
+    "currentRasterPairsPassed": 7,
+    "currentRasterPairsFailed": 1,
+    "ellipseRasterPassed": false,
+    "invertedPolygonRasterPassed": true,
+    "frontendCasesPassed": 31,
+    "serverCasesPassed": 24,
+    "strictAppBuild": "PASS",
+    "gpuJobs": 0,
+    "paidGpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "fullStudioSuiteQualified": false,
+    "wholePreviewFinalParityQualified": false,
+    "readinessPromoted": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ],
+    "nextImplementationSlice": "S03 global composition order; S02 remaining raster/moving/cold/broad picture and sound remain open"
   }
 }

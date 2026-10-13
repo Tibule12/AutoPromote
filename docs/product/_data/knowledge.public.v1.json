@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.8",
+  "knowledge_version": "1.0.9",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-13T20:03:00.043879Z",
+  "updated_at": "2026-10-13T21:44:18.983227Z",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -1744,10 +1744,11 @@
         "Open the relevant workspace with an owned source.",
         "Review the result and its limitations before saving or exporting."
       ],
-      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "preview_behavior": "Reopening a saved owned upload can prepare precise paused source frames without changing the edit, including older uploads without a saved digest. Broad continuous picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Accurate paused source pictures remain bounded to qualified clip clocks,90-second windows and128MiB sources. Strict ellipse mask/effect raster agreement and broad continuous picture/sound remain open."
       ],
       "common_errors": [
         {
@@ -1758,7 +1759,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-13",
       "product_version": "1.2.0"
     },
     {

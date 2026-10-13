@@ -1054,6 +1054,7 @@ router.post("/studio-assets/resolve", requireTesterEditingFeature("clipRender"),
       storagePath: source.storagePath,
       size: source.size,
       contentType: source.contentType,
+      generation: source.generation,
     });
   } catch (error) {
     return res.status(error.statusCode || 500).json({

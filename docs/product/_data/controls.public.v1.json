@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.8",
+  "knowledge_version": "1.0.9",
   "controls": [
     {
       "control_id": "studio.transform.x",

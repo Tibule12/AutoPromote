@@ -1,6 +1,6 @@
 # Mask-backed subject effects and browser proxies
 
-Development documentation • product 1.2.0 • knowledge 1.0.8 • 2026-10-13T20:03:00.043879Z
+Development documentation • product 1.2.0 • knowledge 1.0.9 • 2026-10-13T21:44:18.983227Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 

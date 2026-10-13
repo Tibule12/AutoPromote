@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-13T21:44:18.983227Z",
+  "branch": "agent/studio-professional-continuation-v2",
+  "capabilityImproved": "Accurate paused source sampling for reopened older uploads without a saved digest, bound transiently to their authorized immutable storage generation",
+  "changedImplementationFiles": [
+    "frontend/src/components/ViralClipStudio.js",
+    "frontend/src/components/studioSourcePreview.js",
+    "src/mediaRoutes.js",
+    "src/services/studioSourceFrameService.js"
+  ],
+  "implementationSha256": {
+    "frontend/src/components/ViralClipStudio.js": "ac32c8d81e34c5824901a66723ceb790dfce25d90d7b0fef153a36d9b40f8862",
+    "frontend/src/components/studioSourcePreview.js": "77473868f0709dd49395206761136c46a3353b12c596554b42f1542fdf4a214c",
+    "src/mediaRoutes.js": "384a01e7047c89333061846525109f02b8844821a991ea460b1bbae2b718c298",
+    "src/services/studioSourceFrameService.js": "d364154b6673e8620f7c1217b1494187ce67c0ba1e3a242820fb14bdc89e55f3"
+  },
+  "nativeCases": [
+    {
+      "kind": "ellipse",
+      "projectId": "viral-project-d2705ec3-8805-470a-bf73-b4533442fa5c",
+      "canonicalHash": "91d57262c3d26d018a9ed0fb4ac29e8735200c923cf8f53f03dc923af7e3961c",
+      "unchangedCompletedMovie": true,
+      "outputSha256": "a43afb5312f9366390aeefb165b7efa8e6fd939a68f611bf8597efd7d67eff45",
+      "finalMovie": "reports/studio-professional-masked-effects-20261013/proof/masked-effects/final.mp4",
+      "studioRecording": "reports/studio-professional-masked-effects-20261013/proof/masked-effects/edited-in-studio.mp4",
+      "studioRecordingSha256": "23090ca9df751c699044430eaee2b06eb212aab318bb4da3a43e75de4c66e684",
+      "comparison": {
+        "projectId": "viral-project-d2705ec3-8805-470a-bf73-b4533442fa5c",
+        "canonicalHash": "91d57262c3d26d018a9ed0fb4ac29e8735200c923cf8f53f03dc923af7e3961c",
+        "outputSha256": "a43afb5312f9366390aeefb165b7efa8e6fd939a68f611bf8597efd7d67eff45",
+        "comparisons": [
+          {
+            "time": 0.5,
+            "sourceSampling": {
+              "mode": "accurate-paused",
+              "sourceContentHash": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+              "frameIndex": 12,
+              "sourceGeneration": "1791917106647052"
+            },
+            "softEdgePixels": 48041,
+            "nativeFinalRgbRmse": 3.224623171421747,
+            "nativeReferenceRgbRmse": 2.397500005817325,
+            "finalReferenceRgbRmse": 2.6024020786839728,
+            "passed": true
+          },
+          {
+            "time": 1,
+            "sourceSampling": {
+              "mode": "accurate-paused",
+              "sourceContentHash": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+              "frameIndex": 24,
+              "sourceGeneration": "1791917106647052"
+            },
+            "softEdgePixels": 71245,
+            "nativeFinalRgbRmse": 3.030339177228017,
+            "nativeReferenceRgbRmse": 2.3731338807170395,
+            "finalReferenceRgbRmse": 2.425122854088873,
+            "passed": true
+          },
+          {
+            "time": 1.5,
+            "sourceSampling": {
+              "mode": "accurate-paused",
+              "sourceContentHash": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+              "frameIndex": 36,
+              "sourceGeneration": "1791917106647052"
+            },
+            "softEdgePixels": 79124,
+            "nativeFinalRgbRmse": 4.269437629182655,
+            "nativeReferenceRgbRmse": 2.93630759711298,
+            "finalReferenceRgbRmse": 2.7620167902964425,
+            "passed": false
+          },
+          {
+            "time": 2.5,
+            "sourceSampling": {
+              "mode": "accurate-paused",
+              "sourceContentHash": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+              "frameIndex": 60,
+              "sourceGeneration": "1791917106647052"
+            },
+            "softEdgePixels": 77971,
+            "nativeFinalRgbRmse": 3.8188996980921446,
+            "nativeReferenceRgbRmse": 2.9420008360460637,
+            "finalReferenceRgbRmse": 2.6807073914865933,
+            "passed": true
+          }
+        ],
+        "softRegionRgbRmseTolerance": 4,
+        "passed": false,
+        "scope": "Four exact paused source frames of one native transparent image with position, scale, rotation, opacity, geometric mask, gold shadow, cyan glow and blur. Source bytes/generation/frame are verified against the owned sampler. Whole softened effect region, no fitted alignment; continuous playback and broader masks/effects/media/audio/readiness remain unqualified."
+      }
+    },
+    {
+      "kind": "inverted polygon",
+      "projectId": "viral-project-30accd51-6d6c-4916-aaaf-02f20142da2a",
+      "canonicalHash": "e6d08d81b2fc43486daca6f4247f302746e466b5b07e5b218b99b5196798c856",
+      "unchangedCompletedMovie": true,
+      "outputSha256": "bc1447ae11a6747253c8aeb5eddb6600f810058fffb945921d81b035a662fd3c",
+      "finalMovie": "reports/studio-professional-masked-effects-20261013/proof/inverted/masked-effects/final.mp4",
+      "studioRecording": "reports/studio-professional-masked-effects-20261013/proof/inverted/masked-effects/edited-in-studio.mp4",
+      "studioRecordingSha256": "68f2beccaa3a6309fb0fb2e627ea10bf73ce5a4521e742e15f4d1b5ea5000364",
+      "comparison": {
+        "projectId": "viral-project-30accd51-6d6c-4916-aaaf-02f20142da2a",
+        "canonicalHash": "e6d08d81b2fc43486daca6f4247f302746e466b5b07e5b218b99b5196798c856",
+        "outputSha256": "bc1447ae11a6747253c8aeb5eddb6600f810058fffb945921d81b035a662fd3c",
+        "comparisons": [
+          {
+            "time": 0.5,
+            "sourceSampling": {
+              "mode": "accurate-paused",
+              "sourceContentHash": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+              "frameIndex": 12,
+              "sourceGeneration": "1791917106647052"
+            },
+            "softEdgePixels": 24450,
+            "nativeFinalRgbRmse": 3.6058310724775664,
+            "nativeReferenceRgbRmse": 3.602058044030115,
+            "finalReferenceRgbRmse": 2.7662290027596534,
+            "passed": true
+          },
+          {
+            "time": 1,
+            "sourceSampling": {
+              "mode": "accurate-paused",
+              "sourceContentHash": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+              "frameIndex": 24,
+              "sourceGeneration": "1791917106647052"
+            },
+            "softEdgePixels": 38979,
+            "nativeFinalRgbRmse": 2.979062425237158,
+            "nativeReferenceRgbRmse": 2.827282865156951,
+            "finalReferenceRgbRmse": 2.390355502585283,
+            "passed": true
+          },
+          {
+            "time": 1.5,
+            "sourceSampling": {
+              "mode": "accurate-paused",
+              "sourceContentHash": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+              "frameIndex": 36,
+              "sourceGeneration": "1791917106647052"
+            },
+            "softEdgePixels": 55686,
+            "nativeFinalRgbRmse": 2.469248428781208,
+            "nativeReferenceRgbRmse": 1.9169043978661588,
+            "finalReferenceRgbRmse": 2.6985202988401844,
+            "passed": true
+          },
+          {
+            "time": 2.5,
+            "sourceSampling": {
+              "mode": "accurate-paused",
+              "sourceContentHash": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+              "frameIndex": 60,
+              "sourceGeneration": "1791917106647052"
+            },
+            "softEdgePixels": 57794,
+            "nativeFinalRgbRmse": 3.1615452879952017,
+            "nativeReferenceRgbRmse": 2.294039386476952,
+            "finalReferenceRgbRmse": 2.775655026979949,
+            "passed": true
+          }
+        ],
+        "softRegionRgbRmseTolerance": 4,
+        "passed": true,
+        "scope": "Four exact paused source frames of one native transparent image with position, scale, rotation, opacity, geometric mask, gold shadow, cyan glow and blur. Source bytes/generation/frame are verified against the owned sampler. Whole softened effect region, no fitted alignment; continuous playback and broader masks/effects/media/audio/readiness remain unqualified."
+      }
+    }
+  ],
+  "canonicalEditsChanged": false,
+  "newCpuExports": 0,
+  "newGpuJobs": 0,
+  "paidGpuRuntimeSeconds": 0,
+  "paidGpuCost": 0,
+  "focusedFrontendCasesPassed": 31,
+  "focusedServerCasesPassed": 24,
+  "strictAppBuild": "PASS",
+  "fullStudioSuiteQualified": false,
+  "wholePreviewFinalParityQualified": false,
+  "readinessPromoted": false,
+  "priorEllipseFailureRmse": 4.3642789274126015,
+  "currentEllipseFailureRmse": 4.269437629182655,
+  "softRegionRgbRmseTolerance": 4,
+  "retainedFailures": [
+    "reports/studio-professional-masked-effects-20261013/proof/retained-pair-r2-native-source/",
+    "reports/studio-professional-masked-effects-20261013/proof/preview-failure.json"
+  ],
+  "nextImplementationSlice": "S03 global composition order across ordinary layers, motion scenes and 3D; keep S02 strict ellipse raster, moving/cold/broad picture and sound open",
+  "compositionSourceAudit": {
+    "qualifiedAsRuntime": false,
+    "ordinaryOverlayOrder": "Worker reconnects image/video/text blocks in request.overlays order; preview z-index is100+visible index",
+    "motionAnd3DOrder": "Worker appends motion then3D after ordinary layers; preview uses fixed CSS z-index120 and121",
+    "gap": "Separate arrays/stages have no unified ordering control or nested composition nodes. At enough ordinary layers, index-based preview priority can cross the fixed stage priority. Native mixed-stage proof remains needed."
+  }
+}

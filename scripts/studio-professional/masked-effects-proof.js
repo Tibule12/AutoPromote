@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Native Studio controls and ordinary owned CPU export. No graph/auth/route injection.
-const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
+const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict'), crypto = require('node:crypto');
 const inverted = process.env.STUDIO_QA_INVERTED_MASK === '1';
 const report = path.resolve(__dirname, '../../reports/studio-professional-masked-effects-20261013/proof');
 const folder = inverted ? path.join(report, 'inverted') : report;
@@ -70,6 +70,18 @@ async function capture(page) {
   for (const [index, time] of [.5, 1, 1.5, 2.5].entries()) {
     await seek(page, time);
     const canvas = page.getByTestId('studio-program-canvas'); assert.equal(await canvas.getAttribute('data-programme-source'), 'source');
+    // The ordinary paused sampler is asynchronous. A ready video decoder alone
+    // does not establish that the exact mapped source picture has painted.
+    await page.waitForFunction(() => {
+      const c = document.querySelector('[data-testid="studio-program-canvas"]');
+      return c?.dataset.sourceSampling === 'accurate-paused' && c.getAttribute('aria-busy') !== 'true';
+    }, undefined, { timeout: 45000 });
+    const sourceSampling = await canvas.evaluate(c => ({ mode: c.dataset.sourceSampling,
+      sourceContentHash: c.dataset.sourceContentHash, frameIndex: Number(c.dataset.sourceFrameIndex),
+      sourceGeneration: c.dataset.sourceGeneration }));
+    assert.equal(sourceSampling.sourceContentHash,
+      crypto.createHash('sha256').update(fs.readFileSync(path.join(report, 'source-grid.mp4'))).digest('hex'));
+    assert.equal(sourceSampling.frameIndex, Math.round(time * 24));
     const image = page.getByTestId('hook-preview-frame').locator('.draggable-overlay.is-media-overlay');
     assert.equal(await image.count(), 1);
     const properties = await image.evaluate(el => ({ filter: getComputedStyle(el).filter,
@@ -81,7 +93,7 @@ async function capture(page) {
     const background = await canvas.evaluate(c => c.toDataURL('image/png'));
     fs.writeFileSync(path.join(folder, `background-${index}.png`), Buffer.from(background.split(',')[1], 'base64'));
     await page.getByTestId('hook-preview-frame').screenshot({ path: path.join(folder, `preview-${index}.png`) });
-    samples.push({ time, properties, stage: await page.getByTestId('hook-preview-frame').evaluate(el => ({
+    samples.push({ time, sourceSampling, properties, stage: await page.getByTestId('hook-preview-frame').evaluate(el => ({
       width: el.clientWidth, height: el.clientHeight, bounds: el.getBoundingClientRect().toJSON(),
     })) });
   }

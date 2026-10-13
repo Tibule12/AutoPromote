@@ -42,6 +42,11 @@ sheet = Image.new("RGB", (1440, 1304 * len(samples)))
 for index, sample in enumerate(samples):
     time = sample["time"]
     assert time * 24 == round(time * 24), "Only declared delivery-frame clocks qualify"
+    sampling = sample["sourceSampling"]
+    assert sampling["mode"] == "accurate-paused", "Native decoder readiness alone does not qualify exact source sampling"
+    assert sampling["frameIndex"] == round(time * 24)
+    assert sampling["sourceContentHash"] == hashlib.sha256(
+        (root / "reports/studio-professional-masked-effects-20261013/proof/source-grid.mp4").read_bytes()).hexdigest()
     delivered = folder / f"final-{index}.png"
     subprocess.run(["ffmpeg", "-v", "error", "-threads", "1", "-i", str(movie),
                     "-vf", f"select=eq(n\\,{round(time * 24)})", "-frames:v", "1", "-y", str(delivered)], check=True)
@@ -60,7 +65,7 @@ for index, sample in enumerate(samples):
     pair = float(np.sqrt(np.mean((native[edge] - final[edge]) ** 2)))
     native_rmse = float(np.sqrt(np.mean((native[edge] - expected[edge]) ** 2)))
     final_rmse = float(np.sqrt(np.mean((final[edge] - expected[edge]) ** 2)))
-    rows.append({"time": time, "softEdgePixels": int(edge.sum()), "nativeFinalRgbRmse": pair,
+    rows.append({"time": time, "sourceSampling": sampling, "softEdgePixels": int(edge.sum()), "nativeFinalRgbRmse": pair,
                  "nativeReferenceRgbRmse": native_rmse, "finalReferenceRgbRmse": final_rmse,
                  "passed": max(pair, native_rmse, final_rmse) <= 4})
     sheet.paste(Image.fromarray(native.astype(np.uint8)), (0, 1304 * index + 24))
@@ -71,7 +76,7 @@ result = {"projectId": receipt["projectId"], "canonicalHash": receipt["projectHa
           "outputSha256": hashlib.sha256(movie.read_bytes()).hexdigest(), "comparisons": rows,
           "softRegionRgbRmseTolerance": 4,
           "passed": all(row["passed"] for row in rows),
-          "scope": "Four mapped frames of one native transparent image with position, scale, rotation, opacity, geometric mask, gold shadow, cyan glow and blur. Whole softened effect region, no fitted alignment; broader masks/effects/media/audio/readiness remain unqualified."}
+          "scope": "Four exact paused source frames of one native transparent image with position, scale, rotation, opacity, geometric mask, gold shadow, cyan glow and blur. Source bytes/generation/frame are verified against the owned sampler. Whole softened effect region, no fitted alignment; continuous playback and broader masks/effects/media/audio/readiness remain unqualified."}
 assert result["outputSha256"] == receipt["outputSha256"]
 (folder / "paired-masked-effects.json").write_text(json.dumps(result, indent=2) + "\n")
 print(json.dumps(result, indent=2))

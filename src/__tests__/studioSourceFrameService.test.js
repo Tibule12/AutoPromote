@@ -17,6 +17,15 @@ test('sampling cannot accept caller URLs, invalid windows or a frame outside the
   }
 });
 
+test('legacy requests require an exact generation and cannot weaken a supplied digest', () => {
+  const { sourceContentHash, ...legacy } = request;
+  expect(() => validateFrameRequest(legacy)).toThrow('inside a saved source');
+  expect(validateFrameRequest({ ...legacy, sourceGeneration: '1791917104896000' })).toMatchObject({ sourceGeneration: '1791917104896000' });
+  for (const sourceGeneration of [12, '0', '-1', '1e3', 'x', '1'.repeat(33)])
+    expect(() => validateFrameRequest({ ...legacy, sourceGeneration })).toThrow('inside a saved source');
+  expect(() => validateFrameRequest({ ...legacy, sourceGeneration: '12', sourceContentHash: 'bad' })).toThrow('inside a saved source');
+});
+
 describe('actual FFmpeg sampling matches a separately decoded full sequence', () => {
   let folder;
   beforeAll(async () => { folder = await fs.mkdtemp(path.join(os.tmpdir(), 'studio-frame-test-')); });

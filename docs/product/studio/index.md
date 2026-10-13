@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.8 • 2026-10-13T20:03:00.043879Z
+Development documentation • product 1.2.0 • knowledge 1.0.9 • 2026-10-13T21:44:18.983227Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -1316,13 +1316,14 @@ Shows the existing project programme with mapped source frames and sound. Retain
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Reopening a saved owned upload can prepare precise paused source frames without changing the edit, including older uploads without a saved digest. Broad continuous picture and sound agreement with final export remains unqualified.
 
 **Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Accurate paused source pictures remain bounded to qualified clip clocks,90-second windows and128MiB sources. Strict ellipse mask/effect raster agreement and broad continuous picture/sound remain open.
 
 **Common errors**
 

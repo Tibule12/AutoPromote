@@ -12,7 +12,7 @@ import ProductHelpButton from "./ProductHelpButton";
 import StudioLayerMask from "./StudioLayerMask";
 import { studioMediaEffectFilter } from "./studioMediaEffects";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
-import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey } from "./studioSourcePreview";
+import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity } from "./studioMusicBufferClock";
 import { loadStudioVoiceBus, scheduleStudioPreparedDuck } from './studioPreparedVoiceBus';
 import { studioCueSourceKey, createStudioCueBuffer, prepareStudioCuePlayback, prepareStudioBuiltInCue } from "./studioCueBuffer";
@@ -2741,6 +2741,7 @@ const ViralClipStudio = ({
   const [savedProjects, setSavedProjects] = useState([]);
   const [projectSaveState, setProjectSaveState] = useState("unsaved");
   const [projectSourcesRefreshing, setProjectSourcesRefreshing] = useState(false);
+  const [sourceAccessGenerations, setSourceAccessGenerations] = useState({ projectId: null, byPath: {} });
   const projectSourceRefreshVersionRef = useRef(0);
   const [projectSavedAt, setProjectSavedAt] = useState(null);
   const [directorReview, setDirectorReview] = useState(null);
@@ -3786,6 +3787,12 @@ const ViralClipStudio = ({
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.url) throw new Error(result.message || result.error || "Saved video is unavailable.");
       if (activeProjectIdRef.current !== expectedProjectId) return false;
+      if (typeof result.generation === "string" && /^[1-9]\d{0,31}$/.test(result.generation)) {
+        setSourceAccessGenerations(current => activeProjectIdRef.current !== expectedProjectId ? current : {
+          projectId: expectedProjectId,
+          byPath: { ...(current.projectId === expectedProjectId ? current.byPath : {}), [storagePath]: result.generation },
+        });
+      }
       setProjectMedia(current => mapStudioSourceAccess(current, storagePath, item =>
         item.url === result.url && item.status === "ready" && !item.error
           ? item : { ...item, url: result.url, status: "ready", error: "" }));
@@ -13517,11 +13524,14 @@ const ViralClipStudio = ({
   // Exact paused pictures on the shared continuous delivery clock. Source/audio
   // playback remains native; reviewed subject/composition decoders retain their
   // own authority. A late response must never replace a newer seek/project.
+  const pausedSourceGeneration = sourceAccessGenerations.projectId === projectId
+    ? sourceAccessGenerations.byPath[currentTimelineClip?.sourceStoragePath || currentTimelineClip?.storagePath]
+    : undefined;
   const pausedFrameRequestKey = !renderedOutputUrl && isPreviewPaused && !projectSourcesRefreshing &&
     !subjectProgrammePreview && !activeSideBySideOverlay && !speakerStackPreviewIsLive &&
     smartCrop && smartCropMode === "speaker_track"
       ? pausedStudioFrameKey(pausedStudioMappedFrameRequest(currentTimelineClip, Number(videoTime),
-        exportSettings.fps, timeline, previewOutputTimeMap))
+        exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration))
       : "";
   useEffect(() => {
     if (!pausedFrameRequestKey) { setPausedSourceFrame(null); return undefined; }
@@ -13554,13 +13564,12 @@ const ViralClipStudio = ({
           await new Promise(resolve => setTimeout(resolve, 500));
           if (disposed || controller.signal.aborted) return;
         }
-        if (!response.ok || result.sourceContentHash !== request.sourceContentHash ||
-            result.frameIndex !== request.frameIndex || result.start !== request.start ||
-            result.end !== request.end || result.fps !== request.fps || result.contentType !== "image/png")
+        if (!response.ok || !studioPausedFrameReceiptMatches(request, result))
           throw new Error("Paused frame unavailable");
         const image = new Image();
         image.onload = () => { clearTimeout(deadline); if (!disposed && !controller.signal.aborted) setPausedSourceFrame({ key, image, status: "accurate", receipt: {
           sampler: result.sampler, sourceGeneration: result.sourceGeneration, imageContentHash: result.imageContentHash,
+          sourceContentHash: result.sourceContentHash, frameIndex: result.frameIndex,
         } }); };
         image.onerror = () => { clearTimeout(deadline); if (!disposed) setPausedSourceFrame({ key, status: "unavailable" }); };
         image.src = `data:image/png;base64,${result.image}`;
@@ -13598,7 +13607,7 @@ const ViralClipStudio = ({
       const pausedRequest = programmeVideo.paused && !programmeVideo.seeking && !renderedOutputUrl &&
         !subjectProgrammePreview && !activeSideBySideOverlay && !speakerStackPreviewIsLive && pausedSourceFrame?.image
         ? pausedStudioMappedFrameRequest(currentTimelineClip, Number(programmeVideo.currentTime),
-          exportSettings.fps, timeline, previewOutputTimeMap) : null;
+          exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration) : null;
       const pausedClockIsCurrent = pausedRequest && pausedSourceFrame.key === pausedStudioFrameKey(pausedRequest);
       const sampledSourceTime = pausedClockIsCurrent
         ? pausedRequest.start + pausedRequest.frameIndex / pausedRequest.fps
@@ -13641,8 +13650,11 @@ const ViralClipStudio = ({
         !reviewedSubject && !alternateIsCurrent && !cachedAlternateIsCurrent &&
         pausedSourceFrame?.image && pausedSourceFrame.key === pausedStudioFrameKey(
           pausedStudioMappedFrameRequest(currentTimelineClip, Number(programmeVideo.currentTime),
-            exportSettings.fps, timeline, previewOutputTimeMap));
+            exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration));
       canvas.dataset.sourceSampling = pausedFrameIsCurrent ? "accurate-paused" : "native";
+      canvas.dataset.sourceContentHash = pausedFrameIsCurrent ? pausedSourceFrame.receipt.sourceContentHash : "";
+      canvas.dataset.sourceFrameIndex = pausedFrameIsCurrent ? String(pausedSourceFrame.receipt.frameIndex) : "";
+      canvas.dataset.sourceGeneration = pausedFrameIsCurrent ? pausedSourceFrame.receipt.sourceGeneration : "";
       const sourceVideo = subjectIsCurrent ? subjectVideo : pausedFrameIsCurrent ? pausedSourceFrame.image : alternateIsCurrent
         ? alternateVideo
         : cachedAlternateIsCurrent ? cachedSoloFrame.canvas : programmeVideo;
@@ -14167,6 +14179,7 @@ const ViralClipStudio = ({
     };
   }, [
     pausedSourceFrame,
+    pausedSourceGeneration,
     timeline,
     previewOutputTimeMap,
     smartCrop,

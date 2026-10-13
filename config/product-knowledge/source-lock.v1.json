@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Image key/preview review: canonical opacity and transforms take precedence over legacy CSS entrance fill/transitions. Two native masked-effect CPU films/timelines; inverted4/4 picture pairs pass, ellipse3/4 and historical edge failures remain recorded. No full-parity, readiness or creative promotion.",
-  "reviewed_at": "2026-10-13T20:04:30.751Z",
-  "catalog_sha256": "3c84e4f9bd6aa3655ca29a4225d9ae37b99099dc172992f4b541c58889d11b16",
+  "reason": "Review legacy owned generation sampling and exact-source native checks with unchanged edits/movies, retained ellipse raster failure, bounded cross-stage order audit and unchanged readiness.",
+  "reviewed_at": "2026-10-13T21:45:54.238Z",
+  "catalog_sha256": "9bf3b52779b1097a37884291a6a8a152ce6f4049a895219949993c40bcdc1ba1",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "3321f989db4b4929884d837534c2ac861cc1cd42dd58d73dd78ace8bb040ee12"
+      "sha256": "ac32c8d81e34c5824901a66723ceb790dfce25d90d7b0fef153a36d9b40f8862"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -156,6 +156,10 @@
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
       "sha256": "756a3db1b0e698d0094f245de8089d5d8f8098a3d348dd15a7f576f6885ed8d4"
+    },
+    {
+      "path": "frontend/src/components/studioSourcePreview.js",
+      "sha256": "77473868f0709dd49395206761136c46a3353b12c596554b42f1542fdf4a214c"
     },
     {
       "path": "frontend/src/components/studioSubjectVfxContract.js",
@@ -290,6 +294,10 @@
       "sha256": "1ed2291144b194ffb860795576f656dfa82d96a0807c09d7ad025eb1bf93bb74"
     },
     {
+      "path": "src/services/studioSourceFrameService.js",
+      "sha256": "d364154b6673e8620f7c1217b1494187ce67c0ba1e3a242820fb14bdc89e55f3"
+    },
+    {
       "path": "src/services/studioSourceService.js",
       "sha256": "51340a9ea0bd83937334739b6151f1e298131651321cec49eca30f06169c39a6"
     },
@@ -303,11 +311,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "c8bc5c220078df64ddaf4cc0aead63b26151766380850348d4441019eb528747"
+      "sha256": "a7e1e62884b372a855a8b132af45ee9051462eed8be6c6b057ef6133c547ce9c"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "3627f23b47ed8ab322616a1c79fd9286e66708c2cb41274c6cec6af8b4dc0760"
+      "sha256": "b1c424ced25894858189b835f7da4b4216215df709aa30f0c0b1d9eba174f3c8"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
