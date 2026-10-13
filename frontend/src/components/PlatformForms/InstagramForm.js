@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import EmojiPicker from "../EmojiPicker";
-import HashtagSuggestions from "../HashtagSuggestions";
-import { OPTIMAL_TIMES } from "../BestTimeToPost";
 import FilterEffects from "../FilterEffects";
 import ImageCropper from "../ImageCropper";
 import { sanitizeUrl } from "../../utils/security";
@@ -26,6 +24,7 @@ const InstagramForm = ({
   setProtocol7Volatility,
   onFileChange,
   currentFile,
+  publisherRelease = false,
   onReviewAI,
   onFindViralClips,
 }) => {
@@ -147,30 +146,6 @@ const InstagramForm = ({
         </span>{" "}
         Instagram Creator
       </h4>
-      {OPTIMAL_TIMES.instagram && (
-        <div
-          className="provider-posting-hint"
-          style={{
-            fontSize: "11px",
-            color: "#059669",
-            marginBottom: "12px",
-            padding: "8px 10px",
-            backgroundColor: "#ecfdf5",
-            borderRadius: "6px",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            border: "1px solid #a7f3d0",
-          }}
-        >
-          <span style={{ fontSize: "14px" }}>⏰</span>
-          <span>
-            <strong>Best time to upload:</strong>{" "}
-            {OPTIMAL_TIMES.instagram.days.slice(0, 2).join(", ")} @{" "}
-            {OPTIMAL_TIMES.instagram.hours[0]}:00.
-          </span>
-        </div>
-      )}
 
       <MetaConnectionRequirementsNotice
         title="Instagram publishing requirements"
@@ -179,7 +154,7 @@ const InstagramForm = ({
       />
 
       {/* Scope Disclaimer / Permission Box */}
-      {selectedPageId && (
+      {!publisherRelease && selectedPageId && (
         <div
           className="scope-info-box"
           style={{
@@ -243,7 +218,7 @@ const InstagramForm = ({
         </div>
       )}
 
-      <div className="form-group-modern">
+      {!publisherRelease && <div className="form-group-modern">
         <label className="form-label-bold">Media File</label>
         <div
           style={{
@@ -403,7 +378,7 @@ const InstagramForm = ({
             </div>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* IDENTITY SECTION: CRITICAL FOR REVIEWERS */}
       <div className="form-group-modern">
@@ -450,7 +425,7 @@ const InstagramForm = ({
             Business account linked.
           </div>
         )}
-        <p className="legal-hint" style={{ marginTop: "4px" }}>
+        {!publisherRelease && <p className="legal-hint" style={{ marginTop: "4px" }}>
           <span style={{ color: "#888" }}>
             {(() => {
               const selectedPage = facebookPages.find(p => p.id === selectedPageId);
@@ -461,9 +436,9 @@ const InstagramForm = ({
               return "IG ID: N/A";
             })()}
           </span>
-        </p>
+        </p>}
 
-        <div
+        {!publisherRelease && <div
           className="scope-info-box"
           style={{
             marginTop: "8px",
@@ -537,7 +512,7 @@ const InstagramForm = ({
             your private personal profile data. We only interact with the specific business assets
             you authorize.
           </p>
-        </div>
+        </div>}
       </div>
 
       <div className="form-group-modern">
@@ -599,15 +574,6 @@ const InstagramForm = ({
           )}
         </div>
         <div className="char-count">{caption.length}/2200</div>
-        <HashtagSuggestions
-          contentType="image"
-          title={caption}
-          description=""
-          onAddHashtag={tag => {
-            setCaption(prev => prev + " #" + tag);
-            setIsCaptionDirty(true);
-          }}
-        />
       </div>
 
       <div className="form-row-modern">

@@ -12,6 +12,7 @@ const FacebookForm = ({
   pages = [],
   onFileChange,
   currentFile,
+  publisherRelease = false,
   onReviewAI,
   onFindViralClips,
 }) => {
@@ -85,7 +86,7 @@ const FacebookForm = ({
         style={{ marginBottom: "16px" }}
       />
 
-      <div className="form-group-modern">
+      {!publisherRelease && <div className="form-group-modern">
         <label className="form-label-bold">Media File</label>
         <div
           style={{
@@ -176,7 +177,7 @@ const FacebookForm = ({
             label="Facebook media preview"
           />
         )}
-      </div>
+      </div>}
 
       {pages.length === 0 ? (
         <div className="alert-box warning">
@@ -196,11 +197,11 @@ const FacebookForm = ({
               </option>
             ))}
           </select>
-          <p className="legal-hint" style={{ marginTop: "4px" }}>
+          {!publisherRelease && <p className="legal-hint" style={{ marginTop: "4px" }}>
             <span style={{ color: "#888" }}>Page ID: {pageId}</span>
-          </p>
+          </p>}
 
-          <div
+          {!publisherRelease && <div
             className="scope-info-box"
             style={{
               marginTop: "8px",
@@ -298,7 +299,7 @@ const FacebookForm = ({
               <strong>User Privacy:</strong> We do not access your personal profile&apos;s private
               messages or modify your Page&apos;s admin settings.
             </p>
-          </div>
+          </div>}
         </div>
       )}
 

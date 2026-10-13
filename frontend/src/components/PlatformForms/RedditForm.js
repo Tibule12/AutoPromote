@@ -14,6 +14,7 @@ const RedditForm = ({
   globalDescription,
   globalDescription: _globalDescription,
   currentFile,
+  publisherRelease = false,
   onFileChange,
   onReviewAI,
   onFindViralClips,
@@ -249,7 +250,7 @@ const RedditForm = ({
       )}
 
       {/* Existing destination media controls remain available without dominating copy preparation. */}
-      <details className="reddit-media-tools"><summary>Media for Reddit</summary>
+      {!publisherRelease && <details className="reddit-media-tools"><summary>Media for Reddit</summary>
       <div className="form-group-modern">
         <label className="form-label-bold">Media File</label>
         <div
@@ -343,7 +344,7 @@ const RedditForm = ({
         )}
       </div>
 
-      </details>
+      </details>}
       <div className="form-group-modern">
         <label htmlFor="reddit-subreddit">Subreddit *</label>
 

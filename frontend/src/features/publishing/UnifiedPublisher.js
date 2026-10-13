@@ -30,7 +30,6 @@ import InstagramForm from "../../components/PlatformForms/InstagramForm";
 import FacebookForm from "../../components/PlatformForms/FacebookForm";
 import LinkedInForm from "../../components/PlatformForms/LinkedInForm";
 import RedditForm from "../../components/PlatformForms/RedditForm";
-import BestTimeToPost from "../../components/BestTimeToPost";
 import VideoEditor from "../../components/VideoEditor";
 import ImageCropper from "../../components/ImageCropper";
 import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
@@ -75,19 +74,13 @@ const UnifiedPublisher = ({ onUpload, initialFile, initialDestinations, contentL
     globalDescription,
     setGlobalDescription,
     bountyAmount,
-    setBountyAmount,
     bountyNiche,
-    setBountyNiche,
     protocol7Enabled,
-    setProtocol7Enabled,
     protocol7Volatility,
-    setProtocol7Volatility,
 
     // Marketing
     optimizeViral,
-    setOptimizeViral,
     variants,
-    setVariants,
 
     // Scheduling
     frequency,
@@ -100,7 +93,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, initialDestinations, contentL
     updatePlatformData,
     getPlatformEffectiveData,
     platformData,
-    resetPublishingState,
   } = usePublishingState(handedDestinations);
   const [focusedPlatform, setFocusedPlatform] = useState(handedDestinations[0] || "");
   const [workflowStep, setWorkflowStep] = useState(initialFile ? handedDestinations.length ? 2 : 1 : 0);
@@ -412,17 +404,11 @@ const UnifiedPublisher = ({ onUpload, initialFile, initialDestinations, contentL
 
     // Transforms
     trimStart,
-    setTrimStart,
     trimEnd,
-    setTrimEnd,
     rotate,
-    setRotate,
     flipH,
-    setFlipH,
     flipV,
-    setFlipV,
     selectedFilter,
-    setSelectedFilter,
     duration,
     setDuration,
     resetMediaState,
@@ -468,24 +454,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, initialDestinations, contentL
           : selectedFilter,
       duration,
     });
-  };
-
-  const resetPublisherForm = () => {
-    resetPublishingState();
-    resetMediaState();
-    setFeedbackMessage("");
-    setFallbackPublishPlatform(null);
-    setEditingTarget(null);
-    setShowVideoEditor(false);
-    setShowCropper(false);
-    setIsPublishing(false);
-    setPublishingPlatform(null);
-    setWorkflowStep(0);
-    setPublishTiming("now");
-    setVisitedPlatforms({});
-    setSourceAsset(null);
-    setDeliveryFields({ date: "", time: "09:00" });
-    setCustomFields({});
   };
 
   const formatPublisherError = err => {
@@ -714,15 +682,12 @@ const UnifiedPublisher = ({ onUpload, initialFile, initialDestinations, contentL
       reddit: RedditForm, tiktok: TikTokForm, youtube: YouTubeForm }[platformId];
     if (!Form) return null;
     return <div className="dark-theme-form"><Form key={`${platformId}:${formVersions[platformId] || 0}`}
+      publisherRelease
       globalTitle={globalTitle} globalDescription={globalDescription} currentFile={data.file}
       pages={facebookPages} facebookPages={facebookPages}
       instagramBusinessAccountId={connectionSnapshot.raw?.instagram?.ig_business_account_id || connectionSnapshot.raw?.instagram?.metadata?.instagram_business_account_id}
       creatorInfo={{ tiktok: tiktokCreator, youtube: youtubeChannel, linkedin: linkedinProfile, reddit: redditUser }[platformId]}
       onFileChange={newFile => updatePlatformData(platformId, { file: newFile || globalFile })}
-      onReviewAI={() => { setEditingTarget(platformId); processFileChange(data.file || globalFile); setShowVideoEditor(true); }}
-      bountyAmount={bountyAmount} setBountyAmount={setBountyAmount} bountyNiche={bountyNiche} setBountyNiche={setBountyNiche}
-      protocol7Enabled={protocol7Enabled} setProtocol7Enabled={setProtocol7Enabled}
-      protocol7Volatility={protocol7Volatility} setProtocol7Volatility={setProtocol7Volatility}
       onChange={newData => updatePlatformData(platformId, newData)} initialData={data} />
     </div>;
   };
@@ -1048,22 +1013,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, initialDestinations, contentL
         setCustomFields={(platform, fields) => setCustomFields(current => ({ ...current, [platform]: fields }))}
         reviewOptions={reviewOptions} getData={getPlatformEffectiveData} nextReason={nextReason}
         submit={handlePublishAll} submitting={isPublishing} feedback={feedbackMessage} onNavigate={onNavigate}
-        bestTime={<details className="release-advanced"><summary>Best time insights</summary><BestTimeToPost selectedPlatforms={selectedPlatforms} /></details>}
-        advanced={<details className="release-advanced"><summary>Media and optional settings</summary>
-          <button type="button" onClick={resetPublisherForm}>Reset this preparation</button>
-          <button type="button" onClick={() => { setEditingTarget("global"); setShowVideoEditor(true); }} disabled={!globalFile}>Open media editor</button>
-          {mediaType === "image" && <button type="button" disabled={!globalFile} onClick={() => setShowCropper(true)}>Crop image</button>}
-          {mediaType === "video" && <div className="release-date-time"><label>Trim start (seconds)<input type="number" min="0" max={duration || undefined} step="0.1" value={trimStart} onChange={event => setTrimStart(Number(event.target.value))} /></label><label>Trim end (0 = full)<input type="number" min={trimStart} max={duration || undefined} step="0.1" value={trimEnd} onChange={event => setTrimEnd(Number(event.target.value))} /></label></div>}
-          <label>Rotation<select value={rotate} onChange={event => setRotate(Number(event.target.value))}>{[0, 90, 180, 270].map(value => <option key={value} value={value}>{value}°</option>)}</select></label>
-          <label className="release-check"><input type="checkbox" checked={flipH} onChange={event => setFlipH(event.target.checked)} />Flip horizontally</label>
-          <label className="release-check"><input type="checkbox" checked={flipV} onChange={event => setFlipV(event.target.checked)} />Flip vertically</label>
-          <label>Visual filter<select value={selectedFilter || ""} onChange={event => setSelectedFilter(event.target.value || null)}>{[["", "None"], ["grayscale", "Grayscale"], ["sepia", "Sepia"], ["invert", "Invert"], ["brightness", "Brightness Boost"], ["contrast", "High Contrast"]].map(([value, name]) => <option key={value} value={value}>{name}</option>)}</select></label>
-          <label>Alternate hook or title<input value={variants[0] || ""} onChange={event => setVariants(event.target.value ? [event.target.value] : [])} /></label>
-          <label className="release-check"><input type="checkbox" checked={optimizeViral} onChange={event => setOptimizeViral(event.target.checked)} />Request existing viral optimization</label>
-          <label className="release-check"><input type="checkbox" checked={protocol7Enabled} onChange={event => setProtocol7Enabled(event.target.checked)} />Protocol 7</label>
-          <label>Bounty amount<input type="number" min="0" value={bountyAmount} onChange={event => setBountyAmount(Number(event.target.value))} /></label>
-          <label>Bounty niche<input value={bountyNiche} onChange={event => setBountyNiche(event.target.value)} /></label>
-        </details>}
       />
 
       {/* --- Modals --- */}

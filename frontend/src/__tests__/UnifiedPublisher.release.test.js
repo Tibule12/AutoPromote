@@ -95,7 +95,7 @@ test("destination-specific copy survives switching between real forms and workfl
   expect(onUpload).not.toHaveBeenCalled();
 });
 
-test("owned image URLs render in real TikTok and Instagram forms without creating Blob URLs", async () => {
+test("owned image URLs render in the release preview without duplicate form media tools", async () => {
   URL.createObjectURL.mockImplementation(value => {
     if (!(value instanceof Blob)) throw new TypeError("Expected a Blob");
     return "blob:local-image";
@@ -108,8 +108,30 @@ test("owned image URLs render in real TikTok and Instagram forms without creatin
   fireEvent.click(screen.getByRole("checkbox", { name: /Instagram/ }));
   fireEvent.click(screen.getByRole("button", { name: /Customize destinations/ }));
   fireEvent.click(screen.getByRole("tab", { name: "Instagram" }));
-  expect(within(screen.getByRole("region", { name: "Instagram form" })).getByRole("button", { name: /Crop Image/ })).toBeInTheDocument();
+  expect(within(screen.getByRole("region", { name: "Instagram form" })).queryByRole("button", { name: /Crop Image/ })).not.toBeInTheDocument();
+  expect(screen.getByRole("img", { name: "Release media" })).toHaveAttribute("src", "https://example.test/owned.png");
   expect(URL.createObjectURL).not.toHaveBeenCalled();
+  expect(onUpload).not.toHaveBeenCalled();
+});
+
+test("Customize keeps real platform settings and removes repeated media and promotional controls", async () => {
+  render(<UnifiedPublisher initialFile={{ url: asset.url, type: "video/mp4", name: "Owned video" }} onUpload={onUpload} />);
+  for (const platform of platforms) fireEvent.click(screen.getByRole("checkbox", { name: new RegExp(platform, "i") }));
+  fireEvent.click(screen.getByRole("button", { name: /Customize destinations/ }));
+  for (const platform of platforms) {
+    fireEvent.click(screen.getByRole("tab", { name: new RegExp(platform, "i") }));
+    const form = screen.getByRole("region", { name: new RegExp(`${platform} form`, "i") });
+    expect(within(form).queryByText(/Media File|Video File|Media for Reddit|Review AI Enhancements|Protocol 7|Data Access & Permissions|Instagram Permissions|Google Permissions|Best time to upload|Trending Hashtags/i)).not.toBeInTheDocument();
+    expect(within(form).queryByRole("button", { name: /^Remove$/ })).not.toBeInTheDocument();
+    if (platform === "tiktok") {
+      expect(within(form).getByLabelText("Privacy (required)")).toBeInTheDocument();
+      expect(within(form).getByText("Advanced TikTok disclosures and consent")).toBeInTheDocument();
+    }
+  }
+  expect(within(screen.getByRole("region", { name: "YouTube form" })).getByLabelText("Video Title")).toBeInTheDocument();
+  expect(within(screen.getByRole("region", { name: "YouTube form" })).getByText("Made for Kids")).toBeInTheDocument();
+  expect(within(screen.getByRole("region", { name: "YouTube form" })).getAllByRole("textbox", { name: "Video Title" })).toHaveLength(1);
+  expect(screen.queryByText("Media and optional settings")).not.toBeInTheDocument();
   expect(onUpload).not.toHaveBeenCalled();
 });
 
@@ -136,7 +158,7 @@ test("fresh releases have no selected destinations and show the five-step workfl
   expect(screen.getByText("Choose a video or image to start.")).toBeInTheDocument();
   expect(screen.queryByRole("region", { name: "Release content" })).not.toBeInTheDocument();
   expect(screen.queryByRole("region", { name: "Before delivery" })).not.toBeInTheDocument();
-  expect(screen.getByText("Media and optional settings")).not.toBeVisible();
+  expect(screen.queryByText("Media and optional settings")).not.toBeInTheDocument();
   expect(screen.queryByRole("region", { name: "Selected destinations" })).not.toBeInTheDocument();
   expect(screen.queryByText(/2 selected/)).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Choose destinations/ })).toBeDisabled();
