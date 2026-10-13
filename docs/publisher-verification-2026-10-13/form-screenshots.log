@@ -1,0 +1,19 @@
+PASS Desktop 1600: no workspace or page overflow
+PASS Viewport 1280: no workspace or page overflow
+PASS Viewport 1024: no workspace or page overflow
+PASS Viewport 768: no workspace or page overflow
+PASS Viewport 390: no workspace or page overflow
+PASS Facebook 1280: no workspace or page overflow
+PASS Facebook 390: no workspace or page overflow
+PASS Instagram 1280: no workspace or page overflow
+PASS Instagram 390: no workspace or page overflow
+PASS LinkedIn 1280: no workspace or page overflow
+PASS LinkedIn 390: no workspace or page overflow
+PASS Reddit 1280: no workspace or page overflow
+PASS Reddit 390: no workspace or page overflow
+PASS TikTok 1280: no workspace or page overflow
+PASS TikTok 390: no workspace or page overflow
+PASS YouTube 1280: no workspace or page overflow
+PASS YouTube 390: no workspace or page overflow
+PASS All six real forms: fields, preview, target validation, master copy and edit preservation
+PASS Zero browser page errors; zero requests to mutate existing schedules

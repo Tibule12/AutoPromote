@@ -211,6 +211,8 @@ function App() {
   const [logoutInProgress, setLogoutInProgress] = useState(false);
   const [content, setContent] = useState([]);
   const [mySchedules, setMySchedules] = useState([]);
+  const [mySchedulesLoading, setMySchedulesLoading] = useState(true);
+  const [mySchedulesError, setMySchedulesError] = useState("");
   const [analytics, setAnalytics] = useState(null);
   const [userDefaults, setUserDefaults] = useState({
     timezone: "UTC",
@@ -257,14 +259,7 @@ function App() {
     document.body.classList.toggle("modal-open", shouldLockScroll);
 
     return () => document.body.classList.remove("modal-open");
-  }, [
-    showLogin,
-    showRegister,
-    showAdminLogin,
-    showMfaModal,
-    showTermsModal,
-    showLogoutConfirm,
-  ]);
+  }, [showLogin, showRegister, showAdminLogin, showMfaModal, showTermsModal, showLogoutConfirm]);
 
   // E2E test auth bypass: when true, skip firebase auth and set test user
   const E2E_AUTH_BYPASS = process.env.REACT_APP_E2E_AUTH_BYPASS === "true";
@@ -409,6 +404,8 @@ function App() {
         } else if (user && user.token) {
           token = user.token;
         } else {
+          setMySchedulesLoading(false);
+          setMySchedulesError("Sign in to load your schedule.");
           return;
         }
       }
@@ -443,12 +440,18 @@ function App() {
           setTermsRequired(true);
           setRequiredTermsVersion(body.requiredVersion || null);
           setShowTermsModal(true);
+          setMySchedulesLoading(false);
+          setMySchedulesError("Accept the updated terms to load your schedule.");
           return;
         }
         if (res.status === 403) {
           // Quietly suppress generic 403s during background fetch to avoid console noise
+          setMySchedulesLoading(false);
+          setMySchedulesError("Schedule could not be loaded. Try again.");
           return;
         }
+        setMySchedulesLoading(false);
+        setMySchedulesError("Schedule could not be loaded. Try again.");
         return;
       }
       const parsed = await parseJsonSafe(res);
@@ -456,19 +459,26 @@ function App() {
       setContent((data && data.content) || []);
       // After content, also fetch schedules (reuse token)
       await fetchMySchedules(token);
-    } catch (error) {}
+    } catch (error) {
+      setMySchedulesLoading(false);
+      setMySchedulesError("Schedule could not be loaded. Try again.");
+    }
   };
 
   const fetchMySchedules = async (providedToken = null) => {
+    setMySchedulesLoading(true);
+    setMySchedulesError("");
     try {
       let token = providedToken;
       if (!token) {
         const currentUser = auth.currentUser;
         if (currentUser) token = await currentUser.getIdToken(true);
         else if (user && user.token) token = user.token;
-        else return;
+        else throw new Error("Sign in to load your schedule.");
       }
-      const res = await fetch(`${API_ENDPOINTS.MY_SCHEDULES}?summary=1&limit=100`, {
+      // The full owned schedule includes timezone and platform copy, which the
+      // summary response intentionally omits. This is still a read-only GET.
+      const res = await fetch(`${API_ENDPOINTS.MY_SCHEDULES}?limit=250`, {
         method: "GET",
         headers: withWorkspaceHeaders({
           Authorization: `Bearer ${token}`,
@@ -476,12 +486,17 @@ function App() {
           Accept: "application/json",
         }),
       });
-      if (res.ok) {
-        const parsed = await parseJsonSafe(res);
-        const data = parsed.json || null;
-        setMySchedules(Array.isArray(data?.schedules) ? data.schedules : []);
-      }
-    } catch (_) {}
+      if (!res.ok) throw new Error("Schedule could not be loaded. Try again.");
+      const parsed = await parseJsonSafe(res);
+      const data = parsed.json || null;
+      if (!Array.isArray(data?.schedules)) throw new Error("Schedule response was incomplete.");
+      setMySchedules(data.schedules);
+      if (data?.meta?.hasMore) setMySchedulesError("Only the most recent 250 schedules are shown.");
+    } catch (error) {
+      setMySchedulesError(error.message || "Schedule could not be loaded.");
+    } finally {
+      setMySchedulesLoading(false);
+    }
   };
 
   // Expose a refresh handler to child components that perform schedule actions
@@ -1306,7 +1321,7 @@ function App() {
       const schedule_hint = {
         ...schedule,
         frequency: schedule?.frequency || userDefaults.defaultFrequency || "once",
-        timezone: userDefaults.timezone || "UTC",
+        timezone: schedule?.timezone || userDefaults.timezone || "UTC",
         mode: scheduledPromotionTime || platformScheduleTimes ? "queued_new_upload" : "publish_now",
         platform_schedule_times: platformScheduleTimes,
       };
@@ -1755,6 +1770,8 @@ function App() {
                     onLogout={() => setShowLogoutConfirm(true)}
                     onUpload={handleContentUpload}
                     mySchedules={mySchedules}
+                    mySchedulesLoading={mySchedulesLoading}
+                    mySchedulesError={mySchedulesError}
                     onSchedulesChanged={refreshSchedules}
                     onWorkspaceChanged={async workspace => {
                       setActiveWorkspaceId(workspace?.id || null);

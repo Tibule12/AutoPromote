@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import EmojiPicker from "../EmojiPicker";
-import HashtagSuggestions from "../HashtagSuggestions";
-import { OPTIMAL_TIMES } from "../BestTimeToPost";
 import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
 import { revokeObjectUrlLater } from "../../utils/objectUrl";
 
@@ -31,6 +29,7 @@ const YouTubeForm = ({
   setProtocol7Volatility,
   onFileChange,
   currentFile,
+  publisherRelease = false,
   onReviewAI,
   onFindViralClips,
 }) => {
@@ -139,8 +138,7 @@ const YouTubeForm = ({
         </div>
       )}
 
-      {/* SCOPE EXPLANATION: Essential for Audit */}
-      <div
+      {!publisherRelease && <div
         className="scope-info-box"
         style={{
           marginBottom: "16px",
@@ -212,66 +210,10 @@ const YouTubeForm = ({
           <strong>Privacy Guarantee:</strong> We cannot delete videos, manage comments, or access
           your viewing history.
         </p>
-      </div>
+      </div>}
 
-      <div className="form-group-modern youtube-legacy-title-field">
-        <label>Title</label>
-        <div style={{ position: "relative" }}>
-          <input
-            type="text"
-            className="modern-input"
-            value={title}
-            onChange={e => {
-              setTitle(e.target.value);
-              setIsTitleDirty(true);
-            }}
-            placeholder="Video Title"
-          />
-          <button
-            className="emoji-trigger-btn"
-            onClick={() =>
-              setShowEmojiPicker({
-                field: "title",
-                visible: !showEmojiPicker.visible || showEmojiPicker.field !== "title",
-              })
-            }
-          >
-            😊
-          </button>
-          {showEmojiPicker.visible && showEmojiPicker.field === "title" && (
-            <div className="emoji-popover-container">
-              <EmojiPicker onSelect={handleInsertEmoji} />
-            </div>
-          )}
-        </div>
-      </div>
 
-      {OPTIMAL_TIMES.youtube && (
-        <div
-          className="youtube-posting-hint"
-          style={{
-            fontSize: "11px",
-            color: "#059669",
-            marginBottom: "12px",
-            padding: "8px 10px",
-            backgroundColor: "#ecfdf5",
-            borderRadius: "6px",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            border: "1px solid #a7f3d0",
-          }}
-        >
-          <span style={{ fontSize: "14px" }}>⏰</span>
-          <span>
-            <strong>Best time to upload:</strong>{" "}
-            {OPTIMAL_TIMES.youtube.days.slice(0, 2).join(", ")} @ {OPTIMAL_TIMES.youtube.hours[0]}
-            :00. Consider scheduling your video for maximum reach.
-          </span>
-        </div>
-      )}
-
-      <div className="form-group-modern youtube-media-override">
+      {!publisherRelease && <div className="form-group-modern youtube-media-override">
         <label htmlFor="youtube-file-input" className="form-label-bold">
           Video File
         </label>
@@ -362,9 +304,9 @@ const YouTubeForm = ({
             label="YouTube media preview"
           />
         )}
-      </div>
+      </div>}
 
-      <div
+      {!publisherRelease && <div
         className="scope-info-box"
         style={{
           marginBottom: "16px",
@@ -418,7 +360,7 @@ const YouTubeForm = ({
           settings. The <code>readonly</code> permission allows us to check channel status and
           analytics to optimize your upload times.
         </p>
-      </div>
+      </div>}
 
       <div className="form-group-modern">
         <label htmlFor="youtube-title-input">Video Title</label>
@@ -506,15 +448,6 @@ const YouTubeForm = ({
             </div>
           )}
         </div>
-        <HashtagSuggestions
-          contentType="video"
-          title={title}
-          description={description}
-          onAddHashtag={tag => {
-            setDescription(prev => prev + " #" + tag);
-            setIsDescriptionDirty(true);
-          }}
-        />
         <div className="char-count">{description.length}/5,000</div>
       </div>
 

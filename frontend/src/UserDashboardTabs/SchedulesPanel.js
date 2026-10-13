@@ -1,610 +1,848 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import {
+  PLATFORM_NAMES,
+  aggregateStatus,
+  displayTimezone,
+  browserTimezone,
+  timezoneLabel,
+  destinationHasOwnSchedule,
+  scheduleMedia,
+  formatScheduleTime,
+  groupSchedules,
+  isValidTimezone,
+  localFields,
+  releaseMedia,
+  scheduleCopy,
+  zonedFieldsToIso,
+} from "./scheduleReleaseModel";
 import "./SchedulesPanel.css";
-import { toast } from "react-hot-toast";
+
+const dateLabel = (value, timezone) =>
+  formatScheduleTime(value, timezone, { dateStyle: "medium", timeStyle: undefined });
+const clockLabel = (value, timezone) =>
+  formatScheduleTime(value, timezone, { dateStyle: undefined, timeStyle: "short" });
+const actionIds = release =>
+  Array.from(new Set(release.destinations.map(item => item.schedule.id)));
+const PLATFORM_GLYPHS = {
+  facebook: "f",
+  instagram: "◎",
+  linkedin: "in",
+  reddit: "●",
+  tiktok: "♪",
+  youtube: "▶",
+};
+
+function originLabel(content) {
+  if (!content) return "";
+  const source = String(
+    content.source || content.origin || content.createdWith || ""
+  ).toLowerCase();
+  if (["viral_clip_studio", "viral-clip-studio", "studio"].includes(source))
+    return "Created in Studio";
+  const template = content.templateName || content.template?.name || content.meta?.template?.name;
+  return typeof template === "string" && template.trim() ? `Template: ${template.trim()}` : "";
+}
+
+function StatusPill({ status }) {
+  return (
+    <span className={`schedule-status schedule-status-${status.toLowerCase()}`}>{status}</span>
+  );
+}
 
 const SchedulesPanel = ({
   schedulesList,
   contentList,
-  onCreate,
+  loading = false,
+  loadError = "",
+  defaultTimezone,
+  currentTime = Date.now(),
   onPause,
   onResume,
   onReschedule,
+  onRescheduleMany,
+  onPauseMany,
+  onResumeMany,
   onDelete,
   onDeleteMany,
+  onEditCopy,
   onNavigate,
 }) => {
-  const [viewMode, setViewMode] = useState("list"); // 'orchestrator' | 'list'
-  const [currentDate] = useState(new Date());
+  const [selectedId, setSelectedId] = useState("");
+  const [expandedPlatform, setExpandedPlatform] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [reschedule, setReschedule] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [copyEditor, setCopyEditor] = useState(null);
+  const [copySaving, setCopySaving] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [mediaFailed, setMediaFailed] = useState(false);
+  const detailRef = useRef(null);
+  const [viewTimezone, setViewTimezone] = useState("");
+  const viewingTimezone = viewTimezone ||
+    (isValidTimezone(defaultTimezone) ? defaultTimezone : browserTimezone());
 
-  // Injection State (Creation)
-  const [showInjector, setShowInjector] = useState(false);
-  const [injectData, setInjectData] = useState({
-    contentId: "",
-    date: new Date().toISOString().split("T")[0],
-    time: "12:00",
-    platforms: [],
-    frequency: "once",
-  });
-  const [isInjecting, setIsInjecting] = useState(false);
-  const [selectedScheduleIds, setSelectedScheduleIds] = useState(() => new Set());
-
-  // Platform Definitions
-  const platforms = [
-    { id: "youtube", name: "YouTube", color: "#ff0000" },
-    { id: "instagram", name: "Instagram", color: "#E1306C" },
-    { id: "tiktok", name: "TikTok", color: "#00f2ea" },
-    { id: "twitter", name: "Twitter/X", color: "#1DA1F2" },
-    { id: "linkedin", name: "LinkedIn", color: "#0077b5" },
-    { id: "facebook", name: "Facebook", color: "#1877F2" },
-  ];
-
-  // Helper: Get days for the timeline header (Next 7 days)
-  const getTimelineDays = () => {
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(currentDate);
-      d.setDate(d.getDate() + i);
-      days.push(d);
-    }
-    return days;
-  };
-
-  const handleInject = async e => {
-    e.preventDefault();
-    if (!injectData.contentId) return toast.error("Select content payload");
-    if (injectData.platforms.length === 0) return toast.error("Target at least one platform");
-
-    setIsInjecting(true);
-    const isoDateTime = new Date(`${injectData.date}T${injectData.time}`).toISOString(); // Respect local timezone
-
-    try {
-      if (onCreate) {
-        await onCreate({
-          contentId: injectData.contentId,
-          time: isoDateTime,
-          frequency: injectData.frequency,
-          platforms: injectData.platforms,
-        });
-        toast.success("Payload injected into timeline.");
-        setShowInjector(false);
-        // Reset
-        setInjectData(prev => ({ ...prev, contentId: "", platforms: [] }));
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Injection failed.");
-    } finally {
-      setIsInjecting(false);
-    }
-  };
-
-  const togglePlatform = pid => {
-    setInjectData(prev => ({
-      ...prev,
-      platforms: prev.platforms.includes(pid)
-        ? prev.platforms.filter(p => p !== pid)
-        : [...prev.platforms, pid],
-    }));
-  };
-
-  const visibleSchedules = useMemo(
-    () =>
-      Array.isArray(schedulesList)
-        ? schedulesList.filter(schedule => {
-            if (!schedule?.id) return false;
-            if (schedule.isActive === false) return false;
-            return !["executed", "completed", "failed", "skipped", "error"].includes(
-              String(schedule.status || "").toLowerCase()
-            );
-          })
-        : [],
-    [schedulesList]
+  const allReleases = useMemo(
+    () => groupSchedules(schedulesList, contentList),
+    [schedulesList, contentList]
   );
-  const queueSummary = useMemo(() => {
-    const now = Date.now();
-    const weekFromNow = now + 7 * 24 * 60 * 60 * 1000;
-    const platformCount = new Set();
-    let paused = 0;
-    let nextSevenDays = 0;
+  const upcoming = allReleases.filter(
+    release =>
+      new Date(release.time).getTime() >= currentTime &&
+      release.destinations.some(item => ["Ready", "Scheduled", "Paused"].includes(item.status))
+  );
+  const releases = showHistory ? allReleases : upcoming.length ? upcoming : allReleases.slice(-12);
+  const selected = releases.find(release => release.id === selectedId) || releases[0];
+  const subjects = useMemo(() => {
+    const map = new Map();
+    releases.forEach(release => {
+      if (!map.has(release.subject)) map.set(release.subject, []);
+      map.get(release.subject).push(release);
+    });
+    return Array.from(map.entries());
+  }, [releases]);
+  const destinationCount = releases.reduce(
+    (count, release) => count + release.destinations.length,
+    0
+  );
+  const pausedCount = releases.reduce(
+    (count, release) =>
+      count + release.destinations.filter(item => item.status === "Paused").length,
+    0
+  );
+  const platformCount = new Set(
+    releases.flatMap(release => release.destinations.map(item => item.platform))
+  ).size;
+  const timezoneInfo = selected
+    ? displayTimezone(selected.destinations[0]?.schedule, viewingTimezone)
+    : { value: viewingTimezone, recorded: false };
+  const timezone = timezoneInfo.value;
+  const mixedTimezones =
+    selected &&
+    selected.destinations.some(
+      item => displayTimezone(item.schedule).storedValue !== timezoneInfo.storedValue
+    );
+  const media = releaseMedia(selected?.content);
+  const firstCopy = selected
+    ? scheduleCopy(selected.destinations[0]?.schedule, selected.content, selected.destinations[0]?.platform)
+    : { title: "", caption: "" };
+  const previewTitle =
+    firstCopy.title && firstCopy.title !== selected?.title ? firstCopy.title : "";
+  const origin = originLabel(selected?.content);
+  const historyLimitNotice = loadError.startsWith("Only the most recent");
 
-    visibleSchedules.forEach(schedule => {
-      const status = String(schedule?.status || "").toLowerCase();
-      if (status === "paused") paused += 1;
-      const scheduledAt = new Date(schedule?.startTime || schedule?.time || 0).getTime();
-      if (scheduledAt >= now && scheduledAt <= weekFromNow) nextSevenDays += 1;
-      (schedule?.platforms || (schedule?.platform ? [schedule.platform] : [])).forEach(platform =>
-        platformCount.add(platform)
+  const selectRelease = release => {
+    setSelectedId(release.id);
+    setExpandedPlatform("");
+    setMediaFailed(false);
+  };
+
+  const editable = item => ["Ready", "Scheduled", "Paused"].includes(item.status);
+  const canControlDestination = item => destinationHasOwnSchedule(item.schedule, item.platform);
+  const releaseEditable = selected?.destinations.every(editable);
+  const openCopyEditor = (release, item) => {
+    if (!item || !editable(item)) return;
+    const copy = scheduleCopy(item.schedule, item.content || release.content, item.platform);
+    setCopyEditor({
+      releaseId: release.id,
+      scheduleId: item.schedule.id,
+      platform: item.platform,
+      releaseTitle: release.title,
+      title: copy.title,
+      caption: copy.caption,
+      error: "",
+    });
+  };
+
+  const submitCopy = async event => {
+    event.preventDefault();
+    if (!copyEditor || copySaving) return;
+    setCopySaving(true);
+    try {
+      const result = await onEditCopy?.(copyEditor.scheduleId, {
+        title: copyEditor.title,
+        caption: copyEditor.caption,
+      });
+      if (!result)
+        throw new Error("Could not save this destination's copy. Review its status and retry.");
+      setCopyEditor(null);
+    } catch (error) {
+      setCopyEditor(current => current && { ...current, error: error.message });
+    } finally {
+      setCopySaving(false);
+    }
+  };
+
+  const openReschedule = (release, destination = null) => {
+    const zone = displayTimezone(
+      destination?.schedule || release.destinations[0]?.schedule,
+      viewingTimezone
+    ).value;
+    const fields = localFields(destination?.schedule?.startTime || release.time, zone);
+    setReschedule({
+      releaseTitle: release.title,
+      ids: destination ? [destination.schedule.id] : actionIds(release),
+      scope: destination
+        ? PLATFORM_NAMES[destination.platform] || destination.platform
+        : "entire release",
+      date: fields.date,
+      time: fields.time,
+      timezone: zone,
+      error: "",
+    });
+  };
+
+  const submitReschedule = async event => {
+    event.preventDefault();
+    if (!reschedule || saving) return;
+    try {
+      const when = zonedFieldsToIso(reschedule.date, reschedule.time, reschedule.timezone);
+      if (new Date(when).getTime() <= Date.now()) throw new Error("Choose a future publish time.");
+      setSaving(true);
+      const result =
+        reschedule.ids.length > 1 && onRescheduleMany
+          ? await onRescheduleMany(reschedule.ids, when, reschedule.timezone)
+          : await onReschedule?.(reschedule.ids[0], when, reschedule.timezone);
+      if (result === false || result === null)
+        throw new Error(
+          "Some destinations could not be rescheduled. Review their current times before retrying."
+        );
+      setReschedule(null);
+    } catch (error) {
+      setReschedule(
+        current => current && { ...current, error: error.message || "Could not reschedule." }
       );
-    });
-
-    return {
-      active: visibleSchedules.length,
-      nextSevenDays,
-      paused,
-      platforms: platformCount.size,
-    };
-  }, [visibleSchedules]);
-  const selectedCount = selectedScheduleIds.size;
-  const allVisibleSelected =
-    visibleSchedules.length > 0 &&
-    visibleSchedules.every(schedule => selectedScheduleIds.has(schedule.id));
-
-  const toggleScheduleSelection = id => {
-    if (!id) return;
-    setSelectedScheduleIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const toggleAllVisibleSchedules = () => {
-    setSelectedScheduleIds(prev => {
-      if (allVisibleSelected) return new Set();
-      const next = new Set(prev);
-      visibleSchedules.forEach(schedule => next.add(schedule.id));
-      return next;
-    });
+  const pauseRelease = async () => {
+    if (!selected || !onPauseMany) return;
+    const ids = actionIds(selected);
+    if (
+      !window.confirm(
+        `Pause ${selected.title} across ${ids.length} scheduled destination${ids.length === 1 ? "" : "s"}?`
+      )
+    )
+      return;
+    await onPauseMany(ids);
   };
 
-  const abortSelectedSchedules = async () => {
-    const ids = Array.from(selectedScheduleIds);
-    if (ids.length === 0 || !onDeleteMany) return;
-    await onDeleteMany(ids);
-    setSelectedScheduleIds(new Set());
+  const resumeRelease = async () => {
+    if (!selected || !onResumeMany) return;
+    await onResumeMany(actionIds(selected));
   };
 
-  const scheduleTitle = (schedule, content) => {
-    const scheduleLabel = String(schedule?.title || "").trim();
-    const contentLabel = String(content?.title || "").trim();
-    if (scheduleLabel) return scheduleLabel;
-    if (contentLabel && contentLabel.toLowerCase() !== "untitled post") return contentLabel;
-    return "Queued Upload";
-  };
-
-  // Helper to position events on the timeline
-  const getEventStyle = scheduleDate => {
-    const eventTime = new Date(scheduleDate);
-    const startOfDay = new Date(currentDate);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    // Calculate offset in days from current view start
-    const diffTime = eventTime - startOfDay;
-    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-
-    // If it's outside the 7 day view (negative or > 7), hide or handle
-    if (diffDays < 0 || diffDays >= 7) return null;
-
-    // Calculate percentage left
-    const leftPercent = (diffDays / 7) * 100;
-
-    return {
-      left: `${leftPercent}%`,
-      width: "13%", // Approx width of one day
-    };
-  };
+  const timezoneOptions = Array.from(
+    new Set(
+      [
+        reschedule?.timezone,
+        viewingTimezone,
+        defaultTimezone,
+        typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "",
+        "UTC",
+        "Africa/Johannesburg",
+      ].filter(isValidTimezone)
+    )
+  );
 
   return (
-    <div className="schedules-panel">
-      {/* Header */}
-      <div className="orchestrator-header">
-        <div>
-          <h2 className="orchestrator-title">Publishing Queue</h2>
-          <div style={{ color: "#64748b", fontSize: "0.9rem" }}>
-            Monitor new uploads that are scheduled for future platform releases.
+    <section className="schedules-panel" aria-label="Schedule releases">
+      {loading && (
+        <div className="schedule-loading" role="status">
+          Loading your scheduled releases…
+        </div>
+      )}
+      {loadError && !loading && (!historyLimitNotice || showHistory) && (
+        <div className="schedule-alert" role="alert">
+          {loadError}
+        </div>
+      )}
+      {!loading && !loadError && allReleases.length === 0 && (
+        <div className="schedule-empty">
+          No scheduled releases yet. Choose a finished file in Publisher to schedule your first
+          post.
+          {onNavigate && <button
+            className="schedule-primary"
+            onClick={() => onNavigate("upload")}
+          >
+            + New release
+          </button>}
+        </div>
+      )}
+
+      {!loading && releases.length > 0 && (
+        <>
+          <div className="schedule-kpis" aria-label="Schedule summary">
+            <article>
+              <span className="schedule-kpi-icon releases" aria-hidden="true">▣</span>
+              <strong>{releases.length}</strong>
+              <span>Releases</span>
+            </article>
+            <article>
+              <span className="schedule-kpi-icon posts" aria-hidden="true">▤</span>
+              <strong>{destinationCount}</strong>
+              <span>Platform posts</span>
+            </article>
+            <article>
+              <span className="schedule-kpi-icon destinations" aria-hidden="true">➤</span>
+              <strong>{platformCount}</strong>
+              <span>Destinations</span>
+            </article>
+            <article>
+              <span className="schedule-kpi-icon paused" aria-hidden="true">Ⅱ</span>
+              <strong>{pausedCount}</strong>
+              <span>Paused</span>
+            </article>
+          </div>
+
+          <label className="schedule-view-timezone">
+            View times in
+            <select value={viewingTimezone} onChange={event => setViewTimezone(event.target.value)}>
+              {timezoneOptions.map(zone => <option key={zone} value={zone}>{zone}</option>)}
+            </select>
+            <small>Changes the display only.</small>
+          </label>
+          <div className="schedule-workspace">
+            <nav className="schedule-release-list" aria-label="Releases">
+              <div className="schedule-list-heading">
+                <h3>Releases</h3>
+                {onNavigate && <button
+                  className="schedule-primary"
+                  onClick={() => onNavigate("upload")}
+                >
+                  + New release
+                </button>}
+              </div>
+              {subjects.map(([subject, items]) => (
+                <div className="schedule-subject" key={subject}>
+                  <h4><span aria-hidden="true">{subject === "Coffee" ? "☕" : subject === "Cycling" ? "🚴" : subject === "Headphones" ? "🎧" : "▣"}</span>{subject}</h4>
+                  {items.map(release => {
+                    const zone = displayTimezone(
+                      release.destinations[0]?.schedule,
+                      viewingTimezone
+                    ).value;
+                    return (
+                      <button
+                        key={release.id}
+                        className={`schedule-release-item ${selected?.id === release.id ? "selected" : ""}`}
+                        aria-current={selected?.id === release.id ? "true" : undefined}
+                        aria-label={`${release.variant || release.title} ${dateLabel(release.time, zone)} ${clockLabel(release.time, zone)} ${zone}`}
+                        onClick={() => selectRelease(release)}
+                      >
+                        <span className="schedule-release-date">
+                          <span aria-hidden="true">▣</span> {dateLabel(release.time, zone)}
+                        </span>
+                        <span className="schedule-release-kind">
+                          <strong>{release.variant || release.title}</strong>
+                          <small className={`schedule-variant ${release.variant === "Timeline" ? "timeline" : "final"}`}>
+                            {release.variant === "Timeline" ? "BEHIND THE EDIT" : release.variant === "Final Edit" ? "FINAL VIDEO" : "RELEASE"}
+                          </small>
+                        </span>
+                        <span className="schedule-release-arrow" aria-hidden="true">›</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+              {allReleases.length > upcoming.length && (
+                <button
+                  className="schedule-history-toggle"
+                  onClick={() => {
+                    setShowHistory(!showHistory);
+                    setSelectedId("");
+                    setMediaFailed(false);
+                  }}
+                >
+                  {showHistory ? "Show upcoming" : `View history (${allReleases.length - upcoming.length})`}
+                </button>
+              )}
+            </nav>
+
+            {selected && (
+              <article ref={detailRef} className="schedule-detail" aria-label={`${selected.title} details`}>
+                <header className="schedule-detail-header">
+                  <div>
+                    <span
+                      className={`schedule-variant ${selected.variant === "Timeline" ? "timeline" : "final"}`}
+                    >
+                      {selected.variant === "Timeline"
+                        ? "BEHIND THE EDIT"
+                        : selected.variant === "Final Edit"
+                          ? "FINAL VIDEO"
+                          : "RELEASE"}
+                    </span>
+                    <h3>{selected.subject}{selected.variant ? ` — ${selected.variant}` : ""}</h3>
+                    {origin && <span className="schedule-origin">{origin}</span>}
+                  </div>
+                  <strong className="schedule-aggregate">{aggregateStatus(selected.destinations)}</strong>
+                </header>
+                <div className="schedule-detail-main">
+                  <div className="schedule-media">
+                    {media.url && media.kind === "video" && !mediaFailed ? (
+                      <video
+                        controls
+                        preload="metadata"
+                        poster={media.poster || undefined}
+                        src={media.url}
+                        aria-label={`${selected.title} video preview`}
+                        onError={() => setMediaFailed(true)}
+                      />
+                    ) : media.url && media.kind === "image" && !mediaFailed ? (
+                      <img
+                        src={media.url}
+                        alt={`${selected.title} scheduled media`}
+                        onError={() => setMediaFailed(true)}
+                      />
+                    ) : media.poster ? (
+                      <img src={media.poster} alt={`${selected.title} poster`} />
+                    ) : (
+                      <div className="schedule-media-empty">
+                        Media preview unavailable
+                        <br />
+                        <small>
+                          The queue has no accessible poster or media URL for this release.
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                  <div className="schedule-overview">
+                    <div className="schedule-copy">
+                      <strong>{previewTitle || "Post copy"}</strong>
+                      <p>{firstCopy.caption || "No caption stored for this release."}</p>
+                    </div>
+                    <dl className="schedule-timing">
+                      <div>
+                        <dt>Publish date</dt>
+                        <dd>{dateLabel(selected.time, timezone)}</dd>
+                      </div>
+                      <div>
+                        <dt>Time</dt>
+                        <dd>{clockLabel(selected.time, timezone)}</dd>
+                      </div>
+                      <div>
+                        <dt>Timezone</dt>
+                        <dd>
+                          {timezoneLabel(timezone, selected.time)}
+                          {timezoneInfo.storedValue && !timezoneInfo.recorded && (
+                            <small>Stored timezone: {timezoneInfo.storedValue}</small>
+                          )}
+                          {!timezoneInfo.recorded && (
+                            <small>Viewing timezone; stored publish instant unchanged</small>
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+                    {mixedTimezones && (
+                      <div className="schedule-alert">
+                        Destinations have different recorded timezones. Check each expanded
+                        destination.
+                      </div>
+                    )}
+                    <div className="schedule-destinations">
+                  <h4>Destinations ({selected.destinations.length})</h4>
+                  {selected.destinations.map(item => {
+                    const copy = scheduleCopy(item.schedule, item.content, item.platform);
+                    const destinationMedia = scheduleMedia(item.schedule, item.content, item.platform);
+                    const ownSchedule = canControlDestination(item);
+                    const expanded = expandedPlatform === `${item.platform}:${item.schedule.id}`;
+                    const zone = displayTimezone(item.schedule, viewingTimezone);
+                    return (
+                      <div
+                        key={`${item.platform}:${item.schedule.id}`}
+                        className="schedule-destination"
+                      >
+                        <button
+                          className="schedule-destination-toggle"
+                          aria-expanded={expanded}
+                          onClick={() =>
+                            setExpandedPlatform(
+                              expanded ? "" : `${item.platform}:${item.schedule.id}`
+                            )
+                          }
+                        >
+                          <span className={`schedule-platform-icon platform-${item.platform}`}>
+                            {PLATFORM_GLYPHS[item.platform] || (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
+                          </span>
+                          <strong>{PLATFORM_NAMES[item.platform] || item.platform}</strong>
+                          <StatusPill status={item.status} />
+                          <span aria-hidden="true">{expanded ? "⌃" : "⌄"}</span>
+                        </button>
+                        {expanded && (
+                          <div className="schedule-destination-detail">
+                            <div>
+                              <span>Post title</span>
+                              <p>
+                                {copy.title || "No title stored for this destination"}
+                              </p>
+                            </div>
+                            <div>
+                              <span>Caption</span>
+                              <p>{copy.caption || "No platform-specific caption stored"}</p>
+                            </div>
+                            {(destinationMedia.url || destinationMedia.poster) ? (
+                                <div className="schedule-platform-media">
+                                  <span>Media for this destination</span>
+                                  {destinationMedia.kind === "image" || !destinationMedia.url ? (
+                                    <img
+                                      src={destinationMedia.kind === "image" ? destinationMedia.url || destinationMedia.poster : destinationMedia.poster}
+                                      alt={`${PLATFORM_NAMES[item.platform]} scheduled media`}
+                                    />
+                                  ) : (
+                                    <video
+                                      src={destinationMedia.url}
+                                      poster={destinationMedia.poster || undefined}
+                                      controls
+                                      preload="metadata"
+                                      aria-label={`${PLATFORM_NAMES[item.platform]} scheduled video`}
+                                    />
+                                  )}
+                                </div>
+                              ) : <p>Media unavailable for this destination.</p>}
+                            <p className="schedule-destination-time">
+                              {formatScheduleTime(
+                                item.schedule.startTime || item.schedule.time,
+                                zone.value
+                              )}{" "}
+                              · {timezoneLabel(zone.value, item.schedule.startTime || item.schedule.time)}
+                              {!zone.recorded ? " (viewing timezone)" : ""}
+                              {zone.storedValue && !zone.recorded && <small>Stored timezone: {zone.storedValue}</small>}
+                            </p>
+                            {!ownSchedule && <p>This schedule is shared by multiple destinations. Use release controls.</p>}
+                            {ownSchedule && <div className="schedule-destination-actions">
+                              {onEditCopy && <button
+                                onClick={() => openCopyEditor(selected, item)}
+                                disabled={!editable(item)}
+                              >
+                                Edit {PLATFORM_NAMES[item.platform] || item.platform} copy
+                              </button>}
+                              {onReschedule && <button
+                                onClick={() => openReschedule(selected, item)}
+                                disabled={!editable(item)}
+                              >
+                                Reschedule {PLATFORM_NAMES[item.platform] || item.platform}
+                              </button>}
+                              {item.status === "Paused" && onResume ? (
+                                <button onClick={() => onResume?.(item.schedule.id)}>
+                                  Resume destination
+                                </button>
+                              ) : editable(item) && item.status !== "Paused" && onPause ? (
+                                <button
+                                  onClick={() => {
+                                    if (
+                                      window.confirm(
+                                        `Pause only ${PLATFORM_NAMES[item.platform] || item.platform} for ${selected.title}?`
+                                      )
+                                    )
+                                      onPause?.(item.schedule.id);
+                                  }}
+                                >
+                                  Pause destination
+                                </button>
+                              ) : null}
+                              {onDelete && <button
+                                className="danger"
+                                onClick={() => onDelete(item.schedule.id)}
+                                disabled={!editable(item)}
+                              >
+                                Cancel destination
+                              </button>}
+                            </div>}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                    </div>
+                  </div>
+                </div>
+                <div className="schedule-release-actions">
+                  <button
+                    onClick={() => setPreviewOpen(true)}
+                    disabled={(!media.url || mediaFailed) && !media.poster}
+                  >
+                    Preview
+                  </button>
+                  <button
+                    onClick={() => openCopyEditor(selected, selected.destinations.find(item => editable(item) && canControlDestination(item)))}
+                    disabled={!onEditCopy || !selected.destinations.some(item => editable(item) && canControlDestination(item))}
+                  >
+                    Edit post/copy
+                  </button>
+                  <button onClick={() => openReschedule(selected)} disabled={!releaseEditable}>
+                    Reschedule release
+                  </button>
+                  {selected.destinations.every(item => item.status === "Paused") ? (
+                    <button onClick={resumeRelease}>Resume release</button>
+                  ) : (
+                    <button onClick={pauseRelease} disabled={!releaseEditable}>
+                      Pause release
+                    </button>
+                  )}
+                  <button
+                    className="danger"
+                    onClick={() => onDeleteMany?.(actionIds(selected))}
+                    disabled={!releaseEditable}
+                  >
+                    Cancel release <small>All {selected.destinations.length} destinations</small>
+                  </button>
+                </div>
+                <p className="schedule-copy-limit">
+                  Expand a destination for its exact copy, media, time and individual controls.
+                </p>
+              </article>
+            )}
+          </div>
+
+          <section className="schedule-calendar" aria-label="Release calendar">
+            <header>
+              <div>
+                <h3>Release calendar</h3>
+                <p>Select a release to inspect all destinations. Times include the recorded or viewing timezone.</p>
+              </div>
+              <div className="schedule-legend">
+                {["Ready", "Scheduled", "Publishing", "Published", "Failed"].map(status => (
+                  <span key={status}>
+                    <StatusPill status={status} />
+                  </span>
+                ))}
+              </div>
+            </header>
+            <div className="schedule-calendar-grid">
+              {releases.map(release => {
+                const zone = displayTimezone(
+                  release.destinations[0]?.schedule,
+                  viewingTimezone
+                ).value;
+                return (
+                  <button
+                    key={release.id}
+                    className={`schedule-calendar-card ${selected?.id === release.id ? "selected" : ""}`}
+                    onClick={() => {
+                      selectRelease(release);
+                      detailRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+                    }}
+                    aria-label={`Select ${release.title}, ${dateLabel(release.time, zone)}, ${release.destinations.length} destinations`}
+                  >
+                    <span className="schedule-calendar-date"><small>{dateLabel(release.time, zone)}</small><StatusPill status={release.destinations[0]?.status || "Ready"} /></span>
+                    <span
+                      className={`schedule-variant ${release.variant === "Timeline" ? "timeline" : "final"}`}
+                    >
+                      {release.variant === "Timeline"
+                        ? "BEHIND THE EDIT"
+                        : release.variant === "Final Edit"
+                          ? "FINAL VIDEO"
+                          : "RELEASE"}
+                    </span>
+                    <strong>{release.subject}{release.variant ? ` — ${release.variant}` : ""}</strong>
+                    <em>{release.destinations.length} destinations · {clockLabel(release.time, zone)} {timezoneLabel(zone, release.time)}</em>
+                    <span className="schedule-calendar-platforms">
+                      {release.destinations.map(item => (
+                        <span
+                          key={`${item.platform}:${item.schedule.id}`}
+                          title={PLATFORM_NAMES[item.platform] || item.platform}
+                          className={`schedule-platform-icon platform-${item.platform}`}
+                        >
+                          {PLATFORM_GLYPHS[item.platform] || (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
+                        </span>
+                      ))}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </>
+      )}
+
+      {previewOpen && selected && (
+        <div
+          className="schedule-modal-backdrop"
+          role="presentation"
+          onClick={() => setPreviewOpen(false)}
+        >
+          <div
+            className="schedule-modal schedule-preview-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${selected.title} preview`}
+            onClick={event => event.stopPropagation()}
+          >
+            <button
+              className="schedule-modal-close"
+              onClick={() => setPreviewOpen(false)}
+              aria-label="Close preview"
+            >
+              ×
+            </button>
+            <h3>{selected.title}</h3>
+            {media.url && media.kind === "video" && !mediaFailed ? (
+              <video
+                controls
+                preload="metadata"
+                poster={media.poster || undefined}
+                src={media.url}
+                onError={() => setMediaFailed(true)}
+              />
+            ) : (
+              <img src={media.poster || media.url} alt={`${selected.title} preview`} />
+            )}
           </div>
         </div>
-
-        <div className="time-controls">
-          <button
-            className={`control-btn ${viewMode === "orchestrator" ? "active" : ""}`}
-            onClick={() => setViewMode("orchestrator")}
-          >
-            Calendar
-          </button>
-          <button
-            className={`control-btn ${viewMode === "list" ? "active" : ""}`}
-            onClick={() => setViewMode("list")}
-          >
-            List
-          </button>
-          <button
-            className="control-btn"
-            style={{ borderColor: "#10b981", color: "#10b981" }}
-            onClick={() => (onNavigate ? onNavigate("upload") : setShowInjector(!showInjector))}
-          >
-            {onNavigate ? "+ Schedule post" : showInjector ? "CANCEL DROP" : "+ SCHEDULE DROP"}
-          </button>
-        </div>
-      </div>
-
-      <div className="queue-kpi-grid" aria-label="Queue summary">
-        <article>
-          <span>Active posts</span>
-          <strong>{queueSummary.active}</strong>
-          <small>Currently in your publishing queue</small>
-        </article>
-        <article>
-          <span>Next 7 days</span>
-          <strong>{queueSummary.nextSevenDays}</strong>
-          <small>Scheduled for the coming week</small>
-        </article>
-        <article>
-          <span>Paused</span>
-          <strong>{queueSummary.paused}</strong>
-          <small>Waiting for you to resume</small>
-        </article>
-        <article>
-          <span>Platforms</span>
-          <strong>{queueSummary.platforms}</strong>
-          <small>Destinations represented</small>
-        </article>
-      </div>
-
-      <div className="queue-guidance">
-        <div>
-          <span className="queue-guidance-kicker">How queue works</span>
-          <strong>
-            Choose a fresh media file in Publish, select platforms, then pick a future time.
-          </strong>
-          <p>
-            Queue never auto-selects old uploads. Each selected platform uses one automated
-            distribution task from the user&apos;s monthly plan allowance.
-          </p>
-        </div>
-        <button
-          className="queue-guidance-action"
-          onClick={() => onNavigate && onNavigate("upload")}
+      )}
+      {copyEditor && (
+        <div
+          className="schedule-modal-backdrop"
+          role="presentation"
+          onClick={() => !copySaving && setCopyEditor(null)}
         >
-          Open Publisher
-        </button>
-      </div>
-
-      {/* Injection Panel (Create Form) */}
-      {showInjector && (
-        <div className="injection-panel">
-          <h4 style={{ marginBottom: "15px", color: "#fff" }}>CONFIGURE CONTENT DROP</h4>
-          <form onSubmit={handleInject} className="injection-form">
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "5px",
-                  fontSize: "0.8rem",
-                  color: "#94a3b8",
+          <form
+            className="schedule-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Edit post copy"
+            onSubmit={submitCopy}
+            onClick={event => event.stopPropagation()}
+          >
+            <h3>Edit post/copy</h3>
+            <p>
+              {copyEditor.releaseTitle} ·{" "}
+              {PLATFORM_NAMES[copyEditor.platform] || copyEditor.platform} only
+            </p>
+            <label>
+              Destination
+              <select
+                value={copyEditor.scheduleId}
+                onChange={event => {
+                  const item = selected?.destinations.find(
+                    destination => destination.schedule.id === event.target.value
+                  );
+                  if (item) openCopyEditor(selected, item);
                 }}
               >
-                PAYLOAD (CONTENT)
-              </label>
-              <select
-                className="cyber-input"
-                aria-label="Select Content"
-                value={injectData.contentId}
-                onChange={e => setInjectData({ ...injectData, contentId: e.target.value })}
-              >
-                <option value="">Select Content Node...</option>
-                {contentList?.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.title || "Untitled Node"}
+                {selected?.destinations.map(item => (
+                  <option
+                    key={item.schedule.id}
+                    value={item.schedule.id}
+                    disabled={!editable(item)}
+                  >
+                    {PLATFORM_NAMES[item.platform] || item.platform} · {item.status}
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "5px",
-                  fontSize: "0.8rem",
-                  color: "#94a3b8",
-                }}
-              >
-                TARGET VECTOR (DATE/TIME)
-              </label>
-              <div style={{ display: "flex", gap: "5px" }}>
-                <input
-                  type="date"
-                  className="cyber-input"
-                  aria-label="Schedule Date"
-                  value={injectData.date}
-                  onChange={e => setInjectData({ ...injectData, date: e.target.value })}
-                />
-                <input
-                  type="time"
-                  className="cyber-input"
-                  aria-label="Schedule Time"
-                  value={injectData.time}
-                  onChange={e => setInjectData({ ...injectData, time: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "5px",
-                  fontSize: "0.8rem",
-                  color: "#94a3b8",
-                }}
-              >
-                CHANNELS
-              </label>
-              <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
-                {platforms.map(p => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => togglePlatform(p.id)}
-                    style={{
-                      padding: "5px 10px",
-                      borderRadius: "4px",
-                      border: "1px solid",
-                      borderColor: injectData.platforms.includes(p.id) ? p.color : "#334155",
-                      background: injectData.platforms.includes(p.id)
-                        ? `${p.color}33`
-                        : "transparent",
-                      color: injectData.platforms.includes(p.id) ? p.color : "#64748b",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                  >
-                    {p.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "flex-end" }}>
-              <button
-                type="submit"
-                className="control-btn"
-                style={{
-                  width: "100%",
-                  background: "#10b981",
-                  color: "black",
-                  borderColor: "#10b981",
-                  fontWeight: "bold",
-                }}
-                disabled={isInjecting}
-              >
-                {isInjecting ? "INJECTING..." : "INITIATE SCHEDULE"}
+            </label>
+            <label>
+              Platform title
+              <input
+                maxLength={160}
+                value={copyEditor.title}
+                onChange={event => setCopyEditor({ ...copyEditor, title: event.target.value })}
+                placeholder="Optional platform title"
+              />
+            </label>
+            <label>
+              Caption / post text
+              <textarea
+                maxLength={5000}
+                rows={6}
+                value={copyEditor.caption}
+                onChange={event => setCopyEditor({ ...copyEditor, caption: event.target.value })}
+                placeholder="Write this destination's post text"
+              />
+            </label>
+            <p className="schedule-modal-note">
+              Saving updates only the selected destination before publishing starts. The scheduled
+              date and other destinations stay as they are.
+            </p>
+            {copyEditor.error && (
+              <p className="schedule-alert" role="alert">
+                {copyEditor.error}
+              </p>
+            )}
+            <div className="schedule-modal-actions">
+              <button type="button" onClick={() => setCopyEditor(null)} disabled={copySaving}>
+                Discard changes
+              </button>
+              <button type="submit" disabled={copySaving}>
+                {copySaving ? "Saving…" : "Save destination copy"}
               </button>
             </div>
           </form>
         </div>
       )}
-
-      {/* Main Orchestrator View */}
-      {viewMode === "orchestrator" ? (
-        <div className="chronoline-container">
-          {/* Timeline Header (Days) */}
-          <div className="chronoline-header">
-            <div style={{ width: "120px", borderRight: "1px solid rgba(255,255,255,0.08)" }}></div>
-            {getTimelineDays().map((date, i) => (
-              <div key={i} className={`timeline-column ${i === 0 ? "today" : ""}`}>
-                <div style={{ fontWeight: "bold" }}>
-                  {date.toLocaleDateString("en-US", { weekday: "short" })}
-                </div>
-                <div style={{ fontSize: "0.7rem" }}>
-                  {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Timeline Body (Swimlanes) */}
-          <div className="chronoline-body">
-            {/* Current Time Playhead (Mock) */}
-            <div className="chronoline-playhead" style={{ left: "14%" }}>
-              {" "}
-              {/* 14% is approx partly into first day */}
-              <div className="playhead-label">NOW</div>
-            </div>
-
-            {platforms.map(platform => (
-              <div key={platform.id} className="platform-swimlane">
-                <div className="swimlane-header">
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      background: platform.color,
-                    }}
-                  ></span>
-                  {platform.name}
-                </div>
-                <div className="swimlane-track">
-                  {/* AI Prime Time Suggestions (Mock) */}
-                  {platform.id === "instagram" && (
-                    <div
-                      className="ai-suggestion-slot"
-                      style={{ left: "35%", width: "5%" }}
-                      title="High Engagement Probability"
-                    >
-                      PRIME
-                    </div>
-                  )}
-
-                  {/* Render Scheduled Events */}
-                  {visibleSchedules
-                    ?.filter(s => {
-                      const sp = s.platforms || (s.platform ? [s.platform] : []);
-                      return sp.includes(platform.id);
-                    })
-                    .map((sched, idx) => {
-                      const time = sched.startTime || sched.time;
-                      const style = getEventStyle(time);
-                      if (!style) return null;
-
-                      const content = contentList?.find(c => c.id === sched.contentId);
-
-                      const label = scheduleTitle(sched, content);
-
-                      return (
-                        <div
-                          key={idx}
-                          className="timeline-event-node"
-                          style={{
-                            ...style,
-                            borderLeft: `3px solid ${platform.color}`,
-                            background: "rgba(30, 41, 59, 0.9)",
-                          }}
-                          onClick={() => toast(`Scheduled: ${label}`)}
-                        >
-                          {label}
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        /* Legacy List View */
-        <div className="schedules-list-legacy">
-          {visibleSchedules.length === 0 && (
-            <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
-              NO ACTIVE TRANSMISSIONS FOUND
-            </div>
-          )}
-          {visibleSchedules.length > 0 && (
-            <div className="schedule-bulk-bar">
-              <label className="schedule-select-all">
-                <input
-                  type="checkbox"
-                  checked={allVisibleSelected}
-                  onChange={toggleAllVisibleSchedules}
-                />
-                Select all visible
-              </label>
-              <span>{selectedCount} selected</span>
-              <button
-                className="control-btn"
-                disabled={selectedCount === 0 || !onDeleteMany}
-                onClick={abortSelectedSchedules}
+      {reschedule && (
+        <div
+          className="schedule-modal-backdrop"
+          role="presentation"
+          onClick={() => !saving && setReschedule(null)}
+        >
+          <form
+            className="schedule-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Reschedule"
+            onSubmit={submitReschedule}
+            onClick={event => event.stopPropagation()}
+          >
+            <h3>Reschedule {reschedule.scope}</h3>
+            <p>
+              {reschedule.releaseTitle} · {reschedule.ids.length} destination
+              {reschedule.ids.length === 1 ? "" : "s"}
+            </p>
+            <label>
+              Publish date
+              <input
+                type="date"
+                required
+                value={reschedule.date}
+                onChange={event => setReschedule({ ...reschedule, date: event.target.value })}
+              />
+            </label>
+            <label>
+              Time
+              <input
+                type="time"
+                required
+                value={reschedule.time}
+                onChange={event => setReschedule({ ...reschedule, time: event.target.value })}
+              />
+            </label>
+            <label>
+              Timezone
+              <select
+                value={reschedule.timezone}
+                onChange={event => setReschedule({ ...reschedule, timezone: event.target.value })}
               >
-                ABORT SELECTED
+                {timezoneOptions.map(value => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="schedule-modal-note">
+              All selected destinations receive the same instant. If one update fails, the others
+              may already have changed; review each status afterward.
+            </p>
+            {reschedule.error && (
+              <p className="schedule-alert" role="alert">
+                {reschedule.error}
+              </p>
+            )}
+            <div className="schedule-modal-actions">
+              <button type="button" onClick={() => setReschedule(null)} disabled={saving}>
+                Keep current time
+              </button>
+              <button type="submit" disabled={saving}>
+                {saving
+                  ? "Saving…"
+                  : `Reschedule ${reschedule.ids.length} destination${reschedule.ids.length === 1 ? "" : "s"}`}
               </button>
             </div>
-          )}
-          {visibleSchedules.map((sch, i) => {
-            const content = contentList?.find(c => c.id === sch.contentId);
-            const label = scheduleTitle(sch, content);
-            const time = sch.startTime || sch.time;
-            const channelList = sch.platforms || (sch.platform ? [sch.platform] : []);
-
-            return (
-              <div
-                key={sch.id || i}
-                className="control-module"
-                style={{
-                  marginBottom: "10px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <label className="schedule-row-select" onClick={event => event.stopPropagation()}>
-                  <input
-                    type="checkbox"
-                    checked={selectedScheduleIds.has(sch.id)}
-                    onChange={() => toggleScheduleSelection(sch.id)}
-                    aria-label={`Select schedule ${label || sch.id}`}
-                  />
-                </label>
-                <div>
-                  <div style={{ fontWeight: "bold", color: "white" }}>{label}</div>
-                  <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
-                    Target: {time ? new Date(time).toLocaleString() : "Unscheduled"} •{" "}
-                    {sch.frequency || "once"} •{" "}
-                    {sch.source === "new_upload_queue" ? "new upload" : "legacy queue"}
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-                  {channelList.map(p => (
-                    <span
-                      key={p}
-                      style={{
-                        padding: "2px 6px",
-                        borderRadius: "4px",
-                        background: "rgba(255,255,255,0.1)",
-                        fontSize: "0.7rem",
-                      }}
-                    >
-                      {p}
-                    </span>
-                  ))}
-                </div>
-                <div style={{ display: "flex", gap: "4px" }}>
-                  {sch.status === "paused" ? (
-                    <button
-                      onClick={() => onResume && onResume(sch.id)}
-                      className="control-btn"
-                      style={{
-                        padding: "4px 8px",
-                        fontSize: "0.7rem",
-                        borderColor: "#22c55e",
-                        color: "#22c55e",
-                      }}
-                    >
-                      RESUME
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => onPause && onPause(sch.id)}
-                      className="control-btn"
-                      style={{
-                        padding: "4px 8px",
-                        fontSize: "0.7rem",
-                        borderColor: "#f59e0b",
-                        color: "#f59e0b",
-                      }}
-                    >
-                      PAUSE
-                    </button>
-                  )}
-                  <button
-                    onClick={() => {
-                      const newTime = prompt(
-                        "Reschedule to (YYYY-MM-DDTHH:MM):",
-                        injectData.date + "T" + injectData.time
-                      );
-                      if (newTime && onReschedule) onReschedule(sch.id, newTime + ":00.000Z");
-                    }}
-                    className="control-btn"
-                    style={{
-                      padding: "4px 8px",
-                      fontSize: "0.7rem",
-                      borderColor: "#6366f1",
-                      color: "#6366f1",
-                    }}
-                  >
-                    RESCHEDULE
-                  </button>
-                  <button
-                    onClick={() => onDelete && onDelete(sch.id)}
-                    className="control-btn"
-                    style={{
-                      padding: "4px 8px",
-                      fontSize: "0.7rem",
-                      borderColor: "#ef4444",
-                      color: "#ef4444",
-                    }}
-                  >
-                    ABORT
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          </form>
         </div>
       )}
-    </div>
+    </section>
   );
 };
 

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 // import "../../ContentUploadForm.css";
 import EmojiPicker from "../EmojiPicker";
-import HashtagSuggestions from "../HashtagSuggestions";
-import { OPTIMAL_TIMES } from "../BestTimeToPost";
 import FilterEffects from "../FilterEffects";
 import { sanitizeUrl } from "../../utils/security";
 import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
@@ -80,6 +78,7 @@ const TikTokForm = ({
   type = "video",
   onFileChange,
   currentFile,
+  publisherRelease = false,
   onReviewAI,
   onFindViralClips,
 }) => {
@@ -159,11 +158,13 @@ const TikTokForm = ({
   const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
-    if (currentFile && currentFile.type.startsWith("image/")) {
+    if (currentFile instanceof Blob && currentFile.type.startsWith("image/")) {
       // Only images for filters currently
       const url = URL.createObjectURL(currentFile);
       setPreviewUrl(url);
       return () => revokeObjectUrlLater(url);
+    } else if (currentFile?.type?.startsWith("image/") && currentFile.url) {
+      setPreviewUrl(sanitizeUrl(currentFile.url));
     } else {
       setPreviewUrl(null);
     }
@@ -238,29 +239,6 @@ const TikTokForm = ({
         <span className="icon">🎵</span> TikTok Configuration
       </h4>
 
-      {OPTIMAL_TIMES.tiktok && (
-        <div
-          className="tiktok-posting-hint"
-          style={{
-            fontSize: "11px",
-            color: "#059669",
-            marginBottom: "12px",
-            padding: "8px 10px",
-            backgroundColor: "#ecfdf5",
-            borderRadius: "6px",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            border: "1px solid #a7f3d0",
-          }}
-        >
-          <span style={{ fontSize: "14px" }}>⏰</span>
-          <span>
-            <strong>Best time to post:</strong> {OPTIMAL_TIMES.tiktok.days.slice(0, 2).join(", ")} @{" "}
-            {OPTIMAL_TIMES.tiktok.hours[0]}:00.
-          </span>
-        </div>
-      )}
 
       {/* Creator Info & Posting Cap */}
       <div
@@ -360,17 +338,8 @@ const TikTokForm = ({
           )}
         </div>
         <div className="char-count">{caption.length}/2200</div>
-        <HashtagSuggestions
-          contentType="video"
-          title={caption}
-          description=""
-          onAddHashtag={tag => {
-            setCaption(prev => prev + " #" + tag);
-            setIsCaptionDirty(true);
-          }}
-        />
       </div>
-      <div className="form-group-modern tiktok-media-override">
+      {!publisherRelease && <div className="form-group-modern tiktok-media-override">
         <label htmlFor="tiktok-file-input" className="form-label-bold">
           Video File
         </label>
@@ -492,7 +461,7 @@ const TikTokForm = ({
             />
           </div>
         )}
-      </div>
+      </div>}
       <div className="tiktok-core-options" style={{ display: "grid", gap: 8 }}>
         <div>
           <label htmlFor="tiktok-privacy" className="form-label-bold">

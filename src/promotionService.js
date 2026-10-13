@@ -517,8 +517,9 @@ class PromotionService {
           if (!snap.exists) return null;
           const data = snap.data();
 
-          // Skip if already processing or executed.
-          if (data.status === "processing" || data.status === "executed") return null;
+          // Recheck eligibility under the lock: a user may have paused or
+          // rescheduled this destination after the pending query ran.
+          if (data.status !== "pending" || data.isActive !== true) return null;
 
           // Skip if it's not due yet (possible due to race/concurrency)
           if (data.startTime && data.startTime > now) return null;

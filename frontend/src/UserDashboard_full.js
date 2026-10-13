@@ -64,7 +64,7 @@ const DASHBOARD_PAGE_META = {
   upload: {
     eyebrow: "Create",
     title: "Publisher",
-    description: "Prepare one master asset, tailor each destination, and publish with confidence.",
+    description: "Prepare one release. Complete every destination.",
   },
   cam_combiner: {
     eyebrow: "Create",
@@ -96,8 +96,8 @@ const DASHBOARD_PAGE_META = {
   },
   schedules: {
     eyebrow: "Publish",
-    title: "Queue",
-    description: "Review scheduled posts, change timing, and keep every release on track.",
+    title: "Schedule",
+    description: "Create once. Publish everywhere.",
   },
   analytics: {
     eyebrow: "Measure",
@@ -346,6 +346,8 @@ const UserDashboard = ({
   onLogout,
   onUpload,
   mySchedules = [],
+  mySchedulesLoading = false,
+  mySchedulesError = "",
   onSchedulesChanged,
   onWorkspaceChanged,
 }) => {
@@ -795,65 +797,130 @@ const UserDashboard = ({
 
   const doPause = useCallback(
     async id => {
-      await withAuth(async token => {
-        try {
-          await fetch(API_ENDPOINTS.SCHEDULE_PAUSE(id), {
-            method: "POST",
-            headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
-          });
-          triggerSchedulesRefresh();
-          toast.success("Schedule paused");
-        } catch (e) {
-          console.warn(e);
-          toast.error("Failed to pause schedule");
-        }
+      const result = await withAuth(async token => {
+        const response = await fetch(API_ENDPOINTS.SCHEDULE_PAUSE(id), {
+          method: "POST",
+          headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
+        });
+        if (!response.ok) throw new Error("Failed to pause destination");
+        triggerSchedulesRefresh();
+        toast.success("Destination paused");
+        return true;
       });
+      return result;
     },
     [withAuth, triggerSchedulesRefresh]
   );
   const doResume = useCallback(
     async id => {
-      await withAuth(async token => {
-        try {
-          await fetch(API_ENDPOINTS.SCHEDULE_RESUME(id), {
-            method: "POST",
-            headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
-          });
-          triggerSchedulesRefresh();
-          toast.success("Schedule resumed");
-        } catch (e) {
-          console.warn(e);
-          toast.error("Failed to resume schedule");
-        }
+      return withAuth(async token => {
+        const response = await fetch(API_ENDPOINTS.SCHEDULE_RESUME(id), {
+          method: "POST",
+          headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
+        });
+        if (!response.ok) throw new Error("Failed to resume destination");
+        triggerSchedulesRefresh();
+        toast.success("Destination resumed");
+        return true;
       });
     },
     [withAuth, triggerSchedulesRefresh]
   );
   const doReschedule = useCallback(
-    async (id, when) => {
-      await withAuth(async token => {
-        try {
-          await fetch(API_ENDPOINTS.SCHEDULE_RESCHEDULE(id), {
-            method: "POST",
-            headers: withWorkspaceHeaders({
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            }),
-            body: JSON.stringify({ time: when }),
-          });
-          triggerSchedulesRefresh();
-          toast.success("Schedule updated");
-        } catch (e) {
-          console.warn(e);
-          toast.error("Failed to reschedule");
-        }
+    async (id, when, timezone) => {
+      return withAuth(async token => {
+        const response = await fetch(API_ENDPOINTS.SCHEDULE_RESCHEDULE(id), {
+          method: "POST",
+          headers: withWorkspaceHeaders({
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }),
+          body: JSON.stringify({ time: when, timezone }),
+        });
+        if (!response.ok) throw new Error("Failed to reschedule destination");
+        triggerSchedulesRefresh();
+        toast.success("Destination rescheduled");
+        return true;
       });
     },
     [withAuth, triggerSchedulesRefresh]
   );
+  const doReleaseAction = useCallback(
+    async (ids, action, when, timezone) => {
+      const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+      if (!uniqueIds.length) return false;
+      return withAuth(async token => {
+        const endpoint = id =>
+          action === "pause"
+            ? API_ENDPOINTS.SCHEDULE_PAUSE(id)
+            : action === "resume"
+              ? API_ENDPOINTS.SCHEDULE_RESUME(id)
+              : API_ENDPOINTS.SCHEDULE_RESCHEDULE(id);
+        const results = await Promise.allSettled(
+          uniqueIds.map(async id => {
+            const response = await fetch(endpoint(id), {
+              method: "POST",
+              headers: withWorkspaceHeaders({
+                Authorization: `Bearer ${token}`,
+                ...(action === "reschedule" ? { "Content-Type": "application/json" } : {}),
+              }),
+              ...(action === "reschedule" ? { body: JSON.stringify({ time: when, timezone }) } : {}),
+            });
+            if (!response.ok) throw new Error(`${id}: ${response.status}`);
+          })
+        );
+        await triggerSchedulesRefresh();
+        const failed = results.filter(result => result.status === "rejected").length;
+        if (failed) {
+          toast.error(
+            `${failed}/${uniqueIds.length} destinations could not be ${action === "reschedule" ? "rescheduled" : action === "pause" ? "paused" : "resumed"}. Check each status before retrying.`
+          );
+          return false;
+        }
+        toast.success(
+          `${uniqueIds.length} destinations ${action === "reschedule" ? "rescheduled" : action === "pause" ? "paused" : "resumed"}`
+        );
+        return true;
+      });
+    },
+    [withAuth, triggerSchedulesRefresh]
+  );
+  const doEditScheduleCopy = useCallback(
+    async (id, copy) => {
+      try {
+        const currentUser = auth?.currentUser;
+        if (!currentUser) throw new Error("Sign in to edit scheduled copy");
+        const token = await currentUser.getIdToken(true);
+        const response = await fetch(API_ENDPOINTS.SCHEDULE_POST_COPY(id), {
+          method: "PATCH",
+          headers: withWorkspaceHeaders({
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }),
+          body: JSON.stringify(copy),
+        });
+        if (!response.ok) {
+          const detail = await response.json().catch(() => ({}));
+          throw new Error(detail.error || "Could not update scheduled copy");
+        }
+        await triggerSchedulesRefresh();
+        toast.success("Platform post copy updated");
+        return true;
+      } catch (error) {
+        toast.error(error.message || "Could not update scheduled copy");
+        return false;
+      }
+    },
+    [triggerSchedulesRefresh]
+  );
   const doDelete = useCallback(
     async id => {
-      if (!window.confirm("Delete this schedule?")) return;
+      if (
+        !window.confirm(
+          "Cancel this destination's scheduled post? The other destinations remain scheduled."
+        )
+      )
+        return;
       await withAuth(async token => {
         try {
           const response = await fetch(API_ENDPOINTS.SCHEDULE_DELETE(id), {
@@ -864,10 +931,10 @@ const UserDashboard = ({
             throw new Error(`Delete failed with status ${response.status}`);
           }
           triggerSchedulesRefresh();
-          toast.success("Schedule deleted");
+          toast.success("Destination cancelled");
         } catch (e) {
           console.warn(e);
-          toast.error("Failed to delete schedule");
+          toast.error("Failed to cancel destination");
         }
       });
     },
@@ -880,7 +947,7 @@ const UserDashboard = ({
       if (uniqueIds.length === 0) return;
       if (
         !window.confirm(
-          `Abort ${uniqueIds.length} queued schedule${uniqueIds.length === 1 ? "" : "s"}?`
+          `Cancel this release across ${uniqueIds.length} destination${uniqueIds.length === 1 ? "" : "s"}? This removes those scheduled posts.`
         )
       ) {
         return;
@@ -888,10 +955,10 @@ const UserDashboard = ({
 
       await withAuth(async token => {
         const toastId = toast.loading(
-          `Aborting ${uniqueIds.length} schedule${uniqueIds.length === 1 ? "" : "s"}...`
+          `Cancelling ${uniqueIds.length} destination${uniqueIds.length === 1 ? "" : "s"}...`
         );
         try {
-          const results = await Promise.all(
+          const results = await Promise.allSettled(
             uniqueIds.map(async id => {
               const response = await fetch(API_ENDPOINTS.SCHEDULE_DELETE(id), {
                 method: "DELETE",
@@ -900,18 +967,18 @@ const UserDashboard = ({
               return { id, ok: response.ok || response.status === 404, status: response.status };
             })
           );
-          const failed = results.filter(result => !result.ok);
-          triggerSchedulesRefresh();
+          const failed = results.filter(result => result.status === "rejected" || !result.value.ok);
+          await triggerSchedulesRefresh();
           if (failed.length > 0) {
             toast.error(
-              `${failed.length} schedule${failed.length === 1 ? "" : "s"} could not be aborted`,
+              `${failed.length} destination${failed.length === 1 ? "" : "s"} could not be cancelled`,
               {
                 id: toastId,
               }
             );
           } else {
             toast.success(
-              `Aborted ${uniqueIds.length} schedule${uniqueIds.length === 1 ? "" : "s"}`,
+              `Cancelled ${uniqueIds.length} destination${uniqueIds.length === 1 ? "" : "s"}`,
               {
                 id: toastId,
               }
@@ -919,35 +986,9 @@ const UserDashboard = ({
           }
         } catch (e) {
           console.warn(e);
-          toast.error("Failed to abort selected schedules", { id: toastId });
+          toast.error("Failed to cancel selected destinations", { id: toastId });
         }
       });
-    },
-    [withAuth, triggerSchedulesRefresh]
-  );
-
-  const createSchedule = useCallback(
-    async ({ contentId, time, frequency, platforms = [], platformOptions = {} }) => {
-      const toastId = toast.loading("Creating schedule...");
-      try {
-        await withAuth(async token => {
-          if (!contentId) throw new Error("Missing contentId");
-          const res = await fetch(`${API_BASE_URL}/api/content/${contentId}/promotion-schedules`, {
-            method: "POST",
-            headers: withWorkspaceHeaders({
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            }),
-            body: JSON.stringify({ time, frequency, platforms, platformOptions }),
-          });
-          if (!res.ok) throw new Error("Failed to create schedule");
-          triggerSchedulesRefresh();
-          toast.success("Schedule created successfully!", { id: toastId });
-        });
-      } catch (e) {
-        console.warn(e);
-        toast.error("Failed to create schedule", { id: toastId });
-      }
     },
     [withAuth, triggerSchedulesRefresh]
   );
@@ -1747,6 +1788,7 @@ const UserDashboard = ({
             initialTabOverride={uploadLaunchTab}
             onInitialTabHandled={() => setUploadLaunchTab(null)}
             contentList={contentList}
+            defaultTimezone={userDefaults?.timezone}
             platformMetadata={platformMetadata}
             platformOptions={platformOptions}
             setPlatformOption={setPlatformOption}
@@ -1785,6 +1827,13 @@ const UserDashboard = ({
             initialFile={selectedFile}
             onUpgrade={() => handleNav("billing")}
             onOpenPublisher={file => {
+              if (file && typeof file === "object") {
+                try {
+                  Object.assign(file, { source: file.source || "viral_clip_studio" });
+                } catch (_) {
+                  // The rendered media remains usable if custom File properties are unavailable.
+                }
+              }
               setSelectedFile(file);
               handleNav("upload");
               toast.success("Viral Clip Studio render is ready to publish.");
@@ -1807,11 +1856,17 @@ const UserDashboard = ({
         {activeTab === "schedules" && (
           <SchedulesPanel
             schedulesList={schedulesList}
+            loading={mySchedulesLoading}
+            loadError={mySchedulesError}
+            defaultTimezone={userDefaults?.timezone}
             contentList={contentList}
-            onCreate={createSchedule}
             onPause={doPause}
             onResume={doResume}
             onReschedule={doReschedule}
+            onEditCopy={doEditScheduleCopy}
+            onRescheduleMany={(ids, when, timezone) => doReleaseAction(ids, "reschedule", when, timezone)}
+            onPauseMany={ids => doReleaseAction(ids, "pause")}
+            onResumeMany={ids => doReleaseAction(ids, "resume")}
             onDelete={doDelete}
             onDeleteMany={doDeleteMany}
             onNavigate={handleNav}

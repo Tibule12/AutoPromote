@@ -22,7 +22,9 @@ export const getPlatformName = platformId => {
   );
 };
 
-export const DEFAULT_SELECTED_PLATFORMS = ["tiktok", "youtube"];
+// A new release has no implied delivery destinations. A workflow may pass an
+// explicit destination handoff to UnifiedPublisher instead.
+export const DEFAULT_SELECTED_PLATFORMS = [];
 
 export const buildMediaMeta = ({
   trimStart = 0,
@@ -97,6 +99,24 @@ export const normalizeEditedAsset = (result, fallbackName = "edited-media") => {
   }
   return result;
 };
+
+export async function cropPublisherImage(url, crop, file) {
+  const image = await new Promise((resolve, reject) => {
+    const source = new Image();
+    source.crossOrigin = "anonymous";
+    source.onload = () => resolve(source);
+    source.onerror = () => reject(new Error("The image could not be loaded for cropping."));
+    source.src = url;
+  });
+  if (!(crop.w > 0 && crop.h > 0)) throw new Error("Choose a valid image crop.");
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(crop.w);
+  canvas.height = Math.round(crop.h);
+  canvas.getContext("2d").drawImage(image, crop.x, crop.y, crop.w, crop.h, 0, 0, canvas.width, canvas.height);
+  const type = file?.type === "image/jpeg" ? "image/jpeg" : "image/png";
+  const blob = await new Promise((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error("The image crop could not be saved.")), type, 0.92));
+  return new File([blob], `cropped-${String(file?.name || "image").replace(/\.[^.]+$/, "")}.${type === "image/jpeg" ? "jpg" : "png"}`, { type });
+}
 
 export const buildStructuredUploadError = (result, fallbackMessage, httpStatus) => {
   const serverErr =

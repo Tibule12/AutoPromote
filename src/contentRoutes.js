@@ -3,6 +3,8 @@ const router = express.Router();
 const { db, admin } = require("./firebaseAdmin");
 const logger = require("./utils/logger");
 const { extractOwnedStoragePathFromUrl } = require("./utils/cleanupSource");
+const { contentSource, directContentSource } = require("./utils/contentSource");
+const { enrichPublisherAssets } = require("./utils/publisherAssetMetadata");
 const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
 const crypto = require("crypto");
@@ -927,6 +929,7 @@ router.post(
         description || firstPlatformText(["description", "caption", "message", "commentary"]) || ""
       ).trim();
 
+      const uploadedSource = directContentSource({ meta: req.body.meta });
       const contentData = {
         title: resolvedTitle,
         type,
@@ -952,6 +955,7 @@ router.post(
         monetization_settings: monetization_settings || {}, // Persist TikTok/Revenue settings
         protocol7: protocol7 || {}, // Persist Protocol 7 settings
         meta: req.body.meta,
+        ...(uploadedSource ? { source: uploadedSource } : {}),
         duration:
           typeof (req.body.meta && req.body.meta.duration) === "number"
             ? req.body.meta.duration
@@ -1248,6 +1252,7 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       .orderBy("created_at", "desc");
     const snapshot = await contentRef.get();
     const docs = snapshot.docs;
+    const recordsById = new Map(docs.map(doc => [doc.id, doc.data()]));
     const docsToEnrich = new Set();
 
     if (includeStats && statsLimit > 0) {
@@ -1263,6 +1268,8 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       docs.map(async doc => {
         const data = doc.data();
         const item = { id: doc.id, ...data };
+        const source = contentSource(data, recordsById);
+        if (source) item.source = source;
 
         if (docsToEnrich.has(doc.id)) {
           try {
@@ -1280,6 +1287,9 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       })
     );
 
+    const contentForResponse = parseBooleanQuery(req.query.publisherAssets, false)
+      ? await enrichPublisherAssets(contentWithStats, admin.storage().bucket())
+      : contentWithStats;
     const took = Date.now() - startMs;
     if (took > 500)
       console.warn(
@@ -1289,7 +1299,7 @@ router.get("/my-content", authMiddleware, async (req, res) => {
         req.ip || req.headers["x-forwarded-for"] || "unknown"
       );
     res.json({
-      content: contentWithStats,
+      content: contentForResponse,
       meta: {
         statsIncluded: includeStats,
         statsLimit,
@@ -1577,19 +1587,71 @@ router.post("/promotion-schedules/:id/reschedule", authMiddleware, async (req, r
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
-    const { time } = req.body;
+    const { time, timezone } = req.body;
     if (!time) return res.status(400).json({ error: "Missing required field: time" });
+    if (timezone !== undefined) {
+      try {
+        new Intl.DateTimeFormat("en-US", { timeZone: timezone });
+      } catch (_) {
+        return res.status(400).json({ error: "Invalid timezone" });
+      }
+    }
 
     const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
     if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
     if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
 
     const promotionService = require("./promotionService");
-    const updated = await promotionService.updatePromotionSchedule(id, { startTime: time });
+    const updated = await promotionService.updatePromotionSchedule(id, {
+      startTime: time,
+      ...(timezone !== undefined ? { timezone } : {}),
+    });
     res.json({ success: true, schedule: updated });
   } catch (error) {
     console.error("[POST /promotion-schedules/:id/reschedule] Error:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PATCH /promotion-schedules/:id/post-copy - Edit copy before a platform task starts.
+router.patch("/promotion-schedules/:id/post-copy", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    const { title, caption } = req.body || {};
+    if (typeof title !== "string" || typeof caption !== "string" || title.length > 160 || caption.length > 5000) {
+      return res.status(400).json({ error: "Title and caption must be text within the allowed lengths" });
+    }
+    const ref = db.collection("promotion_schedules").doc(req.params.id);
+    const result = await db.runTransaction(async transaction => {
+      const doc = await transaction.get(ref);
+      if (!doc.exists) return { status: 404, error: "Schedule not found" };
+      const schedule = doc.data() || {};
+      if (schedule.user_id !== userId) return { status: 403, error: "Forbidden" };
+      if (!["pending", "queued", "scheduled", "paused", "ready"].includes(String(schedule.status || "pending").toLowerCase())) {
+        return { status: 409, error: "This post has started publishing and its copy can no longer be changed" };
+      }
+      transaction.update(ref, {
+        platformSpecificSettings: {
+          ...(schedule.platformSpecificSettings || {}),
+          title: title.trim(),
+          caption: caption.trim(),
+          text: caption.trim(),
+          commentary: caption.trim(),
+          message: caption.trim(),
+          description: caption.trim(),
+        },
+        message: caption.trim(),
+        caption: caption.trim(),
+        updatedAt: new Date().toISOString(),
+      });
+      return { status: 200 };
+    });
+    if (result.status !== 200) return res.status(result.status).json({ error: result.error });
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("[PATCH /promotion-schedules/:id/post-copy] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
