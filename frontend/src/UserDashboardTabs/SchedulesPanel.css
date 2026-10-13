@@ -938,8 +938,19 @@
 .schedule-destination-toggle strong { font-size: .75rem; }
 .schedule-destination-toggle .schedule-status { font-size: .68rem; }
 .schedule-platform-icon { width: 20px; height: 20px; }
+.platform-instagram { background: linear-gradient(35deg, #f9b23f, #e02f79 55%, #7354e8); font-size: 1.05rem; }
+.platform-linkedin { font-size: .57rem; border-radius: 4px; }
+.platform-reddit { font-size: .6rem; }
+.platform-tiktok { font-size: 1rem; color: #ff557b; text-shadow: -1px -1px #59eced; }
+.platform-youtube { border-radius: 5px; font-size: .58rem; }
 .schedule-release-actions { flex-wrap: nowrap; margin-top: 8px; gap: 6px; }
 .schedule-release-actions button { min-height: 35px; padding: 6px 8px; font-size: .68rem; white-space: nowrap; }
+.schedule-release-actions button::before { display: inline-block; margin-right: 5px; color: #dce8ff; }
+.schedule-release-actions button:nth-child(1)::before { content: '◉'; }
+.schedule-release-actions button:nth-child(2)::before { content: '✎'; }
+.schedule-release-actions button:nth-child(3)::before { content: '▣'; }
+.schedule-release-actions button:nth-child(4)::before { content: 'Ⅱ'; }
+.schedule-release-actions button:nth-child(5)::before { content: '⊗'; color: #ff929c; }
 .schedule-release-actions small { white-space: normal; font-size: .58rem; }
 .schedule-copy-limit { font-size: .65rem; margin-top: 6px; }
 .schedule-calendar { margin-top: 12px; padding: 12px 14px; }

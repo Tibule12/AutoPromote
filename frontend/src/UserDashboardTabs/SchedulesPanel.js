@@ -21,6 +21,14 @@ const clockLabel = (value, timezone) =>
   formatScheduleTime(value, timezone, { dateStyle: undefined, timeStyle: "short" });
 const actionIds = release =>
   Array.from(new Set(release.destinations.map(item => item.schedule.id)));
+const PLATFORM_GLYPHS = {
+  facebook: "f",
+  instagram: "◎",
+  linkedin: "in",
+  reddit: "●",
+  tiktok: "♪",
+  youtube: "▶",
+};
 
 function originLabel(content) {
   if (!content) return "";
@@ -527,7 +535,7 @@ const SchedulesPanel = ({
                           }
                         >
                           <span className={`schedule-platform-icon platform-${item.platform}`}>
-                            {(PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
+                            {PLATFORM_GLYPHS[item.platform] || (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
                           </span>
                           <strong>{PLATFORM_NAMES[item.platform] || item.platform}</strong>
                           <StatusPill status={item.status} />
@@ -705,7 +713,7 @@ const SchedulesPanel = ({
                           title={PLATFORM_NAMES[item.platform] || item.platform}
                           className={`schedule-platform-icon platform-${item.platform}`}
                         >
-                          {(PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
+                          {PLATFORM_GLYPHS[item.platform] || (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
                         </span>
                       ))}
                     </span>
