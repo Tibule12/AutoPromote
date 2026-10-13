@@ -134,14 +134,19 @@ test("fresh releases have no selected destinations and show the five-step workfl
   render(<UnifiedPublisher contentList={[asset]} onUpload={onUpload} embedded />);
   expect(screen.getByRole("list", { name: "Publishing workflow" })).toHaveTextContent("1Content2Destinations3Customize4Delivery5Review");
   expect(screen.getByText("Choose a video or image to start.")).toBeInTheDocument();
+  expect(screen.queryByRole("region", { name: "Release content" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("region", { name: "Before delivery" })).not.toBeInTheDocument();
+  expect(screen.getByText("Media and optional settings")).not.toBeVisible();
   expect(screen.queryByRole("region", { name: "Selected destinations" })).not.toBeInTheDocument();
   expect(screen.queryByText(/2 selected/)).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Choose destinations/ })).toBeDisabled();
   fireEvent.click(await screen.findByRole("button", { name: /Coffee — Final Edit/ }));
   expect(screen.getByRole("region", { name: "Release content" })).toHaveTextContent("Coffee — Final Edit");
+  expect(screen.getByRole("button", { name: /Coffee — Final Edit/ })).toHaveAttribute("aria-pressed", "true");
   fireEvent.click(screen.getByRole("button", { name: /Choose destinations/ }));
   expect(screen.getByRole("checkbox", { name: /TikTok/ })).not.toBeChecked();
   expect(screen.getByRole("checkbox", { name: /YouTube/ })).not.toBeChecked();
+  expect(screen.queryByRole("region", { name: "Selected destinations" })).not.toBeInTheDocument();
 });
 
 test("only explicit destination handoff preselects providers", () => {
