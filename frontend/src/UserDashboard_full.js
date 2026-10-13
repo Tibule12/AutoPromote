@@ -64,7 +64,7 @@ const DASHBOARD_PAGE_META = {
   upload: {
     eyebrow: "Create",
     title: "Publisher",
-    description: "Prepare one master asset, tailor each destination, and publish with confidence.",
+    description: "Prepare one release. Complete every destination.",
   },
   cam_combiner: {
     eyebrow: "Create",
@@ -1788,6 +1788,7 @@ const UserDashboard = ({
             initialTabOverride={uploadLaunchTab}
             onInitialTabHandled={() => setUploadLaunchTab(null)}
             contentList={contentList}
+            defaultTimezone={userDefaults?.timezone}
             platformMetadata={platformMetadata}
             platformOptions={platformOptions}
             setPlatformOption={setPlatformOption}

@@ -2,8 +2,9 @@
 // The "Command Center" for cross-platform publishing.
 // Wraps existing platform forms and delegates upload to App.js
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./UnifiedPublisher.css";
+import "./PublisherRelease.css";
 // Ensure platform form styles are loaded
 import "../../components/PlatformForms/PlatformForms.css";
 
@@ -33,26 +34,24 @@ import BestTimeToPost from "../../components/BestTimeToPost";
 import VideoEditor from "../../components/VideoEditor";
 import ImageCropper from "../../components/ImageCropper";
 import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
-import { SafeImage, SafeVideo } from "../../components/SafeMedia";
 
 // --- New Features ---
 
 // --- Helpers ---
-import { PlatformPreview } from "./components/PlatformPreview";
+import PublisherReleaseWorkspace from "./components/PublisherReleaseWorkspace";
+import { assetFromContent, connectionState, masterCopyFor, mediaUrl, platformIssues,
+  preparePlatformOptions, resolveDelivery } from "./utils/publisherWorkflow";
+import { browserTimezone, isValidTimezone } from "../../UserDashboardTabs/scheduleReleaseModel";
 import {
   getPlatformName,
   DEFAULT_SELECTED_PLATFORMS,
   buildMediaMeta,
   hasMeaningfulMediaMeta,
-  getBrowserPreviewFailureMessage,
   normalizeEditedAsset,
   buildStructuredUploadError,
   EXPECTED_PUBLISH_BLOCK_CODES,
   formatMonthLabel,
   buildClientUploadError,
-  buildTikTokCaption,
-  DateTimeSplitControl,
-  buildPlatformScheduleTimes,
   normalizeTikTokCreatorInfo,
   normalizeYouTubeCreatorInfo,
   normalizeLinkedInCreatorInfo,
@@ -61,7 +60,7 @@ import {
   fetchPlatformStatusSnapshot,
 } from "./utils/publishingUtils";
 
-const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
+const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTimezone, onNavigate, embedded = false }) => {
   // 1. Initialize State Logic
   const {
     // Global File (Raw)
@@ -87,14 +86,10 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     setVariants,
 
     // Scheduling
-    scheduledTime,
-    setScheduledTime,
     frequency,
     setFrequency,
     customPlatformSchedule,
     setCustomPlatformSchedule,
-    platformScheduleTimes,
-    updatePlatformScheduleTime,
 
     selectedPlatforms,
     togglePlatform,
@@ -105,7 +100,39 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
   } = usePublishingState(DEFAULT_SELECTED_PLATFORMS); // Default selection
   const [focusedPlatform, setFocusedPlatform] = useState(DEFAULT_SELECTED_PLATFORMS[0] || "tiktok");
   const [workflowStep, setWorkflowStep] = useState(initialFile ? 2 : 0);
-  const [publishTiming, setPublishTiming] = useState(scheduledTime ? "schedule" : "now");
+  const [publishTiming, setPublishTiming] = useState("now");
+  const [visitedPlatforms, setVisitedPlatforms] = useState({});
+  const [formVersions, setFormVersions] = useState({});
+  const [assetTab, setAssetTab] = useState(initialFile ? "studio" : "assets");
+  const [sourceAsset, setSourceAsset] = useState(null);
+  const [dimensions, setDimensions] = useState({});
+  const [connectionSnapshot, setConnectionSnapshot] = useState({ raw: {}, summary: {} });
+  const [connectionsLoaded, setConnectionsLoaded] = useState(false);
+  const [deliveryTimezone, setDeliveryTimezone] = useState(isValidTimezone(defaultTimezone) ? defaultTimezone : browserTimezone());
+  const [deliveryFields, setDeliveryFields] = useState({ date: "", time: "09:00" });
+  const [customFields, setCustomFields] = useState({});
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const token = await getUploadAuthToken();
+        const snapshot = await fetchPlatformStatusSnapshot(token);
+        if (active) setConnectionSnapshot(snapshot);
+      } catch (_) {
+        if (active) setConnectionSnapshot({ raw: {}, summary: {} });
+      } finally {
+        if (active) setConnectionsLoaded(true);
+      }
+    };
+    load();
+    return () => { active = false; };
+  }, []);
+
+  const activatePlatform = platform => {
+    setFocusedPlatform(platform);
+    setVisitedPlatforms(current => ({ ...current, [platform]: true }));
+  };
 
   useEffect(() => {
     if (!selectedPlatforms.length) return;
@@ -117,7 +144,10 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
   // Handle Initial File
   useEffect(() => {
     if (initialFile) {
-      setGlobalFile(initialFile);
+      const asset = typeof initialFile === "string" ? { url: initialFile, type: /\.(png|jpe?g|webp)(?:[?#]|$)/i.test(initialFile) ? "image/jpeg" : "video/mp4", name: "Selected media" } : initialFile;
+      setGlobalFile(asset);
+      setSourceAsset(asset);
+      setVisitedPlatforms(current => ({ ...current, [DEFAULT_SELECTED_PLATFORMS[0]]: true }));
       if (initialFile.suggestedTitle) setGlobalTitle(initialFile.suggestedTitle);
       if (initialFile.suggestedDescription) setGlobalDescription(initialFile.suggestedDescription);
       setWorkflowStep(2);
@@ -369,9 +399,9 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
   } = useMediaProcessor(globalFile);
 
   const [isPublishing, setIsPublishing] = useState(false);
-  const [publishingPlatform, setPublishingPlatform] = useState(null);
+  const [, setPublishingPlatform] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
-  const [fallbackPublishPlatform, setFallbackPublishPlatform] = useState(null);
+  const [, setFallbackPublishPlatform] = useState(null);
   const [editingTarget, setEditingTarget] = useState(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradePlanId, setUpgradePlanId] = useState(null);
@@ -418,6 +448,10 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     setPublishingPlatform(null);
     setWorkflowStep(0);
     setPublishTiming("now");
+    setVisitedPlatforms({});
+    setSourceAsset(null);
+    setDeliveryFields({ date: "", time: "09:00" });
+    setCustomFields({});
   };
 
   const formatPublisherError = err => {
@@ -443,7 +477,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       const required = err?.context?.required;
       const suggestedTier = err?.context?.suggested_tier;
       if (typeof remaining === "number" && typeof required === "number") {
-        return `You only have ${remaining} auto-publish slot${remaining === 1 ? "" : "s"} left this month, and this publish needs ${required}. Trim a few platforms or upgrade${suggestedTier ? ` to ${suggestedTier}` : ""}.`;
+        return `You only have ${remaining} publishing slot${remaining === 1 ? "" : "s"} left this month, and this publish needs ${required}. Trim a few platforms or upgrade${suggestedTier ? ` to ${suggestedTier}` : ""}.`;
       }
     }
     return err?.message || "Upload failed. Please try again.";
@@ -574,7 +608,10 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       processFileChange(file);
       // 2. Update Global State
       setGlobalFile(file);
-      setWorkflowStep(1);
+      setSourceAsset(null);
+      setDimensions({});
+      setDuration(0);
+      setWorkflowStep(0);
       console.log("Global file selected:", file.name);
       const extension = String(file.name || "")
         .split(".")
@@ -588,362 +625,88 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     }
   };
 
-  // 3. Render Helpers
-  const renderPlatformForm = platformId => {
-    // Get the effective data (Global + Overrides)
-    const data = getPlatformEffectiveData(platformId);
-
-    // Common props for ALL forms
-    const commonProps = {
-      // 1. Core Content
-      globalTitle,
-      globalDescription,
-      currentFile: data.file,
-      // Pass facebook pages (needed for FB and IG forms)
-      pages: facebookPages,
-      facebookPages: facebookPages,
-      // Pass Platform Specific Creator Info
-      creatorInfo:
-        platformId === "tiktok"
-          ? tiktokCreator
-          : platformId === "youtube"
-            ? youtubeChannel
-            : platformId === "linkedin"
-              ? linkedinProfile
-              : platformId === "reddit"
-                ? redditUser
-                : null,
-
-      onFileChange: newFile => {
-        updatePlatformData(platformId, { file: newFile });
-      },
-
-      onReviewAI: () => {
-        const fileToEdit = data.file || globalFile;
-        if (!fileToEdit) {
-          setFeedbackMessage("Please select a file first.");
-          return;
-        }
-
-        setEditingTarget(platformId);
-        processFileChange(fileToEdit);
-        setShowVideoEditor(true);
-      },
-
-      // 2. Global Features (Bounty / Protocol 7)
-      bountyAmount,
-      setBountyAmount, // Note: If a form changes bounty, it affects global state
-      bountyNiche,
-      setBountyNiche,
-      protocol7Enabled,
-      setProtocol7Enabled,
-      protocol7Volatility,
-      setProtocol7Volatility,
-
-      // 3. State Management
-      // The form calls this when the user types something specific (overriding global)
-      onChange: newData => updatePlatformData(platformId, newData),
-    };
-
-    switch (platformId) {
-      case "tiktok":
-        return (
-          <div
-            className="platform-card-wrapper"
-            style={{ background: "#1e293b", border: "1px solid #334155" }}
-          >
-            <div className="platform-card-header" style={{ marginBottom: "15px" }}>
-              <h3 style={{ margin: 0, color: "#f8fafc" }}>TikTok Configuration</h3>
-            </div>
-
-            {/* STACKED LAYOUT: Form Top, Preview Bottom */}
-            <div className="platform-card-body">
-              <div className="platform-form-column" style={{ marginBottom: "20px" }}>
-                {/* Wrap in dark-theme-provider class to force styles */}
-                <div className="dark-theme-form">
-                  <TikTokForm {...commonProps} initialData={data} />
-                </div>
-              </div>
-              <div className="platform-preview-column">
-                <div className="publisher-preview-title">TikTok preview</div>
-                <PlatformPreview
-                  label="TikTok Preview"
-                  data={data}
-                  globalFile={globalFile}
-                  previewUrl={previewUrl}
-                  thumbnailUrl={effectiveThumbnailUrl}
-                  mediaType={mediaType}
-                  platformId={platformId}
-                  creatorInfo={tiktokCreator}
-                />
-
-                <button
-                  className="btn-primary-sm"
-                  style={{
-                    marginTop: "12px",
-                    width: "100%",
-                    fontSize: "0.9rem",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handlePublishPlatform(platformId)}
-                  disabled={isPublishing && publishingPlatform !== platformId}
-                >
-                  {isPublishing && publishingPlatform === platformId
-                    ? "Publishing..."
-                    : `Publish to ${getPlatformName(platformId)}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      case "youtube":
-        return (
-          <div
-            className="platform-card-wrapper"
-            style={{ background: "#1e293b", border: "1px solid #334155" }}
-          >
-            <div className="platform-card-header" style={{ marginBottom: "15px" }}>
-              <h3 style={{ margin: 0, color: "#f8fafc" }}>YouTube Configuration</h3>
-            </div>
-            <div className="platform-card-body">
-              <div className="platform-form-column" style={{ marginBottom: "20px" }}>
-                <div className="dark-theme-form">
-                  <YouTubeForm {...commonProps} initialData={data} />
-                </div>
-              </div>
-              <div className="platform-preview-column">
-                <div className="publisher-preview-title">YouTube preview</div>
-                <PlatformPreview
-                  thumbnailUrl={effectiveThumbnailUrl}
-                  label="YouTube Preview"
-                  data={data}
-                  globalFile={globalFile}
-                  previewUrl={previewUrl}
-                  mediaType={mediaType}
-                  platformId={platformId}
-                  creatorInfo={youtubeChannel}
-                />
-
-                <button
-                  className="btn-primary-sm"
-                  style={{
-                    marginTop: "12px",
-                    width: "100%",
-                    fontSize: "0.9rem",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handlePublishPlatform(platformId)}
-                  disabled={isPublishing && publishingPlatform !== platformId}
-                >
-                  {isPublishing && publishingPlatform === platformId
-                    ? "Publishing..."
-                    : `Publish to ${getPlatformName(platformId)}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      case "instagram":
-        return (
-          <div
-            className="platform-card-wrapper"
-            style={{ background: "#1e293b", border: "1px solid #334155" }}
-          >
-            <div className="platform-card-header" style={{ marginBottom: "15px" }}>
-              <h3 style={{ margin: 0, color: "#f8fafc" }}>Instagram Configuration</h3>
-            </div>
-            <div className="platform-card-body">
-              <div className="platform-form-column" style={{ marginBottom: "20px" }}>
-                <div className="dark-theme-form">
-                  <InstagramForm {...commonProps} initialData={data} />
-                </div>
-              </div>
-              <div className="platform-preview-column">
-                <PlatformPreview
-                  thumbnailUrl={effectiveThumbnailUrl}
-                  label="Instagram Preview"
-                  data={data}
-                  globalFile={globalFile}
-                  previewUrl={previewUrl}
-                  mediaType={mediaType}
-                  platformId={platformId}
-                />
-
-                <button
-                  className="btn-primary-sm"
-                  style={{
-                    marginTop: "12px",
-                    width: "100%",
-                    fontSize: "0.9rem",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handlePublishPlatform(platformId)}
-                  disabled={isPublishing && publishingPlatform !== platformId}
-                >
-                  {isPublishing && publishingPlatform === platformId
-                    ? "Publishing..."
-                    : `Publish to ${getPlatformName(platformId)}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      case "facebook":
-        return (
-          <div
-            className="platform-card-wrapper"
-            style={{ background: "#1e293b", border: "1px solid #334155" }}
-          >
-            <div className="platform-card-header" style={{ marginBottom: "15px" }}>
-              <h3 style={{ margin: 0, color: "#f8fafc" }}>Facebook Configuration</h3>
-            </div>
-            <div className="platform-card-body">
-              <div className="platform-form-column" style={{ marginBottom: "20px" }}>
-                <div className="dark-theme-form">
-                  <FacebookForm {...commonProps} initialData={data} />
-                </div>
-              </div>
-              <div className="platform-preview-column">
-                <PlatformPreview
-                  thumbnailUrl={effectiveThumbnailUrl}
-                  label="Facebook Preview"
-                  data={data}
-                  globalFile={globalFile}
-                  previewUrl={previewUrl}
-                  mediaType={mediaType}
-                  platformId={platformId}
-                />
-
-                <button
-                  className="btn-primary-sm"
-                  style={{
-                    marginTop: "12px",
-                    width: "100%",
-                    fontSize: "0.9rem",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handlePublishPlatform(platformId)}
-                  disabled={isPublishing && publishingPlatform !== platformId}
-                >
-                  {isPublishing && publishingPlatform === platformId
-                    ? "Publishing..."
-                    : `Publish to ${getPlatformName(platformId)}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      case "linkedin":
-        return (
-          <div
-            className="platform-card-wrapper"
-            style={{ background: "#1e293b", border: "1px solid #334155" }}
-          >
-            <div className="platform-card-header" style={{ marginBottom: "15px" }}>
-              <h3 style={{ margin: 0, color: "#f8fafc" }}>LinkedIn Configuration</h3>
-            </div>
-            <div className="platform-card-body">
-              <div className="platform-form-column" style={{ marginBottom: "20px" }}>
-                <div className="dark-theme-form">
-                  <LinkedInForm {...commonProps} initialData={data} />
-                </div>
-              </div>
-              <div className="platform-preview-column">
-                <PlatformPreview
-                  thumbnailUrl={effectiveThumbnailUrl}
-                  label="LinkedIn Preview"
-                  data={data}
-                  globalFile={globalFile}
-                  previewUrl={previewUrl}
-                  mediaType={mediaType}
-                  platformId={platformId}
-                  creatorInfo={linkedinProfile}
-                />
-
-                <button
-                  className="btn-primary-sm"
-                  style={{
-                    marginTop: "12px",
-                    width: "100%",
-                    fontSize: "0.9rem",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handlePublishPlatform(platformId)}
-                  disabled={isPublishing && publishingPlatform !== platformId}
-                >
-                  {isPublishing && publishingPlatform === platformId
-                    ? "Publishing..."
-                    : `Publish to ${getPlatformName(platformId)}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      case "reddit":
-        return (
-          <div
-            className="platform-card-wrapper"
-            style={{ background: "#1e293b", border: "1px solid #334155" }}
-          >
-            <div className="platform-card-header" style={{ marginBottom: "15px" }}>
-              <h3 style={{ margin: 0, color: "#f8fafc" }}>Reddit Configuration</h3>
-            </div>
-            <div className="platform-card-body">
-              <div className="platform-form-column" style={{ marginBottom: "20px" }}>
-                <div className="dark-theme-form">
-                  <RedditForm {...commonProps} initialData={data} />
-                </div>
-              </div>
-              <div className="platform-preview-column">
-                <PlatformPreview
-                  thumbnailUrl={effectiveThumbnailUrl}
-                  label="Reddit Preview"
-                  data={data}
-                  globalFile={globalFile}
-                  previewUrl={previewUrl}
-                  mediaType={mediaType}
-                  platformId={platformId}
-                  creatorInfo={redditUser}
-                />
-
-                <button
-                  className="btn-primary-sm"
-                  style={{
-                    marginTop: "12px",
-                    width: "100%",
-                    fontSize: "0.9rem",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handlePublishPlatform(platformId)}
-                  disabled={isPublishing && publishingPlatform !== platformId}
-                >
-                  {isPublishing && publishingPlatform === platformId
-                    ? "Publishing..."
-                    : `Publish to ${getPlatformName(platformId)}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return <div>Unknown Platform: {platformId}</div>;
+  const availableAssets = useMemo(() => contentList.map(assetFromContent).filter(Boolean), [contentList]);
+  const visibleAssets = availableAssets.filter(asset => assetTab === "assets" ||
+    (assetTab === "studio" && ["studio", "viral_clip_studio", "viral-clip-studio"].includes(asset.source)) ||
+    (assetTab === "generated" && ["generated", "idea_video", "smart_promo"].includes(asset.source)));
+  const selectOwnedAsset = asset => {
+    setSourceAsset(asset);
+    setGlobalFile(asset);
+    processFileChange(asset);
+    setDuration(Number(asset.duration) || 0);
+    setDimensions({ width: asset.width, height: asset.height });
+    if (asset.suggestedTitle) setGlobalTitle(asset.suggestedTitle);
+    if (asset.suggestedDescription) setGlobalDescription(asset.suggestedDescription);
+  };
+  const connections = Object.fromEntries(["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube"].map(platform => [platform, connectionState(connectionSnapshot, platform, connectionsLoaded)]));
+  const destinationIssues = Object.fromEntries(selectedPlatforms.map(platform => [platform, platformIssues(platform, getPlatformEffectiveData(platform), {
+    connection: connections[platform], visited: visitedPlatforms[platform],
+    creator: platform === "tiktok" ? tiktokCreator : null,
+    publishReady: platform === "tiktok" ? connectionSnapshot.summary?.tiktok?.publishReady : undefined,
+    instagramAccountId: connectionSnapshot.raw?.instagram?.ig_business_account_id || connectionSnapshot.raw?.instagram?.metadata?.instagram_business_account_id,
+  })]));
+  let delivery = null;
+  let deliveryError = "";
+  try {
+    delivery = resolveDelivery({ mode: publishTiming, ...deliveryFields, timezone: deliveryTimezone,
+      customTimes: customPlatformSchedule ? customFields : {}, platforms: selectedPlatforms });
+  } catch (error) { deliveryError = error.message; }
+  const scheduledTime = delivery?.scheduledTime || "";
+  const platformScheduleTimes = delivery?.platformTimes || {};
+  const reviewOptions = Object.fromEntries(selectedPlatforms.map(platform => [platform,
+    preparePlatformOptions(platform, getPlatformEffectiveData(platform), globalTitle, globalDescription)]));
+  const nextReason = nextStep => {
+    if (nextStep > 0 && !globalFile) return "Choose media before selecting destinations.";
+    if (nextStep > 1 && !selectedPlatforms.length) return "Select at least one destination.";
+    if (nextStep > 2) {
+      const incomplete = selectedPlatforms.find(platform => destinationIssues[platform]?.length);
+      if (incomplete) return `${getPlatformName(incomplete)}: ${destinationIssues[incomplete][0]}`;
     }
+    if (nextStep > 3 && deliveryError) return deliveryError;
+    return "";
+  };
+  const moveToWorkflowStep = nextStep => {
+    const reason = nextReason(nextStep);
+    if (reason) { setFeedbackMessage(reason); return; }
+    if (nextStep === 2 && selectedPlatforms.length) activatePlatform(selectedPlatforms.includes(focusedPlatform) ? focusedPlatform : selectedPlatforms[0]);
+    setFeedbackMessage("");
+    setWorkflowStep(Math.max(0, Math.min(4, nextStep)));
+  };
+  const copyMaster = platform => {
+    updatePlatformData(platform, masterCopyFor(platform, globalTitle, globalDescription));
+    setFormVersions(current => ({ ...current, [platform]: (current[platform] || 0) + 1 }));
+  };
+  const renderPlatformForm = platformId => {
+    const data = getPlatformEffectiveData(platformId);
+    const Form = { facebook: FacebookForm, instagram: InstagramForm, linkedin: LinkedInForm,
+      reddit: RedditForm, tiktok: TikTokForm, youtube: YouTubeForm }[platformId];
+    if (!Form) return null;
+    return <div className="dark-theme-form"><Form key={`${platformId}:${formVersions[platformId] || 0}`}
+      globalTitle={globalTitle} globalDescription={globalDescription} currentFile={data.file}
+      pages={facebookPages} facebookPages={facebookPages}
+      creatorInfo={{ tiktok: tiktokCreator, youtube: youtubeChannel, linkedin: linkedinProfile, reddit: redditUser }[platformId]}
+      onFileChange={newFile => updatePlatformData(platformId, { file: newFile || globalFile })}
+      onReviewAI={() => { setEditingTarget(platformId); processFileChange(data.file || globalFile); setShowVideoEditor(true); }}
+      bountyAmount={bountyAmount} setBountyAmount={setBountyAmount} bountyNiche={bountyNiche} setBountyNiche={setBountyNiche}
+      protocol7Enabled={protocol7Enabled} setProtocol7Enabled={setProtocol7Enabled}
+      protocol7Volatility={protocol7Volatility} setProtocol7Volatility={setProtocol7Volatility}
+      onChange={newData => updatePlatformData(platformId, newData)} initialData={data} />
+    </div>;
   };
 
   // 4. Publish Action
   const publish = async (platforms, label, options = {}) => {
+    if (isPublishing) return;
+    const blockReason = nextReason(4);
+    if (workflowStep !== 4 || blockReason) {
+      setFeedbackMessage(blockReason || "Review the release before submitting.");
+      return;
+    }
+    // Recheck the selected instants at submission, not just when the UI last rendered.
+    try {
+      resolveDelivery({ mode: publishTiming, ...deliveryFields, timezone: deliveryTimezone,
+        customTimes: customPlatformSchedule ? customFields : {}, platforms });
+    } catch (error) { setFeedbackMessage(error.message); return; }
     // Determine the file to upload: prefer global file, but fall back to a single-platform file if set.
     let fileToUpload = globalFile;
 
@@ -975,12 +738,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       return;
     }
 
-    const platformScheduleTimesForPayload = buildPlatformScheduleTimes({
-      platforms,
-      scheduledTime,
-      customPlatformSchedule,
-      platformScheduleTimes,
-    });
+    const platformScheduleTimesForPayload = platformScheduleTimes;
 
     if (scheduledTime) {
       const scheduledAtMs = Date.parse(scheduledTime);
@@ -1062,9 +820,10 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
         }
 
         setFeedbackMessage("Finalizing...");
-      } else if (typeof fileToUpload === "string") {
-        finalUrl = fileToUpload;
+      } else if (/^https?:\/\//i.test(mediaUrl(fileToUpload))) {
+        finalUrl = mediaUrl(fileToUpload);
       }
+      if (!finalUrl) throw new Error("This media has no usable publishing URL.");
 
       // --- 3. Construct Payload ---
       const platformOptionsMap = {};
@@ -1072,16 +831,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
 
       platforms.forEach(p => {
         const data = getPlatformEffectiveData(p);
-        platformOptionsMap[p] = { ...data };
-
-        const platformTitle = String(data.title || "").trim();
-        const platformDescription = String(data.description || "").trim();
-        if (platformTitle) {
-          platformOptionsMap[p].title = platformTitle;
-        }
-        if (platformDescription) {
-          platformOptionsMap[p].description = platformDescription;
-        }
+        platformOptionsMap[p] = preparePlatformOptions(p, data, globalTitle, globalDescription);
 
         const platformSpecificFile = data.file;
         if (
@@ -1103,32 +853,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
           platformOptionsMap[p].meta = platformMeta;
         }
 
-        if (p === "tiktok") {
-          const tiktokCaption = buildTikTokCaption({
-            title: platformTitle || globalTitle,
-            description: platformDescription || globalDescription,
-            caption: data.caption,
-          });
-          if (tiktokCaption) {
-            platformOptionsMap[p].caption = tiktokCaption;
-          }
-          platformOptionsMap[p].commercial = {
-            isCommercial: data.commercialContent,
-            yourBrand: data.yourBrand,
-            brandedContent: data.brandedContent,
-            is_commercial_content: data.commercialContent,
-          };
-          platformOptionsMap[p].commercialContent = data.commercialContent;
-        }
 
-        if (p === "instagram") {
-          if (platformOptionsMap[p].isPaidPartnership && !platformOptionsMap[p].sponsorUser) {
-            console.warn(
-              "[UnifiedPublisher] Sanitizing Instagram options: disabling isPaidPartnership (missing sponsorUser)"
-            );
-            platformOptionsMap[p].isPaidPartnership = false;
-          }
-        }
       });
 
       const uploadMeta =
@@ -1194,6 +919,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
           ? {
               date: new Date(scheduledTime).toISOString(),
               frequency: frequency,
+              timezone: deliveryTimezone,
               platformScheduleTimes: Object.keys(platformScheduleTimesForPayload).length
                 ? platformScheduleTimesForPayload
                 : undefined,
@@ -1202,6 +928,9 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
         isDryRun: false,
         meta: {
           ...(uploadMeta || {}),
+          ...(sourceAsset?.sourceContentId ? { sourceContentId: sourceAsset.sourceContentId } : {}),
+          ...(sourceAsset?.source ? { source: sourceAsset.source } : {}),
+          ...(sourceAsset?.templateName ? { template: { name: sourceAsset.templateName } } : {}),
           ...(fileToUpload?.clipLearning || mediaFile?.clipLearning
             ? {
                 clipLearning: fileToUpload?.clipLearning || mediaFile?.clipLearning,
@@ -1211,8 +940,9 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       };
 
       if (onUpload) {
-        await onUpload(uploadParams);
-        setFeedbackMessage(`${label} started successfully!`);
+        const result = await onUpload(uploadParams);
+        if (result?.ok === false) throw new Error(result.error || "Submission failed.");
+        setFeedbackMessage(`${label} submitted. Check Schedule for delivery status.`);
       } else {
         console.warn("UnifiedPublisher: No onUpload prop provided");
         setFeedbackMessage("Error: Upload handler missing.");
@@ -1249,7 +979,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
   };
 
   const handlePublishAll = () => publish(selectedPlatforms, "Publish Everywhere");
-  const handlePublishPlatform = platformId => publish([platformId], `Publish to ${platformId}`);
 
   const handleUpgradeSuccess = async () => {
     const pending = pendingPublishRequest;
@@ -1264,763 +993,42 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     await publish(pending.platforms, pending.label, { skipUpgradePrompt: true });
   };
 
-  const modalOpen = showVideoEditor || showCropper || showUpgradeModal;
-  const isQueuedPublish = publishTiming === "schedule" && Boolean(scheduledTime);
-  const selectedMediaName =
-    (globalFile && typeof globalFile === "object" && globalFile.name) ||
-    (typeof globalFile === "string" ? "Selected media URL" : "No media selected yet");
-  const queueActionLabel = publishTiming === "schedule" ? "Schedule post" : "Publish now";
-  const queuePlatformCount = selectedPlatforms.length;
-  const isTikTokPostingCapped =
-    selectedPlatforms.includes("tiktok") &&
-    typeof tiktokCreator?.posting_remaining === "number" &&
-    tiktokCreator.posting_remaining <= 0;
-  const selectedMediaSize =
-    globalFile && typeof globalFile === "object" && Number(globalFile.size)
-      ? `${Math.max(1, Math.round(globalFile.size / 1024 / 1024))} MB`
-      : "";
-  const workflowSteps = ["Media", "Platforms", "Customize", "Review"];
-  const workflowStepHelp = [
-    "Choose the source",
-    "Select destinations",
-    "Perfect each post",
-    "Publish or schedule",
-  ];
-  const moveToWorkflowStep = nextStep => {
-    if (nextStep > 0 && !globalFile) {
-      setFeedbackMessage("Choose a media file before selecting platforms.");
-      return;
-    }
-    if (nextStep > 1 && selectedPlatforms.length === 0) {
-      setFeedbackMessage("Select at least one publishing platform before customizing.");
-      return;
-    }
-    setFeedbackMessage("");
-    setWorkflowStep(Math.max(0, Math.min(3, nextStep)));
-  };
+  const timezones = Array.from(new Set([deliveryTimezone, defaultTimezone, browserTimezone(), "Africa/Johannesburg", "UTC",
+    ...(typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : [])].filter(isValidTimezone)));
 
   return (
-    <div
-      className={`unified-publisher-container publisher-redesign${embedded ? " is-embedded" : ""}${modalOpen ? " modal-open" : ""}`}
-    >
-      {/* --- HEADER: Global Context --- */}
-      {!embedded && (
-        <header className="publisher-header">
-          <h1>Publisher</h1>
-          <p>Upload once, tailor the details, and publish everywhere.</p>
-        </header>
-      )}
-
-      <ol className="publisher-stepper" aria-label="Publishing workflow">
-        {workflowSteps.map((step, index) => (
-          <li
-            key={step}
-            className={index === workflowStep ? "active" : index < workflowStep ? "complete" : ""}
-          >
-            <button type="button" onClick={() => moveToWorkflowStep(index)}>
-              <span>{index < workflowStep ? "✓" : index + 1}</span>
-              <div>
-                <strong>{step}</strong>
-                <small>{workflowStepHelp[index]}</small>
-              </div>
-            </button>
-          </li>
-        ))}
-      </ol>
-
-      <section className="publisher-current-asset" aria-label="Current publishing asset">
-        <span className={`publisher-asset-icon ${previewUrl ? "has-preview" : ""}`}>
-          {previewUrl ? (
-            mediaType === "image" ? (
-              <SafeImage src={sanitizeUrl(previewUrl)} alt="" />
-            ) : (
-              <SafeVideo src={sanitizeUrl(previewUrl)} muted preload="metadata" />
-            )
-          ) : mediaType === "image" ? (
-            "▧"
-          ) : (
-            "▶"
-          )}
-        </span>
-        <div>
-          <small>Current media</small>
-          <strong>{selectedMediaName}</strong>
-          <span>
-            {selectedMediaSize || "Choose a master file to begin"}
-            {duration > 0 ? ` · ${Math.round(duration)} seconds` : ""}
-          </span>
-        </div>
-        <div className="publisher-destination-pills">
-          {selectedPlatforms.length ? (
-            selectedPlatforms.map(platform => (
-              <span key={platform}>{getPlatformName(platform)}</span>
-            ))
-          ) : (
-            <em>No platforms selected</em>
-          )}
-        </div>
-        <span className="publisher-asset-status">
-          {globalFile ? "Media ready" : "Waiting for media"}
-        </span>
-      </section>
-
-      <div className={`publisher-layout publisher-step-${workflowStep}`}>
-        {/* --- LEFT SIDE: The "Global" Input (Optional Helper) --- */}
-        <aside className="global-controls">
-          <div className="card global-card">
-            <h2>1. Master Content</h2>
-            <div className="form-group">
-              <label>Master File</label>
-
-              <label className="publisher-upload-dropzone">
-                <input type="file" accept="video/*,image/*" onChange={handleGlobalFileChange} />
-                <span className="publisher-upload-icon" aria-hidden="true">
-                  ↑
-                </span>
-                <strong>{globalFile ? "Replace media" : "Choose a video or image"}</strong>
-                <small>Drag and drop or browse your device · MP4, MOV, JPG, PNG</small>
-              </label>
-
-              {previewUrl && mediaType !== "video" && (
-                <div
-                  className="preview-container"
-                  style={{ marginTop: "10px", marginBottom: "10px" }}
-                >
-                  <img
-                    src={sanitizeUrl(previewUrl)}
-                    alt="Preview"
-                    className="preview-media"
-                    style={{
-                      width: "100%",
-                      maxHeight: "200px",
-                      objectFit: "contain",
-                      borderRadius: "4px",
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Media Tools */}
-              {mediaFile && (
-                <div className="media-tools">
-                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-                    <button
-                      type="button"
-                      className="btn-secondary-sm"
-                      style={{ flex: 1 }}
-                      onClick={() => {
-                        setEditingTarget("global");
-                        setShowVideoEditor(true);
-                      }}
-                    >
-                      {mediaType === "image" ? "🎬 Create Slideshow" : "✨ Review AI Enhancements"}
-                    </button>
-                  </div>
-
-                  {previewUrl && (
-                    <div
-                      className="preview-container"
-                      style={{
-                        marginTop: "15px",
-                        background: "#000",
-                        padding: "10px",
-                        borderRadius: "8px",
-                        textAlign: "center",
-                        border: "1px solid #333",
-                      }}
-                    >
-                      <label
-                        style={{
-                          display: "block",
-                          marginBottom: "5px",
-                          color: "#888",
-                          fontSize: "0.8rem",
-                          textAlign: "left",
-                        }}
-                      >
-                        Preview:
-                      </label>
-                      {effectiveThumbnailUrl && (
-                        <div
-                          style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}
-                        >
-                          <SafeImage
-                            src={safeThumbUrl}
-                            alt="Thumbnail"
-                            style={{
-                              width: 120,
-                              height: 68,
-                              objectFit: "contain",
-                              borderRadius: 6,
-                              border: "2px solid #a78bfa",
-                              background: "#020617",
-                              padding: 4,
-                            }}
-                          />
-                          <span style={{ color: "#a78bfa", fontSize: 11 }}>
-                            {"Your cover frame"}
-                          </span>
-                        </div>
-                      )}
-                      <SafeVideo
-                        key={previewUrl}
-                        src={sanitizeUrl(previewUrl)}
-                        controls
-                        className="preview-media"
-                        preload="metadata"
-                        onLoadedMetadata={e => setDuration(e.target.duration)}
-                        onError={e => {
-                          const message = getBrowserPreviewFailureMessage(
-                            globalFile,
-                            e.currentTarget
-                          );
-                          console.warn("Master preview video failed to load", {
-                            fileName: globalFile?.name,
-                            fileType: globalFile?.type,
-                            fileSize: globalFile?.size,
-                            mediaErrorCode: e.currentTarget?.error?.code,
-                          });
-                          setFeedbackMessage(message);
-                        }}
-                        style={{
-                          width: "100%",
-                          maxHeight: "300px",
-                          objectFit: "contain",
-                          borderRadius: "4px",
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {mediaType === "video" && (
-                    <div className="trim-controls" style={{ margin: "10px 0" }}>
-                      <label style={{ display: "block", marginBottom: "6px" }}>
-                        Start: {trimStart}s / End: {trimEnd > 0 ? trimEnd + "s" : "Full"}
-                      </label>
-                      <div style={{ fontSize: "0.78rem", color: "#94a3b8", marginBottom: "6px" }}>
-                        Trim the master clip window before it flows into the platform-specific
-                        forms.
-                      </div>
-                      <label style={{ display: "block", fontSize: "0.8rem", marginBottom: "4px" }}>
-                        Start time
-                      </label>
-                      <input
-                        type="range"
-                        min="0"
-                        max={duration}
-                        step="0.1"
-                        value={trimStart}
-                        onChange={e => {
-                          const nextStart = Number(e.target.value);
-                          setTrimStart(nextStart);
-                          if (trimEnd > 0 && trimEnd < nextStart) {
-                            setTrimEnd(nextStart);
-                          }
-                        }}
-                        style={{ width: "100%" }}
-                      />
-                      <label
-                        style={{
-                          display: "block",
-                          fontSize: "0.8rem",
-                          marginTop: "8px",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        End time
-                      </label>
-                      <input
-                        type="range"
-                        min={trimStart}
-                        max={duration}
-                        step="0.1"
-                        value={trimEnd > 0 ? trimEnd : duration}
-                        onChange={e => {
-                          const nextEnd = Number(e.target.value);
-                          if (duration > 0 && Math.abs(nextEnd - duration) < 0.11) {
-                            setTrimEnd(0);
-                            return;
-                          }
-                          setTrimEnd(Math.max(nextEnd, trimStart));
-                        }}
-                        style={{ width: "100%" }}
-                      />
-                    </div>
-                  )}
-                  {mediaType === "image" && (
-                    <button className="btn-secondary-sm" onClick={() => setShowCropper(true)}>
-                      📐 Crop Image
-                    </button>
-                  )}
-
-                  {/* Common Transforms */}
-                  <div
-                    className="transform-controls"
-                    style={{
-                      marginTop: "15px",
-                      padding: "10px",
-                      background: "rgba(0, 0, 0, 0.3)",
-                      borderRadius: "4px",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                    }}
-                  >
-                    <div className="control-row">
-                      <label style={{ display: "block", marginBottom: "5px" }}>
-                        Rotation: {rotate}°
-                      </label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="270"
-                        step="90"
-                        value={rotate}
-                        onChange={e => setRotate(parseInt(e.target.value))}
-                        style={{ width: "100%" }}
-                      />
-                    </div>
-
-                    <div
-                      className="control-row checkbox-group"
-                      style={{ display: "flex", gap: "15px", marginTop: "10px" }}
-                    >
-                      <label style={{ cursor: "pointer" }}>
-                        <input
-                          type="checkbox"
-                          checked={flipH}
-                          onChange={e => setFlipH(e.target.checked)}
-                        />{" "}
-                        Flip Horizontal
-                      </label>
-                      <label style={{ cursor: "pointer" }}>
-                        <input
-                          type="checkbox"
-                          checked={flipV}
-                          onChange={e => setFlipV(e.target.checked)}
-                        />{" "}
-                        Flip Vertical
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Filters */}
-                  <div className="filter-controls" style={{ marginTop: "15px" }}>
-                    <label style={{ display: "block", marginBottom: "5px" }}>Visual Filter:</label>
-                    <select
-                      value={selectedFilter || ""}
-                      onChange={e => setSelectedFilter(e.target.value || null)}
-                      className="form-control"
-                      style={{ width: "100%", padding: "8px" }}
-                    >
-                      <option value="">None (Original)</option>
-                      <option value="grayscale">Grayscale</option>
-                      <option value="sepia">Sepia</option>
-                      <option value="invert">Invert</option>
-                      <option value="brightness">Brightness Boost</option>
-                      <option value="contrast">High Contrast</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>Master Title</label>
-              <input
-                type="text"
-                value={globalTitle}
-                onChange={e => setGlobalTitle(e.target.value)}
-                placeholder="My Awesome Video"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Master Description</label>
-              <textarea
-                value={globalDescription}
-                onChange={e => setGlobalDescription(e.target.value)}
-                placeholder="Check this out..."
-                rows={3}
-              />
-            </div>
-
-            {/* --- MARKETING & GROWTH --- */}
-            <div
-              className="marketing-tools"
-              style={{
-                marginTop: "15px",
-                padding: "10px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-              }}
-            >
-              <h4 style={{ margin: "0 0 10px 0", fontSize: "14px" }}>🚀 Growth Optimization</h4>
-              <p
-                style={{
-                  margin: "0 0 10px 0",
-                  fontSize: "12px",
-                  color: "#64748b",
-                  lineHeight: 1.5,
-                }}
-              >
-                Keep this section focused on options that are applied at upload time. Repost cadence
-                and follow-up recycling are managed after publish.
-              </p>
-
-              {/* Viral Toggle */}
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "8px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={optimizeViral}
-                  onChange={e => setOptimizeViral(e.target.checked)}
-                  style={{ marginRight: "8px" }}
-                />
-                <span>Prime this upload for viral seeding</span>
-              </label>
-
-              {/* A/B Variants */}
-              <div
-                className="variants-section"
-                style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px dashed #eee" }}
-              >
-                <label style={{ fontSize: "12px", fontWeight: "bold" }}>
-                  Alternate hook or title
-                </label>
-                <input
-                  type="text"
-                  placeholder="Optional alternate title for testing"
-                  value={variants[0] || ""}
-                  onChange={e => setVariants(e.target.value ? [e.target.value] : [])}
-                  style={{ width: "100%", fontSize: "12px" }}
-                />
-                <div style={{ marginTop: "6px", fontSize: "11px", color: "#64748b" }}>
-                  AutoPromote stores this as a simple rotation variant for headline testing.
-                </div>
-              </div>
-            </div>
-
-            {/* --- PUBLISH QUEUE --- */}
-            <div className="scheduling-tools">
-              <div className="schedule-header">
-                <div>
-                  <h4>Publish Queue</h4>
-                  <p>
-                    Queue the new media selected here for the platforms you choose. This does not
-                    re-queue old uploads from your library.
-                  </p>
-                </div>
-                <span className={`queue-mode-pill ${isQueuedPublish ? "queued" : "ready"}`}>
-                  {queueActionLabel}
-                </span>
-              </div>
-
-              <BestTimeToPost selectedPlatforms={selectedPlatforms} />
-
-              <div className="queue-summary-grid">
-                <div className="queue-summary-card">
-                  <span>New Media</span>
-                  <strong>{selectedMediaName}</strong>
-                </div>
-                <div className="queue-summary-card">
-                  <span>Platforms</span>
-                  <strong>{queuePlatformCount} selected</strong>
-                </div>
-              </div>
-
-              <div className="schedule-field">
-                <label>Publish Time</label>
-                <DateTimeSplitControl
-                  value={scheduledTime}
-                  onChange={value => {
-                    setScheduledTime(value);
-                    setPublishTiming(value ? "schedule" : "now");
-                  }}
-                />
-                <small>
-                  {scheduledTime
-                    ? "This new upload will be queued for the selected platforms. Plan limits are checked before anything is uploaded."
-                    : "Leave empty to publish immediately after upload."}
-                </small>
-              </div>
-
-              {scheduledTime && (
-                <div className="platform-schedule-block">
-                  <label className="platform-schedule-toggle">
-                    <input
-                      type="checkbox"
-                      checked={customPlatformSchedule}
-                      onChange={e => setCustomPlatformSchedule(e.target.checked)}
-                    />
-                    Customize time per platform
-                  </label>
-                  {customPlatformSchedule && (
-                    <div className="platform-schedule-grid">
-                      {selectedPlatforms.map(platform => (
-                        <label key={platform} className="platform-schedule-row">
-                          <span>{getPlatformName(platform)}</span>
-                          <DateTimeSplitControl
-                            value={platformScheduleTimes[platform] || scheduledTime}
-                            onChange={value => updatePlatformScheduleTime(platform, value)}
-                            compact
-                          />
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {scheduledTime && (
-                <div className="schedule-field">
-                  <label>Frequency</label>
-                  <select
-                    value={frequency}
-                    onChange={e => setFrequency(e.target.value)}
-                    className="form-control"
-                  >
-                    <option value="once">Once</option>
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                  </select>
-                  <small>
-                    Each platform in the queue uses one automated distribution task from the current
-                    plan allowance.
-                  </small>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="card platform-selector">
-            <h2>2. Select Networks</h2>
-            <div className="platform-toggles">
-              {["tiktok", "youtube", "instagram", "facebook", "linkedin", "reddit"].map(p => (
-                <label
-                  key={p}
-                  className={`toggle-btn ${selectedPlatforms.includes(p) ? "active" : ""}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedPlatforms.includes(p)}
-                    onChange={() => togglePlatform(p)}
-                  />
-                  {getPlatformName(p)}
-                </label>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* --- RIGHT SIDE: The Platform Cards (Your Existing Forms) --- */}
-        <main className="platform-workspace" style={{ paddingBottom: "120px" }}>
-          <div className="publisher-platform-heading">
-            <div>
-              <small>Customize by platform</small>
-              <h2>Perfect each destination</h2>
-            </div>
-            <div className="publisher-platform-tabs" role="tablist" aria-label="Selected platforms">
-              {selectedPlatforms.map(platformId => (
-                <button
-                  key={platformId}
-                  type="button"
-                  role="tab"
-                  aria-selected={focusedPlatform === platformId}
-                  className={focusedPlatform === platformId ? "active" : ""}
-                  onClick={() => setFocusedPlatform(platformId)}
-                >
-                  {getPlatformName(platformId)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {selectedPlatforms.length === 0 ? (
-            <div className="empty-state">Select a platform to begin.</div>
-          ) : (
-            <div className="platform-stack">
-              {selectedPlatforms
-                .filter(platformId => platformId === focusedPlatform)
-                .map(platformId => (
-                  <div key={platformId} className="platform-section">
-                    {renderPlatformForm(platformId)}
-                  </div>
-                ))}
-            </div>
-          )}
-
-          {workflowStep === 2 ? (
-            <section className="publisher-customize-schedule" aria-label="Publish timing">
-              <div className="publisher-customize-schedule-heading">
-                <div>
-                  <small>Publish timing</small>
-                  <strong>Choose when this post goes live</strong>
-                </div>
-                <div className="publisher-timing-options">
-                  <label>
-                    <input
-                      type="radio"
-                      name="publisher-timing"
-                      checked={publishTiming === "now"}
-                      onChange={() => {
-                        setPublishTiming("now");
-                        setScheduledTime("");
-                      }}
-                    />
-                    Publish now
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="publisher-timing"
-                      checked={publishTiming === "schedule"}
-                      onChange={() => setPublishTiming("schedule")}
-                    />
-                    Schedule
-                  </label>
-                </div>
-              </div>
-
-              {publishTiming === "schedule" ? (
-                <div className="publisher-schedule-controls">
-                  <div className="schedule-field">
-                    <label>Default publish time</label>
-                    <DateTimeSplitControl value={scheduledTime} onChange={setScheduledTime} />
-                  </div>
-                  <label className="platform-schedule-toggle">
-                    <input
-                      type="checkbox"
-                      checked={customPlatformSchedule}
-                      onChange={event => setCustomPlatformSchedule(event.target.checked)}
-                    />
-                    Use a different time for each platform
-                  </label>
-                  {customPlatformSchedule ? (
-                    <div className="platform-schedule-grid">
-                      {selectedPlatforms.map(platform => (
-                        <label key={platform} className="platform-schedule-row">
-                          <span>{getPlatformName(platform)}</span>
-                          <DateTimeSplitControl
-                            value={platformScheduleTimes[platform] || scheduledTime}
-                            onChange={value => updatePlatformScheduleTime(platform, value)}
-                            compact
-                          />
-                        </label>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-            </section>
-          ) : null}
-
-          {workflowStep === 3 ? (
-            <section className="publisher-review-panel" aria-label="Review publishing details">
-              <div className="publisher-review-heading">
-                <div>
-                  <small>Final review</small>
-                  <h2>Ready to publish</h2>
-                </div>
-                <span>{isQueuedPublish ? "Scheduled" : "Publish now"}</span>
-              </div>
-              <div className="publisher-review-grid">
-                <article>
-                  <span>Media</span>
-                  <strong>{selectedMediaName}</strong>
-                  <small>{selectedMediaSize || "Ready"}</small>
-                </article>
-                <article>
-                  <span>Destinations</span>
-                  <strong>{selectedPlatforms.map(getPlatformName).join(", ")}</strong>
-                  <small>{selectedPlatforms.length} platform(s)</small>
-                </article>
-                <article>
-                  <span>Delivery</span>
-                  <strong>{scheduledTime ? "Scheduled" : "Immediately"}</strong>
-                  <small>{scheduledTime || "As soon as processing finishes"}</small>
-                </article>
-              </div>
-              <div className="publisher-review-schedule">
-                <label>Publish timing</label>
-                <DateTimeSplitControl
-                  value={scheduledTime}
-                  onChange={value => {
-                    setScheduledTime(value);
-                    setPublishTiming(value ? "schedule" : "now");
-                  }}
-                />
-                <small>Leave the date empty to publish immediately.</small>
-              </div>
-            </section>
-          ) : null}
-        </main>
-      </div>
-
-      <div className="publisher-wizard-actions">
-        <div>
-          {workflowStep > 0 ? (
-            <button
-              type="button"
-              className="btn-secondary-sm"
-              onClick={() => moveToWorkflowStep(workflowStep - 1)}
-            >
-              ← Back
-            </button>
-          ) : (
-            <button type="button" className="btn-secondary-sm" onClick={resetPublisherForm}>
-              Reset
-            </button>
-          )}
-          {feedbackMessage ? <span className="feedback-message">{feedbackMessage}</span> : null}
-          {fallbackPublishPlatform ? (
-            <span className="feedback-message">
-              Using {getPlatformName(fallbackPublishPlatform)} media.
-            </span>
-          ) : null}
-        </div>
-        {workflowStep < 3 ? (
-          <button
-            type="button"
-            className="btn-primary-large"
-            onClick={() => moveToWorkflowStep(workflowStep + 1)}
-            disabled={
-              (workflowStep === 0 && !globalFile) ||
-              (workflowStep === 1 && !selectedPlatforms.length)
-            }
-          >
-            {workflowStep === 0
-              ? "Choose platforms →"
-              : workflowStep === 1
-                ? "Customize posts →"
-                : "Review publishing →"}
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="btn-primary-large"
-            onClick={handlePublishAll}
-            disabled={
-              isPublishing ||
-              selectedPlatforms.length === 0 ||
-              !globalFile ||
-              isTikTokPostingCapped ||
-              (publishTiming === "schedule" && !scheduledTime)
-            }
-          >
-            {isPublishing
-              ? "Publishing..."
-              : isQueuedPublish
-                ? "Queue publishing →"
-                : "Publish now →"}
-          </button>
-        )}
-      </div>
+    <>
+      <PublisherReleaseWorkspace embedded={embedded} step={workflowStep} moveToStep={moveToWorkflowStep}
+        title={globalTitle} description={globalDescription} onTitle={setGlobalTitle} onDescription={setGlobalDescription}
+        file={globalFile} preview={previewUrl} poster={safeThumbUrl} duration={duration} dimensions={dimensions}
+        onMetadata={video => { setDuration(video.duration); setDimensions({ width: video.videoWidth, height: video.videoHeight }); }}
+        onUploadFile={handleGlobalFileChange} assetTab={assetTab} onAssetTab={setAssetTab} assets={visibleAssets}
+        onSelectAsset={selectOwnedAsset} sourceAsset={sourceAsset} selected={selectedPlatforms} togglePlatform={togglePlatform}
+        focus={focusedPlatform} activatePlatform={activatePlatform} connections={connections} issues={destinationIssues}
+        visited={visitedPlatforms} forms={renderPlatformForm} copyMaster={copyMaster} mode={publishTiming} setMode={setPublishTiming}
+        deliveryFields={deliveryFields} setDeliveryFields={setDeliveryFields} timezone={deliveryTimezone} setTimezone={setDeliveryTimezone}
+        timezones={timezones} delivery={delivery} deliveryError={deliveryError} frequency={frequency} setFrequency={setFrequency}
+        customSchedule={customPlatformSchedule} setCustomSchedule={setCustomPlatformSchedule} customFields={customFields}
+        setCustomFields={(platform, fields) => setCustomFields(current => ({ ...current, [platform]: fields }))}
+        reviewOptions={reviewOptions} getData={getPlatformEffectiveData} nextReason={nextReason}
+        submit={handlePublishAll} submitting={isPublishing} feedback={feedbackMessage} onNavigate={onNavigate}
+        bestTime={<details className="release-advanced"><summary>Best time insights</summary><BestTimeToPost selectedPlatforms={selectedPlatforms} /></details>}
+        advanced={<details className="release-advanced"><summary>Media and optional settings</summary>
+          <button type="button" onClick={resetPublisherForm}>Reset this preparation</button>
+          <button type="button" onClick={() => { setEditingTarget("global"); setShowVideoEditor(true); }} disabled={!globalFile}>Open media editor</button>
+          {mediaType === "image" && <button type="button" disabled={!globalFile} onClick={() => setShowCropper(true)}>Crop image</button>}
+          {mediaType === "video" && <div className="release-date-time"><label>Trim start (seconds)<input type="number" min="0" max={duration || undefined} step="0.1" value={trimStart} onChange={event => setTrimStart(Number(event.target.value))} /></label><label>Trim end (0 = full)<input type="number" min={trimStart} max={duration || undefined} step="0.1" value={trimEnd} onChange={event => setTrimEnd(Number(event.target.value))} /></label></div>}
+          <label>Rotation<select value={rotate} onChange={event => setRotate(Number(event.target.value))}>{[0, 90, 180, 270].map(value => <option key={value} value={value}>{value}°</option>)}</select></label>
+          <label className="release-check"><input type="checkbox" checked={flipH} onChange={event => setFlipH(event.target.checked)} />Flip horizontally</label>
+          <label className="release-check"><input type="checkbox" checked={flipV} onChange={event => setFlipV(event.target.checked)} />Flip vertically</label>
+          <label>Visual filter<select value={selectedFilter || ""} onChange={event => setSelectedFilter(event.target.value || null)}>{[["", "None"], ["grayscale", "Grayscale"], ["sepia", "Sepia"], ["invert", "Invert"], ["brightness", "Brightness Boost"], ["contrast", "High Contrast"]].map(([value, name]) => <option key={value} value={value}>{name}</option>)}</select></label>
+          <label>Alternate hook or title<input value={variants[0] || ""} onChange={event => setVariants(event.target.value ? [event.target.value] : [])} /></label>
+          <label className="release-check"><input type="checkbox" checked={optimizeViral} onChange={event => setOptimizeViral(event.target.checked)} />Request existing viral optimization</label>
+          <label className="release-check"><input type="checkbox" checked={protocol7Enabled} onChange={event => setProtocol7Enabled(event.target.checked)} />Protocol 7</label>
+          <label>Bounty amount<input type="number" min="0" value={bountyAmount} onChange={event => setBountyAmount(Number(event.target.value))} /></label>
+          <label>Bounty niche<input value={bountyNiche} onChange={event => setBountyNiche(event.target.value)} /></label>
+        </details>}
+      />
 
       {/* --- Modals --- */}
       {showVideoEditor && mediaFile && (
@@ -2174,7 +1182,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

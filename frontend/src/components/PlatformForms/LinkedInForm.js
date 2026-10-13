@@ -62,6 +62,7 @@ const LinkedInForm = ({
     onChange({
       platform: "linkedin",
       visibility,
+      postingTarget,
       commentary,
       title,
       companyId: postingTarget === "company" ? companyId : "",

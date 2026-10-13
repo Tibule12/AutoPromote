@@ -1,0 +1,129 @@
+/* The release preparation workspace; provider forms and backend contracts stay intact. */
+.publisher-release { --release-accent: #8b5cf6; --release-border: #283447; color: #e9edf7; font-family: Inter, system-ui, sans-serif; }
+.publisher-release *, .publisher-release *::before, .publisher-release *::after { box-sizing: border-box; }
+.publisher-release [hidden] { display: none !important; }
+.release-page-heading h1 { margin: 0 0 6px; font-size: 29px; }
+.release-page-heading p, .release-identity p { margin: 0; color: #aebad0; font-size: 14px; }
+.release-workflow-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--release-border); }
+.release-product-flow { color: #98a6bf; font-size: 12px; margin: 0; }
+.release-stepper { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 18px; padding: 0; margin: 0; }
+.release-stepper button { border: 0; background: transparent; color: #9faac2; display: flex; align-items: center; gap: 7px; font-size: 12px; cursor: pointer; padding: 3px 0; }
+.release-stepper button > span { display: grid; place-items: center; border: 1px solid #536078; border-radius: 50%; width: 27px; height: 27px; }
+.release-stepper .complete button, .release-stepper .active button { color: #f1eaff; }
+.release-stepper .complete span, .release-stepper .active span { background: #7c3aed; border-color: #9e78ff; }
+.release-stepper .active button { font-weight: 700; }
+.release-identity { padding: 18px 0; }
+.release-identity h2 { margin: 0 0 5px; font-size: 24px; letter-spacing: -.4px; }
+.release-workspace { display: grid; grid-template-columns: minmax(230px, .9fr) minmax(360px, 1.25fr) minmax(235px, .9fr); gap: 14px; align-items: start; }
+.release-sidebar, .release-main, .release-inspector { display: grid; gap: 14px; min-width: 0; }
+.release-card { background: linear-gradient(145deg, #121e30, #101a2a); border: 1px solid var(--release-border); border-radius: 12px; padding: 16px; min-width: 0; }
+.release-card h3 { margin: 0 0 10px; font-size: 17px; color: #f2f4fc; }
+.release-card h4 { font-size: 14px; margin: 16px 0 8px; }
+.release-card > p, .release-form-heading p { font-size: 12px; color: #a7b4cd; line-height: 1.5; margin: 4px 0 12px; }
+.release-media { display: block; width: 100%; max-height: 245px; aspect-ratio: 16/9; object-fit: contain; background: #050b14; border-radius: 9px; }
+.release-media-empty { min-height: 145px; border: 1px dashed #4b4466; border-radius: 9px; display: grid; place-items: center; text-align: center; color: #a7b4cd; font-size: 13px; padding: 18px; }
+.release-media-name { display: block; margin-top: 12px; font-size: 14px; overflow-wrap: anywhere; }
+.release-media-meta, .release-origin { color: #a8b5ce; font-size: 11px; margin: 6px 0; }
+.release-text-button { color: #b38bff; border: 0; background: none; padding: 6px 0; font-weight: 600; font-size: 12px; cursor: pointer; text-align: left; }
+.release-text-button:hover { color: #d8c6ff; }
+.release-destination-row { width: 100%; display: grid; grid-template-columns: 24px minmax(58px, 1fr) auto 8px; gap: 7px; align-items: center; padding: 10px 8px; background: #131f31; color: #e7ecf7; border: 1px solid #2c3a51; border-radius: 8px; margin-top: 8px; text-align: left; cursor: pointer; }
+.release-destination-row.active { background: #2a1d47; border-color: #9a69ed; }
+.release-destination-row > strong { font-size: 11px; }
+.release-destination-row > span:last-child { grid-column: 4; grid-row: 1/3; }
+.release-connection { font-size: 10px; color: #d1a187; grid-column: 2; }
+.release-connection.connected { color: #8cd5b4; }
+.release-form-status { grid-column: 3; grid-row: 1/3; font-size: 10px; max-width: 92px; overflow-wrap: anywhere; }
+.release-platform-icon { display: inline-grid; place-items: center; width: 25px; height: 25px; border-radius: 7px; background: #433763; color: white; font-size: 16px; font-weight: 800; flex: 0 0 25px; }
+.release-platform-icon.facebook { background: #1877f2; border-radius: 50%; }
+.release-platform-icon.instagram { background: linear-gradient(145deg, #702bd4, #d9378d, #efa749); }
+.release-platform-icon.linkedin { background: #0a66c2; font-size: 13px; }
+.release-platform-icon.reddit { background: #f04414; border-radius: 50%; }
+.release-platform-icon.tiktok { background: #030711; border: 1px solid #4e445d; }
+.release-platform-icon.youtube { background: #e52634; font-size: 13px; }
+.publisher-release label { display: block; font-size: 12px; color: #d0d9ea; margin-bottom: 12px; }
+.publisher-release input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]), .publisher-release textarea, .publisher-release select { display: block; width: 100%; background: #0c1626; color: #eef0f8; border: 1px solid #39465d; border-radius: 7px; padding: 10px 11px; margin-top: 6px; font: inherit; min-height: 38px; }
+.publisher-release input:focus-visible, .publisher-release textarea:focus-visible, .publisher-release select:focus-visible, .publisher-release button:focus-visible { outline: 2px solid #b391ff; outline-offset: 2px; }
+.publisher-release input[type=checkbox], .publisher-release input[type=radio] { accent-color: #8b5cf6; }
+.release-source-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; }
+.release-source-tabs button, .release-platform-tabs button { border: 1px solid #2c3a51; color: #c7d0e4; background: #172337; border-radius: 8px; padding: 9px 11px; font-size: 11px; cursor: pointer; }
+.release-source-tabs button[aria-selected=true], .release-platform-tabs button[aria-selected=true] { background: #7135dc; border-color: #a26fff; color: white; }
+.release-upload { border: 1px dashed #77608f; padding: 20px; border-radius: 9px; background: #171b32; }
+.release-upload span { display: block; color: #a7b4cd; margin: 7px 0; }
+.release-upload input { width: 100%; margin-top: 12px; }
+.release-asset-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.release-asset-grid button { background: #172337; color: #e9edf7; border: 1px solid #38445d; border-radius: 9px; padding: 8px; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.release-asset-grid img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; }
+.release-asset-grid strong, .release-asset-grid small { display: block; margin-top: 5px; font-size: 12px; }
+.release-asset-grid > p { grid-column: 1/-1; color: #a7b4cd; font-size: 13px; line-height: 1.5; }
+.release-master-copy { margin-top: 18px; padding-top: 4px; border-top: 1px solid #2d3b50; }
+.release-master-copy p { color: #a7b4cd; font-size: 12px; }
+.release-platform-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.release-platform-grid label { display: grid; grid-template-columns: 18px 28px 1fr; gap: 7px; align-items: center; background: #152136; border: 1px solid #39465d; border-radius: 9px; padding: 14px 10px; margin: 0; cursor: pointer; }
+.release-platform-grid label.selected { border-color: #9874ed; background: #241c3c; }
+.release-platform-grid small { grid-column: 3; font-size: 10px; color: #b7c0d6; }
+.release-platform-tabs { display: flex; gap: 5px; overflow-x: auto; margin-bottom: 9px; padding-bottom: 3px; }
+.release-platform-tabs button { display: flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 10px; padding: 7px; }
+.release-platform-tabs .release-platform-icon { width: 19px; height: 19px; font-size: 12px; flex-basis: 19px; }
+.release-form-heading { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+.release-form-heading h3 { margin-bottom: 4px; }
+.release-form-heading .release-text-button { white-space: nowrap; font-size: 11px; }
+.release-issues { background: #332233; color: #f5b4c6; border-left: 2px solid #de758d; border-radius: 7px; padding: 10px; font-size: 12px; margin: 12px 0; }
+.release-issues ul { padding-left: 18px; margin: 6px 0 0; }
+.release-form-card .platform-form { padding: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important; width: 100% !important; max-width: none !important; }
+.release-form-card .platform-form-header { display: none; }
+.release-form-card .form-group-modern, .release-form-card .form-group { margin: 14px 0; }
+.release-form-card .modern-input, .release-form-card .form-control { font-size: 12px !important; }
+.release-form-card .identity-badge { background: #1c2940 !important; border-color: #39465d !important; }
+.release-form-card .identity-badge * { color: #c9d4e9 !important; }
+.release-form-card .input-icon { display: none; }
+.release-form-card .commercial-section { background: #172337 !important; border-color: #39465d !important; padding: 12px !important; border-radius: 8px; }
+.release-form-card .char-count, .release-form-card .help-text { color: #a3b0c8 !important; font-size: 10px !important; }
+.release-form-card .form-label-bold, .release-form-card .form-label, .release-form-card .label-text, .release-form-card .form-group-modern > label { color: #dce2f1 !important; }
+.release-form-card .checkbox-modern, .release-form-card .checkbox-pill { display: flex; gap: 7px; align-items: center; }
+.release-form-card .toggles-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.release-form-card .reddit-media-tools { margin: 8px 0; font-size: 12px; color: #a7b4cd; }
+.release-form-card .reddit-media-tools summary { cursor: pointer; }
+.release-social-preview { border-radius: 9px; background: #f7f8fc; color: #161d2e; padding: 12px; font-size: 12px; }
+.release-social-preview > small { color: #596682; }
+.release-social-preview h4 { margin: 10px 0; color: #161d2e; }
+.release-social-preview .release-media { margin-top: 12px; }
+.release-post-preview > small { color: #9fabc2; display: block; font-size: 10px; margin-top: 10px; }
+.release-post-preview h3 { display: flex; gap: 8px; align-items: center; }
+.release-full-copy { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.55; margin: 8px 0 12px; font-size: 12px; }
+.release-readiness p { color: #bfc9de; font-size: 12px; margin-bottom: 10px; }
+.publisher-release .complete { color: #8de2b7; }
+.publisher-release .attention { color: #f6a6bf; }
+.release-issue-link { display: block; width: 100%; color: #f6a6bf; background: #322237; border: 0; border-radius: 7px; margin: 8px 0; padding: 9px; text-align: left; font-size: 11px; cursor: pointer; }
+.release-readiness-help { border-top: 1px solid #2d3b50; padding-top: 12px; }
+.release-next-delivery strong { display: block; font-size: 13px; padding-top: 8px; }
+.release-next-delivery p { font-size: 11px; color: #a7b4cd; }
+.release-delivery-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0; }
+.release-delivery-modes label { display: grid; grid-template-columns: 18px 1fr; gap: 7px; background: #172337; border: 1px solid #44516a; border-radius: 8px; padding: 14px 10px; cursor: pointer; }
+.release-delivery-modes .selected { background: #2d2148; border-color: #a371f6; }
+.release-delivery-modes span { grid-column: 2; color: #bdc7de; font-size: 11px; }
+.release-date-time { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.release-exact-time { padding: 12px; border-radius: 7px; background: #241d38; color: #dbc9fd !important; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.release-exact-time small { display: block; color: #b3bdd4; }
+.publisher-release .release-check { display: flex; align-items: center; gap: 8px; }
+.release-custom-time { border: 1px solid #38465d; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.release-review-destination { margin-top: 12px; border: 1px solid #38465d; border-radius: 8px; overflow: hidden; }
+.release-review-destination > summary { display: flex; gap: 9px; align-items: center; padding: 12px; cursor: pointer; font-size: 13px; background: #172337; }
+.release-review-destination summary > span:last-child { margin-left: auto; color: #aebbd3; font-size: 11px; }
+.release-review-destination > div { padding: 12px; }
+.release-review dl { font-size: 12px; }
+.release-review dl > div { display: grid; grid-template-columns: 120px 1fr; gap: 10px; margin: 7px 0; }
+.release-review dt { color: #a3b1ca; }
+.release-review dd { margin: 0; overflow-wrap: anywhere; }
+.release-advanced { padding: 14px 0 0; border-top: 1px solid #38465d; margin-top: 16px; font-size: 12px; color: #bfc9de; }
+.release-advanced summary { cursor: pointer; margin-bottom: 14px; }
+.release-advanced button { background: #192b43; color: #d7e0f1; border: 1px solid #4b5770; border-radius: 7px; padding: 9px 12px; margin: 0 7px 12px 0; cursor: pointer; }
+.release-error { color: #f4a6bc !important; font-size: 12px; overflow-wrap: anywhere; }
+.release-footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 16px 0 8px; border-top: 1px solid var(--release-border); margin-top: 16px; }
+.release-footer-action { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 12px; max-width: 75%; }
+.release-footer-action p { margin: 0; font-size: 11px; }
+.release-footer-action small { flex-basis: 100%; text-align: right; color: #9fabc2; font-size: 10px; }
+.release-primary { background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: #fff; border: 1px solid #9e70ff; border-radius: 8px; padding: 11px 17px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.release-primary:disabled { background: #24334b; border-color: #44546d; color: #9aa8c1; cursor: not-allowed; }
+@media (min-width: 1450px) { .release-workspace { grid-template-columns: minmax(275px, 1fr) minmax(390px, 1.3fr) minmax(285px, 1fr); } }
+@media (max-width: 1050px) { .release-workspace { grid-template-columns: minmax(210px, .7fr) minmax(320px, 1.3fr); } .release-inspector { grid-column: 2; } .release-workflow-heading { flex-direction: column; align-items: start; } }
+@media (max-width: 700px) { .release-workspace { display: flex; flex-direction: column; } .release-sidebar, .release-main, .release-inspector { width: 100%; } .release-sidebar { grid-template-columns: 1fr; } .release-inspector { order: 3; } .release-stepper { gap: 9px; } .release-stepper button { font-size: 10px; gap: 4px; } .release-stepper button > span { width: 22px; height: 22px; } .release-form-heading { flex-wrap: wrap; } .release-footer { align-items: start; } .release-footer-action { max-width: 70%; } .release-footer-action .release-primary { white-space: normal; } .release-date-time, .release-delivery-modes { grid-template-columns: 1fr; } }

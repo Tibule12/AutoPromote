@@ -11,6 +11,7 @@ const RedditForm = ({
   initialData = {},
   creatorInfo,
   globalTitle,
+  globalDescription,
   globalDescription: _globalDescription,
   currentFile,
   onFileChange,
@@ -44,6 +45,9 @@ const RedditForm = ({
   const [subredditFetchError, setSubredditFetchError] = useState("");
   const [title, setTitle] = useState(initialData.title || globalTitle || "");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [kind, setKind] = useState(initialData.kind || "video");
+  const [postText, setPostText] = useState(initialData.text || globalDescription || "");
+  const [postLink, setPostLink] = useState(initialData.url || "");
   const [flairId] = useState(initialData.flairId || "");
   const [isNSFW, setIsNSFW] = useState(initialData.isNSFW || false);
   const [isSpoiler, setIsSpoiler] = useState(initialData.isSpoiler || false);
@@ -181,6 +185,9 @@ const RedditForm = ({
       platform: "reddit",
       subreddit: normalized,
       title,
+      kind,
+      text: postText,
+      url: postLink,
       flairId,
       isNSFW,
       isSpoiler,
@@ -189,7 +196,7 @@ const RedditForm = ({
     if (normalized && typeof window !== "undefined") {
       localStorage.setItem("lastRedditSubreddit", normalized);
     }
-  }, [subreddit, title, flairId, isNSFW, isSpoiler, isPromotional]);
+  }, [subreddit, title, kind, postText, postLink, flairId, isNSFW, isSpoiler, isPromotional]);
 
   const handleInsertEmoji = emoji => {
     const emojiChar = typeof emoji === "object" && emoji.native ? emoji.native : emoji;
@@ -241,7 +248,8 @@ const RedditForm = ({
         </div>
       )}
 
-      {/* File Input for Reddit (Added) */}
+      {/* Existing destination media controls remain available without dominating copy preparation. */}
+      <details className="reddit-media-tools"><summary>Media for Reddit</summary>
       <div className="form-group-modern">
         <label className="form-label-bold">Media File</label>
         <div
@@ -335,12 +343,14 @@ const RedditForm = ({
         )}
       </div>
 
+      </details>
       <div className="form-group-modern">
-        <label>Where should this be posted? (required)</label>
+        <label htmlFor="reddit-subreddit">Subreddit *</label>
 
         {normalizedAvailableSubreddits.length > 0 ? (
           <>
             <select
+              id="reddit-subreddit"
               className="modern-input"
               value={subreddit}
               onChange={e => setSubreddit(String(e.target.value || "").replace(/^r\//i, "").trim())}
@@ -376,6 +386,7 @@ const RedditForm = ({
           <div className="input-with-icon">
             <span className="input-icon">r/</span>
             <input
+              id="reddit-subreddit"
               type="text"
               className="modern-input"
               value={subreddit}
@@ -398,11 +409,19 @@ const RedditForm = ({
       </div>
 
       <div className="form-group-modern">
-        <label>Title</label>
+        <label htmlFor="reddit-kind">Post type *</label>
+        <select id="reddit-kind" className="modern-input" value={kind} onChange={event => setKind(event.target.value)}>
+          <option value="video">Video</option><option value="link">Link</option><option value="self">Text</option>
+        </select>
+      </div>
+      {kind === "link" && <div className="form-group-modern"><label htmlFor="reddit-post-link">Post link *</label><input id="reddit-post-link" type="url" className="modern-input" value={postLink} onChange={event => setPostLink(event.target.value)} /></div>}
+      <div className="form-group-modern">
+        <label htmlFor="reddit-title">Title *</label>
         <div style={{ position: "relative" }}>
           <input
             type="text"
             className="modern-input"
+            id="reddit-title"
             value={title}
             onChange={e => {
               setTitle(e.target.value);
@@ -439,6 +458,7 @@ const RedditForm = ({
         <div className="char-count">{title.length}/300</div>
       </div>
 
+      <div className="form-group-modern"><label htmlFor="reddit-post-text">Post text{kind === "self" ? " *" : ""}</label><textarea id="reddit-post-text" className="modern-input" rows={4} value={postText} onChange={event => setPostText(event.target.value)} /></div>
       <div className="commercial-section">
         <label className="checkbox-modern">
           <input

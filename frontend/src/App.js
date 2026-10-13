@@ -1321,7 +1321,7 @@ function App() {
       const schedule_hint = {
         ...schedule,
         frequency: schedule?.frequency || userDefaults.defaultFrequency || "once",
-        timezone: userDefaults.timezone || "UTC",
+        timezone: schedule?.timezone || userDefaults.timezone || "UTC",
         mode: scheduledPromotionTime || platformScheduleTimes ? "queued_new_upload" : "publish_now",
         platform_schedule_times: platformScheduleTimes,
       };
