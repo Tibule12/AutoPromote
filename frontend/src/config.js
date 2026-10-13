@@ -125,6 +125,7 @@ export const API_ENDPOINTS = {
   SCHEDULE_PAUSE: id => `${API_BASE_URL}/api/content/promotion-schedules/${id}/pause`,
   SCHEDULE_RESUME: id => `${API_BASE_URL}/api/content/promotion-schedules/${id}/resume`,
   SCHEDULE_RESCHEDULE: id => `${API_BASE_URL}/api/content/promotion-schedules/${id}/reschedule`,
+  SCHEDULE_POST_COPY: id => `${API_BASE_URL}/api/content/promotion-schedules/${id}/post-copy`,
   SCHEDULE_DELETE: id => `${API_BASE_URL}/api/content/promotion-schedules/${id}`,
 
   // Health check

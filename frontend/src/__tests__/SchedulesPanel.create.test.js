@@ -22,7 +22,7 @@ describe("SchedulesPanel create schedule", () => {
     );
 
     // 1. Open Injector
-    const injectBtn = screen.getByText(/\+ SCHEDULE DROP/i);
+    const injectBtn = screen.getByText(/\+ Schedule post/i);
     fireEvent.click(injectBtn);
 
     // 2. Choose Content
@@ -38,11 +38,11 @@ describe("SchedulesPanel create schedule", () => {
     fireEvent.change(timeInput, { target: { value: "12:00" } });
 
     // 4. Select Platform
-    const ytBtn = screen.getByRole("button", { name: "YouTube" });
+    const ytBtn = screen.getByRole("checkbox", { name: "YouTube" });
     fireEvent.click(ytBtn);
 
     // 5. Submit
-    const submitBtn = screen.getByText(/INITIATE SCHEDULE/i);
+    const submitBtn = screen.getByRole("button", { name: "Schedule post" });
     fireEvent.click(submitBtn);
 
     // Wait for async onCreate

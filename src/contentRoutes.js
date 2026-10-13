@@ -1577,19 +1577,71 @@ router.post("/promotion-schedules/:id/reschedule", authMiddleware, async (req, r
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { id } = req.params;
-    const { time } = req.body;
+    const { time, timezone } = req.body;
     if (!time) return res.status(400).json({ error: "Missing required field: time" });
+    if (timezone !== undefined) {
+      try {
+        new Intl.DateTimeFormat("en-US", { timeZone: timezone });
+      } catch (_) {
+        return res.status(400).json({ error: "Invalid timezone" });
+      }
+    }
 
     const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
     if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
     if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
 
     const promotionService = require("./promotionService");
-    const updated = await promotionService.updatePromotionSchedule(id, { startTime: time });
+    const updated = await promotionService.updatePromotionSchedule(id, {
+      startTime: time,
+      ...(timezone !== undefined ? { timezone } : {}),
+    });
     res.json({ success: true, schedule: updated });
   } catch (error) {
     console.error("[POST /promotion-schedules/:id/reschedule] Error:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PATCH /promotion-schedules/:id/post-copy - Edit copy before a platform task starts.
+router.patch("/promotion-schedules/:id/post-copy", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    const { title, caption } = req.body || {};
+    if (typeof title !== "string" || typeof caption !== "string" || title.length > 160 || caption.length > 5000) {
+      return res.status(400).json({ error: "Title and caption must be text within the allowed lengths" });
+    }
+    const ref = db.collection("promotion_schedules").doc(req.params.id);
+    const result = await db.runTransaction(async transaction => {
+      const doc = await transaction.get(ref);
+      if (!doc.exists) return { status: 404, error: "Schedule not found" };
+      const schedule = doc.data() || {};
+      if (schedule.user_id !== userId) return { status: 403, error: "Forbidden" };
+      if (!["pending", "queued", "scheduled", "paused", "ready"].includes(String(schedule.status || "pending").toLowerCase())) {
+        return { status: 409, error: "This post has started publishing and its copy can no longer be changed" };
+      }
+      transaction.update(ref, {
+        platformSpecificSettings: {
+          ...(schedule.platformSpecificSettings || {}),
+          title: title.trim(),
+          caption: caption.trim(),
+          text: caption.trim(),
+          commentary: caption.trim(),
+          message: caption.trim(),
+          description: caption.trim(),
+        },
+        message: caption.trim(),
+        caption: caption.trim(),
+        updatedAt: new Date().toISOString(),
+      });
+      return { status: 200 };
+    });
+    if (result.status !== 200) return res.status(result.status).json({ error: result.error });
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("[PATCH /promotion-schedules/:id/post-copy] Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
