@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Professional mask authoring review: expose canonical percentage-polygon paths and rectangle radius, preserve explicit zero and reject invalid drafts/saved exports. One native CPU film/timeline and eight bounded portrait comparisons; historical landscape edge failures and all broader mask/effect/sound/readiness limits remain open.",
-  "reviewed_at": "2026-10-13T19:37:48.599Z",
-  "catalog_sha256": "75dc589f2ae6d49fadff2222f351c71f5853393221c9f15dc706dfee2b0cc8db",
+  "reason": "Image key/preview review: canonical opacity and transforms take precedence over legacy CSS entrance fill/transitions. Two native masked-effect CPU films/timelines; inverted4/4 picture pairs pass, ellipse3/4 and historical edge failures remain recorded. No full-parity, readiness or creative promotion.",
+  "reviewed_at": "2026-10-13T20:04:30.751Z",
+  "catalog_sha256": "3c84e4f9bd6aa3655ca29a4225d9ae37b99099dc172992f4b541c58889d11b16",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -98,8 +98,12 @@
       "sha256": "fab0fbc632dda0daddfa79cef9bee38248d932780185b65a74c8650fbed8cfe9"
     },
     {
+      "path": "frontend/src/components/ViralClipStudio.css",
+      "sha256": "cfb9b6960cf578ef1e58ac1148052491141c49a1327740f9618f4bd011e8d9dd"
+    },
+    {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "4d3c4de9e5e6758251ad001e9aa4a6c401e1757bc3efe0dd236734e2fe5ab4e9"
+      "sha256": "3321f989db4b4929884d837534c2ac861cc1cd42dd58d73dd78ace8bb040ee12"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -299,11 +303,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "cc70355fa7b02efc5927e7efdb181973e7ed2b3d1d1dc8694b0e1c76aa06fe03"
+      "sha256": "c8bc5c220078df64ddaf4cc0aead63b26151766380850348d4441019eb528747"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "22a449115e13c68693e033a7a52078b1de12cb1d86695cd5887e1d351faa0428"
+      "sha256": "3627f23b47ed8ab322616a1c79fd9286e66708c2cb41274c6cec6af8b4dc0760"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

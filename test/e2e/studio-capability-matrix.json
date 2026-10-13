@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-13T19:37:47.936156Z",
+  "updatedAt": "2026-10-13T20:04:30.101472Z",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -732,7 +732,9 @@
       "latestNativeVoiceoverDuckingEvidence": "reports/model-capability-runtime-v1-20261009/VOICEOVER-DUCKING-AND-RECOVERY-20261012.md",
       "latestNativeVoiceoverDuckingScope": "Real import/trim/gain/history/owned save/cold-reopen/CPU export/full Studio timeline; short1x voice phase corrected. Full retimed sound/picture, speech DSP and human review remain unqualified.",
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
-      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+      "latestProfessionalMaskedEffectsEvidence": "reports/studio-professional-masked-effects-20261013/README.md",
+      "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified."
     },
     {
       "id": "final_render",
@@ -1965,7 +1967,9 @@
       "latestNativeKeyframeSoundEvidence": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
       "latestNativeKeyframeSoundScope": "Native editable keyframes/export/full finished-file playback, retimed bus audio correction and bounded composition repairs. Whole product/creative parity remains unqualified.",
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
-      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+      "latestProfessionalMaskedEffectsEvidence": "reports/studio-professional-masked-effects-20261013/README.md",
+      "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified."
     },
     {
       "id": "masking",
@@ -4051,7 +4055,9 @@
       "latestProfessionalImageEffectsEvidence": "reports/studio-professional-continuation-20261013/README.md",
       "latestProfessionalImageEffectsScope": "Two native transparent-image edits: blur and ordered gold-shadow/cyan-glow/blur with X keys, history, save/cold reopen, owned CPU export/native download/full decode and complete editable Studio playback. Eight mapped alpha/color pairs pass. Whole picture/sound, masks/broad media and readiness remain unqualified.",
       "latestProfessionalMaskAuthoringEvidence": "reports/studio-professional-mask-authoring-20261013/README.md",
-      "latestProfessionalMaskAuthoringScope": "Native geometric polygon path and zero-radius rectangle controls: invalid draft rejected, Escape, path change/undo/redo/save/cold reopen, one owned CPU export/download/full decode and complete editable Studio playback. Eight paired whole-box alpha/boundary checks pass. Historical landscape edge failures, broad masks/effect stacks/full picture/sound and readiness remain unqualified."
+      "latestProfessionalMaskAuthoringScope": "Native geometric polygon path and zero-radius rectangle controls: invalid draft rejected, Escape, path change/undo/redo/save/cold reopen, one owned CPU export/download/full decode and complete editable Studio playback. Eight paired whole-box alpha/boundary checks pass. Historical landscape edge failures, broad masks/effect stacks/full picture/sound and readiness remain unqualified.",
+      "latestProfessionalMaskedEffectsEvidence": "reports/studio-professional-masked-effects-20261013/README.md",
+      "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified."
     },
     {
       "id": "vfx",
@@ -7911,24 +7917,26 @@
   },
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "NATIVE_GEOMETRIC_MASK_PATH_AND_ZERO_RADIUS_AUTHORING",
-    "lastSessionRealCapabilityRuns": 1,
+    "lastSessionKind": "NATIVE_MASKED_IMAGE_MOTION_AND_CSS_OPACITY_PRECEDENCE_REPAIR",
+    "lastSessionRealCapabilityRuns": 2,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-mask-authoring-20261013/README.md",
+    "exactBlockersSource": "reports/studio-professional-masked-effects-20261013/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-mask-authoring-20261013/README.md",
+    "lastSessionEvidence": "reports/studio-professional-masked-effects-20261013/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendMaskCompilerCasesPassed": 12,
-      "workerCasesPassed": 18,
+      "frontendHelperCasesPassed": 21,
+      "nativePreviewComponentCasesPassed": 1,
+      "nativePreviewComponentCasesSkipped": 123,
+      "workerCasesPassed": 20,
       "strictLocalAppBuild": "PASS",
       "fullStudioSuite": false
     },
-    "nextSlice": "S02 historical strict mask edge and combined mask/effect-stack conformance, whole mapped picture/sound and broad/cold media; then S03 global composition/nesting and S04 controls.",
+    "nextSlice": "S02 source/graphic raster separation and retained ellipse/landscape edge failures, complete moving/cold/broad picture and sound; then S03 global composition/nesting and S04 controls.",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -8587,7 +8595,7 @@
         "readinessPromotion": false
       }
     ],
-    "lastSessionRealCapabilityScope": "Native geometric polygon path and zero-radius rectangle controls: invalid draft rejected, Escape, path change/undo/redo/save/cold reopen, one owned CPU export/download/full decode and complete editable Studio playback. Eight paired whole-box alpha/boundary checks pass. Historical landscape edge failures, broad masks/effect stacks/full picture/sound and readiness remain unqualified.",
+    "lastSessionRealCapabilityScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified.",
     "history": [
       {
         "at": "2026-10-12T23:29:14.460Z",
@@ -11567,6 +11575,39 @@
     "paidGpuRuntimeSeconds": 0,
     "paidGpuCost": 0,
     "readinessPromotion": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ]
+  },
+  "professionalMaskedEffects20261013": {
+    "evidence": "reports/studio-professional-masked-effects-20261013/README.md",
+    "checkpoint": "reports/studio-professional-masked-effects-20261013/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified.",
+    "nativeProjects": 2,
+    "nativeCpuExports": 2,
+    "nativeHistorySaveColdReopen": true,
+    "completeStudioRecordings": 2,
+    "canonicalImageOpacityPrecedenceRepaired": true,
+    "sameEllipseExportReusedAfterPreviewFix": true,
+    "currentRasterPairsPassed": 7,
+    "currentRasterPairsFailed": 1,
+    "invertedPolygonRasterPassed": true,
+    "ellipseRasterPassed": false,
+    "priorScaledEllipseFailureRetained": true,
+    "focusedFrontendAutomationMaskCompilerPassed": 21,
+    "focusedNativePreviewComponentPassed": 1,
+    "focusedNativePreviewComponentSkipped": 123,
+    "workerLayerTextCasesPassed": 20,
+    "strictAppBuild": "PASS",
+    "fullStudioSuiteQualified": false,
+    "gpuJobs": 0,
+    "paidGpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "readinessPromoted": false,
+    "wholePreviewFinalParityQualified": false,
     "nextTaskIds": [
       "S02",
       "S03",

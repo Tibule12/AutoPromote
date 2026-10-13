@@ -1,6 +1,6 @@
 # Motion / Transform Keyframes
 
-Development documentation • product 1.2.0 • knowledge 1.0.7 • 2026-10-13T19:32:31.748101Z
+Development documentation • product 1.2.0 • knowledge 1.0.8 • 2026-10-13T20:03:00.043879Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -67,13 +67,14 @@ Adds property keys to a selected ordinary layer, moves them in the timeline and 
 3. Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.
 4. Owning-track locks prevent changes. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Evaluates ordinary canonical property keys on the existing preview clock. Keyed image layers take precedence over legacy CSS entrance animations and transitions, so opacity, scale and rotation remain visible. Broad raster, media and continuous playback agreement remains unqualified.
 
 **Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Two bounded masked image-effect edits preserve eight position/scale/rotation/opacity keys through native save/reopen/export. Inverted-polygon sampled picture passes; one ellipse raster pair still exceeds the strict colour bound. This does not qualify every mask/easing/media or legacy entrance clock.
 
 **Common errors**
 

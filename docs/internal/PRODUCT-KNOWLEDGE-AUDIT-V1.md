@@ -1,5 +1,7 @@
 # Product documentation audit V1 — 12 October 2026
 
+13 October knowledge1.0.8 records canonical image-key precedence over legacy CSS entrance fill/transitions. [Two actual masked-effects films/timelines,7 of8 current raster pairs and exact failures](../../reports/studio-professional-masked-effects-20261013/README.md). Feature counts/readiness remain unchanged; whole picture/sound and failed ellipse/landscape pairs remain open.
+
 13 October knowledge1.0.7 records two ordinary geometric-mask controls: editable percentage-polygon path and rectangle radius, including invalid draft/export rejection and explicit zero. [Native film/timeline, eight bounded pairs and remaining limits](../../reports/studio-professional-mask-authoring-20261013/README.md). Feature readiness remains unchanged; subject-mask feathering and broad mask/effect parity remain unqualified.
 
 13 October source review1.0.3 records the actual shared mask/crop/title and delivery-resolution fixes in the existing PARTIAL compositing entry. No catalogue counts or readiness change. [Native films, timeline recordings, boundaries and remaining work](../../reports/model-capability-runtime-v1-20261009/STUDIO-S02-MASKS-TITLES-20261013.md).

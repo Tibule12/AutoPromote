@@ -1,6 +1,6 @@
 # Audio editing and sound design
 
-Development documentation • product 1.2.0 • knowledge 1.0.7 • 2026-10-13T19:32:31.748101Z
+Development documentation • product 1.2.0 • knowledge 1.0.8 • 2026-10-13T20:03:00.043879Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 

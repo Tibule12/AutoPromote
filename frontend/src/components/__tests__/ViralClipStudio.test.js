@@ -254,6 +254,24 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(layer.style.filter).toContain('drop-shadow(0 0 0px');
   });
 
+  test('canonical image opacity and transform keys cannot be replaced by legacy entrance animation', async () => {
+    const source = { id: 'range', start: 2, end: 8, duration: 6, sourceDuration: 12 };
+    const artwork = { id: 'artwork', type: 'image', src: 'https://example.com/artwork.png',
+      startTime: 0, duration: 6, x: 50, y: 50, width: 30, height: 30,
+      animation: { enter: 'zoom', enterDuration: .35 } };
+    mountNativePreview({ initialSavedProject: { id: 'keyed-artwork', name: 'Keyed artwork', snapshot: {
+      orderedClips: [source], selectedClipId: 'range',
+      timeline: [{ ...source, sourceClipId: 'range', startRequest: 2, endRequest: 8, url: 'https://example.com/source.mp4' }],
+      overlays: [artwork], addHook: false,
+      motionKeyframes: [{ id: 'alpha', targetId: 'artwork', property: 'opacity', time: 0, value: .4 },
+        { id: 'rotation', targetId: 'artwork', property: 'rotation', time: 0, value: 15 }],
+    } } });
+    const layer = (await screen.findByAltText('Overlay')).closest('.draggable-overlay');
+    expect(layer).not.toHaveClass('broll-anim-zoom');
+    expect(layer).toHaveStyle({ opacity: '0.4', animation: 'none', transition: 'none' });
+    expect(layer.style.getPropertyValue('--title-rotation')).toBe('15deg');
+  });
+
   test("metadata reload preserves the selected trim and paused editing frame", () => {
     const { video } = mountNativePreview();
     fireEvent.loadedMetadata(video);

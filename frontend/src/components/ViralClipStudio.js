@@ -19329,11 +19329,16 @@ const ViralClipStudio = ({
                           );
                           const frameRadius = getOverlayFrameRadius(overlay);
                           const anim = overlay.animation || {};
-                          const animClass = anim.enter ? `broll-anim-${anim.enter}` : "";
+                          const overlayKeys = motionKeyframes.filter(
+                            keyframe => String(keyframe.targetId) === String(overlay.id)
+                          );
+                          // Canonical image keys own transform and opacity.
+                          // CSS entrance fill otherwise freezes opacity at1 or
+                          // replaces the authored scale/rotation after the entry.
+                          const keyedImage = overlay.type === "image" && overlayKeys.length > 0;
+                          const animClass = anim.enter && !keyedImage ? `broll-anim-${anim.enter}` : "";
                           const overlayMotion = buildMotionAutomationStyle(
-                            motionKeyframes.filter(
-                              keyframe => String(keyframe.targetId) === String(overlay.id)
-                            ),
+                            overlayKeys,
                             previewTimelineTime,
                             overlay
                           );
@@ -19397,6 +19402,8 @@ const ViralClipStudio = ({
                                 // priority. Export uses this same saved stack.
                                 zIndex: 100 + index,
                                 opacity: overlayMotion.opacity * titlePose.opacity,
+                                "--layer-opacity": overlay.type === "image"
+                                  ? overlayMotion.opacity * titlePose.opacity : undefined,
                                 mixBlendMode: overlay.blendMode || "normal",
                                 filter: isMediaOverlay ? studioMediaEffectFilter(overlay) : undefined,
                                 clipPath: getOverlayMaskClipPath({
@@ -19405,7 +19412,8 @@ const ViralClipStudio = ({
                                   cropY: overlayMotion.cropY,
                                 }),
                                 borderRadius: isFullscreen ? "0" : frameRadius,
-                                transition: !isStyledTitle && anim.enterDuration
+                                animation: keyedImage ? "none" : undefined,
+                                transition: keyedImage ? "none" : !isStyledTitle && anim.enterDuration
                                   ? `opacity ${anim.enterDuration}s ease, transform ${anim.enterDuration}s ease`
                                   : undefined,
                               }}
