@@ -333,6 +333,7 @@ const IdeaVideoPanel = ({ onPublish }) => {
     const file = new File([video.blob], fileName, { type: mimeType });
     file.suggestedTitle = video.title || idea || "";
     file.suggestedDescription = video.description || buildShotListText(idea, scripts);
+    file.workflowAction = "idea_video";
 
     onPublish(file);
   };

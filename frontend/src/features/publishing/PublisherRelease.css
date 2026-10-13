@@ -4,8 +4,7 @@
 .publisher-release [hidden] { display: none !important; }
 .release-page-heading h1 { margin: 0 0 6px; font-size: 29px; }
 .release-page-heading p, .release-identity p { margin: 0; color: #aebad0; font-size: 14px; }
-.release-workflow-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--release-border); }
-.release-product-flow { color: #98a6bf; font-size: 12px; margin: 0; }
+.release-workflow-heading { display: flex; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--release-border); }
 .release-stepper { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 18px; padding: 0; margin: 0; }
 .release-stepper button { border: 0; background: transparent; color: #9faac2; display: flex; align-items: center; gap: 7px; font-size: 12px; cursor: pointer; padding: 3px 0; }
 .release-stepper button > span { display: grid; place-items: center; border: 1px solid #536078; border-radius: 50%; width: 27px; height: 27px; }
@@ -15,6 +14,7 @@
 .release-identity { padding: 18px 0; }
 .release-identity h2 { margin: 0 0 5px; font-size: 24px; letter-spacing: -.4px; }
 .release-workspace { display: grid; grid-template-columns: minmax(230px, .9fr) minmax(360px, 1.25fr) minmax(235px, .9fr); gap: 14px; align-items: start; }
+.release-workspace.release-stage-0, .release-workspace.release-stage-1 { grid-template-columns: minmax(210px, .65fr) minmax(0, 1.6fr); }
 .release-sidebar, .release-main, .release-inspector { display: grid; gap: 14px; min-width: 0; }
 /* App.css styles all main elements. The inner workspace owns its own spacing. */
 .publisher-release .release-main { padding: 0; margin: 0; max-width: none; grid-template-columns: minmax(0, 1fr); }
@@ -59,6 +59,7 @@
 .release-asset-grid strong, .release-asset-grid small { display: block; margin-top: 5px; font-size: 12px; }
 .release-asset-grid > p { grid-column: 1/-1; color: #a7b4cd; font-size: 13px; line-height: 1.5; }
 .release-master-copy { margin-top: 18px; padding-top: 4px; border-top: 1px solid #2d3b50; }
+.release-customize > .release-master-copy { margin: 0 0 10px; padding: 16px; border: 1px solid var(--release-border); }
 .release-master-copy p { color: #a7b4cd; font-size: 12px; }
 .release-platform-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
 .release-platform-grid label { display: grid; grid-template-columns: 18px 28px 1fr; gap: 7px; align-items: center; background: #152136; border: 1px solid #39465d; border-radius: 9px; padding: 14px 10px; margin: 0; cursor: pointer; }
@@ -135,7 +136,7 @@
 .release-primary { background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: #fff; border: 1px solid #9e70ff; border-radius: 8px; padding: 11px 17px; font-weight: 700; cursor: pointer; white-space: nowrap; }
 .release-primary:disabled { background: #24334b; border-color: #44546d; color: #9aa8c1; cursor: not-allowed; }
 @media (min-width: 1450px) { .release-workspace { grid-template-columns: minmax(275px, 1fr) minmax(390px, 1.3fr) minmax(285px, 1fr); } }
-@media (max-width: 1050px) { .release-workspace { grid-template-columns: minmax(210px, .7fr) minmax(320px, 1.3fr); } .release-inspector { grid-column: 2; } .release-workflow-heading { flex-direction: column; align-items: start; } }
+@media (max-width: 1050px) { .release-workspace { grid-template-columns: minmax(210px, .7fr) minmax(320px, 1.3fr); } .release-inspector { grid-column: 2; } }
 /* Adapt to the dashboard's available width, including its desktop navigation. */
 @container (max-width: 900px) { .release-workspace { grid-template-columns: minmax(190px, .7fr) minmax(0, 1.3fr); } .release-inspector { grid-column: 2; } .release-workflow-heading { flex-direction: column; align-items: start; } }
 @container (max-width: 650px) { .release-workspace { display: flex; flex-direction: column; } .release-sidebar, .release-main, .release-inspector { width: 100%; } .release-inspector { order: 3; } }

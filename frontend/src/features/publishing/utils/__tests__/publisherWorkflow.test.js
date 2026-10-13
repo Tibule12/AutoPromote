@@ -1,6 +1,6 @@
 import {
   assetFromContent, connectionState, masterCopyFor, platformIssues, preparePlatformOptions,
-  resolveDelivery, sourceLabels, destinationCopy,
+  resolveDelivery, sourceLabels, destinationCopy, canonicalAssetSource, uniquePublisherAssets,
 } from "../publisherWorkflow";
 
 const connected = { connection: { connected: true }, visited: true };
@@ -13,6 +13,29 @@ test("owned assets reuse their stored source URL and preserve real provenance", 
   expect(sourceLabels(asset)).toEqual({ origin: "Created in Studio", template: "Template: Coffee launch" });
   expect(sourceLabels({ name: "Made in Studio.mp4" })).toEqual({ origin: "", template: "" });
   expect(assetFromContent({ id: "missing", url: "javascript:bad" })).toBeNull();
+});
+
+test("source categories use workflow provenance and never infer from titles", () => {
+  const studio = assetFromContent({ id: "studio-1", url: "https://example.test/studio.mp4", title: "Coffee", sourceContext: "clip_studio" });
+  const generated = assetFromContent({ id: "generated-1", url: "https://example.test/generated.mp4", title: "Cycling", meta: { source: "smart_promo" } });
+  const project = assetFromContent({ id: "project-1", url: "https://example.test/project.mp4", title: "Made in AutoPromote: Headphones — the final edit" });
+  expect([studio, generated, project].map(canonicalAssetSource)).toEqual(["studio", "generated", "assets"]);
+  expect(sourceLabels(project).origin).toBe("");
+});
+
+test("the picker collapses media references while retaining distinct edits", () => {
+  const output = "https://firebasestorage.googleapis.com/v0/b/project/o/studio%2Frender.mp4";
+  const copy = assetFromContent({ id: "scheduled-copy", url: `${output}?alt=media&token=new`, meta: { sourceContentId: "studio-original" } });
+  const original = assetFromContent({ id: "studio-original", url: `${output}?alt=media&token=old`, source: "studio" });
+  const otherCut = assetFromContent({ id: "other-cut", url: `${output}?alt=media&token=old`, virtualClip: { start: 10, end: 20 } });
+  expect(uniquePublisherAssets([copy, original, otherCut]).map(asset => asset.sourceContentId)).toEqual(["studio-original", "other-cut"]);
+});
+
+test("identical bytes in distinct stored objects show once while titles alone do not dedupe", () => {
+  const first = assetFromContent({ id: "a", title: "Coffee", url: "https://example.test/a.mp4", mediaHash: "md5:same" });
+  const copiedBytes = assetFromContent({ id: "b", title: "Coffee", url: "https://example.test/b.mp4", mediaHash: "md5:same" });
+  const differentRender = assetFromContent({ id: "c", title: "Coffee", url: "https://example.test/c.mp4", mediaHash: "md5:other" });
+  expect(uniquePublisherAssets([first, copiedBytes, differentRender]).map(asset => asset.sourceContentId)).toEqual(["a", "c"]);
 });
 
 test("connection status must come from a real loaded status snapshot", () => {

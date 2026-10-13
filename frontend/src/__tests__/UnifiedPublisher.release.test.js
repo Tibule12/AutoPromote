@@ -23,6 +23,7 @@ beforeEach(() => {
   URL.revokeObjectURL = jest.fn();
   onUpload = jest.fn().mockResolvedValue({ ok: true });
   global.fetch = jest.fn(async url => {
+    if (String(url).startsWith(API_ENDPOINTS.MY_CONTENT)) return response({ content: [asset] });
     if (url === API_ENDPOINTS.PLATFORM_STATUS) return response({ raw: Object.fromEntries(platforms.map(platform => [platform, { connected: true }])), summary: { tiktok: { connected: true, publishReady: true } } });
     if (url === API_ENDPOINTS.FACEBOOK_STATUS) return response({ pages: [{ id: "page-1", name: "Coffee", instagram_business_account: { id: "ig-1", username: "coffee" } }] });
     if (url === API_ENDPOINTS.TIKTOK_CREATOR_INFO) return response({ creator: { privacy_level_options: ["PUBLIC_TO_EVERYONE", "SELF_ONLY"], creator_username: "coffee" } });
@@ -33,11 +34,9 @@ beforeEach(() => {
 
 async function startReddit() {
   render(<UnifiedPublisher contentList={[asset]} defaultTimezone="Africa/Johannesburg" onUpload={onUpload} />);
-  fireEvent.click(screen.getByRole("button", { name: /Coffee — Final Edit/ }));
+  fireEvent.click(await screen.findByRole("button", { name: /Coffee — Final Edit/ }));
   expect(screen.getAllByText("Template: Coffee launch").length).toBeGreaterThan(0);
   fireEvent.click(screen.getByRole("button", { name: /Choose destinations/ }));
-  fireEvent.click(screen.getByRole("checkbox", { name: /TikTok/ }));
-  fireEvent.click(screen.getByRole("checkbox", { name: /YouTube/ }));
   fireEvent.click(screen.getByRole("checkbox", { name: /Reddit/ }));
   fireEvent.click(screen.getByRole("button", { name: /Customize destinations/ }));
   await waitFor(() => expect(screen.getByRole("region", { name: "Reddit form" })).toBeInTheDocument());
@@ -102,6 +101,8 @@ test("owned image URLs render in real TikTok and Instagram forms without creatin
     return "blob:local-image";
   });
   render(<UnifiedPublisher initialFile={{ url: "https://example.test/owned.png", type: "image/png", name: "Owned image" }} onUpload={onUpload} />);
+  fireEvent.click(screen.getByRole("checkbox", { name: /TikTok/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Customize destinations/ }));
   await waitFor(() => expect(screen.getByRole("region", { name: "TikTok form" })).toBeInTheDocument());
   fireEvent.click(screen.getByRole("button", { name: "Change destinations" }));
   fireEvent.click(screen.getByRole("checkbox", { name: /Instagram/ }));
@@ -115,8 +116,7 @@ test("owned image URLs render in real TikTok and Instagram forms without creatin
 test("late account timezone defaults load without replacing an explicit delivery timezone", async () => {
   const initialFile = { url: asset.url, type: "video/mp4", name: "Owned video", suggestedTitle: "Account defaults" };
   const view = render(<UnifiedPublisher initialFile={initialFile} defaultTimezone="UTC" onUpload={onUpload} />);
-  fireEvent.click(screen.getByRole("button", { name: "Change destinations" }));
-  fireEvent.click(screen.getByRole("checkbox", { name: /TikTok/ }));
+  fireEvent.click(screen.getByRole("checkbox", { name: /YouTube/ }));
   fireEvent.click(screen.getByRole("button", { name: /Customize destinations/ }));
   await waitFor(() => expect(screen.getByRole("button", { name: /Continue to Delivery/ })).toBeEnabled());
   view.rerender(<UnifiedPublisher initialFile={initialFile} defaultTimezone="Africa/Johannesburg" onUpload={onUpload} />);
@@ -128,4 +128,25 @@ test("late account timezone defaults load without replacing an explicit delivery
   fireEvent.change(timezone, { target: { value: "America/New_York" } });
   view.rerender(<UnifiedPublisher initialFile={initialFile} defaultTimezone="Europe/London" onUpload={onUpload} />);
   expect(timezone).toHaveValue("America/New_York");
+});
+
+test("fresh releases have no selected destinations and show the five-step workflow", async () => {
+  render(<UnifiedPublisher contentList={[asset]} onUpload={onUpload} embedded />);
+  expect(screen.getByRole("list", { name: "Publishing workflow" })).toHaveTextContent("1Content2Destinations3Customize4Delivery5Review");
+  expect(screen.getByText("Choose a video or image to start.")).toBeInTheDocument();
+  expect(screen.queryByRole("region", { name: "Selected destinations" })).not.toBeInTheDocument();
+  expect(screen.queryByText(/2 selected/)).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /Choose destinations/ })).toBeDisabled();
+  fireEvent.click(await screen.findByRole("button", { name: /Coffee — Final Edit/ }));
+  expect(screen.getByRole("region", { name: "Release content" })).toHaveTextContent("Coffee — Final Edit");
+  fireEvent.click(screen.getByRole("button", { name: /Choose destinations/ }));
+  expect(screen.getByRole("checkbox", { name: /TikTok/ })).not.toBeChecked();
+  expect(screen.getByRole("checkbox", { name: /YouTube/ })).not.toBeChecked();
+});
+
+test("only explicit destination handoff preselects providers", () => {
+  render(<UnifiedPublisher initialFile={{ url: asset.url, name: "Handed-off video", type: "video/mp4" }} initialDestinations={["youtube", "reddit", "youtube", "invalid"]} onUpload={onUpload} />);
+  expect(screen.getByRole("region", { name: "Selected destinations" })).toHaveTextContent("2 selected");
+  expect(screen.getByRole("tab", { name: "YouTube" })).toHaveAttribute("aria-selected", "true");
+  expect(screen.getByRole("tab", { name: "Reddit" })).toBeInTheDocument();
 });
