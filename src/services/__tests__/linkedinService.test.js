@@ -25,10 +25,14 @@ jest.mock("../../firebaseAdmin", () => ({
         return {
           get: async () => ({
             exists: true,
-            data: () => ({
-              tokens: { access_token: "li_token", expires_in: 999999 },
-              updatedAt: { _seconds: Math.floor(Date.now() / 1000) },
-            }),
+            data: () =>
+              global.__linkedin_connection || {
+                tokens: { access_token: "li_token", expires_in: 999999 },
+                updatedAt: { _seconds: Math.floor(Date.now() / 1000) },
+              },
+          }),
+          set: jest.fn(async data => {
+            global.__linkedin_connection_update = data;
           }),
         };
       }
@@ -49,7 +53,67 @@ jest.mock("../../firebaseAdmin", () => ({
   admin: { firestore: { FieldValue: { serverTimestamp: () => ({}) } } },
 }));
 
-const { postToLinkedIn } = require("../linkedinService");
+const { postToLinkedIn, getValidAccessToken } = require("../linkedinService");
+const { safeFetch } = require("../../utils/ssrfGuard");
+
+afterEach(() => {
+  delete global.__linkedin_connection;
+  delete global.__linkedin_connection_update;
+});
+
+describe("LinkedIn expired credentials", () => {
+  test("stops an expired ISO timestamp credential and asks for reconnect", async () => {
+    global.__linkedin_connection = {
+      tokens: { access_token: "expired", expires_in: 3600 },
+      updatedAt: "2026-01-01T00:00:00Z",
+    };
+    const calls = safeFetch.mock.calls.length;
+    await expect(getValidAccessToken("user1")).rejects.toMatchObject({
+      errorClass: "auth",
+      status: 401,
+    });
+    expect(safeFetch.mock.calls).toHaveLength(calls);
+    expect(global.__linkedin_connection_update).toMatchObject({
+      connected: false,
+      reauthRequired: true,
+    });
+  });
+  test("recognizes a provider-revoked legacy token without retrying publication", async () => {
+    safeFetch.mockResolvedValueOnce({ ok: false, status: 401 });
+    await expect(postToLinkedIn({ uid: "user1", text: "Hello" })).rejects.toMatchObject({
+      errorClass: "auth",
+    });
+  });
+  test("uses a supplied refresh token and persists the replacement", async () => {
+    const previousId = process.env.LINKEDIN_CLIENT_ID,
+      previousSecret = process.env.LINKEDIN_CLIENT_SECRET;
+    process.env.LINKEDIN_CLIENT_ID = "test-client";
+    process.env.LINKEDIN_CLIENT_SECRET = "test-secret";
+    global.__linkedin_connection = {
+      tokens: { access_token: "expired", refresh_token: "refresh", expires_in: 3600 },
+      updatedAt: "2026-01-01T00:00:00Z",
+    };
+    safeFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ access_token: "replacement", expires_in: 3600 }),
+    });
+    try {
+      await expect(getValidAccessToken("user1")).resolves.toBe("replacement");
+      expect(global.__linkedin_connection_update).toMatchObject({
+        connected: true,
+        reauthRequired: false,
+      });
+      const [url, , opts] = safeFetch.mock.calls.at(-1);
+      expect(url).toBe("https://www.linkedin.com/oauth/v2/accessToken");
+      expect(opts.fetchOptions.body.get("grant_type")).toBe("refresh_token");
+    } finally {
+      if (previousId === undefined) delete process.env.LINKEDIN_CLIENT_ID;
+      else process.env.LINKEDIN_CLIENT_ID = previousId;
+      if (previousSecret === undefined) delete process.env.LINKEDIN_CLIENT_SECRET;
+      else process.env.LINKEDIN_CLIENT_SECRET = previousSecret;
+    }
+  });
+});
 
 describe("LinkedIn posting with hashtags", () => {
   test("appends hashtagString to shareCommentary.text", async () => {

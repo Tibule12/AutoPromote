@@ -11,13 +11,20 @@ try {
   fetchFn = global.fetch;
 }
 
-const REDDIT_VIDEO_FALLBACK_POSTER_BASE64 =
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+lm6kAAAAASUVORK5CYII=";
+const { createRedditVideoPoster } = require("./redditVideoPoster");
 
 /**
  * Get user's Reddit connection tokens
  */
 const { tokensFromDoc } = require("./connectionTokenUtils");
+const { accessTokenExpiresAt } = require("./connectionTokenExpiry");
+const { publishingError } = require("./publishingTaskErrors");
+const {
+  redditPostIdentity,
+  waitForRedditPublication,
+  findRedditPublication,
+  verifyRedditVideoPublication,
+} = require("./redditPublication");
 
 async function getUserRedditConnection(uid) {
   const snap = await db.collection("users").doc(uid).collection("connections").doc("reddit").get();
@@ -37,10 +44,10 @@ async function getValidAccessToken(uid) {
 
   const tokens = connection.tokens;
   const now = Date.now();
+  const expiresAt = accessTokenExpiresAt(connection, tokens);
 
   // Check if token is still valid
   if (tokens.expires_in && tokens.access_token) {
-    const expiresAt = (connection.updatedAt?._seconds || 0) * 1000 + tokens.expires_in * 1000;
     if (now < expiresAt - 300000) {
       // 5 min buffer
       return tokens.access_token;
@@ -54,9 +61,17 @@ async function getValidAccessToken(uid) {
       return refreshed.access_token;
     } catch (e) {
       console.warn("[Reddit] Token refresh failed:", e.message);
+      throw e;
     }
   }
 
+  if (Number.isFinite(expiresAt) && now >= expiresAt) {
+    throw publishingError(
+      "Reddit access token expired. Reconnect Reddit before retrying.",
+      "auth",
+      401
+    );
+  }
   return tokens.access_token;
 }
 
@@ -95,10 +110,23 @@ async function refreshToken(uid, refreshToken) {
   });
 
   if (!response.ok) {
-    throw new Error("Reddit token refresh failed");
+    throw publishingError(
+      "Reddit token refresh failed. Reconnect Reddit if the credential expired.",
+      [400, 401, 403].includes(response.status)
+        ? "auth"
+        : response.status === 429
+          ? "rate_limit"
+          : "transient",
+      response.status
+    );
   }
 
   const tokens = await response.json();
+  if (!tokens.access_token)
+    throw publishingError(
+      "Reddit did not return a usable refreshed access token. Reconnect Reddit.",
+      "auth"
+    );
 
   // Store refreshed tokens
   const ref = db.collection("users").doc(uid).collection("connections").doc("reddit");
@@ -139,13 +167,16 @@ async function refreshToken(uid, refreshToken) {
  * Upload media to Reddit's S3 bucket
  * Returns: { s3Url, asset_id } (or just s3Url for now)
  */
-async function uploadRedditMedia(uid, contentUrl, mimeType) {
-  if (!contentUrl) return null;
+async function uploadRedditMedia(uid, contentUrl, mimeType, suppliedMedia = {}) {
+  if (!contentUrl && !suppliedMedia.buffer) return null;
   const accessToken = await getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid Reddit access token for upload");
 
   // 1. Fetch content stream/buffer
-  const filename = contentUrl.split("/").pop().split("?")[0] || "media_file";
+  const filename =
+    suppliedMedia.filename ||
+    decodeURIComponent(contentUrl.split("/").pop().split("?")[0]).split("/").pop() ||
+    "media_file";
   // Determine mimeType if not provided? For now assume caller provides or we default
   // Ideally we inspect file, but simple default is okay:
   if (!mimeType) {
@@ -154,14 +185,14 @@ async function uploadRedditMedia(uid, contentUrl, mimeType) {
     else mimeType = "video/mp4";
   }
 
-  const contentRes = await safeFetch(contentUrl, fetchFn);
-  if (!contentRes.ok) throw new Error(`Failed to fetch media from ${contentUrl}`);
-
-  let buffer;
-  if (typeof contentRes.buffer === "function") {
-    buffer = await contentRes.buffer();
-  } else {
-    buffer = Buffer.from(await contentRes.arrayBuffer());
+  let buffer = suppliedMedia.buffer;
+  if (!buffer) {
+    const contentRes = await safeFetch(contentUrl, fetchFn);
+    if (!contentRes.ok) throw new Error("Failed to fetch Reddit upload source");
+    buffer =
+      typeof contentRes.buffer === "function"
+        ? await contentRes.buffer()
+        : Buffer.from(await contentRes.arrayBuffer());
   }
 
   // 2. Get Upload Lease
@@ -185,7 +216,15 @@ async function uploadRedditMedia(uid, contentUrl, mimeType) {
 
   if (!leaseRes.ok) {
     const err = await leaseRes.text();
-    throw new Error(`Reddit Lease failed: ${err}`);
+    throw publishingError(
+      `Reddit Lease failed: ${err}`,
+      [401, 403].includes(leaseRes.status)
+        ? "auth"
+        : leaseRes.status === 429
+          ? "rate_limit"
+          : "transient",
+      leaseRes.status
+    );
   }
 
   const leaseData = await leaseRes.json();
@@ -225,6 +264,7 @@ async function uploadRedditMedia(uid, contentUrl, mimeType) {
   return {
     url: finalUrl,
     assetId: leaseData.asset ? leaseData.asset.asset_id : null,
+    sourceBuffer: buffer,
   };
 }
 
@@ -248,40 +288,6 @@ async function getContentPosterUrl(contentId) {
   }
 }
 
-async function getFallbackPosterUrl() {
-  try {
-    const storage =
-      require("../firebaseAdmin").storage ||
-      (admin.storage ? admin.storage() : null);
-    const bucket =
-      storage && typeof storage.bucket === "function"
-        ? storage.bucket()
-        : admin.storage
-          ? admin.storage().bucket()
-          : null;
-    if (!bucket) return null;
-
-    const file = bucket.file("system/reddit-video-placeholder.png");
-    const [exists] = await file.exists();
-    if (!exists) {
-      await file.save(Buffer.from(REDDIT_VIDEO_FALLBACK_POSTER_BASE64, "base64"), {
-        metadata: {
-          contentType: "image/png",
-          cacheControl: "public, max-age=31536000",
-        },
-      });
-    }
-    const [signed] = await file.getSignedUrl({
-      action: "read",
-      expires: "03-01-2500",
-    });
-    return signed;
-  } catch (e) {
-    console.warn("[Reddit] Failed to provision fallback poster:", e.message);
-    return null;
-  }
-}
-
 /**
  * Submit a post to Reddit
  */
@@ -297,6 +303,8 @@ async function postToReddit({
   hashtagString = "",
   videoUrl,
   thumbnailUrl,
+  submissionReceipt,
+  onSubmissionAccepted,
 }) {
   if (!uid) throw new Error("uid required");
   if (!subreddit) throw new Error("subreddit required");
@@ -309,9 +317,78 @@ async function postToReddit({
   const accessToken = await getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid Reddit access token");
 
+  const pendingResult = receipt => ({
+    success: false,
+    pending: true,
+    platform: "reddit",
+    subreddit,
+    errorClass: "publication_pending",
+    error:
+      "Reddit accepted the submission; publication is still being verified. The video will not be submitted again.",
+    submissionReceipt: receipt,
+  });
+  const confirm = async receipt => {
+    let identity = receipt.postId
+      ? { postId: receipt.postId, url: receipt.url }
+      : (await waitForRedditPublication(receipt.websocketUrl)) ||
+        (await findRedditPublication({ receipt, accessToken, fetchFn }));
+    if (!identity) return pendingResult(receipt);
+    const identifiedReceipt = { ...receipt, ...identity };
+    if (onSubmissionAccepted) await onSubmissionAccepted(identifiedReceipt);
+    if (kind === "video") {
+      const video = await verifyRedditVideoPublication({ identity, accessToken, fetchFn });
+      if (!video) return pendingResult(identifiedReceipt);
+      identity = { ...identity, ...video };
+    }
+    return storeConfirmedPost(identity, {
+      json: { data: { id: identity.postId, url: identity.url } },
+    });
+  };
+  const storeConfirmedPost = async (identity, raw) => {
+    if (contentId) {
+      try {
+        await db
+          .collection("content")
+          .doc(contentId)
+          .set(
+            {
+              reddit: {
+                postId: identity.postId,
+                subreddit,
+                title,
+                kind,
+                url: identity.url,
+                postedAt: new Date().toISOString(),
+                lastUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+              },
+            },
+            { merge: true }
+          );
+      } catch (e) {
+        console.warn("[Reddit] Failed to store confirmed post:", e.message);
+      }
+    }
+    if (videoUrl) cleanupSourceFile(videoUrl).catch(() => {});
+    return { success: true, platform: "reddit", ...identity, subreddit, raw };
+  };
+  if (submissionReceipt) {
+    if (
+      submissionReceipt.subreddit !== subreddit ||
+      submissionReceipt.title !== title.substring(0, 300) ||
+      submissionReceipt.kind !== kind
+    ) {
+      throw publishingError(
+        "Reddit submission receipt does not match this post. Review the existing submission before retrying.",
+        "publication_unconfirmed"
+      );
+    }
+    return confirm(submissionReceipt);
+  }
+
   // Handle Video Upload (Native)
   let finalVideoUrl = null;
   let finalPosterUrl = null;
+  let sourceBuffer;
 
   if (kind === "video") {
     // 1. Upload Video
@@ -322,7 +399,9 @@ async function postToReddit({
       // We do NOT cleanup here. We cleanup after successful *submission*.
       const vResult = await uploadRedditMedia(uid, vSource, "video/mp4");
       finalVideoUrl = vResult.url;
+      sourceBuffer = vResult.sourceBuffer;
     } catch (e) {
+      if (e.errorClass) throw e;
       throw new Error(`Failed to upload video to Reddit: ${e.message}`);
     }
 
@@ -331,17 +410,22 @@ async function postToReddit({
     if (!posterSource) {
       posterSource = await getContentPosterUrl(contentId);
     }
-    if (!posterSource) {
-      posterSource = await getFallbackPosterUrl();
-    }
 
     if (posterSource) {
       try {
         const tResult = await uploadRedditMedia(uid, posterSource, "image/png");
         finalPosterUrl = tResult.url;
       } catch (e) {
+        if (e.errorClass === "auth") throw e;
         console.warn("[Reddit] Failed to upload thumbnail:", e.message);
       }
+    } else {
+      const buffer = await createRedditVideoPoster(sourceBuffer);
+      const poster = await uploadRedditMedia(uid, null, "image/png", {
+        buffer,
+        filename: "video-poster.png",
+      });
+      finalPosterUrl = poster.url;
     }
 
     // Hard fail early with actionable message instead of opaque Reddit API error.
@@ -384,6 +468,7 @@ async function postToReddit({
   }
 
   // Submit post
+  const submittedAt = new Date().toISOString();
   const response = await safeFetch("https://oauth.reddit.com/api/submit", fetchFn, {
     fetchOptions: {
       method: "POST",
@@ -408,7 +493,17 @@ async function postToReddit({
 
   if (!response.ok) {
     const errorMsg = responseData.message || responseData.error || "Reddit posting failed";
-    throw new Error(`Reddit posting failed: ${errorMsg}`);
+    throw publishingError(
+      `Reddit posting failed: ${errorMsg}`,
+      [401, 403].includes(response.status)
+        ? "auth"
+        : response.status === 429
+          ? "rate_limit"
+          : response.status >= 500
+            ? "transient"
+            : "validation",
+      response.status
+    );
   }
 
   if (responseData.json && responseData.json.errors && responseData.json.errors.length > 0) {
@@ -423,56 +518,39 @@ async function postToReddit({
         hasPoster: !!finalPosterUrl,
       })
     );
-    throw new Error(`Reddit API Error: ${errs}`);
-  }
-
-  // Cleanup source file after successful Reddit submission
-  if (videoUrl) {
-    cleanupSourceFile(videoUrl).catch(() => {});
+    const codes = responseData.json.errors.map(e => e[0]);
+    throw publishingError(
+      `Reddit API Error: ${errs}`,
+      codes.includes("RATELIMIT") ? "rate_limit" : "validation"
+    );
   }
 
   // Reddit returns data in json.data.url format
   const postData = responseData.json?.data;
   const postId = postData?.id || postData?.name;
   const postUrl = postData?.url;
-  const permalink = postData?.permalink ? `https://www.reddit.com${postData.permalink}` : postUrl;
-
-  // Store post info in Firestore if contentId provided
-  if (contentId && postId) {
-    try {
-      const contentRef = db.collection("content").doc(contentId);
-      const existing = await contentRef.get();
-      const existingData = existing.exists ? existing.data().reddit || {} : {};
-
-      await contentRef.set(
-        {
-          reddit: {
-            ...existingData,
-            postId,
-            subreddit,
-            title,
-            kind,
-            url: permalink,
-            postedAt: new Date().toISOString(),
-            createdAt: existingData.createdAt || admin.firestore.FieldValue.serverTimestamp(),
-            lastUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-        },
-        { merge: true }
-      );
-    } catch (e) {
-      console.warn("[Reddit] Failed to store post info in Firestore:", e.message);
-    }
-  }
-
-  return {
-    success: true,
-    platform: "reddit",
-    postId,
+  const identity = redditPostIdentity(postData?.permalink || postUrl);
+  if (postId && identity && kind !== "video")
+    return storeConfirmedPost({ ...identity, postId }, responseData);
+  const receipt = {
+    submittedAt,
     subreddit,
-    url: permalink,
-    raw: responseData,
+    title: title.substring(0, 300),
+    kind,
+    websocketUrl: typeof postData?.websocket_url === "string" ? postData.websocket_url : null,
+    mediaUrl: finalVideoUrl || url || null,
+    text: kind === "self" ? text : null,
+    ...(identity ? { postId: identity.postId, url: identity.url } : {}),
   };
+  // Persist acknowledgement before any fallible provider verification.
+  if (onSubmissionAccepted) await onSubmissionAccepted(receipt);
+  if (!postData || !Array.isArray(responseData.json?.errors)) {
+    throw publishingError(
+      "Reddit returned no verifiable submission receipt. Check the profile before retrying to avoid a duplicate.",
+      "publication_unconfirmed"
+    );
+  }
+  return confirm(receipt);
 }
 
 /**
@@ -567,6 +645,25 @@ async function getSubredditInfo({ uid, subreddit }) {
   };
 }
 
+async function getOwnProfile({ uid }) {
+  if (!uid) throw new Error("uid required");
+  const accessToken = await getValidAccessToken(uid);
+  if (!accessToken) throw new Error("Reddit connection unavailable");
+  const response = await safeFetch("https://oauth.reddit.com/api/v1/me", fetchFn, {
+    fetchOptions: {
+      headers: { Authorization: `Bearer ${accessToken}`, "User-Agent": "AutoPromote/1.0" },
+      signal: AbortSignal.timeout(15000),
+    },
+    requireHttps: true,
+    allowHosts: ["oauth.reddit.com"],
+  });
+  if (!response.ok) throw new Error("Reddit profile unavailable; reconnect the account");
+  const data = await response.json();
+  if (typeof data.name !== "string" || !/^[a-z0-9_-]{3,20}$/i.test(data.name))
+    throw new Error("Reddit returned an invalid profile identity");
+  return { connected: true, name: data.name };
+}
+
 module.exports = {
   getUserRedditConnection,
   getValidAccessToken,
@@ -574,4 +671,5 @@ module.exports = {
   postToReddit,
   getPostInfo,
   getSubredditInfo,
+  getOwnProfile,
 };

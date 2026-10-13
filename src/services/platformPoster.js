@@ -369,7 +369,15 @@ const handlers = {
   telegram: postToTelegram,
 };
 
-async function dispatchPlatformPost({ platform, contentId, payload, reason, uid }) {
+async function dispatchPlatformPost({
+  platform,
+  contentId,
+  payload,
+  reason,
+  uid,
+  submissionReceipt,
+  onSubmissionAccepted,
+}) {
   console.log(
     `[PlatformPoster] 🚀 Dispatching post to ${platform} for content ${contentId}. Reason: ${reason}`
   );
@@ -492,12 +500,18 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
   }
 
   // Execute handler with logging wrapper
+  if (platform === "reddit") {
+    baseArgs.submissionReceipt = submissionReceipt;
+    baseArgs.onSubmissionAccepted = onSubmissionAccepted;
+  }
   try {
     const start = Date.now();
     const result = await handler(baseArgs);
     const took = Date.now() - start;
 
-    if (result && result.success) {
+    if (result?.pending) {
+      console.log(`[PlatformPoster] Submission accepted for ${platform}; verifying publication.`);
+    } else if (result && result.success) {
       console.log(
         `[PlatformPoster] ✅ Upload SUCCESS for ${platform} (took ${took}ms). PostID: ${
           result.postId || result.id || "N/A"

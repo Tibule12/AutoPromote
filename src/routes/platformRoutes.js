@@ -1546,6 +1546,10 @@ router.get("/linkedin/auth/callback", platformPublicLimiter, async (req, res) =>
             hasEncryption: true,
             meta,
             updatedAt: now,
+            tokensUpdatedAt: now,
+            expiresAt: tokenJson.expires_in ? new Date(Date.now() + Number(tokenJson.expires_in) * 1000).toISOString() : null,
+            reauthRequired: false,
+            lastConnectionError: null,
           },
           { merge: true }
         );

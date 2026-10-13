@@ -1,0 +1,32 @@
+{
+  "verifiedAt": "2026-10-13T16:44:10.374Z",
+  "linkedin": {
+    "taskId": "50DAvk2VwzV4dkvWdcRk",
+    "status": "completed",
+    "shareId": "urn:li:ugcPost:7515811932084494336",
+    "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7515811932084494336"
+  },
+  "reddit": {
+    "taskId": "82Y4wJsIxXZu5eXIj7VO",
+    "postId": "1x51o49",
+    "url": "https://www.reddit.com/user/Tibule12/comments/1x51o49/made_in_autopromote_coffee_the_timeline/",
+    "videoVerified": true,
+    "videoUrl": "https://v.redd.it/o7i8iysgj9vh1/CMAF_720.mp4?source=fallback",
+    "videoDuration": 20,
+    "hasAudio": true,
+    "publicationConfirmed": true,
+    "videoBytes": 1546220,
+    "previousBrokenPostId": "1x50ksn",
+    "realPoster": {
+      "width": 1280,
+      "height": 800
+    },
+    "verification": "provider attachment metadata and accessible MP4 bytes",
+    "dashManifestVerified": true,
+    "audioRenditionDownloaded": true,
+    "nativePlayerCount": 0,
+    "browserPageTitle": "Reddit - Prove your humanity"
+  },
+  "main": "3ed931f8",
+  "deployments": 0
+}
