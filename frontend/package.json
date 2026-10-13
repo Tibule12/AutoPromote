@@ -16,7 +16,7 @@
     "nth-check": "2.1.1",
     "postcss": "8.5.25",
     "fast-xml-parser": "$fast-xml-parser",
-    "fast-uri": "3.1.6",
+    "fast-uri": "3.1.7",
     "browserslist": "4.28.7",
     "baseline-browser-mapping": "2.11.0",
     "colord": "2.9.4",

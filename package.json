@@ -86,18 +86,18 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.3.0",
     "node-fetch": "^2.7.0",
-    "nodemailer": "^9.1.1",
+    "nodemailer": "^10.0.9",
     "pexels": "^1.4.0",
     "resend": "^4.0.0",
     "streamifier": "^0.1.1",
-    "undici": "^7.28.0",
+    "undici": "^7.29.1",
     "uuid": "^14.0.0",
     "ajv": "6.15.0"
   },
   "overrides": {
     "axios": "^1.18.1",
     "websocket-driver": "0.7.5",
-    "morgan": "1.12.0",
+    "morgan": "1.12.1",
     "hono": "4.13.5",
     "@hono/node-server": "^2.0.12",
     "protobufjs": "7.6.5",
@@ -114,23 +114,24 @@
     "@grpc/grpc-js": "1.14.4",
     "flatted": "3.4.2",
     "fast-xml-parser": "5.8.0",
-    "fast-uri": "3.1.6",
+    "fast-uri": "3.1.7",
     "browserslist": "4.28.7",
     "baseline-browser-mapping": "$baseline-browser-mapping",
     "csv-parse": "7.0.2",
     "webpack-dev-server": "5.2.6",
     "node-gyp": {
-      "undici": "6.28.0"
+      "undici": "6.28.1"
     },
     "node-forge": "1.4.0",
     "uuid": "^14.0.0",
     "qs": "6.16.0",
     "ws": "8.21.0",
     "tmp": "0.2.7",
-    "ip-address": "10.5.0",
+    "ip-address": "10.5.1",
+    "stream-json": "^3.5.0",
     "re2": {
       "node-gyp": {
-        "undici": "6.28.0"
+        "undici": "6.28.1"
       }
     },
     "yaml": "2.8.3",
