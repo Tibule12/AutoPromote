@@ -45,6 +45,7 @@ const SchedulesPanel = ({
   loading = false,
   loadError = "",
   defaultTimezone = "UTC",
+  currentTime = Date.now(),
   onCreate,
   onPause,
   onResume,
@@ -64,6 +65,8 @@ const SchedulesPanel = ({
   const [saving, setSaving] = useState(false);
   const [copyEditor, setCopyEditor] = useState(null);
   const [copySaving, setCopySaving] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [mediaFailed, setMediaFailed] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [createData, setCreateData] = useState({
     contentId: "",
@@ -72,10 +75,16 @@ const SchedulesPanel = ({
     platforms: [],
   });
 
-  const releases = useMemo(
+  const allReleases = useMemo(
     () => groupSchedules(schedulesList, contentList),
     [schedulesList, contentList]
   );
+  const upcoming = allReleases.filter(
+    release =>
+      new Date(release.time).getTime() >= currentTime &&
+      release.destinations.some(item => ["Ready", "Scheduled", "Paused"].includes(item.status))
+  );
+  const releases = showHistory ? allReleases : upcoming.length ? upcoming : allReleases.slice(-12);
   const selected = releases.find(release => release.id === selectedId) || releases[0];
   const subjects = useMemo(() => {
     const map = new Map();
@@ -117,6 +126,7 @@ const SchedulesPanel = ({
   const selectRelease = release => {
     setSelectedId(release.id);
     setExpandedPlatform("");
+    setMediaFailed(false);
   };
 
   const editable = item => ["Ready", "Scheduled", "Paused"].includes(item.status);
@@ -253,14 +263,37 @@ const SchedulesPanel = ({
       <div className="schedule-toolbar">
         <div>
           <strong>Releases</strong>
-          <span>One release, all its destinations, and the exact time in one place.</span>
+          <span>
+            {showHistory
+              ? "All recent releases"
+              : upcoming.length
+                ? "Upcoming releases"
+                : "Recent release history"}
+            {" · "}One release, all its destinations, and the exact time in one place.
+          </span>
         </div>
-        <button
-          className="schedule-primary"
-          onClick={() => (onNavigate ? onNavigate("upload") : setShowCreate(!showCreate))}
-        >
-          + Schedule post
-        </button>
+        <div className="schedule-toolbar-actions">
+          {allReleases.length > upcoming.length && (
+            <button
+              className="schedule-history-toggle"
+              onClick={() => {
+                setShowHistory(!showHistory);
+                setSelectedId("");
+                setMediaFailed(false);
+              }}
+            >
+              {showHistory
+                ? "Show upcoming"
+                : `View history (${allReleases.length - upcoming.length})`}
+            </button>
+          )}
+          <button
+            className="schedule-primary"
+            onClick={() => (onNavigate ? onNavigate("upload") : setShowCreate(!showCreate))}
+          >
+            + Schedule post
+          </button>
+        </div>
       </div>
 
       {showCreate && !onNavigate && (
@@ -336,7 +369,7 @@ const SchedulesPanel = ({
           {loadError}
         </div>
       )}
-      {!loading && !loadError && releases.length === 0 && (
+      {!loading && !loadError && allReleases.length === 0 && (
         <div className="schedule-empty">
           No scheduled releases yet. Choose a finished file in Publisher to schedule your first
           post.
@@ -425,16 +458,21 @@ const SchedulesPanel = ({
                 </header>
                 <div className="schedule-detail-main">
                   <div className="schedule-media">
-                    {media.url && media.kind === "video" ? (
+                    {media.url && media.kind === "video" && !mediaFailed ? (
                       <video
                         controls
                         preload="metadata"
                         poster={media.poster || undefined}
                         src={media.url}
                         aria-label={`${selected.title} video preview`}
+                        onError={() => setMediaFailed(true)}
                       />
-                    ) : media.url && media.kind === "image" ? (
-                      <img src={media.url} alt={`${selected.title} scheduled media`} />
+                    ) : media.url && media.kind === "image" && !mediaFailed ? (
+                      <img
+                        src={media.url}
+                        alt={`${selected.title} scheduled media`}
+                        onError={() => setMediaFailed(true)}
+                      />
                     ) : media.poster ? (
                       <img src={media.poster} alt={`${selected.title} poster`} />
                     ) : (
@@ -482,7 +520,8 @@ const SchedulesPanel = ({
                 <div className="schedule-destinations">
                   <h4>Destinations ({selected.destinations.length})</h4>
                   {selected.destinations.map(item => {
-                    const copy = scheduleCopy(item.schedule, selected.content);
+                    const copy = scheduleCopy(item.schedule, item.content || selected.content);
+                    const destinationMedia = releaseMedia(item.content);
                     const expanded = expandedPlatform === `${item.platform}:${item.schedule.id}`;
                     const zone = displayTimezone(item.schedule, defaultTimezone);
                     return (
@@ -520,6 +559,25 @@ const SchedulesPanel = ({
                               <span>Caption</span>
                               <p>{copy.caption || "No platform-specific caption stored"}</p>
                             </div>
+                            {item.content?.id !== selected.content?.id &&
+                              (destinationMedia.url || destinationMedia.poster) && (
+                                <div className="schedule-platform-media">
+                                  <span>Media for this destination</span>
+                                  {destinationMedia.poster || destinationMedia.kind === "image" ? (
+                                    <img
+                                      src={destinationMedia.poster || destinationMedia.url}
+                                      alt={`${PLATFORM_NAMES[item.platform]} scheduled media`}
+                                    />
+                                  ) : (
+                                    <video
+                                      src={destinationMedia.url}
+                                      controls
+                                      preload="metadata"
+                                      aria-label={`${PLATFORM_NAMES[item.platform]} scheduled video`}
+                                    />
+                                  )}
+                                </div>
+                              )}
                             <p className="schedule-destination-time">
                               {formatScheduleTime(
                                 item.schedule.startTime || item.schedule.time,
@@ -576,7 +634,7 @@ const SchedulesPanel = ({
                 <div className="schedule-release-actions">
                   <button
                     onClick={() => setPreviewOpen(true)}
-                    disabled={!media.url && !media.poster}
+                    disabled={(!media.url || mediaFailed) && !media.poster}
                   >
                     Preview
                   </button>
@@ -696,15 +754,16 @@ const SchedulesPanel = ({
               ×
             </button>
             <h3>{selected.title}</h3>
-            {media.url && media.kind === "video" ? (
+            {media.url && media.kind === "video" && !mediaFailed ? (
               <video
                 controls
                 preload="metadata"
                 poster={media.poster || undefined}
                 src={media.url}
+                onError={() => setMediaFailed(true)}
               />
             ) : (
-              <img src={media.url || media.poster} alt={`${selected.title} preview`} />
+              <img src={media.poster || media.url} alt={`${selected.title} preview`} />
             )}
           </div>
         </div>

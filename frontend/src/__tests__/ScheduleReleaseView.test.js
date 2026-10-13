@@ -20,7 +20,7 @@ const pieces = [
 const schedules = pieces.flatMap(([subject, variant, time], index) =>
   platforms.map(platform => ({
     id: `${subject}-${variant}-${platform}`,
-    contentId: `content-${index}`,
+    contentId: platform === "reddit" ? `reddit-content-${index}` : `content-${index}`,
     title: `Made in AutoPromote: ${subject} — the ${variant}`,
     startTime: time,
     timezone: "UTC",
@@ -103,6 +103,29 @@ test("loading does not flash empty counts; missing media and long copy are handl
   fireEvent.click(screen.getByRole("button", { name: /Final Edit Oct 14/i }));
   fireEvent.click(screen.getByRole("button", { name: /Facebook Scheduled/i }));
   expect(screen.getAllByText(/A long caption A long caption/).length).toBeGreaterThan(0);
+});
+
+test("upcoming view hides old history while keeping the six destinations together", () => {
+  const old = {
+    id: "old-post",
+    contentId: "old",
+    title: "Old release",
+    startTime: "2025-01-01T09:00:00Z",
+    platform: "youtube",
+    status: "executed",
+  };
+  render(
+    <SchedulesPanel
+      schedulesList={[old, ...schedules]}
+      contentList={[]}
+      currentTime={new Date("2026-10-13T06:00:00Z").getTime()}
+    />
+  );
+  expect(screen.getAllByText("6", { selector: ".schedule-kpis strong" })).toHaveLength(2);
+  expect(screen.getByText("36", { selector: ".schedule-kpis strong" })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Old release Jan/i })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "View history (1)" }));
+  expect(screen.getByRole("button", { name: /Old release Jan/i })).toBeInTheDocument();
 });
 
 test("timezone conversion round trips and rejects nonexistent DST time", () => {

@@ -171,9 +171,13 @@ export function groupSchedules(schedules = [], contents = []) {
     ).trim();
     const time = schedule.startTime || schedule.time || "";
     const identity = releaseIdentity(title);
-    // An exact instant and content ID keep separately scheduled variants distinct.
-    // Older records without content IDs use the visible title as their identity.
-    const key = `${schedule.contentId || `title:${title.toLowerCase()}`}|${time}`;
+    // Studio destinations can refer to different content records (Reddit in
+    // the existing six-platform releases does). Their shared named variant
+    // and publish instant identify one release without changing queue IDs.
+    const instant = Number.isFinite(new Date(time).getTime()) ? new Date(time).toISOString() : time;
+    const key = identity.variant
+      ? `variant:${title.toLowerCase()}|${instant}`
+      : `${schedule.contentId || `title:${title.toLowerCase()}`}|${instant}`;
     if (!groups.has(key)) {
       groups.set(key, {
         id: key,
@@ -186,8 +190,21 @@ export function groupSchedules(schedules = [], contents = []) {
       });
     }
     const release = groups.get(key);
+    const destinationContent = contentById.get(String(schedule.contentId)) || null;
+    if (
+      !release.content ||
+      (release.destinations.every(item => item.platform === "reddit") &&
+        !uniquePlatforms(schedule).includes("reddit"))
+    ) {
+      release.content = destinationContent || release.content;
+    }
     uniquePlatforms(schedule).forEach(platform => {
-      release.destinations.push({ platform, schedule, status: scheduleStatus(schedule) });
+      release.destinations.push({
+        platform,
+        schedule,
+        content: destinationContent,
+        status: scheduleStatus(schedule),
+      });
     });
   });
   return Array.from(groups.values())
