@@ -877,6 +877,7 @@
   font-size: .7rem;
 }
 .schedule-detail { padding: 13px 14px 12px; }
+.schedule-detail { scroll-margin-top: 85px; }
 .schedule-detail-header {
   align-items: center;
   justify-content: flex-start;

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import {
   PLATFORM_NAMES,
@@ -76,6 +76,7 @@ const SchedulesPanel = ({
   const [showHistory, setShowHistory] = useState(false);
   const [mediaFailed, setMediaFailed] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const detailRef = useRef(null);
   const [createData, setCreateData] = useState({
     contentId: "",
     date: "",
@@ -437,7 +438,7 @@ const SchedulesPanel = ({
             </nav>
 
             {selected && (
-              <article className="schedule-detail" aria-label={`${selected.title} details`}>
+              <article ref={detailRef} className="schedule-detail" aria-label={`${selected.title} details`}>
                 <header className="schedule-detail-header">
                   <div>
                     <span
@@ -691,7 +692,10 @@ const SchedulesPanel = ({
                   <button
                     key={release.id}
                     className={`schedule-calendar-card ${selected?.id === release.id ? "selected" : ""}`}
-                    onClick={() => selectRelease(release)}
+                    onClick={() => {
+                      selectRelease(release);
+                      detailRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+                    }}
                     aria-label={`Select ${release.title}, ${dateLabel(release.time, zone)}, ${release.destinations.length} destinations`}
                   >
                     <span className="schedule-calendar-date"><small>{dateLabel(release.time, zone)}</small><StatusPill status={release.destinations[0]?.status || "Ready"} /></span>
