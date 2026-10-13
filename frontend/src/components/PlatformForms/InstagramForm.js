@@ -84,10 +84,12 @@ const InstagramForm = ({
   }, [currentFile]);
 
   useEffect(() => {
-    if (currentFile && currentFile.type.startsWith("image/")) {
+    if (currentFile instanceof Blob && currentFile.type.startsWith("image/")) {
       const url = URL.createObjectURL(currentFile);
       setPreviewUrl(url);
       return () => revokeObjectUrlLater(url);
+    } else if (currentFile?.type?.startsWith("image/") && currentFile.url) {
+      setPreviewUrl(sanitizeUrl(currentFile.url));
     } else {
       setPreviewUrl(null);
     }
@@ -147,6 +149,7 @@ const InstagramForm = ({
       </h4>
       {OPTIMAL_TIMES.instagram && (
         <div
+          className="provider-posting-hint"
           style={{
             fontSize: "11px",
             color: "#059669",
@@ -744,6 +747,7 @@ const InstagramForm = ({
           alignItems: "center",
           gap: "8px",
         }}
+        className="provider-processing-note"
       >
         <span>ℹ️</span>
         <span>

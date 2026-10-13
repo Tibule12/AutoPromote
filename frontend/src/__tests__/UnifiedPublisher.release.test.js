@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import UnifiedPublisher from "../features/publishing/UnifiedPublisher";
 import { API_ENDPOINTS } from "../config";
+import { auth } from "../firebaseClient";
 
 jest.mock("../firebaseClient", () => ({ auth: { currentUser: { getIdToken: jest.fn().mockResolvedValue("local-test-token") } } }));
 jest.mock("../components/VideoEditor", () => () => null);
@@ -15,6 +16,8 @@ const platforms = ["facebook", "instagram", "linkedin", "reddit", "tiktok", "you
 const response = data => ({ ok: true, headers: { get: () => "application/json" }, json: async () => data });
 let onUpload;
 beforeEach(() => {
+  // CRA resets mock implementations between tests; the root Jest project does not.
+  auth.currentUser.getIdToken.mockResolvedValue("local-test-token");
   localStorage.clear();
   URL.createObjectURL = jest.fn(() => "blob:local-preview");
   URL.revokeObjectURL = jest.fn();
@@ -91,4 +94,38 @@ test("destination-specific copy survives switching between real forms and workfl
   fireEvent.click(screen.getByRole("tab", { name: "Reddit" }));
   expect(within(screen.getByRole("region", { name: "Reddit form" })).getByLabelText("Post text")).toHaveValue("Reddit copy remains intact");
   expect(onUpload).not.toHaveBeenCalled();
+});
+
+test("owned image URLs render in real TikTok and Instagram forms without creating Blob URLs", async () => {
+  URL.createObjectURL.mockImplementation(value => {
+    if (!(value instanceof Blob)) throw new TypeError("Expected a Blob");
+    return "blob:local-image";
+  });
+  render(<UnifiedPublisher initialFile={{ url: "https://example.test/owned.png", type: "image/png", name: "Owned image" }} onUpload={onUpload} />);
+  await waitFor(() => expect(screen.getByRole("region", { name: "TikTok form" })).toBeInTheDocument());
+  fireEvent.click(screen.getByRole("button", { name: "Change destinations" }));
+  fireEvent.click(screen.getByRole("checkbox", { name: /Instagram/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Customize destinations/ }));
+  fireEvent.click(screen.getByRole("tab", { name: "Instagram" }));
+  expect(within(screen.getByRole("region", { name: "Instagram form" })).getByRole("button", { name: /Crop Image/ })).toBeInTheDocument();
+  expect(URL.createObjectURL).not.toHaveBeenCalled();
+  expect(onUpload).not.toHaveBeenCalled();
+});
+
+test("late account timezone defaults load without replacing an explicit delivery timezone", async () => {
+  const initialFile = { url: asset.url, type: "video/mp4", name: "Owned video", suggestedTitle: "Account defaults" };
+  const view = render(<UnifiedPublisher initialFile={initialFile} defaultTimezone="UTC" onUpload={onUpload} />);
+  fireEvent.click(screen.getByRole("button", { name: "Change destinations" }));
+  fireEvent.click(screen.getByRole("checkbox", { name: /TikTok/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Customize destinations/ }));
+  await waitFor(() => expect(screen.getByRole("button", { name: /Continue to Delivery/ })).toBeEnabled());
+  view.rerender(<UnifiedPublisher initialFile={initialFile} defaultTimezone="Africa/Johannesburg" onUpload={onUpload} />);
+  fireEvent.click(screen.getByRole("button", { name: /Continue to Delivery/ }));
+  const delivery = screen.getByRole("region", { name: "Delivery settings" });
+  fireEvent.click(within(delivery).getByRole("radio", { name: /^Schedule/ }));
+  const timezone = within(delivery).getAllByRole("combobox")[0];
+  expect(timezone).toHaveValue("Africa/Johannesburg");
+  fireEvent.change(timezone, { target: { value: "America/New_York" } });
+  view.rerender(<UnifiedPublisher initialFile={initialFile} defaultTimezone="Europe/London" onUpload={onUpload} />);
+  expect(timezone).toHaveValue("America/New_York");
 });

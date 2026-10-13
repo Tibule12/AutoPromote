@@ -1,0 +1,79 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> autopromote-frontend@1.0.0 build
+> react-scripts build
+
+(node:26) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Creating an optimized production build...
+Compiled successfully.
+
+File sizes after gzip:
+
+  886.1 kB (+630 B)  build/static/js/main.7433034e.js
+  148.64 kB          build/static/js/405.ff2b9322.chunk.js
+  145.2 kB (+121 B)  build/static/css/main.0ffe5e9c.css
+  98.68 kB           build/static/js/378.bafc11e9.chunk.js
+  34.58 kB           build/static/js/838.f7bf12de.chunk.js
+  25.2 kB            build/static/js/922.bab9f617.chunk.js
+  23.6 kB            build/static/js/507.eea9bb9d.chunk.js
+  13.05 kB           build/static/js/422.2a8c05bc.chunk.js
+  3.76 kB            build/static/js/8.7bf9daf0.chunk.js
+  3.29 kB            build/static/js/599.96824be9.chunk.js
+  2.53 kB            build/static/js/842.f5dcd67c.chunk.js
+  2.12 kB            build/static/js/738.68d037bb.chunk.js
+  2.06 kB            build/static/js/326.73bf7594.chunk.js
+  2.05 kB            build/static/js/533.3b8b5cf0.chunk.js
+  2 kB               build/static/js/555.7a14869f.chunk.js
+  1.88 kB            build/static/js/875.5a14bbb5.chunk.js
+  1.81 kB            build/static/js/686.9b0b42a2.chunk.js
+  1.7 kB             build/static/js/603.f16bdb02.chunk.js
+  1.57 kB            build/static/js/123.edfadb99.chunk.js
+  1.27 kB            build/static/css/599.38024f67.chunk.css
+  1.14 kB            build/static/js/170.ee5716ac.chunk.js
+  1.01 kB            build/static/js/688.556cd4c9.chunk.js
+  936 B              build/static/js/544.481e9948.chunk.js
+  914 B              build/static/js/234.05f5a0d2.chunk.js
+  906 B              build/static/css/170.c8caec5e.chunk.css
+  906 B              build/static/css/219.c8caec5e.chunk.css
+  906 B              build/static/css/234.c8caec5e.chunk.css
+  906 B              build/static/css/326.c8caec5e.chunk.css
+  906 B              build/static/css/373.c8caec5e.chunk.css
+  906 B              build/static/css/442.c8caec5e.chunk.css
+  906 B              build/static/css/533.c8caec5e.chunk.css
+  906 B              build/static/css/541.c8caec5e.chunk.css
+  906 B              build/static/css/544.c8caec5e.chunk.css
+  906 B              build/static/css/603.c8caec5e.chunk.css
+  906 B              build/static/css/686.c8caec5e.chunk.css
+  906 B              build/static/css/738.c8caec5e.chunk.css
+  906 B              build/static/css/804.c8caec5e.chunk.css
+  906 B              build/static/css/814.c8caec5e.chunk.css
+  906 B              build/static/css/923.c8caec5e.chunk.css
+  869 B              build/static/js/965.3292d0f5.chunk.js
+  857 B              build/static/js/541.73a48671.chunk.js
+  837 B              build/static/js/373.ad4eceeb.chunk.js
+  787 B              build/static/js/923.75501a06.chunk.js
+  723 B              build/static/js/219.bb242f3e.chunk.js
+  694 B              build/static/css/875.324ffe7d.chunk.css
+  630 B              build/static/js/442.d1dd639b.chunk.js
+  607 B              build/static/js/804.8606b6d2.chunk.js
+  558 B              build/static/js/814.0908addc.chunk.js
+  208 B              build/static/css/507.3ad99012.chunk.css
+
+The bundle size is significantly larger than recommended.
+Consider reducing it with code splitting: https://goo.gl/9VhYWB
+You can also analyze the project dependencies: https://goo.gl/LeUzfb
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+

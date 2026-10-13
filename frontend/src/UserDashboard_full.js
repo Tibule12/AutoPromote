@@ -1827,6 +1827,13 @@ const UserDashboard = ({
             initialFile={selectedFile}
             onUpgrade={() => handleNav("billing")}
             onOpenPublisher={file => {
+              if (file && typeof file === "object") {
+                try {
+                  Object.assign(file, { source: file.source || "viral_clip_studio" });
+                } catch (_) {
+                  // The rendered media remains usable if custom File properties are unavailable.
+                }
+              }
               setSelectedFile(file);
               handleNav("upload");
               toast.success("Viral Clip Studio render is ready to publish.");

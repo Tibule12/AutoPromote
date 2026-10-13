@@ -48,6 +48,7 @@ import {
   buildMediaMeta,
   hasMeaningfulMediaMeta,
   normalizeEditedAsset,
+  cropPublisherImage,
   buildStructuredUploadError,
   EXPECTED_PUBLISH_BLOCK_CODES,
   formatMonthLabel,
@@ -109,8 +110,13 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
   const [connectionSnapshot, setConnectionSnapshot] = useState({ raw: {}, summary: {} });
   const [connectionsLoaded, setConnectionsLoaded] = useState(false);
   const [deliveryTimezone, setDeliveryTimezone] = useState(isValidTimezone(defaultTimezone) ? defaultTimezone : browserTimezone());
+  const [deliveryTimezoneChosen, setDeliveryTimezoneChosen] = useState(false);
   const [deliveryFields, setDeliveryFields] = useState({ date: "", time: "09:00" });
   const [customFields, setCustomFields] = useState({});
+
+  useEffect(() => {
+    if (!deliveryTimezoneChosen && isValidTimezone(defaultTimezone)) setDeliveryTimezone(defaultTimezone);
+  }, [defaultTimezone, deliveryTimezoneChosen]);
 
   useEffect(() => {
     let active = true;
@@ -407,6 +413,10 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
   const [upgradePlanId, setUpgradePlanId] = useState(null);
   const [upgradePromptMessage, setUpgradePromptMessage] = useState("");
   const [pendingPublishRequest, setPendingPublishRequest] = useState(null);
+  // The existing editor's URL-object contract requires isRemote. Owned assets
+  // keep their original publishing object; adapt only the editor input.
+  const editorFile = useMemo(() => mediaFile && !(mediaFile instanceof Blob) && typeof mediaFile === "object" && mediaFile.url
+    ? { ...mediaFile, isRemote: true } : mediaFile, [mediaFile]);
 
   const effectiveThumbnailUrl = thumbnailUrl || "";
   const safeThumbUrl = effectiveThumbnailUrl ? sanitizeUrl(effectiveThumbnailUrl) : "";
@@ -684,6 +694,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
     return <div className="dark-theme-form"><Form key={`${platformId}:${formVersions[platformId] || 0}`}
       globalTitle={globalTitle} globalDescription={globalDescription} currentFile={data.file}
       pages={facebookPages} facebookPages={facebookPages}
+      instagramBusinessAccountId={connectionSnapshot.raw?.instagram?.ig_business_account_id || connectionSnapshot.raw?.instagram?.metadata?.instagram_business_account_id}
       creatorInfo={{ tiktok: tiktokCreator, youtube: youtubeChannel, linkedin: linkedinProfile, reddit: redditUser }[platformId]}
       onFileChange={newFile => updatePlatformData(platformId, { file: newFile || globalFile })}
       onReviewAI={() => { setEditingTarget(platformId); processFileChange(data.file || globalFile); setShowVideoEditor(true); }}
@@ -1006,7 +1017,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
         onSelectAsset={selectOwnedAsset} sourceAsset={sourceAsset} selected={selectedPlatforms} togglePlatform={togglePlatform}
         focus={focusedPlatform} activatePlatform={activatePlatform} connections={connections} issues={destinationIssues}
         visited={visitedPlatforms} forms={renderPlatformForm} copyMaster={copyMaster} mode={publishTiming} setMode={setPublishTiming}
-        deliveryFields={deliveryFields} setDeliveryFields={setDeliveryFields} timezone={deliveryTimezone} setTimezone={setDeliveryTimezone}
+        deliveryFields={deliveryFields} setDeliveryFields={setDeliveryFields} timezone={deliveryTimezone} setTimezone={zone => { setDeliveryTimezoneChosen(true); setDeliveryTimezone(zone); }}
         timezones={timezones} delivery={delivery} deliveryError={deliveryError} frequency={frequency} setFrequency={setFrequency}
         customSchedule={customPlatformSchedule} setCustomSchedule={setCustomPlatformSchedule} customFields={customFields}
         setCustomFields={(platform, fields) => setCustomFields(current => ({ ...current, [platform]: fields }))}
@@ -1066,7 +1077,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
               ×
             </button>
             <VideoEditor
-              file={mediaFile}
+              file={editorFile}
               hideCreationWorkflows
               onSave={result => {
                 const target = editingTarget || "global";
@@ -1122,13 +1133,20 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
               ×
             </button>
             <ImageCropper
-              file={mediaFile}
-              onSave={newFile => {
-                setGlobalFile(newFile);
-                processFileChange(newFile);
-                setShowCropper(false);
+              imageUrl={previewUrl}
+              onChangeCrop={async crop => {
+                try {
+                  const newFile = await cropPublisherImage(previewUrl, crop, mediaFile);
+                  setGlobalFile(newFile);
+                  processFileChange(newFile);
+                  setFeedbackMessage("");
+                  toast.success("Image crop applied.");
+                } catch (error) {
+                  setFeedbackMessage(`Image crop failed: ${error.message}`);
+                  toast.error("The image crop could not be saved. Try uploading the image from your device.");
+                }
               }}
-              onCancel={() => setShowCropper(false)}
+              onClose={() => setShowCropper(false)}
             />
           </div>
         </div>

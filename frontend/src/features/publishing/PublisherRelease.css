@@ -1,5 +1,5 @@
 /* The release preparation workspace; provider forms and backend contracts stay intact. */
-.publisher-release { --release-accent: #8b5cf6; --release-border: #283447; color: #e9edf7; font-family: Inter, system-ui, sans-serif; }
+.publisher-release { --release-accent: #8b5cf6; --release-border: #283447; color: #e9edf7; font-family: Inter, system-ui, sans-serif; container-type: inline-size; }
 .publisher-release *, .publisher-release *::before, .publisher-release *::after { box-sizing: border-box; }
 .publisher-release [hidden] { display: none !important; }
 .release-page-heading h1 { margin: 0 0 6px; font-size: 29px; }
@@ -16,6 +16,9 @@
 .release-identity h2 { margin: 0 0 5px; font-size: 24px; letter-spacing: -.4px; }
 .release-workspace { display: grid; grid-template-columns: minmax(230px, .9fr) minmax(360px, 1.25fr) minmax(235px, .9fr); gap: 14px; align-items: start; }
 .release-sidebar, .release-main, .release-inspector { display: grid; gap: 14px; min-width: 0; }
+/* App.css styles all main elements. The inner workspace owns its own spacing. */
+.publisher-release .release-main { padding: 0; margin: 0; max-width: none; grid-template-columns: minmax(0, 1fr); }
+.release-customize { min-width: 0; }
 .release-card { background: linear-gradient(145deg, #121e30, #101a2a); border: 1px solid var(--release-border); border-radius: 12px; padding: 16px; min-width: 0; }
 .release-card h3 { margin: 0 0 10px; font-size: 17px; color: #f2f4fc; }
 .release-card h4 { font-size: 14px; margin: 16px 0 8px; }
@@ -71,6 +74,12 @@
 .release-issues ul { padding-left: 18px; margin: 6px 0 0; }
 .release-form-card .platform-form { padding: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important; width: 100% !important; max-width: none !important; }
 .release-form-card .platform-form-header { display: none; }
+/* Retained provider forms also run on light surfaces; keep their notices legible here. */
+.publisher-release .release-form-card .dark-theme-form :is(label, p, span, div, strong, small, h4, h5, summary, ul, li, code) { color: #cbd5e1 !important; }
+.publisher-release .release-form-card .dark-theme-form :is(.scope-info-box, .alert-box, .tiktok-behavior-summary, .best-time-banner, .provider-posting-hint, .tiktok-posting-hint, .youtube-posting-hint, .protocol-7-card, .provider-processing-note, .youtube-processing-note, .checkbox-pill, .compliance-section, .toggle-card, .card-option) { background: #172337 !important; border-color: #39465d !important; }
+.publisher-release .release-form-card .dark-theme-form code { background: #29384f !important; }
+.publisher-release .release-form-card .dark-theme-form .card-option.selected { background: #2a1d47 !important; border-color: #9a69ed !important; }
+.publisher-release .release-form-card .dark-theme-form .char-count { background: #172337 !important; }
 .release-form-card .form-group-modern, .release-form-card .form-group { margin: 14px 0; }
 .release-form-card .modern-input, .release-form-card .form-control { font-size: 12px !important; }
 .release-form-card .identity-badge { background: #1c2940 !important; border-color: #39465d !important; }
@@ -86,6 +95,7 @@
 .release-social-preview { border-radius: 9px; background: #f7f8fc; color: #161d2e; padding: 12px; font-size: 12px; }
 .release-social-preview > small { color: #596682; }
 .release-social-preview h4 { margin: 10px 0; color: #161d2e; }
+.publisher-release .release-social-preview :is(h4, p) { color: #161d2e !important; }
 .release-social-preview .release-media { margin-top: 12px; }
 .release-post-preview > small { color: #9fabc2; display: block; font-size: 10px; margin-top: 10px; }
 .release-post-preview h3 { display: flex; gap: 8px; align-items: center; }
@@ -126,4 +136,7 @@
 .release-primary:disabled { background: #24334b; border-color: #44546d; color: #9aa8c1; cursor: not-allowed; }
 @media (min-width: 1450px) { .release-workspace { grid-template-columns: minmax(275px, 1fr) minmax(390px, 1.3fr) minmax(285px, 1fr); } }
 @media (max-width: 1050px) { .release-workspace { grid-template-columns: minmax(210px, .7fr) minmax(320px, 1.3fr); } .release-inspector { grid-column: 2; } .release-workflow-heading { flex-direction: column; align-items: start; } }
+/* Adapt to the dashboard's available width, including its desktop navigation. */
+@container (max-width: 900px) { .release-workspace { grid-template-columns: minmax(190px, .7fr) minmax(0, 1.3fr); } .release-inspector { grid-column: 2; } .release-workflow-heading { flex-direction: column; align-items: start; } }
+@container (max-width: 650px) { .release-workspace { display: flex; flex-direction: column; } .release-sidebar, .release-main, .release-inspector { width: 100%; } .release-inspector { order: 3; } }
 @media (max-width: 700px) { .release-workspace { display: flex; flex-direction: column; } .release-sidebar, .release-main, .release-inspector { width: 100%; } .release-sidebar { grid-template-columns: 1fr; } .release-inspector { order: 3; } .release-stepper { gap: 9px; } .release-stepper button { font-size: 10px; gap: 4px; } .release-stepper button > span { width: 22px; height: 22px; } .release-form-heading { flex-wrap: wrap; } .release-footer { align-items: start; } .release-footer-action { max-width: 70%; } .release-footer-action .release-primary { white-space: normal; } .release-date-time, .release-delivery-modes { grid-template-columns: 1fr; } }

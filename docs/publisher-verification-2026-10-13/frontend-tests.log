@@ -1,0 +1,268 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> autopromote-frontend@1.0.0 test
+> react-scripts test --watchAll=false --runInBand src/__tests__/UnifiedPublisher.release.test.js src/features/publishing/utils/__tests__/publisherWorkflow.test.js src/__tests__/UploadPanel.test.js
+
+PASS src/__tests__/UnifiedPublisher.release.test.js (5.762 s)
+  ● Console
+
+    console.error
+      An update to RedditForm inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      146 |
+      147 |         if (!isMounted) return;
+    > 148 |         setAvailableSubreddits(subs);
+          |         ^
+      149 |
+      150 |         const normalizedInitial = String(initialData.subreddit || "")
+      151 |           .replace(/^r\//i, "")
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setAvailableSubreddits (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at fetchSubreddits (src/components/PlatformForms/RedditForm.js:148:9)
+
+    console.error
+      An update to RedditForm inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      162 |
+      163 |         if (fallback) {
+    > 164 |           setSubreddit(fallback);
+          |           ^
+      165 |           setManualSubreddit(fallback);
+      166 |         }
+      167 |       } catch (err) {
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setSubreddit (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at fetchSubreddits (src/components/PlatformForms/RedditForm.js:164:11)
+
+    console.error
+      An update to RedditForm inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      163 |         if (fallback) {
+      164 |           setSubreddit(fallback);
+    > 165 |           setManualSubreddit(fallback);
+          |           ^
+      166 |         }
+      167 |       } catch (err) {
+      168 |         if (!isMounted) return;
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setManualSubreddit (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at fetchSubreddits (src/components/PlatformForms/RedditForm.js:165:11)
+
+    console.error
+      An update to RedditForm inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      169 |         setSubredditFetchError(err.message || "Could not load subreddit list");
+      170 |       } finally {
+    > 171 |         if (isMounted) setIsLoadingSubreddits(false);
+          |                        ^
+      172 |       }
+      173 |     };
+      174 |
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setIsLoadingSubreddits (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at fetchSubreddits (src/components/PlatformForms/RedditForm.js:171:24)
+
+    console.error
+      An update to UnifiedPublisher inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      260 |           if (mounted && res.ok) {
+      261 |             const json = await res.json();
+    > 262 |             setYoutubeChannel(
+          |             ^
+      263 |               normalizeYouTubeCreatorInfo(
+      264 |                 json && !json.error ? json.channel || json : null,
+      265 |                 platformStatus.raw.youtube,
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setYoutubeChannel (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at fetchYouTube (src/features/publishing/UnifiedPublisher.js:262:13)
+
+    console.error
+      An update to UnifiedPublisher inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      347 |             const json = await res.json();
+      348 |             if (json && !json.error) {
+    > 349 |               setRedditUser(
+          |               ^
+      350 |                 normalizeRedditCreatorInfo(
+      351 |                   json,
+      352 |                   platformStatus.raw.reddit,
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setRedditUser (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at fetchReddit (src/features/publishing/UnifiedPublisher.js:349:15)
+
+    console.error
+      An update to UnifiedPublisher inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      233 |           const json = await res.json();
+      234 |           if (json.diagnostic) console.warn("[FacebookStatus]", json.diagnostic);
+    > 235 |           setFacebookPages(json.pages || []);
+          |           ^
+      236 |         }
+      237 |       } catch (e) {
+      238 |         console.warn("UnifiedPublisher: Failed to fetch FB pages", e);
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setFacebookPages (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at fetchPages (src/features/publishing/UnifiedPublisher.js:235:11)
+
+    console.error
+      An update to UnifiedPublisher inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      189 |             const json = await res.json();
+      190 |             if (json && !json.error) {
+    > 191 |               setTiktokCreator(
+          |               ^
+      192 |                 normalizeTikTokCreatorInfo(
+      193 |                   json.creator || json,
+      194 |                   platformStatus.raw.tiktok,
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setTiktokCreator (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at fetchTikTok (src/features/publishing/UnifiedPublisher.js:191:15)
+
+    console.error
+      An update to UnifiedPublisher inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      260 |           if (mounted && res.ok) {
+      261 |             const json = await res.json();
+    > 262 |             setYoutubeChannel(
+          |             ^
+      263 |               normalizeYouTubeCreatorInfo(
+      264 |                 json && !json.error ? json.channel || json : null,
+      265 |                 platformStatus.raw.youtube,
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setYoutubeChannel (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at fetchYouTube (src/features/publishing/UnifiedPublisher.js:262:13)
+
+PASS src/features/publishing/utils/__tests__/publisherWorkflow.test.js
+PASS src/__tests__/UploadPanel.test.js
+
+Test Suites: 3 passed, 3 total
+Tests:       16 passed, 16 total
+Snapshots:   0 total
+Time:        6.331 s
+Ran all test suites matching /src\/__tests__\/UnifiedPublisher.release.test.js|src\/features\/publishing\/utils\/__tests__\/publisherWorkflow.test.js|src\/__tests__\/UploadPanel.test.js/i.

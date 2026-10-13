@@ -43,7 +43,7 @@ const LinkedInForm = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState({ field: null, visible: false });
 
   const [companyId, setCompanyId] = useState(initialData.companyId || "");
-  const [postingTarget, setPostingTarget] = useState(initialData.companyId ? "company" : "profile");
+  const [postingTarget, setPostingTarget] = useState(initialData.postingTarget || (initialData.companyId ? "company" : "profile"));
 
   // Sync global descriptions if not manually edited
   useEffect(() => {
@@ -123,7 +123,7 @@ const LinkedInForm = ({
           )}
           <div>
             <div style={{ fontWeight: "600", color: "#333" }}>{profileName}</div>
-            <div style={{ fontSize: "0.8rem", color: "#666" }}>Posting as Profile</div>
+            <div style={{ fontSize: "0.8rem", color: "#666" }}>{postingTarget === "company" ? `Posting as Company Page${companyId ? ` ${companyId}` : " (ID required)"}` : "Posting as Profile"}</div>
           </div>
         </div>
       )}
@@ -139,7 +139,7 @@ const LinkedInForm = ({
           <option value="company">Company Page (optional)</option>
         </select>
         <p className="help-text" style={{ fontSize: "0.75rem", color: "#666", marginTop: "4px" }}>
-          Profile posting uses your connected LinkedIn account automatically.
+          {postingTarget === "company" ? "Enter the numeric company Page ID below." : "Profile posting uses your connected LinkedIn account automatically."}
         </p>
       </div>
 
@@ -371,6 +371,7 @@ const LinkedInForm = ({
           alignItems: "center",
           gap: "8px",
         }}
+        className="provider-processing-note"
       >
         <span>ℹ️</span>
         <span>Note: Video processing may take a few minutes to reflect on your LinkedIn Page.</span>

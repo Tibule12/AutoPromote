@@ -1,0 +1,12 @@
+
+/workspace/scratch/5762633eaa5b/AutoPromote/frontend/src/components/PlatformForms/FacebookForm.js
+  10:3  warning  'globalTitle' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/workspace/scratch/5762633eaa5b/AutoPromote/frontend/src/components/PlatformForms/InstagramForm.js
+  19:3  warning  'bountyAmount' is defined but never used. Allowed unused args must match /^_/u     no-unused-vars
+  20:3  warning  'setBountyAmount' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  21:3  warning  'bountyNiche' is defined but never used. Allowed unused args must match /^_/u      no-unused-vars
+  22:3  warning  'setBountyNiche' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+
+✖ 5 problems (0 errors, 5 warnings)
+

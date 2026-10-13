@@ -1,0 +1,1023 @@
+{
+  "checks": [
+    "Desktop 1600: no workspace or page overflow",
+    "Viewport 1280: no workspace or page overflow",
+    "Viewport 1024: no workspace or page overflow",
+    "Viewport 768: no workspace or page overflow",
+    "Viewport 390: no workspace or page overflow",
+    "Facebook 1280: no workspace or page overflow",
+    "Facebook 390: no workspace or page overflow",
+    "Instagram 1280: no workspace or page overflow",
+    "Instagram 390: no workspace or page overflow",
+    "LinkedIn 1280: no workspace or page overflow",
+    "LinkedIn 390: no workspace or page overflow",
+    "Reddit 1280: no workspace or page overflow",
+    "Reddit 390: no workspace or page overflow",
+    "TikTok 1280: no workspace or page overflow",
+    "TikTok 390: no workspace or page overflow",
+    "YouTube 1280: no workspace or page overflow",
+    "YouTube 390: no workspace or page overflow",
+    "All six real forms: fields, preview, target validation, master copy and edit preservation",
+    "schedule: real App upload adapter, exact mocked JSON and action-specific review CTA",
+    "now: real App upload adapter, exact mocked JSON and action-specific review CTA",
+    "Owned image reuse does not crash mounted Instagram or TikTok forms",
+    "Disconnected destination, missing Page, TikTok permissions and quota visibly block delivery",
+    "Direct Instagram account identity and readiness work without Facebook Pages",
+    "Rejected mocked readiness makes no upload request and shows no success",
+    "Advanced media controls: editor URL preview, trim/rotate/flip/filter and optional JSON contracts preserved",
+    "No fabricated source/template metadata; global image crop loads, cancels and applies a real image Blob",
+    "Actual Studio render error/retry and Use in Publisher handoff retain owned rendered URL and real provenance",
+    "Zero browser page errors; zero requests to mutate existing schedules"
+  ],
+  "requests": [
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/linkedin/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/linkedin/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/reddit/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/reddit/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/reddit/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/upload/readiness",
+      "method": "POST",
+      "body": "{\"target_platforms\":[\"youtube\",\"reddit\"],\"scheduled_promotion_time\":\"2030-10-21T20:00:00.000Z\",\"platform_schedule_times\":{\"reddit\":\"2030-10-21T21:30:00.000Z\"}}"
+    },
+    {
+      "path": "/api/content/upload/readiness",
+      "method": "POST",
+      "body": "{\"target_platforms\":[\"youtube\",\"reddit\"],\"scheduled_promotion_time\":\"2030-10-21T20:00:00.000Z\",\"platform_schedule_times\":{\"reddit\":\"2030-10-21T21:30:00.000Z\"}}"
+    },
+    {
+      "path": "/api/content/upload",
+      "method": "POST",
+      "body": "{\"isDryRun\":false,\"title\":\"Coffee launch — final edit\",\"type\":\"video\",\"url\":\"https://fixture.invalid/owned.mp4\",\"description\":\"A brighter morning. Destination copy fixture.\",\"monetization_settings\":{\"niche\":\"general\",\"is_sponsored\":false,\"brand_name\":\"\",\"product_link\":\"\",\"commercial_rights\":false},\"bounty\":{\"amount\":0,\"niche\":\"general\"},\"target_platforms\":[\"youtube\",\"reddit\"],\"platform_options\":{\"youtube\":{\"title\":\"Coffee launch — final edit\",\"description\":\"A brighter morning. Destination copy fixture.\",\"platform\":\"youtube\",\"privacy\":\"public\",\"madeForKids\":false,\"tags\":\"\",\"category\":\"22\",\"paidPromotion\":false,\"shortsMode\":false,\"id\":\"youtube\",\"media_url\":\"https://fixture.invalid/owned.mp4\",\"meta\":{\"duration\":6}},\"reddit\":{\"title\":\"Coffee launch — final edit\",\"description\":\"A brighter morning. Destination copy fixture.\",\"platform\":\"reddit\",\"subreddit\":\"coffee\",\"kind\":\"video\",\"text\":\"A brighter morning. Destination copy fixture.\",\"url\":\"\",\"flairId\":\"\",\"isNSFW\":false,\"isSpoiler\":false,\"isPromotional\":false,\"id\":\"reddit\",\"media_url\":\"https://fixture.invalid/owned.mp4\",\"meta\":{\"duration\":6}}},\"scheduled_promotion_time\":\"2030-10-21T20:00:00.000Z\",\"platform_schedule_times\":{\"reddit\":\"2030-10-21T21:30:00.000Z\"},\"promotion_frequency\":\"weekly\",\"schedule_hint\":{\"date\":\"2030-10-21T20:00:00.000Z\",\"frequency\":\"weekly\",\"timezone\":\"America/New_York\",\"platformScheduleTimes\":{\"reddit\":\"2030-10-21T21:30:00.000Z\"},\"mode\":\"queued_new_upload\",\"platform_schedule_times\":{\"reddit\":\"2030-10-21T21:30:00.000Z\"}},\"meta\":{\"duration\":6,\"sourceContentId\":\"audit-owned\",\"source\":\"studio\",\"template\":{\"name\":\"Coffee launch\"}}}"
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/reddit/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/reddit/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/upload/readiness",
+      "method": "POST",
+      "body": "{\"target_platforms\":[\"youtube\",\"reddit\"],\"scheduled_promotion_time\":null}"
+    },
+    {
+      "path": "/api/content/upload/readiness",
+      "method": "POST",
+      "body": "{\"target_platforms\":[\"youtube\",\"reddit\"]}"
+    },
+    {
+      "path": "/api/content/upload",
+      "method": "POST",
+      "body": "{\"isDryRun\":false,\"title\":\"Coffee launch — final edit\",\"type\":\"video\",\"url\":\"https://fixture.invalid/owned.mp4\",\"description\":\"A brighter morning. Destination copy fixture.\",\"monetization_settings\":{\"niche\":\"general\",\"is_sponsored\":false,\"brand_name\":\"\",\"product_link\":\"\",\"commercial_rights\":false},\"bounty\":{\"amount\":0,\"niche\":\"general\"},\"target_platforms\":[\"youtube\",\"reddit\"],\"platform_options\":{\"youtube\":{\"title\":\"Coffee launch — final edit\",\"description\":\"A brighter morning. Destination copy fixture.\",\"platform\":\"youtube\",\"privacy\":\"public\",\"madeForKids\":false,\"tags\":\"\",\"category\":\"22\",\"paidPromotion\":false,\"shortsMode\":false,\"id\":\"youtube\",\"media_url\":\"https://fixture.invalid/owned.mp4\",\"meta\":{\"duration\":6}},\"reddit\":{\"title\":\"Coffee launch — final edit\",\"description\":\"A brighter morning. Destination copy fixture.\",\"platform\":\"reddit\",\"subreddit\":\"coffee\",\"kind\":\"video\",\"text\":\"A brighter morning. Destination copy fixture.\",\"url\":\"\",\"flairId\":\"\",\"isNSFW\":false,\"isSpoiler\":false,\"isPromotional\":false,\"id\":\"reddit\",\"media_url\":\"https://fixture.invalid/owned.mp4\",\"meta\":{\"duration\":6}}},\"promotion_frequency\":\"once\",\"schedule_hint\":{\"frequency\":\"once\",\"timezone\":\"Africa/Johannesburg\",\"mode\":\"publish_now\"},\"meta\":{\"duration\":6,\"sourceContentId\":\"audit-owned\",\"source\":\"studio\",\"template\":{\"name\":\"Coffee launch\"}}}"
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/upload/readiness",
+      "method": "POST",
+      "body": "{\"target_platforms\":[\"youtube\"],\"scheduled_promotion_time\":null}"
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/upload/readiness",
+      "method": "POST",
+      "body": "{\"target_platforms\":[\"youtube\"],\"scheduled_promotion_time\":null}"
+    },
+    {
+      "path": "/api/content/upload/readiness",
+      "method": "POST",
+      "body": "{\"target_platforms\":[\"youtube\"]}"
+    },
+    {
+      "path": "/api/content/upload",
+      "method": "POST",
+      "body": "{\"isDryRun\":false,\"title\":\"Coffee launch — final edit\",\"type\":\"video\",\"url\":\"https://fixture.invalid/owned.mp4\",\"description\":\"A brighter morning. Destination copy fixture.\",\"monetization_settings\":{\"niche\":\"general\",\"is_sponsored\":false,\"brand_name\":\"\",\"product_link\":\"\",\"commercial_rights\":false},\"bounty\":{\"amount\":10,\"niche\":\"coffee\"},\"viral_boost\":{\"force_seeding\":true},\"variants\":[\"Alternate coffee hook\"],\"variant_strategy\":\"rotation\",\"target_platforms\":[\"youtube\"],\"platform_options\":{\"youtube\":{\"title\":\"Coffee launch — final edit\",\"description\":\"A brighter morning. Destination copy fixture.\",\"platform\":\"youtube\",\"privacy\":\"public\",\"madeForKids\":false,\"tags\":\"\",\"category\":\"22\",\"paidPromotion\":false,\"shortsMode\":false,\"id\":\"youtube\",\"media_url\":\"https://fixture.invalid/owned.mp4\",\"meta\":{\"trimStart\":1,\"trimEnd\":4,\"rotate\":90,\"flipH\":true,\"flipV\":true,\"filter\":\"sepia\",\"duration\":6}}},\"promotion_frequency\":\"once\",\"schedule_hint\":{\"frequency\":\"once\",\"timezone\":\"Africa/Johannesburg\",\"mode\":\"publish_now\"},\"meta\":{\"trimStart\":1,\"trimEnd\":4,\"rotate\":90,\"flipH\":true,\"flipV\":true,\"filter\":\"sepia\",\"duration\":6,\"sourceContentId\":\"audit-owned\",\"source\":\"studio\",\"template\":{\"name\":\"Coffee launch\"}}}"
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/upload/source-file",
+      "method": "POST",
+      "body": "\u0000\u0000\u0000 ftypisom\u0000\u0000\u0002\u0000isomiso2avc1mp41\u0000\u0000\nDmoov\u0000\u0000\u0000lmvhd\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0003�\u0000\u0000\u0017p\u0000\u0001\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000@\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\tntrak\u0000\u0000\u0000\\tkhd\u0000\u0000\u0000\u0003\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0017p\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000@\u0000\u0000\u0000\u0002�\u0000\u0000\u0001h\u0000\u0000\u0000\u0000\u0000$edts\u0000\u0000\u0000\u001celst\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0017p\u0000\u0000\u0004\u0000\u0000\u0001\u0000\u0000\u0000\u0000\b�mdia\u0000\u0000\u0000 mdhd\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u00002\u0000\u0000\u0001,\u0000U�\u0000\u0000\u0000\u0000\u0000-hdlr\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000vide\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000VideoHandler\u0000\u0000\u0000\b�minf\u0000\u0000\u0000\u0014vmhd\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000$dinf\u0000\u0000\u0000\u001cdref\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\furl \u0000\u0000\u0000\u0001\u0000\u0000\bQstbl\u0000\u0000\u0000�stsd\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000�avc1\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002�\u0001h\u0000H\u0000\u0000\u0000H\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0015Lavc60.31.102 libx264\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0018��\u0000\u0000\u00007avcC\u0001d\u0000\u001e��\u0000\u001agd\u0000\u001e��@�/�p\u0011\u0000\u0000\u0003\u0000\u0001\u0000\u0000\u0003\u00002\u000f\u0016-�\u0001\u0000\u0006h���\"����\u0000\u0000\u0000\u0000\u0010pasp\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0014btrt\u0000\u0000\u0000\u0000\u0000\u0000(�\u0000\u0000(�\u0000\u0000\u0000\u0018stts\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000�\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0014stss\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0001\u0000\u0000\u0004�ctts\u0000\u0000\u0000\u0000\u0000\u0000\u0000�\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\n\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0004\u0000\u0000\u0000\u0000\u001cstsc\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0001\u0000\u0000\u0000�\u0000\u0000\u0000\u0001\u0000\u0000\u0002lstsz\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000�\u0000\u0000\r�\u0000\u0000\u0000b\u0000\u0000\u0000!\u0000\u0000\u0000\u001f\u0000\u0000\u0000\u001a\u0000\u0000\u0000'\u0000\u0000\u0000%\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001c\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001b\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001b\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001a\u0000\u0000\u0000\"\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u001b\u0000\u0000\u0000\u001a\u0000\u0000\u0000\u0014stco\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\nt\u0000\u0000\u0000budta\u0000\u0000\u0000Zmeta\u0000\u0000\u0000\u0000\u0000\u0000\u0000!hdlr\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000mdirappl\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000-ilst\u0000\u0000\u0000%�too\u0000\u0000\u0000\u001ddata\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000Lavf60.16.100\u0000\u0000\u0000\bfree\u0000\u0000\u001e�mdat\u0000\u0000\u0002�\u0006\u0005����E���H��,� �#��x264 - core 164 r3108 31e19f9 - H.264/MPEG-4 AVC codec - Copyleft 2003-2023 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=11 lookahead_threads=1 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=23.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00\u0000�\u0000\u0000\n�e��\u0000;����\u0014ԩ��ʶ\u001c�э?<R]��L�r��\u001d�Հ\u0000\u0000\u0003\u0000\u0000\u0003\u0000\u0000R�\u0017=��f=�\u0000\u0000\u0003\u0000\u001d0\u0005H\u001e�\u000f\f0�\rP�\u0017\u0011���\u001e�@-�\u0002�(�#s�\u00122\u000bExnT�\u001cb���1\u0002J�R�VTť\u0010\trTX�5M=y���\u001c\u0011{ \u0007s���na����x\u0012\u0017��%r��|\u0014��d�30���g���C�e��\"#\u0017\u000b�9�ݐ�%\u0018s�j�\u000b�K\u000f���\"S�\u0001���m2\u0013�ϟG��,J�{�[6v����K�j��\u0007D����жv�b�6U��>�,\u001aR\u0005��x/3�\n\u001f�x\u0015�X�\u0003\u0006\u0004�\u0013»�iQ(W0��DL+��P\r��0�`j�\u0010\u0018�\u0010\u0016<�\u0019����>\f��\u0001W��צ'��+)�u�\u0004Y�=̘@�~PgZϛm黴�(B�\u000bb�ʑx�7�d��k����}n�ܩ$9�+H�'i\u000el\u001c\u000f�}r]� ��y�\u0000M\b��h��Acb�\u0010r犯�v\f.�ۃ�J�5;��5�!�;��\u0000T��Ji����'\u0003�C�\u001eΟ=�x��o�Dy\u001cȔZkw��nn���_\u001c�rV$��H��2d)����3��ס�8�N��\u001c#����n�,��\u0007�A1m�\u00140?��d�\u0010\u0019���xƙ����'p�\u0010\u0003Aj�mf�b�š��(\u0016�s=:�\t\u001eo۸���吷�mo\u000f�7w�\u000eلoV�{�n����Q�u�A��9<�z�һ)h�0\u0013 \u0002O\u000b�\u0006�ntu�\u001b�X�TZ����iA�NZ�I���[̥W�\u0016C��\u0006�|u��_��g,\u001d\u0018Gyli\u0019�\u0004�~.\"R5��T�/Ř�\u001f\u0005r�m�\u001b\u00155]��97��G(�Iiۭc3�n\u0012��]!���ba��+��w�~1q,\n?���}Ϊ�T/�^f��`���\u0005*�݌\u0005\b�h�Ȇ榌\u000eg|�X\u0006��\b�#�����O-�N�e�E���\u0000O��\n�&\u0003����~?�us�z)���G�E@�|\u0000`>��2o�,�\b�\u0000#-�O\u001b\u0019�\u001b�#�M��E\b�o�G���\f���_1��>�`Oɕ4\u0017\u001f���z\b*�\u0003�\rVu�@�\u001d����`��ߦ�bZ쿟đ:Z4��\f��C�\u001d�\u0000�\u0018\u0002\n�a�W\"Md�jI��O�:\u0000\u0013\u0003)�&�O�~\u0016�\u0005B_�|�)�`Ba�pL�:��?��Y��͊x�U`��#'���4\u001b�{�8\u0018��\u0014IZ��0�������jWL�\t\u0012?^�w^l\u0017�t��\r�\u0005��\u0015��\u000eS�ʾ7�vꝓ}\u001c�%\u0001�|������$I�Q\u0018���\t5o\u0003\u0001'��쾘[\u001cfu\n\b�~3�/��\u0016-��\u0012jҴ�R˭\u0012?<���T�`��G�הb\u0005;�J\u0010�6з�8��8�Q_���\f\u001b�HsC�Ztj�U��2�1%\u0000��\u0000B6�-\u0007�d���G*=6�2Sӣg�g\u0002*v��u��\u0015���=3A8\u000e)�\u000f�!��n�u��[G�H��\u001e�P�1�r�<��r=s��O��\u00103�4�����c�\u0017u�&׽�VY0d�A���#]g��|KZD>i�be�S쪔ٵ��n\u000b0l�S�����J����`�,��:���$ox\u0000���L�\u0005��0�2�<U�\u0019�������j�ޕ�H�czH�qI/XU�}\u0017�G�`_I���g�@�Fy�D#-@De+�\u0002���#���/.\b&y�=\u001eO�t���บ牤tPw~0��\u001cM]��p\u0006Hd�Z�(�A\u0000A;Xk?P�vG!�\u0006\u001e���P\u0003*�����v0>�FW�T\f����V�*��ՆȚ�-\u0001�\b���U��G���x@��⣀�,�\u0015\n'�<&��\u001a\u0018v���I�jѴp���J\u001d,��\f5�\u0016ץ���y[.D��\u0010��}NXK�H\u001dFM�`��C�\u0003.{�ld�@�g\t�4�\u0014\u001cb����%v�Iv?���\u0000����\u0016k�bϫ�U��\u0001�gF��b�2ԩ�(�Ci۹r,�\tv���)�\u0014\u0018����\u0003\b�^M��$��\u000bq\u0017rP\u0002�uf���c\\:��\u0011�QR��D<}-�s��=��d�)[�\u0002:��t����\"n�Ў�9�l�\u0000�h��g������w���ۉ�\u001d���\u0005�\u0019��\u0018������M.�;\u001a�?h\u0015x�\f���Ԏ�.y�\u000fu��-�˧ZQ�Bb��\u001b33L�\u0014R0`}�ͥ�\u0011�.iE\u0000�\u001a��J��26O\b5�K`�\f�\u001dn�@q�Y����1uV�\r��\r\u0001V��\u000et]Ĕ5�\rn����vFsN�\u0015����`�Bщ�[�!�P��F�\u000b�ȼ�3C�7�7���-��\u0013?\u0014�Ȅ\u000e��C����j�\u000f�><6�N�|��≜e9\u0012�Y�@i����վn\u0003����\to�*i����I�vbݓVӎ��\u001e?\b�yK�b&s�bw!\u0005��X��A�*Q���GI��\u0010\u001eD_ݺ��E8�mm|�u�!�-qz�.=�q]d����I6Gp�\u0005+�}��\b�\u0019�*,P�����ER�\u0017O+\b�-\\څ \u001ef��K��\u00003��wܩ��fߖ�\u0015J�\u0001�����pv�7���U$�\u0006�\u0016~����ƺ\u0002��Xg\u0017�moc��0VV%e'�!\u0011\u0013T��|���/\u0006�2W\u0011�h�'�j# �� �RX[,��Uk�\u000f0&�P��w�����h�\u0003�A*��\u0015�\t��\u0012]���S�\u0002c��H�FMB�\u001bZ}��\u0004oYUI��Z��\u001e\u0006&\u001f��L:5ᬸd������3)�)\u001d�~��\rX��+��+�6��748�RH �����O<��\u0004Cl#|\u000eꘞR��\u0017��'&�1d�H���\u0019����1���=ݲ �6g�\u0003o���j$:�\u0013��\\�ɇ=���9��\n��{��AX�VsT���\u0019?J���vo^��[y�\u0002��T_Uv��Y/��V��(��N\u001bB\u0001�#�\u000e�q\u001d��\u0016 ��ZC�9nU�#%d$3�\u0012V�����c8�\u001bww\u001c\u001b\u0007�W�p<���]�O�o\r/�H(���K�_~�͇8��^\u001c�+}^�Z<�P���\u000fA��-�T�\t65�\u001b��.`\u0011��\u0006>[�X�*��/���)\br��>|/��\u000b���\u0002^W��2�/\u001c\u0013��+�>}xE,��d��q\u0002�4�\u0018�9+n\u000b��\bU���Ȱ�q=yK]�L�7�\u0001r�\u000b\u0016��\u0003:�:07@c�C�=�����\u0019�ʇ�f^���G�\"T`'�~d]m�F\u001b4��s\u001aG����b2n�M�E�ftZ�Nx \u0012\u0014+���U\u0007\u0011ڪ7~5�\b�[g\u001c\u000f?\u0005��I�'�ѿ�\b\u0002��IX\"�\u0000;@\u0000\u0000\u0003\u0000\u0000\u0003\u0000\u0000\u0003\u0000\u0000\u0003\u0000\u0000\u001b�\u0000\u0000\u0000^A�$lC����\u0000\u0000\u0003\u0002`�j\u0000t\u001bJ{\u0013v^�\u0018��:���}�(�@\\��g�$�t:�:p\u0006���k�G�8x?\u000e��q\u000bwI\\�)� ���\u0000%������Ò�{�K�\u0000\u0000\u0000\u001dA�Bx��\u0000\u0000\u0004�\u001fC�Z�2�\"W���0݀5�\u0000\u0000\u0000\u001b\u0001�atB�\u0000\u0000\u0006��PŪ@Dy}(n�>���\u0004�\u0000\u0000\u0000\u0016\u0001�cjB�\u0000\u0000\u0006�ҿ8����}\u0012�mA\u0000\u0000\u0000#A�hI�Ah�L\bw����\u0000\u0000\u0003\u0001m��`\u0013D�r%���N�\u0017q\u0000\u0000\u0000!A��E\u0011,/�\u0000\u0000\u0004�\"�&����h�;�,S�\u0012�Y�\u0000\u001f1\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�\u000eE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�-tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001�/jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�4I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�RE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�qtB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�sjB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�xI�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�\u001eE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�=tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�?jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�$I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�BE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�atB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�cjB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�hI�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�\u000eE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�-tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001�/jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�4I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�RE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�qtB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�sjB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�xI�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�\u001eE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�=tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�?jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�$I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�BE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�atB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�cjB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�hI�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�\u000eE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�-tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001�/jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�4I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�RE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�qtB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�sjB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�xI�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�\u001eE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�=tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�?jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�$I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�BE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�atB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�cjB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�hI�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�\u000eE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�-tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001�/jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�4I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�RE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�qtB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�sjB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�xI�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A��I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�\u001eE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�=tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�?jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�$I�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA�BE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�atB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�cjB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0018A�hI�Al�L\bw����\u0000\u0000\u0003\u0000\u0000\u0003\u0000�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0017A��I�Al�L\bo����\u0000\u0000\u0003\u0000\u0000\u0003\u0001�\u0000\u0000\u0000\u001eA��E\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001��tB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001��jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0017A��I�Al�L\bo����\u0000\u0000\u0003\u0000\u0000\u0003\u0001�\u0000\u0000\u0000\u001eA�\u000eE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�-tB�\u0000\u0000\u0006����u��\f��w\u0002_\u0000\u0000\u0000\u0017\u0001�/jB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0016A�4I�Al�L\b_����\u0000\u0000\u0003\u0000\u0000\u0006�\u0000\u0000\u0000\u001eA�RE\u0015,/�\u0000\u0000\u0004�\"�o�\u0012��$\u001e�}�\u000b��\u0000��\u0000\u0000\u0000\u0016\u0001�qtB�\u0000\u0000\u0006����u��\f��w\u0002^\u0000\u0000\u0000\u0017\u0001�sjB�\u0000\u0000\u0006�ҿ8���Ip.����\u0000\u0000\u0000\u0016A�uI�Al�L\bW��8@\u0000\u0000\u0003\u0000\u0000\u001b1"
+    },
+    {
+      "path": "/api/media/process",
+      "method": "POST",
+      "body": "{\"fileUrl\":\"https://fixture.invalid/uploaded.mp4\",\"sourceStoragePath\":null,\"renderJobId\":null,\"renderRequestId\":\"ad28ea7e-4eba-4b89-83f7-52896feddb19\",\"options\":{\"smartCrop\":true,\"cropStyle\":\"blur\",\"silenceRemoval\":false,\"silenceThreshold\":-35,\"minSilenceDuration\":0.75,\"captions\":false,\"muteAudio\":false,\"addMusic\":false,\"musicVolume\":0.15,\"musicDucking\":true,\"musicDuckingStrength\":0.35,\"removeWatermark\":false,\"watermarkMode\":\"adaptive\",\"analyzeClips\":false,\"isSearch\":false,\"safeSearch\":true,\"musicFile\":null,\"addHook\":false,\"hookText\":\"THIS CHANGES FAST\",\"manualWatermarkRegions\":[],\"hookIntroSeconds\":3,\"hookTemplate\":\"blur_reveal\",\"hookStartTime\":0,\"hookBlurBackground\":true,\"hookDarkOverlay\":true,\"hookFreezeFrame\":false,\"hookZoomScale\":1.08,\"hookTextAnimation\":\"slide-up\",\"hookFocusPoint\":null,\"coverFrame\":null,\"thumbnailFrame\":null,\"enhanceQuality\":false,\"hookEndTime\":3,\"hookSourceStartTime\":0.8,\"hookSourceEndTime\":3.8,\"exportDestination\":\"general\",\"renderViral\":true,\"viralData\":{\"video_url\":\"https://fixture.invalid/uploaded.mp4\",\"start_time\":0,\"end_time\":6,\"overlays\":[],\"auto_captions\":false,\"timeline_segments\":[{\"id\":\"main\",\"source_clip_id\":\"main\",\"url\":\"https://fixture.invalid/uploaded.mp4\",\"start_time\":0,\"end_time\":6,\"duration\":6,\"transition_in\":null,\"transition_out\":null,\"transition_duration\":0,\"audioTrimOffsetStart\":0,\"audioTrimOffsetEnd\":0}],\"background_audio\":null,\"hook_focus_point\":null,\"cover_frame\":null,\"thumbnail_frame\":null,\"caption_style\":\"bold_pop\",\"caption_position\":\"bottom_center\",\"caption_scale\":1,\"caption_text_override\":null,\"caption_segments\":[],\"caption_review_copy\":false,\"translate_captions_to_english\":false,\"preview_speed\":1,\"pacing_level\":\"balanced\",\"creative_intent\":\"energy\",\"studio_plan\":null,\"professional_cleanup\":false,\"creative_plan\":{\"version\":1,\"enabled\":false,\"intensity\":\"bold\",\"fallback\":\"clean\",\"effects\":[]},\"finish_plan\":{\"version\":1,\"enabled\":true,\"color_cube\":null,\"adjustment_layers\":[],\"main_frame\":{\"enabled\":true,\"shape\":\"round\",\"inset_percent\":2.5,\"border_radius_percent\":6,\"background\":\"studio_black\"},\"color\":{\"preset\":null,\"precisionGrade\":false,\"exposureStops\":0,\"lift\":0,\"gamma\":1,\"gain\":1,\"tint\":0,\"brightness\":1,\"contrast\":1,\"saturation\":1,\"temperature\":0,\"sharpness\":0,\"vignette\":0},\"motion\":{\"zoom\":1,\"zoom_anchor\":\"center\",\"base_scale\":1,\"scale_keyframes\":[],\"base_transform\":{\"x\":50,\"y\":50,\"scale\":1,\"rotation\":0,\"opacity\":1,\"crop_x\":0,\"crop_y\":0},\"keyframes\":[]},\"texture\":{\"film_grain\":0,\"chromatic_aberration\":0,\"vhs_tracking\":0,\"light_leak\":0},\"visualizer\":{\"enabled\":false,\"mode\":\"wave\",\"color\":\"#72f7ff\",\"intensity\":0.75,\"position\":\"bottom\",\"source\":\"original_speech\"},\"keyframes\":[],\"magnetic_beats\":{\"enabled\":true,\"markers\":[]},\"reframe\":{\"enabled\":true,\"aspect\":\"9:16\",\"mode\":\"speaker_track\",\"zoom\":1,\"keyframes\":[]}},\"audio_restoration\":{\"enabled\":true,\"preset\":\"natural\",\"voiceIsolation\":false,\"denoise\":22,\"deEsser\":18,\"humFrequency\":50,\"compressor\":35,\"limiter\":-1,\"loudness\":-14,\"eq\":{\"low\":0,\"mid\":0,\"high\":0}},\"audio_automation\":{\"originalAudio\":[],\"masterPodcast\":[],\"voiceover\":[],\"music\":[],\"broll\":[],\"sfx\":[]},\"audio_track_states\":{\"video\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"adjustment\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"graphics\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"broll\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"captions\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"originalAudio\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"voiceover\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"music\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"sfx\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false}},\"editor_timeline\":{\"track_states\":{\"video\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"adjustment\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"graphics\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"broll\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"captions\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"originalAudio\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"voiceover\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"music\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"sfx\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false}},\"edit_tool\":\"select\",\"snapping\":true,\"linked_selection\":true,\"ripple_mode\":false,\"motion_keyframes\":[],\"audio_keyframes\":{\"originalAudio\":[],\"masterPodcast\":[],\"voiceover\":[],\"music\":[],\"broll\":[],\"sfx\":[]},\"speed_keyframes\":[],\"adjustment_layers\":[],\"compound_clips\":[],\"voiceovers\":[]},\"composition_plan\":{\"version\":1,\"coordinate_space\":\"canvas_percent\",\"preview_timebase\":\"output_timeline_seconds\",\"layers\":[{\"id\":\"main-video\",\"name\":\"Main video\",\"type\":\"video\",\"base_transform\":{\"x\":50,\"y\":50,\"scale\":1,\"rotation\":0,\"opacity\":1,\"crop_x\":0,\"crop_y\":0},\"anchor_x\":50,\"anchor_y\":50,\"effects\":{\"blur\":0,\"glow\":{\"enabled\":false,\"color\":\"#8b5cf6\",\"radius\":0,\"intensity\":0},\"shadow\":{\"enabled\":false,\"color\":\"#000000\",\"blur\":0,\"opacity\":0,\"x\":0,\"y\":0},\"motion_blur\":{\"enabled\":false,\"samples\":1,\"shutter\":0}},\"motion_keyframes\":[]}]},\"speed_segments\":[{\"id\":\"speed-1\",\"start_time\":0,\"end_time\":6,\"rate\":1,\"pitch_preserved\":true}],\"smart_crop\":true,\"smart_crop_mode\":\"speaker_track\",\"visual_enhance\":false,\"silence_removal\":false,\"silence_threshold_db\":-35,\"min_silence_duration\":0.75,\"remove_watermark\":false,\"watermark_mode\":\"adaptive\",\"watermark_regions\":[],\"brand_watermark\":true,\"watermark_text\":\"AutoPromote · Viral Clip Studio\",\"brand_watermark_variant\":\"studio\",\"brand_watermark_schedule\":[{\"startTime\":0,\"endTime\":3.75,\"position\":\"bottom_left\",\"left\":6,\"top\":83,\"width\":28,\"height\":8},{\"startTime\":3.75,\"endTime\":6,\"position\":\"bottom_right\",\"left\":66,\"top\":83,\"width\":28,\"height\":8}],\"output_settings\":{\"resolution\":\"1080p\",\"fps\":\"30\",\"codec\":\"h264\",\"quality\":\"high\",\"videoBitrate\":\"auto\",\"targetFileSizeMb\":\"\",\"audioCodec\":\"aac\",\"audioBitrate\":\"192\",\"colorSpace\":\"rec709\"},\"add_hook\":false,\"hook_text\":\"THIS CHANGES FAST\",\"hook_intro_seconds\":3,\"hook_template\":\"blur_reveal\",\"hook_start_time\":0,\"hook_end_time\":3,\"hook_source_start_time\":0.8,\"hook_source_end_time\":3.8,\"hook_blur_background\":true,\"hook_dark_overlay\":true,\"hook_freeze_frame\":false,\"hook_zoom_scale\":1.08,\"hook_text_animation\":\"slide-up\",\"add_music\":false,\"music_url\":null,\"music_name\":null,\"music_selection\":\"upbeat_pop.mp3\",\"is_search\":false,\"safe_search\":true,\"music_volume\":0.15,\"music_ducking\":true,\"music_ducking_strength\":0.35,\"music_ducking_mode\":\"speech\",\"music_fade_in\":0.5,\"music_fade_out\":0.5,\"music_loop\":true,\"sound_effects\":[],\"audio_remix\":{\"version\":1,\"enabled\":false,\"preset\":\"slowed_reverb\",\"speed\":0.82,\"pitch_semitones\":-3,\"bass_db\":8,\"clarity_db\":2,\"air_db\":1,\"reverb_mix\":0.68,\"intensity\":0.75,\"keep_pitch\":false,\"content_type\":\"auto\",\"target\":\"master\",\"output_gain_db\":0,\"level_match\":true,\"quality\":\"studio\"},\"motionGraphics\":{\"version\":1,\"scenes\":[]},\"threeDGraphics\":[],\"mute_audio\":false,\"export_destination\":\"general\"}}}"
+    },
+    {
+      "path": "/api/media/process",
+      "method": "POST",
+      "body": "{\"fileUrl\":\"https://fixture.invalid/uploaded.mp4\",\"sourceStoragePath\":null,\"renderJobId\":null,\"renderRequestId\":\"63c2e6a5-c9d5-473a-b0e6-40a717cd3663\",\"options\":{\"smartCrop\":true,\"cropStyle\":\"blur\",\"silenceRemoval\":false,\"silenceThreshold\":-35,\"minSilenceDuration\":0.75,\"captions\":false,\"muteAudio\":false,\"addMusic\":false,\"musicVolume\":0.15,\"musicDucking\":true,\"musicDuckingStrength\":0.35,\"removeWatermark\":false,\"watermarkMode\":\"adaptive\",\"analyzeClips\":false,\"isSearch\":false,\"safeSearch\":true,\"musicFile\":null,\"addHook\":false,\"hookText\":\"THIS CHANGES FAST\",\"manualWatermarkRegions\":[],\"hookIntroSeconds\":3,\"hookTemplate\":\"blur_reveal\",\"hookStartTime\":0,\"hookBlurBackground\":true,\"hookDarkOverlay\":true,\"hookFreezeFrame\":false,\"hookZoomScale\":1.08,\"hookTextAnimation\":\"slide-up\",\"hookFocusPoint\":null,\"coverFrame\":null,\"thumbnailFrame\":null,\"enhanceQuality\":false,\"hookEndTime\":3,\"hookSourceStartTime\":0.8,\"hookSourceEndTime\":3.8,\"exportDestination\":\"general\",\"renderViral\":true,\"viralData\":{\"video_url\":\"https://fixture.invalid/uploaded.mp4\",\"start_time\":0,\"end_time\":6,\"overlays\":[],\"auto_captions\":false,\"timeline_segments\":[{\"id\":\"main\",\"source_clip_id\":\"main\",\"url\":\"https://fixture.invalid/uploaded.mp4\",\"start_time\":0,\"end_time\":6,\"duration\":6,\"transition_in\":null,\"transition_out\":null,\"transition_duration\":0,\"audioTrimOffsetStart\":0,\"audioTrimOffsetEnd\":0}],\"background_audio\":null,\"hook_focus_point\":null,\"cover_frame\":null,\"thumbnail_frame\":null,\"caption_style\":\"bold_pop\",\"caption_position\":\"bottom_center\",\"caption_scale\":1,\"caption_text_override\":null,\"caption_segments\":[],\"caption_review_copy\":false,\"translate_captions_to_english\":false,\"preview_speed\":1,\"pacing_level\":\"balanced\",\"creative_intent\":\"energy\",\"studio_plan\":null,\"professional_cleanup\":false,\"creative_plan\":{\"version\":1,\"enabled\":false,\"intensity\":\"bold\",\"fallback\":\"clean\",\"effects\":[]},\"finish_plan\":{\"version\":1,\"enabled\":true,\"color_cube\":null,\"adjustment_layers\":[],\"main_frame\":{\"enabled\":true,\"shape\":\"round\",\"inset_percent\":2.5,\"border_radius_percent\":6,\"background\":\"studio_black\"},\"color\":{\"preset\":null,\"precisionGrade\":false,\"exposureStops\":0,\"lift\":0,\"gamma\":1,\"gain\":1,\"tint\":0,\"brightness\":1,\"contrast\":1,\"saturation\":1,\"temperature\":0,\"sharpness\":0,\"vignette\":0},\"motion\":{\"zoom\":1,\"zoom_anchor\":\"center\",\"base_scale\":1,\"scale_keyframes\":[],\"base_transform\":{\"x\":50,\"y\":50,\"scale\":1,\"rotation\":0,\"opacity\":1,\"crop_x\":0,\"crop_y\":0},\"keyframes\":[]},\"texture\":{\"film_grain\":0,\"chromatic_aberration\":0,\"vhs_tracking\":0,\"light_leak\":0},\"visualizer\":{\"enabled\":false,\"mode\":\"wave\",\"color\":\"#72f7ff\",\"intensity\":0.75,\"position\":\"bottom\",\"source\":\"original_speech\"},\"keyframes\":[],\"magnetic_beats\":{\"enabled\":true,\"markers\":[]},\"reframe\":{\"enabled\":true,\"aspect\":\"9:16\",\"mode\":\"speaker_track\",\"zoom\":1,\"keyframes\":[]}},\"audio_restoration\":{\"enabled\":true,\"preset\":\"natural\",\"voiceIsolation\":false,\"denoise\":22,\"deEsser\":18,\"humFrequency\":50,\"compressor\":35,\"limiter\":-1,\"loudness\":-14,\"eq\":{\"low\":0,\"mid\":0,\"high\":0}},\"audio_automation\":{\"originalAudio\":[],\"masterPodcast\":[],\"voiceover\":[],\"music\":[],\"broll\":[],\"sfx\":[]},\"audio_track_states\":{\"video\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"adjustment\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"graphics\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"broll\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"captions\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"originalAudio\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"voiceover\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"music\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"sfx\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false}},\"editor_timeline\":{\"track_states\":{\"video\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"adjustment\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"graphics\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"broll\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"captions\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"originalAudio\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"voiceover\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"music\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false},\"sfx\":{\"visible\":true,\"locked\":false,\"muted\":false,\"solo\":false}},\"edit_tool\":\"select\",\"snapping\":true,\"linked_selection\":true,\"ripple_mode\":false,\"motion_keyframes\":[],\"audio_keyframes\":{\"originalAudio\":[],\"masterPodcast\":[],\"voiceover\":[],\"music\":[],\"broll\":[],\"sfx\":[]},\"speed_keyframes\":[],\"adjustment_layers\":[],\"compound_clips\":[],\"voiceovers\":[]},\"composition_plan\":{\"version\":1,\"coordinate_space\":\"canvas_percent\",\"preview_timebase\":\"output_timeline_seconds\",\"layers\":[{\"id\":\"main-video\",\"name\":\"Main video\",\"type\":\"video\",\"base_transform\":{\"x\":50,\"y\":50,\"scale\":1,\"rotation\":0,\"opacity\":1,\"crop_x\":0,\"crop_y\":0},\"anchor_x\":50,\"anchor_y\":50,\"effects\":{\"blur\":0,\"glow\":{\"enabled\":false,\"color\":\"#8b5cf6\",\"radius\":0,\"intensity\":0},\"shadow\":{\"enabled\":false,\"color\":\"#000000\",\"blur\":0,\"opacity\":0,\"x\":0,\"y\":0},\"motion_blur\":{\"enabled\":false,\"samples\":1,\"shutter\":0}},\"motion_keyframes\":[]}]},\"speed_segments\":[{\"id\":\"speed-1\",\"start_time\":0,\"end_time\":6,\"rate\":1,\"pitch_preserved\":true}],\"smart_crop\":true,\"smart_crop_mode\":\"speaker_track\",\"visual_enhance\":false,\"silence_removal\":false,\"silence_threshold_db\":-35,\"min_silence_duration\":0.75,\"remove_watermark\":false,\"watermark_mode\":\"adaptive\",\"watermark_regions\":[],\"brand_watermark\":true,\"watermark_text\":\"AutoPromote · Viral Clip Studio\",\"brand_watermark_variant\":\"studio\",\"brand_watermark_schedule\":[{\"startTime\":0,\"endTime\":3.75,\"position\":\"bottom_left\",\"left\":6,\"top\":83,\"width\":28,\"height\":8},{\"startTime\":3.75,\"endTime\":6,\"position\":\"bottom_right\",\"left\":66,\"top\":83,\"width\":28,\"height\":8}],\"output_settings\":{\"resolution\":\"1080p\",\"fps\":\"30\",\"codec\":\"h264\",\"quality\":\"high\",\"videoBitrate\":\"auto\",\"targetFileSizeMb\":\"\",\"audioCodec\":\"aac\",\"audioBitrate\":\"192\",\"colorSpace\":\"rec709\"},\"add_hook\":false,\"hook_text\":\"THIS CHANGES FAST\",\"hook_intro_seconds\":3,\"hook_template\":\"blur_reveal\",\"hook_start_time\":0,\"hook_end_time\":3,\"hook_source_start_time\":0.8,\"hook_source_end_time\":3.8,\"hook_blur_background\":true,\"hook_dark_overlay\":true,\"hook_freeze_frame\":false,\"hook_zoom_scale\":1.08,\"hook_text_animation\":\"slide-up\",\"add_music\":false,\"music_url\":null,\"music_name\":null,\"music_selection\":\"upbeat_pop.mp3\",\"is_search\":false,\"safe_search\":true,\"music_volume\":0.15,\"music_ducking\":true,\"music_ducking_strength\":0.35,\"music_ducking_mode\":\"speech\",\"music_fade_in\":0.5,\"music_fade_out\":0.5,\"music_loop\":true,\"sound_effects\":[],\"audio_remix\":{\"version\":1,\"enabled\":false,\"preset\":\"slowed_reverb\",\"speed\":0.82,\"pitch_semitones\":-3,\"bass_db\":8,\"clarity_db\":2,\"air_db\":1,\"reverb_mix\":0.68,\"intensity\":0.75,\"keep_pitch\":false,\"content_type\":\"auto\",\"target\":\"master\",\"output_gain_db\":0,\"level_match\":true,\"quality\":\"studio\"},\"motionGraphics\":{\"version\":1,\"scenes\":[]},\"threeDGraphics\":[],\"mute_audio\":false,\"export_destination\":\"general\"}}}"
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    }
+  ],
+  "pageErrors": [],
+  "blocked": [
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    },
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    }
+  ],
+  "accountData": "API-shaped local fixtures, no production credentials or live account snapshot"
+}

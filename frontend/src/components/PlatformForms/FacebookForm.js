@@ -383,6 +383,7 @@ const FacebookForm = ({
           alignItems: "center",
           gap: "8px",
         }}
+        className="provider-processing-note"
       >
         <span>ℹ️</span>
         <span>Note: Video processing may take a few minutes to reflect on your Facebook Page.</span>

@@ -159,11 +159,13 @@ const TikTokForm = ({
   const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
-    if (currentFile && currentFile.type.startsWith("image/")) {
+    if (currentFile instanceof Blob && currentFile.type.startsWith("image/")) {
       // Only images for filters currently
       const url = URL.createObjectURL(currentFile);
       setPreviewUrl(url);
       return () => revokeObjectUrlLater(url);
+    } else if (currentFile?.type?.startsWith("image/") && currentFile.url) {
+      setPreviewUrl(sanitizeUrl(currentFile.url));
     } else {
       setPreviewUrl(null);
     }

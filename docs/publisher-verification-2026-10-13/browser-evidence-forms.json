@@ -1,0 +1,208 @@
+{
+  "checks": [
+    "Desktop 1600: no workspace or page overflow",
+    "Viewport 1280: no workspace or page overflow",
+    "Viewport 1024: no workspace or page overflow",
+    "Viewport 768: no workspace or page overflow",
+    "Viewport 390: no workspace or page overflow",
+    "Facebook 1280: no workspace or page overflow",
+    "Facebook 390: no workspace or page overflow",
+    "Instagram 1280: no workspace or page overflow",
+    "Instagram 390: no workspace or page overflow",
+    "LinkedIn 1280: no workspace or page overflow",
+    "LinkedIn 390: no workspace or page overflow",
+    "Reddit 1280: no workspace or page overflow",
+    "Reddit 390: no workspace or page overflow",
+    "TikTok 1280: no workspace or page overflow",
+    "TikTok 390: no workspace or page overflow",
+    "YouTube 1280: no workspace or page overflow",
+    "YouTube 390: no workspace or page overflow",
+    "All six real forms: fields, preview, target validation, master copy and edit preservation",
+    "Zero browser page errors; zero requests to mutate existing schedules"
+  ],
+  "requests": [
+    {
+      "path": "/api/content/my-content",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/content/my-promotion-schedules",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/linkedin/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/tiktok/creator_info",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/facebook/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/youtube/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/linkedin/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/reddit/status",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/platform/status",
+      "method": "GET",
+      "body": null
+    }
+  ],
+  "pageErrors": [],
+  "blocked": [
+    {
+      "url": "https://fonts.googleapis.com/css2",
+      "method": "GET"
+    }
+  ],
+  "accountData": "API-shaped local fixtures, no production credentials or live account snapshot"
+}

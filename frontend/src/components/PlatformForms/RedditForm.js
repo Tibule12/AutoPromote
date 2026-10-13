@@ -508,6 +508,7 @@ const RedditForm = ({
           alignItems: "center",
           gap: "8px",
         }}
+        className="provider-processing-note"
       >
         <span>ℹ️</span>
         <span>
