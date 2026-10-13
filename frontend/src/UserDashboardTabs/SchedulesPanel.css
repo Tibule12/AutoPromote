@@ -746,12 +746,16 @@
 }
 
 /* Release workspace: keep the list, selected post, and calendar in one visual frame. */
-.ap-dashboard-redesign .schedules-panel {
+.ap-dashboard-redesign main.dashboard-main .schedules-panel {
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+.ap-dashboard-redesign .dashboard-main:has(> .schedules-panel) {
+  padding-right: 24px;
+  padding-left: 24px;
 }
 .schedule-kpis {
   gap: 16px;
