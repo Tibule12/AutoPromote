@@ -2,7 +2,7 @@ import React from "react";
 import UnifiedPublisher from "../features/publishing/UnifiedPublisher";
 import "./UploadPanel.css";
 
-function UploadPanel({ onUpload, initialFile, onClearInitialFile, contentList, defaultTimezone, onNavigate }) {
+function UploadPanel({ onUpload, initialFile, initialDestinations, onClearInitialFile, contentList, defaultTimezone, onNavigate }) {
   return (
     <section className="upload-panel">
       <UnifiedPublisher
@@ -17,6 +17,7 @@ function UploadPanel({ onUpload, initialFile, onClearInitialFile, contentList, d
         defaultTimezone={defaultTimezone}
         onNavigate={onNavigate}
         initialFile={initialFile}
+        initialDestinations={initialDestinations}
       />
     </section>
   );

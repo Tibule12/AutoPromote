@@ -39,8 +39,8 @@ import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
 
 // --- Helpers ---
 import PublisherReleaseWorkspace from "./components/PublisherReleaseWorkspace";
-import { assetFromContent, connectionState, masterCopyFor, mediaUrl, platformIssues,
-  preparePlatformOptions, resolveDelivery } from "./utils/publisherWorkflow";
+import { assetFromContent, canonicalAssetSource, connectionState, masterCopyFor, mediaUrl, platformIssues,
+  preparePlatformOptions, resolveDelivery, uniquePublisherAssets } from "./utils/publisherWorkflow";
 import { browserTimezone, isValidTimezone } from "../../UserDashboardTabs/scheduleReleaseModel";
 import {
   getPlatformName,
@@ -61,7 +61,10 @@ import {
   fetchPlatformStatusSnapshot,
 } from "./utils/publishingUtils";
 
-const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTimezone, onNavigate, embedded = false }) => {
+const UnifiedPublisher = ({ onUpload, initialFile, initialDestinations, contentList = [], defaultTimezone, onNavigate, embedded = false }) => {
+  const handedDestinations = useMemo(() => Array.isArray(initialDestinations)
+    ? [...new Set(initialDestinations.filter(platform => ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube"].includes(platform)))]
+    : DEFAULT_SELECTED_PLATFORMS, [initialDestinations]);
   // 1. Initialize State Logic
   const {
     // Global File (Raw)
@@ -98,13 +101,15 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
     getPlatformEffectiveData,
     platformData,
     resetPublishingState,
-  } = usePublishingState(DEFAULT_SELECTED_PLATFORMS); // Default selection
-  const [focusedPlatform, setFocusedPlatform] = useState(DEFAULT_SELECTED_PLATFORMS[0] || "tiktok");
-  const [workflowStep, setWorkflowStep] = useState(initialFile ? 2 : 0);
+  } = usePublishingState(handedDestinations);
+  const [focusedPlatform, setFocusedPlatform] = useState(handedDestinations[0] || "");
+  const [workflowStep, setWorkflowStep] = useState(initialFile ? handedDestinations.length ? 2 : 1 : 0);
   const [publishTiming, setPublishTiming] = useState("now");
   const [visitedPlatforms, setVisitedPlatforms] = useState({});
   const [formVersions, setFormVersions] = useState({});
-  const [assetTab, setAssetTab] = useState(initialFile ? "studio" : "assets");
+  const [assetTab, setAssetTab] = useState("studio");
+  const [publisherContent, setPublisherContent] = useState(null);
+  const [assetsLoading, setAssetsLoading] = useState(Boolean(auth.currentUser));
   const [sourceAsset, setSourceAsset] = useState(null);
   const [dimensions, setDimensions] = useState({});
   const [connectionSnapshot, setConnectionSnapshot] = useState({ raw: {}, summary: {} });
@@ -135,6 +140,25 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      if (!auth.currentUser) { setAssetsLoading(false); return; }
+      try {
+        const token = await auth.currentUser.getIdToken();
+        const response = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0&publisherAssets=1`, {
+          headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}`, Accept: "application/json" }),
+        });
+        if (!response.ok) throw new Error("Publisher assets could not be loaded.");
+        const payload = await response.json();
+        if (active && Array.isArray(payload.content)) setPublisherContent(payload.content);
+      } catch (_) { /* Existing dashboard content remains available. */ }
+      finally { if (active) setAssetsLoading(false); }
+    };
+    load();
+    return () => { active = false; };
+  }, []);
+
   const activatePlatform = platform => {
     setFocusedPlatform(platform);
     setVisitedPlatforms(current => ({ ...current, [platform]: true }));
@@ -153,17 +177,17 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
       const asset = typeof initialFile === "string" ? { url: initialFile, type: /\.(png|jpe?g|webp)(?:[?#]|$)/i.test(initialFile) ? "image/jpeg" : "video/mp4", name: "Selected media" } : initialFile;
       setGlobalFile(asset);
       setSourceAsset(asset);
-      setVisitedPlatforms(current => ({ ...current, [DEFAULT_SELECTED_PLATFORMS[0]]: true }));
+      setAssetTab(canonicalAssetSource(asset));
+      if (handedDestinations.length) {
+        setVisitedPlatforms(current => ({ ...current, [handedDestinations[0]]: true }));
+      }
       if (initialFile.suggestedTitle) setGlobalTitle(initialFile.suggestedTitle);
       if (initialFile.suggestedDescription) setGlobalDescription(initialFile.suggestedDescription);
-      setWorkflowStep(2);
-      toast.success(
-        initialFile.workflowAction === "find-viral-clips"
-          ? "Loaded the selected viral clip. Proceed to publish."
-          : "Loaded generated video! Proceed to publish."
-      );
+      setWorkflowStep(handedDestinations.length ? 2 : 1);
+      const source = canonicalAssetSource(asset);
+      toast.success(`${source === "studio" ? "Studio media" : source === "generated" ? "Generated media" : "Media"} selected. ${handedDestinations.length ? "Review the destinations." : "Choose destinations next."}`);
     }
-  }, [initialFile, setGlobalFile, setGlobalTitle, setGlobalDescription]);
+  }, [initialFile, handedDestinations, setGlobalFile, setGlobalTitle, setGlobalDescription]);
 
   // --- External Data Fetching ---
   const [tiktokCreator, setTiktokCreator] = useState(null);
@@ -635,10 +659,8 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
     }
   };
 
-  const availableAssets = useMemo(() => contentList.map(assetFromContent).filter(Boolean), [contentList]);
-  const visibleAssets = availableAssets.filter(asset => assetTab === "assets" ||
-    (assetTab === "studio" && ["studio", "viral_clip_studio", "viral-clip-studio"].includes(asset.source)) ||
-    (assetTab === "generated" && ["generated", "idea_video", "smart_promo"].includes(asset.source)));
+  const availableAssets = useMemo(() => uniquePublisherAssets((publisherContent || contentList).map(assetFromContent).filter(Boolean)), [publisherContent, contentList]);
+  const visibleAssets = availableAssets.filter(asset => canonicalAssetSource(asset) === assetTab);
   const selectOwnedAsset = asset => {
     setSourceAsset(asset);
     setGlobalFile(asset);
@@ -666,7 +688,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
   const reviewOptions = Object.fromEntries(selectedPlatforms.map(platform => [platform,
     preparePlatformOptions(platform, getPlatformEffectiveData(platform), globalTitle, globalDescription)]));
   const nextReason = nextStep => {
-    if (nextStep > 0 && !globalFile) return "Choose media before selecting destinations.";
+    if (nextStep > 0 && !globalFile) return "Choose content to continue.";
     if (nextStep > 1 && !selectedPlatforms.length) return "Select at least one destination.";
     if (nextStep > 2) {
       const incomplete = selectedPlatforms.find(platform => destinationIssues[platform]?.length);
@@ -940,7 +962,10 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
         meta: {
           ...(uploadMeta || {}),
           ...(sourceAsset?.sourceContentId ? { sourceContentId: sourceAsset.sourceContentId } : {}),
-          ...(sourceAsset?.source ? { source: sourceAsset.source } : {}),
+          ...(sourceAsset && canonicalAssetSource(sourceAsset) !== "assets"
+            ? { source: canonicalAssetSource(sourceAsset) }
+            : sourceAsset?.source ? { source: sourceAsset.source } : {}),
+          ...(sourceAsset?.sourceContext ? { sourceContext: sourceAsset.sourceContext } : {}),
           ...(sourceAsset?.templateName ? { template: { name: sourceAsset.templateName } } : {}),
           ...(fileToUpload?.clipLearning || mediaFile?.clipLearning
             ? {
@@ -1013,7 +1038,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, contentList = [], defaultTime
         title={globalTitle} description={globalDescription} onTitle={setGlobalTitle} onDescription={setGlobalDescription}
         file={globalFile} preview={previewUrl} poster={safeThumbUrl} duration={duration} dimensions={dimensions}
         onMetadata={video => { setDuration(video.duration); setDimensions({ width: video.videoWidth, height: video.videoHeight }); }}
-        onUploadFile={handleGlobalFileChange} assetTab={assetTab} onAssetTab={setAssetTab} assets={visibleAssets}
+        onUploadFile={handleGlobalFileChange} assetTab={assetTab} onAssetTab={setAssetTab} assets={visibleAssets} assetsLoading={assetsLoading}
         onSelectAsset={selectOwnedAsset} sourceAsset={sourceAsset} selected={selectedPlatforms} togglePlatform={togglePlatform}
         focus={focusedPlatform} activatePlatform={activatePlatform} connections={connections} issues={destinationIssues}
         visited={visitedPlatforms} forms={renderPlatformForm} copyMaster={copyMaster} mode={publishTiming} setMode={setPublishTiming}

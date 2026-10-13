@@ -28,15 +28,18 @@ function ReleaseMedia({ file, preview, poster, onMetadata, label = "Release medi
 export default function PublisherReleaseWorkspace({
   embedded, step, moveToStep, title, description, onTitle, onDescription,
   file, preview, poster, duration, dimensions, onMetadata, onUploadFile,
-  assetTab, onAssetTab, assets, onSelectAsset, sourceAsset,
+  assetTab, onAssetTab, assets, assetsLoading, onSelectAsset, sourceAsset,
   selected, togglePlatform, focus, activatePlatform, connections, issues,
   visited, forms, copyMaster, mode, setMode, deliveryFields, setDeliveryFields,
   timezone, setTimezone, timezones, delivery, deliveryError, frequency, setFrequency,
   customSchedule, setCustomSchedule, customFields, setCustomFields,
   reviewOptions, getData, nextReason, submit, submitting, feedback, advanced, bestTime, onNavigate,
 }) {
+  const [assetQuery, setAssetQuery] = useState("");
+  const [showAllAssets, setShowAllAssets] = useState(false);
+  const matchingAssets = assets.filter(asset => `${asset.name} ${asset.templateName || ""}`.toLowerCase().includes(assetQuery.trim().toLowerCase()));
+  const displayedAssets = showAllAssets ? matchingAssets : matchingAssets.slice(0, 12);
   const complete = selected.filter(platform => !issues[platform]?.length).length;
-  const needsAttention = selected.length - complete;
   const source = sourceLabels(sourceAsset || file);
   const releaseTitle = title || file?.name || "New release";
   const focusedData = getData(focus);
@@ -50,7 +53,6 @@ export default function PublisherReleaseWorkspace({
     <div className={`unified-publisher-container publisher-release${embedded ? " is-embedded" : ""}`}>
       {!embedded && <header className="release-page-heading"><h1>Publisher</h1><p>Prepare one release. Complete every destination.</p></header>}
       <div className="release-workflow-heading">
-        <p className="release-product-flow">Studio → Publisher → Schedule → Analytics</p>
         <ol className="release-stepper" aria-label="Publishing workflow">
           {PUBLISHER_STEPS.map((name, index) => <li key={name} className={step === index ? "active" : step > index ? "complete" : ""}>
             <button type="button" onClick={() => moveToStep(index)} aria-current={step === index ? "step" : undefined}>
@@ -59,63 +61,64 @@ export default function PublisherReleaseWorkspace({
           </li>)}
         </ol>
       </div>
-      <header className="release-identity"><h2>{releaseTitle}</h2><p>{step === 2 ? "Complete each destination's required fields." : step === 4 ? "Review every post before submitting your release." : "One release, prepared for your selected destinations."}</p></header>
-      <div className={`release-workspace release-stage-${step}`}>
-        <aside className="release-sidebar">
-          <section className="release-card release-content-card" aria-label="Release content">
+      <header className="release-identity"><h2>{releaseTitle}</h2><p>{step === 0 ? file ? "Content selected. Continue to destinations or choose another asset." : "Choose a video or image to start." : step === 1 ? "Choose where this content will be published." : step === 2 ? "Customize each destination's post." : step === 3 ? "Choose when to publish." : "Review every post before submitting your release."}</p></header>
+      <div className={`release-workspace release-stage-${step}${file ? "" : " is-empty"}`}>
+        {(file || step > 0) && <aside className="release-sidebar">
+          {file && <section className="release-card release-content-card" aria-label="Release content">
             <h3>Content</h3>
             <ReleaseMedia file={file} preview={preview} poster={poster} onMetadata={onMetadata} />
             <strong className="release-media-name">{releaseTitle}</strong>
-            <p className="release-media-meta">{duration > 0 ? `${Math.round(duration)} seconds` : "Duration unavailable"}{dimensions.width && dimensions.height ? ` · ${dimensions.width}:${dimensions.height}` : ""}</p>
+            {file && <p className="release-media-meta">{duration > 0 ? `${Math.round(duration)} seconds` : "Duration unavailable"}{dimensions.width && dimensions.height ? ` · ${dimensions.width}:${dimensions.height}` : ""}</p>}
             {source.origin && <p className="release-origin">{source.origin}</p>}
             {source.template && <p className="release-origin">{source.template}</p>}
-            {sourceAsset?.sourceContentId && <p className="release-origin">Existing project asset</p>}
-            <button type="button" className="release-text-button" onClick={() => moveToStep(0)}>Change content</button>
-          </section>
-          <section className="release-card release-destination-list" aria-label="Selected destinations">
-            <h3>Destinations</h3><p>{selected.length} selected · {complete} complete</p>
+            {file && step !== 0 && <button type="button" className="release-text-button" onClick={() => moveToStep(0)}>Change content</button>}
+          </section>}
+          {step > 1 && <section className="release-card release-destination-list" aria-label="Selected destinations">
+            <h3>Destinations</h3>{selected.length > 0 && <p>{selected.length} selected · {complete} complete</p>}
             {selected.map(platform => <button key={platform} type="button" className={`release-destination-row ${focus === platform ? "active" : ""}`} onClick={() => { activatePlatform(platform); moveToStep(2); }}>
               <PublisherPlatformIcon platform={platform} /><strong>{getPlatformName(platform)}</strong>
               <span className={`release-connection ${connections[platform]?.connected ? "connected" : ""}`}>{connections[platform]?.label}</span>
               <span className={`release-form-status ${issues[platform]?.length ? "attention" : "complete"}`}>{badge(platform)}</span>
               <span aria-hidden="true">›</span>
             </button>)}
-            {!selected.length && <p>Select the destinations for this release.</p>}
-            <button type="button" className="release-text-button" onClick={() => moveToStep(1)}>Change destinations</button>
-          </section>
-        </aside>
+            {!selected.length && <p>{file ? "Choose where this content will be published." : "Choose content first, then select destinations."}</p>}
+            {step > 1 && <button type="button" className="release-text-button" onClick={() => moveToStep(1)}>Change destinations</button>}
+          </section>}
+        </aside>}
         <main className="release-main">
           {step === 0 && <section className="release-card release-content-chooser" aria-label="Choose release content">
             <h3>Choose your content</h3><p>Use media AutoPromote already owns, or upload a video or image.</p>
             <div className="release-source-tabs" role="tablist" aria-label="Content sources">
-              {[ ["studio", "Studio"], ["generated", "Generated"], ["assets", "Project assets"], ["upload", "Upload"] ].map(([id, name]) => <button key={id} type="button" role="tab" aria-selected={assetTab === id} onClick={() => onAssetTab(id)}>{name}</button>)}
+              {[ ["studio", "Studio"], ["generated", "Generated"], ["assets", "Project assets"], ["upload", "Upload"] ].map(([id, name]) => <button key={id} type="button" role="tab" aria-selected={assetTab === id} onClick={() => { setAssetQuery(""); setShowAllAssets(false); onAssetTab(id); }}>{name}</button>)}
             </div>
-            {assetTab === "upload" ? <label className="release-upload"><strong>Choose a video or image</strong><span>Upload from your device</span><input aria-label="Upload release media" type="file" accept="video/*,image/*" onChange={onUploadFile} /></label> : <div className="release-asset-grid">
-              {assets.map(asset => <button key={asset.sourceContentId} type="button" onClick={() => onSelectAsset(asset)}>
-                {asset.thumbnailUrl ? <img src={sanitizeUrl(asset.thumbnailUrl)} alt="" /> : <span aria-hidden="true">▷</span>}
+            {assetTab !== "upload" && !assetsLoading && assets.length > 12 && <label className="release-asset-search">Find an asset<input type="search" value={assetQuery} onChange={event => { setAssetQuery(event.target.value); setShowAllAssets(false); }} placeholder="Search by name or template" /></label>}
+            {assetTab === "upload" ? <label className="release-upload"><strong>Choose a video or image</strong><span>Upload from your device</span><input aria-label="Upload release media" type="file" accept="video/*,image/*" onChange={onUploadFile} /></label> : <div className="release-asset-grid" aria-busy={assetsLoading}>
+              {!assetsLoading && displayedAssets.map(asset => <button key={asset.sourceContentId} type="button" aria-pressed={!!file && sourceAsset?.sourceContentId === asset.sourceContentId} onClick={() => onSelectAsset(asset)}>
+                {asset.thumbnailUrl ? <img src={sanitizeUrl(asset.thumbnailUrl)} alt="" /> : <span className="release-asset-placeholder" aria-hidden="true">▷</span>}
                 <strong>{asset.name}</strong>{sourceLabels(asset).template && <small>{sourceLabels(asset).template}</small>}
               </button>)}
-              {!assets.length && <p>No available {assetTab === "assets" ? "project" : assetTab} assets in this workspace. Use another source or upload media.</p>}
+              {assetsLoading ? <p role="status">Loading {assetTab === "assets" ? "project" : assetTab} assets…</p> : !matchingAssets.length && <p>{assetQuery ? "No assets match that search." : `No available ${assetTab === "assets" ? "project" : assetTab} assets in this workspace. Use another source or upload media.`}</p>}
+              {!assetsLoading && !showAllAssets && matchingAssets.length > displayedAssets.length && <button type="button" className="release-show-assets" onClick={() => setShowAllAssets(true)}>Show all {matchingAssets.length} assets</button>}
             </div>}
-            <div className="release-master-copy"><h4>Master copy</h4><p>Starting copy for destination forms. Each destination can keep its own edits.</p>
-              <label>Master title<input value={title} onChange={event => onTitle(event.target.value)} maxLength={160} /></label>
-              <label>Master description<textarea value={description} onChange={event => onDescription(event.target.value)} maxLength={5000} rows={4} /></label>
-            </div>
-            {advanced}
           </section>}
-          {step === 1 && <section className="release-card" aria-label="Choose destinations"><h3>Choose destinations</h3><p>{selected.length} selected. Connection and form completion are checked separately.</p>
+          {step === 1 && <section className="release-card" aria-label="Choose destinations"><h3>Choose destinations</h3><p>Select the destinations for this release. You can customize each post next.</p>
             <div className="release-platform-grid">{PUBLISHER_PLATFORMS.map(platform => <label key={platform} className={selected.includes(platform) ? "selected" : ""}>
               <input type="checkbox" checked={selected.includes(platform)} onChange={() => togglePlatform(platform)} /><PublisherPlatformIcon platform={platform} /><strong>{getPlatformName(platform)}</strong><small>{connections[platform]?.label}</small>
             </label>)}</div>
             {onNavigate && <button type="button" className="release-text-button" onClick={() => onNavigate("connections")}>Manage provider connections →</button>}
           </section>}
           <section className="release-customize" hidden={step !== 2} aria-label="Customize destinations">
+            <div className="release-card release-master-copy"><h3>Starting copy</h3><p>Edit the copy shared with your destinations. Each destination can keep its own edits.</p>
+              <label>Master title<input value={title} onChange={event => onTitle(event.target.value)} maxLength={160} /></label>
+              <label>Master description<textarea value={description} onChange={event => onDescription(event.target.value)} maxLength={5000} rows={4} /></label>
+            </div>
             <div className="release-platform-tabs" role="tablist" aria-label="Destination forms">{selected.map(platform => <button type="button" key={platform} role="tab" aria-selected={focus === platform} onClick={() => activatePlatform(platform)}><PublisherPlatformIcon platform={platform} />{getPlatformName(platform)}</button>)}</div>
             {selected.filter(platform => visited[platform]).map(platform => <section key={platform} className="release-card release-form-card" hidden={focus !== platform} aria-label={`${getPlatformName(platform)} form`}>
               <div className="release-form-heading"><div><h3>{getPlatformName(platform)} post</h3><p>Complete the required fields for this destination.</p></div><button type="button" className="release-text-button" onClick={() => copyMaster(platform)}>Use master copy</button></div>
               {!!issues[platform]?.length && <div className="release-issues" role="status"><strong>Before delivery</strong><ul>{issues[platform].map(issue => <li key={issue}>{issue}</li>)}</ul></div>}
               {forms(platform)}
             </section>)}
+            {advanced}
           </section>
           {step === 3 && <section className="release-card release-delivery" aria-label="Delivery settings"><h3>Delivery</h3><p>Choose when the completed posts are sent.</p>
             <div className="release-delivery-modes">{[["now", "Publish now", "Send to selected destinations now."], ["schedule", "Schedule", "Choose date, time and timezone."]].map(([id, name, help]) => <label key={id} className={mode === id ? "selected" : ""}><input type="radio" name="release-delivery" checked={mode === id} onChange={() => setMode(id)} /><strong>{name}</strong><span>{help}</span></label>)}</div>
@@ -140,21 +143,15 @@ export default function PublisherReleaseWorkspace({
             </div></details>; })}
           </section>}
         </main>
-        <aside className="release-inspector">
-          {step === 2 && <section className="release-card release-post-preview" aria-label={`${getPlatformName(focus)} post preview`}><h3><PublisherPlatformIcon platform={focus} />{getPlatformName(focus)} preview</h3><div className="release-social-preview">
+        {step === 2 && <aside className="release-inspector">
+          <section className="release-card release-post-preview" aria-label={`${getPlatformName(focus)} post preview`}><h3><PublisherPlatformIcon platform={focus} />{getPlatformName(focus)} preview</h3><div className="release-social-preview">
             <small>{focus === "reddit" ? focusedOptions.subreddit ? `r/${focusedOptions.subreddit}` : "Subreddit not selected" : getPlatformName(focus)}</small><h4>{copy.title}</h4><p className="release-full-copy">{copy.body || "Your post copy will appear here."}</p><ReleaseMedia file={focusedMedia} preview={preview} poster={poster} label={`${getPlatformName(focus)} post media`} />
-          </div><small>Preview of your submitted media and copy.</small></section>}
-          <section className="release-card release-readiness" aria-label="Before delivery"><h3>Before delivery</h3><p className={file ? "complete" : "attention"}>{file ? "✓" : "!"} Media {file ? "selected" : "required"}</p><p>{selected.filter(platform => connections[platform]?.connected).length} of {selected.length} destinations connected</p><p className={needsAttention ? "attention" : "complete"}>{complete} of {selected.length} forms complete</p>
-            {selected.filter(platform => issues[platform]?.length).map(platform => <button type="button" key={platform} className="release-issue-link" onClick={() => { activatePlatform(platform); moveToStep(2); }}>{getPlatformName(platform)}: {issues[platform][0]}</button>)}
-            <p className="release-readiness-help">Complete required fields before choosing delivery.</p>
-          </section>
-          {step === 2 && <section className="release-card release-next-delivery"><h3>Next: Delivery</h3><strong>Publish now</strong><p>Send completed posts now.</p><strong>Schedule</strong><p>Choose date, time and timezone.</p></section>}
-        </aside>
+          </div><small>Preview of your submitted media and copy.</small></section>
+        </aside>}
       </div>
       <footer className="release-footer"><div>{step > 0 && <button type="button" className="release-text-button" onClick={() => moveToStep(step - 1)}>← Back to {PUBLISHER_STEPS[step - 1]}</button>}</div><div className="release-footer-action">
         {(feedback || forwardReason) && <p className="release-error" role="status">{feedback || forwardReason}</p>}
         {step < 4 ? <button type="button" className="release-primary" disabled={!!forwardReason || submitting} onClick={() => moveToStep(step + 1)}>{buttonLabels[step]} →</button> : <button type="button" className="release-primary" disabled={!!nextReason(4) || submitting} onClick={submit}>{submitting ? "Submitting…" : mode === "schedule" ? `Schedule ${selected.length} posts` : `Publish to ${selected.length} destinations`} →</button>}
-        <small>{step === 4 ? "Delivery status appears in Schedule." : needsAttention ? `${needsAttention} destination${needsAttention === 1 ? "" : "s"} need attention` : "Review each platform before submission."}</small>
       </div></footer>
     </div>
   );

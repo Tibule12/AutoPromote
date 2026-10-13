@@ -6,6 +6,46 @@ export const PUBLISHER_STEPS = ["Content", "Destinations", "Customize", "Deliver
 const text = value => String(value || "").trim();
 export const mediaUrl = file => typeof file === "string" ? file : file?.url || "";
 
+// These are identities written by AutoPromote workflows, not words inferred
+// from a title or filename. Unknown provenance remains a project asset.
+const STUDIO_SOURCES = new Set(["studio", "viral_clip_studio", "viral-clip-studio", "viral-clip-rendered", "clip_studio"]);
+const GENERATED_SOURCES = new Set(["generated", "idea_video", "idea-to-video", "smart_promo", "smart-promo", "smart_promo_summary"]);
+export function canonicalAssetSource(asset) {
+  const candidates = [asset?.source, asset?.meta?.source, asset?.sourceContext,
+    asset?.meta?.sourceContext, asset?.workflowAction, asset?.sourceType];
+  for (const value of candidates) {
+    const source = text(value).toLowerCase();
+    if (STUDIO_SOURCES.has(source)) return "studio";
+    if (GENERATED_SOURCES.has(source)) return "generated";
+    if (source === "ai_clip" && asset?.sourceClipId && asset?.sourceAnalysisId) return "studio";
+  }
+  return "assets";
+}
+
+export function uniquePublisherAssets(assets) {
+  const canonical = new Map();
+  for (const asset of assets) {
+    const url = text(asset.url);
+    let mediaKey = url;
+    try {
+      const parsed = new URL(url);
+      // Firebase download tokens can change while the storage object stays the same.
+      if (["firebasestorage.googleapis.com", "storage.googleapis.com"].includes(parsed.hostname)) {
+        mediaKey = `${parsed.origin}${parsed.pathname}`;
+      }
+    } catch (_) { /* Keep the exact URL as its identity. */ }
+    const clip = asset.virtualClip;
+    const cut = clip ? `:${clip.start ?? ""}:${clip.end ?? ""}` : "";
+    const key = `${text(asset.renderOutputHash || asset.mediaHash || asset.storagePath) || mediaKey || `id:${asset.sourceContentId}`}${cut}`;
+    const previous = canonical.get(key);
+    // Prefer the original, provenance-bearing item to a later scheduling copy.
+    const score = candidate => (canonicalAssetSource(candidate) !== "assets" ? 2 : 0) +
+      (candidate.originContentId ? 0 : 1);
+    if (!previous || score(asset) > score(previous)) canonical.set(key, asset);
+  }
+  return [...canonical.values()];
+}
+
 export function assetFromContent(content) {
   const url = [content.persistentMediaUrl, content.url, content.mediaUrl, content.media_url,
     content.downloadInfo?.url, content.processedUrl].find(value => typeof value === "string" && /^https?:\/\//i.test(value));
@@ -18,7 +58,17 @@ export function assetFromContent(content) {
     thumbnailUrl: content.posterUrl || content.thumbnailUrl || content.selectedThumbnailUrl || "",
     duration: content.duration || content.meta?.duration,
     sourceContentId: content.id,
-    source: content.source || content.origin || content.meta?.source,
+    originContentId: content.meta?.sourceContentId,
+    source: content.source || content.meta?.source || content.origin,
+    sourceContext: content.sourceContext || content.meta?.sourceContext,
+    sourceType: content.sourceType,
+    sourceClipId: content.sourceClipId,
+    sourceAnalysisId: content.sourceAnalysisId,
+    workflowAction: content.workflowAction || content.meta?.workflowAction,
+    renderOutputHash: content.renderOutputHash || content.meta?.renderOutputHash,
+    mediaHash: content.mediaHash || content.meta?.mediaHash,
+    storagePath: content.storagePath || content.meta?.storagePath,
+    virtualClip: content.virtualClip,
     templateName: content.templateName || content.template?.name || content.meta?.template?.name,
     width: content.width || content.meta?.width,
     height: content.height || content.meta?.height,
@@ -26,10 +76,8 @@ export function assetFromContent(content) {
 }
 
 export function sourceLabels(asset) {
-  const source = String(asset?.source || asset?.origin || asset?.workflowAction || asset?.meta?.source || "").toLowerCase();
-  const studio = ["studio", "viral_clip_studio", "viral-clip-studio", "viral-clip-rendered"].includes(source);
   const template = asset?.templateName || asset?.template?.name || asset?.meta?.template?.name;
-  return { origin: studio ? "Created in Studio" : "", template: typeof template === "string" && template.trim() ? `Template: ${template.trim()}` : "" };
+  return { origin: canonicalAssetSource(asset) === "studio" ? "Created in Studio" : "", template: typeof template === "string" && template.trim() ? `Template: ${template.trim()}` : "" };
 }
 
 export function connectionState(snapshot, platform, loaded) {

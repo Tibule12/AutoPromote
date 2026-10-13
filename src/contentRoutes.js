@@ -3,6 +3,8 @@ const router = express.Router();
 const { db, admin } = require("./firebaseAdmin");
 const logger = require("./utils/logger");
 const { extractOwnedStoragePathFromUrl } = require("./utils/cleanupSource");
+const { contentSource, directContentSource } = require("./utils/contentSource");
+const { enrichPublisherAssets } = require("./utils/publisherAssetMetadata");
 const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
 const crypto = require("crypto");
@@ -927,6 +929,7 @@ router.post(
         description || firstPlatformText(["description", "caption", "message", "commentary"]) || ""
       ).trim();
 
+      const uploadedSource = directContentSource({ meta: req.body.meta });
       const contentData = {
         title: resolvedTitle,
         type,
@@ -952,6 +955,7 @@ router.post(
         monetization_settings: monetization_settings || {}, // Persist TikTok/Revenue settings
         protocol7: protocol7 || {}, // Persist Protocol 7 settings
         meta: req.body.meta,
+        ...(uploadedSource ? { source: uploadedSource } : {}),
         duration:
           typeof (req.body.meta && req.body.meta.duration) === "number"
             ? req.body.meta.duration
@@ -1248,6 +1252,7 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       .orderBy("created_at", "desc");
     const snapshot = await contentRef.get();
     const docs = snapshot.docs;
+    const recordsById = new Map(docs.map(doc => [doc.id, doc.data()]));
     const docsToEnrich = new Set();
 
     if (includeStats && statsLimit > 0) {
@@ -1263,6 +1268,8 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       docs.map(async doc => {
         const data = doc.data();
         const item = { id: doc.id, ...data };
+        const source = contentSource(data, recordsById);
+        if (source) item.source = source;
 
         if (docsToEnrich.has(doc.id)) {
           try {
@@ -1280,6 +1287,9 @@ router.get("/my-content", authMiddleware, async (req, res) => {
       })
     );
 
+    const contentForResponse = parseBooleanQuery(req.query.publisherAssets, false)
+      ? await enrichPublisherAssets(contentWithStats, admin.storage().bucket())
+      : contentWithStats;
     const took = Date.now() - startMs;
     if (took > 500)
       console.warn(
@@ -1289,7 +1299,7 @@ router.get("/my-content", authMiddleware, async (req, res) => {
         req.ip || req.headers["x-forwarded-for"] || "unknown"
       );
     res.json({
-      content: contentWithStats,
+      content: contentForResponse,
       meta: {
         statsIncluded: includeStats,
         statsLimit,

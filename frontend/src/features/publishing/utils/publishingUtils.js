@@ -22,7 +22,9 @@ export const getPlatformName = platformId => {
   );
 };
 
-export const DEFAULT_SELECTED_PLATFORMS = ["tiktok", "youtube"];
+// A new release has no implied delivery destinations. A workflow may pass an
+// explicit destination handoff to UnifiedPublisher instead.
+export const DEFAULT_SELECTED_PLATFORMS = [];
 
 export const buildMediaMeta = ({
   trimStart = 0,
