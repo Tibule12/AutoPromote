@@ -1,0 +1,95 @@
+{
+  "scope": "Static left-background geometry only; excludes subject movement, title, 3D, audio and creative qualification. Same actual native pre-final/export captures normalized to preview dimensions.",
+  "samples": [
+    {
+      "programmeTime": 0.75,
+      "normalizedWidth": 730,
+      "normalizedHeight": 410,
+      "declaredRoi": [
+        10,
+        45,
+        277,
+        375
+      ],
+      "inliers": 346,
+      "affine": [
+        [
+          1.0014578091194848,
+          0.0005457504271322391,
+          -1.1174469627539296
+        ],
+        [
+          -0.0005457504271322391,
+          1.0014578091194848,
+          -0.3235323562870241
+        ]
+      ],
+      "scale": 1.0014579578244547,
+      "rotationDegrees": -0.03122367488873224,
+      "medianIdentityErrorPx": 0.9300912618637085,
+      "p95IdentityErrorPx": 1.2747766971588135,
+      "declaredP95TolerancePx": 2,
+      "result": "PASS"
+    },
+    {
+      "programmeTime": 1.55,
+      "normalizedWidth": 730,
+      "normalizedHeight": 410,
+      "declaredRoi": [
+        10,
+        45,
+        277,
+        375
+      ],
+      "inliers": 294,
+      "affine": [
+        [
+          1.0005970930426893,
+          0.0004595312955218784,
+          -1.0113508584529647
+        ],
+        [
+          -0.0004595312955218784,
+          1.0005970930426893,
+          -0.0908765937572637
+        ]
+      ],
+      "scale": 1.0005971985641833,
+      "rotationDegrees": -0.026313490334482492,
+      "medianIdentityErrorPx": 0.9123367667198181,
+      "p95IdentityErrorPx": 1.3183536529541016,
+      "declaredP95TolerancePx": 2,
+      "result": "PASS"
+    },
+    {
+      "programmeTime": 3.75,
+      "normalizedWidth": 730,
+      "normalizedHeight": 410,
+      "declaredRoi": [
+        10,
+        45,
+        277,
+        375
+      ],
+      "inliers": 326,
+      "affine": [
+        [
+          1.0010213051606536,
+          0.0004617685186820538,
+          -1.0482195460839072
+        ],
+        [
+          -0.0004617685186820538,
+          1.0010213051606536,
+          -0.26812108943924806
+        ]
+      ],
+      "scale": 1.001021411666955,
+      "rotationDegrees": -0.026430391860215806,
+      "medianIdentityErrorPx": 0.895756721496582,
+      "p95IdentityErrorPx": 1.2939205169677734,
+      "declaredP95TolerancePx": 2,
+      "result": "PASS"
+    }
+  ]
+}

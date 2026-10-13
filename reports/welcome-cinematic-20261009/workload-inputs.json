@@ -1,0 +1,32 @@
+{
+  "version": 5,
+  "prefix": "founder_films/welcome-cinematic-20261009/v5",
+  "files": {
+    "runtime.tar.gz": {
+      "localPath": "/home/tibule12/.cache/autopromote-cinematic-runtime/runtime.tar.gz",
+      "sha256": "cd2c52e50905be395bf3a604b5c35a6ac9cbd18426a15e1d751ac28cc4c251d5",
+      "bytes": 122621129,
+      "localRepackedSha256": "7291d1638d2d7fcd22ccbc8d0cb0f64391c254fed6e03e269fa34eff0859361f",
+      "note": "The first successful runtime upload is reused. Repack has identical worker/dependency entries but different gzip/tar timestamps; the job validates the original uploaded archive SHA256."
+    },
+    "inputs.tar.gz": {
+      "localPath": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/welcome-cinematic-20261009/inputs-v5.tar.gz",
+      "sha256": "52532d8282cc74be2547e1126b06f0d89dc0a26cabe6b7e03beba00f355a778c",
+      "bytes": 24505176
+    },
+    "blender.tar.xz": {
+      "localPath": "/home/tibule12/.cache/autopromote-cinematic-runtime/blender.tar.xz",
+      "sha256": "dcdc3eca6c9825bb35a8033b689c053f3cb5a9b0cd2a61b2eac2a49436b4ad3d",
+      "bytes": 377929956
+    },
+    "native-libs.tar.gz": {
+      "localPath": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/welcome-cinematic-20261009/native-libs.tar.gz",
+      "bytes": 56540,
+      "sha256": "0ad9751ece48b0d032f69d8c66d74c6824bf6443c49d41ed9992becc350e91aa"
+    }
+  },
+  "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+  "workerSha256": "31284e6d7446a05358584ed23b2be5019a8f0542d0a453e1985e14e9363a04e2",
+  "assetPrefix": "founder_films/welcome-cinematic-20261009/v1",
+  "inputObject": "inputs-v5.tar.gz"
+}

@@ -1,0 +1,9 @@
+{
+  "reference": "reports/studio-stability-20261007/subject/preview.mp4",
+  "referenceUserListeningAccepted": true,
+  "durationDeltaSamples": 0,
+  "correlation": 1.0,
+  "samePcm": true,
+  "newOutputListeningApproval": false,
+  "scope": "Continuity measurement only; not a fresh listening claim"
+}

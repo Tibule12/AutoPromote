@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-07T18:58:20.288Z",
+  "realAuth": true,
+  "noMocks": true,
+  "events": [
+    {
+      "path": "/api/media/studio-assets/resolve",
+      "status": 200,
+      "artifact": false
+    },
+    {
+      "path": "/api/media/studio-assets/resolve",
+      "status": 200,
+      "artifact": false
+    },
+    {
+      "path": "/api/media/track-studio-faces",
+      "status": 200,
+      "shots": [
+        4.7,
+        5.2
+      ],
+      "artifact": true
+    }
+  ],
+  "reviewText": "No normal reviewable proposal presented"
+}

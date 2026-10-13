@@ -1,0 +1,216 @@
+{
+  "url": "http://localhost:5000/",
+  "text": "CREATE\nViral Clip Studio\n🔈\nExplain This Tab\nThulani Mtshwelo\ntmtshwelo21@gmail.com\nAutoPromote\nCreator workspace\nOverview\n\nCREATE\n\nCam Combiner\nFind Viral Clips\nViral Clip Studio\nSmart Promo\nIdea-to-Video\n\nPUBLISH\n\nPublisher\nQueue\n\nMEASURE\n\nAnalytics\n\nSETTINGS\n\nConnections\nTeam\nBilling\nSecurity\nNeed help getting started?\nVisit the docs →\nSign out\nCREATE\nViral Clip Studio\n\nEdit detected moments on the full timeline, refine hooks, and render short clips.\n\nVideo Editing Workspace\n×\nLocal testing mode: backend editing credits are bypassed on this machine. Production billing stays enabled.\nTop Up Credits\nPrevious render\nDismiss\n\nYour finished clip is ready to preview, download, or use in the publisher.\n\nDownload clip\n✨ Effects\n📥 Download\nPRIMARY WORKFLOW\nOpen Clip Studio\n\nEdit timing, overlays, captions, and export from one workspace. Studio access stays included on paid plans, while heavier generations use credits only when you actually run them.\n\nDesktop editing tools\nCam Combiner included\nFlow Edit included\nThumbnail Lab included\nFind Viral Clips: 8 credits\nRender Final Clip: 5 credits\nSmart Promo Summary: 18 credits\n999999 editing credits available (999999 included monthly + 39 top-up). Credit-based runs draw from included monthly credits first, then top-up credits. Included editing tools stay available on paid plans.\nClip Studio and Cam Combiner are optimized for laptop and desktop editing. You can still use mobile-friendly tools here, then finish timeline work on a computer.\n🔥 Launch Clip Studio\nOpen Podcast Cam Combiner\nSmart Promo Summary\nLocal testing mode: backend editing credits are bypassed on this machine. Production billing stays enabled.\nThumbnail Lab, Cam Combiner, and Flow Edit stay included on paid plans. Save your credits for analysis, promo generation, and final rendering.\n🎬 Generate Thumbnail\nCancel\nSave & Continue",
+  "controls": [
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": "Notifications",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Overview",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Cam Combiner",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Find Viral Clips",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Viral Clip Studio",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Smart Promo",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Idea-to-Video",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Publisher",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Queue",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Analytics",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Connections",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Team",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Billing",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Security",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": null,
+      "text": "Sign out",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": null,
+      "text": "×",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": null,
+      "text": "Top Up Credits",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Dismiss",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Download clip",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "✨ Effects",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "📥 Download",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": null,
+      "text": "🔥 Launch Clip Studio",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Open Podcast Cam Combiner",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Smart Promo Summary",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "🎬 Generate Thumbnail",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": null,
+      "text": "Cancel",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": null,
+      "text": "Save & Continue",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": "Open Chat",
+      "text": "",
+      "options": null
+    }
+  ],
+  "media": [
+    {
+      "readyState": 4,
+      "duration": 12,
+      "time": 0,
+      "paused": true
+    },
+    {
+      "readyState": 4,
+      "duration": 12,
+      "time": 0,
+      "paused": true
+    }
+  ]
+}

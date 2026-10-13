@@ -1,0 +1,47 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "problems",
+  "sourceBrief": {
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+    "artifact": "source-brief.txt"
+  },
+  "settings": {
+    "duration": 6,
+    "fps": 24,
+    "samples": 16,
+    "width": 1280,
+    "height": 720
+  },
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "tool": "AutoPromote Studio Blender / original founder-film template",
+  "nativeScene": "scene.blend",
+  "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+  "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+  "seconds": 112.10291248099998,
+  "editable": [
+    "camera quaternion curves",
+    "actual logo Bezier geometry",
+    "staggered layer timing",
+    "materials",
+    "lighting",
+    "physical source carriers",
+    "film route",
+    "sound cue plan"
+  ],
+  "artifact": {
+    "path": "/film/assets/problems/video.mp4",
+    "sha256": "e692746ce67fda59318af042890a109b84ce57a4abad65596ced7075780bffa1",
+    "duration": 6,
+    "fps": 24,
+    "container": "mp4",
+    "codec": "h264",
+    "nativeScene": "scene.blend"
+  }
+}

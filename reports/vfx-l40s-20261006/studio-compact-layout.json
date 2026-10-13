@@ -1,0 +1,135 @@
+{
+  "status": "PASS",
+  "results": [
+    {
+      "label": "1440x1000",
+      "layout": {
+        "left": 0,
+        "right": 1440,
+        "top": 46,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 954
+      },
+      "dock": {
+        "left": 0,
+        "right": 1440,
+        "top": 720,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1440,
+        "top": 730,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1439,
+        "top": 731,
+        "bottom": 778,
+        "width": 1438,
+        "height": 47
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1439,
+        "top": 778,
+        "bottom": 966,
+        "width": 1438,
+        "height": 188
+      },
+      "preview": {
+        "left": 72,
+        "right": 1120,
+        "top": 46,
+        "bottom": 720,
+        "width": 1048,
+        "height": 674
+      },
+      "tools": {
+        "left": 0,
+        "right": 72,
+        "top": 46,
+        "bottom": 720,
+        "width": 72,
+        "height": 674
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "label": "1280x800",
+      "layout": {
+        "left": 0,
+        "right": 1280,
+        "top": 46,
+        "bottom": 800,
+        "width": 1280,
+        "height": 754
+      },
+      "dock": {
+        "left": 0,
+        "right": 1280,
+        "top": 520,
+        "bottom": 800,
+        "width": 1280,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1280,
+        "top": 530,
+        "bottom": 800,
+        "width": 1280,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1279,
+        "top": 531,
+        "bottom": 602,
+        "width": 1278,
+        "height": 71
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1279,
+        "top": 602,
+        "bottom": 775,
+        "width": 1278,
+        "height": 173
+      },
+      "preview": {
+        "left": 72,
+        "right": 960,
+        "top": 46,
+        "bottom": 520,
+        "width": 888,
+        "height": 474
+      },
+      "tools": {
+        "left": 0,
+        "right": 72,
+        "top": 46,
+        "bottom": 520,
+        "width": 72,
+        "height": 474
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  ]
+}

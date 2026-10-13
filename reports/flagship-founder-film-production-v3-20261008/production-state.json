@@ -1,0 +1,94 @@
+{
+  "createdAt": "2026-10-08T11:54:29.969965+00:00",
+  "userInstruction": "start now then shit",
+  "status": "PRIVATE_ROUGH_RENDERED_CREATIVE_REJECTED",
+  "privateOnly": true,
+  "publicApproved": false,
+  "GPUWindow": {
+    "jobDeadlineEpoch": 1791464069,
+    "operatorSelectedMinutes": 60,
+    "authorization": "Current user instruction to start producing the requested film now; historical windows not reused.",
+    "vmInitially": "RUNNING",
+    "startedVmHere": true,
+    "shutdownScope": "Stop only our container, then stop our restarted VM if no other process/container is active. Preserve foreign work if present.",
+    "restartedAt": "2026-10-08T12:09:35.173766+00:00",
+    "priorReservation": "Concurrent Studio session completed its window; fresh brev ls verified STOPPED before current restart."
+  },
+  "cpuPolicy": "Local preparation bounded to two cores; no heavy Studio browser resume; NVIDIA-only visual production.",
+  "preflight": {
+    "gpu": "NVIDIA L40S",
+    "uuid": "GPU-351e3c40-1450-c60d-591d-5bb2ecd15292",
+    "memoryMiB": 1,
+    "computeJobs": 0,
+    "otherContainers": [
+      "autopromote-studio-qa-vfx"
+    ]
+  },
+  "sourceBriefSha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+  "creativeApproval": false,
+  "gpuJobsStarted": 4,
+  "watchdogPid": 174345,
+  "blockedLaunches": [
+    {
+      "stage": "vessel-preview",
+      "exitCode": 75,
+      "reason": "Existing GPU lock held; no production container launched."
+    }
+  ],
+  "queuePolicy": "Wait at most 420 seconds for the existing shared lock; recheck GPU processes after acquisition; preserve other worker.",
+  "queuedPreviewResult": {
+    "exitCode": 255,
+    "cause": "Other session stopped its VM before the shared lock released; no production container launched."
+  },
+  "postRestartPreflight": {
+    "at": "2026-10-08T12:10:43.024128+00:00",
+    "gpu": "NVIDIA L40S",
+    "computeJobs": 0,
+    "containers": 0,
+    "memoryMiB": 1
+  },
+  "identPreviewQueue": "Three directions queued after vessel under the same shared lock.",
+  "fullRunStartedAt": "2026-10-08T12:31:41Z",
+  "rawPreviewReview": {
+    "vessel": "Framing corrected and full 168-frame geometry bounds validated. Selected for rough assembly; pastel CG finish and water scale remain below flagship bar.",
+    "ident": "Layered extrusion and real part pivots observed in revised cinematic macro preview. Full motion and lockup pending.",
+    "story": "Readable origin/failure/quota/reveal previews. Edge-cropped problems/director labels corrected again; current script generates fresh previews before its full frames."
+  },
+  "preflightBeforeFull": {
+    "computeJobs": 0,
+    "otherContainers": 0,
+    "actualSharedLock": "/data/autopromote-l40s-20261006/content-factory-gpu.lock"
+  },
+  "finalEncodeWindow": {
+    "authorizedBy": "User active instruction to start and finish the requested film; bounded renewed render, not historical GPU window",
+    "deadlineEpoch": 1791466334,
+    "durationCapSeconds": 900,
+    "reason": "Compiled native Director edit requires NVIDIA-only final encode; private video sources already generated.",
+    "result": "GPU provider rejected VM restart: credits exhausted; no new GPU job ran. All three actual Studio renderer outputs used CPU fallback, capped to cores 6 and 7.",
+    "failureEvidence": "gpu-credit-refusal.json"
+  },
+  "deliveries": {
+    "hero": {
+      "sha256": "3b22a99aead61be0e43e4ec58745a6137fc850d33187af6c1578da950eb9f76e",
+      "duration": 51.083333,
+      "encoder": "libx264",
+      "audioChannels": 2,
+      "status": "RENDERED_PENDING_CREATIVE_REVIEW"
+    },
+    "cutdown": {
+      "sha256": "a2d6313a8d8fb0318ee2ebf8c546548b298a480a30b3a87526e1ff9962fd993c",
+      "duration": 26.5,
+      "encoder": "libx264",
+      "audioChannels": 2,
+      "status": "RENDERED_PENDING_CREATIVE_REVIEW"
+    },
+    "teaser": {
+      "sha256": "6f622a32687112f2fe6429a999cd7f91fcaf97ccc8feaefa6e4eb5eb693fcefc",
+      "duration": 10.0,
+      "encoder": "libx264",
+      "audioChannels": 2,
+      "status": "RENDERED_PENDING_CREATIVE_REVIEW"
+    }
+  },
+  "browserReview": "browser-review/receipt.json"
+}

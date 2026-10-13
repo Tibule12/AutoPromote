@@ -1,0 +1,149 @@
+{
+  "checkedAt": "2026-10-09T16:35:28.005733+00:00",
+  "scope": "Read-only cost investigation; no inference, provision, restart, render, deployment or merge",
+  "verifiedTotalSpendUsd": null,
+  "runtimeProof": {
+    "gpuExecutionCount": 9,
+    "executionWallSeconds": 3205.3720200000002,
+    "reportedBillableInstanceSeconds": 1941.227334099017,
+    "estimatedComputeUsd": 1.7659965991541084,
+    "failedAttemptEstimatedComputeUsd": 0.78091244809879,
+    "rows": [
+      {
+        "execution": "autopromote-model-v1-segmentation-kjqbf",
+        "capability": "segment_subject",
+        "status": "completed",
+        "executionWallSeconds": 188.151225,
+        "reportedBillableSeconds": 6.246878219000003,
+        "estimatedSecondsWithOneMinuteMinimum": 60,
+        "estimatedComputeUsd": 0.0531132
+      },
+      {
+        "execution": "autopromote-model-v1-video-tr7z8",
+        "capability": "generate_video",
+        "status": "failed",
+        "executionWallSeconds": 759.538772,
+        "reportedBillableSeconds": 540.020579979,
+        "estimatedSecondsWithOneMinuteMinimum": 540.020579979,
+        "estimatedComputeUsd": 0.4780370178090103
+      },
+      {
+        "execution": "autopromote-model-v1-vision-t99ws",
+        "capability": "understand_video",
+        "status": "cancelled",
+        "executionWallSeconds": 23.100139,
+        "reportedBillableSeconds": 0,
+        "estimatedSecondsWithOneMinuteMinimum": 0,
+        "estimatedComputeUsd": 0.0
+      },
+      {
+        "execution": "autopromote-model-v1-video-6nrl7",
+        "capability": "generate_video",
+        "status": "completed",
+        "executionWallSeconds": 921.192885,
+        "reportedBillableSeconds": 730.97023453,
+        "estimatedSecondsWithOneMinuteMinimum": 730.97023453,
+        "estimatedComputeUsd": 0.6470694710106465
+      },
+      {
+        "execution": "autopromote-model-v1-vision-8tgvf",
+        "capability": "detect_object",
+        "status": "completed",
+        "executionWallSeconds": 240.927112,
+        "reportedBillableSeconds": 60.0,
+        "estimatedSecondsWithOneMinuteMinimum": 60,
+        "estimatedComputeUsd": 0.0531132
+      },
+      {
+        "execution": "autopromote-model-v1-vision-767n9",
+        "capability": "understand_video",
+        "status": "completed",
+        "executionWallSeconds": 284.713709,
+        "reportedBillableSeconds": 201.842570259,
+        "estimatedSecondsWithOneMinuteMinimum": 201.842570259,
+        "estimatedComputeUsd": 0.17867508004467197
+      },
+      {
+        "execution": "autopromote-model-v1-segmentation-v6hg6",
+        "capability": "segment_subject",
+        "status": "completed",
+        "executionWallSeconds": 202.647871,
+        "reportedBillableSeconds": 60.0,
+        "estimatedSecondsWithOneMinuteMinimum": 60,
+        "estimatedComputeUsd": 0.0531132
+      },
+      {
+        "execution": "autopromote-model-v1-vision-dc229",
+        "capability": "understand_video",
+        "status": "failed",
+        "executionWallSeconds": 276.069865,
+        "reportedBillableSeconds": 199.590614877,
+        "estimatedSecondsWithOneMinuteMinimum": 199.590614877,
+        "estimatedComputeUsd": 0.17668160410141792
+      },
+      {
+        "execution": "autopromote-model-v1-vision-qwlqp",
+        "capability": "understand_video",
+        "status": "failed",
+        "executionWallSeconds": 309.030442,
+        "reportedBillableSeconds": 142.556456235017,
+        "estimatedSecondsWithOneMinuteMinimum": 142.556456235017,
+        "estimatedComputeUsd": 0.12619382618836175
+      }
+    ],
+    "estimateMethod": "Job-level Cloud Monitoring delta points attributed to nonoverlapping execution windows; one-minute floor per observed task. Zero observed use on cancelled dispatch is not a verified zero invoice charge. Rates from Google Cloud Run us-central1 pricing; 1 RTX PRO 6000 no zonal redundancy, 20 vCPU, 80GiB. Not an invoice.",
+    "excluded": [
+      "earlier Brev work",
+      "earlier Google jobs",
+      "builds",
+      "storage",
+      "network",
+      "logs",
+      "taxes",
+      "credits/free-tier/discounts"
+    ],
+    "priceSource": "https://cloud.google.com/run/pricing",
+    "billableMetricSource": "run.googleapis.com/container/billable_instance_time"
+  },
+  "freshInventory": {
+    "at": "2026-10-09T16:30:51.050910+00:00",
+    "project": "autopromote-cc6d3",
+    "gpuJobs": [
+      {
+        "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-video",
+        "accelerator": "nvidia-rtx-pro-6000"
+      },
+      {
+        "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-segmentation",
+        "accelerator": "nvidia-rtx-pro-6000"
+      },
+      {
+        "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-vision",
+        "accelerator": "nvidia-rtx-pro-6000"
+      },
+      {
+        "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/viral-studio-rtx-qualification",
+        "accelerator": "nvidia-rtx-pro-6000"
+      }
+    ],
+    "gpuServices": [],
+    "activeGpuExecutions": []
+  },
+  "brev": {
+    "instance": "autopromote-l40s-staging",
+    "id": "xgh6wcu74",
+    "status": "STOPPED",
+    "source": "Fresh authenticated brev ls during this investigation",
+    "historicalConsoleHourlyUsd": 1.79,
+    "totalComputeHoursVerified": null,
+    "invoiceRetrieved": false,
+    "storageChargesMayContinue": true
+  },
+  "googleBilling": {
+    "billingAccountAccessible": true,
+    "currency": "USD",
+    "billingExportDatasetsInProject": 0,
+    "invoiceRetrieved": false
+  },
+  "remainingBlocker": "Total spend and avoidable spend across earlier work cannot be verified from the retrieved records. Invoice/transaction ledger and all instance intervals are not reconciled."
+}

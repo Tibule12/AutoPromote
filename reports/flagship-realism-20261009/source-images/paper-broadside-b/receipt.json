@@ -1,0 +1,40 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "The Small Boat: correct the opening vessel orientation before a continuity-controlled transformation. One recognizable navy/ivory folded paper boat facing right in photographic open water, side view; maintain one hull. Stills must pass inspection before any video take. Previous near-front source and world-replacement takes remain rejected.",
+  "prompt": "Photograph of one tiny origami boat, navy folded paper hull and two ivory triangular paper sails, port side, pointed bow facing right. Low ocean-level camera, blue waves and distant horizon, warm light from left. Angular paper creases, paper fibres. No real vessel.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 20261009072,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16",
+    "encodedTokenCounts": [
+      59,
+      59
+    ],
+    "promptTruncated": false,
+    "conditioning": "image-to-image",
+    "strength": 0.86,
+    "referenceResize": "aspect-preserving centre crop"
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "reference_conditioned_generated_image",
+  "artifact": {
+    "path": "/work/source-images/paper-broadside-b/video.mp4",
+    "sha256": "09d2bccc8f22923deff43881f19f2e34a48d41447ac10e9bb27e943d38da6e59",
+    "duration": 1.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/source-images/paper-broadside-b/image.png",
+      "sha256": "79bd5f16692fa2e73803c4695762369da329ffa9588beaa9cd06c96c232d3060"
+    }
+  ],
+  "seconds": 4.899408492001385,
+  "referenceImageSha256": "30228bad8a7c3a631a256d59d6d45cb9d8a414adf2dc121945635bd580a5846d"
+}

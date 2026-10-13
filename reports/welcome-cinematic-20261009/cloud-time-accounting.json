@@ -1,0 +1,246 @@
+{
+  "executions": [
+    {
+      "execution": "viral-studio-rtx-qualification-78m5m",
+      "startTime": "2026-10-09T08:05:15.275085Z",
+      "completionTime": "2026-10-09T08:06:44.988787Z",
+      "executionElapsedSeconds": 89.713702,
+      "succeededCount": 0,
+      "failedCount": 1,
+      "conditions": [
+        {
+          "type": "Started",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Started deployed execution in 53.06s.",
+          "lastTransitionTime": "2026-10-09T08:05:46.847736Z"
+        },
+        {
+          "type": "Completed",
+          "state": "CONDITION_FAILED",
+          "message": "Task viral-studio-rtx-qualification-78m5m-task0 failed with exit code: 1 and message: The container exited with an error.",
+          "lastTransitionTime": "2026-10-09T08:06:44.988787Z",
+          "executionReason": "NON_ZERO_EXIT_CODE"
+        },
+        {
+          "type": "ContainerReady",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Imported container image in 1.25s.",
+          "lastTransitionTime": "2026-10-09T08:04:53.643426Z"
+        },
+        {
+          "type": "ResourcesAvailable",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Provisioned imported containers.",
+          "lastTransitionTime": "2026-10-09T08:04:53.785189Z"
+        }
+      ],
+      "tasks": [
+        {
+          "startTime": "2026-10-09T08:05:46.847736Z",
+          "completionTime": "2026-10-09T08:06:43.643213Z",
+          "reportedRunSeconds": 56.795477,
+          "lastAttemptResult": {
+            "status": {
+              "code": 10,
+              "message": "The container exited with an error."
+            },
+            "exitCode": 1
+          }
+        }
+      ]
+    },
+    {
+      "execution": "viral-studio-rtx-qualification-8pkf9",
+      "startTime": "2026-10-09T08:12:33.321006Z",
+      "completionTime": "2026-10-09T08:14:03.459245Z",
+      "executionElapsedSeconds": 90.138239,
+      "succeededCount": 0,
+      "failedCount": 0,
+      "conditions": [
+        {
+          "type": "Started",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Started deployed execution in 1m47.47s.",
+          "lastTransitionTime": "2026-10-09T08:14:03.545793Z"
+        },
+        {
+          "type": "Completed",
+          "state": "CONDITION_FAILED",
+          "message": "Cancelled by user.",
+          "lastTransitionTime": "2026-10-09T08:14:03.459245Z",
+          "executionReason": "CANCELLED"
+        },
+        {
+          "type": "ContainerReady",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Imported container image.",
+          "lastTransitionTime": "2026-10-09T08:12:15.902387Z"
+        },
+        {
+          "type": "ResourcesAvailable",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Provisioned imported containers.",
+          "lastTransitionTime": "2026-10-09T08:12:16.079182Z"
+        }
+      ],
+      "tasks": [
+        {
+          "startTime": null,
+          "completionTime": null,
+          "reportedRunSeconds": null,
+          "lastAttemptResult": {
+            "status": {
+              "code": 1,
+              "message": "Cancelled by user."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "execution": "viral-studio-rtx-qualification-z9jjf",
+      "startTime": "2026-10-09T08:43:43.329013Z",
+      "completionTime": "2026-10-09T08:46:01.182252Z",
+      "executionElapsedSeconds": 137.853239,
+      "succeededCount": 0,
+      "failedCount": 1,
+      "conditions": [
+        {
+          "type": "Started",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Started deployed execution in 1m27.18s.",
+          "lastTransitionTime": "2026-10-09T08:44:59.639542Z"
+        },
+        {
+          "type": "Completed",
+          "state": "CONDITION_FAILED",
+          "message": "Task viral-studio-rtx-qualification-z9jjf-task0 failed with exit code: 1 and message: The container exited with an error.",
+          "lastTransitionTime": "2026-10-09T08:46:01.182252Z",
+          "executionReason": "NON_ZERO_EXIT_CODE"
+        },
+        {
+          "type": "ContainerReady",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Imported container image.",
+          "lastTransitionTime": "2026-10-09T08:43:32.306939Z"
+        },
+        {
+          "type": "ResourcesAvailable",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Provisioned imported containers.",
+          "lastTransitionTime": "2026-10-09T08:43:32.457381Z"
+        }
+      ],
+      "tasks": [
+        {
+          "startTime": "2026-10-09T08:44:59.639542Z",
+          "completionTime": "2026-10-09T08:45:58.420695Z",
+          "reportedRunSeconds": 58.781153,
+          "lastAttemptResult": {
+            "status": {
+              "code": 10,
+              "message": "The container exited with an error."
+            },
+            "exitCode": 1
+          }
+        }
+      ]
+    },
+    {
+      "execution": "viral-studio-rtx-qualification-vbb9w",
+      "startTime": "2026-10-09T08:51:49.378678Z",
+      "completionTime": "2026-10-09T09:01:52.164144Z",
+      "executionElapsedSeconds": 602.785466,
+      "succeededCount": 0,
+      "failedCount": 0,
+      "conditions": [
+        {
+          "type": "Started",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Started deployed execution in 1m52.28s.",
+          "lastTransitionTime": "2026-10-09T08:53:30.099969Z"
+        },
+        {
+          "type": "Completed",
+          "state": "CONDITION_FAILED",
+          "message": "Cancelled by user.",
+          "lastTransitionTime": "2026-10-09T09:01:52.164144Z",
+          "executionReason": "CANCELLED"
+        },
+        {
+          "type": "ContainerReady",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Imported container image.",
+          "lastTransitionTime": "2026-10-09T08:51:37.666339Z"
+        },
+        {
+          "type": "ResourcesAvailable",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Provisioned imported containers.",
+          "lastTransitionTime": "2026-10-09T08:51:37.812861Z"
+        }
+      ],
+      "tasks": [
+        {
+          "startTime": "2026-10-09T08:53:30.099969Z",
+          "completionTime": null,
+          "reportedRunSeconds": null,
+          "lastAttemptResult": {
+            "status": {
+              "code": 1,
+              "message": "Cancelled by user."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "execution": "viral-studio-rtx-qualification-2hsx4",
+      "startTime": "2026-10-09T09:06:07.349724Z",
+      "completionTime": "2026-10-09T09:22:41.692720Z",
+      "executionElapsedSeconds": 994.342996,
+      "succeededCount": 1,
+      "failedCount": 0,
+      "conditions": [
+        {
+          "type": "Started",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Started deployed execution in 2m10.65s.",
+          "lastTransitionTime": "2026-10-09T09:08:10.884376Z"
+        },
+        {
+          "type": "Completed",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Execution completed successfully in 16m34.34s.",
+          "lastTransitionTime": "2026-10-09T09:22:41.692720Z"
+        },
+        {
+          "type": "ContainerReady",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Imported container image.",
+          "lastTransitionTime": "2026-10-09T09:06:00.070573Z"
+        },
+        {
+          "type": "ResourcesAvailable",
+          "state": "CONDITION_SUCCEEDED",
+          "message": "Provisioned imported containers.",
+          "lastTransitionTime": "2026-10-09T09:06:00.227648Z"
+        }
+      ],
+      "tasks": [
+        {
+          "startTime": "2026-10-09T09:08:10.884376Z",
+          "completionTime": "2026-10-09T09:22:39.374104Z",
+          "reportedRunSeconds": 868.489728,
+          "lastAttemptResult": {
+            "status": {}
+          }
+        }
+      ]
+    }
+  ],
+  "totalExecutionElapsedSeconds": 1914.833642,
+  "totalReportedTaskRunSeconds": 984.066358,
+  "finalWorkloadSeconds": 853.535984666,
+  "definitions": "Execution elapsed includes provisioning/termination within execution timestamps and cancelled executions. Reported task run excludes entries with no start/completion timestamps. These are measured API durations, not a billing estimate. The reference cancellation has no reported started task. Two failed runs and two cancellations are included honestly."
+}

@@ -1,0 +1,20 @@
+{
+  "status": "pending_creative_review",
+  "artifact": {
+    "path": "outputs/9426c19f3153de6c19f85391/paper-voyage-story/v2/final.mp4",
+    "sha256": "86df442359c210ca1e3eed84c2df019878822ebeee82bd36c9da1d7ee7174aca",
+    "bytes": 23492131,
+    "duration": 34.208333,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 24,
+    "width": 1964,
+    "height": 1080,
+    "hasAudio": true
+  },
+  "editArtifact": {
+    "path": "outputs/9426c19f3153de6c19f85391/paper-voyage-story/v2/studio-project.json",
+    "sha256": "f2b82292f42d805caee11a97c0f1fafca20ede81914fafc70189cbc40e311351"
+  },
+  "documentHash": "96994c9cf8adf03dc527fc0f0338f3097b92f3029c146370444eae550aec2b7b"
+}

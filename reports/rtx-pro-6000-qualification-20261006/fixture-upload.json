@@ -1,0 +1,14 @@
+{
+  "command": [
+    "gcloud",
+    "storage",
+    "cp",
+    "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/rtx-pro-6000-qualification-20261006/input.mp4",
+    "gs://autopromote-cc6d3-viral-studio-3d/temp_studio_3d/qualification/rtx-20261006-160331/input.mp4",
+    "--if-generation-match=0",
+    "--quiet"
+  ],
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "Copying file:///home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/rtx-pro-6000-qualification-20261006/input.mp4 to gs://autopromote-cc6d3-viral-studio-3d/temp_studio_3d/qualification/rtx-20261006-160331/input.mp4\n  \n.............\n"
+}

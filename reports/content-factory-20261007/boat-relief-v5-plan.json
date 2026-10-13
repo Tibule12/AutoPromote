@@ -1,0 +1,18 @@
+{
+  "settings": {
+    "steps": 50,
+    "frame_count": 121,
+    "width": 1280,
+    "height": 704
+  },
+  "shots": [
+    {
+      "name": "boat-relief-v5",
+      "seed": 2026100797,
+      "reference_image": "/work/generated/boat-storm-v5-continuity.png",
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "storyRole": "The same fragile paper boat survives the storm into clear light.",
+      "prompt": "The same single folded paper boat stays on the water, fully visible and intact, preserving its exact hull and paper folds. The breaking wave rolls past the camera and gently subsides into smooth moving ripples. The boat continues floating forward with realistic subtle bobbing. Dark storm clouds open and warm golden sunlight sweeps across the paper hull and sea. The camera slowly follows the boat at water level, revealing a luminous distant horizon. Physical water motion and believable buoyancy, crisp tactile paper, cinematic natural light, a quiet triumphant relief after danger. One continuous shot. No extra boats, no flight, no changing shape, no mast, no bird, no text."
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "title": "The Small Boat: private real-world scene study",
+  "story": {
+    "about": "A working yacht carries people through an ocean swell. This is the photographic payoff scene under development.",
+    "whyCare": "Weight, scale and a human choosing a course make the sea feel tangible. The complete film must later earn this scene through a continuous transformation.",
+    "hook": "A bow is already moving through living water.",
+    "beginning": "Read the full-size vessel and its crew in a restrained parallel track.",
+    "development": "The swell works against the immersed hull, sail and wake; a sailor turns attention to the sea.",
+    "tension": "Will physical contact, water and crew continuity remain believable through the scene?",
+    "payoff": "The vessel continues under sail, with people firmly aboard.",
+    "ending": "Leave the boat moving toward open water, without an explanatory card.",
+    "withheld": "The sailor close view until the yacht has established physical scale. This study does not claim the missing paper transformation exists.",
+    "amplify": [
+      "Bow-water contact and spray returning to the sea",
+      "Sailor grip and forward attention",
+      "Continuous marine sound across picture cuts"
+    ],
+    "remove": [
+      "Disappearing or merging crew",
+      "Orange canopy inconsistent with the cream-sail wide",
+      "Unreviewed transformation footage",
+      "Any feature list or narration"
+    ]
+  },
+  "script": [
+    {
+      "beatId": "vessel",
+      "action": "Parallel tracking view establishes the moving navy-hulled yacht and retained crew.",
+      "sound": "Recorded sea bed; bow-water detail only at observed contact."
+    },
+    {
+      "beatId": "response",
+      "action": "The sailor turns attention toward open water, keeping her hand on the wheel and other hand on the rail. Use the early trim before orange fabric enters.",
+      "sound": "Sea continues; restrained wood weight if justified by observed movement."
+    },
+    {
+      "beatId": "course",
+      "action": "Return to the progressing sailing take; allow its motion to continue.",
+      "sound": "Hold the same sea and let the last water movement breathe."
+    }
+  ],
+  "assets": [],
+  "outputs": []
+}

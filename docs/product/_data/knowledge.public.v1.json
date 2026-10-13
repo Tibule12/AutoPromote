@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.4",
+  "knowledge_version": "1.0.5",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-13",
+  "updated_at": "2026-10-13T17:56:53.682Z",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -96,6 +96,18 @@
         {
           "template_id": "cycling_rhythm_v1",
           "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
         }
       ],
       "aliases": [],
@@ -238,6 +250,18 @@
         {
           "template_id": "cycling_rhythm_v1",
           "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
         }
       ],
       "aliases": [],
@@ -332,10 +356,10 @@
         "studio.keyframe.easing"
       ],
       "workflow": [
-        "Select an ordinary editable layer and open Motion; set its initial pose.",
-        "Move the playhead and choose Add transform keyframe; change the next pose.",
-        "Expand native property lanes, move/nudge keys, adjust easing/curve and play the actual motion.",
-        "Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property."
+        "Show motion keyframes in the timeline and expand an ordinary visual layer, including a layer without animation keys.",
+        "Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.",
+        "Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.",
+        "Owning-track locks prevent changes. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
@@ -373,6 +397,18 @@
         {
           "template_id": "cycling_rhythm_v1",
           "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
         }
       ],
       "aliases": [],
@@ -957,6 +993,18 @@
         {
           "template_id": "cycling_rhythm_v1",
           "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
         }
       ],
       "aliases": [],
@@ -1105,6 +1153,18 @@
         {
           "template_id": "cycling_rhythm_v1",
           "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
         }
       ],
       "aliases": [],
@@ -1636,6 +1696,18 @@
         {
           "template_id": "cycling_rhythm_v1",
           "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
         }
       ],
       "aliases": [],
@@ -1731,6 +1803,18 @@
         {
           "template_id": "cycling_rhythm_v1",
           "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
         }
       ],
       "aliases": [],
@@ -1908,6 +1992,18 @@
         {
           "template_id": "cycling_rhythm_v1",
           "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
         }
       ],
       "aliases": [],

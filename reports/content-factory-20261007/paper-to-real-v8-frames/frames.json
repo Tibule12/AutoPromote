@@ -1,0 +1,85 @@
+{
+  "sourceSha256": "418cb6b640f46609e77bc4928311ffe832fdf7ec50da91060d4f610045e72ca5",
+  "frames": [
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "539fdc6fdb3b7d92ea689d85d344d4b765ff2015f2aabeaa7c4744178cc73b0d"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-02.png",
+      "timestamp": 0.5041666666666667,
+      "sha256": "e83157ef96933efa9c325d91f1a8c4166d937dd081539472b6639951593a66c1"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-03.png",
+      "timestamp": 1.0083333333333333,
+      "sha256": "0a5f7c507df642353c1e290663526396aa18f4a8c6c708b344635a59baf6cd90"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-04.png",
+      "timestamp": 1.5125,
+      "sha256": "66d25c21bf2a8960faf41021fc3e16051c64c99d091956a0ae97cabf965642c1"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-05.png",
+      "timestamp": 2.0166666666666666,
+      "sha256": "bd812d4efb7990831d57b075baebf4259b82aae36427d08fc024bb1d33856990"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-06.png",
+      "timestamp": 2.5208333333333335,
+      "sha256": "02602da72e30b9a7f6b43c993dca06402a55a8852367a751f29b61a15d9ebd2d"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-07.png",
+      "timestamp": 3.025,
+      "sha256": "2d93b9701fd5fabf7e0e713fa980a5c3db1312084642a52fc638fc8c9ab334b3"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-08.png",
+      "timestamp": 3.529166666666667,
+      "sha256": "10dc637a9532b4d2028a967c9ad5bd1533eb3697c066911138d8182ef6084b48"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-09.png",
+      "timestamp": 4.033333333333333,
+      "sha256": "5e04a2d225138f513575c03fb9168a18b4fba0cd0eea5be8ef2b5d0428b0b1be"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-10.png",
+      "timestamp": 4.5375,
+      "sha256": "fbbab96ca48bec6b9255771e03830ab5d61c6cb02da11fd4867e4c8016b56d53"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-11.png",
+      "timestamp": 5.041666666666667,
+      "sha256": "83ed21fb756dba792b7d7a04a2e7be55e43ebcc96ab5003779cb688a06b265a9"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-12.png",
+      "timestamp": 5.545833333333333,
+      "sha256": "e614c9d0c8b3dd3d459eb7bf74a47ae900166e68adbf9ef60aff1da04a47514f"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-13.png",
+      "timestamp": 6.05,
+      "sha256": "c583f2879914cd8cf7eca435719f9c37a3e68a0f9c455ad9605865c4e1085a8b"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-14.png",
+      "timestamp": 6.554166666666666,
+      "sha256": "300bb8c724d6d3d3e33810c0a861c0abfeffaba7ce3d5995157ab11d65acedd5"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-15.png",
+      "timestamp": 7.058333333333334,
+      "sha256": "b9478df29aae543d9fedaecd1ad5c3181612909b97e45e663a6d7e0c01b07c66"
+    },
+    {
+      "path": "reports/content-factory-20261007/paper-to-real-v8-frames/frame-16.png",
+      "timestamp": 7.4825,
+      "sha256": "78b73d8e7b9971c16972520d3e71518890441084c5c14d00372dacb4bc8f0b02"
+    }
+  ]
+}

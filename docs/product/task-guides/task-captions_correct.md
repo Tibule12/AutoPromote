@@ -1,6 +1,6 @@
 # Create captions and correct transcription
 
-Development documentation • product 1.2.0 • knowledge 1.0.4 • 2026-10-13
+Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 

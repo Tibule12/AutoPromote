@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "compared_fields": [
+    "source_sha256",
+    "matte_sha256",
+    "plan_sha256",
+    "pixel_sha256",
+    "frames"
+  ],
+  "frames": 144,
+  "cpu_encoder": "libx264",
+  "gpu_encoder": "h264_nvenc",
+  "pixel_sha256": "1d73ae4bb95bd334bb3cd7209fceb6c8428c4e3c9f58c4bc38239f1e43680026",
+  "gpu_exposure": "runc and NVIDIA_VISIBLE_DEVICES=void"
+}

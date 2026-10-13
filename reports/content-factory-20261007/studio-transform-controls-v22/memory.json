@@ -1,0 +1,90 @@
+{
+  "identity": "42e4c08e70ea26f1cb4b19df826ebd112bd7dd6c7b37bab13bbc48c23a5db10d",
+  "actions": [
+    {
+      "signature": "25e492bc217487835ab913c5d16d245e5eb184443eb41f43fbf9db001f809e61",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Pause edited preview"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Play edited preview"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T14:04:09.301Z",
+      "reason": "The observed edited preview is already playing; pause before measuring a deliberate playback.",
+      "planner": null,
+      "afterState": "edfc4d6e8c52f146aefe31277134edfd5dfc87a2e144820244389bfc9d2b3589"
+    },
+    {
+      "signature": "bc219e91ee1619b16b521c7eed4a9437edb1edee13b174c53ab099adbfd7044e",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Play edited preview"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Pause edited preview"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T14:04:12.139Z",
+      "reason": "Start the observed paused edited preview and verify its playback state.",
+      "planner": null,
+      "afterState": "7be60be5748b3c9ea268d8415a2fa9fcf78bbc9d440030f7fe07ecb0f246c4fa"
+    },
+    {
+      "signature": "25e492bc217487835ab913c5d16d245e5eb184443eb41f43fbf9db001f809e61",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Pause edited preview"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Play edited preview"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T14:04:30.602Z",
+      "reason": "Pause after the generated transformation source has visibly advanced.",
+      "planner": null,
+      "afterState": "8532dd6922332ab98238afdbbf2631ea03b42ba71a297fd1a612dc817b096e2a"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T14:04:03.486Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T14:04:12.064Z"
+    },
+    {
+      "id": "observation-3",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T14:04:23.286Z"
+    }
+  ],
+  "artifacts": [],
+  "status": "running"
+}

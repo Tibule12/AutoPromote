@@ -1,0 +1,35 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "failure",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": {
+    "path": "source-brief.txt",
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c"
+  },
+  "prompt": "Some days, the only thing that finished was the error log.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 1.04,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/film/assets/narration/failure.wav",
+    "sha256": "90e1326401f5d98303da9fe78ed85da6605baabc47a4cdf96117dae096b0ac2e",
+    "duration": 3.675,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cpu",
+  "gpu": null,
+  "phonemes": [
+    "s\u02cc\u028cm d\u02c8Az, \u00f0i \u02c8Onli \u03b8\u02c8\u026a\u014b \u00f0\u00e6t f\u02c8\u026an\u0259\u0283t w\u028cz \u00f0i \u02c8\u025b\u0279\u0259\u0279 l\u02c8\u0254\u0261."
+  ],
+  "seconds": 1.4275382700000137,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

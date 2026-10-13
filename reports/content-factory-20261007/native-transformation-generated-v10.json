@@ -1,0 +1,35 @@
+{
+  "artifact": {
+    "path": "assets/founder-native-transform-v10/video.mp4",
+    "sha256": "9422c9ea775fc2e2a19d02e472d23a3f1651fcd1b5563f8d4f3412327caef4df",
+    "bytes": 2368399,
+    "duration": 6,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 24,
+    "width": 1280,
+    "height": 720,
+    "hasAudio": false
+  },
+  "model": "Blender connected paper-to-yacht transformation",
+  "modelRevision": "4.5.9 LTS",
+  "tool": "AutoPromote editable 3D raw asset",
+  "settings": {
+    "template": "paper_to_yacht",
+    "deadlineEpoch": 1791374400,
+    "duration": 6,
+    "fps": 24,
+    "width": 1280,
+    "height": 720,
+    "seed": 20261007139,
+    "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea."
+  },
+  "audioRole": null,
+  "reusableArtifacts": [
+    {
+      "role": "native_scene",
+      "path": "assets/founder-native-transform-v10/paper-yacht.blend",
+      "sha256": "2364cafb33fd23508f48a157e5420d02eefdcf26b54df94c24ae6a37306c8054"
+    }
+  ]
+}

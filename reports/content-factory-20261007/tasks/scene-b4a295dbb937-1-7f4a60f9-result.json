@@ -1,0 +1,281 @@
+{
+  "fingerprint": "5ce536cbfd613d91cea2a1c1471ffcb6fbd483e9275f0c03c3d8debcbcb6503d",
+  "result": {
+    "id": "scene-b4a295dbb937-1-7f4a60f9",
+    "value": {
+      "sceneId": "scene_001_3ffc412e",
+      "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+      "summary": "A solitary paper boat on a dark desk, illuminated by a single beam of light, with a droplet of water poised on its bow — symbolizing fragile hope or impending journey in a quiet workshop at night",
+      "story": {
+        "about": "The symbolic weight of a paper boat resting in a dimly lit workshop, hinting at a larger narrative of loss, memory, or transition",
+        "whyCare": "The audience is invited to wonder: What story does this fragile object carry? Who left it here? What will happen next? The stillness invites emotional investment",
+        "hook": "A paper boat, caught in a sliver of light, holds the promise of movement — but is it real or imagined? The tension between stillness and potential motion hooks the viewer",
+        "beginning": "The scene opens with a static, atmospheric shot of the paper boat on a dark desk, establishing mood and mystery without exposition",
+        "development": "The camera lingers on the crease catching light and the water droplet — subtle details that amplify emotional stakes and suggest imminent change",
+        "tension": "The stillness of the workshop contrasts with the implied motion of the boat — the water droplet teeters, the light flickers — creating suspense about whether the boat will move or remain",
+        "payoff": "The boat remains still, but the audience feels the weight of what might come — the silence becomes meaningful, the image resonant",
+        "ending": "The scene ends with the boat unchanged, leaving the viewer to interpret its significance — a moment suspended between past and future",
+        "withheld": "The identity of the creator or owner of the boat, the reason for its presence, and the fate of the water droplet are deliberately withheld",
+        "amplify": [
+          "Emphasize the contrast between darkness and the single beam of light",
+          "Highlight the texture of the paper and the sheen of the water droplet",
+          "Use slow, deliberate camera movements to mirror the stillness of the scene",
+          "Let the silence dominate — no music, no sound effects, only ambient atmosphere"
+        ],
+        "remove": [
+          "Any unnecessary background clutter or distractions",
+          "Explanatory narration or voiceover",
+          "Overly literal interpretations of the boat’s purpose — let the ambiguity linger"
+        ]
+      },
+      "props": [
+        {
+          "name": "paper boat",
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        }
+      ],
+      "characterDesigns": [],
+      "shots": [
+        {
+          "shotId": "shot_001",
+          "action": "Wide static shot of the paper boat on the dark timber desk, centered in frame",
+          "reason": "Establishes the setting and the central object — the boat — immediately",
+          "camera": "Static wide-angle",
+          "framing": "Full shot, showing the entire desk and surrounding space",
+          "duration": 3,
+          "entityNames": [
+            "paper boat",
+            "dark timber desk"
+          ],
+          "dialogueUnitIds": [],
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "shotId": "shot_002",
+          "action": "Slow dolly-in toward the paper boat, focusing on the crease catching light",
+          "reason": "Amplifies the visual metaphor — the light as a lifeline or hope",
+          "camera": "Dolly-in",
+          "framing": "Medium close-up",
+          "duration": 2,
+          "entityNames": [
+            "paper boat",
+            "crease",
+            "light"
+          ],
+          "dialogueUnitIds": [],
+          "sourceQuote": "One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "shotId": "shot_003",
+          "action": "Extreme close-up on the water droplet, slowly tilting to show its reflection in the paper",
+          "reason": "Heightens tension — the droplet could fall, initiating movement",
+          "camera": "Macro lens, slight tilt",
+          "framing": "Extreme close-up",
+          "duration": 1.5,
+          "entityNames": [
+            "paper boat",
+            "bead of water",
+            "folded bow"
+          ],
+          "dialogueUnitIds": [],
+          "sourceQuote": "A bead of water touches the folded bow. 1"
+        },
+        {
+          "shotId": "shot_004",
+          "action": "Pull back to wide shot, lingering on the boat as the light dims slightly",
+          "reason": "Reinforces the theme of fragility — the light fades, suggesting impermanence",
+          "camera": "Pull back",
+          "framing": "Wide shot",
+          "duration": 2.5,
+          "entityNames": [
+            "paper boat",
+            "dark timber desk"
+          ],
+          "dialogueUnitIds": [],
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        }
+      ],
+      "continuity": [
+        {
+          "entityName": "paper boat",
+          "key": "appearance",
+          "value": "Folded, slightly crumpled, resting on a dark timber desk",
+          "intentionalChange": false,
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "entityName": "dark timber desk",
+          "key": "appearance",
+          "value": "Dark wood grain visible, surface slightly worn",
+          "intentionalChange": false,
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "entityName": "light",
+          "key": "screen_direction",
+          "value": "Single thin beam from off-screen, illuminating one crease",
+          "intentionalChange": false,
+          "sourceQuote": "One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "entityName": "bead of water",
+          "key": "prop_state",
+          "value": "Touched the folded bow, stationary",
+          "intentionalChange": false,
+          "sourceQuote": "A bead of water touches the folded bow. 1"
+        },
+        {
+          "entityName": "time_of_day",
+          "key": "time_of_day",
+          "value": "Night",
+          "intentionalChange": false,
+          "sourceQuote": "INT. WORKSHOP - NIGHT"
+        }
+      ]
+    },
+    "rawValue": {
+      "sceneId": "scene_001_3ffc412e",
+      "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+      "summary": "A solitary paper boat on a dark desk, illuminated by a single beam of light, with a droplet of water poised on its bow — symbolizing fragile hope or impending journey in a quiet workshop at night",
+      "story": {
+        "about": "The symbolic weight of a paper boat resting in a dimly lit workshop, hinting at a larger narrative of loss, memory, or transition",
+        "whyCare": "The audience is invited to wonder: What story does this fragile object carry? Who left it here? What will happen next? The stillness invites emotional investment",
+        "hook": "A paper boat, caught in a sliver of light, holds the promise of movement — but is it real or imagined? The tension between stillness and potential motion hooks the viewer",
+        "beginning": "The scene opens with a static, atmospheric shot of the paper boat on a dark desk, establishing mood and mystery without exposition",
+        "development": "The camera lingers on the crease catching light and the water droplet — subtle details that amplify emotional stakes and suggest imminent change",
+        "tension": "The stillness of the workshop contrasts with the implied motion of the boat — the water droplet teeters, the light flickers — creating suspense about whether the boat will move or remain",
+        "payoff": "The boat remains still, but the audience feels the weight of what might come — the silence becomes meaningful, the image resonant",
+        "ending": "The scene ends with the boat unchanged, leaving the viewer to interpret its significance — a moment suspended between past and future",
+        "withheld": "The identity of the creator or owner of the boat, the reason for its presence, and the fate of the water droplet are deliberately withheld",
+        "amplify": [
+          "Emphasize the contrast between darkness and the single beam of light",
+          "Highlight the texture of the paper and the sheen of the water droplet",
+          "Use slow, deliberate camera movements to mirror the stillness of the scene",
+          "Let the silence dominate — no music, no sound effects, only ambient atmosphere"
+        ],
+        "remove": [
+          "Any unnecessary background clutter or distractions",
+          "Explanatory narration or voiceover",
+          "Overly literal interpretations of the boat’s purpose — let the ambiguity linger"
+        ]
+      },
+      "props": [
+        {
+          "name": "paper boat",
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        }
+      ],
+      "characterDesigns": [],
+      "shots": [
+        {
+          "shotId": "shot_001",
+          "action": "Wide static shot of the paper boat on the dark timber desk, centered in frame",
+          "reason": "Establishes the setting and the central object — the boat — immediately",
+          "camera": "Static wide-angle",
+          "framing": "Full shot, showing the entire desk and surrounding space",
+          "duration": 3,
+          "entityNames": [
+            "paper boat",
+            "dark timber desk"
+          ],
+          "dialogueUnitIds": [],
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "shotId": "shot_002",
+          "action": "Slow dolly-in toward the paper boat, focusing on the crease catching light",
+          "reason": "Amplifies the visual metaphor — the light as a lifeline or hope",
+          "camera": "Dolly-in",
+          "framing": "Medium close-up",
+          "duration": 2,
+          "entityNames": [
+            "paper boat",
+            "crease",
+            "light"
+          ],
+          "dialogueUnitIds": [],
+          "sourceQuote": "One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "shotId": "shot_003",
+          "action": "Extreme close-up on the water droplet, slowly tilting to show its reflection in the paper",
+          "reason": "Heightens tension — the droplet could fall, initiating movement",
+          "camera": "Macro lens, slight tilt",
+          "framing": "Extreme close-up",
+          "duration": 1.5,
+          "entityNames": [
+            "paper boat",
+            "bead of water",
+            "folded bow"
+          ],
+          "dialogueUnitIds": [],
+          "sourceQuote": "A bead of water touches the folded bow. 1"
+        },
+        {
+          "shotId": "shot_004",
+          "action": "Pull back to wide shot, lingering on the boat as the light dims slightly",
+          "reason": "Reinforces the theme of fragility — the light fades, suggesting impermanence",
+          "camera": "Pull back",
+          "framing": "Wide shot",
+          "duration": 2.5,
+          "entityNames": [
+            "paper boat",
+            "dark timber desk"
+          ],
+          "dialogueUnitIds": [],
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        }
+      ],
+      "continuity": [
+        {
+          "entityName": "paper boat",
+          "key": "appearance",
+          "value": "Folded, slightly crumpled, resting on a dark timber desk",
+          "intentionalChange": false,
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "entityName": "dark timber desk",
+          "key": "appearance",
+          "value": "Dark wood grain visible, surface slightly worn",
+          "intentionalChange": false,
+          "sourceQuote": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "entityName": "light",
+          "key": "screen_direction",
+          "value": "Single thin beam from off-screen, illuminating one crease",
+          "intentionalChange": false,
+          "sourceQuote": "One crease catches a thin line of light. A bead of water touches the folded bow. 1"
+        },
+        {
+          "entityName": "bead of water",
+          "key": "prop_state",
+          "value": "Touched the folded bow, stationary",
+          "intentionalChange": false,
+          "sourceQuote": "A bead of water touches the folded bow. 1"
+        },
+        {
+          "entityName": "time_of_day",
+          "key": "time_of_day",
+          "value": "Night",
+          "intentionalChange": false,
+          "sourceQuote": "INT. WORKSHOP - NIGHT"
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 4500
+    },
+    "evidenceSha256": null,
+    "frameEvidence": [],
+    "seconds": 77.73115653399873,
+    "gpu": "NVIDIA L40S"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "video_url": "http://127.0.0.1:8765/audio-regression/source.mp4",
+  "start_time": 0,
+  "end_time": 3,
+  "timeline_segments": [
+    {
+      "id": "main",
+      "source_clip_id": "diagnostic",
+      "url": "http://127.0.0.1:8765/audio-regression/source.mp4",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3
+    }
+  ],
+  "overlays": [],
+  "auto_captions": false,
+  "smart_crop": false,
+  "professional_cleanup": false,
+  "mute_audio": true,
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/audio-regression/score.wav",
+  "music_volume": 0.5,
+  "music_loop": false,
+  "music_ducking": false,
+  "music_fade_in": 0,
+  "music_fade_out": 0,
+  "sound_effects": [
+    {
+      "id": "left-impact",
+      "url": "http://127.0.0.1:8765/audio-regression/cue.wav",
+      "startTime": 1,
+      "duration": 0.5,
+      "volume": 0.5,
+      "fadeIn": 0.02,
+      "fadeOut": 0.02,
+      "kind": "sfx"
+    },
+    {
+      "id": "center-voice",
+      "url": "http://127.0.0.1:8765/audio-regression/voice.wav",
+      "startTime": 2,
+      "duration": 0.5,
+      "volume": 0.5,
+      "fadeIn": 0.02,
+      "fadeOut": 0.02,
+      "kind": "voiceover"
+    }
+  ],
+  "output_settings": {
+    "resolution": "source",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "job_id": "shared-stereo-regression-20261008"
+}

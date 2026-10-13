@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Actual paired native PNG endpoints accepted before model loading",
+    "Changed last endpoint hash rejected before model loading",
+    "Last endpoint outside private root rejected before model loading",
+    "Duplicate shot identity rejected before model loading"
+  ],
+  "scope": "Actual CPU-only input guards; no model or GPU dispatch"
+}

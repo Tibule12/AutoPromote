@@ -1,0 +1,32 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "little-courage",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "A little courage.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 0.98,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/work/narration/little-courage.wav",
+    "sha256": "9d60c42ef49d8ce52939cfda838009cc91a2c2922799447acafb70d21856c70a",
+    "duration": 1.7,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cuda",
+  "gpu": "NVIDIA L40S",
+  "phonemes": [
+    "\u0250 l\u02c8\u026aT\u1d4al k\u02c8\u025c\u0279\u026a\u02a4."
+  ],
+  "seconds": 0.09862939999993614,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

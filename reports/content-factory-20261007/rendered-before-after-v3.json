@@ -1,0 +1,20 @@
+{
+  "status": "pending_creative_review",
+  "artifact": {
+    "path": "outputs/b0bca64f7b9460c7971db80b/paper-voyage-before-after/v3/final.mp4",
+    "sha256": "18188abc457cd236d124374b8cd05999bf34f142c66e5d380f7810fd35515495",
+    "bytes": 10581263,
+    "duration": 16.5,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 24,
+    "width": 1920,
+    "height": 1080,
+    "hasAudio": true
+  },
+  "editArtifact": {
+    "path": "outputs/b0bca64f7b9460c7971db80b/paper-voyage-before-after/v3/studio-project.json",
+    "sha256": "626638e2d494a1c17f56930eae43ee7ff38d0c008ee29b4de2d9ad9e22d638da"
+  },
+  "documentHash": "e361532c370ad57f1efd5489d045b32a646a48f47d756b799247f4461b36970c"
+}

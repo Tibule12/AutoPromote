@@ -1,0 +1,60 @@
+[
+  {
+    "path": "reports/rtx-pro-6000-qualification-20261006/autopromote-cc6d3-quota-before-raw.json",
+    "sha256": "51fca4096dd824d15af42e24373ed684fa8303ae0ca7291ad47604f4ac2aed2f"
+  },
+  {
+    "path": "reports/rtx-pro-6000-qualification-20261006/quota-after-create.json",
+    "sha256": "30f6cc0ed79a956e84de4ab35249fd5463ccb0f7695433d27d3fa63060cd459d"
+  },
+  {
+    "path": "frontend/public/landing/podcast-host.webp",
+    "sha256": "b75e7bb0a08db4cc0c40d23a8518f36666e89f3fe0eaaa872414e5ef2b2f8fb4",
+    "use": "historical conversation/UI texture"
+  },
+  {
+    "path": "frontend/public/landing/podcast-guest.webp",
+    "sha256": "e973b141cd52d8e8a46b85885ced525b00bf8a9f172c44e1dc5d70fbaa71dbcd",
+    "use": "historical conversation/UI texture"
+  },
+  {
+    "path": "frontend/public/landing/workspace-studio.png",
+    "sha256": "9029571a0f09de52d854f35f640f4b8d94c1de5fb3259e0e63f512725ccc8dbf",
+    "use": "historical conversation/UI texture"
+  },
+  {
+    "path": "reports/content-factory-20261007/generated/real-voyage-v6.mp4",
+    "sha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+    "use": "retained actual Wan 14B generated moving yacht take"
+  },
+  {
+    "path": "reports/rtx-pro-6000-qualification-20261006/gpu-receipt.json",
+    "sha256": "2dfbbe613051682f715e5f77a1ed319133ef7d0540bedfa59a12e3d9b3937137",
+    "use": "historical RTX qualification"
+  },
+  {
+    "path": "docs/viral-studio-gpu-audit.md",
+    "sha256": "a7a85dc185e7148dc1568e4991d38c219ee92c016c14f48c5ee19da7d37d2a7b",
+    "use": "historical L4 denial; summarized not forged evidence"
+  },
+  {
+    "path": "reports/public-homepage-video-20261006/media-provenance.json",
+    "sha256": "99a47c16d554427b58209893481d27aded2e5c7db0b58466483b670a69985962",
+    "use": "The retained public podcast stock clip is illustrative media; TMT stills come from the existing product demonstration and do not depict a founder reenactment."
+  },
+  {
+    "path": "assets/brand/autopromote-original-v1/logo-geometry.json",
+    "sha256": "c88e7a6e9c145f6ac8a50bd873cb5cab49ee6b4ef387e787cdf842b3548b082c",
+    "use": "Exact authored original A/P and outlined wordmark geometry"
+  },
+  {
+    "path": "scripts/content-factory/founder-film/scene.py",
+    "sha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+    "use": "New spatial raw-picture template"
+  },
+  {
+    "path": "scripts/content-factory/founder-film/sound.py",
+    "sha256": "50242cea0831e2baf56f176b2df9a89584ba43e092ea99e1cbc5e78aee742185",
+    "use": "Original CPU score and timed physical cues"
+  }
+]

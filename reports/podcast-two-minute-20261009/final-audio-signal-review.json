@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-09T09:18:49.728493+00:00",
+  "scope": "Independent signal comparison at16kHz mono; technical only, no new human listening approval",
+  "sourceSamples": 1918464,
+  "finalSeconds": 119.904,
+  "lagMs": 25.0,
+  "alignedCorrelation": 0.8930136306651922,
+  "gain": 1.2292897138207426,
+  "peak": 0.9383690357208252,
+  "rms": 0.12626818689907646,
+  "fullScaleSamples": 0,
+  "minimumAudibleOneSecondCorrelation": 0.7153631603396999,
+  "passed": false,
+  "humanListening": false
+}

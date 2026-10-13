@@ -1,0 +1,242 @@
+{
+  "at": "2026-10-08T10:30:42.399Z",
+  "headless": true,
+  "browserMuted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "disabledFields": {
+    "Font family": true,
+    "Weight": true,
+    "Easing": true,
+    "Background": true,
+    "Quality": true,
+    "Light direction": true,
+    "Audio response": true,
+    "Shadows": true,
+    "Reflections": true
+  },
+  "modes": [
+    {
+      "label": "Material",
+      "disabled": false,
+      "options": [
+        {
+          "value": "chrome",
+          "disabled": false
+        },
+        {
+          "value": "glass",
+          "disabled": false
+        },
+        {
+          "value": "neon",
+          "disabled": false
+        },
+        {
+          "value": "gold",
+          "disabled": false
+        },
+        {
+          "value": "matte",
+          "disabled": false
+        },
+        {
+          "value": "holographic",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "label": "Entrance",
+      "disabled": false,
+      "options": [
+        {
+          "value": "dolly",
+          "disabled": false
+        },
+        {
+          "value": "orbit",
+          "disabled": false
+        },
+        {
+          "value": "burst",
+          "disabled": false
+        },
+        {
+          "value": "pulse",
+          "disabled": true
+        },
+        {
+          "value": "float",
+          "disabled": true
+        },
+        {
+          "value": "slide",
+          "disabled": false
+        },
+        {
+          "value": "fade",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "label": "Font family",
+      "disabled": true,
+      "options": [
+        {
+          "value": "studio",
+          "disabled": false
+        },
+        {
+          "value": "sans",
+          "disabled": false
+        },
+        {
+          "value": "serif",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "label": "Weight",
+      "disabled": true,
+      "options": [
+        {
+          "value": "regular",
+          "disabled": false
+        },
+        {
+          "value": "bold",
+          "disabled": false
+        },
+        {
+          "value": "black",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "label": "Alignment",
+      "disabled": false,
+      "options": [
+        {
+          "value": "left",
+          "disabled": false
+        },
+        {
+          "value": "center",
+          "disabled": false
+        },
+        {
+          "value": "right",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "label": "Easing",
+      "disabled": true,
+      "options": [
+        {
+          "value": "ease_out",
+          "disabled": false
+        },
+        {
+          "value": "ease_in_out",
+          "disabled": false
+        },
+        {
+          "value": "spring",
+          "disabled": false
+        },
+        {
+          "value": "linear",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "label": "Hold",
+      "disabled": false,
+      "options": [
+        {
+          "value": "still",
+          "disabled": false
+        },
+        {
+          "value": "float",
+          "disabled": false
+        },
+        {
+          "value": "pulse",
+          "disabled": true
+        },
+        {
+          "value": "orbit",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "label": "Exit",
+      "disabled": false,
+      "options": [
+        {
+          "value": "fade",
+          "disabled": false
+        },
+        {
+          "value": "dolly",
+          "disabled": true
+        },
+        {
+          "value": "spin",
+          "disabled": false
+        },
+        {
+          "value": "burst",
+          "disabled": true
+        }
+      ]
+    },
+    {
+      "label": "Background",
+      "disabled": true,
+      "options": [
+        {
+          "value": "transparent",
+          "disabled": false
+        },
+        {
+          "value": "dark",
+          "disabled": false
+        },
+        {
+          "value": "light",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "label": "Quality",
+      "disabled": true,
+      "options": [
+        {
+          "value": "draft",
+          "disabled": false
+        },
+        {
+          "value": "preview",
+          "disabled": false
+        },
+        {
+          "value": "high",
+          "disabled": false
+        }
+      ]
+    }
+  ],
+  "status": "PASS",
+  "scope": "Control availability only; no final 3D render or pixel/audio parity"
+}

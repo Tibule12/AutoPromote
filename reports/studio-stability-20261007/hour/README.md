@@ -1,0 +1,21 @@
+# Studio blocker repairs within the authorized hour
+
+Readiness: **not ready**. Window: 23:10:09 SAST 7 October → 00:10:09 SAST 8 October. The GPU start was refused with “insufficient funds to create or start this environment”. Existing L40S remains stopped; no NVIDIA jobs ran this hour. The local CPU worker used for the retests is stopped. This continuation did not revive creative, branding, logo or generated-content work.
+
+Completed implementation and actual checks:
+
+- Video, three individual caption cues and original audio fit the 1366×768 editing viewport. Export destination labels fit without breaking letters. All saved projects are reachable beyond the former first-eight limit.
+- A real edited cue (`STUDIO QA CAPTION RETEST`) survived normal save/cold reload and appeared in the actual 12s export. A real uploaded second source has no copied first-source captions. Its filmstrip remains incomplete. This source-isolation check did not include a new combined export.
+- Completed results clear when the edit changes, late results cannot cover a newer edit, and the original input remains available for the next render. Targeted recovery tests check both transitions; the edited project also rendered through the real Studio workflow.
+- New transient worker exports are copied into existing private owner/job storage before completion. Actual Studio playback and native download worked after the worker was stopped; the SHA stayed identical and a full decode passed. An unsigned object GET returned HTTP 403. Owner-checked status/recovery refreshes signed access; expiry and cross-account end-to-end recovery remain unqualified.
+- A stopped worker returns a typed 503 before job creation/credit charging, with a useful Studio error and no phantom recovery panel. Normal Studio submission reproduced this. The tested founder account does not establish ordinary subscriber debit behavior.
+- Normal saved-project entry waits for the authenticated subscription profile instead of deciding from temporary free-plan defaults. Real cold reload returned to the saved captions without a Billing redirect. Failed project listing now presents a retry.
+- Whole-asset placement bounds repair portrait watermark movement beyond the canvas, including narrow margins. Same normal portrait flow produces a valid 12s 404×720 export. The existing artwork itself still truncates the word; no branding asset was edited.
+
+Two distinct real outputs: portrait SHA `470f829334552efaed19dd38adc4750406237a1c16272c11b792dca211103a86`; caption SHA `a55c92114196f16fac1ad7f013e73045e1040f08bc197f20c7d489a779aea28c`. H.264/AAC, 30 fps, matched 12s clocks and full independent decoding passed. The second caption download after worker stop has the same SHA. Inspected contact sheets establish correct speakers/cuts and the edited cue, but also confirm caption style mismatch and truncated existing artwork. Captions are intentionally draft-stamped; repeated ASR words are not approved.
+
+Targeted automated support: 15 timeline checks, nine recovery checks, five Studio-entry checks, two worker-output guard checks, one actual FFmpeg narrow-canvas check, and one selected saved-caption checkpoint check passed. The selected checkpoint suite skipped 95 unrelated tests; no full-suite pass is claimed. Backend/harness Node syntax, Python syntax and diff whitespace checks passed. Unit checks support repairs; they do not qualify real capability PASS on their own.
+
+The [cumulative nine-column matrix and top 10 blockers](../README.md) remain authoritative. `results.json` here contains only this hour's six capability retests, not 29 reset placeholders. Other GPU features retain the earlier evidence/status and were not rerun this hour. The previous report and results are preserved. No fixes are committed, pushed or deployed.
+
+Receipts: `cold-reload.json`, `caption-ui-check.json`, `caption-source.json`, `offline-download.json`, `offline-render.json`, `private-output-access.json`, `gpu-state-receipt.json`, `preservation-check.json`. The browser is left on the editable saved caption project. App 5000/API 5100 and the normal signed-in QA browser remain local; workers are offline. Do not start new GPU jobs without a new authorization window.

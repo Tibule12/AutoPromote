@@ -1,0 +1,27 @@
+{
+  "status": "ACCEPTED_PRIVATE_ARTIFACT",
+  "scope": "Complete final decode and 19 actual final timeline samples reviewed against the complete moving proxy and authored native animation; headless muted playback documented separately. No human listening/founder creative approval or broad customer qualification claim.",
+  "finalSha256": "63aaf80638ef93e2165924a6562026392bf1f0a10ef7c9826611aa14549ceea3",
+  "proxySha256": "d05c5e2d043b60b43b694c6bab4b5125ca5d5a007eeb9194c34b1341e6cc1abc",
+  "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+  "sameEditorialPayload": true,
+  "story": "The waking workspace releases template cards into the same dimensional AP portal, which reveals the layered founder story and resolves into the final AP assembly.",
+  "visualChecks": {
+    "chapterContinuity": true,
+    "allSevenNarrativeLinesVisible": true,
+    "founderForegroundAndBackgroundSeparate": true,
+    "dimensionalPerspectiveAndReflection": true,
+    "finalHold": true,
+    "sourceConceptPlatesUsedAsSlideshow": false
+  },
+  "audioMeasurements": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "peak": 0.6840224266052246,
+    "rms": 0.07698647677898407,
+    "clippedSamples": 0,
+    "duration": 38.016,
+    "limitation": "Objective decoded measurements; listening and speech comprehension require founder review."
+  },
+  "originalProxyReview": "preview-review.json"
+}

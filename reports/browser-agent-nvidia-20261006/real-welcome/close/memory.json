@@ -1,0 +1,58 @@
+{
+  "identity": "875a493933e5bae04190d9dbeff5794aabcaaa818af14e40387b732ee40cdef8",
+  "actions": [
+    {
+      "signature": "315ebf2159502e2773c179fd7b2838cf82060392bd168d44233673272dbac4a7",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Close demo"
+      },
+      "expect": [
+        {
+          "type": "modal_closed",
+          "role": null,
+          "name": null,
+          "value": null,
+          "pageId": "page-1",
+          "frameIndex": null
+        },
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Watch Demo",
+          "value": null,
+          "pageId": "page-1",
+          "frameIndex": null
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-06T19:26:24.819Z",
+      "reason": "Close the product demo modal to verify the welcome page is usable again",
+      "planner": {
+        "model": "Qwen/Qwen3-VL-8B-Instruct",
+        "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "gpu": "NVIDIA L40S",
+        "seconds": 23.022507658000904,
+        "inputTokens": 11521,
+        "outputTokens": 155
+      }
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:3095/",
+      "pageId": "page-1",
+      "at": "2026-10-06T19:25:42.214Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:3095/",
+      "pageId": "page-1",
+      "at": "2026-10-06T19:26:52.320Z"
+    }
+  ],
+  "status": "completed"
+}

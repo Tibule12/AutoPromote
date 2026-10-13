@@ -1,0 +1,35 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "quota",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": {
+    "path": "source-brief.txt",
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c"
+  },
+  "prompt": "Even the machines said no. But I couldn't leave it there.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 1.04,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/film/assets/narration/quota.wav",
+    "sha256": "3677901cbffbbf11741f023b6aa67cd419d826dba5511158eb50b3eba12f4f91",
+    "duration": 3.325,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cpu",
+  "gpu": null,
+  "phonemes": [
+    "\u02c8iv\u0259n \u00f0\u0259 m\u0259\u0283\u02c8inz s\u02c8\u025bd n\u02c8O. b\u02cc\u028ct \u02ccI k\u02cc\u028ad\u1d4ant l\u02c8iv \u026at \u00f0\u02c8\u025b\u0279."
+  ],
+  "seconds": 1.327961791000007,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

@@ -254,7 +254,8 @@ class ViralRenderContractTests(unittest.TestCase):
         concat_command = run.await_args_list[-1].args[0]
         self.assertEqual(concat_command[1:4], ["-fflags", "+genpts", "-i"])
         self.assertIn("1:a?", concat_command)
-        self.assertEqual(concat_command[-7:-5], ["-c:v", "copy"])
+        self.assertEqual(concat_command[concat_command.index("-c:v") + 1], "copy")
+        self.assertEqual(float(concat_command[concat_command.index("-t") + 1]), 600)
 
     def test_finish_transport_stream_consolidation_preserves_duration_and_audio(self):
         with tempfile.TemporaryDirectory(prefix="finish-ts-real-") as temp_dir:
@@ -583,6 +584,7 @@ class ViralRenderContractTests(unittest.TestCase):
             self.assertEqual(alpha.getpixel((asset.width - 1, asset.height - 1)), 0)
             self.assertGreater(alpha.getbbox()[2], asset.width // 2)
 
+    @patch.dict(os.environ, {"VIRAL_EXPORT_ENCODER": "cpu"})
     def test_viral_export_profile_preserves_aspect_and_creator_quality(self):
         vertical = resolve_viral_export_profile(
             {"resolution": "720p", "fps": "60", "codec": "h265", "quality": "master"},

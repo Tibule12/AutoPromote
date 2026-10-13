@@ -1,0 +1,450 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-07T21:27:50.001Z",
+  "matrixSha256": "0d4701b2c216968aa0950b41392ea5598144fe1e86352895ffbde0e59f19181d",
+  "realAuthRequired": true,
+  "mocksAllowed": false,
+  "cases": [
+    {
+      "id": "preview",
+      "capability": "Preview",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "PASS",
+      "failureFound": "None in tested playback/seek; initial harness assumed playback at EOF could advance beyond duration",
+      "fixApplied": "Harness seeks into valid range before checking advancement Clear a completed render when edits change; ignore late completion for an older edit; retain original media for subsequent edits.",
+      "retestResult": "Normal After play/pause and pointer seek to 6s; presented speaker frame verified",
+      "remainingIssue": "Cross-feature comparison and complex multi-source preview need their own cases In the added second-source timeline check, its video clip lacks filmstrip thumbnails; multi-source visual coverage remains incomplete.",
+      "userFacingSeverity": "None in tested flow",
+      "attempts": [],
+      "visualReview": {
+        "passed": true,
+        "notes": "Inspected real paused frame at programme 6.00/12.00; expected beige-shirt speaker and correct source picture"
+      }
+    },
+    {
+      "id": "final_render",
+      "capability": "Final render",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "PASS",
+      "failureFound": "HTTP 500 missing timeline source binding; returned output failed Studio CORS; Source size upscaled 1280x720 to 1920x1080",
+      "fixApplied": "Preserve optional source_clip_id; configurable exact allowed origin; source-native reframe dimensions Persist transient worker files to existing private owner/job-bound storage, record SHA/bytes, and refresh signed access only after job ownership checks. Studio downloads the completed output instead of the original upload. Check actual worker readiness before charging or creating a job; typed offline/busy rejection avoids phantom recovery.",
+      "retestResult": "Same real user flow produced 12.000s 1280x720 H.264/AAC, usable After playback and actual completed browser download This hour: two real CPU exports; caption output played and downloaded with the worker stopped, identical SHA and full 12s decode. Unsigned object GET returned 403.",
+      "remainingIssue": "New tested exports survive worker shutdown in private storage. Historical local-only jobs are not backfilled. Production GPU availability, other codecs/resolutions/color spaces, interrupted transfers and 24h expiry recovery remain unqualified.",
+      "userFacingSeverity": "GPU availability / production qualification blocker",
+      "attempts": [
+        {
+          "at": "2026-10-07T22:02:25.256179+00:00",
+          "gpuUsed": false,
+          "realAuth": true,
+          "noMocks": true,
+          "evidence": "hour/offline-download.json",
+          "sha256": "a55c92114196f16fac1ad7f013e73045e1040f08bc197f20c7d489a779aea28c",
+          "scope": "Actual UI playback and completed native download after local worker shutdown; local backend/private storage, not a production deployment."
+        },
+        {
+          "evidence": "hour/offline-render.json",
+          "phase": "offline-render",
+          "at": "2026-10-07T21:50:47.205Z",
+          "realAuth": true,
+          "noMocks": true,
+          "gpuUsed": false,
+          "status": 503,
+          "code": "STUDIO_RENDER_WORKER_UNAVAILABLE",
+          "noJobAcknowledged": true,
+          "noRecoveryPanel": true
+        }
+      ],
+      "gpuEvidence": "Downloaded stream tag encoder=Lavc60.31.102 h264_nvenc; NVIDIA L40S runtime and compute samples retained",
+      "visualReview": {
+        "passed": true,
+        "notes": "Reviewed six actual exported frames and Studio After screenshot: correct speakers/cuts, intact picture, readable existing signature, no blank/frozen output"
+      },
+      "technicalSha256": "792366e4495b3c9c621bc90c1d6fe0c711195efd78aeae097f26c7aa758603fa"
+    },
+    {
+      "id": "captions",
+      "capability": "Captions",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "FAIL",
+      "failureFound": "Offline provider initially missed cached model; repeated ASR wording still needs verification; preview-off hid saved cues and merged adjacent cues. Exported draft caption styling visibly differs from the current Studio preview.",
+      "fixApplied": "Pinned provider model paths; retain individual editable timeline cues when preview is off; keep transcript review gates. Fit video/caption/audio lanes at 1366\u00d7768; bind each cue to its source; preserve original source and invalidate stale render results.",
+      "retestResult": "This hour: real cue edit STUDIO QA CAPTION RETEST survived normal save/cold reload, burned into a 12s CPU export, and downloaded again after worker shutdown with identical SHA. A real second source shows three cues only on the first source. Caption appearance still differs between preview and export.",
+      "remainingIssue": "Preview shows a gold caption box/glow; exported ASS text does not match. Repeated ASR wording remains unverified. Draft export is intentionally stamped; no publish-ready transcript approval.",
+      "userFacingSeverity": "High",
+      "attempts": [
+        {
+          "startedAt": "2026-10-07T21:45:22.878Z",
+          "finishedAt": "2026-10-07T21:47:43.762Z",
+          "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio QA hour captions",
+          "realApi": true,
+          "noMocks": true,
+          "submittedJobId": "viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3",
+          "events": [
+            {
+              "path": "/api/media/credits",
+              "status": 200,
+              "at": "2026-10-07T21:45:23.643Z"
+            },
+            {
+              "path": "/api/media/studio-assets/resolve",
+              "status": 200,
+              "at": "2026-10-07T21:45:23.649Z"
+            },
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-07T21:45:30.625Z"
+            },
+            {
+              "path": "/api/media/status/viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3",
+              "status": 200,
+              "at": "2026-10-07T21:45:44.556Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3",
+              "status": 200,
+              "at": "2026-10-07T21:45:55.221Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3",
+              "status": 200,
+              "at": "2026-10-07T21:46:12.735Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3",
+              "status": 200,
+              "at": "2026-10-07T21:46:24.635Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3",
+              "status": 200,
+              "at": "2026-10-07T21:46:41.550Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3",
+              "status": 200,
+              "at": "2026-10-07T21:47:03.848Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3",
+              "status": 200,
+              "at": "2026-10-07T21:47:11.433Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3",
+              "status": 200,
+              "at": "2026-10-07T21:47:18.541Z",
+              "jobStatus": "completed"
+            }
+          ],
+          "errors": [],
+          "download": {
+            "suggestedName": "viral_clip_rendered.mp4",
+            "bytes": 2187364,
+            "nativeCompleted": true
+          },
+          "output": "reports/studio-stability-20261007/hour/captions/download.mp4",
+          "outputSha256": "a55c92114196f16fac1ad7f013e73045e1040f08bc197f20c7d489a779aea28c",
+          "technical": {
+            "passed": true,
+            "sha256": "a55c92114196f16fac1ad7f013e73045e1040f08bc197f20c7d489a779aea28c",
+            "bytes": 2187364,
+            "seconds": 12,
+            "video": {
+              "width": 1280,
+              "height": 720,
+              "codec": "h264",
+              "fps": "30/1",
+              "duration": "12.000000",
+              "pixelFormat": "yuv420p"
+            },
+            "audio": {
+              "codec": "aac",
+              "channels": 2,
+              "sampleRate": "96000",
+              "duration": "12.000000"
+            },
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-stability-20261007/hour/captions/download.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          },
+          "gpuUsed": false,
+          "execution": "Local CPU worker; NVIDIA start blocked by provider funding."
+        },
+        {
+          "evidence": "hour/caption-ui-check.json",
+          "realAuth": true,
+          "noMocks": true,
+          "captionTextVisible": true,
+          "row": {
+            "x": 1,
+            "y": 609,
+            "width": 1364,
+            "height": 52
+          },
+          "viewport": {
+            "width": 1366,
+            "height": 768
+          },
+          "at": "2026-10-07T21:34:25.363Z"
+        },
+        {
+          "evidence": "hour/cold-reload.json",
+          "at": "2026-10-07T21:49:39.007Z",
+          "realAuth": true,
+          "noMocks": true,
+          "gpuUsed": false,
+          "captionTextRestored": true,
+          "normalDashboardEntry": true,
+          "noBillingRedirect": true
+        },
+        {
+          "evidence": "hour/caption-source.json",
+          "phase": "caption-source",
+          "at": "2026-10-07T21:53:11.139Z",
+          "realAuth": true,
+          "noMocks": true,
+          "gpuUsed": false,
+          "captionCues": 3,
+          "twoRealSources": true
+        }
+      ],
+      "gpuEvidence": "caption-gpu-evidence.txt shows actual CUDA worker resident at 2204 MiB and POST /transcribe 200; downloaded H264 uses NVENC",
+      "visualReview": {
+        "passed": false,
+        "notes": "Inspected hour/browser/captions-laptop.png and hour/captions/download.mp4.frames.jpg. Edited text is correct; styled preview and exported draft differ."
+      }
+    },
+    {
+      "id": "reframing",
+      "capability": "Reframing",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "FAIL",
+      "failureFound": "Vertical source-sized output follows correct faces but default watermark is visibly clipped at right edge",
+      "fixApplied": "Source resolution canvas handling repaired earlier; automatic face/camera path verified Bound timed watermark placement by the full asset dimensions; narrow canvases use a feasible safe margin. Corrected the local QA worker entrypoint after a package-import failure.",
+      "retestResult": "Same normal portrait project rendered and downloaded: 12s, 404\u00d7720, 30 fps H.264/AAC; full decode and correct speaker cuts. Placement bounds hold. Existing artwork still truncates its own word even at the left position.",
+      "remainingIssue": "Existing watermark artwork internally truncates AutoPromote. No logo/branding asset was changed. Other portrait presets and small-canvas delivery remain unqualified.",
+      "userFacingSeverity": "Medium",
+      "attempts": [
+        {
+          "startedAt": "2026-10-07T21:27:05.346Z",
+          "finishedAt": "2026-10-07T21:27:50.000Z",
+          "realApi": true,
+          "noMocks": true,
+          "events": [
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-07T21:27:20.650Z"
+            },
+            {
+              "path": "/api/media/status/viral_8ed84d04991998465cf82fc7534edd0fae780c0a9525c199fb7637aca238e312",
+              "status": 200,
+              "at": "2026-10-07T21:27:29.988Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_8ed84d04991998465cf82fc7534edd0fae780c0a9525c199fb7637aca238e312",
+              "status": 200,
+              "at": "2026-10-07T21:27:36.991Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_8ed84d04991998465cf82fc7534edd0fae780c0a9525c199fb7637aca238e312",
+              "status": 200,
+              "at": "2026-10-07T21:27:42.329Z",
+              "jobStatus": "failed"
+            },
+            {
+              "path": "/api/media/viral-render-attempt/f211fbf9-4626-4e1a-ba80-ca1d4aa88120",
+              "status": 200,
+              "at": "2026-10-07T21:27:48.080Z"
+            }
+          ],
+          "errors": [],
+          "error": "Video processing failed: Request failed with status code 500 - Worker says: No module named 'studio_precision_grade'",
+          "gpuUsed": false,
+          "execution": "Local CPU worker; NVIDIA start blocked by provider funding."
+        },
+        {
+          "startedAt": "2026-10-07T21:29:23.801Z",
+          "finishedAt": "2026-10-07T21:30:41.080Z",
+          "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio QA 20261007 vertical",
+          "realApi": true,
+          "noMocks": true,
+          "submittedJobId": "viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+          "events": [
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-07T21:29:37.272Z"
+            },
+            {
+              "path": "/api/media/status/viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+              "status": 200,
+              "at": "2026-10-07T21:29:40.905Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+              "status": 200,
+              "at": "2026-10-07T21:29:46.952Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+              "status": 200,
+              "at": "2026-10-07T21:29:54.615Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+              "status": 200,
+              "at": "2026-10-07T21:29:59.281Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+              "status": 200,
+              "at": "2026-10-07T21:30:05.039Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+              "status": 200,
+              "at": "2026-10-07T21:30:11.080Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+              "status": 200,
+              "at": "2026-10-07T21:30:17.112Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+              "status": 200,
+              "at": "2026-10-07T21:30:23.029Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_32859fe53d6d09ff5e189907929a371ed034dc55cd50f6fbab15a640260c0e58",
+              "status": 200,
+              "at": "2026-10-07T21:30:32.505Z",
+              "jobStatus": "completed"
+            }
+          ],
+          "errors": [],
+          "download": {
+            "suggestedName": "viral_clip_rendered.mp4",
+            "bytes": 1566321,
+            "nativeCompleted": true
+          },
+          "output": "reports/studio-stability-20261007/hour/reframing/download.mp4",
+          "outputSha256": "470f829334552efaed19dd38adc4750406237a1c16272c11b792dca211103a86",
+          "technical": {
+            "passed": true,
+            "sha256": "470f829334552efaed19dd38adc4750406237a1c16272c11b792dca211103a86",
+            "bytes": 1566321,
+            "seconds": 12,
+            "video": {
+              "width": 404,
+              "height": 720,
+              "codec": "h264",
+              "fps": "30/1",
+              "duration": "12.000000",
+              "pixelFormat": "yuv420p"
+            },
+            "audio": {
+              "codec": "aac",
+              "channels": 2,
+              "sampleRate": "96000",
+              "duration": "12.000000"
+            },
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-stability-20261007/hour/reframing/download.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          },
+          "gpuUsed": false,
+          "execution": "Local CPU worker; NVIDIA start blocked by provider funding."
+        }
+      ],
+      "visualReview": {
+        "passed": false,
+        "notes": "hour/reframing/download.mp4.frames.jpg: correct portrait picture/cuts; watermark word remains visually truncated."
+      }
+    },
+    {
+      "id": "save_reload",
+      "capability": "Save / reload",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "PASS",
+      "failureFound": "After page reload, saved projects were unreachable until another video upload Cold entry could test the default free plan before the authenticated premium profile arrived; project picker also hid entries after the first eight.",
+      "fixApplied": "Expose existing saved-project recovery at Studio entry; resolve owned source with normal auth; reuse editor snapshot rehydration Wait for profile loading before Studio access decisions; show all saved projects in the scrollable picker; show list failures with retry.",
+      "retestResult": "Normal page reload \u2192 saved-project button \u2192 owner-bound source \u2192 image/text/motion restored \u2192 same correct 12s real export This hour: saved edited caption marker reopens through normal cold Dashboard entry without Billing redirect.",
+      "remainingIssue": "Same browser only; cross-device sync and expired/missing sources not qualified",
+      "userFacingSeverity": "None in tested flow",
+      "attempts": [
+        {
+          "evidence": "hour/cold-reload.json",
+          "at": "2026-10-07T21:49:39.007Z",
+          "realAuth": true,
+          "noMocks": true,
+          "gpuUsed": false,
+          "captionTextRestored": true,
+          "normalDashboardEntry": true,
+          "noBillingRedirect": true
+        }
+      ],
+      "visualReview": {
+        "passed": true,
+        "notes": "Reloaded export contact sheet matches title, motion, image placement and grade of pre-reload edit; correct full real source"
+      },
+      "gpuEvidence": "Real worker output encoder h264_nvenc; same exclusive L40S worker as motion render"
+    },
+    {
+      "id": "export",
+      "capability": "Export",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "PASS",
+      "failureFound": "Returned file not playable/downloadable through Studio before CORS fix; source resolution changed unexpectedly",
+      "fixApplied": "Explicit worker allowed origin; source-native reframe target Persist transient worker files to existing private owner/job-bound storage, record SHA/bytes, and refresh signed access only after job ownership checks. Studio downloads the completed output instead of the original upload.",
+      "retestResult": "Native Chromium download completed; full independent decode, 12s clock and 1280x720 verified This hour: two real CPU exports; caption output played and downloaded with the worker stopped, identical SHA and full 12s decode. Unsigned object GET returned 403.",
+      "remainingIssue": "New tested exports survive worker shutdown in private storage. Historical local-only jobs are not backfilled. Production GPU availability, other codecs/resolutions/color spaces, interrupted transfers and 24h expiry recovery remain unqualified.",
+      "userFacingSeverity": "GPU availability / production qualification blocker",
+      "attempts": [
+        {
+          "at": "2026-10-07T22:02:25.256179+00:00",
+          "gpuUsed": false,
+          "realAuth": true,
+          "noMocks": true,
+          "evidence": "hour/offline-download.json",
+          "sha256": "a55c92114196f16fac1ad7f013e73045e1040f08bc197f20c7d489a779aea28c",
+          "scope": "Actual UI playback and completed native download after local worker shutdown; local backend/private storage, not a production deployment."
+        }
+      ],
+      "gpuEvidence": "Same actual final_render job and NVENC-encoded browser download",
+      "visualReview": {
+        "passed": true,
+        "notes": "Reviewed downloaded film contact sheet and real Studio After playback"
+      }
+    }
+  ],
+  "updatedAt": "2026-10-07T22:02:25.256179+00:00",
+  "scope": "One-hour continuation; tested subset. Use ../results.json for cumulative 29-capability matrix.",
+  "gpuUsed": false,
+  "readinessVerdict": "not ready"
+}

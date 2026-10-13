@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "artifactSha256": "fe17975cdf0a25b9dd67145241e2fbc1e627f8be42ffb6f5a880162de305bf0b",
+  "reason": "Two cream paper vessels sit on a blue tabletop; no photographic sea, no one-vessel navy broadside source. Both object count and physical world violate the shot.",
+  "reviewer": "Codex native still inspection",
+  "sourceBriefStatus": "Rejected before video generation",
+  "nextDecision": "Use evaluated connected native geometry and a matched camera/sea plate; do not treat a prompt as a geometric constraint or repeat video inference on this failed source.",
+  "publicApproved": false
+}

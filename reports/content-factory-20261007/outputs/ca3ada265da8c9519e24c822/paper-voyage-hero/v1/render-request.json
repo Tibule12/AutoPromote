@@ -1,0 +1,217 @@
+{
+  "video_url": "http://127.0.0.1:8765/generated/paper-awakens.mp4",
+  "start_time": 0,
+  "end_time": 21.8,
+  "overlays": [],
+  "auto_captions": true,
+  "timeline_segments": [
+    {
+      "id": "paper-voyage-hero-1",
+      "source_clip_id": "paper-awakens",
+      "start_time": 2.5,
+      "end_time": 5,
+      "duration": 2.5,
+      "url": "http://127.0.0.1:8765/generated/paper-awakens.mp4"
+    },
+    {
+      "id": "paper-voyage-hero-2",
+      "source_clip_id": "ocean-environment",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/native-images/ocean-keyart-v2/video.mp4"
+    },
+    {
+      "id": "paper-voyage-hero-3",
+      "source_clip_id": "storm-action",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/native-images/storm-keyart-v2/video.mp4"
+    },
+    {
+      "id": "paper-voyage-hero-4",
+      "source_clip_id": "light-path",
+      "start_time": 0,
+      "end_time": 4,
+      "duration": 4,
+      "url": "http://127.0.0.1:8765/generated/light-path.mp4"
+    },
+    {
+      "id": "paper-voyage-hero-5",
+      "source_clip_id": "world-on-desk",
+      "start_time": 1.5,
+      "end_time": 5,
+      "duration": 3.5,
+      "url": "http://127.0.0.1:8765/generated/world-on-desk.mp4"
+    },
+    {
+      "id": "paper-voyage-hero-6",
+      "source_clip_id": "studio-ui",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/ui/studio-source-assembly-v5/video.mp4"
+    },
+    {
+      "id": "paper-voyage-hero-7",
+      "source_clip_id": "identity",
+      "start_time": 0.1,
+      "end_time": 2.9,
+      "duration": 2.8,
+      "url": "http://127.0.0.1:8765/motion/identity/video.mp4"
+    }
+  ],
+  "background_audio": {
+    "url": "http://127.0.0.1:8765/audio/hero-v2/score.wav",
+    "volume": 0.25,
+    "mode": "mix",
+    "enabled": true
+  },
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 0.72,
+  "caption_segments": [
+    {
+      "id": "caption-1",
+      "start_time": 0.2,
+      "end_time": 2.2750000000000004,
+      "text": "An idea isn't a film."
+    },
+    {
+      "id": "caption-2",
+      "start_time": 2.7,
+      "end_time": 4.4,
+      "text": "It needs a world."
+    },
+    {
+      "id": "caption-3",
+      "start_time": 5.7,
+      "end_time": 7.4,
+      "text": "A little courage."
+    },
+    {
+      "id": "caption-4",
+      "start_time": 9.2,
+      "end_time": 10.924999999999999,
+      "text": "And a way through."
+    },
+    {
+      "id": "caption-5",
+      "start_time": 15.2,
+      "end_time": 18.849999999999998,
+      "text": "This started with a brief. No camera. No footage."
+    },
+    {
+      "id": "caption-6",
+      "start_time": 19.3,
+      "end_time": 20.95,
+      "text": "Auto Promote."
+    }
+  ],
+  "creative_intent": "An ordinary idea with no footage becomes a story and a finished film; private founder candidate.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "sound_effects": [
+    {
+      "id": "paper-voyage-hero-audio-1",
+      "name": "idea-isnt-film",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/idea-isnt-film.wav",
+      "startTime": 0.2,
+      "duration": 2.075,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-hero-audio-2",
+      "name": "needs-world",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/needs-world.wav",
+      "startTime": 2.7,
+      "duration": 1.7,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-hero-audio-3",
+      "name": "little-courage",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/little-courage.wav",
+      "startTime": 5.7,
+      "duration": 1.7,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-hero-audio-4",
+      "name": "way-through",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/way-through.wav",
+      "startTime": 9.2,
+      "duration": 1.725,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-hero-audio-5",
+      "name": "brief-no-footage",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/brief-no-footage.wav",
+      "startTime": 15.2,
+      "duration": 3.65,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-hero-audio-6",
+      "name": "autopromote",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/autopromote.wav",
+      "startTime": 19.3,
+      "duration": 1.65,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  }
+}

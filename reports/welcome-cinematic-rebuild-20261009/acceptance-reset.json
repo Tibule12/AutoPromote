@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "REBUILD_IN_PROGRESS",
+  "previousFinal": "../welcome-cinematic-20261009/outputs/final/final.mp4",
+  "previousCreativeVerdict": "REJECTED_BY_FOUNDER",
+  "reason": "Frozen photographed humans, insufficient narrative motion design and weak sound. Encoding success was incorrectly treated as adequate creative acceptance.",
+  "humanMotionInPreviousFinal": "NOT_IMPLEMENTED",
+  "imageToVideoInPreviousWorkload": "NOT_IMPLEMENTED",
+  "exactReferenceFilesAvailable": false,
+  "sourceReferenceCount": 4,
+  "generatedReplacementAccepted": false,
+  "movingProxyAccepted": false,
+  "audioListeningReviewed": false,
+  "readyForFinalGpu": false,
+  "newGpuJobStarted": false,
+  "storyPlan": "STORY-AND-SHOTS.md",
+  "requiredNextEvidence": [
+    "Exact original reference image files bound by content hashes",
+    "CPU-qualified RTX-compatible inference runtime and durable model",
+    "Actual generated human performance with byte-bound full moving review",
+    "Canonical source/effect/track/mask/audio decisions and normal saved-project recovery",
+    "Complete moving proxy with visual and audio creative review before final rendering"
+  ],
+  "previousFinalSha256": "63aaf80638ef93e2165924a6562026392bf1f0a10ef7c9826611aa14549ceea3",
+  "founderRequestSha256": "31efcf58575b688dd4ae3bb713a2b39c14e232cf37dc4214c7e30b5fb70d21bf",
+  "runtimeAudit": "runtime-audit.json",
+  "implementationValidation": "implementation-validation.json",
+  "updatedAt": "2026-10-09T10:45:11.366265+00:00"
+}

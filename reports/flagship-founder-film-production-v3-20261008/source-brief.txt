@@ -1,0 +1,317 @@
+I want you to create the flagship AutoPromote welcome-page film.
+
+This is NOT a generic SaaS promo.
+This is NOT a feature montage.
+This is NOT “look at our AI features.”
+
+I want AutoPromote to tell the story of how AutoPromote itself was built.
+
+CORE IDEA
+────────
+The viewer should watch a cinematic development story:
+
+one problem
+→ more problems
+→ repeated failures
+→ obsession
+→ breakthroughs
+→ AutoPromote becoming bigger than the original idea
+→ AI Director / generation / GPU capability
+→ final reveal:
+
+“The film you just watched was created by AutoPromote.”
+
+That final reveal is important.
+
+The advertisement itself must become proof of the product.
+
+STORY DIRECTION
+────────
+The film should feel personal, cinematic and real.
+
+Start small.
+
+AutoPromote originally came from trying to solve painful creator/media workflow problems.
+
+Show the progression:
+
+- multi-camera footage
+- syncing
+- audio drift
+- automatic camera switching
+- rendering problems
+- captions
+- social clips
+- reframing
+- creator workflow
+- VFX
+- AI Director
+- generated content
+- GPU problems
+- failed quota attempts
+- infrastructure work
+- debugging
+- finally getting serious GPU execution
+- AutoPromote beginning to create, understand and edit content itself
+
+Do NOT turn this into a boring chronological documentary.
+
+Find the emotional story inside the development journey.
+
+There should be:
+- curiosity
+- frustration
+- escalation
+- setbacks
+- breakthrough
+- transformation
+- payoff
+
+HOOK
+====
+The first few seconds must be strong enough that a stranger stays.
+
+Do not begin with:
+“AutoPromote is an AI platform…”
+
+Find a cinematic hook.
+
+Possible direction:
+
+“I was trying to solve one editing problem.
+I didn’t know I was building this.”
+
+Then immediately show something visually impressive from the finished system.
+
+STORY PRINCIPLE
+────────
+The viewer must always understand:
+
+What is happening?
+Why does it matter?
+What changed?
+What are we waiting to see next?
+
+No random montage.
+No disconnected generated clips.
+No meaningless VFX.
+
+Every shot must advance the story.
+
+CREATIVE STANDARD
+────────
+I want “how the hell did they make that?” moments.
+
+Use the strongest capabilities we have where they improve the story:
+
+- generated raw footage
+- cinematic AI imagery/video
+- Blender / 3D
+- motion graphics
+- tracked typography
+- masking / occlusion
+- depth
+- compositing
+- UI integrated into real scenes
+- screen recordings
+- animated emails/screenshots/logs
+- particles / atmosphere
+- dramatic lighting
+- match transitions
+- transformations
+- sound design
+- music
+- voice-over if appropriate
+
+But DO NOT throw effects everywhere.
+
+The effects must reinforce the story.
+
+EXAMPLE
+────────
+If we show GPU quota failure:
+
+Do not simply show a screenshot.
+
+Turn the screenshot into a scene:
+- camera pushes into the email
+- surrounding UI disappears into darkness
+- quota “0” becomes visually dominant
+- failed requests stack up
+- sound becomes tense
+- then transition into the breakthrough
+- “0” transforms into “3000 milliGPU”
+- environment changes
+- RTX PRO 6000 reveal lands with proper payoff
+
+That is the level of storytelling I mean.
+
+AUTOPROMOTE DEVELOPMENT MATERIAL
+────────
+Use real development material where useful:
+
+- screenshots
+- logs
+- failed renders
+- UI
+- source code
+- Cloud Run
+- GPU quota journey
+- NVIDIA L40S
+- RTX PRO 6000
+- AutoPromote Studio
+- Cam Combiner
+- Viral Clip Studio
+- Director work
+- generated assets
+
+You can generate missing raw material when needed.
+
+Do not require me to be a content creator or provide lots of footage.
+
+Generate the supporting material yourself.
+
+FILM STRUCTURE
+────────
+Build roughly:
+
+1. COLD OPEN
+Show an impressive finished AutoPromote moment first.
+
+2. ORIGIN
+“I was trying to solve one problem.”
+
+3. PROBLEM GROWS
+Multi-camera, sync, drift, editing, clips, captions, publishing.
+
+4. BUILD / FAILURE
+Code, broken renders, failed ideas, infrastructure problems.
+
+5. EXPANSION
+AutoPromote stops being just one editing tool and becomes a creative system.
+
+6. GPU / BREAKTHROUGH
+Show the fight for GPU access and the eventual breakthrough visually.
+
+7. MAGIC
+Now demonstrate what AutoPromote has become:
+understanding, generating, editing, transforming, rendering.
+
+8. REVEAL
+Tell the viewer:
+“The film you just watched was made by AutoPromote.”
+
+9. BRAND ENDING
+Premium AutoPromote ident / logo lockup.
+
+Do not use a weak fade-in logo.
+The ending needs a proper premium brand moment.
+
+LENGTH
+======
+Primary hero:
+45–75 seconds.
+
+Also generate:
+- 20–30 sec cutdown
+- 8–12 sec teaser
+- clean hero-page loop if useful
+
+WORKFLOW
+────────
+Do NOT jump straight into final rendering.
+
+First create:
+
+1. story treatment
+2. narration/script
+3. scene-by-scene storyboard
+4. shot/asset requirements
+5. generated/raw assets
+6. rough assembly
+7. review
+8. creative fixes
+9. final render
+
+Use AutoPromote itself wherever possible.
+
+The point is to prove the platform can create its own marketing.
+
+SELF-REVIEW
+────────
+After every rough render, review it like a viewer.
+
+Ask:
+
+- Does this make sense?
+- Is there a real story?
+- Is the hook strong?
+- Does anything feel boring?
+- Are there confusing sections?
+- Is the payoff worth waiting for?
+- Are effects helping or distracting?
+- Does the final reveal land?
+- Would someone ask how this was made?
+
+If not:
+fix it and rerender.
+
+Do not accept “technically successful.”
+
+QUALITY BAR
+────────
+The final result should feel closer to:
+
+- premium technology launch film
+- cinematic founder story
+- modern motion-design studio piece
+- film trailer energy
+
+NOT:
+- startup slideshow
+- random AI montage
+- Canva promo
+- feature-demo screen recording
+- generic SaaS commercial
+
+IMPORTANT
+────────
+Do not spend hours polishing one tiny effect while the whole story is weak.
+
+Prioritize:
+story
+→ pacing
+→ shot choice
+→ transformation
+→ sound
+→ effects
+→ polish
+
+DELIVERABLES
+────────
+Return:
+
+- final story treatment
+- final script
+- storyboard
+- asset list
+- generated assets
+- rough cut
+- final hero film
+- 20–30 sec cutdown
+- 8–12 sec teaser
+- welcome-page recommendation
+- what AutoPromote generated itself
+- what AutoPromote edited itself
+- remaining weaknesses
+
+FINAL SUCCESS CONDITION
+────────
+The film must make AutoPromote feel like something alive that grew out of real problems.
+
+The strongest final reaction should be:
+
+“Wait — AutoPromote made THIS?”
+
+Start with the story treatment and storyboard first.
+Do not render until the story is coherent.

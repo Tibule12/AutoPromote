@@ -1,0 +1,179 @@
+{
+  "capturedAt": "2026-10-06T16:54:35.888516+00:00",
+  "commands": [
+    {
+      "argv": [
+        "hostname"
+      ],
+      "exitCode": 0,
+      "stdout": "brev-xgh6wcu74\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0007
+    },
+    {
+      "argv": [
+        "uname",
+        "-a"
+      ],
+      "exitCode": 0,
+      "stdout": "Linux brev-xgh6wcu74 5.15.0-126-generic #136-Ubuntu SMP Wed Nov 6 10:38:22 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0008
+    },
+    {
+      "argv": [
+        "cat",
+        "/etc/os-release"
+      ],
+      "exitCode": 0,
+      "stdout": "PRETTY_NAME=\"Ubuntu 22.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"22.04\"\nVERSION=\"22.04.5 LTS (Jammy Jellyfish)\"\nVERSION_CODENAME=jammy\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=jammy\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0008
+    },
+    {
+      "argv": [
+        "lscpu"
+      ],
+      "exitCode": 0,
+      "stdout": "Architecture:                         x86_64\nCPU op-mode(s):                       32-bit, 64-bit\nAddress sizes:                        46 bits physical, 57 bits virtual\nByte Order:                           Little Endian\nCPU(s):                               8\nOn-line CPU(s) list:                  0-7\nVendor ID:                            AuthenticAMD\nModel name:                           AMD EPYC 9254 24-Core Processor\nCPU family:                           25\nModel:                                17\nThread(s) per core:                   2\nCore(s) per socket:                   4\nSocket(s):                            1\nStepping:                             1\nBogoMIPS:                             5799.99\nFlags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core invpcid_single ssbd ibrs ibpb stibp vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx512_bf16 clzero xsaveerptr wbnoinvd arat npt lbrv nrip_save tsc_scale vmcb_clean v_vmsave_vmload avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid fsrm arch_capabilities\nVirtualization:                       AMD-V\nHypervisor vendor:                    KVM\nVirtualization type:                  full\nL1d cache:                            128 KiB (4 instances)\nL1i cache:                            128 KiB (4 instances)\nL2 cache:                             4 MiB (4 instances)\nL3 cache:                             32 MiB (1 instance)\nNUMA node(s):                         1\nNUMA node0 CPU(s):                    0-7\nVulnerability Gather data sampling:   Not affected\nVulnerability Itlb multihit:          Not affected\nVulnerability L1tf:                   Not affected\nVulnerability Mds:                    Not affected\nVulnerability Meltdown:               Not affected\nVulnerability Mmio stale data:        Not affected\nVulnerability Reg file data sampling: Not affected\nVulnerability Retbleed:               Not affected\nVulnerability Spec rstack overflow:   Mitigation; safe RET, no microcode\nVulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl and seccomp\nVulnerability Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:             Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                  Not affected\nVulnerability Tsx async abort:        Not affected\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0052
+    },
+    {
+      "argv": [
+        "free",
+        "-b"
+      ],
+      "exitCode": 0,
+      "stdout": "               total        used        free      shared  buff/cache   available\nMem:     155047088128   937156608 149075402752     1028096  5034528768 152785518592\nSwap:              0           0           0\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0028
+    },
+    {
+      "argv": [
+        "df",
+        "-B1"
+      ],
+      "exitCode": 0,
+      "stdout": "Filesystem        1B-blocks        Used    Available Use% Mounted on\ntmpfs           15504711680     1019904  15503691776   1% /run\n/dev/vda1      133003395072 22546399232 110440218624  17% /\ntmpfs           77523542016           0  77523542016   0% /dev/shm\ntmpfs               5242880           0      5242880   0% /run/lock\n/dev/vda15        109395456     6348800    103046656   6% /boot/efi\n/dev/vdb       269427478528       28672 255666778112   1% /data\ntmpfs           15504707584        8192  15504699392   1% /run/user/1000\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0028
+    },
+    {
+      "argv": [
+        "nvidia-smi"
+      ],
+      "exitCode": 0,
+      "stdout": "Tue Oct  6 16:54:35 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 565.57.01              Driver Version: 565.57.01      CUDA Version: 12.7     |\n|-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA L40S                    On  |   00000002:00:01.0 Off |                    0 |\n| N/A   15C    P8             22W /  350W |       1MiB /  46068MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n                                                                                         \n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+\n",
+      "stderr": "",
+      "elapsedSeconds": 0.1922
+    },
+    {
+      "argv": [
+        "nvidia-smi",
+        "--query-gpu=name,driver_version,memory.total,memory.free",
+        "--format=csv,noheader,nounits"
+      ],
+      "exitCode": 0,
+      "stdout": "NVIDIA L40S, 565.57.01, 46068, 45485\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0163
+    },
+    {
+      "argv": [
+        "docker",
+        "--version"
+      ],
+      "exitCode": 0,
+      "stdout": "Docker version 27.3.1, build ce12230\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0095
+    },
+    {
+      "argv": [
+        "docker",
+        "info",
+        "--format",
+        "{{json .Runtimes}}"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"io.containerd.runc.v2\":{\"path\":\"runc\",\"status\":{\"org.opencontainers.runtime-spec.features\":\"{\\\"ociVersionMin\\\":\\\"1.0.0\\\",\\\"ociVersionMax\\\":\\\"1.2.0\\\",\\\"hooks\\\":[\\\"prestart\\\",\\\"createRuntime\\\",\\\"createContainer\\\",\\\"startContainer\\\",\\\"poststart\\\",\\\"poststop\\\"],\\\"mountOptions\\\":[\\\"async\\\",\\\"atime\\\",\\\"bind\\\",\\\"defaults\\\",\\\"dev\\\",\\\"diratime\\\",\\\"dirsync\\\",\\\"exec\\\",\\\"iversion\\\",\\\"lazytime\\\",\\\"loud\\\",\\\"mand\\\",\\\"noatime\\\",\\\"nodev\\\",\\\"nodiratime\\\",\\\"noexec\\\",\\\"noiversion\\\",\\\"nolazytime\\\",\\\"nomand\\\",\\\"norelatime\\\",\\\"nostrictatime\\\",\\\"nosuid\\\",\\\"nosymfollow\\\",\\\"private\\\",\\\"ratime\\\",\\\"rbind\\\",\\\"rdev\\\",\\\"rdiratime\\\",\\\"relatime\\\",\\\"remount\\\",\\\"rexec\\\",\\\"rnoatime\\\",\\\"rnodev\\\",\\\"rnodiratime\\\",\\\"rnoexec\\\",\\\"rnorelatime\\\",\\\"rnostrictatime\\\",\\\"rnosuid\\\",\\\"rnosymfollow\\\",\\\"ro\\\",\\\"rprivate\\\",\\\"rrelatime\\\",\\\"rro\\\",\\\"rrw\\\",\\\"rshared\\\",\\\"rslave\\\",\\\"rstrictatime\\\",\\\"rsuid\\\",\\\"rsymfollow\\\",\\\"runbindable\\\",\\\"rw\\\",\\\"shared\\\",\\\"silent\\\",\\\"slave\\\",\\\"strictatime\\\",\\\"suid\\\",\\\"symfollow\\\",\\\"sync\\\",\\\"tmpcopyup\\\",\\\"unbindable\\\"],\\\"linux\\\":{\\\"namespaces\\\":[\\\"cgroup\\\",\\\"ipc\\\",\\\"mount\\\",\\\"network\\\",\\\"pid\\\",\\\"time\\\",\\\"user\\\",\\\"uts\\\"],\\\"capabilities\\\":[\\\"CAP_CHOWN\\\",\\\"CAP_DAC_OVERRIDE\\\",\\\"CAP_DAC_READ_SEARCH\\\",\\\"CAP_FOWNER\\\",\\\"CAP_FSETID\\\",\\\"CAP_KILL\\\",\\\"CAP_SETGID\\\",\\\"CAP_SETUID\\\",\\\"CAP_SETPCAP\\\",\\\"CAP_LINUX_IMMUTABLE\\\",\\\"CAP_NET_BIND_SERVICE\\\",\\\"CAP_NET_BROADCAST\\\",\\\"CAP_NET_ADMIN\\\",\\\"CAP_NET_RAW\\\",\\\"CAP_IPC_LOCK\\\",\\\"CAP_IPC_OWNER\\\",\\\"CAP_SYS_MODULE\\\",\\\"CAP_SYS_RAWIO\\\",\\\"CAP_SYS_CHROOT\\\",\\\"CAP_SYS_PTRACE\\\",\\\"CAP_SYS_PACCT\\\",\\\"CAP_SYS_ADMIN\\\",\\\"CAP_SYS_BOOT\\\",\\\"CAP_SYS_NICE\\\",\\\"CAP_SYS_RESOURCE\\\",\\\"CAP_SYS_TIME\\\",\\\"CAP_SYS_TTY_CONFIG\\\",\\\"CAP_MKNOD\\\",\\\"CAP_LEASE\\\",\\\"CAP_AUDIT_WRITE\\\",\\\"CAP_AUDIT_CONTROL\\\",\\\"CAP_SETFCAP\\\",\\\"CAP_MAC_OVERRIDE\\\",\\\"CAP_MAC_ADMIN\\\",\\\"CAP_SYSLOG\\\",\\\"CAP_WAKE_ALARM\\\",\\\"CAP_BLOCK_SUSPEND\\\",\\\"CAP_AUDIT_READ\\\",\\\"CAP_PERFMON\\\",\\\"CAP_BPF\\\",\\\"CAP_CHECKPOINT_RESTORE\\\"],\\\"cgroup\\\":{\\\"v1\\\":true,\\\"v2\\\":true,\\\"systemd\\\":true,\\\"systemdUser\\\":true,\\\"rdma\\\":true},\\\"seccomp\\\":{\\\"enabled\\\":true,\\\"actions\\\":[\\\"SCMP_ACT_ALLOW\\\",\\\"SCMP_ACT_ERRNO\\\",\\\"SCMP_ACT_KILL\\\",\\\"SCMP_ACT_KILL_PROCESS\\\",\\\"SCMP_ACT_KILL_THREAD\\\",\\\"SCMP_ACT_LOG\\\",\\\"SCMP_ACT_NOTIFY\\\",\\\"SCMP_ACT_TRACE\\\",\\\"SCMP_ACT_TRAP\\\"],\\\"operators\\\":[\\\"SCMP_CMP_EQ\\\",\\\"SCMP_CMP_GE\\\",\\\"SCMP_CMP_GT\\\",\\\"SCMP_CMP_LE\\\",\\\"SCMP_CMP_LT\\\",\\\"SCMP_CMP_MASKED_EQ\\\",\\\"SCMP_CMP_NE\\\"],\\\"archs\\\":[\\\"SCMP_ARCH_AARCH64\\\",\\\"SCMP_ARCH_ARM\\\",\\\"SCMP_ARCH_MIPS\\\",\\\"SCMP_ARCH_MIPS64\\\",\\\"SCMP_ARCH_MIPS64N32\\\",\\\"SCMP_ARCH_MIPSEL\\\",\\\"SCMP_ARCH_MIPSEL64\\\",\\\"SCMP_ARCH_MIPSEL64N32\\\",\\\"SCMP_ARCH_PPC\\\",\\\"SCMP_ARCH_PPC64\\\",\\\"SCMP_ARCH_PPC64LE\\\",\\\"SCMP_ARCH_RISCV64\\\",\\\"SCMP_ARCH_S390\\\",\\\"SCMP_ARCH_S390X\\\",\\\"SCMP_ARCH_X32\\\",\\\"SCMP_ARCH_X86\\\",\\\"SCMP_ARCH_X86_64\\\"],\\\"knownFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"],\\\"supportedFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"]},\\\"apparmor\\\":{\\\"enabled\\\":true},\\\"selinux\\\":{\\\"enabled\\\":true},\\\"intelRdt\\\":{\\\"enabled\\\":true},\\\"mountExtensions\\\":{\\\"idmap\\\":{\\\"enabled\\\":true}}},\\\"annotations\\\":{\\\"io.github.seccomp.libseccomp.version\\\":\\\"2.5.3\\\",\\\"org.opencontainers.runc.checkpoint.enabled\\\":\\\"true\\\",\\\"org.opencontainers.runc.commit\\\":\\\"v1.2.2-0-g7cb3632\\\",\\\"org.opencontainers.runc.version\\\":\\\"1.2.2\\\"},\\\"potentiallyUnsafeConfigAnnotations\\\":[\\\"bundle\\\",\\\"org.systemd.property.\\\",\\\"org.criu.config\\\"]}\"}},\"nvidia\":{\"path\":\"nvidia-container-runtime\",\"status\":{\"org.opencontainers.runtime-spec.features\":\"{\\\"ociVersionMin\\\":\\\"1.0.0\\\",\\\"ociVersionMax\\\":\\\"1.2.0\\\",\\\"hooks\\\":[\\\"prestart\\\",\\\"createRuntime\\\",\\\"createContainer\\\",\\\"startContainer\\\",\\\"poststart\\\",\\\"poststop\\\"],\\\"mountOptions\\\":[\\\"async\\\",\\\"atime\\\",\\\"bind\\\",\\\"defaults\\\",\\\"dev\\\",\\\"diratime\\\",\\\"dirsync\\\",\\\"exec\\\",\\\"iversion\\\",\\\"lazytime\\\",\\\"loud\\\",\\\"mand\\\",\\\"noatime\\\",\\\"nodev\\\",\\\"nodiratime\\\",\\\"noexec\\\",\\\"noiversion\\\",\\\"nolazytime\\\",\\\"nomand\\\",\\\"norelatime\\\",\\\"nostrictatime\\\",\\\"nosuid\\\",\\\"nosymfollow\\\",\\\"private\\\",\\\"ratime\\\",\\\"rbind\\\",\\\"rdev\\\",\\\"rdiratime\\\",\\\"relatime\\\",\\\"remount\\\",\\\"rexec\\\",\\\"rnoatime\\\",\\\"rnodev\\\",\\\"rnodiratime\\\",\\\"rnoexec\\\",\\\"rnorelatime\\\",\\\"rnostrictatime\\\",\\\"rnosuid\\\",\\\"rnosymfollow\\\",\\\"ro\\\",\\\"rprivate\\\",\\\"rrelatime\\\",\\\"rro\\\",\\\"rrw\\\",\\\"rshared\\\",\\\"rslave\\\",\\\"rstrictatime\\\",\\\"rsuid\\\",\\\"rsymfollow\\\",\\\"runbindable\\\",\\\"rw\\\",\\\"shared\\\",\\\"silent\\\",\\\"slave\\\",\\\"strictatime\\\",\\\"suid\\\",\\\"symfollow\\\",\\\"sync\\\",\\\"tmpcopyup\\\",\\\"unbindable\\\"],\\\"linux\\\":{\\\"namespaces\\\":[\\\"cgroup\\\",\\\"ipc\\\",\\\"mount\\\",\\\"network\\\",\\\"pid\\\",\\\"time\\\",\\\"user\\\",\\\"uts\\\"],\\\"capabilities\\\":[\\\"CAP_CHOWN\\\",\\\"CAP_DAC_OVERRIDE\\\",\\\"CAP_DAC_READ_SEARCH\\\",\\\"CAP_FOWNER\\\",\\\"CAP_FSETID\\\",\\\"CAP_KILL\\\",\\\"CAP_SETGID\\\",\\\"CAP_SETUID\\\",\\\"CAP_SETPCAP\\\",\\\"CAP_LINUX_IMMUTABLE\\\",\\\"CAP_NET_BIND_SERVICE\\\",\\\"CAP_NET_BROADCAST\\\",\\\"CAP_NET_ADMIN\\\",\\\"CAP_NET_RAW\\\",\\\"CAP_IPC_LOCK\\\",\\\"CAP_IPC_OWNER\\\",\\\"CAP_SYS_MODULE\\\",\\\"CAP_SYS_RAWIO\\\",\\\"CAP_SYS_CHROOT\\\",\\\"CAP_SYS_PTRACE\\\",\\\"CAP_SYS_PACCT\\\",\\\"CAP_SYS_ADMIN\\\",\\\"CAP_SYS_BOOT\\\",\\\"CAP_SYS_NICE\\\",\\\"CAP_SYS_RESOURCE\\\",\\\"CAP_SYS_TIME\\\",\\\"CAP_SYS_TTY_CONFIG\\\",\\\"CAP_MKNOD\\\",\\\"CAP_LEASE\\\",\\\"CAP_AUDIT_WRITE\\\",\\\"CAP_AUDIT_CONTROL\\\",\\\"CAP_SETFCAP\\\",\\\"CAP_MAC_OVERRIDE\\\",\\\"CAP_MAC_ADMIN\\\",\\\"CAP_SYSLOG\\\",\\\"CAP_WAKE_ALARM\\\",\\\"CAP_BLOCK_SUSPEND\\\",\\\"CAP_AUDIT_READ\\\",\\\"CAP_PERFMON\\\",\\\"CAP_BPF\\\",\\\"CAP_CHECKPOINT_RESTORE\\\"],\\\"cgroup\\\":{\\\"v1\\\":true,\\\"v2\\\":true,\\\"systemd\\\":true,\\\"systemdUser\\\":true,\\\"rdma\\\":true},\\\"seccomp\\\":{\\\"enabled\\\":true,\\\"actions\\\":[\\\"SCMP_ACT_ALLOW\\\",\\\"SCMP_ACT_ERRNO\\\",\\\"SCMP_ACT_KILL\\\",\\\"SCMP_ACT_KILL_PROCESS\\\",\\\"SCMP_ACT_KILL_THREAD\\\",\\\"SCMP_ACT_LOG\\\",\\\"SCMP_ACT_NOTIFY\\\",\\\"SCMP_ACT_TRACE\\\",\\\"SCMP_ACT_TRAP\\\"],\\\"operators\\\":[\\\"SCMP_CMP_EQ\\\",\\\"SCMP_CMP_GE\\\",\\\"SCMP_CMP_GT\\\",\\\"SCMP_CMP_LE\\\",\\\"SCMP_CMP_LT\\\",\\\"SCMP_CMP_MASKED_EQ\\\",\\\"SCMP_CMP_NE\\\"],\\\"archs\\\":[\\\"SCMP_ARCH_AARCH64\\\",\\\"SCMP_ARCH_ARM\\\",\\\"SCMP_ARCH_MIPS\\\",\\\"SCMP_ARCH_MIPS64\\\",\\\"SCMP_ARCH_MIPS64N32\\\",\\\"SCMP_ARCH_MIPSEL\\\",\\\"SCMP_ARCH_MIPSEL64\\\",\\\"SCMP_ARCH_MIPSEL64N32\\\",\\\"SCMP_ARCH_PPC\\\",\\\"SCMP_ARCH_PPC64\\\",\\\"SCMP_ARCH_PPC64LE\\\",\\\"SCMP_ARCH_RISCV64\\\",\\\"SCMP_ARCH_S390\\\",\\\"SCMP_ARCH_S390X\\\",\\\"SCMP_ARCH_X32\\\",\\\"SCMP_ARCH_X86\\\",\\\"SCMP_ARCH_X86_64\\\"],\\\"knownFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"],\\\"supportedFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"]},\\\"apparmor\\\":{\\\"enabled\\\":true},\\\"selinux\\\":{\\\"enabled\\\":true},\\\"intelRdt\\\":{\\\"enabled\\\":true},\\\"mountExtensions\\\":{\\\"idmap\\\":{\\\"enabled\\\":true}}},\\\"annotations\\\":{\\\"io.github.seccomp.libseccomp.version\\\":\\\"2.5.3\\\",\\\"org.opencontainers.runc.checkpoint.enabled\\\":\\\"true\\\",\\\"org.opencontainers.runc.commit\\\":\\\"v1.2.2-0-g7cb3632\\\",\\\"org.opencontainers.runc.version\\\":\\\"1.2.2\\\"},\\\"potentiallyUnsafeConfigAnnotations\\\":[\\\"bundle\\\",\\\"org.systemd.property.\\\",\\\"org.criu.config\\\"]}\"}},\"runc\":{\"path\":\"runc\",\"status\":{\"org.opencontainers.runtime-spec.features\":\"{\\\"ociVersionMin\\\":\\\"1.0.0\\\",\\\"ociVersionMax\\\":\\\"1.2.0\\\",\\\"hooks\\\":[\\\"prestart\\\",\\\"createRuntime\\\",\\\"createContainer\\\",\\\"startContainer\\\",\\\"poststart\\\",\\\"poststop\\\"],\\\"mountOptions\\\":[\\\"async\\\",\\\"atime\\\",\\\"bind\\\",\\\"defaults\\\",\\\"dev\\\",\\\"diratime\\\",\\\"dirsync\\\",\\\"exec\\\",\\\"iversion\\\",\\\"lazytime\\\",\\\"loud\\\",\\\"mand\\\",\\\"noatime\\\",\\\"nodev\\\",\\\"nodiratime\\\",\\\"noexec\\\",\\\"noiversion\\\",\\\"nolazytime\\\",\\\"nomand\\\",\\\"norelatime\\\",\\\"nostrictatime\\\",\\\"nosuid\\\",\\\"nosymfollow\\\",\\\"private\\\",\\\"ratime\\\",\\\"rbind\\\",\\\"rdev\\\",\\\"rdiratime\\\",\\\"relatime\\\",\\\"remount\\\",\\\"rexec\\\",\\\"rnoatime\\\",\\\"rnodev\\\",\\\"rnodiratime\\\",\\\"rnoexec\\\",\\\"rnorelatime\\\",\\\"rnostrictatime\\\",\\\"rnosuid\\\",\\\"rnosymfollow\\\",\\\"ro\\\",\\\"rprivate\\\",\\\"rrelatime\\\",\\\"rro\\\",\\\"rrw\\\",\\\"rshared\\\",\\\"rslave\\\",\\\"rstrictatime\\\",\\\"rsuid\\\",\\\"rsymfollow\\\",\\\"runbindable\\\",\\\"rw\\\",\\\"shared\\\",\\\"silent\\\",\\\"slave\\\",\\\"strictatime\\\",\\\"suid\\\",\\\"symfollow\\\",\\\"sync\\\",\\\"tmpcopyup\\\",\\\"unbindable\\\"],\\\"linux\\\":{\\\"namespaces\\\":[\\\"cgroup\\\",\\\"ipc\\\",\\\"mount\\\",\\\"network\\\",\\\"pid\\\",\\\"time\\\",\\\"user\\\",\\\"uts\\\"],\\\"capabilities\\\":[\\\"CAP_CHOWN\\\",\\\"CAP_DAC_OVERRIDE\\\",\\\"CAP_DAC_READ_SEARCH\\\",\\\"CAP_FOWNER\\\",\\\"CAP_FSETID\\\",\\\"CAP_KILL\\\",\\\"CAP_SETGID\\\",\\\"CAP_SETUID\\\",\\\"CAP_SETPCAP\\\",\\\"CAP_LINUX_IMMUTABLE\\\",\\\"CAP_NET_BIND_SERVICE\\\",\\\"CAP_NET_BROADCAST\\\",\\\"CAP_NET_ADMIN\\\",\\\"CAP_NET_RAW\\\",\\\"CAP_IPC_LOCK\\\",\\\"CAP_IPC_OWNER\\\",\\\"CAP_SYS_MODULE\\\",\\\"CAP_SYS_RAWIO\\\",\\\"CAP_SYS_CHROOT\\\",\\\"CAP_SYS_PTRACE\\\",\\\"CAP_SYS_PACCT\\\",\\\"CAP_SYS_ADMIN\\\",\\\"CAP_SYS_BOOT\\\",\\\"CAP_SYS_NICE\\\",\\\"CAP_SYS_RESOURCE\\\",\\\"CAP_SYS_TIME\\\",\\\"CAP_SYS_TTY_CONFIG\\\",\\\"CAP_MKNOD\\\",\\\"CAP_LEASE\\\",\\\"CAP_AUDIT_WRITE\\\",\\\"CAP_AUDIT_CONTROL\\\",\\\"CAP_SETFCAP\\\",\\\"CAP_MAC_OVERRIDE\\\",\\\"CAP_MAC_ADMIN\\\",\\\"CAP_SYSLOG\\\",\\\"CAP_WAKE_ALARM\\\",\\\"CAP_BLOCK_SUSPEND\\\",\\\"CAP_AUDIT_READ\\\",\\\"CAP_PERFMON\\\",\\\"CAP_BPF\\\",\\\"CAP_CHECKPOINT_RESTORE\\\"],\\\"cgroup\\\":{\\\"v1\\\":true,\\\"v2\\\":true,\\\"systemd\\\":true,\\\"systemdUser\\\":true,\\\"rdma\\\":true},\\\"seccomp\\\":{\\\"enabled\\\":true,\\\"actions\\\":[\\\"SCMP_ACT_ALLOW\\\",\\\"SCMP_ACT_ERRNO\\\",\\\"SCMP_ACT_KILL\\\",\\\"SCMP_ACT_KILL_PROCESS\\\",\\\"SCMP_ACT_KILL_THREAD\\\",\\\"SCMP_ACT_LOG\\\",\\\"SCMP_ACT_NOTIFY\\\",\\\"SCMP_ACT_TRACE\\\",\\\"SCMP_ACT_TRAP\\\"],\\\"operators\\\":[\\\"SCMP_CMP_EQ\\\",\\\"SCMP_CMP_GE\\\",\\\"SCMP_CMP_GT\\\",\\\"SCMP_CMP_LE\\\",\\\"SCMP_CMP_LT\\\",\\\"SCMP_CMP_MASKED_EQ\\\",\\\"SCMP_CMP_NE\\\"],\\\"archs\\\":[\\\"SCMP_ARCH_AARCH64\\\",\\\"SCMP_ARCH_ARM\\\",\\\"SCMP_ARCH_MIPS\\\",\\\"SCMP_ARCH_MIPS64\\\",\\\"SCMP_ARCH_MIPS64N32\\\",\\\"SCMP_ARCH_MIPSEL\\\",\\\"SCMP_ARCH_MIPSEL64\\\",\\\"SCMP_ARCH_MIPSEL64N32\\\",\\\"SCMP_ARCH_PPC\\\",\\\"SCMP_ARCH_PPC64\\\",\\\"SCMP_ARCH_PPC64LE\\\",\\\"SCMP_ARCH_RISCV64\\\",\\\"SCMP_ARCH_S390\\\",\\\"SCMP_ARCH_S390X\\\",\\\"SCMP_ARCH_X32\\\",\\\"SCMP_ARCH_X86\\\",\\\"SCMP_ARCH_X86_64\\\"],\\\"knownFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"],\\\"supportedFlags\\\":[\\\"SECCOMP_FILTER_FLAG_TSYNC\\\",\\\"SECCOMP_FILTER_FLAG_SPEC_ALLOW\\\",\\\"SECCOMP_FILTER_FLAG_LOG\\\"]},\\\"apparmor\\\":{\\\"enabled\\\":true},\\\"selinux\\\":{\\\"enabled\\\":true},\\\"intelRdt\\\":{\\\"enabled\\\":true},\\\"mountExtensions\\\":{\\\"idmap\\\":{\\\"enabled\\\":true}}},\\\"annotations\\\":{\\\"io.github.seccomp.libseccomp.version\\\":\\\"2.5.3\\\",\\\"org.opencontainers.runc.checkpoint.enabled\\\":\\\"true\\\",\\\"org.opencontainers.runc.commit\\\":\\\"v1.2.2-0-g7cb3632\\\",\\\"org.opencontainers.runc.version\\\":\\\"1.2.2\\\"},\\\"potentiallyUnsafeConfigAnnotations\\\":[\\\"bundle\\\",\\\"org.systemd.property.\\\",\\\"org.criu.config\\\"]}\"}}}\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0322
+    },
+    {
+      "argv": [
+        "docker",
+        "image",
+        "ls",
+        "--format",
+        "{{.Repository}}:{{.Tag}} {{.ID}} {{.Size}}"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "elapsedSeconds": 0.01
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-version"
+      ],
+      "exitCode": null,
+      "error": "[Errno 2] No such file or directory: 'ffmpeg'",
+      "elapsedSeconds": 0.0004
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-hide_banner",
+        "-hwaccels"
+      ],
+      "exitCode": null,
+      "error": "[Errno 2] No such file or directory: 'ffmpeg'",
+      "elapsedSeconds": 0.0004
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-hide_banner",
+        "-encoders"
+      ],
+      "exitCode": null,
+      "error": "[Errno 2] No such file or directory: 'ffmpeg'",
+      "elapsedSeconds": 0.0003
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-hide_banner",
+        "-decoders"
+      ],
+      "exitCode": null,
+      "error": "[Errno 2] No such file or directory: 'ffmpeg'",
+      "elapsedSeconds": 0.0003
+    },
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "import importlib.util; print('torch_installed:', bool(importlib.util.find_spec('torch')))"
+      ],
+      "exitCode": 0,
+      "stdout": "torch_installed: False\n",
+      "stderr": "",
+      "elapsedSeconds": 0.0118
+    },
+    {
+      "argv": [
+        "sudo",
+        "-n",
+        "true"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "elapsedSeconds": 0.0064
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "title": "Imagined, then made: private generated-footage proof",
+  "story": {
+    "about": "An imagined sailing shot becomes generated moving footage and editable Studio material, without recorded footage.",
+    "whyCare": "A creator can begin with an idea even when there is nothing to shoot or upload.",
+    "hook": "A full-size mahogany yacht cuts through real-looking moving water as the voice says One idea. No footage.",
+    "beginning": "Give the actual generated yacht shot enough space for its motion and material details to register.",
+    "development": "Show the exact generated source material in the actual AutoPromote Studio.",
+    "tension": "How did a brief become footage, and can that footage be edited as real source material?",
+    "payoff": "The Studio source reveal supports the spoken origin: This started with a brief. No camera. No footage.",
+    "ending": "The editable cinematic AutoPromote studio ident resolves the creation proof.",
+    "withheld": "The tool identity and creation method until the actual Studio reveal.",
+    "amplify": [
+      "Moving yacht, bow spray and water",
+      "The generated sources in the actual Studio",
+      "Timed brand impact after the final narration"
+    ],
+    "remove": [
+      "Rejected paper-to-yacht transformations",
+      "Claims that a cut is a transformation",
+      "Repeated vessel shots",
+      "Feature lists",
+      "Unqualified public-release and full script-to-film claims"
+    ]
+  },
+  "script": [
+    {
+      "beatId": "hook",
+      "action": "A full-size mahogany yacht moves through waves. One idea. No footage.",
+      "sound": "Opening narration and a restrained generated score."
+    },
+    {
+      "beatId": "reveal",
+      "action": "The exact generated sources are editable in the real AutoPromote Studio.",
+      "sound": "This started with a brief. No camera. No footage."
+    },
+    {
+      "beatId": "ending",
+      "action": "The cinematic AutoPromote ident resolves.",
+      "sound": "Original timed ident impact."
+    }
+  ],
+  "assets": [
+    {
+      "assetId": "real-vessel",
+      "type": "video",
+      "beatId": "hook",
+      "prompt": "A coherent full-size mahogany yacht has cream canvas sails, rigging, moving bow spray and wake throughout. Camera tracks and pushes closer; this is not an aerial/wide reveal.",
+      "reason": "A coherent full-size mahogany yacht has cream canvas sails, rigging, moving bow spray and wake throughout. Camera tracks and pushes closer; this is not an aerial/wide reveal.",
+      "duration": 5.0625,
+      "provider": "reuse",
+      "libraryRef": "real-vessel",
+      "acceptanceCriteria": [
+        "A coherent full-size mahogany yacht has cream canvas sails, rigging, moving bow spray and wake throughout. Camera tracks and pushes closer; this is not an aerial/wide reveal."
+      ],
+      "seed": 20261007127
+    },
+    {
+      "assetId": "studio-ui",
+      "type": "ui",
+      "beatId": "reveal",
+      "prompt": "Actual existing Studio shows these generated source clips. Native paused scrubbing follows the decoded source through a clip change without a loading overlay or resumed playback.",
+      "reason": "Actual existing Studio shows these generated source clips. Native paused scrubbing follows the decoded source through a clip change without a loading overlay or resumed playback.",
+      "duration": 3,
+      "provider": "reuse",
+      "libraryRef": "studio-ui",
+      "acceptanceCriteria": [
+        "Actual existing Studio shows these generated source clips. Native paused scrubbing follows the decoded source through a clip change without a loading overlay or resumed playback."
+      ],
+      "seed": 20261007127
+    },
+    {
+      "assetId": "identity",
+      "type": "three_d",
+      "beatId": "ending",
+      "prompt": "Extruded AutoPromote wordmark resolves through travelling studio light, reflections and restrained glow; editable native scene and timed impact sound are retained.",
+      "reason": "Extruded AutoPromote wordmark resolves through travelling studio light, reflections and restrained glow; editable native scene and timed impact sound are retained.",
+      "duration": 3.5,
+      "provider": "reuse",
+      "libraryRef": "identity",
+      "acceptanceCriteria": [
+        "Extruded AutoPromote wordmark resolves through travelling studio light, reflections and restrained glow; editable native scene and timed impact sound are retained."
+      ],
+      "seed": 20261007127
+    },
+    {
+      "assetId": "score",
+      "type": "audio",
+      "beatId": "hook",
+      "prompt": "Replacement generated score: measurable audibility, stereo headroom and duration pass; CPU VAD/ASR recovers no speech. Accepted for a private assembly test only. Musical effectiveness and instrumental-only status still require listening.",
+      "reason": "Replacement generated score: measurable audibility, stereo headroom and duration pass; CPU VAD/ASR recovers no speech. Accepted for a private assembly test only. Musical effectiveness and instrumental-only status still require listening.",
+      "duration": 23.963,
+      "provider": "reuse",
+      "libraryRef": "score",
+      "acceptanceCriteria": [
+        "Replacement generated score: measurable audibility, stereo headroom and duration pass; CPU VAD/ASR recovers no speech. Accepted for a private assembly test only. Musical effectiveness and instrumental-only status still require listening."
+      ],
+      "seed": 20261007127
+    },
+    {
+      "assetId": "one-idea",
+      "type": "audio",
+      "beatId": "hook",
+      "prompt": "Measured original stereo audio: peak 0.427, RMS 0.062, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "reason": "Measured original stereo audio: peak 0.427, RMS 0.062, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "duration": 2.325,
+      "provider": "reuse",
+      "libraryRef": "one-idea",
+      "acceptanceCriteria": [
+        "Measured original stereo audio: peak 0.427, RMS 0.062, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film."
+      ],
+      "seed": 20261007127
+    },
+    {
+      "assetId": "brief-no-footage",
+      "type": "audio",
+      "beatId": "reveal",
+      "prompt": "Measured original stereo audio: peak 0.561, RMS 0.082, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "reason": "Measured original stereo audio: peak 0.561, RMS 0.082, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "duration": 3.65,
+      "provider": "reuse",
+      "libraryRef": "brief-no-footage",
+      "acceptanceCriteria": [
+        "Measured original stereo audio: peak 0.561, RMS 0.082, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film."
+      ],
+      "seed": 20261007127
+    }
+  ],
+  "outputs": [
+    {
+      "outputId": "generated-footage-proof",
+      "aspect": "16:9",
+      "purpose": "Private viewing proof of generated yacht footage, actual Studio source editing and designed sound. This is not the rejected paper-to-real transformation or a released movie-generation feature.",
+      "musicAssetId": "score",
+      "musicVolume": 0.25,
+      "sequence": [
+        {
+          "assetId": "real-vessel",
+          "start": 0,
+          "duration": 5.0625,
+          "reason": "Let coherent yacht motion and moving water establish the generated shot."
+        },
+        {
+          "assetId": "studio-ui",
+          "start": 0,
+          "duration": 3,
+          "reason": "Show these generated sources in the actual Studio."
+        },
+        {
+          "assetId": "identity",
+          "start": 0,
+          "duration": 3.5,
+          "reason": "Resolve with the editable cinematic brand ident."
+        }
+      ],
+      "audioCues": [
+        {
+          "assetId": "one-idea",
+          "kind": "voiceover",
+          "startTime": 0.05,
+          "duration": 2.325,
+          "trimStart": 0,
+          "volume": 0.9
+        },
+        {
+          "assetId": "brief-no-footage",
+          "kind": "voiceover",
+          "startTime": 5,
+          "duration": 3.65,
+          "trimStart": 0,
+          "volume": 0.9
+        }
+      ],
+      "captionSegments": [
+        {
+          "start": 0.05,
+          "end": 2.375,
+          "text": "One idea. No footage.",
+          "captionIcon": "none",
+          "captionAccent": "#a18aff"
+        },
+        {
+          "start": 5,
+          "end": 6.65,
+          "text": "This started with a brief.",
+          "captionIcon": "none",
+          "captionAccent": "#a18aff"
+        },
+        {
+          "start": 6.65,
+          "end": 8.65,
+          "text": "No camera. No footage.",
+          "captionIcon": "none",
+          "captionAccent": "#a18aff"
+        }
+      ]
+    }
+  ],
+  "plannerProvenance": {
+    "origin": "model_generated",
+    "producer": "Codex creative direction from the founder brief",
+    "basis": "Explicit source brief and inspected raw assets; candidate direction will be revised before final selection"
+  }
+}

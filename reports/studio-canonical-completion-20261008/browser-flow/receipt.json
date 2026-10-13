@@ -1,0 +1,49 @@
+{
+  "startedAt": "2026-10-08T11:12:47.631Z",
+  "projectName": "Studio canonical decisions QA 20261008",
+  "sourceName": "Studio shared-state 20261008",
+  "realAuthRequired": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "gpuJobsStarted": 0,
+  "renderSubmitted": false,
+  "previewFinalParity": "UNVERIFIED: separate paired output work follows state recovery",
+  "steps": [
+    "Normal Hook text/Zoom Focus and Cut/Dissolve transition selection",
+    "Normal reframe controls: enabled, 4:5, preserve full source",
+    "SRT import; reviewed words/speaker/language; Minimal; custom 35/70 position and #abcdef accent; actual caption timeline",
+    "Normal main video transforms and keyframe at caption boundary",
+    "Grade/frame, native undo/redo, final checkpoint save",
+    "Cold UI recovered Hook text and selected Dissolve/duration",
+    "Tab closed; new normal App; saved-project entry; recovered controls/media/caption timeline; exact graph including revision; originals unchanged"
+  ],
+  "originalProjectsBefore": [
+    {
+      "id": "viral-project-e510956a-a160-4c2a-857d-b735d7898a0a",
+      "name": "Studio stereo delivery 20261008",
+      "snapshotSha256": "d4229ca90077f81255aa1290d5a48b749fe69a71a93f5b8ecc48833be8331809"
+    },
+    {
+      "id": "viral-project-f28cae5c-969d-4753-8e2b-395dd40b991e",
+      "name": "Studio shared-state 20261008",
+      "snapshotSha256": "fe6f5f1c943e60a82a72ed49022061c373c069aa81bbfe4018ff498cd06e0a85"
+    }
+  ],
+  "beforeSha256": "a69038eb9e0d2afbd0b087e6995509a4916f03f6b90108d6741d031feb5d17ef",
+  "afterSha256": "a69038eb9e0d2afbd0b087e6995509a4916f03f6b90108d6741d031feb5d17ef",
+  "originalProjectsAfter": [
+    {
+      "id": "viral-project-e510956a-a160-4c2a-857d-b735d7898a0a",
+      "name": "Studio stereo delivery 20261008",
+      "snapshotSha256": "d4229ca90077f81255aa1290d5a48b749fe69a71a93f5b8ecc48833be8331809"
+    },
+    {
+      "id": "viral-project-f28cae5c-969d-4753-8e2b-395dd40b991e",
+      "name": "Studio shared-state 20261008",
+      "snapshotSha256": "fe6f5f1c943e60a82a72ed49022061c373c069aa81bbfe4018ff498cd06e0a85"
+    }
+  ],
+  "stateFlow": "PASS",
+  "finishedAt": "2026-10-08T11:15:33.263Z"
+}

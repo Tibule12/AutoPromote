@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "case": "Actual byte-reviewed source compiles into two canonical occurrences despite an expired GPU window",
+      "status": "PASS",
+      "documentHash": "4cd314566d4df84b0ca406aec1e7ea26c6cfbe79c645406da320b3969cdcfad5",
+      "sourceSha256": "4c0cc8ff183a396523d2c49137100f7b23a9c89a967a1d8ef730b22b109b92cd"
+    },
+    {
+      "case": "Rejected source cannot replace the compiled canonical edit",
+      "status": "PASS"
+    },
+    {
+      "case": "Changed artifact hash is rejected before mutation or render dispatch",
+      "status": "PASS"
+    },
+    {
+      "case": "Actual render still rejects expired operating authorization before provider dispatch",
+      "status": "PASS"
+    }
+  ],
+  "scope": "Private CLI review and canonical compilation over actual generated media. No GPU/browser/renderer invocation, Studio qualification or creative deliverable.",
+  "priorHarnessFailure": "First run expected the wrong configuration error name; actual rejection already worked. Corrected to CONTENT_FACTORY_NVIDIA_CONFIGURATION_REQUIRED.",
+  "at": "2026-10-09T06:38:20.207Z"
+}

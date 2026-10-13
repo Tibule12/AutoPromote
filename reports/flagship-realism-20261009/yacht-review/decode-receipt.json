@@ -1,0 +1,70 @@
+{
+  "status": "DECODED_PENDING_VISUAL_REVIEW",
+  "artifactSha256": "9a779712e28e5c2252c5b4eafd4099236d59a538c92894d54a36a339de921fa6",
+  "stream": {
+    "width": 1280,
+    "height": 720,
+    "avg_frame_rate": "16/1",
+    "duration": "3.062500",
+    "nb_frames": "49"
+  },
+  "decodedFrames": 49,
+  "allFramesIncluded": true,
+  "nativeFrames": [
+    0,
+    8,
+    16,
+    24,
+    32,
+    40,
+    48
+  ],
+  "detailRegions": {
+    "stern-crew": [
+      170,
+      420,
+      410,
+      625
+    ],
+    "hull-water": [
+      400,
+      450,
+      1020,
+      720
+    ],
+    "sail-rigging": [
+      270,
+      70,
+      1000,
+      500
+    ]
+  },
+  "largestChanges": [
+    {
+      "fromFrame": 47,
+      "toFrame": 48,
+      "meanAbsolutePixelChange": 17.162855179398147
+    },
+    {
+      "fromFrame": 45,
+      "toFrame": 46,
+      "meanAbsolutePixelChange": 13.29554976851852
+    },
+    {
+      "fromFrame": 35,
+      "toFrame": 36,
+      "meanAbsolutePixelChange": 12.70239185474537
+    },
+    {
+      "fromFrame": 18,
+      "toFrame": 19,
+      "meanAbsolutePixelChange": 12.604994212962962
+    },
+    {
+      "fromFrame": 43,
+      "toFrame": 44,
+      "meanAbsolutePixelChange": 12.19764937789352
+    }
+  ],
+  "limitation": "All-frame evidence and motion diagnostics only. A reviewer must judge anatomy, physical contact, vessel geometry, water interaction, scene continuity and story. Playback and listening are separate."
+}

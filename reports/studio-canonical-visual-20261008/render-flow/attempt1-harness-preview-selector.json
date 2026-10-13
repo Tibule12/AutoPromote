@@ -1,0 +1,17 @@
+{
+  "startedAt": "2026-10-08T10:12:04.869Z",
+  "projectName": "Studio canonical visual QA 20261008",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "stateFlowReceipt": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
+  "stateBeforeSha256": "7b701df7cb0421e9c3f62a72b4e37eb284fbd46f8b2e6d8ce3527dd3fbdfcbc3",
+  "gpuJobsStarted": 0,
+  "workerStarted": false,
+  "status": "FAIL",
+  "visualReview": "PENDING",
+  "listeningReview": "NOT_RUN",
+  "error": "locator.screenshot: Error: strict mode violation: locator('.phone-frame') resolved to 2 elements:\n    1) <div data-testid=\"hook-preview-frame\" class=\"phone-frame reframe-aspect-4-5    \">…</div> aka getByTestId('hook-preview-frame')\n    2) <div class=\"phone-frame phone-frame-before\">…</div> aka locator('.phone-frame.phone-frame-before')\n\nCall log:\n\u001b[2m  - waiting for locator('.phone-frame')\u001b[22m\n",
+  "finishedAt": "2026-10-08T10:12:09.855Z"
+}

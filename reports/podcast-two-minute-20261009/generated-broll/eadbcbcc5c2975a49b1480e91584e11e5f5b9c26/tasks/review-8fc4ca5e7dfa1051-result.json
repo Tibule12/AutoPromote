@@ -1,0 +1,88 @@
+{
+  "fingerprint": "7b1f4a36b9389c37fd678e339afb599fa5790abaaec22ae85aed45ba045c5fd9",
+  "result": {
+    "id": "review-8fc4ca5e7dfa1051",
+    "value": {
+      "accepted": false,
+      "reason": "The shot does not depict the concrete subject 'singer' as required; it shows only a microphone on a stand, which is an incidental prop, not the singer themselves. The visual subject is missing per the requirement to illustrate the speaker from the quote 'You are a singer — a great'.",
+      "revisionInstructions": "Replace the shot with one showing the actual singer (or a clear representation of them) as the central subject, consistent with the spoken quote. Ensure the singer is clearly identifiable and visually present in the frame, not obscured or replaced by props like microphones alone without the person behind them. Maintain the same lighting and stage setting if appropriate for context, but prioritize the presence of the human subject as specified in the source quote and role definition. Avoid any AI",
+      "criteria": [
+        {
+          "criterion": "The moving shot depicts the concrete subject in the quoted transcript as a nonidentifying illustration",
+          "passed": false,
+          "observation": "Only a microphone on a stand is visible; no singer is shown, violating the requirement to illustrate the concrete subject 'singer'."
+        },
+        {
+          "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+          "passed": true,
+          "observation": "No visible distortions, broken objects, text, logos or distracting generation defects are present in the sampled frames. The image is clean and focused on the microphone setup with stage lights in the background, which is acceptable for a cutaway shot without human subject presence, but still fails the primary requirement to show the singer as the subject. This criterion is technically met but irrelevant to the core failure in subject depiction. No revision needed for this criterion itself, but "
+        },
+        {
+          "criterion": "The shot has stable framing and believable restrained physical movement suitable for a short podcast cutaway",
+          "passed": true,
+          "observation": "The framing is stable throughout the 5-second duration, with minimal camera movement (a slight pan or drift). The movement is restrained and appropriate for a cutaway shot intended to be inserted into a podcast. However, this does not compensate for the absence of the required subject (the singer), so this criterion is passed but insufficient to make the shot usable as defined by the role and source quote. No revision needed for this criterion itself, but the overall shot must be revised to meet"
+        }
+      ]
+    },
+    "rawValue": {
+      "accepted": false,
+      "reason": "The shot does not depict the concrete subject 'singer' as required; it shows only a microphone on a stand, which is an incidental prop, not the singer themselves. The visual subject is missing per the requirement to illustrate the speaker from the quote 'You are a singer — a great'.",
+      "revisionInstructions": "Replace the shot with one showing the actual singer (or a clear representation of them) as the central subject, consistent with the spoken quote. Ensure the singer is clearly identifiable and visually present in the frame, not obscured or replaced by props like microphones alone without the person behind them. Maintain the same lighting and stage setting if appropriate for context, but prioritize the presence of the human subject as specified in the source quote and role definition. Avoid any AI",
+      "criteria": [
+        {
+          "criterion": "The moving shot depicts the concrete subject in the quoted transcript as a nonidentifying illustration",
+          "passed": false,
+          "observation": "Only a microphone on a stand is visible; no singer is shown, violating the requirement to illustrate the concrete subject 'singer'."
+        },
+        {
+          "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+          "passed": true,
+          "observation": "No visible distortions, broken objects, text, logos or distracting generation defects are present in the sampled frames. The image is clean and focused on the microphone setup with stage lights in the background, which is acceptable for a cutaway shot without human subject presence, but still fails the primary requirement to show the singer as the subject. This criterion is technically met but irrelevant to the core failure in subject depiction. No revision needed for this criterion itself, but "
+        },
+        {
+          "criterion": "The shot has stable framing and believable restrained physical movement suitable for a short podcast cutaway",
+          "passed": true,
+          "observation": "The framing is stable throughout the 5-second duration, with minimal camera movement (a slight pan or drift). The movement is restrained and appropriate for a cutaway shot intended to be inserted into a podcast. However, this does not compensate for the absence of the required subject (the singer), so this criterion is passed but insufficient to make the shot usable as defined by the role and source quote. No revision needed for this criterion itself, but the overall shot must be revised to meet"
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 2400
+    },
+    "evidenceSha256": "31fe9f46f531cf9509be27a52b77fd769c407147084c7e7120c451607a48137d",
+    "frameEvidence": [
+      {
+        "timestamp": 0,
+        "sha256": "a952fc02e9ee9813b53780a698573fe613b0c530bc30e0927311ed0d7ed82a61"
+      },
+      {
+        "timestamp": 1.0083334000000002,
+        "sha256": "2152922a8eb413ec4d1de97adbb60c6d63ac7003243501c3945ae48f0546e1c6"
+      },
+      {
+        "timestamp": 2.0166668000000003,
+        "sha256": "41a0c55bff203985f9e2dfff00bfb0abd6c073aba5ee6e66b73ab75c12962440"
+      },
+      {
+        "timestamp": 3.0250002,
+        "sha256": "950fa544255d59085abc57ee21eb3b43c12ddb688230f6e1d53283bb0bd64f15"
+      },
+      {
+        "timestamp": 4.033333600000001,
+        "sha256": "ec5e52b5a050cd7e80913e16ecd22a4cd4455fffb0b1db2e1be468343ef51ea7"
+      },
+      {
+        "timestamp": 4.961667,
+        "sha256": "650b4c78c6ceaf70346fa49fa8e7fef30011b5d34ccc532fd85cc3d48769f5eb"
+      }
+    ],
+    "seconds": 25.289865074000772,
+    "gpu": "NVIDIA L40S"
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "outputId": "paper-voyage-hero",
+  "aspect": "16:9",
+  "purpose": "An ordinary idea with no footage becomes a story and a finished film; private founder candidate.",
+  "musicAssetId": "score",
+  "musicVolume": 0.25,
+  "sequence": [
+    {
+      "assetId": "paper-awakens",
+      "start": 2.5,
+      "duration": 2.5,
+      "reason": "Begin at the impossible movement"
+    },
+    {
+      "assetId": "ocean-environment",
+      "start": 0,
+      "duration": 3,
+      "reason": "An ordinary idea gains a world"
+    },
+    {
+      "assetId": "storm-action",
+      "start": 0,
+      "duration": 3,
+      "reason": "A wall of water threatens the fragile idea"
+    },
+    {
+      "assetId": "light-path",
+      "start": 0,
+      "duration": 4,
+      "reason": "Let the threat resolve into calm"
+    },
+    {
+      "assetId": "world-on-desk",
+      "start": 1.5,
+      "duration": 3.5,
+      "reason": "Reveal the world contained on the desk"
+    },
+    {
+      "assetId": "studio-ui",
+      "start": 0,
+      "duration": 3,
+      "reason": "Show this actual generated material in AutoPromote"
+    },
+    {
+      "assetId": "identity",
+      "start": 0.1,
+      "duration": 2.8,
+      "reason": "Give the story a clear platform identity"
+    }
+  ],
+  "audioCues": [
+    {
+      "assetId": "idea-isnt-film",
+      "kind": "voiceover",
+      "startTime": 0.2,
+      "duration": 2.075,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "needs-world",
+      "kind": "voiceover",
+      "startTime": 2.7,
+      "duration": 1.7,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "little-courage",
+      "kind": "voiceover",
+      "startTime": 5.7,
+      "duration": 1.7,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "way-through",
+      "kind": "voiceover",
+      "startTime": 9.2,
+      "duration": 1.725,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "brief-no-footage",
+      "kind": "voiceover",
+      "startTime": 15.2,
+      "duration": 3.65,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "autopromote",
+      "kind": "voiceover",
+      "startTime": 19.3,
+      "duration": 1.65,
+      "trimStart": 0,
+      "volume": 0.85
+    }
+  ],
+  "captionSegments": [
+    {
+      "start": 0.2,
+      "end": 2.2750000000000004,
+      "text": "An idea isn't a film."
+    },
+    {
+      "start": 2.7,
+      "end": 4.4,
+      "text": "It needs a world."
+    },
+    {
+      "start": 5.7,
+      "end": 7.4,
+      "text": "A little courage."
+    },
+    {
+      "start": 9.2,
+      "end": 10.924999999999999,
+      "text": "And a way through."
+    },
+    {
+      "start": 15.2,
+      "end": 18.849999999999998,
+      "text": "This started with a brief. No camera. No footage."
+    },
+    {
+      "start": 19.3,
+      "end": 20.95,
+      "text": "Auto Promote."
+    }
+  ]
+}

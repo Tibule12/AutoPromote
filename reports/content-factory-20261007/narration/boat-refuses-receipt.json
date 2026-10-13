@@ -1,0 +1,32 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "boat-refuses",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "A paper boat that refuses to sink.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 0.98,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/work/narration/boat-refuses.wav",
+    "sha256": "2fe172645f69de075c5ee17b807c9b8ab56b0826c49c5a8e9461f9e8e1672b47",
+    "duration": 2.65,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cuda",
+  "gpu": "NVIDIA L40S",
+  "phonemes": [
+    "\u0250 p\u02c8Ap\u0259\u0279 b\u02c8Ot \u00f0\u00e6t \u0279\u0259fj\u02c8uz\u1d7bz t\u0259 s\u02c8\u026a\u014bk."
+  ],
+  "seconds": 0.13685805600016465,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

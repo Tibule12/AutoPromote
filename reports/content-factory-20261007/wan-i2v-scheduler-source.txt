@@ -1,0 +1,207 @@
+{
+  "_class_name": "UniPCMultistepScheduler",
+  "_diffusers_version": "0.35.0.dev0",
+  "beta_end": 0.02,
+  "beta_schedule": "linear",
+  "beta_start": 0.0001,
+  "disable_corrector": [],
+  "dynamic_thresholding_ratio": 0.995,
+  "final_sigmas_type": "zero",
+  "flow_shift": 3.0,
+  "lower_order_final": true,
+  "num_train_timesteps": 1000,
+  "predict_x0": true,
+  "prediction_type": "flow_prediction",
+  "rescale_betas_zero_snr": false,
+  "sample_max_value": 1.0,
+  "solver_order": 2,
+  "solver_p": null,
+  "solver_type": "bh2",
+  "steps_offset": 0,
+  "thresholding": false,
+  "time_shift_type": "exponential",
+  "timestep_spacing": "linspace",
+  "trained_betas": null,
+  "use_beta_sigmas": false,
+  "use_dynamic_shifting": false,
+  "use_exponential_sigmas": false,
+  "use_flow_sigmas": true,
+  "use_karras_sigmas": false
+}
+    def add_noise(
+        self,
+        original_samples: torch.Tensor,
+        noise: torch.Tensor,
+        timesteps: torch.IntTensor,
+    ) -> torch.Tensor:
+        """
+        Add noise to the original samples according to the noise schedule at the specified timesteps.
+
+        Args:
+            original_samples (`torch.Tensor`):
+                The original samples without noise.
+            noise (`torch.Tensor`):
+                The noise to add to the samples.
+            timesteps (`torch.IntTensor`):
+                The timesteps at which to add noise to the samples.
+
+        Returns:
+            `torch.Tensor`:
+                The noisy samples.
+        """
+        # Make sure sigmas and timesteps have the same device and dtype as original_samples
+        sigmas = self.sigmas.to(device=original_samples.device, dtype=original_samples.dtype)
+        if original_samples.device.type == "mps" and torch.is_floating_point(timesteps):
+            # mps does not support float64
+            schedule_timesteps = self.timesteps.to(original_samples.device, dtype=torch.float32)
+            timesteps = timesteps.to(original_samples.device, dtype=torch.float32)
+        else:
+            schedule_timesteps = self.timesteps.to(original_samples.device)
+            timesteps = timesteps.to(original_samples.device)
+
+        # begin_index is None when the scheduler is used for training or pipeline does not implement set_begin_index
+        if self.begin_index is None:
+            step_indices = [self.index_for_timestep(t, schedule_timesteps) for t in timesteps]
+        elif self.step_index is not None:
+            # add_noise is called after first denoising step (for inpainting)
+            step_indices = [self.step_index] * timesteps.shape[0]
+        else:
+            # add noise is called before first denoising step to create initial latent(img2img)
+            step_indices = [self.begin_index] * timesteps.shape[0]
+
+        sigma = sigmas[step_indices].flatten()
+        while len(sigma.shape) < len(original_samples.shape):
+            sigma = sigma.unsqueeze(-1)
+
+        alpha_t, sigma_t = self._sigma_to_alpha_sigma_t(sigma)
+        noisy_samples = alpha_t * original_samples + sigma_t * noise
+        return noisy_samples
+
+    def set_timesteps(
+        self, num_inference_steps: int, device: Optional[Union[str, torch.device]] = None, mu: Optional[float] = None
+    ) -> None:
+        """
+        Sets the discrete timesteps used for the diffusion chain (to be run before inference).
+
+        Args:
+            num_inference_steps (`int`):
+                The number of diffusion steps used when generating samples with a pre-trained model.
+            device (`str` or `torch.device`, *optional*):
+                The device to which the timesteps should be moved to. If `None`, the timesteps are not moved.
+            mu (`float`, *optional*):
+                Optional mu parameter for dynamic shifting when using exponential time shift type.
+        """
+        # "linspace", "leading", "trailing" corresponds to annotation of Table 2. of https://huggingface.co/papers/2305.08891
+        if mu is not None:
+            assert self.config.use_dynamic_shifting and self.config.time_shift_type == "exponential"
+            self.config.flow_shift = np.exp(mu)
+        if self.config.timestep_spacing == "linspace":
+            timesteps = (
+                np.linspace(0, self.config.num_train_timesteps - 1, num_inference_steps + 1)
+                .round()[::-1][:-1]
+                .copy()
+                .astype(np.int64)
+            )
+        elif self.config.timestep_spacing == "leading":
+            step_ratio = self.config.num_train_timesteps // (num_inference_steps + 1)
+            # creates integer timesteps by multiplying by ratio
+            # casting to int to avoid issues when num_inference_step is power of 3
+            timesteps = (np.arange(0, num_inference_steps + 1) * step_ratio).round()[::-1][:-1].copy().astype(np.int64)
+            timesteps += self.config.steps_offset
+        elif self.config.timestep_spacing == "trailing":
+            step_ratio = self.config.num_train_timesteps / num_inference_steps
+            # creates integer timesteps by multiplying by ratio
+            # casting to int to avoid issues when num_inference_step is power of 3
+            timesteps = np.arange(self.config.num_train_timesteps, 0, -step_ratio).round().copy().astype(np.int64)
+            timesteps -= 1
+        else:
+            raise ValueError(
+                f"{self.config.timestep_spacing} is not supported. Please make sure to choose one of 'linspace', 'leading' or 'trailing'."
+            )
+
+        sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+        if self.config.use_karras_sigmas:
+            log_sigmas = np.log(sigmas)
+            sigmas = np.flip(sigmas).copy()
+            sigmas = self._convert_to_karras(in_sigmas=sigmas, num_inference_steps=num_inference_steps)
+            timesteps = np.array([self._sigma_to_t(sigma, log_sigmas) for sigma in sigmas]).round()
+            if self.config.final_sigmas_type == "sigma_min":
+                sigma_last = sigmas[-1]
+            elif self.config.final_sigmas_type == "zero":
+                sigma_last = 0
+            else:
+                raise ValueError(
+                    f"`final_sigmas_type` must be one of 'zero', or 'sigma_min', but got {self.config.final_sigmas_type}"
+                )
+            sigmas = np.concatenate([sigmas, [sigma_last]]).astype(np.float32)
+        elif self.config.use_exponential_sigmas:
+            log_sigmas = np.log(sigmas)
+            sigmas = np.flip(sigmas).copy()
+            sigmas = self._convert_to_exponential(in_sigmas=sigmas, num_inference_steps=num_inference_steps)
+            timesteps = np.array([self._sigma_to_t(sigma, log_sigmas) for sigma in sigmas])
+            if self.config.final_sigmas_type == "sigma_min":
+                sigma_last = sigmas[-1]
+            elif self.config.final_sigmas_type == "zero":
+                sigma_last = 0
+            else:
+                raise ValueError(
+                    f"`final_sigmas_type` must be one of 'zero', or 'sigma_min', but got {self.config.final_sigmas_type}"
+                )
+            sigmas = np.concatenate([sigmas, [sigma_last]]).astype(np.float32)
+        elif self.config.use_beta_sigmas:
+            log_sigmas = np.log(sigmas)
+            sigmas = np.flip(sigmas).copy()
+            sigmas = self._convert_to_beta(in_sigmas=sigmas, num_inference_steps=num_inference_steps)
+            timesteps = np.array([self._sigma_to_t(sigma, log_sigmas) for sigma in sigmas])
+            if self.config.final_sigmas_type == "sigma_min":
+                sigma_last = sigmas[-1]
+            elif self.config.final_sigmas_type == "zero":
+                sigma_last = 0
+            else:
+                raise ValueError(
+                    f"`final_sigmas_type` must be one of 'zero', or 'sigma_min', but got {self.config.final_sigmas_type}"
+                )
+            sigmas = np.concatenate([sigmas, [sigma_last]]).astype(np.float32)
+        elif self.config.use_flow_sigmas:
+            alphas = np.linspace(1, 1 / self.config.num_train_timesteps, num_inference_steps + 1)
+            sigmas = 1.0 - alphas
+            sigmas = np.flip(self.config.flow_shift * sigmas / (1 + (self.config.flow_shift - 1) * sigmas))[:-1].copy()
+            timesteps = (sigmas * self.config.num_train_timesteps).copy()
+            if self.config.final_sigmas_type == "sigma_min":
+                sigma_last = sigmas[-1]
+            elif self.config.final_sigmas_type == "zero":
+                sigma_last = 0
+            else:
+                raise ValueError(
+                    f"`final_sigmas_type` must be one of 'zero', or 'sigma_min', but got {self.config.final_sigmas_type}"
+                )
+            sigmas = np.concatenate([sigmas, [sigma_last]]).astype(np.float32)
+        else:
+            sigmas = np.interp(timesteps, np.arange(0, len(sigmas)), sigmas)
+            if self.config.final_sigmas_type == "sigma_min":
+                sigma_last = ((1 - self.alphas_cumprod[0]) / self.alphas_cumprod[0]) ** 0.5
+            elif self.config.final_sigmas_type == "zero":
+                sigma_last = 0
+            else:
+                raise ValueError(
+                    f"`final_sigmas_type` must be one of 'zero', or 'sigma_min', but got {self.config.final_sigmas_type}"
+                )
+            sigmas = np.concatenate([sigmas, [sigma_last]]).astype(np.float32)
+
+        self.sigmas = torch.from_numpy(sigmas)
+        self.timesteps = torch.from_numpy(timesteps).to(device=device, dtype=torch.int64)
+
+        self.num_inference_steps = len(timesteps)
+
+        self.model_outputs = [
+            None,
+        ] * self.config.solver_order
+        self.lower_order_nums = 0
+        self.last_sample = None
+        if self.solver_p:
+            self.solver_p.set_timesteps(self.num_inference_steps, device=device)
+
+        # add an index counter for schedulers that allow duplicated timesteps
+        self._step_index = None
+        self._begin_index = None
+        self.sigmas = self.sigmas.to("cpu")  # to avoid too much CPU/GPU communication

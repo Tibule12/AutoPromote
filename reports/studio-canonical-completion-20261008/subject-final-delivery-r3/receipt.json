@@ -1,0 +1,208 @@
+{
+  "startedAt": "2026-10-08T13:12:53.007Z",
+  "realAuth": true,
+  "noMocks": true,
+  "newGpuJobsStarted": 0,
+  "creativeApproval": false,
+  "reviewBasis": "Visual inspection of actual owned 3s preview; PCM identical to user-accepted prior preview (gpu/subject/audio-continuity.json)",
+  "status": "DELIVERED_TECHNICAL_VISUAL_PASS_FULL_MIX_LISTENING_UNQUALIFIED",
+  "output": {
+    "startedAt": "2026-10-08T13:12:59.097Z",
+    "finishedAt": "2026-10-08T13:15:42.933Z",
+    "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio NVIDIA subject QA 20261008 r2",
+    "realApi": true,
+    "noMocks": true,
+    "submittedJobId": "viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+    "events": [
+      {
+        "path": "/api/media/process",
+        "status": 200,
+        "at": "2026-10-08T13:13:09.640Z"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:13:18.058Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:13:24.372Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:13:30.060Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:13:36.061Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:13:42.053Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:13:48.055Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:13:54.058Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:00.765Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:06.069Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:12.428Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:18.244Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:24.062Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:30.065Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:36.523Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:42.065Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:48.090Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:14:54.089Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:15:00.382Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:15:06.094Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:15:12.583Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:15:18.297Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:15:24.661Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:15:30.087Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_24e4c7fe4447effaa939fa3b0a2ec61d7b131c39472c86eb3f455fb90d6fc788",
+        "status": 200,
+        "at": "2026-10-08T13:15:37.115Z",
+        "jobStatus": "completed"
+      }
+    ],
+    "errors": [],
+    "download": {
+      "suggestedName": "viral_clip_rendered.mp4",
+      "bytes": 2507226,
+      "nativeCompleted": true
+    },
+    "output": "reports/studio-canonical-completion-20261008/subject-final-delivery-r3/vfx/download.mp4",
+    "outputSha256": "d0f0fe63227379dfce3c0dad2f2f90eed90fd34bcbc78464b00302d61675b0e8",
+    "technical": {
+      "passed": true,
+      "sha256": "d0f0fe63227379dfce3c0dad2f2f90eed90fd34bcbc78464b00302d61675b0e8",
+      "bytes": 2507226,
+      "seconds": 12,
+      "video": {
+        "width": 1280,
+        "height": 720,
+        "codec": "h264",
+        "fps": "30/1",
+        "duration": "11.966667",
+        "pixelFormat": "yuv420p"
+      },
+      "audio": {
+        "codec": "aac",
+        "channels": 2,
+        "sampleRate": "96000",
+        "duration": "12.000000"
+      },
+      "independentFullDecode": true,
+      "contactSheet": "reports/studio-canonical-completion-20261008/subject-final-delivery-r3/vfx/download.mp4.frames.jpg",
+      "scope": "Technical only. Pixel and listening review are separate required evidence."
+    }
+  },
+  "finishedAt": "2026-10-08T13:15:42.934Z",
+  "gpuRequestsObserved": [],
+  "visualReview": {
+    "at": "2026-10-08T13:24:00.062526+00:00",
+    "passed": true,
+    "scope": "Contact sheet and actual first-range frames: correct person, text behind subject, tracked callout and graded background retained; later source footage remains. Hair-edge quality and predictive whole-graph parity unqualified.",
+    "creativeApproval": false
+  },
+  "audioMeasurementEvidence": "reports/studio-canonical-completion-20261008/subject-final-delivery-r3/audio-measurements.json"
+}

@@ -1,0 +1,1774 @@
+[
+  {
+    "assetId": "paper-awakens",
+    "type": "video",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "generated/paper-awakens.mp4",
+      "sha256": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+      "bytes": 1596307,
+      "duration": 5.041667,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1280,
+      "height": 704,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex visual inspection",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b",
+      "reason": "Use the final 2.5 seconds where water appears and the boat floats; omit the static lead-in.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "Use the final 2.5 seconds where water appears and the boat floats; omit the static lead-in."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Machine visual selection; final story review remains separate."
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+      "settings": {
+        "steps": 50,
+        "referenceImageSha256": null
+      },
+      "seed": 2026100711,
+      "tool": "AutoPromote Wan adapter",
+      "origin": "server_generated",
+      "generationReceipt": "generated/paper-awakens-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "world-on-desk",
+    "type": "video",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "generated/world-on-desk.mp4",
+      "sha256": "ae70b7bec1bddf4f3dd080ab85daae2e75692f6e3fa4d15b230408f68789874a",
+      "bytes": 1793365,
+      "duration": 5.041667,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1280,
+      "height": 704,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex visual inspection",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "f374567cf48486103ee8bd07a283f9804635caefcbc33162b2c5f31ad0a0d0ed",
+      "reason": "The expanding miniature pool and blank sheet reveal the ordinary origin of the world.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "The expanding miniature pool and blank sheet reveal the ordinary origin of the world."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Machine visual selection; final story review remains separate."
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. A small ivory origami sailboat floats in a beautiful circular pool of deep blue ocean water on a dark wooden desk. The camera slowly pulls back from the boat and water to reveal that an entire miniature ocean world is contained on the desk beside a single blank sheet of paper. Strong amber side light, dark studio background. All geometry stable, realistic miniature water, no text or screens. One uninterrupted five-second shot.",
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+      "settings": {
+        "steps": 50,
+        "referenceImageSha256": null
+      },
+      "seed": 2026100715,
+      "tool": "AutoPromote Wan adapter",
+      "origin": "server_generated",
+      "generationReceipt": "generated/world-on-desk-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "light-path",
+    "type": "video",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "generated/light-path.mp4",
+      "sha256": "d9f97c72e6f441809721506d9d3a4b1d94536bb8c6c8ec4ebadcc6eb858b9447",
+      "bytes": 2752903,
+      "duration": 5.041667,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1280,
+      "height": 704,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex visual inspection",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "4f67c4b9954078fc93087ffd23c6e556470bf676206903678a24464611f60257",
+      "reason": "Warm reflected light and calm water provide relief after the threatening wave. Use only as a short relief beat; boat continuity is imperfect.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "Warm reflected light and calm water provide relief after the threatening wave. Use only as a short relief beat; boat continuity is imperfect."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Machine visual selection; final story review remains separate."
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. A dark ocean becomes calm as a narrow golden path of reflected sunlight opens across the waves. A small ivory origami sailboat with crisp triangular sail floats steadily toward the warm amber horizon. The camera slowly rises behind the boat revealing the luminous path and immense quiet sea. Emotional relief, tactile paper and realistic water, restrained cinematic atmosphere. One uninterrupted five-second shot.",
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+      "settings": {
+        "steps": 50,
+        "referenceImageSha256": null
+      },
+      "seed": 2026100714,
+      "tool": "AutoPromote Wan adapter",
+      "origin": "server_generated",
+      "generationReceipt": "generated/light-path-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "identity",
+    "type": "three_d",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "idents/cinematic-v2/ident.mp4",
+      "sha256": "2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+      "bytes": 1239941,
+      "duration": 3.5,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1280,
+      "height": 720,
+      "hasAudio": true
+    },
+    "audioRole": "brand_ident",
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex visual inspection",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "c4a5749bbd34c52494498d4909c802db72740192f90221088225d2414a359e41",
+      "reason": "A full-size extruded wordmark resolves through travelling studio light with reflections and timed original impact sound.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "A full-size extruded wordmark resolves through travelling studio light with reflections and timed original impact sound."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Machine visual selection; final story review remains separate."
+    },
+    "provenance": {
+      "sourceBrief": "Create cinematic editable AutoPromote studio logo reveals: cinematic, AI compute, premium minimal and creator-energy. Brand ink, violet and ivory. Real extrusion, reflections, timed reveal and original impact audio.",
+      "sourceBriefHash": "4e187b129d82a3b239f6752c54697ba0ecdfe94279eaeed70455a31e5501328b",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "A full-size extruded wordmark resolves through travelling studio light with reflections and timed original impact sound.",
+      "model": "Blender AutoPromote studio ident",
+      "modelRevision": "4.5.9 LTS",
+      "settings": {
+        "template": "autopromote_ident",
+        "style": "cinematic",
+        "duration": 3.5,
+        "seed": 2026100780,
+        "sourceBrief": "Create cinematic editable AutoPromote studio logo reveals: cinematic, AI compute, premium minimal and creator-energy. Brand ink, violet and ivory. Real extrusion, reflections, timed reveal and original impact audio.",
+        "deadlineEpoch": 1791363059.6449072
+      },
+      "seed": 0,
+      "tool": "Blender",
+      "origin": "server_generated",
+      "generationReceipt": "idents/cinematic-v2/receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "studio-ui",
+    "type": "ui",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "ui/studio-source-assembly-v5/video.mp4",
+      "sha256": "03aa2eead0f635210ecf6a05c1402aab8831c2ac301f94333f5f3ef3a21159d2",
+      "bytes": 449165,
+      "duration": 3,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1440,
+      "height": 900,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex visual inspection",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "467f5ca08ee09a4375c889a880b4ebfb95e7c4d04e1911675f09a32dbbc4b16d",
+      "reason": "Actual AutoPromote Studio shows the generated boat footage, editable source clips and live preview.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "Actual AutoPromote Studio shows the generated boat footage, editable source clips and live preview."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Machine visual selection; final story review remains separate."
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "Actual AutoPromote Studio shows the generated boat footage, editable source clips and live preview.",
+      "model": "AutoPromote actual Studio browser capture",
+      "modelRevision": "studio-ui-capture-v1",
+      "settings": {
+        "url": "http://127.0.0.1:5008/?fixture=factory",
+        "projectName": "Paper voyage · generated source assembly",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "fps": 24,
+        "frames": 72
+      },
+      "seed": 0,
+      "tool": "Playwright and BrowserOperator observe-act-verify",
+      "origin": "server_generated",
+      "generationReceipt": "ui/studio-source-assembly-v5/receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "ocean-environment",
+    "type": "video",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "generated/ocean-scale-v2.mp4",
+      "sha256": "6447770166c0fdfc744b512c0194f1d8146b70356c1cc2b6c29bb4e1333cbd76",
+      "bytes": 6113086,
+      "duration": 5.041667,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1280,
+      "height": 704,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex visual inspection",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "6f087c655a2bc6917f09b21aaeafb7617bfec2d6d9b47e0b4580fa34557c2d9e",
+      "reason": "Use only 0.4–2.1 seconds: the matching boat opens into a moving sea. Reject the later overexposed close ocean for the requested wide-shot role.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "Use only 0.4–2.1 seconds: the matching boat opens into a moving sea. Reject the later overexposed close ocean for the requested wide-shot role."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Machine visual selection; final story review remains separate."
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "The camera rapidly cranes upward and pulls far back from the same single ivory origami boat with one tall triangular folded paper sail. The dark desk surface falls out of view as an immense deep blue moving ocean expands around the small intact boat. By the middle of the shot the complete boat is tiny, below fifteen percent of the frame, surrounded by vast sweeping ocean waves and a distant warm amber horizon. A coherent physical impossible miniature world unfolds into full cinematic scale. The paper sail and folded hull retain their exact shape and remain visible. One uninterrupted smooth five-second shot. No extra boats, no words or screens.",
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+      "settings": {
+        "steps": 50,
+        "referenceImageSha256": "15147e938c9001643a25ca5d7161db89b4bf3507f7f326517c32655664bdcd5a"
+      },
+      "seed": 2026100761,
+      "tool": "AutoPromote Wan adapter",
+      "origin": "server_generated",
+      "generationReceipt": "generated/ocean-scale-v2-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "storm-action",
+    "type": "video",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "generated/storm-action-v2.mp4",
+      "sha256": "af83a57035473e976d912bedd032daca954486b2c0decf7633091177e6169b57",
+      "bytes": 6706893,
+      "duration": 5.041667,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1280,
+      "height": 704,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex visual inspection",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "4a498f504082017384e767a8443e09f14771b528709ea093b335e8f49d403b12",
+      "reason": "The wave visibly curls and collapses across successive frames. Use as an environment threat cutaway; no boat is present inside this shot.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "The wave visibly curls and collapses across successive frames. Use as an environment threat cutaway; no boat is present inside this shot."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Machine visual selection; final story review remains separate."
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "This enormous dark blue curling ocean wave moves forcefully forward. The towering crest curls over, white sea spray peels from the top and crashes down into the turbulent foreground, foam surges toward the low camera. The thick curling water wall fills the frame, with physically convincing moving water and powerful scale. A warm narrow rim light makes the crest readable against deep blue storm atmosphere. One smooth uninterrupted dramatic five-second shot of a threatening wave approaching, no cut, no new objects, no boats, no text, no slow static cloud shot.",
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+      "settings": {
+        "steps": 50,
+        "referenceImageSha256": "6998e0119aa689666c5f558e039ceca7d6acc0a741f34ea42494408cc92a136a"
+      },
+      "seed": 2026100762,
+      "tool": "AutoPromote Wan adapter",
+      "origin": "server_generated",
+      "generationReceipt": "generated/storm-action-v2-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "light-return",
+    "type": "video",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "generated/golden-return-v2.mp4",
+      "sha256": "9043b7439f9cbbe7683ed68213a90fd75ac7cc300362a2d028da717b2b0df038",
+      "bytes": 6112095,
+      "duration": 5.041667,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1280,
+      "height": 704,
+      "hasAudio": false
+    },
+    "audioRole": null,
+    "review": {
+      "accepted": true,
+      "reviewer": "Codex visual inspection",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "51484f3ee204ff175e11c7e5a56ab853c25c2e68922d72b1cbe49dcec8d1b2d1",
+      "reason": "The same reference boat remains intact as the camera reveals a golden sea. Use 2–5 seconds for relief after the wave, omitting the desk lead-in.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "The same reference boat remains intact as the camera reveals a golden sea. Use 2–5 seconds for relief after the wave, omitting the desk lead-in."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Machine visual selection; final story review remains separate."
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "The same single small ivory origami boat with one tall triangular paper sail floats intact on the deep blue water. The camera rises smoothly behind the boat and reveals a long luminous golden path of reflected sunrise ahead. The sea becomes spacious and calm, warm amber light grows across the crisp folded paper and ocean ripples. The boat glides toward the distant golden horizon as the camera pulls back slightly to show the complete hull and sail. The miniature desk disappears out of frame, leaving an immense peaceful ocean. Emotional relief after danger, tactile stable paper folds, physically realistic moving water. One uninterrupted five-second shot, no other objects, no writing.",
+      "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+      "settings": {
+        "steps": 50,
+        "referenceImageSha256": "15147e938c9001643a25ca5d7161db89b4bf3507f7f326517c32655664bdcd5a"
+      },
+      "seed": 2026100763,
+      "tool": "AutoPromote Wan adapter",
+      "origin": "server_generated",
+      "generationReceipt": "generated/golden-return-v2-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "score",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "audio/hero-v3/score.wav",
+      "sha256": "f74f27c1f0720b12699498944a4fae4877576839e6c1ff2c26b0860af7da0694",
+      "bytes": 4608044,
+      "duration": 24,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "music",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "f74f27c1f0720b12699498944a4fae4877576839e6c1ff2c26b0860af7da0694",
+      "reason": "Measured original stereo audio: peak 0.198, RMS 0.038, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "Original score gives the wave tension and a timed harmonic resolution."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.198, RMS 0.038, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.197967529296875,
+        "rms": 0.038357599890475505,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 24
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "Original score gives the wave tension and a timed harmonic resolution.",
+      "model": "original-procedural-composition",
+      "modelRevision": "paper-voyage-score-v1",
+      "settings": {
+        "sampleRate": 48000,
+        "tempo": 96,
+        "duration": 24,
+        "payoffAt": 8.2,
+        "motif": "minor tension to warm resolution",
+        "stereo": true
+      },
+      "seed": 2026100721,
+      "tool": "AutoPromote Content Factory original audio",
+      "origin": "server_generated",
+      "generationReceipt": "audio/hero-v3/score-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "idea-isnt-film",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/idea-isnt-film.wav",
+      "sha256": "cf5b472143f6b6f9aa2e6ce0c2f79401b538b1cce0ca984535190e928d7b8719",
+      "bytes": 398478,
+      "duration": 2.075,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "cf5b472143f6b6f9aa2e6ce0c2f79401b538b1cce0ca984535190e928d7b8719",
+      "reason": "Measured original stereo audio: peak 0.451, RMS 0.074, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "An idea isn't a film."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.451, RMS 0.074, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.4510498046875,
+        "rms": 0.0742219588038214,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.075
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "An idea isn't a film.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/idea-isnt-film-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "needs-world",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/needs-world.wav",
+      "sha256": "619971ac6f7e2609533a062d6ed53d6b66e7d5d98525897f4cae6ef1b09b32d5",
+      "bytes": 326478,
+      "duration": 1.7,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "619971ac6f7e2609533a062d6ed53d6b66e7d5d98525897f4cae6ef1b09b32d5",
+      "reason": "Measured original stereo audio: peak 0.109, RMS 0.014, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "It needs a world."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.109, RMS 0.014, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.10888671875,
+        "rms": 0.014121029518247652,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 1.7
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "It needs a world.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/needs-world-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "little-courage",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/little-courage.wav",
+      "sha256": "d6a282fee7dfd0cdf9de46060a08aab9687bd51f44da34eb3e15a20dce6e8eed",
+      "bytes": 326478,
+      "duration": 1.7,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "d6a282fee7dfd0cdf9de46060a08aab9687bd51f44da34eb3e15a20dce6e8eed",
+      "reason": "Measured original stereo audio: peak 0.107, RMS 0.011, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "A little courage."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.107, RMS 0.011, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.106964111328125,
+        "rms": 0.010564867417307977,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 1.7
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "A little courage.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/little-courage-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "way-through",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/way-through.wav",
+      "sha256": "c8510f277fae6119c9e517a40ee9f2ad49b17361b2e6366f9715486567df4d6d",
+      "bytes": 331278,
+      "duration": 1.725,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "c8510f277fae6119c9e517a40ee9f2ad49b17361b2e6366f9715486567df4d6d",
+      "reason": "Measured original stereo audio: peak 0.098, RMS 0.009, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "And a way through."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.098, RMS 0.009, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.098419189453125,
+        "rms": 0.008630555032613944,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 1.725
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "And a way through.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/way-through-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "brief-no-footage",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/brief-no-footage.wav",
+      "sha256": "e78da06e03e8aa9d029cfd282d157aa19946379c82411d916d34f49d9af9d6b1",
+      "bytes": 700878,
+      "duration": 3.65,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "e78da06e03e8aa9d029cfd282d157aa19946379c82411d916d34f49d9af9d6b1",
+      "reason": "Measured original stereo audio: peak 0.561, RMS 0.082, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "This started with a brief. No camera. No footage."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.561, RMS 0.082, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.56097412109375,
+        "rms": 0.0824021993283638,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 3.65
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "This started with a brief. No camera. No footage.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/brief-no-footage-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "autopromote",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/autopromote.wav",
+      "sha256": "1f83ce6cee102dd8c807fc64111f89c618d151e62df9c35711edc820524c4d54",
+      "bytes": 316878,
+      "duration": 1.65,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "1f83ce6cee102dd8c807fc64111f89c618d151e62df9c35711edc820524c4d54",
+      "reason": "Measured original stereo audio: peak 0.111, RMS 0.013, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "Auto Promote."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.111, RMS 0.013, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.111053466796875,
+        "rms": 0.012841437091590057,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 1.65
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "Auto Promote.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/autopromote-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "see-in-head",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/see-in-head.wav",
+      "sha256": "12498140512843cadc0359ab51d7af802764eeb741960aa9a685fce2866a4455",
+      "bytes": 384078,
+      "duration": 2,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "12498140512843cadc0359ab51d7af802764eeb741960aa9a685fce2866a4455",
+      "reason": "Measured original stereo audio: peak 0.460, RMS 0.076, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "You can see it in your head."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.460, RMS 0.076, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.460357666015625,
+        "rms": 0.07634595265147662,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "You can see it in your head.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/see-in-head-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "nothing-to-upload",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/nothing-to-upload.wav",
+      "sha256": "76b1db60133c3f2a3b97d3b627642e65446444e99675c022f913ad35da92469e",
+      "bytes": 412878,
+      "duration": 2.15,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "76b1db60133c3f2a3b97d3b627642e65446444e99675c022f913ad35da92469e",
+      "reason": "Measured original stereo audio: peak 0.110, RMS 0.012, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "But there's nothing to upload."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.110, RMS 0.012, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.110443115234375,
+        "rms": 0.012208699229968142,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.15
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "But there's nothing to upload.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/nothing-to-upload-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "no-cameras",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/no-cameras.wav",
+      "sha256": "f42b1d3acbc23d369baacd8f0eecddc1f8f5c96d40de125a3262201d2e6a73da",
+      "bytes": 446478,
+      "duration": 2.325,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "f42b1d3acbc23d369baacd8f0eecddc1f8f5c96d40de125a3262201d2e6a73da",
+      "reason": "Measured original stereo audio: peak 0.505, RMS 0.078, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "No cameras. No crew."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.505, RMS 0.078, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.504608154296875,
+        "rms": 0.07803832114744406,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.325
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "No cameras. No crew.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/no-cameras-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "gave-one-idea",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/gave-one-idea.wav",
+      "sha256": "2e8f3c871432f6a9d053478868f5f3b3ee8b041390c6b8a5b2c3ffa82659b26f",
+      "bytes": 518478,
+      "duration": 2.7,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "2e8f3c871432f6a9d053478868f5f3b3ee8b041390c6b8a5b2c3ffa82659b26f",
+      "reason": "Measured original stereo audio: peak 0.111, RMS 0.013, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "So we gave Auto Promote one idea."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.111, RMS 0.013, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.110809326171875,
+        "rms": 0.012747908707713938,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.7
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "So we gave Auto Promote one idea.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/gave-one-idea-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "boat-refuses",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/boat-refuses.wav",
+      "sha256": "e048f96a25fb617feb77d2e2b4bcf6135120e365df6a99368263d035fc2d7858",
+      "bytes": 508878,
+      "duration": 2.65,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "e048f96a25fb617feb77d2e2b4bcf6135120e365df6a99368263d035fc2d7858",
+      "reason": "Measured original stereo audio: peak 0.111, RMS 0.013, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "A paper boat that refuses to sink."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.111, RMS 0.013, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.110748291015625,
+        "rms": 0.012901527531967657,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.65
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "A paper boat that refuses to sink.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/boat-refuses-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "made-material",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/made-material.wav",
+      "sha256": "518681c76c6a4eb62b9a6bd860fa081bcb708e5d6c38099bc3f4636a7e4128d3",
+      "bytes": 379278,
+      "duration": 1.975,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "518681c76c6a4eb62b9a6bd860fa081bcb708e5d6c38099bc3f4636a7e4128d3",
+      "reason": "Measured original stereo audio: peak 0.102, RMS 0.013, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "It made the raw material."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.102, RMS 0.013, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.10198974609375,
+        "rms": 0.012545612468041414,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 1.975
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "It made the raw material.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/made-material-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "reject-weak",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/reject-weak.wav",
+      "sha256": "fcea9f8ce6809e9724880caeffd70449a651e88dcc38d640d2b939183b473527",
+      "bytes": 432078,
+      "duration": 2.25,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "fcea9f8ce6809e9724880caeffd70449a651e88dcc38d640d2b939183b473527",
+      "reason": "Measured original stereo audio: peak 0.511, RMS 0.076, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "We rejected what didn't work."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.511, RMS 0.076, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.511474609375,
+        "rms": 0.07648462257637469,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.25
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "We rejected what didn't work.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/reject-weak-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "edited-story",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/edited-story.wav",
+      "sha256": "df7999aa2a11ce80f69980f7446a4c8b33f62b457eae1fd3cf95d76001364702",
+      "bytes": 523278,
+      "duration": 2.725,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "df7999aa2a11ce80f69980f7446a4c8b33f62b457eae1fd3cf95d76001364702",
+      "reason": "Measured original stereo audio: peak 0.111, RMS 0.012, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "Then Auto Promote edited the story."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.111, RMS 0.012, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.11090087890625,
+        "rms": 0.012072335436840912,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.725
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "Then Auto Promote edited the story.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/edited-story-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "brief-to-this",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/brief-to-this.wav",
+      "sha256": "eceb6cf274ed391e98cbc17d2b989ad4157bcbe17c3e5d864470dd6834860a48",
+      "bytes": 393678,
+      "duration": 2.05,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "eceb6cf274ed391e98cbc17d2b989ad4157bcbe17c3e5d864470dd6834860a48",
+      "reason": "Measured original stereo audio: peak 0.107, RMS 0.011, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "From a brief... to this."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.107, RMS 0.011, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.10711669921875,
+        "rms": 0.011230961273301403,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.05
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "From a brief... to this.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/brief-to-this-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "teaser-start",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/teaser-start.wav",
+      "sha256": "bbe2693246bf2e3703efa273fc0306c694bc88a706dcbb220444ee241971184b",
+      "bytes": 518478,
+      "duration": 2.7,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "bbe2693246bf2e3703efa273fc0306c694bc88a706dcbb220444ee241971184b",
+      "reason": "Measured original stereo audio: peak 0.106, RMS 0.010, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "No footage? Start with an idea."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.106, RMS 0.010, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.106414794921875,
+        "rms": 0.010442006009799946,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.7
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "No footage? Start with an idea.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/teaser-start-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "make-world",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/make-world.wav",
+      "sha256": "3381932cbe195c6f8239581239996c2fee3c41badc4a07e48941cc6ae4e1c609",
+      "bytes": 312078,
+      "duration": 1.625,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "3381932cbe195c6f8239581239996c2fee3c41badc4a07e48941cc6ae4e1c609",
+      "reason": "Measured original stereo audio: peak 0.445, RMS 0.072, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "Make a world."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.445, RMS 0.072, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.4451904296875,
+        "rms": 0.07202631016843275,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 1.625
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "Make a world.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/make-world-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "make-story",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/make-story.wav",
+      "sha256": "d1c045a13def60d4f2733196550f28f6fcbd6a4582e64c3b1050f6d8e4f3c934",
+      "bytes": 336078,
+      "duration": 1.75,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "d1c045a13def60d4f2733196550f28f6fcbd6a4582e64c3b1050f6d8e4f3c934",
+      "reason": "Measured original stereo audio: peak 0.531, RMS 0.072, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "Make it a story."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.531, RMS 0.072, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.530975341796875,
+        "rms": 0.0721428893452578,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 1.75
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "Make it a story.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/make-story-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "made-with",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/made-with.wav",
+      "sha256": "18d830bbfd6c0d3422b1d6949554f4a705bd74a03590c6f6ea8bf737b533388a",
+      "bytes": 499278,
+      "duration": 2.6,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "18d830bbfd6c0d3422b1d6949554f4a705bd74a03590c6f6ea8bf737b533388a",
+      "reason": "Measured original stereo audio: peak 0.109, RMS 0.015, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "This film was made with Auto Promote."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.109, RMS 0.015, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.108642578125,
+        "rms": 0.015073050116537872,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.6
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "This film was made with Auto Promote.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/made-with-receipt.json"
+    },
+    "usedIn": []
+  },
+  {
+    "assetId": "one-idea",
+    "type": "audio",
+    "beatId": "hook",
+    "status": "accepted",
+    "artifact": {
+      "path": "narration-cpu/one-idea.wav",
+      "sha256": "f72bacef2b75809f042b44c3de7fc74f11a66efe6c197d44c89fc269c975cca3",
+      "bytes": 446478,
+      "duration": 2.325,
+      "codec": "pcm_s16le",
+      "container": "wav",
+      "fps": 24,
+      "width": null,
+      "height": null,
+      "hasAudio": true
+    },
+    "audioRole": "voiceover",
+    "review": {
+      "accepted": true,
+      "reviewer": "AutoPromote objective audio measurements",
+      "modelRevision": "content-factory-selected-roles-20261007",
+      "evidenceSha256": "f72bacef2b75809f042b44c3de7fc74f11a66efe6c197d44c89fc269c975cca3",
+      "reason": "Measured original stereo audio: peak 0.107, RMS 0.016, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+      "criteria": [
+        {
+          "criterion": "Usable for the explicitly assigned story role",
+          "passed": true,
+          "observation": "One idea. No footage."
+        }
+      ],
+      "revisionInstructions": "",
+      "limitation": "Measured audibility/headroom; speech clarity and musical effectiveness await founder listening.",
+      "measurements": {
+        "accepted": true,
+        "reason": "Measured original stereo audio: peak 0.107, RMS 0.016, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+        "peak": 0.106781005859375,
+        "rms": 0.015576418937008866,
+        "clippedFraction": 0,
+        "channels": 2,
+        "sampleRate": 48000,
+        "duration": 2.325
+      }
+    },
+    "provenance": {
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "sourceBriefHash": "bd7c98e30fa52e976ea58e6294d4b6842ba8d0808154a63d84d21b948dc3128e",
+      "directionHash": "da748613c4190b9ccd9ee66c7247293480c2a3763e35c27515735c75655c78aa",
+      "prompt": "One idea. No footage.",
+      "model": "hexgrad/Kokoro-82M",
+      "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+      "settings": {
+        "voice": "af_heart",
+        "speed": 0.98,
+        "sampleRate": 48000,
+        "loudnessTargetLUFS": -18
+      },
+      "seed": 0,
+      "tool": "AutoPromote NVIDIA narration adapter",
+      "origin": "server_generated",
+      "generationReceipt": "narration-cpu/one-idea-receipt.json"
+    },
+    "usedIn": []
+  }
+]

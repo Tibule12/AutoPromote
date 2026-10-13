@@ -1,6 +1,6 @@
 # Audio editing and sound design
 
-Development documentation • product 1.2.0 • knowledge 1.0.4 • 2026-10-13
+Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -39,7 +39,7 @@ Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX bus
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Add B-roll](../task-guides/task-add_broll.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## Voiceover takes
 
@@ -150,7 +150,7 @@ Places sound cues on the native timeline. Included sound-design presets synthesi
 
 **Guides:** [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## Voice repair
 

@@ -1,0 +1,508 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-08T19:45:18.803Z",
+  "matrixSha256": "c575f34815143eaca40e2014e6ae246757b1a3575fb4442dd55b5dab0b260219",
+  "realAuthRequired": true,
+  "mocksAllowed": false,
+  "cases": [
+    {
+      "id": "media_ingest",
+      "capability": "Media ingest",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "preview",
+      "capability": "Preview",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "final_render",
+      "capability": "Final render",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "captions",
+      "capability": "Captions",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "reframing",
+      "capability": "Reframing",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "overlays",
+      "capability": "Overlays",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "motion_graphics",
+      "capability": "Motion graphics",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "masking",
+      "capability": "Masking / subject isolation",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "tracking",
+      "capability": "Tracking",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "depth_occlusion",
+      "capability": "Depth / occlusion",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "segmentation",
+      "capability": "Segmentation",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "three_d",
+      "capability": "3D",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "blender",
+      "capability": "Blender rendering",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "compositing",
+      "capability": "Compositing",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "vfx",
+      "capability": "VFX",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Real render and independent full decode completed",
+      "remainingIssue": "Output produced; visual review and GPU attribution pending",
+      "userFacingSeverity": "Unqualified",
+      "attempts": [
+        {
+          "startedAt": "2026-10-08T19:43:39.073Z",
+          "finishedAt": "2026-10-08T19:45:18.801Z",
+          "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio subject speed NVIDIA QA 20261008 r11",
+          "realApi": true,
+          "noMocks": true,
+          "submittedJobId": "viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+          "events": [
+            {
+              "path": "/api/media/process",
+              "status": 200,
+              "at": "2026-10-08T19:43:57.242Z"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:04.217Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:10.221Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:16.227Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:22.275Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:29.205Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:34.275Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:40.263Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:46.202Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:52.210Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:44:58.233Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:45:04.552Z",
+              "jobStatus": "processing"
+            },
+            {
+              "path": "/api/media/status/viral_0cc4eaccbbebd32666465cd910c5163843ae6f0c3e14ca663c1721e05256e840",
+              "status": 200,
+              "at": "2026-10-08T19:45:11.646Z",
+              "jobStatus": "completed"
+            }
+          ],
+          "errors": [],
+          "download": {
+            "suggestedName": "viral_clip_rendered.mp4",
+            "bytes": 1650031,
+            "nativeCompleted": true
+          },
+          "output": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r8/vfx/download.mp4",
+          "outputSha256": "eed3ffce445a1183f35c2a1df86185430ab4d34b7267d3b4ae6bd98034fed9dc",
+          "technical": {
+            "passed": true,
+            "sha256": "eed3ffce445a1183f35c2a1df86185430ab4d34b7267d3b4ae6bd98034fed9dc",
+            "bytes": 1650031,
+            "seconds": 6,
+            "video": {
+              "width": 1280,
+              "height": 720,
+              "codec": "h264",
+              "fps": "60/1",
+              "duration": "6.000000",
+              "frameCount": 360,
+              "pixelFormat": "yuv420p",
+              "encoder": "Lavc60.31.102 libx264"
+            },
+            "audio": {
+              "codec": "aac",
+              "channels": 2,
+              "sampleRate": "96000",
+              "duration": "6.000000"
+            },
+            "independentFullDecode": true,
+            "contactSheet": "reports/studio-canonical-completion-20261008/subject-programme-cpu-r8/vfx/download.mp4.frames.jpg",
+            "scope": "Technical only. Pixel and listening review are separate required evidence."
+          }
+        }
+      ]
+    },
+    {
+      "id": "audio",
+      "capability": "Audio",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "generated_image",
+      "capability": "Generated image assets",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "generated_video",
+      "capability": "Generated video assets",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "generated_raw",
+      "capability": "Generated raw content",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "save_reload",
+      "capability": "Save / reload",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "project_revisions",
+      "capability": "Project revisions",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "export",
+      "capability": "Export",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "cuts_speed",
+      "capability": "Cuts / trim / speed",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "b_roll",
+      "capability": "B-roll / multi-source",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "color",
+      "capability": "Color / finish",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "audio_restoration",
+      "capability": "Audio restoration",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "voiceover_sfx",
+      "capability": "Voice-over / SFX",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "three_d_audio",
+      "capability": "3D audio reactivity",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    },
+    {
+      "id": "director",
+      "capability": "Director / analysis",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "",
+      "fixApplied": "",
+      "retestResult": "Not run",
+      "remainingIssue": "Not executed in this sprint",
+      "userFacingSeverity": "Unqualified",
+      "attempts": []
+    }
+  ],
+  "updatedAt": "2026-10-08T19:45:18.804Z"
+}

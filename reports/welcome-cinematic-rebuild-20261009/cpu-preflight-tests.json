@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "tests": 8,
+  "gpuStarted": false,
+  "scope": "CPU input/identity/attempt guards only; no inference or creative qualification",
+  "log": "cpu-preflight-tests.log"
+}

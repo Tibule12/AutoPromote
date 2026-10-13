@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-08T14:03:55.457Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008 r2",
+  "status": "FAIL",
+  "steps": [
+    "Native Reset transform removes the QA tilt, zoom, offsets and main-video keys"
+  ],
+  "error": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('preview-quick-both-cams')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" class=\"preview-cam-btn \" data-testid=\"preview-quick-both-cams\" title=\"Show everyone in a vertical split using two editable source crops\">👥 Show Everyone</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    30 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n",
+  "finishedAt": "2026-10-08T14:04:46.918Z"
+}

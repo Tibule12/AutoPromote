@@ -1,0 +1,516 @@
+{
+  "text": "ifike kubona ibe bhaskathu abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abazi abazi abazi abazi abazi abazi abazi abazi abazi abazi abazi utshwala ee yonke into yam utshwa eewe iwayini ya ya i drink i think so ya iwayini four streets ya i give akutshayiwa kuthiwa four streets and ke ngake apparently kuthiwa bebesephilile isixo uba ajongile ee uba yeyi iwayini bale eyi guys yekani iwayini yekani iwayini yekani iwayini iwayini iwayini ayiyo ndoba but i feel like",
+  "segments": [
+    {
+      "id": 1,
+      "start": 0.0,
+      "end": 16.08,
+      "text": " ifike kubona ibe bhaskathu abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abaphumi abazi abazi abazi abazi abazi abazi abazi abazi abazi abazi abazi",
+      "words": [
+        {
+          "start": 0.0,
+          "end": 0.14,
+          "word": " ifike",
+          "probability": 0.49381256103515625
+        },
+        {
+          "start": 0.14,
+          "end": 0.46,
+          "word": " kubona",
+          "probability": 0.86767578125
+        },
+        {
+          "start": 0.46,
+          "end": 0.58,
+          "word": " ibe",
+          "probability": 0.3311767578125
+        },
+        {
+          "start": 0.58,
+          "end": 1.16,
+          "word": " bhaskathu",
+          "probability": 0.61309814453125
+        },
+        {
+          "start": 1.16,
+          "end": 1.74,
+          "word": " abaphumi",
+          "probability": 0.6605021158854166
+        },
+        {
+          "start": 1.74,
+          "end": 1.98,
+          "word": " abaphumi",
+          "probability": 0.6330070495605469
+        },
+        {
+          "start": 1.98,
+          "end": 2.3,
+          "word": " abaphumi",
+          "probability": 0.4605717658996582
+        },
+        {
+          "start": 2.3,
+          "end": 2.32,
+          "word": " abaphumi",
+          "probability": 0.3842464288075765
+        },
+        {
+          "start": 2.32,
+          "end": 2.36,
+          "word": " abaphumi",
+          "probability": 0.3554007212320964
+        },
+        {
+          "start": 2.36,
+          "end": 2.42,
+          "word": " abaphumi",
+          "probability": 0.35885365804036456
+        },
+        {
+          "start": 2.42,
+          "end": 2.54,
+          "word": " abaphumi",
+          "probability": 0.351715087890625
+        },
+        {
+          "start": 2.54,
+          "end": 2.78,
+          "word": " abaphumi",
+          "probability": 0.34464263916015625
+        },
+        {
+          "start": 2.78,
+          "end": 3.98,
+          "word": " abaphumi",
+          "probability": 0.3515116373697917
+        },
+        {
+          "start": 3.98,
+          "end": 4.9,
+          "word": " abaphumi",
+          "probability": 0.363555908203125
+        },
+        {
+          "start": 4.9,
+          "end": 9.48,
+          "word": " abazi",
+          "probability": 0.08648681640625
+        },
+        {
+          "start": 9.48,
+          "end": 9.78,
+          "word": " abazi",
+          "probability": 0.36507511138916016
+        },
+        {
+          "start": 9.78,
+          "end": 9.78,
+          "word": " abazi",
+          "probability": 0.3449382781982422
+        },
+        {
+          "start": 9.78,
+          "end": 10.66,
+          "word": " abazi",
+          "probability": 0.264495849609375
+        },
+        {
+          "start": 10.66,
+          "end": 10.78,
+          "word": " abazi",
+          "probability": 0.291015625
+        },
+        {
+          "start": 10.78,
+          "end": 11.6,
+          "word": " abazi",
+          "probability": 0.382568359375
+        },
+        {
+          "start": 11.6,
+          "end": 12.0,
+          "word": " abazi",
+          "probability": 0.447021484375
+        },
+        {
+          "start": 12.0,
+          "end": 14.38,
+          "word": " abazi",
+          "probability": 0.5001220703125
+        },
+        {
+          "start": 14.38,
+          "end": 14.42,
+          "word": " abazi",
+          "probability": 0.5186767578125
+        },
+        {
+          "start": 14.42,
+          "end": 14.58,
+          "word": " abazi",
+          "probability": 0.504150390625
+        },
+        {
+          "start": 14.58,
+          "end": 16.08,
+          "word": " abazi",
+          "probability": 0.4837646484375
+        }
+      ],
+      "avg_logprob": -0.635576923076923,
+      "no_speech_prob": 0.0,
+      "compression_ratio": 3.7916666666666665
+    },
+    {
+      "id": 2,
+      "start": 16.08,
+      "end": 45.96,
+      "text": " utshwala ee yonke into yam utshwa eewe iwayini ya ya i drink i think so ya iwayini four streets ya i give akutshayiwa kuthiwa four streets and ke ngake apparently kuthiwa bebesephilile isixo uba ajongile ee uba yeyi iwayini bale eyi guys yekani iwayini yekani iwayini yekani iwayini iwayini iwayini ayiyo ndoba but i feel like",
+      "words": [
+        {
+          "start": 16.08,
+          "end": 16.88,
+          "word": " utshwala",
+          "probability": 0.673095703125
+        },
+        {
+          "start": 16.88,
+          "end": 17.3,
+          "word": " ee",
+          "probability": 0.26544189453125
+        },
+        {
+          "start": 17.3,
+          "end": 17.6,
+          "word": " yonke",
+          "probability": 0.95458984375
+        },
+        {
+          "start": 17.6,
+          "end": 17.98,
+          "word": " into",
+          "probability": 0.97412109375
+        },
+        {
+          "start": 17.98,
+          "end": 19.1,
+          "word": " yam",
+          "probability": 0.293701171875
+        },
+        {
+          "start": 19.1,
+          "end": 19.48,
+          "word": " utshwa",
+          "probability": 0.7190755208333334
+        },
+        {
+          "start": 19.48,
+          "end": 19.98,
+          "word": " eewe",
+          "probability": 0.8014322916666666
+        },
+        {
+          "start": 19.98,
+          "end": 20.44,
+          "word": " iwayini",
+          "probability": 0.94921875
+        },
+        {
+          "start": 20.44,
+          "end": 20.88,
+          "word": " ya",
+          "probability": 0.8193359375
+        },
+        {
+          "start": 20.88,
+          "end": 21.76,
+          "word": " ya",
+          "probability": 0.28173828125
+        },
+        {
+          "start": 21.76,
+          "end": 22.12,
+          "word": " i",
+          "probability": 0.9033203125
+        },
+        {
+          "start": 22.12,
+          "end": 22.22,
+          "word": " drink",
+          "probability": 0.90185546875
+        },
+        {
+          "start": 22.22,
+          "end": 22.44,
+          "word": " i",
+          "probability": 0.488037109375
+        },
+        {
+          "start": 22.44,
+          "end": 22.48,
+          "word": " think",
+          "probability": 0.160888671875
+        },
+        {
+          "start": 22.48,
+          "end": 23.0,
+          "word": " so",
+          "probability": 0.96142578125
+        },
+        {
+          "start": 23.0,
+          "end": 23.3,
+          "word": " ya",
+          "probability": 0.68115234375
+        },
+        {
+          "start": 23.3,
+          "end": 24.36,
+          "word": " iwayini",
+          "probability": 0.94580078125
+        },
+        {
+          "start": 24.36,
+          "end": 24.6,
+          "word": " four",
+          "probability": 0.31494140625
+        },
+        {
+          "start": 24.6,
+          "end": 24.96,
+          "word": " streets",
+          "probability": 0.5390625
+        },
+        {
+          "start": 24.96,
+          "end": 25.72,
+          "word": " ya",
+          "probability": 0.86328125
+        },
+        {
+          "start": 25.72,
+          "end": 25.98,
+          "word": " i",
+          "probability": 0.66845703125
+        },
+        {
+          "start": 25.98,
+          "end": 26.98,
+          "word": " give",
+          "probability": 0.366943359375
+        },
+        {
+          "start": 26.98,
+          "end": 27.58,
+          "word": " akutshayiwa",
+          "probability": 0.7078450520833334
+        },
+        {
+          "start": 27.58,
+          "end": 27.86,
+          "word": " kuthiwa",
+          "probability": 0.86651611328125
+        },
+        {
+          "start": 27.86,
+          "end": 28.04,
+          "word": " four",
+          "probability": 0.97802734375
+        },
+        {
+          "start": 28.04,
+          "end": 28.42,
+          "word": " streets",
+          "probability": 0.8125
+        },
+        {
+          "start": 28.42,
+          "end": 29.92,
+          "word": " and",
+          "probability": 0.3466796875
+        },
+        {
+          "start": 29.92,
+          "end": 30.4,
+          "word": " ke",
+          "probability": 0.91015625
+        },
+        {
+          "start": 30.4,
+          "end": 30.54,
+          "word": " ngake",
+          "probability": 0.5965576171875
+        },
+        {
+          "start": 30.54,
+          "end": 30.94,
+          "word": " apparently",
+          "probability": 0.765625
+        },
+        {
+          "start": 30.94,
+          "end": 31.44,
+          "word": " kuthiwa",
+          "probability": 0.908203125
+        },
+        {
+          "start": 31.44,
+          "end": 32.16,
+          "word": " bebesephilile",
+          "probability": 0.622412109375
+        },
+        {
+          "start": 32.16,
+          "end": 33.14,
+          "word": " isixo",
+          "probability": 0.4110107421875
+        },
+        {
+          "start": 33.14,
+          "end": 33.28,
+          "word": " uba",
+          "probability": 0.59613037109375
+        },
+        {
+          "start": 33.28,
+          "end": 33.72,
+          "word": " ajongile",
+          "probability": 0.7457682291666666
+        },
+        {
+          "start": 33.72,
+          "end": 34.06,
+          "word": " ee",
+          "probability": 0.3071441650390625
+        },
+        {
+          "start": 34.06,
+          "end": 35.04,
+          "word": " uba",
+          "probability": 0.5267791748046875
+        },
+        {
+          "start": 35.04,
+          "end": 35.48,
+          "word": " yeyi",
+          "probability": 0.4254150390625
+        },
+        {
+          "start": 35.48,
+          "end": 35.84,
+          "word": " iwayini",
+          "probability": 0.9305013020833334
+        },
+        {
+          "start": 35.84,
+          "end": 36.04,
+          "word": " bale",
+          "probability": 0.407470703125
+        },
+        {
+          "start": 36.04,
+          "end": 36.6,
+          "word": " eyi",
+          "probability": 0.595703125
+        },
+        {
+          "start": 36.6,
+          "end": 37.12,
+          "word": " guys",
+          "probability": 0.09918212890625
+        },
+        {
+          "start": 37.12,
+          "end": 38.18,
+          "word": " yekani",
+          "probability": 0.7676595052083334
+        },
+        {
+          "start": 38.18,
+          "end": 38.88,
+          "word": " iwayini",
+          "probability": 0.9793294270833334
+        },
+        {
+          "start": 38.88,
+          "end": 40.94,
+          "word": " yekani",
+          "probability": 0.8294270833333334
+        },
+        {
+          "start": 40.94,
+          "end": 41.64,
+          "word": " iwayini",
+          "probability": 0.9947916666666666
+        },
+        {
+          "start": 41.64,
+          "end": 42.78,
+          "word": " yekani",
+          "probability": 0.8623046875
+        },
+        {
+          "start": 42.78,
+          "end": 43.5,
+          "word": " iwayini",
+          "probability": 0.9957682291666666
+        },
+        {
+          "start": 43.5,
+          "end": 44.28,
+          "word": " iwayini",
+          "probability": 0.8553059895833334
+        },
+        {
+          "start": 44.28,
+          "end": 44.3,
+          "word": " iwayini",
+          "probability": 0.7381184895833334
+        },
+        {
+          "start": 44.3,
+          "end": 44.68,
+          "word": " ayiyo",
+          "probability": 0.5926106770833334
+        },
+        {
+          "start": 44.68,
+          "end": 44.86,
+          "word": " ndoba",
+          "probability": 0.5741373697916666
+        },
+        {
+          "start": 44.86,
+          "end": 45.22,
+          "word": " but",
+          "probability": 0.41162109375
+        },
+        {
+          "start": 45.22,
+          "end": 45.56,
+          "word": " i",
+          "probability": 0.95654296875
+        },
+        {
+          "start": 45.56,
+          "end": 45.82,
+          "word": " feel",
+          "probability": 0.96435546875
+        },
+        {
+          "start": 45.82,
+          "end": 45.96,
+          "word": " like",
+          "probability": 0.8740234375
+        }
+      ],
+      "avg_logprob": -0.4598958243926366,
+      "no_speech_prob": 0.0,
+      "compression_ratio": 1.9520958083832336
+    }
+  ],
+  "language": "en",
+  "duration": 45.99875,
+  "engine": "faster-whisper"
+}

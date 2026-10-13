@@ -1,0 +1,47 @@
+{
+  "at": "2026-10-08T20:03:13.626Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "jobId": "28775092-1b3b-4739-8a70-53c5abda74e3",
+  "newInferencePosts": 0,
+  "workerStopped": true,
+  "normalCheckSavedRenderUsed": true,
+  "reviewed": false,
+  "technical": {
+    "passed": true,
+    "sha256": "24e0d461749ec946fddaa47e11be754ba98ef0f110329333afac0100ca3d6175",
+    "bytes": 2236810,
+    "seconds": 3,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "3.000000",
+      "frameCount": 72,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 h264_nvenc"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "44100",
+      "duration": "3.000000"
+    },
+    "independentFullDecode": true,
+    "contactSheet": "reports/studio-canonical-completion-20261008/subject-seven-effects/preview.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "effects": [
+    "text_behind",
+    "background_grade",
+    "tracked_callout",
+    "depth",
+    "kinetic_type",
+    "glow",
+    "particles"
+  ],
+  "status": "SAME_JOB_NATIVE_PREVIEW_RECOVERY_PASS_VISUAL_REVIEW_PENDING"
+}

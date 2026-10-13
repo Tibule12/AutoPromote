@@ -1,0 +1,208 @@
+{
+  "error": null,
+  "id": "observation-1",
+  "pageId": "page-1",
+  "url": "http://127.0.0.1:3099/",
+  "pages": [
+    {
+      "id": "page-1",
+      "url": "http://127.0.0.1:3099/"
+    }
+  ],
+  "dialog": null,
+  "frames": [
+    {
+      "index": 0,
+      "url": "http://127.0.0.1:3099/",
+      "text": "AUTOPROMOTE · PRIVATE FILM REVIEW\nOne Edit\n\nOne editing problem. Every answer opened another problem. Then the question changed.\n\nFull film\nShort cut\nTeaser\nThe full story · 51 seconds\n\nPress play to hear the narration, score and sound design.\n\nDownload film\nShort cut · 27 seconds\nDownload short cut\nTeaser · 10 seconds\nDownload teaser\n\nThis is a production review. The yacht’s CG finish and the repeated conversation imagery still need creative judgment before a welcome-page release.",
+      "headings": [
+        "One Edit",
+        "The full story · 51 seconds",
+        "Short cut · 27 seconds",
+        "Teaser · 10 seconds"
+      ],
+      "alerts": [],
+      "busy": false,
+      "captcha": false,
+      "scroll": {
+        "x": 0,
+        "y": 0,
+        "height": 2885,
+        "viewportHeight": 850
+      },
+      "controls": [
+        {
+          "ref": "observation-1:f0:e0",
+          "role": "link",
+          "name": "Full film",
+          "label": "",
+          "tag": "a",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": "http://127.0.0.1:3099/#hero",
+          "inModal": false,
+          "context": "",
+          "modalName": "",
+          "box": {
+            "x": 80,
+            "y": 212.984375,
+            "width": 59.328125,
+            "height": 22
+          },
+          "inViewport": true,
+          "occluded": false
+        },
+        {
+          "ref": "observation-1:f0:e1",
+          "role": "link",
+          "name": "Short cut",
+          "label": "",
+          "tag": "a",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": "http://127.0.0.1:3099/#cutdown",
+          "inModal": false,
+          "context": "",
+          "modalName": "",
+          "box": {
+            "x": 159.328125,
+            "y": 212.984375,
+            "width": 68.25,
+            "height": 22
+          },
+          "inViewport": true,
+          "occluded": false
+        },
+        {
+          "ref": "observation-1:f0:e2",
+          "role": "link",
+          "name": "Teaser",
+          "label": "",
+          "tag": "a",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": "http://127.0.0.1:3099/#teaser",
+          "inModal": false,
+          "context": "",
+          "modalName": "",
+          "box": {
+            "x": 247.578125,
+            "y": 212.984375,
+            "width": 49.078125,
+            "height": 22
+          },
+          "inViewport": true,
+          "occluded": false
+        },
+        {
+          "ref": "observation-1:f0:e3",
+          "role": "link",
+          "name": "Download film",
+          "label": "",
+          "tag": "a",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": "http://127.0.0.1:3099/hero.mp4",
+          "inModal": false,
+          "context": "The full story · 51 seconds",
+          "modalName": "",
+          "box": {
+            "x": 80,
+            "y": 1089.484375,
+            "width": 109.015625,
+            "height": 22
+          },
+          "inViewport": false,
+          "occluded": true
+        },
+        {
+          "ref": "observation-1:f0:e4",
+          "role": "link",
+          "name": "Download short cut",
+          "label": "",
+          "tag": "a",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": "http://127.0.0.1:3099/cutdown.mp4",
+          "inModal": false,
+          "context": "Short cut · 27 seconds",
+          "modalName": "",
+          "box": {
+            "x": 80,
+            "y": 1908.390625,
+            "width": 147.421875,
+            "height": 22
+          },
+          "inViewport": false,
+          "occluded": true
+        },
+        {
+          "ref": "observation-1:f0:e5",
+          "role": "link",
+          "name": "Download teaser",
+          "label": "",
+          "tag": "a",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": "http://127.0.0.1:3099/teaser.mp4",
+          "inModal": false,
+          "context": "Teaser · 10 seconds",
+          "modalName": "",
+          "box": {
+            "x": 80,
+            "y": 2727.296875,
+            "width": 127.375,
+            "height": 22
+          },
+          "inViewport": false,
+          "occluded": true
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "type": "requestfailed",
+      "page": "page-1",
+      "url": "http://127.0.0.1:3099/hero.mp4",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "priorActions": []
+}

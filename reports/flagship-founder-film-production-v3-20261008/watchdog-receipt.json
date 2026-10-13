@@ -1,0 +1,8 @@
+{
+  "deadlineEpoch": 1791464069,
+  "recordedAtEpoch": 1791464069.0000854,
+  "scope": "Own production container only. Preserve existing Studio VFX worker and VM.",
+  "status": "OWN_LEASE_EXPIRED_VM_STOP_REQUESTED",
+  "exitCode": 1,
+  "stopExitCode": 0
+}

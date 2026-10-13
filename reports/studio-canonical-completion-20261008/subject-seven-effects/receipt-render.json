@@ -1,0 +1,44 @@
+{
+  "startedAt": "2026-10-08T19:52:57.027Z",
+  "projectName": "Studio seven subject effects QA 20261008",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "status": "FAIL",
+  "events": [
+    {
+      "path": "/api/media/studio-subject-vfx",
+      "status": 202,
+      "jobId": "28775092-1b3b-4739-8a70-53c5abda74e3"
+    },
+    {
+      "path": "/api/media/studio-subject-vfx/28775092-1b3b-4739-8a70-53c5abda74e3",
+      "status": 200,
+      "jobId": "28775092-1b3b-4739-8a70-53c5abda74e3",
+      "jobStatus": "processing",
+      "error": null
+    },
+    {
+      "path": "/api/media/studio-subject-vfx/28775092-1b3b-4739-8a70-53c5abda74e3",
+      "status": 200,
+      "jobId": "28775092-1b3b-4739-8a70-53c5abda74e3",
+      "jobStatus": "processing",
+      "error": null
+    },
+    {
+      "path": "/api/media/studio-subject-vfx/28775092-1b3b-4739-8a70-53c5abda74e3",
+      "status": 200,
+      "jobId": "28775092-1b3b-4739-8a70-53c5abda74e3",
+      "jobStatus": "processing",
+      "error": null
+    },
+    {
+      "path": "/api/media/studio-subject-vfx/28775092-1b3b-4739-8a70-53c5abda74e3",
+      "status": 503,
+      "error": "Could not check this subject render."
+    }
+  ],
+  "error": "locator.waitFor: Timeout 240000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('Rendered subject effects with original audio', { exact: true }) to be visible\u001b[22m\n",
+  "finishedAt": "2026-10-08T19:57:13.616Z"
+}

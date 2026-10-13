@@ -1,0 +1,72 @@
+{
+  "fingerprint": "583b8a73fd8bf094f0d683930c9031cfc5362f80a3f7bfc47879bb69a0cf1428",
+  "result": {
+    "id": "review-7fd8e4a2b7ccef15",
+    "value": {
+      "accepted": false,
+      "reason": "Missing payoff and static placeholder material. The 'water rises' sequence lacks dynamic motion and fails to establish the boat's journey. No clear transition to the 'storm' or 'light return' beats. Final reveal of the desk-world and studio UI is absent. The contact sheet shows only static paper states and water reflections without narrative progression or emotional payoff. The 'exact libraryRef: paper-awakens' requirement is unmet as the asset does not match the described animation or story arc",
+      "revisionInstructions": "Add dynamic water animation rising from the page, show boat floating with motion blur, include storm wave with boat submerged, then restore golden calm with expanding desk-world reveal, and finally show AutoPromote Studio UI with editable clips and live preview. Remove all static paper frames and ensure the libraryRef matches the new animated sequence",
+      "criteria": [
+        {
+          "criterion": "Water emerges from edge of blank page",
+          "passed": false,
+          "observation": "Frames 01-06 show static paper with no water animation or emergence"
+        },
+        {
+          "criterion": "Boat floats into frame",
+          "passed": false,
+          "observation": "Boat remains stationary throughout; no floating motion or entry into frame"
+        },
+        {
+          "criterion": "No static lead-in",
+          "passed": false,
+          "observation": "All frames are identical static shots with no progression or motion"
+        },
+        {
+          "criterion": "Exact libraryRef: paper-awakens",
+          "passed": false,
+          "observation": "The asset does not match the described animation or story arc; it is a static contact sheet without the required dynamic elements"
+        }
+      ]
+    },
+    "rawValue": {
+      "accepted": false,
+      "reason": "Missing payoff and static placeholder material. The 'water rises' sequence lacks dynamic motion and fails to establish the boat's journey. No clear transition to the 'storm' or 'light return' beats. Final reveal of the desk-world and studio UI is absent. The contact sheet shows only static paper states and water reflections without narrative progression or emotional payoff. The 'exact libraryRef: paper-awakens' requirement is unmet as the asset does not match the described animation or story arc",
+      "revisionInstructions": "Add dynamic water animation rising from the page, show boat floating with motion blur, include storm wave with boat submerged, then restore golden calm with expanding desk-world reveal, and finally show AutoPromote Studio UI with editable clips and live preview. Remove all static paper frames and ensure the libraryRef matches the new animated sequence",
+      "criteria": [
+        {
+          "criterion": "Water emerges from edge of blank page",
+          "passed": false,
+          "observation": "Frames 01-06 show static paper with no water animation or emergence"
+        },
+        {
+          "criterion": "Boat floats into frame",
+          "passed": false,
+          "observation": "Boat remains stationary throughout; no floating motion or entry into frame"
+        },
+        {
+          "criterion": "No static lead-in",
+          "passed": false,
+          "observation": "All frames are identical static shots with no progression or motion"
+        },
+        {
+          "criterion": "Exact libraryRef: paper-awakens",
+          "passed": false,
+          "observation": "The asset does not match the described animation or story arc; it is a static contact sheet without the required dynamic elements"
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 4500
+    },
+    "evidenceSha256": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b",
+    "seconds": 18.728917624999667,
+    "gpu": "NVIDIA L40S"
+  }
+}

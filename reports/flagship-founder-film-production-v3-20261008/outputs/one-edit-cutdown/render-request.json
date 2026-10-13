@@ -1,0 +1,235 @@
+{
+  "video_url": "http://127.0.0.1:8765/story-v3/assets/origin/video.mp4",
+  "start_time": 0,
+  "end_time": 26.5,
+  "overlays": [],
+  "auto_captions": false,
+  "timeline_segments": [
+    {
+      "id": "one-edit-cutdown-1",
+      "source_clip_id": "origin",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/story-v3/assets/origin/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-2",
+      "source_clip_id": "quota",
+      "start_time": 0,
+      "end_time": 3.5,
+      "duration": 3.5,
+      "url": "http://127.0.0.1:8765/story-v3/assets/quota/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-3",
+      "source_clip_id": "breakthrough",
+      "start_time": 0,
+      "end_time": 3.5,
+      "duration": 3.5,
+      "url": "http://127.0.0.1:8765/story-v3/assets/breakthrough/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-4",
+      "source_clip_id": "vessel",
+      "start_time": 0,
+      "end_time": 7,
+      "duration": 7,
+      "url": "http://127.0.0.1:8765/vessel-full/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-5",
+      "source_clip_id": "reveal",
+      "start_time": 0,
+      "end_time": 4.5,
+      "duration": 4.5,
+      "url": "http://127.0.0.1:8765/story-v3/assets/reveal/video.mp4"
+    },
+    {
+      "id": "one-edit-cutdown-6",
+      "source_clip_id": "ident",
+      "start_time": 0,
+      "end_time": 5,
+      "duration": 5,
+      "url": "http://127.0.0.1:8765/ident-full/video.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 0.72,
+  "caption_segments": [],
+  "creative_intent": "26.5-second problem, capacity obstacle, breakthrough, connected transformation and self-referential ending.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "smart_crop": true,
+  "smart_crop_mode": "safe_fit",
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/assets/sound/score-cutdown.wav",
+  "music_name": "score-cutdown",
+  "music_volume": 0.68,
+  "music_ducking": false,
+  "music_fade_in": 0.25,
+  "music_fade_out": 0.6,
+  "music_loop": false,
+  "sound_effects": [
+    {
+      "id": "one-edit-cutdown-audio-1",
+      "url": "http://127.0.0.1:8765/assets/narration/cold-open.wav",
+      "enabled": true,
+      "kind": "voiceover",
+      "name": "vo-cold-open",
+      "sourceClipId": "vo-cold-open",
+      "storagePath": "assets/narration/cold-open.wav",
+      "contentHash": "b81f0a3ba05220b7e85c81b2eb596da37cb07b92eea4ad92c0df3b2853a47e80",
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 0.15,
+      "duration": 2.175,
+      "trimStart": 0
+    },
+    {
+      "id": "one-edit-cutdown-audio-2",
+      "url": "http://127.0.0.1:8765/assets/narration/quota.wav",
+      "enabled": true,
+      "kind": "voiceover",
+      "name": "vo-quota",
+      "sourceClipId": "vo-quota",
+      "storagePath": "assets/narration/quota.wav",
+      "contentHash": "3677901cbffbbf11741f023b6aa67cd419d826dba5511158eb50b3eba12f4f91",
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 3.1,
+      "duration": 3.325,
+      "trimStart": 0
+    },
+    {
+      "id": "one-edit-cutdown-audio-3",
+      "url": "http://127.0.0.1:8765/assets/narration/breakthrough.wav",
+      "enabled": true,
+      "kind": "voiceover",
+      "name": "vo-breakthrough",
+      "sourceClipId": "vo-breakthrough",
+      "storagePath": "assets/narration/breakthrough.wav",
+      "contentHash": "c81c56ed7512a554e8af218dde94d2d8df9bf470f0280b79ab4317f3f70fcc2d",
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 6.65,
+      "duration": 3.225,
+      "trimStart": 0
+    },
+    {
+      "id": "one-edit-cutdown-audio-4",
+      "url": "http://127.0.0.1:8765/assets/narration/magic.wav",
+      "enabled": true,
+      "kind": "voiceover",
+      "name": "vo-magic",
+      "sourceClipId": "vo-magic",
+      "storagePath": "assets/narration/magic.wav",
+      "contentHash": "a4177157a9f82de1728a32482b8eaf346b1920e8aa2743d9c3e8d99be5a8b4de",
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 10.3,
+      "duration": 3.075,
+      "trimStart": 0
+    },
+    {
+      "id": "one-edit-cutdown-audio-5",
+      "url": "http://127.0.0.1:8765/assets/narration/reveal.wav",
+      "enabled": true,
+      "kind": "voiceover",
+      "name": "vo-reveal",
+      "sourceClipId": "vo-reveal",
+      "storagePath": "assets/narration/reveal.wav",
+      "contentHash": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 17.35,
+      "duration": 3.4,
+      "trimStart": 0
+    },
+    {
+      "id": "one-edit-cutdown-audio-6",
+      "url": "http://127.0.0.1:8765/assets/sound/cues-cutdown.wav",
+      "enabled": true,
+      "kind": "sfx",
+      "name": "cues-cutdown",
+      "sourceClipId": "cues-cutdown",
+      "storagePath": "assets/sound/cues-cutdown.wav",
+      "contentHash": "6d2987c64beda52e458d900107513d377e8cbe4fc108a0fd04d1f32d06a24ff2",
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 0,
+      "duration": 12,
+      "trimStart": 0
+    },
+    {
+      "id": "one-edit-cutdown-audio-7",
+      "url": "http://127.0.0.1:8765/assets/sound/cues-cutdown.wav",
+      "enabled": true,
+      "kind": "sfx",
+      "name": "cues-cutdown",
+      "sourceClipId": "cues-cutdown",
+      "storagePath": "assets/sound/cues-cutdown.wav",
+      "contentHash": "6d2987c64beda52e458d900107513d377e8cbe4fc108a0fd04d1f32d06a24ff2",
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 12,
+      "duration": 12,
+      "trimStart": 12
+    },
+    {
+      "id": "one-edit-cutdown-audio-8",
+      "url": "http://127.0.0.1:8765/assets/sound/cues-cutdown.wav",
+      "enabled": true,
+      "kind": "sfx",
+      "name": "cues-cutdown",
+      "sourceClipId": "cues-cutdown",
+      "storagePath": "assets/sound/cues-cutdown.wav",
+      "contentHash": "6d2987c64beda52e458d900107513d377e8cbe4fc108a0fd04d1f32d06a24ff2",
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "startTime": 24,
+      "duration": 2.5,
+      "trimStart": 24
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "mute_audio": true,
+  "planned_black_ranges": [
+    {
+      "start": 21.5,
+      "end": 22.05,
+      "reason": "Complete dedicated ident anticipation."
+    }
+  ]
+}

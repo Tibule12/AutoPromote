@@ -1,0 +1,30 @@
+{
+  "recordedAt": "2026-10-08T10:03:39.669166+00:00",
+  "health": {
+    "frontend": {
+      "httpStatus": 200,
+      "reachable": true
+    },
+    "api": {
+      "httpStatus": 200,
+      "reachable": true
+    },
+    "cpuFallbackWorker": {
+      "httpStatus": 200,
+      "reachable": true
+    },
+    "vfxWorker": {
+      "reachable": false,
+      "errorType": "URLError"
+    },
+    "headlessCdp": {
+      "httpStatus": 200,
+      "reachable": true
+    }
+  },
+  "authProfilePermissions": "0700",
+  "browserSigninRetained": true,
+  "lastNvidiaObservation": "STOPPED from brev ls during this continuation; no paid jobs started",
+  "paidGpuJobsStarted": 0,
+  "scope": "Loopback service health and private profile mode; no credential values or full production operations qualification"
+}

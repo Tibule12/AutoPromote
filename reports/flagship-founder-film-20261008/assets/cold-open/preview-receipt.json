@@ -1,0 +1,38 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "cold-open",
+  "sourceBrief": {
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+    "artifact": "source-brief.txt"
+  },
+  "settings": {
+    "duration": 4,
+    "fps": 24,
+    "samples": 16,
+    "width": 1280,
+    "height": 720
+  },
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "tool": "AutoPromote Studio Blender / original founder-film template",
+  "nativeScene": "scene.blend",
+  "scriptSha256": "6444c7754b0495f1e69463b26a2d5a5395f3fc63a954868a1ef89253e85beecb",
+  "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+  "seconds": 2.7713554449999265,
+  "editable": [
+    "camera quaternion curves",
+    "actual logo Bezier geometry",
+    "staggered layer timing",
+    "materials",
+    "lighting",
+    "physical source carriers",
+    "film route",
+    "sound cue plan"
+  ]
+}

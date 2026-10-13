@@ -1,0 +1,8 @@
+{
+  "visibleDeviceCount": 1,
+  "deviceName": "NVIDIA L40S",
+  "driverAPIVersion": 12070,
+  "memoryFreeBytes": 47240577024,
+  "memoryTotalBytes": 47693955072,
+  "containerAccess": true
+}

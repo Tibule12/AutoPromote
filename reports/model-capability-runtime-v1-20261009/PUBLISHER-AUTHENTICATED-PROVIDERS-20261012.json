@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-12T20:55:03.844Z",
+  "results": [
+    {
+      "route": "/api/linkedin/status",
+      "httpStatus": 200,
+      "connected": true,
+      "identityVerified": false,
+      "error": null
+    },
+    {
+      "route": "/api/reddit/status",
+      "httpStatus": 200,
+      "connected": true,
+      "identityVerified": false,
+      "error": null
+    },
+    {
+      "route": "/api/reddit/profile",
+      "httpStatus": 200,
+      "connected": true,
+      "identityVerified": true,
+      "error": null
+    }
+  ]
+}

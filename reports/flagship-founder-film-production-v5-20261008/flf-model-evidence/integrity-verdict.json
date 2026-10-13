@@ -1,0 +1,21 @@
+{
+  "status": "PREPARED_FILES_HASH_VERIFIED_PENDING_INFERENCE",
+  "model": "Wan-AI/Wan2.1-FLF2V-14B-720P-diffusers",
+  "revision": "17c30769b1e0b5dcaa1799b117bf20a9c31f59d7",
+  "checkedFiles": 32,
+  "modelReceiptSha256": "8c7c625dee1e6770078f433e9a6854765cb349e538b8c08c141101eede35b66e",
+  "seconds": 76.11504055800015,
+  "verifiedAtEpoch": 1791482799.8643088,
+  "receiptCorrections": [
+    {
+      "originalRecord": {
+        "file": "transformer/diffusion_pytorch_model.safetensors.index.json",
+        "sha256": "09c370e96a4bf61ce1bfd2535a454a3601bb97662b08bf05dcfe0272b3aa9a43",
+        "bytes": 117160
+      },
+      "atEpoch": 1791482723.749162,
+      "reason": "Refresh prepared index hash after bf16 metadata update; weight map unchanged."
+    }
+  ],
+  "scope": "Prepared local files; retained encoder/VAE were verified during preparation."
+}

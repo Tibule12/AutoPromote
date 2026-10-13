@@ -1,0 +1,199 @@
+{
+  "at": "2026-10-08T06:02:35.070Z",
+  "headless": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "analysisStatus": 200,
+  "requests": [
+    {
+      "brandWatermark": false,
+      "reframe": {
+        "enabled": true,
+        "aspect": "9:16",
+        "mode": "speaker_track",
+        "zoom": 1,
+        "timeline_cuts": [
+          {
+            "time": 0,
+            "mode": "speaker_track",
+            "zoom": 1.099
+          },
+          {
+            "time": 4.7,
+            "mode": "speaker_track",
+            "zoom": 1.102
+          },
+          {
+            "time": 5.2,
+            "mode": "speaker_track",
+            "zoom": 1.102
+          }
+        ],
+        "keyframes": [
+          {
+            "time": 0,
+            "x": 74.2556342857143,
+            "y": 50
+          },
+          {
+            "time": 0.5,
+            "x": 77.18134857142857,
+            "y": 50
+          },
+          {
+            "time": 1,
+            "x": 78.65005714285714,
+            "y": 50
+          },
+          {
+            "time": 1.5,
+            "x": 77.71675428571429,
+            "y": 50
+          },
+          {
+            "time": 2,
+            "x": 77.03798857142857,
+            "y": 50
+          },
+          {
+            "time": 2.5,
+            "x": 76.28754285714285,
+            "y": 50
+          },
+          {
+            "time": 3,
+            "x": 76.43090285714285,
+            "y": 50
+          },
+          {
+            "time": 3.5,
+            "x": 76.83465142857142,
+            "y": 50
+          },
+          {
+            "time": 4,
+            "x": 77.30422857142858,
+            "y": 50
+          },
+          {
+            "time": 4.5,
+            "x": 78.59593142857143,
+            "y": 50
+          },
+          {
+            "time": 4.7,
+            "cut": true,
+            "x": 16.136319999999998,
+            "y": 50
+          },
+          {
+            "time": 5,
+            "x": 16.901394285714282,
+            "y": 50
+          },
+          {
+            "time": 5.2,
+            "cut": true,
+            "x": 77.75625142857143,
+            "y": 50
+          },
+          {
+            "time": 5.5,
+            "x": 77.68457142857143,
+            "y": 50
+          },
+          {
+            "time": 6,
+            "x": 77.71968,
+            "y": 50
+          },
+          {
+            "time": 6.5,
+            "x": 77.16818285714287,
+            "y": 50
+          },
+          {
+            "time": 7,
+            "x": 76.91072,
+            "y": 50
+          },
+          {
+            "time": 7.5,
+            "x": 77.65531428571428,
+            "y": 50
+          },
+          {
+            "time": 8,
+            "x": 77.87474285714286,
+            "y": 50
+          },
+          {
+            "time": 8.5,
+            "x": 77.68018285714285,
+            "y": 50
+          },
+          {
+            "time": 9,
+            "x": 77.63337142857144,
+            "y": 50
+          },
+          {
+            "time": 9.5,
+            "x": 76.77321142857144,
+            "y": 50
+          },
+          {
+            "time": 10,
+            "x": 76.19099428571428,
+            "y": 50
+          },
+          {
+            "time": 10.5,
+            "x": 76.26121142857143,
+            "y": 50
+          },
+          {
+            "time": 11,
+            "x": 76.32850285714287,
+            "y": 50
+          },
+          {
+            "time": 11.5,
+            "x": 76.71908571428571,
+            "y": 50
+          }
+        ]
+      },
+      "reviewCopy": true
+    }
+  ],
+  "output": "reports/studio-stability-20261008/reframing/download.mp4",
+  "technical": {
+    "passed": true,
+    "sha256": "dd83c7e13e6c0b0c120bae3bee7a7e3ec5d6c8e129761bb718435880e12d08ca",
+    "bytes": 1587034,
+    "seconds": 12,
+    "video": {
+      "width": 404,
+      "height": 720,
+      "codec": "h264",
+      "fps": "30/1",
+      "duration": "12.000000",
+      "pixelFormat": "yuv420p"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "96000",
+      "duration": "12.000000"
+    },
+    "independentFullDecode": true,
+    "contactSheet": "reports/studio-stability-20261008/reframing/download.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "visualReview": {
+    "result": "PASS within this flow",
+    "evidence": "Six exported frames inspected: both speaker faces inside portrait crop; all three marker cues present; no AutoPromote mark; draft label readable. A transient long caption animation extends too wide; captions remain FAIL separately."
+  }
+}

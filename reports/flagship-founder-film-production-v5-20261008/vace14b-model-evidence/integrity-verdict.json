@@ -1,0 +1,22 @@
+{
+  "status": "PREPARED_FILES_HASH_VERIFIED_PENDING_INFERENCE",
+  "model": "Wan-AI/Wan2.1-VACE-14B-diffusers",
+  "revision": "db79b90c60bbb45ceec9e41b9d5a4df934538ac4",
+  "checkedFiles": 23,
+  "modelReceiptSha256": "47fce519b4b082eab221c59bd54cd27b8f052d8e11a26d2ab187d9baa343cb8f",
+  "seconds": 106.08263233899925,
+  "verifiedAtEpoch": 1791487026.8937702,
+  "receiptCorrections": [
+    {
+      "originalSettings": {
+        "transformerDtype": "bfloat16",
+        "imageEncoderDtype": "float32",
+        "vaeDtype": "float32"
+      },
+      "originalVaeValidation": "Byte-identical to official FLF VAE weights",
+      "atEpoch": 1791486920.8107312,
+      "reason": "Shared preparation receipt labels corrected: VACE has no CLIP image encoder; the existing preparation hash check compared the selected official VACE VAE."
+    }
+  ],
+  "scope": "Prepared local files; retained encoder/VAE were verified during preparation."
+}

@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-08T08:02:53.148Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "openedDifferentProjectWithoutUnrelatedOutput": true,
+  "returnedTo3DWithMatchingRecoveredOutput": true,
+  "noBlockingRecoveryOverlay": true
+}

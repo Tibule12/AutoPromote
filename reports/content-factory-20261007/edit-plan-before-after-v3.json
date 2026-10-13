@@ -1,0 +1,94 @@
+{
+  "outputId": "paper-voyage-before-after",
+  "aspect": "16:9",
+  "purpose": "An ordinary idea with no footage becomes a story and a finished film; private founder candidate.",
+  "musicAssetId": "score",
+  "musicVolume": 0.25,
+  "sequence": [
+    {
+      "assetId": "before-label",
+      "start": 0,
+      "duration": 1.5,
+      "reason": "Name the concrete failed direction"
+    },
+    {
+      "assetId": "failed-storm",
+      "start": 0,
+      "duration": 3,
+      "reason": "Show the failure honestly"
+    },
+    {
+      "assetId": "after-label",
+      "start": 0,
+      "duration": 1.5,
+      "reason": "State the corrected physical action"
+    },
+    {
+      "assetId": "storm-action",
+      "start": 0.8,
+      "duration": 4,
+      "reason": "A wave now visibly breaks"
+    },
+    {
+      "assetId": "light-return",
+      "start": 2,
+      "duration": 3,
+      "reason": "The idea survives into a golden world"
+    },
+    {
+      "assetId": "identity",
+      "start": 0,
+      "duration": 3.5,
+      "reason": "Resolve with a cinematic AutoPromote ending"
+    }
+  ],
+  "audioCues": [
+    {
+      "assetId": "reject-weak",
+      "kind": "voiceover",
+      "startTime": 1.7,
+      "duration": 2.25,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "make-story",
+      "kind": "voiceover",
+      "startTime": 6.6,
+      "duration": 1.75,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "made-with",
+      "kind": "voiceover",
+      "startTime": 13.3,
+      "duration": 2.6,
+      "trimStart": 0,
+      "volume": 0.85
+    }
+  ],
+  "captionSegments": [
+    {
+      "start": 1.7,
+      "end": 3.95,
+      "text": "We rejected what didn't work.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 6.6,
+      "end": 8.35,
+      "text": "Make it a story.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 13.3,
+      "end": 15.9,
+      "text": "This film was made with Auto Promote.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    }
+  ]
+}

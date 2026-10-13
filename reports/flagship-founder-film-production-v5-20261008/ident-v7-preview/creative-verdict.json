@@ -1,0 +1,20 @@
+{
+  "accepted": false,
+  "reason": "Physical close-up reveal now exists, but the final hold clips the left edge of the identity. Do not render the full take until the entire mark and wordmark fit with clean margins.",
+  "reviewer": "Codex sampled ident frame inspection",
+  "modelRevision": "private visual review 2026-10-08",
+  "evidenceSha256": "febd76158a2ea58c112edd8c23b5d782f0b7e9b12d759b8b10216be6aa21409d",
+  "criteria": [
+    {
+      "criterion": "Visible physical layered emergence after brief anticipation",
+      "passed": true,
+      "observation": "At 0.5s the metal edges and separate folds are in the close camera."
+    },
+    {
+      "criterion": "Whole identity holds clearly inside the final frame",
+      "passed": false,
+      "observation": "The left logo blade is cropped by the left frame boundary at 2.75s and 4.46s."
+    }
+  ],
+  "revisionInstructions": "Centre the camera on the complete identity extent and validate projected bounds before rendering. Preserve this failed preview."
+}

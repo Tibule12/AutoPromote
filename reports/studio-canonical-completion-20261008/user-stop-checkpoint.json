@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-08T14:15:07.243718+00:00",
+  "state": "STOPPED_AT_USER_REQUEST",
+  "reason": "User explicitly stopped work; resume only after a new user instruction. NVIDIA window ended and instance was last verified STOPPED; no new GPU authorization. Main frame on/off, history and reset implementation is repaired; real save/cold-reopen/final delivery remains unverified. Latest r6 harness failed because it tried the in-editor project rail after App reload instead of opening the normal Saved Studio projects entry. No render was submitted by this framing run. Next: repair that harness entry, rerun unchanged framing test and inspect the actual final; continue S02 outer-frame/retiming/audio parity, then S03. All changes/attempts preserved.",
+  "servicesSignalled": [
+    {
+      "servicePid": 269464,
+      "processesSignalled": 1
+    },
+    {
+      "servicePid": 172159,
+      "processesSignalled": 1
+    }
+  ],
+  "newGpuJobsStarted": 0,
+  "additionalServicesSignalled": []
+}

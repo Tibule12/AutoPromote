@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "audioRate": "48000",
+  "audioBitrate": "256480",
+  "decodedSeconds": 120.0,
+  "badPacketDurations": [],
+  "packetCount": 5626,
+  "output": "vfx/download.mp4",
+  "humanListening": false
+}

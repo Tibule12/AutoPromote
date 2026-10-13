@@ -1,0 +1,21 @@
+{
+  "status": "VERIFIED_PRIVATE_VIEWING_AND_DOWNLOAD",
+  "artifact": "outputs/local-cpu/footage-proof/v20/final.mp4",
+  "artifactSha256": "e1aef9d59d85150183df7b32bdb4c2a5270552a0d2e6466bd248f881ed1dc4b1",
+  "downloadedSha256": "e1aef9d59d85150183df7b32bdb4c2a5270552a0d2e6466bd248f881ed1dc4b1",
+  "downloadedBytes": 6603396,
+  "playback": {
+    "duration": 11.583333,
+    "width": 1920,
+    "height": 1080,
+    "currentTime": 6,
+    "readyState": 4,
+    "decodedFrames": 40,
+    "mutedForHeadlessCheck": true
+  },
+  "rangeStatus": 206,
+  "errors": [],
+  "operatorJournal": "memory.json",
+  "reasoning": "Manually reasoned observation/action; no NVIDIA model run claimed.",
+  "limitation": "Actual headless picture playback, seeking and download verification; no human sound/creative acceptance claimed."
+}

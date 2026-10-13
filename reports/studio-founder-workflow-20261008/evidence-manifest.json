@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-08T10:04:50.320940Z",
+  "purpose": "Shared Studio state and stereo delivery conformance",
+  "gpuJobsStarted": 0,
+  "creativeOutputComplete": false,
+  "nativeStudioFinalExport": true,
+  "checks": {
+    "model": 70,
+    "server": 52,
+    "productionComponentSelected": 5,
+    "productionComponentSkipped": 95,
+    "pythonRealPCMAndMotion": 15,
+    "broadComponentRun": "Stopped without a result; not counted",
+    "browserRunnerPreflight": 3
+  },
+  "files": [
+    {
+      "path": "native-project-before-reopen.json",
+      "bytes": 16119,
+      "sha256": "4f83843c674a6e662e983ffa50cc32118f47ec783996b7608dbdf4e7287d6ccb"
+    },
+    {
+      "path": "native-project-after-reopen.json",
+      "bytes": 16119,
+      "sha256": "4f83843c674a6e662e983ffa50cc32118f47ec783996b7608dbdf4e7287d6ccb"
+    },
+    {
+      "path": "native-state-proof.json",
+      "bytes": 677,
+      "sha256": "7af7d6882f0e744674c0c806724ab1300f7b0de86c246776603bea55db804f79"
+    },
+    {
+      "path": "audio-regression-request.json",
+      "bytes": 1331,
+      "sha256": "5bbe84fc821ced10e5ef36efebc676242c7abe67d84a6e89969da47a8d564ad7"
+    },
+    {
+      "path": "audio-regression-measurements.json",
+      "bytes": 588,
+      "sha256": "14adf408d0063bb4b171719807ed98d9dd60f287c24ba7c535d88c02253e8581"
+    },
+    {
+      "path": "audio-regression-export/final.mp4",
+      "bytes": 178999,
+      "sha256": "22b33d1c97ec2365c11f151bb2e30bc99e94d9bf5b02902c29e2fc536beb2eef"
+    },
+    {
+      "path": "audio-regression-export/render-receipt.json",
+      "bytes": 7949,
+      "sha256": "d5e19701e27b533e1524c92c3b71e1eccc8b8e3bb7478c12cc3efe2cb94ef986"
+    },
+    {
+      "path": "final-model-tests.log",
+      "bytes": 558,
+      "sha256": "dcb23228dc5a73721495a9b498ec6051c970a8b89ddfb33c136ef0e3c0335e0f"
+    },
+    {
+      "path": "final-server-tests.log",
+      "bytes": 348,
+      "sha256": "aee5d41eb866fd552bffe4472d916f35b175cc3b1f07b3c43d5d3dcd380d163e"
+    },
+    {
+      "path": "final-component-tests.log",
+      "bytes": 243,
+      "sha256": "5fd7e64ee227c6806636a45007200f3668f6bafa20446f67b720744f1b85142f"
+    },
+    {
+      "path": "audio-channel-tests.log",
+      "bytes": 2769,
+      "sha256": "fae3268836c3873876d39b41c87a644d4b2637d5ab59bfb7e5241558223bfdcb"
+    },
+    {
+      "path": "kernel-check.log",
+      "bytes": 67,
+      "sha256": "075736a8f955867d00faaaf3686a2a5f5847cb70b64c7725d5ef220d7fb4cf37"
+    },
+    {
+      "path": "native-stereo-export-proof.json",
+      "bytes": 1632,
+      "sha256": "c781df405eea09469e47a84f1299695c8bba0d9fc7ad3bd1797ff2046452c41e"
+    },
+    {
+      "path": "native-stereo-audio-measurements.json",
+      "bytes": 516,
+      "sha256": "d3bbb8eb70c64fbff961a96ac10d1b8569ba5c700f63e369348074f4ebf355da"
+    },
+    {
+      "path": "native-stereo-recovery-events.json",
+      "bytes": 410,
+      "sha256": "1d32a44a5085be6b6b3cefe699394c77226593cef7c81bf938fdfd35f0b588d8"
+    },
+    {
+      "path": "native-stereo-delivery/download.mp4",
+      "bytes": 2134451,
+      "sha256": "19ca1ce213096e76ac407723dee3d87b2ed406dcd7d31cd2068a437dc4b0ad9f"
+    },
+    {
+      "path": "native-stereo-delivery/download.mp4.technical.json",
+      "bytes": 634,
+      "sha256": "dbb8ceea144de6a5f11473f71bb6bd927ed031c9b928f37116b65f1eb23c621b"
+    },
+    {
+      "path": "native-stereo-delivery/download.mp4.frames.jpg",
+      "bytes": 89531,
+      "sha256": "b38913710143f22cb8434e07134694bd683a43da27a04bc349bd8298a1dc780d"
+    },
+    {
+      "path": "browser-runner-preflight.json",
+      "bytes": 427,
+      "sha256": "6f078e7847263abc83cae2a7e39b0e242dbf43132ba62eda466b99eb81c443bc"
+    },
+    {
+      "path": "current-model-tests.log",
+      "bytes": 136,
+      "sha256": "3db7f8ad91b2bc71525c8887d3bdf9f86238a4d7daa2b66b2e9113fee8c347a8"
+    },
+    {
+      "path": "current-server-tests.log",
+      "bytes": 149,
+      "sha256": "4d52b5054d3225d94f1158177a14df5ce90e47ce483fb51de233dbd833f5f351"
+    },
+    {
+      "path": "kernel-check-current.log",
+      "bytes": 67,
+      "sha256": "075736a8f955867d00faaaf3686a2a5f5847cb70b64c7725d5ef220d7fb4cf37"
+    },
+    {
+      "path": "runtime-checkpoint.json",
+      "bytes": 781,
+      "sha256": "3683608ed3c0bfda082fd526117d5c866b68b48cb85052e312e12d035731ed04"
+    },
+    {
+      "path": "contract-validation-final.log",
+      "bytes": 364,
+      "sha256": "4d4437efedf32de38857901ca5c36821d3e0ce66eb26f42085878df723f68712"
+    }
+  ],
+  "nativeStudioFinalExportScope": "Separate owned CPU fallback stereo delivery diagnostic; no generated film, 3D rendering, listening or paired preview/final approval"
+}

@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review current main Publisher/Schedule anchors and owned LinkedIn/Reddit recovery. Preserve readiness and inherited Studio evidence; require real playable Reddit media.",
-  "reviewed_at": "2026-10-13T16:53:47.299Z",
-  "catalog_sha256": "32fefd4bef0ca4fae74cb006e473198c7b6f8280858c8fc6c5558166b532aad5",
+  "reason": "Repository integration review: preserve existing qualification, document individual property controls and bind draft template revisions 1.1.0–1.1.2; retain security dependency updates and unchanged readiness.",
+  "reviewed_at": "2026-10-13T17:57:43.975Z",
+  "catalog_sha256": "9a1ae0868cc99f489d80b2b9f305887470d3332753d207ed60bf12a8762c8fe9",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
-      "sha256": "1216a6a9649d4e558dad4bcc1ffcfee57f36338858b1fe175dd839c2bf9b865d"
+      "sha256": "098abf6c08f1a9ffe700ce19ffd27b9ba0ad5cf58408a607e11c5d7659512210"
     },
     {
       "path": "config/model-runtime/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "9b7bce9e1ea0e51a219ef4366fd18042d3dd6ab7ebf5150ea797063c9f17585d"
+      "sha256": "4b497e9fc4397ca31067132c6f2e943c86a17d1b2c74ef0ad5b40fff43d8196e"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -87,7 +87,7 @@
     },
     {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "1f915ff697ccadecca9f3fb87e20c5c17ece35ac9b75d2bcef4b091d8b4e0bf6"
+      "sha256": "611dac847c2b8adc9d952f7f6d955ce39b5cc27b90b077b54475a6257d2a8f1e"
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
@@ -95,7 +95,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "fa07c077e14106f95958eb4b27c30893bd137c86593b34561ec3130c742f2533"
+      "sha256": "1c44507f33fe9b15c8ce21ab5232b02be468904feb5ce8afbb9bdced99590dc3"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -167,7 +167,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "7d49ee803680d8c813b22e33862bc45df4ead53bc9358cf5056aa20a170e7d1d"
+      "sha256": "c1e7b57bfc17998d9d0ba1e4992bc6af1e5b6aae9efcdc65241081d94b4b34a2"
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
@@ -287,11 +287,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "d6ad5e538a7377ef5545db5a22848e394a625404de05c91e3b40b057ca2d4aaf"
+      "sha256": "fba5cd751ba561da6443d52fceff0084570e7a489e684ce4ec708b323259e172"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "b59be4b27e03d15a282a60df506acd06216374c33a7ff2eab07c521e709fcbcd"
+      "sha256": "f6ee39ef6343283d8567564f17a2c55ae03da018473c197dca20737e447159a8"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

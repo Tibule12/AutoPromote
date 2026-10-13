@@ -1,0 +1,14 @@
+{
+  "instance": "autopromote-l40s-staging",
+  "status": "STOPPED",
+  "verifiedAtEpoch": 1791381698.2859788,
+  "authorizedCutoffSAST": "2026-10-07 16:00:00 +02:00",
+  "method": "Detached deadline watchdog called brev stop; independent subsequent brev ls reports STOPPED.",
+  "providerEvidence": "gpu-final-provider-status.log",
+  "preStopComputeEvidence": "gpu-before-authorized-shutdown.log",
+  "inferenceActiveAtCutoff": false,
+  "preservedLocalPreviews": [
+    "http://127.0.0.1:3096/review.html",
+    "http://127.0.0.1:5009/?fixture=factory"
+  ]
+}

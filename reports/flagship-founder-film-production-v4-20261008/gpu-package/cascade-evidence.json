@@ -1,0 +1,8 @@
+{
+  "kind": "documented_studio_render_blocker",
+  "sourcePath": "reports/studio-canonical-visual-20261008/render-flow-2d/receipt.json",
+  "sourceSha256": "df8198c96d5d33e0672b1cfcd9ac34207f7e0d5673cf348a2000983dfd9084f1",
+  "status": "FAIL",
+  "error": "Video processing failed: Request failed with status code 500 - Worker says: Caption review is incomplete: audible speech has no captions at 0.0-2.8s, 5.2-6.8s, 9.2-12.0s. Return to the editable transcript and caption every spoken phrase.",
+  "limitation": "A real 2026-10-08 QA blocker used as visual evidence of the wider build struggle, not a chronological founder reenactment."
+}

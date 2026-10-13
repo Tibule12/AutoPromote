@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-10-08T16:26:22.806Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008 r13",
+  "status": "INTERRUPTED",
+  "steps": [
+    "Native Reset transform removes the QA tilt, zoom, offsets and main-video keys",
+    "Frame off/on history is shared with the enabled Color inspector checkbox",
+    "Normal Save, new App load and saved project reopen retain the exact framing decisions"
+  ],
+  "interruptionScope": "QA runner terminated when the chat turn was interrupted. Native reset/history/save/new-App/reopen steps completed. No delivery or paired visual pass claimed for this attempt."
+}

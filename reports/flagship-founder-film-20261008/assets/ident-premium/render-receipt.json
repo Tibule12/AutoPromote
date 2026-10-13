@@ -1,0 +1,94 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "ident",
+  "sourceBrief": {
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+    "artifact": "source-brief.txt"
+  },
+  "settings": {
+    "duration": 5,
+    "fps": 24,
+    "samples": 48,
+    "width": 1920,
+    "height": 1080
+  },
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "tool": "AutoPromote Studio Blender / original founder-film template",
+  "nativeScene": "scene.blend",
+  "scriptSha256": "e529b67c5f784cb9a5b1676ec9d84d8c94b05a9fedea73c6002bb31ec34ab80b",
+  "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+  "seconds": 84.23305843599974,
+  "templateParameters": {
+    "template": "autopromote-original-vector-studio-ident-v3",
+    "version": 3,
+    "logoGeometry": "assets/brand/autopromote-original-v1/logo-geometry.json",
+    "duration": 5,
+    "fps": 24,
+    "timing": {
+      "anticipationEnd": 0.4,
+      "symbolLayersResolve": 2.25,
+      "wordmarkLock": 3.2,
+      "cleanHold": 1.8
+    },
+    "camera": {
+      "worldUp": [
+        0,
+        1,
+        0
+      ],
+      "lens": 56,
+      "symbolTargetX": -3.75,
+      "macroDistance": 7.4,
+      "lockupDistance": 14.6,
+      "resolveSeconds": 3.2
+    },
+    "materials": {
+      "symbol": "original two-tone anodized violet",
+      "wordmark": "readable platinum",
+      "backLayers": 3,
+      "glassTransmission": 0.55,
+      "glassIOR": 1.46,
+      "bevel": 0.008
+    },
+    "lighting": {
+      "key": 1700,
+      "rim": 2100,
+      "sweep": 2300,
+      "lockupFill": 2000,
+      "darkOpening": true
+    },
+    "particles": {
+      "enabled": false
+    },
+    "soundCues": [
+      {
+        "type": "rise",
+        "at": 0.25,
+        "duration": 2.95
+      },
+      {
+        "type": "impact",
+        "at": 3.2
+      }
+    ],
+    "editableNative": "scene.blend",
+    "scalePolicy": "uniform; exact original Bezier contours; no raster tracing"
+  },
+  "editable": [
+    "camera quaternion curves",
+    "actual logo Bezier geometry",
+    "staggered layer timing",
+    "materials",
+    "lighting",
+    "physical source carriers",
+    "film route",
+    "sound cue plan"
+  ]
+}

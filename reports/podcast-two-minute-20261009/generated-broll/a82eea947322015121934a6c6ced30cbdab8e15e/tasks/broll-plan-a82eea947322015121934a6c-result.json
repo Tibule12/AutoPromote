@@ -1,0 +1,53 @@
+{
+  "fingerprint": "3576efa9c04a18c997bce84dea6e2ea778a59756d5481ddb88a4cac5b92e4a85",
+  "result": {
+    "id": "broll-plan-a82eea947322015121934a6c",
+    "value": {
+      "reason": "The opening lines convey emotional reunion and return, while the guest’s childhood description offers rich visual potential. The 'church-going child' line motivates a symbolic shot of light through stained glass, and the 'grew up well' moment invites a warm, reflective environment. Both align with the show’s tone and avoid generic filler or replacing key figures. Only two shots selected to maintain pacing and emotional weight without overloading visuals",
+      "shots": [
+        {
+          "captionId": "transcript-caption-35-timeline-1",
+          "title": "Church Light Through Stained Glass",
+          "prompt": "A slow dolly shot through a slightly dusty church window, sunlight filtering through colorful stained glass, casting shifting patterns on worn wooden pews. No people visible. Natural light, quiet stillness, subtle dust motes dancing in beams. 3 seconds duration, 16:9 aspect ratio, no text or logos",
+          "duration": 3
+        },
+        {
+          "captionId": "transcript-caption-38-cue-1-timeline-1",
+          "title": "Warm Living Room with Bookshelf",
+          "prompt": "A gentle handheld pan across a cozy living room: soft sunlight on a wooden bookshelf filled with children’s books, a half-open door revealing a hallway, and a framed photo on the wall. A small toy car sits near a rug. No people visible. Natural light, shallow depth of field, 3 seconds duration, 16:9 aspect ratio, no text or logos",
+          "duration": 3
+        }
+      ]
+    },
+    "rawValue": {
+      "reason": "The opening lines convey emotional reunion and return, while the guest’s childhood description offers rich visual potential. The 'church-going child' line motivates a symbolic shot of light through stained glass, and the 'grew up well' moment invites a warm, reflective environment. Both align with the show’s tone and avoid generic filler or replacing key figures. Only two shots selected to maintain pacing and emotional weight without overloading visuals",
+      "shots": [
+        {
+          "captionId": "transcript-caption-35-timeline-1",
+          "title": "Church Light Through Stained Glass",
+          "prompt": "A slow dolly shot through a slightly dusty church window, sunlight filtering through colorful stained glass, casting shifting patterns on worn wooden pews. No people visible. Natural light, quiet stillness, subtle dust motes dancing in beams. 3 seconds duration, 16:9 aspect ratio, no text or logos",
+          "duration": 3
+        },
+        {
+          "captionId": "transcript-caption-38-cue-1-timeline-1",
+          "title": "Warm Living Room with Bookshelf",
+          "prompt": "A gentle handheld pan across a cozy living room: soft sunlight on a wooden bookshelf filled with children’s books, a half-open door revealing a hallway, and a framed photo on the wall. A small toy car sits near a rug. No people visible. Natural light, shallow depth of field, 3 seconds duration, 16:9 aspect ratio, no text or logos",
+          "duration": 3
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 4500
+    },
+    "evidenceSha256": null,
+    "frameEvidence": [],
+    "seconds": 17.042762638999193,
+    "gpu": "NVIDIA L40S"
+  }
+}

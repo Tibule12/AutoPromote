@@ -1,0 +1,42 @@
+{
+  "createdAt": "2026-10-08T10:43:39.313794+00:00",
+  "status": "PARTIAL_RAW_TAKES_GENERATED_NOT_APPROVED",
+  "gpuJobsStarted": 4,
+  "gpuDeadlineEpoch": 1791458095,
+  "sourceRequest": "User renewed the instruction to produce results now after the rejected film and Studio diagnostics.",
+  "privateOnly": true,
+  "publicApproved": false,
+  "historyPreserved": "reports/flagship-founder-film-20261008",
+  "gpuLeaseStartedEpoch": 1791456295.642233,
+  "phase": "RAW_TAKES_RETAINED_CPU_RELIEF_APPLIED",
+  "operatingScope": "Renewed user request for the film now, after GPU-stopped status; operator selected a 30-minute maximum from restart. Historical windows are not reused.",
+  "watchdogPid": 120112,
+  "completedRawAssets": [
+    "ident",
+    "magic"
+  ],
+  "missingRawAssets": [
+    "origin",
+    "cascade",
+    "problems",
+    "failure",
+    "quota",
+    "breakthrough",
+    "director",
+    "reveal",
+    "cold-open"
+  ],
+  "filmAssembled": false,
+  "creativeApproval": false,
+  "browserState": "Private QA browser suspended with sign-in/page state retained",
+  "updatedAt": "2026-10-08T11:12:21.831580+00:00",
+  "gpuShutdown": {
+    "stopCommandExitCode": 0,
+    "otherComputeJobsBeforeStop": 0,
+    "otherContainersBeforeStop": 0,
+    "requestedAt": "2026-10-08T11:13:53.236631+00:00",
+    "reason": "Raw take attempts preserved; private QA CPU incident handled; no further paid job queued.",
+    "verifiedStatus": "STOPPED",
+    "verifiedAt": "2026-10-08T11:14:08.905628+00:00"
+  }
+}

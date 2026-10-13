@@ -1,0 +1,19 @@
+{
+  "device": {
+    "backend": "OPTIX",
+    "gpu_verified": true,
+    "denoiser": "OPENIMAGEDENOISE_CPU",
+    "denoisingQuality": "BALANCED",
+    "denoisingPrefilter": "FAST",
+    "persistentData": true,
+    "devices": [
+      "NVIDIA RTX PRO 6000 Blackwell Server Edition"
+    ]
+  },
+  "width": 1920,
+  "samples": 24,
+  "step": 1,
+  "duration": 38,
+  "frameCount": 912,
+  "seconds": 768.340886319
+}

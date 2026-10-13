@@ -1,0 +1,17 @@
+{
+  "containers": [
+    "factory-wan-br-a82eea94732201512193-shot-1"
+  ],
+  "gpu": "NVIDIA L40S, 100 %, 17905 MiB",
+  "cudaPids": [
+    "126514"
+  ],
+  "workerState": "API unavailable while another existing GPU job owns the session; do not duplicate or interrupt",
+  "at": "2026-10-09T07:31:21.585569+00:00",
+  "deadlineEpoch": 1791536400,
+  "cutoffSast": "2026-10-09T11:00:00+02:00",
+  "ownedFilmJobsActive": false,
+  "cutoffWatchdogAlive": true,
+  "reviewServerPid": 30886,
+  "reviewHttpStatus": 200
+}

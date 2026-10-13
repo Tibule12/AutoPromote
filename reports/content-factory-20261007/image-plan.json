@@ -1,0 +1,54 @@
+{
+  "deadlineEpoch": 1791363059.6449072,
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "images": [
+    {
+      "id": "storm-keyart",
+      "prompt": "Low-angle cinematic photograph of one tiny ivory origami paper sailboat, folded triangular hull and one single tall triangular paper sail, dwarfed by an enormous curling blue ocean wave directly behind it. The curling crest towers over the complete boat, white sea spray held in the air, a sliver of warm amber light cuts through deep petrol-blue water. The boat is intact, clearly visible in the lower middle, less than 15 percent of the image. Actual massive steep water wall, not just storm clouds. Photoreal tactile paper and turbulent water, dramatic scale, 35mm commercial cinematography, no text.",
+      "seed": 2026100730,
+      "duration": 3
+    },
+    {
+      "id": "ocean-keyart",
+      "prompt": "Very distant high aerial cinematic photograph of one tiny ivory origami paper sailboat with a sharply folded hull and one tall triangular sail, a bright small object occupying only five percent of the full image. Immense deep blue ocean fills the entire frame, long parallel sweeping wave lines, one golden reflection leads to a bright distant horizon. Clean complete boat silhouette, grand visual scale, restrained teal and amber color grade, realistic film grain and sunlight, beautiful ocean voyage, no text.",
+      "seed": 2026100731,
+      "duration": 3
+    },
+    {
+      "id": "world-from-paper",
+      "prompt": "A single blank ivory sheet on a dark wooden desk has physically unfolded into a vast exquisitely detailed miniature ocean world: tiny ivory origami sailboat with one triangular sail, curling deep blue water and warm amber horizon rise from the paper. Dramatic macro-to-wide photograph, readable one continuous impossible paper sculpture, dark studio background, one idea becoming a world, tactile paper, realistic water, restrained premium cinematic lighting. No text, no screen, no technology icons.",
+      "seed": 2026100732,
+      "duration": 3
+    },
+    {
+      "id": "story-world",
+      "prompt": "One blank ivory folded sheet unfolds into a miniature architectural city on a dark wooden desk, alleys and towers emerge as precise paper folds, one tiny path of warm amber light travels from the page toward a deep blue skyline. Cinematic impossible world born from ordinary raw material, tactile paper grain, photoreal macro commercial photography, crisp coherent architecture, dark quiet background, no writing, no logo, no screens.",
+      "seed": 2026100733,
+      "duration": 3
+    },
+    {
+      "id": "manual-time",
+      "prompt": "Cinematic photograph of a dark wooden creator desk almost buried in long winding strips of ivory paper and scattered small blank square frames. A tiny clean paper boat is trapped among those strips. A single strong amber light isolates the boat; deep petrol blue shadows. The visual story is a small idea buried under work before it can be seen, readable physical objects and quiet human absence, photoreal paper grain, 35mm commercial photograph, no printed words or logos.",
+      "seed": 2026100734,
+      "duration": 3
+    },
+    {
+      "id": "clear-path",
+      "prompt": "Cinematic photograph of the same tiny ivory origami boat with one tall triangular sail sailing along a narrow clear path through long ivory paper strips on a dark wooden desk. The strips have opened into two clean banks, deep blue water between, warm amber light at the end of the path. A fragile idea finally finding a way through a mountain of work, photoreal tactile paper and water, strong readable leading lines, restrained film contrast, no text or screens.",
+      "seed": 2026100735,
+      "duration": 3
+    },
+    {
+      "id": "founder-night",
+      "prompt": "Empty founder workbench late at night, one ordinary blank sheet and a tiny ivory paper sailboat under a warm practical desk lamp. Behind the workbench, an immense imagined ocean appears as the dark room naturally opens toward the blue sea. The small beginning and enormous ambition are visible together. A realistic quiet human workspace without any person, no invented testimonials or identity, cinematic amber and blue lighting, tactile paper and wood, no readable screens or text.",
+      "seed": 2026100736,
+      "duration": 3
+    },
+    {
+      "id": "golden-arrival",
+      "prompt": "Cinematic photograph of one tiny ivory origami paper sailboat with a sharply folded hull and one tall triangular sail, intact after a storm, floating on calm deep blue water. A spectacular narrow golden path of reflected dawn sunlight opens directly in front of the boat and leads toward a bright horizon. The boat is complete and occupies ten percent of frame, immense quiet sea and emotional relief, restrained photoreal amber and blue grading, crisp tactile paper, no words or logos.",
+      "seed": 2026100737,
+      "duration": 3
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "path": "frontend/public/landing/product-tour-l40s.mp4",
+    "bytes": 10793433,
+    "sha256": "ed4e6ce10dffe7584a0bd3acb6d798a84f284a2a304a57ad3fc8b623301cdcdc"
+  },
+  {
+    "path": "frontend/public/landing/product-tour-l40s-vertical.mp4",
+    "bytes": 4146083,
+    "sha256": "de72d79ff36a14b366b665b73944abe343b7ea19d9b731775571400e011ddc8b"
+  },
+  {
+    "path": "frontend/public/landing/product-tour-l40s.webp",
+    "bytes": 80718,
+    "sha256": "e54c6840711eaf6220e8c5f7c77fe3ec9d69d6ef6cfbaa3ec7308814b0a41e6c"
+  },
+  {
+    "path": "frontend/public/landing/product-tour-l40s-vertical.webp",
+    "bytes": 42224,
+    "sha256": "a1ec91d39a8e4ce8cc12dfc10c6b0b06b09abdf37d9833714cf751e0cdae750a"
+  },
+  {
+    "path": "frontend/public/landing/product-tour-l40s.vtt",
+    "bytes": 516,
+    "sha256": "b757689ba4b32632c94cd51141bfc8bdd4e380eddedd3fee1349ccce903c87d9"
+  }
+]

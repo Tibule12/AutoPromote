@@ -1,0 +1,58 @@
+{
+  "scope": "White title glyph geometry in declared ROI; other parity remains unqualified",
+  "roi": [
+    175,
+    20,
+    300,
+    125
+  ],
+  "outputTime": 3.5,
+  "previewSize": [
+    328,
+    410
+  ],
+  "previewGlyphBoxes": [
+    [
+      195,
+      32,
+      277,
+      49
+    ],
+    [
+      195,
+      65,
+      278,
+      87
+    ],
+    [
+      207,
+      100,
+      265,
+      116
+    ]
+  ],
+  "finalNormalizedGlyphBoxes": [
+    [
+      195,
+      33,
+      276,
+      49
+    ],
+    [
+      196,
+      65,
+      277,
+      87
+    ],
+    [
+      207,
+      100,
+      265,
+      115
+    ]
+  ],
+  "maximumGlyphBoxErrorPreviewPixels": 1,
+  "declaredGeometryTolerancePreviewPixels": 2.0,
+  "expectedLines": 3,
+  "result": "PASS"
+}

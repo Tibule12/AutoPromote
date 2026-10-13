@@ -1,0 +1,17 @@
+{
+  "valid": true,
+  "capabilities": 29,
+  "counts": {
+    "UNIMPLEMENTED": 3,
+    "BROKEN": 1,
+    "PARTIAL": 6,
+    "FUNCTIONAL": 19,
+    "PRO-READY": 0,
+    "PRODUCTION-READY": 0
+  },
+  "combinations": 13,
+  "parityChecks": 17,
+  "presentFixtures": 4,
+  "newCapabilityExecutions": 0,
+  "note": "Record validation only; no browser, provider or GPU execution."
+}

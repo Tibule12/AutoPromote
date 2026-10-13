@@ -1,0 +1,246 @@
+{
+  "stage": "last native EOF",
+  "message": "page.waitForFunction: Timeout 15000ms exceeded.",
+  "checks": [
+    {
+      "label": "Two distinct native source files form a 16-second sequence"
+    },
+    {
+      "label": "Native 12-second source EOF advances into the 4-second second video"
+    }
+  ],
+  "media": {
+    "currentTime": 11.728192,
+    "duration": 12,
+    "paused": false,
+    "ended": false,
+    "readyState": 4,
+    "src": "http://127.0.0.1:5009/fixture.mp4"
+  },
+  "events": [
+    {
+      "name": "loadstart",
+      "time": 11.800623052959502,
+      "duration": null,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "loadedmetadata",
+      "time": 11.800623,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 11.800623,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 11.800623,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "play",
+      "time": 12,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "pause",
+      "time": 12,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "ended",
+      "time": 12,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "loadstart",
+      "time": 0,
+      "duration": null,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "loadedmetadata",
+      "time": 0,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 0,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "play",
+      "time": 0.342948,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 1.641617,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 1.65105,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "pause",
+      "time": 4,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "loadstart",
+      "time": 0,
+      "duration": null,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "play",
+      "time": 0,
+      "duration": null,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "loadedmetadata",
+      "time": 0.008145,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 0,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 0.772264,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 0.778005,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "loadstart",
+      "time": 3.8006230529595015,
+      "duration": null,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "loadedmetadata",
+      "time": 3.800623,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "play",
+      "time": 3.800623,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 4,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 4,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "pause",
+      "time": 4,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "ended",
+      "time": 4,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture-second.mp4"
+    },
+    {
+      "name": "loadstart",
+      "time": 0,
+      "duration": null,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "loadedmetadata",
+      "time": 0,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "play",
+      "time": 0,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 0.361246,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 0.37225,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5009/fixture.mp4"
+    }
+  ]
+}

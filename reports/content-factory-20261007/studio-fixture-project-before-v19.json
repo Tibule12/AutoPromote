@@ -1,0 +1,314 @@
+{
+  "project": {
+    "id": "factory:real-vessel-fixture-v6:paper-to-real",
+    "name": "Paper to real \u00b7 generated source assembly",
+    "snapshot": {
+      "timeline": [
+        {
+          "id": "paper-to-real-1",
+          "sourceClipId": "paper-idea",
+          "startRequest": 0,
+          "endRequest": 3.625,
+          "duration": 3.625,
+          "contentHash": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+          "name": "Paper boat \u00b7 generated opening",
+          "url": "/factory-media/generated/boat-launch-v4-qualified.mp4"
+        },
+        {
+          "id": "paper-to-real-2",
+          "sourceClipId": "real-vessel",
+          "startRequest": 0,
+          "endRequest": 5.0625,
+          "duration": 5.0625,
+          "contentHash": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+          "name": "Real yacht \u00b7 generated moving footage",
+          "url": "/factory-media/generated/real-voyage-v6.mp4",
+          "end": 5.0625,
+          "sourceDuration": 5.0625
+        }
+      ],
+      "orderedClips": [
+        {
+          "id": "paper-to-real-1",
+          "sourceClipId": "paper-idea",
+          "startRequest": 0,
+          "endRequest": 3.625,
+          "duration": 3.625,
+          "contentHash": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+          "name": "Paper boat \u00b7 generated opening",
+          "url": "/factory-media/generated/boat-launch-v4-qualified.mp4",
+          "start": 0,
+          "end": 3.625,
+          "sourceDuration": 3.625
+        },
+        {
+          "id": "paper-to-real-2",
+          "sourceClipId": "real-vessel",
+          "startRequest": 0,
+          "endRequest": 5.0625,
+          "duration": 5.0625,
+          "contentHash": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+          "name": "Real yacht \u00b7 generated moving footage",
+          "url": "/factory-media/generated/real-voyage-v6.mp4",
+          "start": 0,
+          "end": 5.0625,
+          "sourceDuration": 5.0625
+        }
+      ],
+      "selectedClipId": "paper-to-real-1",
+      "reframeAspect": "16:9",
+      "exportSettings": {
+        "resolution": "1080p",
+        "fps": 24,
+        "codec": "h264",
+        "audioCodec": "aac"
+      },
+      "overlays": [],
+      "motionScenes": [],
+      "captionSegments": [],
+      "autoCaptions": false,
+      "soundEffects": [],
+      "speedKeyframes": [],
+      "trackStates": {},
+      "muteOriginalAudio": true,
+      "musicDucking": false,
+      "musicDuckingStrength": 0,
+      "musicTrack": null,
+      "studioDocument": {
+        "schemaVersion": 1,
+        "projectId": "factory:real-vessel-fixture-v6:paper-to-real",
+        "revision": 0,
+        "clock": {
+          "ticksPerSecond": 90000,
+          "interval": "half_open"
+        },
+        "output": {
+          "aspectRatio": "16:9",
+          "requestedResolution": "1080p",
+          "frameRate": {
+            "numerator": 24,
+            "denominator": 1
+          },
+          "codec": "h264",
+          "audioCodec": "aac",
+          "audioSampleRate": null,
+          "audioSampleRatePolicy": "worker_selected"
+        },
+        "assets": [
+          {
+            "assetId": "source:paper-idea:sha256:0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+            "sourceId": "paper-idea",
+            "contentHash": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+            "identityState": "hash_verified"
+          },
+          {
+            "assetId": "source:real-vessel:sha256:54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+            "sourceId": "real-vessel",
+            "contentHash": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+            "identityState": "hash_verified",
+            "storagePath": "generated/real-voyage-v6.mp4"
+          }
+        ],
+        "clipOccurrences": [
+          {
+            "occurrenceId": "paper-to-real-1",
+            "assetId": "source:paper-idea:sha256:0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 326250
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 326250
+            },
+            "timeMapId": "map:paper-to-real-1",
+            "playback": {
+              "direction": "forward",
+              "freeze": false,
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              }
+            }
+          },
+          {
+            "occurrenceId": "paper-to-real-2",
+            "assetId": "source:real-vessel:sha256:54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 455625
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 326250,
+              "endTick": 781875
+            },
+            "timeMapId": "map:paper-to-real-2",
+            "playback": {
+              "direction": "forward",
+              "freeze": false,
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              }
+            }
+          }
+        ],
+        "timeMaps": [
+          {
+            "timeMapId": "map:paper-to-real-1",
+            "occurrenceId": "paper-to-real-1",
+            "segments": [
+              {
+                "sourceRange": {
+                  "space": "source",
+                  "startTick": 0,
+                  "endTick": 326250
+                },
+                "clipLocalRange": {
+                  "space": "clip_local",
+                  "startTick": 0,
+                  "endTick": 326250
+                },
+                "programmeRange": {
+                  "space": "programme",
+                  "startTick": 0,
+                  "endTick": 326250
+                },
+                "rate": {
+                  "numerator": 1,
+                  "denominator": 1
+                },
+                "direction": "forward",
+                "freeze": false
+              }
+            ]
+          },
+          {
+            "timeMapId": "map:paper-to-real-2",
+            "occurrenceId": "paper-to-real-2",
+            "segments": [
+              {
+                "sourceRange": {
+                  "space": "source",
+                  "startTick": 0,
+                  "endTick": 455625
+                },
+                "clipLocalRange": {
+                  "space": "clip_local",
+                  "startTick": 0,
+                  "endTick": 455625
+                },
+                "programmeRange": {
+                  "space": "programme",
+                  "startTick": 326250,
+                  "endTick": 781875
+                },
+                "rate": {
+                  "numerator": 1,
+                  "denominator": 1
+                },
+                "direction": "forward",
+                "freeze": false
+              }
+            ]
+          }
+        ],
+        "layers": [],
+        "linkedTiming": {
+          "cues": {
+            "soundEffects": [],
+            "voiceovers": [],
+            "adjustmentLayers": []
+          },
+          "keys": {
+            "motionKeyframes": [],
+            "finishKeyframes": [],
+            "reframeKeyframes": [],
+            "reframeModeCuts": [],
+            "speakerFocusCuts": []
+          }
+        },
+        "audioGraph": {
+          "legacySnapshotRef": "audioRemix",
+          "routes": [],
+          "routing": {
+            "muteOriginalAudio": true,
+            "musicDucking": false,
+            "musicDuckingStrength": 0,
+            "musicTrackId": null
+          }
+        },
+        "constraints": {
+          "locks": []
+        },
+        "styleRef": null,
+        "analysisRefs": [],
+        "projectIntelligenceRefs": [],
+        "programmeSpeedKeys": [],
+        "fallbackSpeed": 1,
+        "outputTimeMap": [
+          {
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 781875
+            },
+            "outputRange": {
+              "space": "output",
+              "startTick": 0,
+              "endTick": 781875
+            },
+            "rateNumerator": 1000000,
+            "rateDenominator": 1000000
+          }
+        ],
+        "journal": [],
+        "idempotency": {},
+        "directorReviewJournal": [],
+        "compatibility": {
+          "legacySnapshotVersion": 1,
+          "projection": "clip_occurrences_canonical_other_fields_legacy",
+          "layerComposition": "separate_worker_stages"
+        }
+      },
+      "timelineDockHeight": 360,
+      "projectMedia": [
+        {
+          "id": "paper-idea",
+          "name": "Paper boat \u00b7 generated opening",
+          "url": "/factory-media/generated/boat-launch-v4-qualified.mp4",
+          "duration": 3.625,
+          "status": "existing",
+          "isPrimary": true
+        },
+        {
+          "id": "real-vessel",
+          "name": "Real yacht \u00b7 generated keyframe",
+          "url": "/factory-media/native-images/real-sailboat-v6/video.mp4",
+          "duration": 3,
+          "status": "existing",
+          "isPrimary": false
+        }
+      ],
+      "studioDocumentHash": "1213fb5afb08b75da4d9e7f436145a5c2bb1d96a7de3446c4dc73b72778ecc62"
+    },
+    "versions": []
+  },
+  "clip": {
+    "id": "paper-to-real-1",
+    "sourceClipId": "paper-idea",
+    "startRequest": 0,
+    "endRequest": 3.625,
+    "duration": 3.625,
+    "contentHash": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+    "name": "Paper boat \u00b7 generated opening",
+    "url": "/factory-media/generated/boat-launch-v4-qualified.mp4",
+    "start": 0,
+    "end": 3.625,
+    "sourceDuration": 3.625
+  }
+}

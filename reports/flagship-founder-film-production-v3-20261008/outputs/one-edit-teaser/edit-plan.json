@@ -1,0 +1,46 @@
+{
+  "outputId": "one-edit-teaser",
+  "aspect": "16:9",
+  "purpose": "10-second transformation event, clear created-by payoff and resolving brand lockup.",
+  "musicAssetId": "score-teaser",
+  "musicVolume": 0.65,
+  "sequence": [
+    {
+      "assetId": "vessel",
+      "start": 3.5,
+      "duration": 3,
+      "reason": "Transforming world"
+    },
+    {
+      "assetId": "reveal",
+      "start": 0,
+      "duration": 4,
+      "reason": "Production identity"
+    },
+    {
+      "assetId": "ident",
+      "start": 2,
+      "duration": 3,
+      "reason": "Resolving ident and readable hold"
+    }
+  ],
+  "audioCues": [
+    {
+      "assetId": "vo-reveal",
+      "kind": "voiceover",
+      "startTime": 3.15,
+      "trimStart": 0,
+      "duration": 3.4,
+      "volume": 0.94
+    },
+    {
+      "assetId": "cues-teaser",
+      "kind": "sfx",
+      "startTime": 0,
+      "trimStart": 0,
+      "duration": 10,
+      "volume": 0.8
+    }
+  ],
+  "captionSegments": []
+}

@@ -1,0 +1,80 @@
+{
+  "scope": "Normalized static-background geometry only; excludes moving subject, 3D, full matte/raster/audio and creative acceptance. Same actual native pre-final/final snapshots after the premature-crop repair.",
+  "samples": [
+    {
+      "programmeTime": 0.75,
+      "declaredRoi": [
+        10,
+        45,
+        277,
+        375
+      ],
+      "inliers": 343,
+      "p95IdentityErrorPx": 1.366675853729248,
+      "declaredTolerancePx": 2,
+      "result": "PASS",
+      "affine": [
+        [
+          0.9989331969678334,
+          -0.0003100424578994587,
+          1.0301763257944394
+        ],
+        [
+          0.0003100424578994587,
+          0.9989331969678334,
+          0.2497981536770317
+        ]
+      ]
+    },
+    {
+      "programmeTime": 1.55,
+      "declaredRoi": [
+        10,
+        45,
+        277,
+        375
+      ],
+      "inliers": 314,
+      "p95IdentityErrorPx": 1.292140007019043,
+      "declaredTolerancePx": 2,
+      "result": "PASS",
+      "affine": [
+        [
+          0.9991440248761263,
+          -0.00034666256767650955,
+          0.9792917456557094
+        ],
+        [
+          0.00034666256767650955,
+          0.9991440248761263,
+          0.17488023626482604
+        ]
+      ]
+    },
+    {
+      "programmeTime": 3.75,
+      "declaredRoi": [
+        10,
+        45,
+        277,
+        375
+      ],
+      "inliers": 326,
+      "p95IdentityErrorPx": 1.363086462020874,
+      "declaredTolerancePx": 2,
+      "result": "PASS",
+      "affine": [
+        [
+          0.9992706941854926,
+          -0.0004247920334976114,
+          1.0128883322177267
+        ],
+        [
+          0.0004247920334976114,
+          0.9992706941854926,
+          0.20901776411737533
+        ]
+      ]
+    }
+  ]
+}

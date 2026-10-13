@@ -1,0 +1,1006 @@
+{
+  "collectedAt": "2026-10-06T15:59:32.944010+00:00",
+  "region": "us-central1",
+  "activeProject": "autopromote-cc6d3",
+  "branch": "agent/director-analysis-staging-browser-v1",
+  "head": "7f7530ad746050c094bfc78d0921190da98d2098",
+  "inventory": {
+    "autopromote-cc6d3-jobs": [
+      {
+        "name": "cam-combiner-render-fast-job",
+        "spec_sha256": "4a8672645e2ce3be52de7a291f8f29d19b93dd2a76e05bdcb9edbff0d9514bda",
+        "image": "gcr.io/autopromote-cc6d3/cam-combiner-worker-fast:3dff28b2bd109ad7299d4e5788978cc6c190ce7c",
+        "resources": {
+          "limits": {
+            "cpu": "8",
+            "memory": "12Gi"
+          }
+        },
+        "serviceAccount": "cam-combiner-job@autopromote-cc6d3.iam.gserviceaccount.com",
+        "taskCount": 1,
+        "parallelism": 1,
+        "nodeSelector": null,
+        "environmentNames": [
+          "NODE_ENV",
+          "FIREBASE_STORAGE_BUCKET",
+          "MULTICAM_INGEST_BUCKET",
+          "MULTICAM_UPLOAD_FIREBASE",
+          "MULTICAM_MASTER_RETENTION_DAYS",
+          "MULTICAM_BETA_MAX_SECONDS",
+          "MULTICAM_BETA_MAX_SEGMENTS",
+          "MULTICAM_RENDER_CHECKPOINTS_ENABLED",
+          "MULTICAM_RENDER_CHECKPOINT_SECONDS",
+          "MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS",
+          "ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK",
+          "MULTICAM_REUSE_VIDEO_ONLY_SYNC_AUDIT",
+          "MULTICAM_SOURCE_PREP_CONCURRENCY",
+          "MULTICAM_VISUAL_PROXY_CONCURRENCY",
+          "MULTICAM_SEGMENT_RENDER_CONCURRENCY",
+          "MULTICAM_X264_THREADS",
+          "MULTICAM_REACTION_INSERT_INTERVAL_SECONDS",
+          "MULTICAM_JOB_MAX_RETRIES",
+          "MULTICAM_FAST_NO_CAPTIONS",
+          "MULTICAM_CARD_CANVAS_STYLE",
+          "ALLOW_RUNTIME_DEPENDENCY_INSTALL",
+          "MULTICAM_JOB_CALLBACK_URL",
+          "MULTICAM_QA_RECEIPT_SECRET",
+          "MULTICAM_JOB_CALLBACK_SECRET",
+          "MEDIA_WORKER_TASK_SECRET"
+        ],
+        "generation": 16,
+        "traffic": null,
+        "annotations": {
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "568.0.0",
+          "run.googleapis.com/execution-environment": "gen2"
+        }
+      },
+      {
+        "name": "cam-combiner-render-job",
+        "spec_sha256": "764d45c8fd7ec4f7ef7328ddf55c3e4b3d1ad554923690615e7d64207d98eb51",
+        "image": "gcr.io/autopromote-cc6d3/cam-combiner-worker:3dff28b2bd109ad7299d4e5788978cc6c190ce7c",
+        "resources": {
+          "limits": {
+            "cpu": "8",
+            "memory": "12Gi"
+          }
+        },
+        "serviceAccount": "cam-combiner-job@autopromote-cc6d3.iam.gserviceaccount.com",
+        "taskCount": 1,
+        "parallelism": 1,
+        "nodeSelector": null,
+        "environmentNames": [
+          "NODE_ENV",
+          "FIREBASE_STORAGE_BUCKET",
+          "MULTICAM_INGEST_BUCKET",
+          "MULTICAM_UPLOAD_FIREBASE",
+          "MULTICAM_MASTER_RETENTION_DAYS",
+          "MULTICAM_BETA_MAX_SECONDS",
+          "MULTICAM_BETA_MAX_SEGMENTS",
+          "MULTICAM_RENDER_CHECKPOINTS_ENABLED",
+          "MULTICAM_RENDER_CHECKPOINT_SECONDS",
+          "MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS",
+          "ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK",
+          "MULTICAM_REUSE_VIDEO_ONLY_SYNC_AUDIT",
+          "MULTICAM_SOURCE_PREP_CONCURRENCY",
+          "MULTICAM_VISUAL_PROXY_CONCURRENCY",
+          "MULTICAM_SEGMENT_RENDER_CONCURRENCY",
+          "MULTICAM_X264_THREADS",
+          "MULTICAM_REACTION_INSERT_INTERVAL_SECONDS",
+          "MULTICAM_JOB_MAX_RETRIES",
+          "MULTICAM_CARD_CANVAS_STYLE",
+          "WHISPER_ENGINE",
+          "FASTER_WHISPER_DEVICE",
+          "FASTER_WHISPER_COMPUTE_TYPE",
+          "ALLOW_RUNTIME_DEPENDENCY_INSTALL",
+          "MULTICAM_JOB_CALLBACK_URL",
+          "MULTICAM_QA_RECEIPT_SECRET",
+          "MULTICAM_JOB_CALLBACK_SECRET",
+          "MEDIA_WORKER_TASK_SECRET"
+        ],
+        "generation": 30,
+        "traffic": null,
+        "annotations": {
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "568.0.0",
+          "run.googleapis.com/execution-environment": "gen2"
+        }
+      }
+    ],
+    "autopromote-cc6d3-services": [
+      {
+        "name": "cam-combiner-worker",
+        "spec_sha256": "915d34502350f6a8d05222ee54123ba37aafea7d4171ff3af3e5041f6b05d73b",
+        "image": "gcr.io/autopromote-cc6d3/cam-combiner-worker-fast:3dff28b2bd109ad7299d4e5788978cc6c190ce7c",
+        "resources": {
+          "limits": {
+            "cpu": "4",
+            "memory": "8Gi"
+          }
+        },
+        "serviceAccount": "341498038874-compute@developer.gserviceaccount.com",
+        "taskCount": null,
+        "parallelism": null,
+        "nodeSelector": null,
+        "environmentNames": [
+          "NODE_ENV",
+          "FIREBASE_STORAGE_BUCKET",
+          "MULTICAM_INGEST_BUCKET",
+          "MULTICAM_UPLOAD_FIREBASE",
+          "MULTICAM_MASTER_RETENTION_DAYS",
+          "MULTICAM_BETA_MAX_SECONDS",
+          "MULTICAM_BETA_MAX_SEGMENTS",
+          "MULTICAM_RENDER_CHECKPOINTS_ENABLED",
+          "MULTICAM_RENDER_CHECKPOINT_SECONDS",
+          "MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS",
+          "MULTICAM_EXECUTION_MODE",
+          "MULTICAM_FAST_NO_CAPTIONS",
+          "MULTICAM_CARD_CANVAS_STYLE",
+          "ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK",
+          "MULTICAM_REUSE_VIDEO_ONLY_SYNC_AUDIT",
+          "ALLOW_RUNTIME_DEPENDENCY_INSTALL",
+          "MULTICAM_QA_RECEIPT_SECRET",
+          "MEDIA_WORKER_TASK_SECRET"
+        ],
+        "generation": 75,
+        "traffic": [
+          {
+            "percent": 100,
+            "revisionName": "cam-combiner-worker-00073-log"
+          }
+        ],
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "3",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "568.0.0",
+          "run.googleapis.com/cpu-throttling": "true",
+          "run.googleapis.com/execution-environment": "gen2",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        }
+      },
+      {
+        "name": "media-worker-v1",
+        "spec_sha256": "a6c00158738ece1174a1bff7b3518b4ca190ba3cb25d8b879b26c1dfa8b9c93c",
+        "image": "gcr.io/autopromote-cc6d3/media-worker-v1:a8ae44b81969c3c8c3a30bcead3164c38764c91e",
+        "resources": {
+          "limits": {
+            "cpu": "4",
+            "memory": "4Gi"
+          }
+        },
+        "serviceAccount": "341498038874-compute@developer.gserviceaccount.com",
+        "taskCount": null,
+        "parallelism": null,
+        "nodeSelector": null,
+        "environmentNames": [
+          "NODE_ENV",
+          "FIREBASE_STORAGE_BUCKET",
+          "MULTICAM_UPLOAD_FIREBASE",
+          "MULTICAM_MASTER_RETENTION_DAYS",
+          "ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK",
+          "WHISPER_ENGINE",
+          "PROMO_WHISPER_MODEL",
+          "FASTER_WHISPER_DEVICE",
+          "FASTER_WHISPER_COMPUTE_TYPE",
+          "FASTER_WHISPER_STRICT",
+          "ALLOW_RUNTIME_DEPENDENCY_INSTALL",
+          "MEDIA_WORKER_TASK_SECRET"
+        ],
+        "generation": 111,
+        "traffic": [
+          {
+            "percent": 100,
+            "revisionName": "media-worker-v1-00110-fox"
+          },
+          {
+            "revisionName": "media-worker-v1-00037-cim",
+            "tag": "lean-costfix"
+          },
+          {
+            "revisionName": "media-worker-v1-00042-qot",
+            "tag": "candidate-31699226273-2"
+          },
+          {
+            "revisionName": "media-worker-v1-00044-xet",
+            "tag": "candidate-31740784286-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00046-wom",
+            "tag": "candidate-31787966999-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00048-qoz",
+            "tag": "candidate-31793643739-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00050-zex",
+            "tag": "candidate-31796266684-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00052-gub",
+            "tag": "candidate-32354209174-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00054-ziy",
+            "tag": "candidate-32461421493-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00056-noj",
+            "tag": "candidate-33090309703-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00057-nuv",
+            "tag": "candidate-33090996014-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00059-pux",
+            "tag": "candidate-33095659008-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00061-muj",
+            "tag": "candidate-33101188893-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00063-nuq",
+            "tag": "candidate-33139461230-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00065-kuc",
+            "tag": "candidate-33185304507-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00067-bet",
+            "tag": "candidate-33236820111-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00069-yef",
+            "tag": "candidate-33237109268-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00071-xas",
+            "tag": "candidate-35178664903-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00073-did",
+            "tag": "candidate-35376867396-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00078-xeq",
+            "tag": "candidate-35447454474-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00080-puj",
+            "tag": "candidate-35451245400-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00082-kab",
+            "tag": "candidate-35452106300-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00084-wex",
+            "tag": "candidate-35453095219-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00086-fid",
+            "tag": "candidate-35455173025-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00088-fey",
+            "tag": "candidate-35456953636-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00090-qir",
+            "tag": "candidate-35459100046-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00092-goj",
+            "tag": "candidate-35489132924-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00094-zif",
+            "tag": "candidate-35490747442-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00099-qel",
+            "tag": "candidate-35493062675-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00102-fid",
+            "tag": "candidate-36232506709-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00104-cop",
+            "tag": "candidate-36384914543-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00106-tim",
+            "tag": "candidate-36391923519-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00108-yes",
+            "tag": "candidate-36409005558-1"
+          },
+          {
+            "revisionName": "media-worker-v1-00110-fox",
+            "tag": "candidate-36458734663-1"
+          }
+        ],
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "3",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "568.0.0",
+          "run.googleapis.com/cpu-throttling": "true",
+          "run.googleapis.com/execution-environment": "gen2",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        }
+      },
+      {
+        "name": "thulani-api",
+        "spec_sha256": "8b22079bcc03640a0c21a887bfaf9bb692ae3af36f9dd3a0fc882ba0d8e5ce15",
+        "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/thulani-api:cam-durable-final-20260710",
+        "resources": {
+          "limits": {
+            "cpu": "1",
+            "memory": "512Mi"
+          }
+        },
+        "serviceAccount": "341498038874-compute@developer.gserviceaccount.com",
+        "taskCount": null,
+        "parallelism": null,
+        "nodeSelector": null,
+        "environmentNames": [
+          "WORKER_URL",
+          "CAM_COMBINER_WORKER_URL",
+          "MEDIA_WORKER_URL",
+          "ALLOW_LOCAL_WORKER_FALLBACK",
+          "NODE_ENV",
+          "FIREBASE_STORAGE_BUCKET",
+          "MULTICAM_INGEST_BUCKET",
+          "MULTICAM_INGEST_RETENTION_HOURS",
+          "MULTICAM_MASTER_RETENTION_DAYS",
+          "WORKER_AUTH_MODE",
+          "MULTICAM_RENDER_JOB_NAME",
+          "MULTICAM_RENDER_JOB_REGION",
+          "MULTICAM_EXECUTION_MODE",
+          "MULTICAM_SERVER_PROOF_REQUIRED",
+          "MULTICAM_JOB_CALLBACK_SECRET",
+          "MULTICAM_MAX_ACTIVE_JOBS",
+          "MULTICAM_CAPACITY_RESERVATION_HOURS"
+        ],
+        "generation": 22,
+        "traffic": [
+          {
+            "percent": 100,
+            "revisionName": "thulani-api-00021-joc"
+          },
+          {
+            "revisionName": "thulani-api-00021-joc",
+            "tag": "cam-api-canary"
+          }
+        ],
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "20",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "575.0.1",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        }
+      },
+      {
+        "name": "thulani-frontend",
+        "spec_sha256": "2a5f158eb91e280a319c63980143cf6e0f68161b2fe39bb17abedbcf7e3f4099",
+        "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/worker@sha256:a8ab7a92fd623790fce2ed59f1a5da11f52bc22fa31ccdb0330d38cd56b46fa6",
+        "resources": {
+          "limits": {
+            "cpu": "1",
+            "memory": "512Mi"
+          }
+        },
+        "serviceAccount": "341498038874-compute@developer.gserviceaccount.com",
+        "taskCount": null,
+        "parallelism": null,
+        "nodeSelector": null,
+        "environmentNames": [
+          "WORKER_API_URL"
+        ],
+        "generation": 50,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "percent": 100
+          }
+        ],
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "20",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "569.0.0",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        }
+      },
+      {
+        "name": "thulani-worker",
+        "spec_sha256": "903333b9bb370f8efc3ce53a6b92099052f335052a6545a7ec6ae0ba52cd78d2",
+        "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/worker:latest",
+        "resources": {
+          "limits": {
+            "cpu": "1000m",
+            "memory": "512Mi"
+          }
+        },
+        "serviceAccount": "341498038874-compute@developer.gserviceaccount.com",
+        "taskCount": null,
+        "parallelism": null,
+        "nodeSelector": null,
+        "environmentNames": [
+          "REPLICATE_API_TOKEN",
+          "GROQ_API_KEY",
+          "HUGGINGFACE_API_KEY"
+        ],
+        "generation": 49,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "percent": 100
+          }
+        ],
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "20",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "559.0.0",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        }
+      }
+    ],
+    "autopromote-staging-2026-jobs": [
+      {
+        "name": "studio-analysis-once",
+        "spec_sha256": "30bbcb81cf92352471511206d42e4487947cb18471be2fa3f33f23bd1bd6ceed",
+        "image": "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/worker@sha256:d0bde70ef153b0684dd405de6ce48cad129cd73947261dd0909706bdecd8de61",
+        "resources": {
+          "limits": {
+            "cpu": "1",
+            "memory": "1Gi"
+          }
+        },
+        "serviceAccount": "studio-analysis-smoke@autopromote-staging-2026.iam.gserviceaccount.com",
+        "taskCount": 1,
+        "parallelism": null,
+        "nodeSelector": null,
+        "environmentNames": [
+          "ENABLE_STUDIO_ANALYSIS_WORKER",
+          "STUDIO_ANALYSIS_WORKER_ONCE",
+          "FIREBASE_STORAGE_BUCKET",
+          "MEDIA_WORKER_URL",
+          "WORKER_AUTH_MODE",
+          "FIREBASE_DATABASE_URL",
+          "STUDIO_ANALYSIS_WORKER_MAX_PASSES"
+        ],
+        "generation": 4,
+        "traffic": null,
+        "annotations": {
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "586.0.0",
+          "run.googleapis.com/execution-environment": "gen2"
+        }
+      }
+    ],
+    "autopromote-staging-2026-services": [
+      {
+        "name": "studio-face-analyzer",
+        "spec_sha256": "4cd518596da3d06fdd833fdb1c752223ab3e09744929447d79e4f816bce95f47",
+        "image": "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/face-analyzer@sha256:7e5246ca5fbfdcb6280e52ed89f011dee03a90229c8aae500fe293ca5b4d50f3",
+        "resources": {
+          "limits": {
+            "cpu": "4",
+            "memory": "4Gi"
+          }
+        },
+        "serviceAccount": "studio-analysis-smoke@autopromote-staging-2026.iam.gserviceaccount.com",
+        "taskCount": null,
+        "parallelism": null,
+        "nodeSelector": null,
+        "environmentNames": [
+          "FIREBASE_STORAGE_BUCKET"
+        ],
+        "generation": 5,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "percent": 100
+          }
+        ],
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "1",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "587.0.0",
+          "run.googleapis.com/execution-environment": "gen2",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        }
+      }
+    ]
+  },
+  "quota": {
+    "autopromote-cc6d3-quota": [
+      {
+        "quotaId": "CpuAllocPerProjectRegion",
+        "metric": "run.googleapis.com/cpu_allocation",
+        "unit": "Total CPU allocation, in milli vCPU, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "us-central1"
+            ],
+            "details": {
+              "value": "5000000"
+            },
+            "dimensions": {
+              "region": "us-central1"
+            }
+          }
+        ],
+        "reportedValue": [
+          "5000000"
+        ]
+      },
+      {
+        "quotaId": "NvidiaL4GpuAllocNoZonalRedundancyPerProjectRegion",
+        "metric": "run.googleapis.com/nvidia_l4_gpu_allocation_no_zonal_redundancy",
+        "unit": "Total Nvidia L4 GPU allocation without zonal redundancy, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "us-central1"
+            ],
+            "details": {},
+            "dimensions": {
+              "region": "us-central1"
+            }
+          }
+        ],
+        "reportedValue": [
+          "0 (omitted protobuf scalar)"
+        ]
+      },
+      {
+        "quotaId": "NvidiaL4GpuAllocPerProjectRegion",
+        "metric": "run.googleapis.com/nvidia_l4_gpu_allocation",
+        "unit": "Total Nvidia L4 GPU allocation with zonal redundancy, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "africa-south1",
+              "asia-east1",
+              "asia-east2",
+              "asia-northeast1",
+              "asia-northeast2",
+              "asia-northeast3",
+              "asia-south1",
+              "asia-south2",
+              "asia-southeast1",
+              "asia-southeast2",
+              "asia-southeast3",
+              "australia-southeast1",
+              "australia-southeast2",
+              "europe-central2",
+              "europe-north1",
+              "europe-north2",
+              "europe-southwest1",
+              "europe-west1",
+              "europe-west10",
+              "europe-west12",
+              "europe-west2",
+              "europe-west3",
+              "europe-west4",
+              "europe-west6",
+              "europe-west8",
+              "europe-west9",
+              "me-central1",
+              "me-central2",
+              "me-west1",
+              "northamerica-northeast1",
+              "northamerica-northeast2",
+              "northamerica-south1",
+              "southamerica-east1",
+              "southamerica-west1",
+              "us-central1",
+              "us-east1",
+              "us-east4",
+              "us-east5",
+              "us-south1",
+              "us-west1",
+              "us-west2",
+              "us-west3",
+              "us-west4"
+            ],
+            "details": {}
+          }
+        ],
+        "reportedValue": [
+          "0 (omitted protobuf scalar)"
+        ]
+      },
+      {
+        "quotaId": "NvidiaRtxPro6000GpuAllocNoZonalRedundancyPerProjectRegion",
+        "metric": "run.googleapis.com/nvidia_rtx_pro_6000_gpu_allocation_no_zonal_redundancy",
+        "unit": "Total Nvidia RTX Pro 6000 GPU allocation, in milli GPU, without zonal redundancy, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "africa-south1",
+              "asia-east1",
+              "asia-east2",
+              "asia-northeast1",
+              "asia-northeast2",
+              "asia-northeast3",
+              "asia-south1",
+              "asia-south2",
+              "asia-southeast1",
+              "asia-southeast2",
+              "asia-southeast3",
+              "australia-southeast1",
+              "australia-southeast2",
+              "europe-central2",
+              "europe-north1",
+              "europe-north2",
+              "europe-southwest1",
+              "europe-west1",
+              "europe-west10",
+              "europe-west12",
+              "europe-west2",
+              "europe-west3",
+              "europe-west4",
+              "europe-west6",
+              "europe-west8",
+              "europe-west9",
+              "me-central1",
+              "me-central2",
+              "me-west1",
+              "northamerica-northeast1",
+              "northamerica-northeast2",
+              "northamerica-south1",
+              "southamerica-east1",
+              "southamerica-west1",
+              "us-central1",
+              "us-east1",
+              "us-east4",
+              "us-east5",
+              "us-south1",
+              "us-west1",
+              "us-west2",
+              "us-west3",
+              "us-west4"
+            ],
+            "details": {}
+          }
+        ],
+        "reportedValue": [
+          "0 (omitted protobuf scalar)"
+        ]
+      },
+      {
+        "quotaId": "NvidiaRtxPro6000GpuAllocPerProjectRegion",
+        "metric": "run.googleapis.com/nvidia_rtx_pro_6000_gpu_allocation",
+        "unit": "Total Nvidia RTX Pro 6000 GPU allocation, in milli GPU, with zonal redundancy, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "africa-south1",
+              "asia-east1",
+              "asia-east2",
+              "asia-northeast1",
+              "asia-northeast2",
+              "asia-northeast3",
+              "asia-south1",
+              "asia-south2",
+              "asia-southeast1",
+              "asia-southeast2",
+              "asia-southeast3",
+              "australia-southeast1",
+              "australia-southeast2",
+              "europe-central2",
+              "europe-north1",
+              "europe-north2",
+              "europe-southwest1",
+              "europe-west1",
+              "europe-west10",
+              "europe-west12",
+              "europe-west2",
+              "europe-west3",
+              "europe-west4",
+              "europe-west6",
+              "europe-west8",
+              "europe-west9",
+              "me-central1",
+              "me-central2",
+              "me-west1",
+              "northamerica-northeast1",
+              "northamerica-northeast2",
+              "northamerica-south1",
+              "southamerica-east1",
+              "southamerica-west1",
+              "us-central1",
+              "us-east1",
+              "us-east4",
+              "us-east5",
+              "us-south1",
+              "us-west1",
+              "us-west2",
+              "us-west3",
+              "us-west4"
+            ],
+            "details": {}
+          }
+        ],
+        "reportedValue": [
+          "0 (omitted protobuf scalar)"
+        ]
+      }
+    ],
+    "autopromote-staging-2026-quota": [
+      {
+        "quotaId": "CpuAllocPerProjectRegion",
+        "metric": "run.googleapis.com/cpu_allocation",
+        "unit": "Total CPU allocation, in milli vCPU, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "us-central1"
+            ],
+            "details": {
+              "value": "5000000"
+            },
+            "dimensions": {
+              "region": "us-central1"
+            }
+          }
+        ],
+        "reportedValue": [
+          "5000000"
+        ]
+      },
+      {
+        "quotaId": "NvidiaL4GpuAllocNoZonalRedundancyPerProjectRegion",
+        "metric": "run.googleapis.com/nvidia_l4_gpu_allocation_no_zonal_redundancy",
+        "unit": "Total Nvidia L4 GPU allocation without zonal redundancy, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "africa-south1",
+              "asia-east1",
+              "asia-east2",
+              "asia-northeast1",
+              "asia-northeast2",
+              "asia-northeast3",
+              "asia-south1",
+              "asia-south2",
+              "asia-southeast1",
+              "asia-southeast2",
+              "asia-southeast3",
+              "australia-southeast1",
+              "australia-southeast2",
+              "europe-central2",
+              "europe-north1",
+              "europe-north2",
+              "europe-southwest1",
+              "europe-west1",
+              "europe-west10",
+              "europe-west12",
+              "europe-west2",
+              "europe-west3",
+              "europe-west4",
+              "europe-west6",
+              "europe-west8",
+              "europe-west9",
+              "me-central1",
+              "me-central2",
+              "me-west1",
+              "northamerica-northeast1",
+              "northamerica-northeast2",
+              "northamerica-south1",
+              "southamerica-east1",
+              "southamerica-west1",
+              "us-central1",
+              "us-east1",
+              "us-east4",
+              "us-east5",
+              "us-south1",
+              "us-west1",
+              "us-west2",
+              "us-west3",
+              "us-west4"
+            ],
+            "details": {}
+          }
+        ],
+        "reportedValue": [
+          "0 (omitted protobuf scalar)"
+        ]
+      },
+      {
+        "quotaId": "NvidiaL4GpuAllocPerProjectRegion",
+        "metric": "run.googleapis.com/nvidia_l4_gpu_allocation",
+        "unit": "Total Nvidia L4 GPU allocation with zonal redundancy, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "africa-south1",
+              "asia-east1",
+              "asia-east2",
+              "asia-northeast1",
+              "asia-northeast2",
+              "asia-northeast3",
+              "asia-south1",
+              "asia-south2",
+              "asia-southeast1",
+              "asia-southeast2",
+              "asia-southeast3",
+              "australia-southeast1",
+              "australia-southeast2",
+              "europe-central2",
+              "europe-north1",
+              "europe-north2",
+              "europe-southwest1",
+              "europe-west1",
+              "europe-west10",
+              "europe-west12",
+              "europe-west2",
+              "europe-west3",
+              "europe-west4",
+              "europe-west6",
+              "europe-west8",
+              "europe-west9",
+              "me-central1",
+              "me-central2",
+              "me-west1",
+              "northamerica-northeast1",
+              "northamerica-northeast2",
+              "northamerica-south1",
+              "southamerica-east1",
+              "southamerica-west1",
+              "us-central1",
+              "us-east1",
+              "us-east4",
+              "us-east5",
+              "us-south1",
+              "us-west1",
+              "us-west2",
+              "us-west3",
+              "us-west4"
+            ],
+            "details": {}
+          }
+        ],
+        "reportedValue": [
+          "0 (omitted protobuf scalar)"
+        ]
+      },
+      {
+        "quotaId": "NvidiaRtxPro6000GpuAllocNoZonalRedundancyPerProjectRegion",
+        "metric": "run.googleapis.com/nvidia_rtx_pro_6000_gpu_allocation_no_zonal_redundancy",
+        "unit": "Total Nvidia RTX Pro 6000 GPU allocation, in milli GPU, without zonal redundancy, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "africa-south1",
+              "asia-east1",
+              "asia-east2",
+              "asia-northeast1",
+              "asia-northeast2",
+              "asia-northeast3",
+              "asia-south1",
+              "asia-south2",
+              "asia-southeast1",
+              "asia-southeast2",
+              "asia-southeast3",
+              "australia-southeast1",
+              "australia-southeast2",
+              "europe-central2",
+              "europe-north1",
+              "europe-north2",
+              "europe-southwest1",
+              "europe-west1",
+              "europe-west10",
+              "europe-west12",
+              "europe-west2",
+              "europe-west3",
+              "europe-west4",
+              "europe-west6",
+              "europe-west8",
+              "europe-west9",
+              "me-central1",
+              "me-central2",
+              "me-west1",
+              "northamerica-northeast1",
+              "northamerica-northeast2",
+              "northamerica-south1",
+              "southamerica-east1",
+              "southamerica-west1",
+              "us-central1",
+              "us-east1",
+              "us-east4",
+              "us-east5",
+              "us-south1",
+              "us-west1",
+              "us-west2",
+              "us-west3",
+              "us-west4"
+            ],
+            "details": {}
+          }
+        ],
+        "reportedValue": [
+          "0 (omitted protobuf scalar)"
+        ]
+      },
+      {
+        "quotaId": "NvidiaRtxPro6000GpuAllocPerProjectRegion",
+        "metric": "run.googleapis.com/nvidia_rtx_pro_6000_gpu_allocation",
+        "unit": "Total Nvidia RTX Pro 6000 GPU allocation, in milli GPU, with zonal redundancy, per project per region",
+        "matchingDimensions": [
+          {
+            "applicableLocations": [
+              "africa-south1",
+              "asia-east1",
+              "asia-east2",
+              "asia-northeast1",
+              "asia-northeast2",
+              "asia-northeast3",
+              "asia-south1",
+              "asia-south2",
+              "asia-southeast1",
+              "asia-southeast2",
+              "asia-southeast3",
+              "australia-southeast1",
+              "australia-southeast2",
+              "europe-central2",
+              "europe-north1",
+              "europe-north2",
+              "europe-southwest1",
+              "europe-west1",
+              "europe-west10",
+              "europe-west12",
+              "europe-west2",
+              "europe-west3",
+              "europe-west4",
+              "europe-west6",
+              "europe-west8",
+              "europe-west9",
+              "me-central1",
+              "me-central2",
+              "me-west1",
+              "northamerica-northeast1",
+              "northamerica-northeast2",
+              "northamerica-south1",
+              "southamerica-east1",
+              "southamerica-west1",
+              "us-central1",
+              "us-east1",
+              "us-east4",
+              "us-east5",
+              "us-south1",
+              "us-west1",
+              "us-west2",
+              "us-west3",
+              "us-west4"
+            ],
+            "details": {}
+          }
+        ],
+        "reportedValue": [
+          "0 (omitted protobuf scalar)"
+        ]
+      }
+    ]
+  },
+  "protectedFileHashes": {
+    "studio_3d_renderer/Dockerfile": "8a7cf94d8af2f9d7e0d9bf3297a8b3abd15e0d0dc7f69a50493a0ffed8672916",
+    "studio_3d_renderer/render.py": "2d0b9ee8aac87c71194475ab6bdba638a0df04cd01e280075f26a5e17a0ada49",
+    "studio_3d_renderer/spec.py": "0ce80e8d1f61220ebd01b8610fc143daf66973cc0d7c6c63d403f67738c22b11",
+    "studio_3d_renderer/blender_scene.py": "07b854f81fccc0ed184ab3cf4719ee84e69d89d757af4b6fa9962cdabec6a8aa",
+    "src/services/studio3DService.js": "994c34485ad569a535b7e4dcf4dcc38f9e3296817a141704ffe93713cbdaba57",
+    ".github/workflows/deploy-media-worker.yml": "b89cdeb8b205c0c5915a6d1ba0b8592517ccbfcb5ae39c086a8c987996d2db4c",
+    "Dockerfile.studio-analysis-worker": "384c75a46e5e2717a40b52524c977f26b158524812886c267ef40203c82988cd"
+  },
+  "failures": [],
+  "targetProject": "autopromote-cc6d3",
+  "targetReason": "Existing private 3D bucket, renderer service account, immutable renderer image and Cloud Run Job dispatcher are in this project; staging analysis remains CPU."
+}

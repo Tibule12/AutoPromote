@@ -1,0 +1,47 @@
+{
+  "identity": "963e37f2f6eedfb10eacfe6471fc29aaeaa1a21dacf3882c1ab2763cfc0ad951",
+  "actions": [
+    {
+      "signature": "a771ee407782468401a656713fede2a0b6d321b1e69bdda2fd0c3826a6fe2204",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Show media"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Hide media"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T08:13:59.048Z",
+      "reason": "Open the observed Show media control",
+      "planner": null,
+      "afterState": "36498fab8805d9a542bcb888f804430ed7d9ee2449d8e94dbd919c9c87e4717d"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:5008/",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:13:53.793Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:5008/",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:14:09.461Z"
+    },
+    {
+      "id": "observation-3",
+      "url": "http://127.0.0.1:5008/",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:14:15.067Z"
+    }
+  ],
+  "status": "running"
+}

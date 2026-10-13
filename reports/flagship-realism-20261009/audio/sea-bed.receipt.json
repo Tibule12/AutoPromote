@@ -1,0 +1,38 @@
+{
+  "status": "EXTRACTED_PENDING_LISTENING_REVIEW",
+  "sourceBrief": "Private The Small Boat real-world payoff; physical marine ambience from licensed field recordings.",
+  "model": "licensed field recording source trim",
+  "modelRevision": "ffmpeg-trim-resample-v1",
+  "tool": "AutoPromote audio source preparation",
+  "origin": "recorded_sound_trim",
+  "parentProvenance": {
+    "path": "sea-recording-preview.mp3",
+    "sha256": "4763c1949f77cb921d6fa9242b154f518335cc4a424b5deccb98b762e1bf2db7",
+    "bytes": 1541280,
+    "origin": "recorded_sound_preview",
+    "creator": "Tom_Kaszuba",
+    "sourceUrl": "https://cdn.freesound.org/previews/659/659002_11673893-hq.mp3",
+    "license": "CC0-1.0",
+    "licenseEvidence": "https://freesound.org/people/Tom_Kaszuba/sounds/659002/",
+    "retrievedAt": "2026-10-09T06:25:41.481510+00:00",
+    "limitation": "Public compressed HQ preview; not the full-resolution source recording."
+  },
+  "parentSha256": "4763c1949f77cb921d6fa9242b154f518335cc4a424b5deccb98b762e1bf2db7",
+  "sourceRange": {
+    "start": 11,
+    "duration": 8
+  },
+  "settings": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "sampleFormat": "pcm_s24le",
+    "trimStart": 11,
+    "duration": 8
+  },
+  "artifact": {
+    "path": "audio/sea-bed.wav",
+    "sha256": "8d82da54feda1fc4a66e3b04362598072561336bb899df08da3b7d728041d89d",
+    "duration": 8
+  },
+  "listeningApproval": false
+}

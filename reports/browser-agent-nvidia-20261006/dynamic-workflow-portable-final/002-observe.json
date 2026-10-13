@@ -1,0 +1,96 @@
+{
+  "error": null,
+  "id": "observation-2",
+  "pageId": "page-1",
+  "url": "http://127.0.0.1:41117/",
+  "pages": [
+    {
+      "id": "page-1",
+      "url": "http://127.0.0.1:41117/"
+    }
+  ],
+  "dialog": null,
+  "frames": [
+    {
+      "index": 0,
+      "url": "http://127.0.0.1:41117/",
+      "text": "Local browser operator regression fixture\nPrepare a review copy\n\nOpen the editor, enter a title, choose landscape, and create one draft.\n\nEditing workspace\n\nThe saved source is ready.\n\nContinue to draft",
+      "headings": [
+        "Prepare a review copy",
+        "Editing workspace"
+      ],
+      "alerts": [],
+      "busy": false,
+      "captcha": false,
+      "scroll": {
+        "x": 0,
+        "y": 0,
+        "height": 900,
+        "viewportHeight": 900
+      },
+      "controls": [
+        {
+          "ref": "observation-2:f0:e0",
+          "role": "button",
+          "name": "Continue to draft",
+          "label": "",
+          "tag": "button",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": null,
+          "inModal": true,
+          "context": "",
+          "modalName": "Editing workspace",
+          "box": {
+            "x": 526.125,
+            "y": 485.90625,
+            "width": 172.625,
+            "height": 52
+          },
+          "inViewport": true,
+          "occluded": false
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "priorActions": [
+    {
+      "signature": "50338780b98f416e3abf7fcfc21ae1885d35393fd5bc2c9dd9fcfcc10afb9706",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Open editor"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "role": null,
+          "name": null,
+          "value": "b20522cca9b5cdc233dc0d3c808e54914195234dfe22ddd9e0e63d3f9a3aabb3",
+          "pageId": "page-1",
+          "frameIndex": 0
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-06T19:44:29.084Z",
+      "reason": "Open the editor to start preparing the review copy as instructed",
+      "planner": {
+        "model": "Qwen/Qwen3-VL-8B-Instruct",
+        "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "gpu": "NVIDIA L40S",
+        "seconds": 13.095614101001047,
+        "inputTokens": 2528,
+        "outputTokens": 114
+      },
+      "afterState": "c931e6e71e6186af540a70de1932cf758605796e3cade70fce51be4d761b9a4c"
+    }
+  ]
+}

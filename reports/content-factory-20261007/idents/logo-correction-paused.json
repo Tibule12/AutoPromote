@@ -1,0 +1,14 @@
+{
+  "status": "PAUSED_LOGO_ASSET_SELECTION_DISPUTED",
+  "reason": "User challenged the action. The older rocket raster was selected without establishing it as the current approved brand asset. Do not render or integrate these candidates until logo identity is resolved.",
+  "appLogoChanged": false,
+  "gpuRestarted": false,
+  "ownedRenderProcessesStopped": [],
+  "unfinishedFiles": [
+    "scripts/content-factory/prepare-logo-geometry.py",
+    "scripts/content-factory/make-layered-brand-ident.py",
+    "studio_3d_renderer/assets/autopromote-logo-geometry.json"
+  ],
+  "providerIntegrationChanged": false,
+  "replacementDelivered": false
+}

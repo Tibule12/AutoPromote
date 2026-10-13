@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "artifactSha256": "9422c9ea775fc2e2a19d02e472d23a3f1651fcd1b5563f8d4f3412327caef4df",
+  "reviewer": "Codex inspection of sixteen ordered decoded frames",
+  "reason": "The whole water surface becomes white, and the yacht hull is submerged by the waves after four seconds. This fails the visible payoff. The geometry is connected and the camera stays in frame; the model critic invented a cut and sail crop, so those claims are not used as evidence.",
+  "evidence": "native-transformation-review-v10.jpg",
+  "evidenceSha256": "77662d1a4781f546e544251eb72a0ee42a4b82e4347c2e48c8d569c4997c2206",
+  "nextCorrection": "Threshold actual Ocean foam color instead of constant alpha/Fac; bake editable yacht heave against the actual evaluated water surface."
+}

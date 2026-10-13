@@ -1,0 +1,30 @@
+{
+  "startedAt": "2026-10-08T12:43:45.687Z",
+  "projectName": "Studio trim clock QA 20261008",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "renderJobsStarted": 0,
+  "checks": [
+    {
+      "id": "native_trim_2_to_8",
+      "result": "PASS",
+      "at": "2026-10-08T12:45:00.714Z"
+    },
+    {
+      "id": "paused_end_clock",
+      "result": "PASS",
+      "at": "2026-10-08T12:45:01.051Z"
+    },
+    {
+      "id": "timing_lock_and_undo",
+      "result": "PASS",
+      "at": "2026-10-08T12:45:12.004Z"
+    }
+  ],
+  "status": "FAIL",
+  "error": "locator.click: Error: strict mode violation: getByRole('region', { name: 'Saved Studio projects', exact: true }).getByRole('button', { name: 'Studio trim clock QA 20261008', exact: true }) resolved to 2 elements:\n    1) <button type=\"button\" class=\"btn-secondary\">Studio trim clock QA 20261008</button> aka getByRole('button', { name: 'Studio trim clock QA' }).first()\n    2) <button type=\"button\" class=\"btn-secondary\">Studio trim clock QA 20261008</button> aka getByRole('button', { name: 'Studio trim clock QA' }).nth(1)\n\nCall log:\n\u001b[2m  - waiting for getByRole('region', { name: 'Saved Studio projects', exact: true }).getByRole('button', { name: 'Studio trim clock QA 20261008', exact: true })\u001b[22m\n",
+  "finishedAt": "2026-10-08T12:45:31.917Z"
+}

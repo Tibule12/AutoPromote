@@ -1,0 +1,11 @@
+{
+  "instanceName": "autopromote-l40s-staging",
+  "createdInstances": 0,
+  "fixture": "../rtx-pro-6000-qualification-20261006/input.mp4",
+  "inputSha256": "807f0f361f03c0a4936733c8c69d1232e6f4620791d3af12b0998978d008473b",
+  "sharedHelperSha256": "4334b75628bd307f0a08881cbe15d10350abe0a8363b724b4580c5cc709d4cc6",
+  "timing": "One measured transcode, identical argument sequence and monotonic timer boundaries to Google qualification; includes FFmpeg process startup.",
+  "scope": "One 2-second 640x360 24fps 48-frame fixture. No large models or long renders.",
+  "productionRequests": 0,
+  "stopAfterQualification": true
+}

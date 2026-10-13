@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-10-08T10:13:01.079Z",
+  "projectName": "Studio canonical visual QA 20261008",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "stateFlowReceipt": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
+  "stateBeforeSha256": "7b701df7cb0421e9c3f62a72b4e37eb284fbd46f8b2e6d8ce3527dd3fbdfcbc3",
+  "gpuJobsStarted": 0,
+  "workerStarted": false,
+  "status": "BLOCKED",
+  "visualReview": "PENDING",
+  "listeningReview": "NOT_RUN",
+  "error": "Studio did not acknowledge a render submission within 30 seconds; inspect the recorded UI validation and requests",
+  "finishedAt": "2026-10-08T10:14:17.161Z",
+  "remainingIssue": "Active saved 3D scene has no HQ preview. NVIDIA remains stopped; normal Studio correctly prevented an unverified final render.",
+  "renderSubmitted": false
+}

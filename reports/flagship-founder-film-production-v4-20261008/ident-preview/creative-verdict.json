@@ -1,0 +1,18 @@
+{
+  "status": "REJECTED_FOR_FILM",
+  "evidence": [
+    "contact-sheet.jpg",
+    "frame_0000.png",
+    "frame_0026.png",
+    "frame_0050.png",
+    "frame_0077.png",
+    "frame_0119.png"
+  ],
+  "findings": [
+    "Black anticipation works, but the mid sequence reads as an oversized purple AP extrusion.",
+    "The layer convergence is not clearly visible from the sampled camera views.",
+    "The final mark is small and static in a mostly empty black frame.",
+    "It does not establish the premium studio-identity motion the film needs."
+  ],
+  "decision": "Do not render the full v5 ident. Develop a new physical motif tied to the folded-vessel story and preview it before any full render."
+}

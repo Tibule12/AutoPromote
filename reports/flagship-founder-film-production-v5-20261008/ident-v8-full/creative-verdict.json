@@ -1,0 +1,35 @@
+{
+  "status": "PRIVATE_IDENT_CANDIDATE_PENDING_WHOLE_FILM_REVIEW",
+  "artifactSha256": "c175f403cef6dac0cc11dc2fd765764a10df27f584a62dd2a94d0063d9ca1594",
+  "evidenceSha256": "baf425a00164a7311176af4c5d80cc0af3d6e8623de8793cc8372b4dd48455ef",
+  "frames": 108,
+  "fps": 24,
+  "duration": 4.5,
+  "impactAt": 2.77,
+  "lockupProjectedBounds": {
+    "left": 0.07555567473173141,
+    "right": 0.8067276477813721,
+    "bottom": 0.32470235228538513,
+    "top": 0.7414635419845581
+  },
+  "sourceSceneSha256": "b72d829d7bdb905159deeec231aaba48147f762d2cccad1889ecbbfc745ad666",
+  "visualFindings": [
+    "Brief dark opening now leads to illuminated physical fold edges by 0.3s.",
+    "Three separate solids rotate into one identity while the camera pulls back; no flat logo fade or glow substitute.",
+    "Every logo blade and wordmark glyph fits with a margin throughout the final clean hold.",
+    "The ident is a restrained metallic direction; exceptional whole-film effect and connection to the paper story are not yet established."
+  ],
+  "audioFindings": {
+    "peak": 0.253448486328125,
+    "rms": 0.01654673332996045,
+    "clippedFraction": 0,
+    "channels": 2,
+    "sampleRate": 48000,
+    "duration": 4.5,
+    "cueSynchronization": "Declared 2.77s impact follows final glyph assembly at 2.745s",
+    "limitation": "Technical measurements and cue timing, not an assertion of heard sound quality."
+  },
+  "decode": "Full FFmpeg decode without errors",
+  "creativeApproval": false,
+  "playbackEvidence": "asset-playback/receipt.json"
+}

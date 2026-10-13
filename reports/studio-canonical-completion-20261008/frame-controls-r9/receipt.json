@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-08T16:08:34.883Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008 r9",
+  "status": "RUNNING",
+  "steps": [
+    "Native Reset transform removes the QA tilt, zoom, offsets and main-video keys",
+    "Frame off/on history is shared with the enabled Color inspector checkbox"
+  ]
+}

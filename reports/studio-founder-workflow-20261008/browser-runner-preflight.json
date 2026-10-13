@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-08T09:58:20.344Z",
+  "status": "PASS",
+  "checks": [
+    "Unknown case rejected before any page access",
+    "Ambiguous normal app tabs rejected without interaction",
+    "Explicit session URL selects the intended delivery project"
+  ],
+  "pageActionsBeforeUnknownCaseRejection": 0,
+  "newRenderSubmissions": 0,
+  "scope": "Browser runner preflight guards, not planner or universal operator qualification"
+}

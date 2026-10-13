@@ -1,0 +1,77 @@
+{
+  "status": "GENERATED_PENDING_VISUAL_REVIEW",
+  "model": "Wan-AI/Wan2.1-FLF2V-14B-720P-diffusers",
+  "modelRevision": "17c30769b1e0b5dcaa1799b117bf20a9c31f59d7",
+  "modelProfile": "trained_flf2v",
+  "sourceBrief": "Private flagship AutoPromote film: The Small Boat. One recognizable folded paper boat becomes one real yacht in the same physical ocean. Its navy hull facets map to the navy hull and its white central crease becomes the cream sail. The transition is the creative event, followed by purposeful real-looking human action. No two-clip substitution, explanatory feature montage or public release before full creative review.",
+  "shot": {
+    "name": "paper-to-yacht-trained-flf",
+    "reference_image": "/work/output/creative-v2/origami-ocean-d/image.png",
+    "last_reference_image": "/work/assets/lastImage.png",
+    "seed": 20261008230,
+    "prompt": "A single continuous cinematic transformation with one vessel in real moving water. The tiny folded white-and-navy paper boat rides a swell. Its navy paper hull facets curve and lengthen into the dark navy yacht hull while the central white fold visibly unfolds upward into taut cream canvas on a mast rooted in that same hull. The paper structure becomes timber and fabric progressively, with visible folds and edges throughout. The camera arcs slowly from the paper boat's near-front view to the yacht's port side and pulls back as the vessel grows, bow remaining pointed right. Natural reflections, sunlight and spray change scale with the same swell. Finish on the supplied real-looking full-size yacht sailing forward. Hold the completed hull and sail long enough to read the payoff. One world changes; the hull never disappears.",
+    "negative_prompt": "cut, jump cut, dissolve, crossfade, flash, different scene, second vessel, yacht appearing behind paper, disappearing hull, detached mast, floating sail, melted boat, miniature yacht, cartoon, CGI, painted ocean, static water, text, watermark"
+  },
+  "prompt": "A single continuous cinematic transformation with one vessel in real moving water. The tiny folded white-and-navy paper boat rides a swell. Its navy paper hull facets curve and lengthen into the dark navy yacht hull while the central white fold visibly unfolds upward into taut cream canvas on a mast rooted in that same hull. The paper structure becomes timber and fabric progressively, with visible folds and edges throughout. The camera arcs slowly from the paper boat's near-front view to the yacht's port side and pulls back as the vessel grows, bow remaining pointed right. Natural reflections, sunlight and spray change scale with the same swell. Finish on the supplied real-looking full-size yacht sailing forward. Hold the completed hull and sail long enough to read the payoff. One world changes; the hull never disappears.",
+  "seed": 20261008230,
+  "tool": "AutoPromote NVIDIA conditioned-video adapter",
+  "referenceImageSha256": "30228bad8a7c3a631a256d59d6d45cb9d8a414adf2dc121945635bd580a5846d",
+  "lastReferenceImageSha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462",
+  "settings": {
+    "width": 832,
+    "height": 480,
+    "frames": 65,
+    "fps": 16,
+    "steps": 30,
+    "guidance": 5.5,
+    "dtype": "bfloat16; VAE float32",
+    "cpuOffload": true,
+    "conditioning": "first_and_last_frame",
+    "referenceResize": "aspect-preserving centre crop"
+  },
+  "scriptSha256": "a0476e87683273c390a6828ed204d46a0edf1318da2f64e12aacda223c7ae5d6",
+  "modelPreparationSha256": "8c7c625dee1e6770078f433e9a6854765cb349e538b8c08c141101eede35b66e",
+  "reusedComponents": {
+    "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+    "revision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+    "textEncoder": {
+      "path": "/retained/text_encoder",
+      "files": [
+        {
+          "file": "text_encoder/model-00001-of-00003.safetensors",
+          "sha256": "a8e861969c7433e707cc5a74065d795d36cca07ec96eb6763eb4083df7248f58",
+          "bytes": 4935812536
+        },
+        {
+          "file": "text_encoder/model-00002-of-00003.safetensors",
+          "sha256": "d57d948ece4837d850b7a859a4415121d57cacf8b9ee1d4db200c67f592902d7",
+          "bytes": 4983103192
+        },
+        {
+          "file": "text_encoder/model-00003-of-00003.safetensors",
+          "sha256": "0da9ee284e21d1406df708788db1d502d95d75f69faa25cd26151bf8829b7c5f",
+          "bytes": 1442935480
+        }
+      ],
+      "validation": "Pinned retained UMT5 weights and matching architecture; bf16 encoder reused explicitly"
+    },
+    "vae": {
+      "path": "/retained/vae",
+      "sha256": "d6e524b3fffede1787a74e81b30976dce5400c4439ba64222168e607ed19e793",
+      "validation": "Byte-identical to official FLF VAE weights"
+    }
+  },
+  "gpu": "NVIDIA L40S",
+  "torch": "2.7.1+cu126",
+  "diffusers": "0.36.0",
+  "seconds": 653.2083415690004,
+  "peakCudaAllocatedBytes": 36592888832,
+  "peakCudaReservedBytes": 38835060736,
+  "artifact": {
+    "path": "/work/output/flf-transform-preview/paper-to-yacht-trained-flf/video.mp4",
+    "sha256": "51e08193f34525c7a502f1779b10af07ab5249d98b82633c5545f8abb911c50b",
+    "duration": 4.0625,
+    "bytes": 1657885
+  },
+  "completedAt": "2026-10-08T18:27:50.435014+00:00"
+}

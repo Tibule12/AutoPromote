@@ -1,0 +1,26 @@
+{
+  "job": "projects/autopromote-cc6d3/locations/us-central1/jobs/viral-studio-rtx-qualification",
+  "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer@sha256:6b97198c6770c8f211caf8b018be7dc85290035ba5a3922580a4a324179ed522",
+  "resources": {
+    "limits": {
+      "cpu": "20",
+      "nvidia.com/gpu": "1",
+      "memory": "80Gi"
+    }
+  },
+  "template": {
+    "maxRetries": 0,
+    "timeout": "300s",
+    "serviceAccount": "viral-studio-3d-renderer@autopromote-cc6d3.iam.gserviceaccount.com",
+    "executionEnvironment": "EXECUTION_ENVIRONMENT_GEN2",
+    "nodeSelector": {
+      "accelerator": "nvidia-rtx-pro-6000"
+    },
+    "gpuZonalRedundancyDisabled": true
+  },
+  "taskCount": 1,
+  "parallelism": 1,
+  "activeExecutions": [],
+  "noWarmService": true,
+  "gpuServices": []
+}

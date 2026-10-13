@@ -1,0 +1,732 @@
+{
+  "assets": [
+    {
+      "assetId": "paper-awakens",
+      "type": "video",
+      "status": "accepted",
+      "artifact": {
+        "path": "generated/paper-awakens.mp4",
+        "sha256": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+        "duration": 5.041666666666667,
+        "fps": 24
+      },
+      "provenance": {
+        "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+        "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+        "settings": {
+          "steps": 50,
+          "seed": 2026100711
+        },
+        "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list."
+      },
+      "review": {
+        "accepted": true,
+        "reviewer": "Codex visual and measured technical assessment",
+        "modelRevision": "session-20261007",
+        "reason": "Usable desk-to-water transformation after 2.5 seconds; trim stationary opening",
+        "evidenceSha256": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b",
+        "criteria": [
+          {
+            "criterion": "Usable desk-to-water transformation after 2.5 seconds; trim stationary opening",
+            "passed": true,
+            "observation": "Usable desk-to-water transformation after 2.5 seconds; trim stationary opening"
+          }
+        ],
+        "revisionInstructions": ""
+      }
+    },
+    {
+      "assetId": "identity",
+      "type": "motion",
+      "status": "accepted",
+      "artifact": {
+        "path": "motion/identity/video.mp4",
+        "sha256": "ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+        "duration": 3
+      },
+      "provenance": {
+        "model": "AutoPromote Studio motion renderer",
+        "modelRevision": "viral_motion_graphics/v1",
+        "settings": {
+          "scene": {
+            "id": "factory-title",
+            "preset": "title",
+            "design": "editorial",
+            "canvasMode": "standalone",
+            "canvasColor": "#080b10",
+            "text": "AutoPromote",
+            "secondary": "A brief. No footage.",
+            "color": "#d6b782",
+            "startTime": 0,
+            "duration": 3,
+            "x": 50,
+            "y": 50,
+            "scale": 1,
+            "easing": "smooth"
+          },
+          "fps": 24,
+          "width": 1280,
+          "height": 704,
+          "frames": 72
+        }
+      },
+      "review": {
+        "accepted": true,
+        "reviewer": "Codex visual and measured technical assessment",
+        "modelRevision": "session-20261007",
+        "reason": "Readable brand identity card for an ending",
+        "evidenceSha256": "7bb3cbc18af5c2c49c7deab47c956a23e807701f1d815d2a57b0315ebd6a4c88",
+        "criteria": [
+          {
+            "criterion": "Readable brand identity card for an ending",
+            "passed": true,
+            "observation": "Readable brand identity card for an ending"
+          }
+        ],
+        "revisionInstructions": ""
+      }
+    },
+    {
+      "assetId": "score",
+      "type": "audio",
+      "status": "accepted",
+      "artifact": {
+        "path": "audio/hero/score.wav",
+        "sha256": "03805b1629eae6ba73af7474f784830f1ba00845f7a2088c5a24203b6bdff237",
+        "duration": 24,
+        "fps": 24,
+        "container": "wav",
+        "codec": "pcm_s16le",
+        "sampleRate": 48000,
+        "channels": 2,
+        "peak": 0.1964057510804255,
+        "rms": 0.03833283899397365
+      },
+      "provenance": {
+        "model": "original-procedural-composition",
+        "modelRevision": "paper-voyage-score-v1",
+        "settings": {
+          "sampleRate": 48000,
+          "tempo": 96,
+          "duration": 24,
+          "motif": "minor tension to warm resolution",
+          "stereo": true
+        }
+      },
+      "review": {
+        "accepted": true,
+        "reviewer": "Codex visual and measured technical assessment",
+        "modelRevision": "session-20261007",
+        "reason": "Audible original stereo score with measured headroom; listening remains founder review",
+        "evidenceSha256": "03805b1629eae6ba73af7474f784830f1ba00845f7a2088c5a24203b6bdff237",
+        "criteria": [
+          {
+            "criterion": "Audible original stereo score with measured headroom; listening remains founder review",
+            "passed": true,
+            "observation": "Audible original stereo score with measured headroom; listening remains founder review"
+          }
+        ],
+        "revisionInstructions": ""
+      }
+    }
+  ],
+  "output": {
+    "outputId": "pipeline-source-proof",
+    "aspect": "16:9",
+    "purpose": "Internal verification of the real Studio edit and sound path; not a finished campaign",
+    "sequence": [
+      {
+        "assetId": "paper-awakens",
+        "start": 2.5,
+        "duration": 2.5,
+        "reason": "Remove the stationary opening"
+      },
+      {
+        "assetId": "identity",
+        "start": 0.1,
+        "duration": 2.7,
+        "reason": "Test an explicit ending"
+      }
+    ],
+    "musicAssetId": "score"
+  },
+  "edit": {
+    "projectId": "factory:3d140922192f15e24899d3e40581e8d5b82b8de38d64dd3e3bc8e50e4261946c:pipeline-source-proof",
+    "ownerUid": "local-founder",
+    "document": {
+      "schemaVersion": 1,
+      "projectId": "factory:3d140922192f15e24899d3e40581e8d5b82b8de38d64dd3e3bc8e50e4261946c:pipeline-source-proof",
+      "revision": 0,
+      "clock": {
+        "ticksPerSecond": 90000,
+        "interval": "half_open"
+      },
+      "output": {
+        "aspectRatio": "16:9",
+        "requestedResolution": "1080p",
+        "frameRate": {
+          "numerator": 24,
+          "denominator": 1
+        },
+        "codec": "h264",
+        "audioCodec": "aac",
+        "audioSampleRate": null,
+        "audioSampleRatePolicy": "worker_selected"
+      },
+      "assets": [
+        {
+          "assetId": "source:paper-awakens:sha256:7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+          "sourceId": "paper-awakens",
+          "storagePath": "generated/paper-awakens.mp4",
+          "contentHash": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+          "identityState": "hash_verified"
+        },
+        {
+          "assetId": "source:identity:sha256:ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+          "sourceId": "identity",
+          "storagePath": "motion/identity/video.mp4",
+          "contentHash": "ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+          "identityState": "hash_verified"
+        }
+      ],
+      "clipOccurrences": [
+        {
+          "occurrenceId": "pipeline-source-proof-1",
+          "assetId": "source:paper-awakens:sha256:7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 225000,
+            "endTick": 450000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 225000
+          },
+          "timeMapId": "map:pipeline-source-proof-1",
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        },
+        {
+          "occurrenceId": "pipeline-source-proof-2",
+          "assetId": "source:identity:sha256:ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 9000,
+            "endTick": 252000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 225000,
+            "endTick": 468000
+          },
+          "timeMapId": "map:pipeline-source-proof-2",
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        }
+      ],
+      "timeMaps": [
+        {
+          "timeMapId": "map:pipeline-source-proof-1",
+          "occurrenceId": "pipeline-source-proof-1",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 225000,
+                "endTick": 450000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 225000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 0,
+                "endTick": 225000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        },
+        {
+          "timeMapId": "map:pipeline-source-proof-2",
+          "occurrenceId": "pipeline-source-proof-2",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 9000,
+                "endTick": 252000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 243000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 225000,
+                "endTick": 468000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        }
+      ],
+      "layers": [],
+      "linkedTiming": {
+        "cues": {
+          "soundEffects": [],
+          "voiceovers": [],
+          "adjustmentLayers": []
+        },
+        "keys": {
+          "motionKeyframes": [],
+          "finishKeyframes": [],
+          "reframeKeyframes": [],
+          "reframeModeCuts": [],
+          "speakerFocusCuts": []
+        }
+      },
+      "audioGraph": {
+        "legacySnapshotRef": "audioRemix",
+        "routes": [],
+        "routing": {
+          "muteOriginalAudio": false,
+          "musicDucking": false,
+          "musicDuckingStrength": 0,
+          "musicTrackId": null
+        }
+      },
+      "constraints": {
+        "locks": []
+      },
+      "styleRef": null,
+      "analysisRefs": [],
+      "projectIntelligenceRefs": [],
+      "programmeSpeedKeys": [],
+      "fallbackSpeed": 1,
+      "outputTimeMap": [
+        {
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 468000
+          },
+          "outputRange": {
+            "space": "output",
+            "startTick": 0,
+            "endTick": 468000
+          },
+          "rateNumerator": 1000000,
+          "rateDenominator": 1000000
+        }
+      ],
+      "journal": [],
+      "idempotency": {},
+      "directorReviewJournal": [],
+      "compatibility": {
+        "legacySnapshotVersion": 1,
+        "projection": "clip_occurrences_canonical_other_fields_legacy",
+        "layerComposition": "separate_worker_stages"
+      }
+    },
+    "snapshot": {
+      "timeline": [
+        {
+          "id": "pipeline-source-proof-1",
+          "sourceClipId": "paper-awakens",
+          "startRequest": 2.5,
+          "endRequest": 5,
+          "duration": 2.5,
+          "contentHash": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+          "storagePath": "generated/paper-awakens.mp4",
+          "name": "paper-awakens"
+        },
+        {
+          "id": "pipeline-source-proof-2",
+          "sourceClipId": "identity",
+          "startRequest": 0.1,
+          "endRequest": 2.8000000000000003,
+          "duration": 2.7,
+          "contentHash": "ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+          "storagePath": "motion/identity/video.mp4",
+          "name": "identity"
+        }
+      ],
+      "orderedClips": [],
+      "selectedClipId": null,
+      "reframeAspect": "16:9",
+      "exportSettings": {
+        "resolution": "1080p",
+        "fps": 24,
+        "codec": "h264",
+        "audioCodec": "aac"
+      },
+      "overlays": [],
+      "motionScenes": [],
+      "soundEffects": [],
+      "speedKeyframes": [],
+      "trackStates": {},
+      "muteOriginalAudio": false,
+      "musicDucking": false,
+      "musicDuckingStrength": 0
+    },
+    "directorBatch": {
+      "projectId": "factory:3d140922192f15e24899d3e40581e8d5b82b8de38d64dd3e3bc8e50e4261946c:pipeline-source-proof",
+      "baseRevision": 0,
+      "idempotencyKey": "factory-edit-3d140922192f15e24899d3e4-pipeline-source-proof",
+      "actor": {
+        "type": "ai",
+        "id": "content_factory_director"
+      },
+      "operations": [
+        {
+          "type": "trim_clip",
+          "target": {
+            "occurrenceId": "pipeline-source-proof-1"
+          },
+          "keep": {
+            "space": "source",
+            "startTick": 225000,
+            "endTick": 450000
+          }
+        },
+        {
+          "type": "trim_clip",
+          "target": {
+            "occurrenceId": "pipeline-source-proof-2"
+          },
+          "keep": {
+            "space": "source",
+            "startTick": 9000,
+            "endTick": 252000
+          }
+        }
+      ]
+    },
+    "directorPreview": {
+      "duplicate": false,
+      "baseRevision": 0,
+      "newRevision": 1,
+      "affectedNodes": [
+        "pipeline-source-proof-1",
+        "pipeline-source-proof-2"
+      ],
+      "readSet": [
+        "occurrence:pipeline-source-proof-1",
+        "occurrence:pipeline-source-proof-2",
+        "programme:layers",
+        "programme:linked_timing",
+        "programme:speed_keys"
+      ],
+      "writeSet": [
+        "occurrence:pipeline-source-proof-1",
+        "occurrence:pipeline-source-proof-2",
+        "programme:timeline",
+        "time_maps",
+        "programme:layers",
+        "programme:linked_timing",
+        "programme:speed_keys"
+      ],
+      "previewDocument": {
+        "schemaVersion": 1,
+        "projectId": "factory:3d140922192f15e24899d3e40581e8d5b82b8de38d64dd3e3bc8e50e4261946c:pipeline-source-proof",
+        "revision": 0,
+        "clock": {
+          "ticksPerSecond": 90000,
+          "interval": "half_open"
+        },
+        "output": {
+          "aspectRatio": "16:9",
+          "requestedResolution": "1080p",
+          "frameRate": {
+            "numerator": 24,
+            "denominator": 1
+          },
+          "codec": "h264",
+          "audioCodec": "aac",
+          "audioSampleRate": null,
+          "audioSampleRatePolicy": "worker_selected"
+        },
+        "assets": [
+          {
+            "assetId": "source:paper-awakens:sha256:7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+            "sourceId": "paper-awakens",
+            "storagePath": "generated/paper-awakens.mp4",
+            "contentHash": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+            "identityState": "hash_verified"
+          },
+          {
+            "assetId": "source:identity:sha256:ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+            "sourceId": "identity",
+            "storagePath": "motion/identity/video.mp4",
+            "contentHash": "ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+            "identityState": "hash_verified"
+          }
+        ],
+        "clipOccurrences": [
+          {
+            "occurrenceId": "pipeline-source-proof-1",
+            "assetId": "source:paper-awakens:sha256:7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+            "sourceRange": {
+              "space": "source",
+              "startTick": 225000,
+              "endTick": 450000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 225000
+            },
+            "timeMapId": "map:pipeline-source-proof-1",
+            "playback": {
+              "direction": "forward",
+              "freeze": false,
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              }
+            }
+          },
+          {
+            "occurrenceId": "pipeline-source-proof-2",
+            "assetId": "source:identity:sha256:ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+            "sourceRange": {
+              "space": "source",
+              "startTick": 9000,
+              "endTick": 252000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 225000,
+              "endTick": 468000
+            },
+            "timeMapId": "map:pipeline-source-proof-2",
+            "playback": {
+              "direction": "forward",
+              "freeze": false,
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              }
+            }
+          }
+        ],
+        "timeMaps": [
+          {
+            "timeMapId": "map:pipeline-source-proof-1",
+            "occurrenceId": "pipeline-source-proof-1",
+            "segments": [
+              {
+                "sourceRange": {
+                  "space": "source",
+                  "startTick": 225000,
+                  "endTick": 450000
+                },
+                "clipLocalRange": {
+                  "space": "clip_local",
+                  "startTick": 0,
+                  "endTick": 225000
+                },
+                "programmeRange": {
+                  "space": "programme",
+                  "startTick": 0,
+                  "endTick": 225000
+                },
+                "rate": {
+                  "numerator": 1,
+                  "denominator": 1
+                },
+                "direction": "forward",
+                "freeze": false
+              }
+            ]
+          },
+          {
+            "timeMapId": "map:pipeline-source-proof-2",
+            "occurrenceId": "pipeline-source-proof-2",
+            "segments": [
+              {
+                "sourceRange": {
+                  "space": "source",
+                  "startTick": 9000,
+                  "endTick": 252000
+                },
+                "clipLocalRange": {
+                  "space": "clip_local",
+                  "startTick": 0,
+                  "endTick": 243000
+                },
+                "programmeRange": {
+                  "space": "programme",
+                  "startTick": 225000,
+                  "endTick": 468000
+                },
+                "rate": {
+                  "numerator": 1,
+                  "denominator": 1
+                },
+                "direction": "forward",
+                "freeze": false
+              }
+            ]
+          }
+        ],
+        "layers": [],
+        "linkedTiming": {
+          "cues": {
+            "soundEffects": [],
+            "voiceovers": [],
+            "adjustmentLayers": []
+          },
+          "keys": {
+            "motionKeyframes": [],
+            "finishKeyframes": [],
+            "reframeKeyframes": [],
+            "reframeModeCuts": [],
+            "speakerFocusCuts": []
+          }
+        },
+        "audioGraph": {
+          "legacySnapshotRef": "audioRemix",
+          "routes": [],
+          "routing": {
+            "muteOriginalAudio": false,
+            "musicDucking": false,
+            "musicDuckingStrength": 0,
+            "musicTrackId": null
+          }
+        },
+        "constraints": {
+          "locks": []
+        },
+        "styleRef": null,
+        "analysisRefs": [],
+        "projectIntelligenceRefs": [],
+        "programmeSpeedKeys": [],
+        "fallbackSpeed": 1,
+        "outputTimeMap": [
+          {
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 468000
+            },
+            "outputRange": {
+              "space": "output",
+              "startTick": 0,
+              "endTick": 468000
+            },
+            "rateNumerator": 1000000,
+            "rateDenominator": 1000000
+          }
+        ],
+        "journal": [],
+        "idempotency": {},
+        "directorReviewJournal": [],
+        "compatibility": {
+          "legacySnapshotVersion": 1,
+          "projection": "clip_occurrences_canonical_other_fields_legacy",
+          "layerComposition": "separate_worker_stages"
+        }
+      }
+    },
+    "renderRequest": {
+      "video_url": "http://127.0.0.1:8765/generated/paper-awakens.mp4",
+      "start_time": 0,
+      "end_time": 5.2,
+      "overlays": [],
+      "auto_captions": false,
+      "timeline_segments": [
+        {
+          "id": "pipeline-source-proof-1",
+          "source_clip_id": "paper-awakens",
+          "start_time": 2.5,
+          "end_time": 5,
+          "duration": 2.5,
+          "url": "http://127.0.0.1:8765/generated/paper-awakens.mp4"
+        },
+        {
+          "id": "pipeline-source-proof-2",
+          "source_clip_id": "identity",
+          "start_time": 0.1,
+          "end_time": 2.8,
+          "duration": 2.7,
+          "url": "http://127.0.0.1:8765/motion/identity/video.mp4"
+        }
+      ],
+      "background_audio": {
+        "url": "http://127.0.0.1:8765/audio/hero/score.wav",
+        "volume": 0.85,
+        "mode": "replace",
+        "enabled": true
+      },
+      "hook_focus_point": null,
+      "cover_frame": null,
+      "thumbnail_frame": null,
+      "creative_intent": "Internal verification of the real Studio edit and sound path; not a finished campaign",
+      "professional_cleanup": false,
+      "finish_plan": {
+        "version": 1,
+        "enabled": true,
+        "reframe": {
+          "enabled": true,
+          "aspect": "16:9",
+          "mode": "off"
+        }
+      },
+      "brand_watermark": false,
+      "output_settings": {
+        "resolution": "1080p",
+        "fps": 24,
+        "codec": "h264",
+        "audioCodec": "aac"
+      },
+      "sound_effects": [],
+      "motionGraphics": {
+        "version": 1,
+        "scenes": []
+      }
+    },
+    "documentHash": "b5dd1f3dabfb453fada710499851c588a1dd5d48aeaee1013e09f7b0edf277a6",
+    "sourceEvidence": [
+      {
+        "assetId": "paper-awakens",
+        "contentHash": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+        "provenanceHash": "877b55dbd9bf4c95b1c2d9483ab83910f3e41ee8dd2b62beba07ed2dda6b59fa",
+        "reviewEvidenceHash": "b6559a0ca74ec49808b6e3a8f528891a64fc8ed10e58b95d4402e4d070f8f08b"
+      },
+      {
+        "assetId": "identity",
+        "contentHash": "ddb5903d8d119fa895adbb87175c1b359dcf7d8e8008843d497690afe5fe4b8a",
+        "provenanceHash": "2b64b522a38ac10ff809e6ca8bc68d508797ae633cdea78934b09265e28a66b8",
+        "reviewEvidenceHash": "7bb3cbc18af5c2c49c7deab47c956a23e807701f1d815d2a57b0315ebd6a4c88"
+      }
+    ]
+  }
+}

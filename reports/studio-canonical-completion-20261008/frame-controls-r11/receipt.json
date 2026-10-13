@@ -1,0 +1,127 @@
+{
+  "startedAt": "2026-10-08T16:13:56.316Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008 r11",
+  "status": "FAIL",
+  "steps": [
+    "Native Reset transform removes the QA tilt, zoom, offsets and main-video keys",
+    "Frame off/on history is shared with the enabled Color inspector checkbox",
+    "Normal Save, new App load and saved project reopen retain the exact framing decisions"
+  ],
+  "documentSha256": "59fc2053cbabe0ac26d87816efb94aacec542c0dbe9de876f540113efa0f56d6",
+  "framingDecisions": {
+    "mainTransform": {
+      "id": "main-video",
+      "name": "Main video",
+      "type": "video",
+      "x": 50,
+      "y": 50,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "cropX": 0,
+      "cropY": 0
+    },
+    "mainFrame": {
+      "insetPercent": 2.5,
+      "radiusPercent": 6,
+      "background": "studio_black",
+      "enabled": false
+    },
+    "aspect": "16:9",
+    "mode": "center"
+  },
+  "previewFrame": {
+    "width": 728.875,
+    "height": 409.984375,
+    "radius": "0px"
+  },
+  "output": {
+    "startedAt": "2026-10-08T16:15:19.657Z",
+    "finishedAt": "2026-10-08T16:16:07.915Z",
+    "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nStudio framing controls QA 20261008 r11",
+    "realApi": true,
+    "noMocks": true,
+    "submittedJobId": "viral_fcbfdf2385384b76d8dc131bb860d386b068a9892138b5cc7aee3088bb80e086",
+    "events": [
+      {
+        "path": "/api/media/process",
+        "status": 200,
+        "at": "2026-10-08T16:15:25.577Z"
+      },
+      {
+        "path": "/api/media/status/viral_fcbfdf2385384b76d8dc131bb860d386b068a9892138b5cc7aee3088bb80e086",
+        "status": 200,
+        "at": "2026-10-08T16:15:30.127Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_fcbfdf2385384b76d8dc131bb860d386b068a9892138b5cc7aee3088bb80e086",
+        "status": 200,
+        "at": "2026-10-08T16:15:36.129Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_fcbfdf2385384b76d8dc131bb860d386b068a9892138b5cc7aee3088bb80e086",
+        "status": 200,
+        "at": "2026-10-08T16:15:42.129Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_fcbfdf2385384b76d8dc131bb860d386b068a9892138b5cc7aee3088bb80e086",
+        "status": 200,
+        "at": "2026-10-08T16:15:48.129Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_fcbfdf2385384b76d8dc131bb860d386b068a9892138b5cc7aee3088bb80e086",
+        "status": 200,
+        "at": "2026-10-08T16:15:54.211Z",
+        "jobStatus": "processing"
+      },
+      {
+        "path": "/api/media/status/viral_fcbfdf2385384b76d8dc131bb860d386b068a9892138b5cc7aee3088bb80e086",
+        "status": 200,
+        "at": "2026-10-08T16:16:02.140Z",
+        "jobStatus": "completed"
+      }
+    ],
+    "errors": [],
+    "download": {
+      "suggestedName": "viral_clip_rendered.mp4",
+      "bytes": 2861670,
+      "nativeCompleted": true
+    },
+    "output": "reports/studio-canonical-completion-20261008/frame-controls-r11/compositing/download.mp4",
+    "outputSha256": "d370af32419efe82ec6f7cd71d842bf114294f42ccc24f814aaa71409e9ec515",
+    "technical": {
+      "passed": true,
+      "sha256": "d370af32419efe82ec6f7cd71d842bf114294f42ccc24f814aaa71409e9ec515",
+      "bytes": 2861670,
+      "seconds": 12,
+      "video": {
+        "width": 1280,
+        "height": 720,
+        "codec": "h264",
+        "fps": "30/1",
+        "duration": "11.966667",
+        "pixelFormat": "yuv420p"
+      },
+      "audio": {
+        "codec": "aac",
+        "channels": 2,
+        "sampleRate": "96000",
+        "duration": "12.000000"
+      },
+      "independentFullDecode": true,
+      "contactSheet": "reports/studio-canonical-completion-20261008/frame-controls-r11/compositing/download.mp4.frames.jpg",
+      "scope": "Technical only. Pixel and listening review are separate required evidence."
+    }
+  },
+  "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n+   adjustment_layers: [],\n    color: {\n      brightness: 1.08,\n      contrast: 1.08,\n      exposureStops: 0,\n      gain: 1,\n...\n    color_cube: null,\n+   enabled: true,\n    keyframes: [],\n+   magnetic_beats: {\n+     enabled: true,\n+     markers: []\n+   },\n    main_frame: {\n      background: 'studio_black',\n      border_radius_percent: 6,\n      enabled: false,\n      inset_percent: 2.5,\n...\n    },\n+   reframe: {\n+     aspect: '16:9',\n+     enabled: true,\n+     keyframes: [],\n+     mode: 'center',\n+     timeline_cuts: [\n+       {\n+         mode: 'center',\n+         time: 0\n+       },\n+       {\n+         mode: 'center',\n+         time: 10.714\n+       },\n+       {\n+         mode: 'center',\n+         time: 11.084\n+       }\n+     ],\n+     zoom: 1\n+   },\n    texture: {\n      chromatic_aberration: 0,\n      film_grain: 0,\n      light_leak: 0,\n      vhs_tracking: 0\n    },\n+   version: 1,\n    visualizer: {\n      color: '#72f7ff',\n      enabled: false,\n      intensity: 0.75,\n      mode: 'wave',\n",
+  "finishedAt": "2026-10-08T16:16:07.918Z"
+}

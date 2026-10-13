@@ -1,0 +1,622 @@
+{
+  "video_url": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+  "start_time": 0,
+  "end_time": 20,
+  "overlays": [],
+  "auto_captions": true,
+  "timeline_segments": [
+    {
+      "id": "split-left-914d48ed-9abf-4dff-8d87-8d4a01d75d4f",
+      "source_clip_id": "main",
+      "url": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+      "start_time": 16.08,
+      "end_time": 19.070655555555554,
+      "duration": 2.9906555555555556,
+      "transition_in": null,
+      "transition_out": null,
+      "transition_duration": 0,
+      "audioTrimOffsetStart": 0,
+      "audioTrimOffsetEnd": 0
+    },
+    {
+      "id": "split-right-ef9f6918-fe57-46d8-bb3b-2e265b04cd75",
+      "source_clip_id": "main",
+      "url": "http://127.0.0.1:5007/podcast-source-45s.mp4",
+      "start_time": 19.070655555555554,
+      "end_time": 36.08,
+      "duration": 17.009344444444444,
+      "transition_in": null,
+      "transition_out": null,
+      "transition_duration": 0,
+      "audioTrimOffsetStart": 0,
+      "audioTrimOffsetEnd": 0
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "bold_pop",
+  "caption_position": "bottom_center",
+  "caption_scale": 1,
+  "caption_text_override": null,
+  "caption_segments": [
+    {
+      "id": "2-cue-1-timeline-1",
+      "start_time": 0,
+      "end_time": 2.9906555555555556,
+      "text": "utshwala ee yonke into yam utshwa",
+      "speaker": "unknown",
+      "speaker_label": "Speaker needs review",
+      "language": "und",
+      "language_label": "Language needs review",
+      "language_confidence": 0,
+      "review_required": true,
+      "text_review_required": true,
+      "text_reviewed": false,
+      "translated_to_english": false,
+      "caption_placement": "auto",
+      "caption_icon": "auto",
+      "caption_x": 50,
+      "caption_y": 82
+    },
+    {
+      "id": "2-cue-1-timeline-2",
+      "start_time": 2.9906555555555556,
+      "end_time": 3.400000000000002,
+      "text": "utshwala ee yonke into yam utshwa",
+      "speaker": "unknown",
+      "speaker_label": "Speaker needs review",
+      "language": "und",
+      "language_label": "Language needs review",
+      "language_confidence": 0,
+      "review_required": true,
+      "text_review_required": true,
+      "text_reviewed": false,
+      "translated_to_english": false,
+      "caption_placement": "auto",
+      "caption_icon": "auto",
+      "caption_x": 50,
+      "caption_y": 82
+    },
+    {
+      "id": "2-cue-2-timeline-2",
+      "start_time": 3.400000000000002,
+      "end_time": 6.360000000000003,
+      "text": "eewe iwayini ya ya i drink i",
+      "speaker": "unknown",
+      "speaker_label": "Speaker needs review",
+      "language": "und",
+      "language_label": "Language needs review",
+      "language_confidence": 0,
+      "review_required": true,
+      "text_review_required": true,
+      "text_reviewed": false,
+      "translated_to_english": false,
+      "caption_placement": "auto",
+      "caption_icon": "auto",
+      "caption_x": 50,
+      "caption_y": 82
+    },
+    {
+      "id": "2-cue-3-timeline-2",
+      "start_time": 6.360000000000003,
+      "end_time": 9.64,
+      "text": "think so ya iwayini four streets ya",
+      "speaker": "unknown",
+      "speaker_label": "Speaker needs review",
+      "language": "und",
+      "language_label": "Language needs review",
+      "language_confidence": 0,
+      "review_required": true,
+      "text_review_required": true,
+      "text_reviewed": false,
+      "translated_to_english": false,
+      "caption_placement": "auto",
+      "caption_icon": "auto",
+      "caption_x": 50,
+      "caption_y": 82
+    },
+    {
+      "id": "2-cue-4-timeline-2",
+      "start_time": 9.64,
+      "end_time": 13.840000000000003,
+      "text": "i give akutshayiwa kuthiwa four streets and",
+      "speaker": "unknown",
+      "speaker_label": "Speaker needs review",
+      "language": "und",
+      "language_label": "Language needs review",
+      "language_confidence": 0,
+      "review_required": true,
+      "text_review_required": true,
+      "text_reviewed": false,
+      "translated_to_english": false,
+      "caption_placement": "auto",
+      "caption_icon": "auto",
+      "caption_x": 50,
+      "caption_y": 82
+    },
+    {
+      "id": "2-cue-5-timeline-2",
+      "start_time": 13.840000000000003,
+      "end_time": 17.060000000000002,
+      "text": "ke ngake apparently kuthiwa bebesephilile isixo",
+      "speaker": "unknown",
+      "speaker_label": "Speaker needs review",
+      "language": "und",
+      "language_label": "Language needs review",
+      "language_confidence": 0,
+      "review_required": true,
+      "text_review_required": true,
+      "text_reviewed": false,
+      "translated_to_english": false,
+      "caption_placement": "auto",
+      "caption_icon": "auto",
+      "caption_x": 50,
+      "caption_y": 82
+    },
+    {
+      "id": "2-cue-6-timeline-2",
+      "start_time": 17.060000000000002,
+      "end_time": 19.96,
+      "text": "uba ajongile ee uba yeyi iwayini bale",
+      "speaker": "unknown",
+      "speaker_label": "Speaker needs review",
+      "language": "und",
+      "language_label": "Language needs review",
+      "language_confidence": 0,
+      "review_required": true,
+      "text_review_required": true,
+      "text_reviewed": false,
+      "translated_to_english": false,
+      "caption_placement": "auto",
+      "caption_icon": "auto",
+      "caption_x": 50,
+      "caption_y": 82
+    },
+    {
+      "id": "2-cue-7-timeline-2",
+      "start_time": 19.96,
+      "end_time": 20,
+      "text": "eyi guys yekani iwayini yekani",
+      "speaker": "unknown",
+      "speaker_label": "Speaker needs review",
+      "language": "und",
+      "language_label": "Language needs review",
+      "language_confidence": 0,
+      "review_required": true,
+      "text_review_required": true,
+      "text_reviewed": false,
+      "translated_to_english": false,
+      "caption_placement": "auto",
+      "caption_icon": "auto",
+      "caption_x": 50,
+      "caption_y": 82
+    }
+  ],
+  "caption_review_copy": true,
+  "translate_captions_to_english": false,
+  "preview_speed": 1,
+  "pacing_level": "balanced",
+  "creative_intent": "energy",
+  "studio_plan": null,
+  "professional_cleanup": false,
+  "creative_plan": {
+    "version": 1,
+    "enabled": false,
+    "intensity": "bold",
+    "fallback": "clean",
+    "effects": []
+  },
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "color_cube": null,
+    "adjustment_layers": [],
+    "main_frame": {
+      "enabled": true,
+      "shape": "round",
+      "inset_percent": 2.5,
+      "border_radius_percent": 6,
+      "background": "studio_black"
+    },
+    "color": {
+      "preset": null,
+      "precisionGrade": false,
+      "exposureStops": 0,
+      "lift": 0,
+      "gamma": 1,
+      "gain": 1,
+      "tint": 0,
+      "brightness": 1,
+      "contrast": 1,
+      "saturation": 1,
+      "temperature": 0,
+      "sharpness": 0,
+      "vignette": 0
+    },
+    "motion": {
+      "zoom": 1,
+      "zoom_anchor": "center",
+      "base_scale": 1,
+      "scale_keyframes": [],
+      "base_transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "crop_x": 0,
+        "crop_y": 0
+      },
+      "keyframes": []
+    },
+    "texture": {
+      "film_grain": 0,
+      "chromatic_aberration": 0,
+      "vhs_tracking": 0,
+      "light_leak": 0
+    },
+    "visualizer": {
+      "enabled": false,
+      "mode": "wave",
+      "color": "#72f7ff",
+      "intensity": 0.75,
+      "position": "bottom",
+      "source": "original_speech"
+    },
+    "keyframes": [],
+    "magnetic_beats": {
+      "enabled": true,
+      "markers": []
+    },
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "speaker_track",
+      "zoom": 1,
+      "keyframes": []
+    }
+  },
+  "audio_restoration": {
+    "enabled": true,
+    "preset": "natural",
+    "voiceIsolation": false,
+    "denoise": 22,
+    "deEsser": 18,
+    "humFrequency": 50,
+    "compressor": 35,
+    "limiter": -1,
+    "loudness": -14,
+    "eq": {
+      "low": 0,
+      "mid": 0,
+      "high": 0
+    }
+  },
+  "audio_automation": {
+    "originalAudio": [],
+    "masterPodcast": [],
+    "voiceover": [],
+    "music": [],
+    "broll": [],
+    "sfx": []
+  },
+  "audio_track_states": {
+    "video": {
+      "visible": true,
+      "locked": false,
+      "muted": false,
+      "solo": false
+    },
+    "adjustment": {
+      "visible": true,
+      "locked": false,
+      "muted": false,
+      "solo": false
+    },
+    "graphics": {
+      "visible": true,
+      "locked": false,
+      "muted": false,
+      "solo": false
+    },
+    "broll": {
+      "visible": true,
+      "locked": false,
+      "muted": false,
+      "solo": false
+    },
+    "captions": {
+      "visible": true,
+      "locked": false,
+      "muted": false,
+      "solo": false
+    },
+    "originalAudio": {
+      "visible": true,
+      "locked": false,
+      "muted": false,
+      "solo": false
+    },
+    "voiceover": {
+      "visible": true,
+      "locked": false,
+      "muted": false,
+      "solo": false
+    },
+    "music": {
+      "visible": true,
+      "locked": false,
+      "muted": false,
+      "solo": false
+    },
+    "sfx": {
+      "visible": true,
+      "locked": false,
+      "muted": false,
+      "solo": false
+    }
+  },
+  "editor_timeline": {
+    "track_states": {
+      "video": {
+        "visible": true,
+        "locked": false,
+        "muted": false,
+        "solo": false
+      },
+      "adjustment": {
+        "visible": true,
+        "locked": false,
+        "muted": false,
+        "solo": false
+      },
+      "graphics": {
+        "visible": true,
+        "locked": false,
+        "muted": false,
+        "solo": false
+      },
+      "broll": {
+        "visible": true,
+        "locked": false,
+        "muted": false,
+        "solo": false
+      },
+      "captions": {
+        "visible": true,
+        "locked": false,
+        "muted": false,
+        "solo": false
+      },
+      "originalAudio": {
+        "visible": true,
+        "locked": false,
+        "muted": false,
+        "solo": false
+      },
+      "voiceover": {
+        "visible": true,
+        "locked": false,
+        "muted": false,
+        "solo": false
+      },
+      "music": {
+        "visible": true,
+        "locked": false,
+        "muted": false,
+        "solo": false
+      },
+      "sfx": {
+        "visible": true,
+        "locked": false,
+        "muted": false,
+        "solo": false
+      }
+    },
+    "edit_tool": "select",
+    "snapping": true,
+    "linked_selection": true,
+    "ripple_mode": false,
+    "motion_keyframes": [],
+    "audio_keyframes": {
+      "originalAudio": [],
+      "masterPodcast": [],
+      "voiceover": [],
+      "music": [],
+      "broll": [],
+      "sfx": []
+    },
+    "speed_keyframes": [],
+    "adjustment_layers": [],
+    "compound_clips": [],
+    "voiceovers": []
+  },
+  "composition_plan": {
+    "version": 1,
+    "coordinate_space": "canvas_percent",
+    "preview_timebase": "output_timeline_seconds",
+    "layers": [
+      {
+        "id": "main-video",
+        "name": "Main video",
+        "type": "video",
+        "base_transform": {
+          "x": 50,
+          "y": 50,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "crop_x": 0,
+          "crop_y": 0
+        },
+        "anchor_x": 50,
+        "anchor_y": 50,
+        "effects": {
+          "blur": 0,
+          "glow": {
+            "enabled": false,
+            "color": "#8b5cf6",
+            "radius": 0,
+            "intensity": 0
+          },
+          "shadow": {
+            "enabled": false,
+            "color": "#000000",
+            "blur": 0,
+            "opacity": 0,
+            "x": 0,
+            "y": 0
+          },
+          "motion_blur": {
+            "enabled": false,
+            "samples": 1,
+            "shutter": 0
+          }
+        },
+        "motion_keyframes": []
+      }
+    ]
+  },
+  "speed_segments": [
+    {
+      "id": "speed-1",
+      "start_time": 0,
+      "end_time": 20,
+      "rate": 1,
+      "pitch_preserved": true
+    }
+  ],
+  "smart_crop": true,
+  "smart_crop_mode": "speaker_track",
+  "visual_enhance": false,
+  "silence_removal": false,
+  "silence_threshold_db": -35,
+  "min_silence_duration": 0.75,
+  "remove_watermark": false,
+  "watermark_mode": "adaptive",
+  "watermark_regions": [],
+  "brand_watermark": true,
+  "watermark_text": "AutoPromote · Viral Clip Studio",
+  "brand_watermark_variant": "studio",
+  "brand_watermark_schedule": [
+    {
+      "startTime": 0,
+      "endTime": 3.75,
+      "position": "top_left",
+      "left": 6,
+      "top": 7,
+      "width": 28,
+      "height": 8
+    },
+    {
+      "startTime": 3.75,
+      "endTime": 7.5,
+      "position": "top_right",
+      "left": 66,
+      "top": 7,
+      "width": 28,
+      "height": 8
+    },
+    {
+      "startTime": 7.5,
+      "endTime": 11.25,
+      "position": "middle_left",
+      "left": 6,
+      "top": 45,
+      "width": 28,
+      "height": 8
+    },
+    {
+      "startTime": 11.25,
+      "endTime": 15,
+      "position": "middle_right",
+      "left": 66,
+      "top": 45,
+      "width": 28,
+      "height": 8
+    },
+    {
+      "startTime": 15,
+      "endTime": 18.75,
+      "position": "top_left",
+      "left": 6,
+      "top": 7,
+      "width": 28,
+      "height": 8
+    },
+    {
+      "startTime": 18.75,
+      "endTime": 20,
+      "position": "top_right",
+      "left": 66,
+      "top": 7,
+      "width": 28,
+      "height": 8
+    }
+  ],
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": "30",
+    "codec": "h264",
+    "quality": "high",
+    "videoBitrate": "auto",
+    "targetFileSizeMb": "",
+    "audioCodec": "aac",
+    "audioBitrate": "192",
+    "colorSpace": "rec709"
+  },
+  "add_hook": false,
+  "hook_text": "THIS CHANGES FAST",
+  "hook_intro_seconds": 3,
+  "hook_template": "blur_reveal",
+  "hook_start_time": 0,
+  "hook_end_time": 3,
+  "hook_source_start_time": 19.870655555555555,
+  "hook_source_end_time": 22.870655555555555,
+  "hook_blur_background": true,
+  "hook_dark_overlay": true,
+  "hook_freeze_frame": false,
+  "hook_zoom_scale": 1.08,
+  "hook_text_animation": "slide-up",
+  "add_music": false,
+  "music_url": null,
+  "music_name": null,
+  "music_selection": "upbeat_pop.mp3",
+  "is_search": false,
+  "safe_search": true,
+  "music_volume": 0.15,
+  "music_ducking": true,
+  "music_ducking_strength": 0.35,
+  "music_ducking_mode": "speech",
+  "music_fade_in": 0.5,
+  "music_fade_out": 0.5,
+  "music_loop": true,
+  "sound_effects": [],
+  "audio_remix": {
+    "version": 1,
+    "enabled": false,
+    "preset": "slowed_reverb",
+    "speed": 0.82,
+    "pitch_semitones": -3,
+    "bass_db": 8,
+    "clarity_db": 2,
+    "air_db": 1,
+    "reverb_mix": 0.68,
+    "intensity": 0.75,
+    "keep_pitch": false,
+    "content_type": "auto",
+    "target": "master",
+    "output_gain_db": 0,
+    "level_match": true,
+    "quality": "studio"
+  },
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "threeDGraphics": [],
+  "mute_audio": false,
+  "export_destination": "general"
+}

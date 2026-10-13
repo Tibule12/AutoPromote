@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-08T06:44:49.834720+00:00",
+  "realAuth": true,
+  "mocksQualifiedAsEndToEnd": false,
+  "headlessBrowser": true,
+  "audioMuted": true,
+  "nvidiaInstanceState": "STOPPED",
+  "gpuJobsThisContinuation": 4,
+  "cpuExportsThisContinuation": 6,
+  "regressionTests": {
+    "captionStylesAndPayload": 20,
+    "renderRecovery": 17,
+    "componentRegressions": 5,
+    "sourceCoordinateProjection": 3,
+    "initialHydration": 1,
+    "realFFmpegReviewStamp": 1,
+    "ownedPlaybackIdentity": 7
+  },
+  "componentSuiteLimit": "Only selected regression cases ran; no claim that all 99 component tests passed. Mocked component tests are implementation evidence, not real user capability PASS.",
+  "audioLimit": "No new human listening acceptance. Fresh 3s subject preview is byte-identical to the exact previously accepted preview; new final exports have technical audio checks only.",
+  "controlsAudit": "14 existing tools and three viewports; field reachability, not every field output correctness.",
+  "gpuOutputsThisContinuation": 3,
+  "additionalRecoveryRetestExecutions": 2
+}

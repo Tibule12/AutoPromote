@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "artifactSha256": "8e11ffd36c9b94c68cc6352030b437ede2841f3eb687f8619f7de0ab6b5901b8",
+  "reviewer": "Codex visual inspection of sixteen decoded time-ordered frames",
+  "reason": "The full-video input preserves the connected hull and sail change, but low-strength generation retains flat synthetic water, the workbench disk and toy-like materials. It does not meet the cinematic realism or premium marketing requirement.",
+  "evidence": "video-refinement-review-v13.jpg",
+  "evidenceSha256": "d2b7578b0356b45355cf34f9e2032562e88f3a5af1dcf346f7391df3f0a83bdb",
+  "nextCorrection": "Test stronger regeneration while preserving the complete motion guide; qualify surfaces and continuity independently."
+}

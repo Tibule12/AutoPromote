@@ -1,0 +1,35 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "cascade",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": {
+    "path": "source-brief.txt",
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c"
+  },
+  "prompt": "Fix the timing. Lose the sound. Fix the sound. Break the render.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 1.04,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/film/assets/narration/cascade.wav",
+    "sha256": "983858a242fbac92dc1173689057f0882a5fbb715d3d533703e9043a4d4796c4",
+    "duration": 4.55,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cpu",
+  "gpu": null,
+  "phonemes": [
+    "f\u02c8\u026aks \u00f0\u0259 t\u02c8Im\u026a\u014b. l\u02c8uz \u00f0\u0259 s\u02c8Wnd. f\u02c8\u026aks \u00f0\u0259 s\u02c8Wnd. b\u0279\u02c8Ak \u00f0\u0259 \u0279\u02c8\u025bnd\u0259\u0279."
+  ],
+  "seconds": 1.7966092390000767,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

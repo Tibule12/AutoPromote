@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-08T13:15:00Z",
+  "attemptedAction": "brev start autopromote-l40s-staging",
+  "exitCode": 1,
+  "providerMessage": "there was issues with your credits You have run out of credits visit the settings page to purchase more",
+  "result": "No VM started; CPU fallback used only for final edit/render. No further paid GPU job queued."
+}

@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "failure": "blocked-autoplay",
+      "status": "PASS",
+      "state": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "28",
+        "drawCalls": "37",
+        "time": "7.866",
+        "camera": "0.000,0.320,10.818",
+        "speaker": "host",
+        "videoTime": "0.000",
+        "videoFrames": "0",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "0",
+        "previewSource": "poster",
+        "cutCount": "8",
+        "captionLetters": "0",
+        "selected": "false",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "true"
+      },
+      "posterRetained": true,
+      "sourcesReleased": true,
+      "exceptions": []
+    },
+    {
+      "failure": "invalid-media",
+      "status": "PASS",
+      "state": {
+        "engine": "three.js r186",
+        "meshCount": "66",
+        "renderCount": "30",
+        "drawCalls": "30",
+        "time": "8.250",
+        "camera": "0.000,0.320,10.818",
+        "speaker": "host",
+        "videoTime": "0.000",
+        "videoFrames": "0",
+        "videoPaused": "true",
+        "videoDecoders": "1",
+        "videoSurfaces": "0",
+        "previewSource": "poster",
+        "cutCount": "8",
+        "captionLetters": "0",
+        "selected": "false",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "true"
+      },
+      "posterRetained": true,
+      "sourcesReleased": true,
+      "exceptions": []
+    }
+  ]
+}

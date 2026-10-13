@@ -1,0 +1,73 @@
+{
+  "status": "PRIVATE_SCENE_COMPARISON_NOT_COMPLETE_FILM",
+  "directionFile": "scene-direction.json",
+  "assets": [
+    {
+      "assetId": "yacht-720",
+      "type": "video",
+      "beatId": "vessel",
+      "path": "assets/yacht/video.mp4",
+      "receipt": "assets/yacht/receipt.json",
+      "review": "yacht-review/creative-verdict.json",
+      "reusableArtifacts": [
+        {
+          "role": "native_reference_image",
+          "path": "assets/yacht-reference.png",
+          "sha256": "2ee92584176de8e91500a8ce4ddef1217f09b063c5f633eed3578c8a6e49297b"
+        }
+      ]
+    },
+    {
+      "assetId": "helm-response",
+      "type": "video",
+      "beatId": "response",
+      "path": "assets/helm/video.mp4",
+      "receipt": "assets/helm/receipt.json",
+      "review": "assets/helm/review.json"
+    },
+    {
+      "assetId": "sea-bed",
+      "type": "audio",
+      "beatId": "vessel",
+      "audioRole": "sfx",
+      "path": "audio/sea-bed-safe.wav",
+      "receipt": "audio/sea-bed-safe.receipt.json",
+      "review": "audio/sea-bed-safe.review.json"
+    }
+  ],
+  "output": {
+    "outputId": "private-real-world-scene",
+    "aspect": "16:9",
+    "purpose": "Private photographic person/yacht/sea scene study. Pending complete-film continuity, transformation, sound listening and creative review.",
+    "sequence": [
+      {
+        "assetId": "yacht-720",
+        "start": 0,
+        "duration": 1.5,
+        "reason": "Establish moving vessel, hull contact and retained stern crew."
+      },
+      {
+        "assetId": "helm-response",
+        "start": 0,
+        "duration": 1.5,
+        "reason": "Show the purposeful gaze while preserving both real hand contacts; cut before orange overhead fabric."
+      },
+      {
+        "assetId": "yacht-720",
+        "start": 1.5,
+        "duration": 0.75,
+        "reason": "Return to continuing physical motion and a clean horizon."
+      }
+    ],
+    "audioCues": [
+      {
+        "assetId": "sea-bed",
+        "kind": "sfx",
+        "startTime": 0,
+        "trimStart": 0,
+        "duration": 3.75,
+        "volume": 0.7
+      }
+    ]
+  }
+}

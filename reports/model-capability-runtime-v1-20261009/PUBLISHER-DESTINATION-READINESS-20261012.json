@@ -1,0 +1,64 @@
+{
+  "checkedAt": "2026-10-12T20:16:05.962Z",
+  "responses": [
+    {
+      "path": "/api/youtube/status",
+      "status": 200,
+      "connected": true,
+      "simulated": false,
+      "errorCode": null,
+      "pageCount": 0,
+      "metaPageCount": 0,
+      "hasIg": false,
+      "hasRedditUsername": false,
+      "diagnosticCode": null
+    }
+  ],
+  "alerts": [
+    "No Facebook Pages connected. Please connect a page in settings."
+  ],
+  "rawSummary": {
+    "youtube": {
+      "simulated": false,
+      "topPages": 0,
+      "metaPages": 0,
+      "hasRedditUsername": false,
+      "hasIg": false
+    },
+    "facebook": {
+      "simulated": false,
+      "topPages": 1,
+      "metaPages": 0,
+      "hasRedditUsername": false,
+      "hasIg": true
+    },
+    "instagram": {
+      "simulated": false,
+      "topPages": 1,
+      "metaPages": 0,
+      "hasRedditUsername": false,
+      "hasIg": true
+    },
+    "tiktok": {
+      "simulated": false,
+      "topPages": 0,
+      "metaPages": 0,
+      "hasRedditUsername": false,
+      "hasIg": false
+    },
+    "reddit": {
+      "simulated": false,
+      "topPages": 0,
+      "metaPages": 0,
+      "hasRedditUsername": false,
+      "hasIg": false
+    },
+    "linkedin": {
+      "simulated": false,
+      "topPages": 0,
+      "metaPages": 0,
+      "hasRedditUsername": false,
+      "hasIg": false
+    }
+  }
+}

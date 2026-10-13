@@ -1,0 +1,32 @@
+[
+  {
+    "deliveryFilter": "fps=60",
+    "streams": [
+      {
+        "avg_frame_rate": "60/1",
+        "duration": "5.966667",
+        "nb_frames": "358"
+      }
+    ]
+  },
+  {
+    "deliveryFilter": "fps=60:eof_action=pass",
+    "streams": [
+      {
+        "avg_frame_rate": "60/1",
+        "duration": "5.966667",
+        "nb_frames": "358"
+      }
+    ]
+  },
+  {
+    "deliveryFilter": "tpad=stop_mode=clone:stop_duration=0.033333333,fps=60",
+    "streams": [
+      {
+        "avg_frame_rate": "60/1",
+        "duration": "6.000000",
+        "nb_frames": "360"
+      }
+    ]
+  }
+]

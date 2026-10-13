@@ -1,0 +1,20 @@
+{
+  "status": "NATIVE_NVENC_DELIVERY_60FPS_PASS_CAPTION_CLOCK_SUBSET_PASS",
+  "headless": true,
+  "realAuth": true,
+  "mocked": false,
+  "encoder": "Lavc60.31.102 h264_nvenc",
+  "gpu": "NVIDIA L40S",
+  "durationSeconds": 6,
+  "fps": "60/1",
+  "outputSha256": "075953789836bab65d725b5cd8d791d86c56b14b5454fe92612da95b3e3623e4",
+  "sourceDocSha256": "44f6292ed2b7c691bc7391dc61cf49094914453a3bbce2c855d1bc97700af501",
+  "nativeDownloadCompleted": true,
+  "fullDecode": true,
+  "captionSamples": 13,
+  "fadeClockRepairEvidence": "../paired-speed-2x-r2/clock-retest-review.json",
+  "visualReviewPending": false,
+  "creativeApproved": false,
+  "r3FailureClassification": "Harness helper reset 60fps to 30fps before submission; actual Studio obeyed 30fps. Fixed helper to preserve expected fps and independently probe decoded output. Not a product defect.",
+  "visualInspection": "Downloaded NVENC final frames inspected at output1.55/4.45: level full speaker, retained title and reviewed caption words; matching repaired half-opacity/one-third fade clock. Whole raster, broad animation, full audio/listening remain unqualified."
+}

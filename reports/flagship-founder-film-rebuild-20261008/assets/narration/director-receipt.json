@@ -1,0 +1,35 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "director",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": {
+    "path": "source-brief.txt",
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c"
+  },
+  "prompt": "What if the system could understand the story? Create the missing shot. Find the cut. Build the sound.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 1.04,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/film/assets/narration/director.wav",
+    "sha256": "8c69f9c77b5fd0b8f8944312f399a5aef1bf6770a22059695c0ba727248a1117",
+    "duration": 6.1,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cpu",
+  "gpu": null,
+  "phonemes": [
+    "w\u02cc\u028ct \u026af \u00f0\u0259 s\u02c8\u026ast\u0259m k\u028ad \u02cc\u028cnd\u0259\u0279st\u02c8\u00e6nd \u00f0\u0259 st\u02c8\u0254\u0279i? k\u0279i\u02c8At \u00f0\u0259 m\u02c8\u026as\u026a\u014b \u0283\u02c8\u0251t. f\u02c8Ind \u00f0\u0259 k\u02c8\u028ct. b\u02c8\u026ald \u00f0\u0259 s\u02c8Wnd."
+  ],
+  "seconds": 2.5717051620000575,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

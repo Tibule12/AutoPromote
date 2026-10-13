@@ -1,0 +1,259 @@
+{
+  "projectId": "viral-project-95a2d346-bb2f-4403-9d8c-8d951f1fc602",
+  "name": "Studio subject speed NVIDIA QA 20261008 r11",
+  "timeline": [
+    {
+      "id": "split-left-d8054a76-68a4-47b6-95bd-cf03185d764d",
+      "storagePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4",
+      "sourceStoragePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4",
+      "startRequest": 0,
+      "endRequest": 3,
+      "sourceClipId": "main",
+      "name": "podcast-12s.mp4",
+      "duration": 12
+    },
+    {
+      "id": "split-right-a9e3ee27-80b0-486b-bf26-7ff7bf61e76d",
+      "storagePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4",
+      "sourceStoragePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4",
+      "startRequest": 3,
+      "endRequest": 12,
+      "sourceClipId": "main",
+      "name": "podcast-12s.mp4",
+      "duration": 12
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title-d3a6315f-a29b-4a2f-bf7a-caab55f45510",
+      "type": "text",
+      "textAlign": "center",
+      "bg": "transparent",
+      "shadow": "strong",
+      "strokeWidth": 2,
+      "coverMainVideo": false,
+      "muteMainAudio": false,
+      "useOverlayAudio": false,
+      "overlayAudioVolume": 0.7,
+      "audioDucking": false,
+      "audioDuckingStrength": 0.35,
+      "isRainbow": false,
+      "text": "Shared project state",
+      "fontFamily": "Inter",
+      "fontWeight": 900,
+      "color": "#ffffff",
+      "opacity": 1,
+      "x": 72,
+      "y": 18,
+      "rotation": 0,
+      "scale": 1.15,
+      "startTime": 1,
+      "duration": 3,
+      "animation": {
+        "enter": "fade",
+        "exit": "fade",
+        "enterDuration": 0.3,
+        "exitDuration": 0.3
+      },
+      "titlePreset": "headline",
+      "clipId": "main",
+      "mixAudio": false
+    }
+  ],
+  "mainTransform": {
+    "id": "main-video",
+    "name": "Main video",
+    "type": "video",
+    "x": 45,
+    "y": 55,
+    "scale": 1.1,
+    "rotation": 4,
+    "opacity": 1,
+    "cropX": 0,
+    "cropY": 0
+  },
+  "finishFx": {
+    "precisionGrade": true,
+    "exposureStops": 0,
+    "lift": 0,
+    "gamma": 1,
+    "gain": 1,
+    "tint": 0,
+    "preset": null,
+    "brightness": 1.08,
+    "contrast": 1.08,
+    "saturation": 1,
+    "temperature": 0,
+    "sharpness": 0,
+    "vignette": 0,
+    "blur": 0,
+    "blurMode": "edge",
+    "blurStart": -1,
+    "blurEnd": -1,
+    "zoom": 1,
+    "zoomAnchor": "center",
+    "overlayType": "",
+    "overlayOpacity": 0.4,
+    "overlayColor": "#000000",
+    "filmGrain": 0,
+    "chromaticAberration": 0,
+    "vhsTracking": 0,
+    "lightLeak": 0,
+    "letterbox": 0,
+    "fadeIn": 0,
+    "fadeOut": 0
+  },
+  "motionKeyframes": [
+    {
+      "easing": "ease_in_out",
+      "id": "motion-key-155183fa-731e-4529-8faf-9c923efb2ea5",
+      "targetId": "main-video",
+      "property": "x",
+      "value": 45,
+      "time": 3
+    },
+    {
+      "easing": "ease_in_out",
+      "id": "motion-key-70061fc8-cf6a-4275-afeb-1e2ae26cf0e2",
+      "targetId": "main-video",
+      "property": "y",
+      "value": 55,
+      "time": 3
+    },
+    {
+      "easing": "ease_in_out",
+      "id": "motion-key-873b30a6-0cb4-4fe2-a4a2-9c522717576b",
+      "targetId": "main-video",
+      "property": "scale",
+      "value": 1.1,
+      "time": 3
+    },
+    {
+      "easing": "ease_in_out",
+      "id": "motion-key-ffe9b2fd-7ccb-444f-9521-5e6a51070337",
+      "targetId": "main-video",
+      "property": "rotation",
+      "value": 4,
+      "time": 3
+    },
+    {
+      "easing": "ease_in_out",
+      "id": "motion-key-602f4798-7ec4-4a20-acb7-218eedb41ce5",
+      "targetId": "main-video",
+      "property": "opacity",
+      "value": 1,
+      "time": 3
+    },
+    {
+      "easing": "ease_in_out",
+      "id": "motion-key-f160ecb0-7e62-42b8-8d70-57a17ceb6673",
+      "targetId": "main-video",
+      "property": "cropX",
+      "value": 0,
+      "time": 3
+    },
+    {
+      "easing": "ease_in_out",
+      "id": "motion-key-48f6aa64-f44f-4364-9a59-1aafff2e9a2f",
+      "targetId": "main-video",
+      "property": "cropY",
+      "value": 0,
+      "time": 3
+    }
+  ],
+  "subjectVfxScenes": [
+    {
+      "scene": {
+        "version": 1,
+        "id": "subject-vfx-d440cb0d-a514-418c-b15d-9f71cc1c17fb",
+        "sourceId": "main",
+        "sourceStoragePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4",
+        "sourceRange": {
+          "start": 0,
+          "end": 3
+        },
+        "prompt": {
+          "points": [
+            [
+              0.79,
+              0.65
+            ],
+            [
+              0.69,
+              0.28
+            ]
+          ],
+          "labels": [
+            1,
+            1
+          ],
+          "shotPrompts": []
+        },
+        "effects": [
+          {
+            "id": "title",
+            "type": "text_behind",
+            "start": 0,
+            "end": 3,
+            "text": "YOUR STORY",
+            "x": 50,
+            "y": 43,
+            "font_size": 100,
+            "color": "#f5f1ed"
+          },
+          {
+            "id": "subject-layer-51e41828-ad32-4929-a69a-ebc148d9f26b",
+            "type": "background_grade",
+            "start": 0,
+            "end": 3,
+            "exposure": -0.4,
+            "saturation": 0.7,
+            "contrast": 1.05
+          },
+          {
+            "id": "subject-layer-f2bc0158-a61c-409d-b2d3-e4470ee77135",
+            "type": "tracked_callout",
+            "start": 0,
+            "end": 3,
+            "text": "THE STORY",
+            "offset_x": -150,
+            "offset_y": -130,
+            "font_size": 24,
+            "color": "#c1a8ff",
+            "avoid_subject": true
+          },
+          {
+            "id": "subject-layer-9ed7f641-824b-4824-9a62-0abc4878c67c",
+            "type": "depth",
+            "start": 0,
+            "end": 3,
+            "amount": 0.015
+          }
+        ]
+      },
+      "enabled": true,
+      "id": "subject-vfx-d440cb0d-a514-418c-b15d-9f71cc1c17fb",
+      "pending": {
+        "clientRequestId": "subject-render-4c639107-92ab-481a-9db1-5162d66aba79",
+        "revision": "{\"effects\":[{\"color\":\"#f5f1ed\",\"end\":3,\"font_size\":100,\"id\":\"title\",\"start\":0,\"text\":\"YOUR STORY\",\"type\":\"text_behind\",\"x\":50,\"y\":43},{\"contrast\":1.05,\"end\":3,\"exposure\":-0.4,\"id\":\"subject-layer-51e41828-ad32-4929-a69a-ebc148d9f26b\",\"saturation\":0.7,\"start\":0,\"type\":\"background_grade\"},{\"avoid_subject\":true,\"color\":\"#c1a8ff\",\"end\":3,\"font_size\":24,\"id\":\"subject-layer-f2bc0158-a61c-409d-b2d3-e4470ee77135\",\"offset_x\":-150,\"offset_y\":-130,\"start\":0,\"text\":\"THE STORY\",\"type\":\"tracked_callout\"},{\"amount\":0.015,\"end\":3,\"id\":\"subject-layer-9ed7f641-824b-4824-9a62-0abc4878c67c\",\"start\":0,\"type\":\"depth\"}],\"id\":\"subject-vfx-d440cb0d-a514-418c-b15d-9f71cc1c17fb\",\"prompt\":{\"labels\":[1,1],\"points\":[[0.79,0.65],[0.69,0.28]],\"shotPrompts\":[]},\"sourceId\":\"main\",\"sourceRange\":{\"end\":3,\"start\":0},\"sourceStoragePath\":\"uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791450777532_podcast-12s.mp4\",\"version\":1}",
+        "jobId": "b9de374e-cfd5-49d5-9dce-79351b1fe877"
+      }
+    }
+  ],
+  "outputTimeMap": [
+    {
+      "programmeRange": {
+        "space": "programme",
+        "startTick": 0,
+        "endTick": 1080000
+      },
+      "outputRange": {
+        "space": "output",
+        "startTick": 0,
+        "endTick": 540000
+      },
+      "rateNumerator": 2000000,
+      "rateDenominator": 1000000
+    }
+  ]
+}

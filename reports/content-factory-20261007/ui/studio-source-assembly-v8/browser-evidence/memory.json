@@ -1,0 +1,224 @@
+{
+  "identity": "9277fe5a498f1e6bdc8638e81fd08f85febe0af359ed7a1e1434ac4a732da9c1",
+  "actions": [
+    {
+      "signature": "da5b819a6a2d80507d92331b69ca840db7a08dae5e95e3c8563971c4d8c6918f",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Show media"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Hide media"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T08:20:07.047Z",
+      "reason": "Open the observed Show media control",
+      "planner": null,
+      "afterState": "8bbd911a27008e4daf15304d3a68eef4ddcbf1a0d1d17be6ca17c26d3897d6ab"
+    },
+    {
+      "signature": "1a569c26d60b8850678364a1cd98e2ca28c20c43074e1227b68b0366bcab835b",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Paper voyage · generated source assembly"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "value": "1ecb6219b65bd3c3531dd30f64492d7607e5960ca91495cc1ec71123f8e644b6"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T08:20:31.362Z",
+      "reason": "Open the observed Paper voyage · generated source assembly control",
+      "planner": null,
+      "afterState": "10e748eb37efcb57cd26b1ec4d65d65f253beb083af217d237abea685c0f70bc"
+    },
+    {
+      "signature": "9c58b4edced2411a10ae0c690ef3dfa47d79c24448386f7aac9c10c0972f6efc",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Open saved project (2)"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "value": "e4926eaffb710428a254b7b92a8fdfae8018fb98b16390a7f4ae5e9dd1fd5275"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T08:20:54.306Z",
+      "reason": "Open the observed Open saved project control",
+      "planner": null,
+      "afterState": "ff720ab37af84f7dc6448d59755ec134235250fd12d46adeb3107e4cf29b0c77"
+    },
+    {
+      "signature": "6af67e5f1fd594f7356559789e168c7cd2d3c7ed416d8d57d4018b557a6a3fcc",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Paper voyage · generated source assembly 10/7/2026, 10:19:52 AM"
+      },
+      "expect": [
+        {
+          "type": "text_visible",
+          "value": "Ocean voyage · macro take"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T08:21:20.622Z",
+      "reason": "Open the original source assembly from the observed project library",
+      "planner": null,
+      "afterState": "a1f41c7152122fe6337be35ebf9273bb8d2a16a2d6e11591f1cd53bd51415937"
+    },
+    {
+      "signature": "57196a026be154be476c2dbe75bfd76c73ec6e069f59b0edcfdd5441af610676",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Hide media"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Show media"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T08:21:43.162Z",
+      "reason": "Open the observed Hide media control",
+      "planner": null,
+      "afterState": "3fe05e80ebe0bef686684fac6fcdad6a932b76334a0159da1137e5719f630fb1"
+    },
+    {
+      "signature": "fdc29c5b57a468c3eb8e8cab7c68a06d527a0b398b45095881a6a8f2544c888a",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Pause edited preview"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Play edited preview"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T08:22:14.290Z",
+      "reason": "Open the observed Pause edited preview control",
+      "planner": null,
+      "afterState": "890a071f81b315fb490ddc387af07311cb7fd2ff9fcf50a5a775ebd2024f790f"
+    },
+    {
+      "signature": "7d1ad4f80c4dae972beb3a52a076973284da3776eae12ffe47cfbba4029b94db",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Play edited preview"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Pause edited preview"
+        }
+      ],
+      "status": "uncertain",
+      "at": "2026-10-07T08:22:49.646Z",
+      "reason": "Open the observed Play edited preview control",
+      "planner": null,
+      "error": "Action outcome was not verified; inspect state without resubmitting"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:19:59.009Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:20:18.759Z"
+    },
+    {
+      "id": "observation-3",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:20:25.809Z"
+    },
+    {
+      "id": "observation-4",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:20:41.196Z"
+    },
+    {
+      "id": "observation-5",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:20:48.555Z"
+    },
+    {
+      "id": "observation-6",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:21:06.790Z"
+    },
+    {
+      "id": "observation-7",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:21:12.635Z"
+    },
+    {
+      "id": "observation-8",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:21:35.890Z"
+    },
+    {
+      "id": "observation-9",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:21:56.637Z"
+    },
+    {
+      "id": "observation-10",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:22:06.843Z"
+    },
+    {
+      "id": "observation-11",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:22:31.181Z"
+    },
+    {
+      "id": "observation-12",
+      "url": "http://127.0.0.1:5008/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T08:22:44.189Z"
+    }
+  ],
+  "status": "running"
+}

@@ -1,0 +1,11 @@
+{
+  "sourceSha256": "0d06c67776806f51482698216b2ae3cd761761395072196464ffab0351ee4792",
+  "modelPath": "/models",
+  "device": "cpu",
+  "computeType": "int8",
+  "vadFilter": true,
+  "segments": [],
+  "text": "",
+  "seconds": 0.8896927370005869,
+  "limitation": "ASR verifies recoverable speech in actual audio; it is not a human listening or emotional-quality judgment."
+}

@@ -1,0 +1,13 @@
+{
+  "assetId": "ocean-voyage",
+  "status": "rejected_for_assigned_role",
+  "reviewer": "Codex visual inspection",
+  "reviewType": "machine_visual_review",
+  "evidence": "generated/ocean-voyage-review.jpg",
+  "evidenceSha256": "110ed6bdaedae7bf2a1a1847066e0e45591859ad3364ec965c0ee664c32e56d6",
+  "reason": "The required wide establishing shot is actually another close view. The boat fills most of the frame and its sail leaves the upper edge, so the cut does not expand the scale of the world. Five seconds here repeats the previous close-up without advancing the story.",
+  "revisionInstructions": "Use a high, distant aerial establishing view. The complete boat must occupy no more than 15 percent of the image, with the entire sail visible. Show the immense ocean and distant warm horizon. Avoid close-up camera moves.",
+  "reuse": "Potential short macro insert, not accepted as the voyage establishing shot.",
+  "sourceSha256": "ac204d63725f76dd54194550e7037a3317275d1f91a67cd43cae0ddfa30097fa",
+  "at": "2026-10-07T06:20:14.528196+00:00"
+}

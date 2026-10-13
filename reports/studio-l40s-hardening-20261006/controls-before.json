@@ -1,0 +1,354 @@
+[
+  {
+    "className": "",
+    "text": "Quick",
+    "height": 28,
+    "width": 122,
+    "fontSize": "8.64px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "is-active",
+    "text": "Creator",
+    "height": 28,
+    "width": 122,
+    "fontSize": "8.64px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "",
+    "text": "Signature",
+    "height": 28,
+    "width": 122,
+    "fontSize": "8.64px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "tool-btn tool-btn-compact",
+    "text": "↶ Undo",
+    "height": 43,
+    "width": 78.953125,
+    "fontSize": "13.76px",
+    "padding": "10px 12px"
+  },
+  {
+    "className": "tool-btn tool-btn-compact",
+    "text": "↷ Redo",
+    "height": 43,
+    "width": 78.203125,
+    "fontSize": "13.76px",
+    "padding": "10px 12px"
+  },
+  {
+    "className": "close-btn",
+    "text": "×",
+    "height": 37,
+    "width": 37,
+    "fontSize": "19.2px",
+    "padding": "0px"
+  },
+  {
+    "className": "",
+    "text": "✦\nMoments",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "✂\nCut",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "⌁\nHook",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "is-active",
+    "text": "⌗\nReframe",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "CC\nCaptions",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "T\nGraphics",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "◆\nMotion",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "◫\nComposite",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "✺\nCreator FX",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "≋\nPacing",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "▣\nB-roll",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "◐\nColor",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "♫\nSound",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "",
+    "text": "⇧\nExport",
+    "height": 61,
+    "width": 79,
+    "fontSize": "13.3333px",
+    "padding": "8px 4px"
+  },
+  {
+    "className": "creative-director-heading",
+    "text": "AI CREATIVE DIRECTOR\nReturn to story direction\n☷",
+    "height": 24,
+    "width": 352,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "is-active",
+    "text": "9:16\nTikTok · Reels · Shorts",
+    "height": 58,
+    "width": 81.5,
+    "fontSize": "11.52px",
+    "padding": "8px"
+  },
+  {
+    "className": "",
+    "text": "4:5\nInstagram feed",
+    "height": 58,
+    "width": 81.5,
+    "fontSize": "11.52px",
+    "padding": "8px"
+  },
+  {
+    "className": "",
+    "text": "1:1\nSquare social",
+    "height": 58,
+    "width": 81.5,
+    "fontSize": "11.52px",
+    "padding": "8px"
+  },
+  {
+    "className": "",
+    "text": "16:9\nYouTube · landscape",
+    "height": 58,
+    "width": 81.5,
+    "fontSize": "11.52px",
+    "padding": "8px"
+  },
+  {
+    "className": "is-active",
+    "text": "Solo Speaker",
+    "height": 48,
+    "width": 110.65625,
+    "fontSize": "11.52px",
+    "padding": "7px 5px"
+  },
+  {
+    "className": "",
+    "text": "Show Everyone",
+    "height": 48,
+    "width": 110.671875,
+    "fontSize": "11.52px",
+    "padding": "7px 5px"
+  },
+  {
+    "className": "",
+    "text": "Multi-Camera",
+    "height": 48,
+    "width": 110.65625,
+    "fontSize": "11.52px",
+    "padding": "7px 5px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 48,
+    "width": 46.171875,
+    "fontSize": "11.52px",
+    "padding": "5px 8px"
+  },
+  {
+    "className": "is-active",
+    "text": "",
+    "height": 50,
+    "width": 102,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 50,
+    "width": 102,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 50,
+    "width": 102,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "is-active",
+    "text": "",
+    "height": 54,
+    "width": 156.5,
+    "fontSize": "11.52px",
+    "padding": "9px 10px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 54,
+    "width": 156.5,
+    "fontSize": "11.52px",
+    "padding": "9px 10px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 54,
+    "width": 156.5,
+    "fontSize": "11.52px",
+    "padding": "9px 10px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 54,
+    "width": 156.5,
+    "fontSize": "11.52px",
+    "padding": "9px 10px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 54,
+    "width": 156.5,
+    "fontSize": "11.52px",
+    "padding": "9px 10px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "Detect & follow face",
+    "height": 36,
+    "width": 320,
+    "fontSize": "11.52px",
+    "padding": "8px 12px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "Follow existing camera cuts",
+    "height": 36,
+    "width": 320,
+    "fontSize": "11.52px",
+    "padding": "8px 12px"
+  },
+  {
+    "className": "",
+    "text": "+ Add here",
+    "height": 28,
+    "width": 79.40625,
+    "fontSize": "11.52px",
+    "padding": "7px 9px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "👤 Left Speaker",
+    "height": 36,
+    "width": 112.328125,
+    "fontSize": "11.52px",
+    "padding": "8px 12px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "👤 Right Speaker",
+    "height": 36,
+    "width": 120.640625,
+    "fontSize": "11.52px",
+    "padding": "8px 12px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "🔄 Alternate Speakers",
+    "height": 36,
+    "width": 147.109375,
+    "fontSize": "11.52px",
+    "padding": "8px 12px"
+  },
+  {
+    "className": "inspector-primary-action",
+    "text": "▶ Preview 9:16 Framing",
+    "height": 44,
+    "width": 344,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  }
+]

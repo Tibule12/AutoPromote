@@ -1,0 +1,54 @@
+{
+  "startedAt": "2026-10-08T18:45:24.448Z",
+  "projectName": "Studio subject speed NVIDIA QA 20261008 r11",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "graphChanges": 0,
+  "inferenceJobsStarted": 0,
+  "status": "FAIL",
+  "events": [
+    {
+      "route": "/api/media/studio-subject-vfx/b9de374e-cfd5-49d5-9dce-79351b1fe877",
+      "method": "GET"
+    }
+  ],
+  "samples": [
+    {
+      "programmeTime": 0.25,
+      "sourceTime": 0.5,
+      "programmeSource": "subject-vfx"
+    },
+    {
+      "programmeTime": 0.45,
+      "sourceTime": 0.9,
+      "programmeSource": "subject-vfx"
+    },
+    {
+      "programmeTime": 0.75,
+      "sourceTime": 1.5,
+      "programmeSource": "subject-vfx"
+    },
+    {
+      "programmeTime": 1.45,
+      "sourceTime": 2.9,
+      "programmeSource": "subject-vfx"
+    },
+    {
+      "programmeTime": 1.55,
+      "sourceTime": 3.1,
+      "programmeSource": "source"
+    },
+    {
+      "programmeTime": 3.75,
+      "sourceTime": 7.5,
+      "programmeSource": "source"
+    }
+  ],
+  "lastStep": "Captured pre-final programme 3.75s at mapped source 7.5s",
+  "nativeSpeedRestore": "1x then 2x clears completed-file playback; final settings retained",
+  "reviewedProxySha256": "fa90d4e44ab9cffce3c5dd24cc42c2abf5ad2c8b4935435e3875d5edd7496ba0",
+  "error": "STUDIO_RENDER_WORKER_UNAVAILABLE: The render worker is unavailable. Try again once it is online; no credits were charged. (503)",
+  "finishedAt": "2026-10-08T18:47:04.858Z"
+}

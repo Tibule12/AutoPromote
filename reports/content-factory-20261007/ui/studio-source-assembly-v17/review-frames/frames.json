@@ -1,0 +1,35 @@
+{
+  "sourceSha256": "b8642205c018e908c677f5a1d759087131f8a874ac9d03cefbff0851737281b9",
+  "frames": [
+    {
+      "path": "reports/content-factory-20261007/ui/studio-source-assembly-v17/review-frames/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "5d3760a63b56091c462d8585f7ec1715b041871522cba4d8c35b66e4feacb0a5"
+    },
+    {
+      "path": "reports/content-factory-20261007/ui/studio-source-assembly-v17/review-frames/frame-02.png",
+      "timestamp": 0.6,
+      "sha256": "f82f5f3848310edd54cb262ed8c8a686b27c7c7f7cfab6a9d761e840163fd012"
+    },
+    {
+      "path": "reports/content-factory-20261007/ui/studio-source-assembly-v17/review-frames/frame-03.png",
+      "timestamp": 1.2,
+      "sha256": "0d66ca9b3e0d9db83cd65cf7e1cec156a6bcc9ecbeb5c8770810351cc99c19ce"
+    },
+    {
+      "path": "reports/content-factory-20261007/ui/studio-source-assembly-v17/review-frames/frame-04.png",
+      "timestamp": 1.8,
+      "sha256": "5f0b19546f80c7c24d4a9705ba262ad9efeef6737147db7cb7a951e0b6bc5ba7"
+    },
+    {
+      "path": "reports/content-factory-20261007/ui/studio-source-assembly-v17/review-frames/frame-05.png",
+      "timestamp": 2.4,
+      "sha256": "cd5ee47faa5881a57feddc5eab6ca204b4f9e934dd43bb2287e9ddf9b69a2880"
+    },
+    {
+      "path": "reports/content-factory-20261007/ui/studio-source-assembly-v17/review-frames/frame-06.png",
+      "timestamp": 2.92,
+      "sha256": "04c3dd9417e2f74b5fdb84ee3f70227baa5d4e8d08022bf41f09322185cbdee0"
+    }
+  ]
+}

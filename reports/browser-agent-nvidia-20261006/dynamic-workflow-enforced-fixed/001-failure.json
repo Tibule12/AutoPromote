@@ -1,0 +1,115 @@
+{
+  "error": {
+    "code": "UNCERTAIN_OUTCOME",
+    "message": "Action outcome was not verified; inspect state without resubmitting"
+  },
+  "id": "observation-2",
+  "pageId": "page-1",
+  "url": "http://127.0.0.1:44989/",
+  "pages": [
+    {
+      "id": "page-1",
+      "url": "http://127.0.0.1:44989/"
+    }
+  ],
+  "dialog": null,
+  "frames": [
+    {
+      "index": 0,
+      "url": "http://127.0.0.1:44989/",
+      "text": "Local browser operator regression fixture\nPrepare a review copy\n\nOpen the editor, enter a title, choose landscape, and create one draft.\n\nEditing workspace\n\nThe saved source is ready.\n\nContinue to draft",
+      "headings": [
+        "Prepare a review copy",
+        "Editing workspace",
+        "Draft settings"
+      ],
+      "alerts": [],
+      "busy": false,
+      "captcha": false,
+      "scroll": {
+        "x": 0,
+        "y": 0,
+        "height": 900,
+        "viewportHeight": 900
+      },
+      "controls": [
+        {
+          "ref": "observation-2:f0:e0",
+          "role": "button",
+          "name": "Continue to draft",
+          "label": "",
+          "tag": "button",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": null,
+          "inModal": true,
+          "modalName": "Editing workspace",
+          "box": {
+            "x": 526.125,
+            "y": 485.90625,
+            "width": 172.625,
+            "height": 52
+          },
+          "inViewport": true,
+          "occluded": false
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "priorActions": [
+    {
+      "signature": "30efbce975d2c44fe015e583ee0503952c00ef6d4cadaf68b0341c0488b95892",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Open editor"
+      },
+      "expect": [
+        {
+          "type": "url",
+          "value": "http://127.0.0.1:44989/editor/",
+          "pageId": "page-1",
+          "frameIndex": 0,
+          "role": null,
+          "name": null
+        },
+        {
+          "type": "text_visible",
+          "value": "Film title",
+          "pageId": "page-1",
+          "frameIndex": 0,
+          "role": null,
+          "name": null
+        },
+        {
+          "type": "text_visible",
+          "value": "Landscape Format",
+          "pageId": "page-1",
+          "frameIndex": 0,
+          "role": null,
+          "name": null
+        }
+      ],
+      "status": "uncertain",
+      "at": "2026-10-06T19:00:33.868Z",
+      "reason": "Open the editor to start creating a review copy",
+      "planner": {
+        "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+        "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+        "gpu": "NVIDIA L40S",
+        "seconds": 13.418010428999878,
+        "inputTokens": 2153,
+        "outputTokens": 185
+      },
+      "error": "Action outcome was not verified; inspect state without resubmitting"
+    }
+  ]
+}

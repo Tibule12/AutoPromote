@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-09T08:37:17.395Z",
+  "caption37End": 90.22,
+  "sourceASRLastWordEnds": 88.6,
+  "nextSpokenWord": 90.22,
+  "wordingUnchanged": true,
+  "normalUiCoverage": "Audio coverage checked. Confirm the actual words and timing by listening before delivery.",
+  "reason": "Hold completed phrase during source pause; audio activity gate is not proof of missing speech."
+}

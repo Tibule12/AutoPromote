@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-08T20:14:31.419187+00:00",
+  "status": "REPRESENTATIVE_GPU_PREVIEW_VISUAL_AND_AUDIO_IDENTITY_PASS_FINAL_UNQUALIFIED",
+  "jobId": "28775092-1b3b-4739-8a70-53c5abda74e3",
+  "actualNormalStudioPost": true,
+  "initialStatus503Retained": true,
+  "normalCheckSavedRenderRecovery": true,
+  "newInferencePostsDuringRecovery": 0,
+  "gpu": "NVIDIA L40S",
+  "encoder": "h264_nvenc",
+  "frames": 72,
+  "seconds": 3,
+  "effects": [
+    "text_behind",
+    "background_grade",
+    "tracked_callout",
+    "depth",
+    "kinetic_type",
+    "glow",
+    "particles"
+  ],
+  "reviewedFrames": [
+    0.5,
+    2.9
+  ],
+  "visualReview": "Correct original subject, text behind person, readable tracked callout, moving kinetic type, glow and sparse particles; fading text at end. Representative frames only; hair/dense matte/temporal stability not broadly qualified.",
+  "audioIdentity": "Exact decoded PCM equals the retained reviewed four-effect subject proxy; no new listening claim",
+  "finalExportThisSevenEffectProject": "NOT_RUN",
+  "readinessPromotion": false,
+  "creativeApproval": false
+}

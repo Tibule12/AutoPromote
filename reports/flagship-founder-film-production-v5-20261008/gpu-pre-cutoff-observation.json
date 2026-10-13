@@ -1,0 +1,10 @@
+{
+  "observedAt": "2026-10-08T19:59:44.288993+00:00",
+  "exitCode": 0,
+  "reservation": {
+    "computePids": [],
+    "gpuContainers": [
+      "autopromote-studio-qa-vfx"
+    ]
+  }
+}

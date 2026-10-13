@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--name",
+    "autopromote-l40s-film-20261006",
+    "--gpus",
+    "all",
+    "-e",
+    "NVIDIA_DRIVER_CAPABILITIES=compute,utility,video",
+    "-v",
+    "/tmp/autopromote-l40s-film-20261006:/film",
+    "autopromote-l40s-media:20261006",
+    "python3",
+    "/film/render-public-l40s-film.py",
+    "--work",
+    "/film"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 72.7124,
+  "stdout": "L40S master / uploads\nL40S portrait / uploads\nL40S master / studio\nL40S portrait / studio\nL40S master / schedule\nL40S portrait / schedule\nL40S master / analytics\nL40S portrait / analytics\n{\"status\": \"PASS\", \"elapsedSeconds\": 72.2915, \"error\": null}\n",
+  "stderr": ""
+}

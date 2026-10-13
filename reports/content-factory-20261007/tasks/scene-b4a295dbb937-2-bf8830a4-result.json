@@ -1,0 +1,415 @@
+{
+  "fingerprint": "9bbf1b2cd9fb011bbb2b30f1f6757f61d90d0fcdeba751c97092de66c3d2e32f",
+  "result": [
+    {
+      "id": "scene-entities",
+      "value": {
+        "props": [
+          {
+            "name": "same paper boat floats alone",
+            "sourceQuote": "The same paper boat floats alone in the blue water."
+          },
+          {
+            "name": "blue water",
+            "sourceQuote": "The same paper boat floats alone in the blue water."
+          },
+          {
+            "name": "Its folded paper stretches into",
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "name": "canvas; its bow curves into",
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "name": "polished timber",
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "name": "tiny vessel grows into",
+            "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+          },
+          {
+            "name": "full-size mahogany sailing yacht",
+            "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+          },
+          {
+            "name": "sea opens around it",
+            "sourceQuote": "The sea opens around it."
+          }
+        ],
+        "characterDesigns": []
+      },
+      "rawValue": {
+        "props": [
+          {
+            "name": "same paper boat floats alone",
+            "sourceQuote": "The same paper boat floats alone in the blue water."
+          },
+          {
+            "name": "blue water",
+            "sourceQuote": "The same paper boat floats alone in the blue water."
+          },
+          {
+            "name": "Its folded paper stretches into",
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "name": "canvas; its bow curves into",
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "name": "polished timber",
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "name": "tiny vessel grows into",
+            "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+          },
+          {
+            "name": "full-size mahogany sailing yacht",
+            "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+          },
+          {
+            "name": "sea opens around it",
+            "sourceQuote": "The sea opens around it."
+          }
+        ],
+        "characterDesigns": []
+      },
+      "contractRepairs": [],
+      "model": "Qwen/Qwen3-VL-8B-Instruct",
+      "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+      "settings": {
+        "dtype": "bfloat16",
+        "attention": "sdpa",
+        "do_sample": false,
+        "max_tokens": 1600
+      },
+      "evidenceSha256": null,
+      "frameEvidence": [],
+      "seconds": 10.470370273000071,
+      "gpu": "NVIDIA L40S"
+    },
+    {
+      "id": "scene-shots",
+      "value": {
+        "sceneId": "scene_002_ddaf2281",
+        "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+        "summary": "A paper boat transforms into a grand yacht as dawn breaks over the ocean — a visual metaphor for hope rising from memory’s wreckage, witnessed in silence and awe",
+        "story": {
+          "about": "A humble paper boat, abandoned in a workshop, becomes a majestic sailing yacht on the open sea — symbolizing the resurrection of lost dreams through time and perspective",
+          "whyCare": "The viewer cares because the transformation mirrors inner renewal — the quiet power of imagination to resurrect what was broken or forgotten",
+          "hook": "The same paper boat floats alone in the blue water — but it is no longer paper. It is now a full-size mahogany sailing yacht, and the sea opens around it",
+          "beginning": "The scene opens with the paper boat drifting alone in the blue water, its form still recognizable but now imbued with new dimensions",
+          "development": "The camera reveals how its folded paper has become canvas, its bow polished timber — each element evolving into something grander, more enduring",
+          "tension": "The transformation is silent, almost magical — the viewer wonders if this is memory, wish, or reality — and whether the sea will protect or consume it",
+          "payoff": "The yacht sails freely, surrounded by the vast ocean — a visual resolution that suggests rebirth, not just restoration, of what was lost",
+          "ending": "The sea opens around it — no one watches, no one speaks — the yacht exists in perfect solitude, a monument to quiet triumph",
+          "withheld": "The origin of the boat, the identity of its creator, and the nature of the transformation remain unspoken — leaving the mystery of creation and meaning intact",
+          "amplify": [
+            "Emphasize the contrast between the small, fragile paper boat and the immense, polished yacht",
+            "Use slow, sweeping camera movements to mirror the expansion of the vessel",
+            "Let the dawn light wash over the yacht, highlighting its new materiality and scale"
+          ],
+          "remove": [
+            "Any dialogue or narration — the transformation must be felt, not explained",
+            "Any visual clutter — keep the frame focused solely on the boat and the sea",
+            "Any sense of urgency or conflict — the tone must be serene, reverent, and contemplative"
+          ]
+        },
+        "shots": [
+          {
+            "shotId": "shot_001",
+            "action": "Wide establishing shot of the ocean at dawn, the paper boat floating alone in the blue water",
+            "reason": "To establish the setting and introduce the transformed object as the emotional and visual center",
+            "camera": "Dolly out from the horizon",
+            "framing": "Wide shot, low angle, emphasizing the vastness of the sea",
+            "duration": 3,
+            "entityNames": [
+              "OCEAN",
+              "same paper boat floats alone",
+              "blue water"
+            ],
+            "dialogueUnitIds": [],
+            "sourceQuote": "EXT. OCEAN - DAWN"
+          },
+          {
+            "shotId": "shot_002",
+            "action": "Slow zoom into the boat, revealing its folded paper now stretched into canvas",
+            "reason": "To visually confirm the metamorphosis — the paper is no longer paper, but fabric, ready for wind and sail",
+            "camera": "Push-in with shallow depth of field",
+            "framing": "Medium close-up, focusing on the texture transition",
+            "duration": 2,
+            "entityNames": [
+              "same paper boat floats alone",
+              "Its folded paper stretches into",
+              "canvas; its bow curves into"
+            ],
+            "dialogueUnitIds": [],
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "shotId": "shot_003",
+            "action": "Extreme close-up on the bow, now polished timber, reflecting the dawn light",
+            "reason": "To highlight the material evolution — the bow is no longer paper, but a crafted, enduring part of a ship",
+            "camera": "Macro lens, static",
+            "framing": "Extreme close-up, focus on the curve and sheen",
+            "duration": 2,
+            "entityNames": [
+              "polished timber",
+              "tiny vessel grows into",
+              "full-size mahogany sailing yacht"
+            ],
+            "dialogueUnitIds": [],
+            "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+          },
+          {
+            "shotId": "shot_004",
+            "action": "Pull back to reveal the full yacht, sailing alone in the open sea",
+            "reason": "To complete the transformation and show the scale of the miracle — the boat is now a vessel of majesty",
+            "camera": "Dolly back, high angle",
+            "framing": "Wide shot, showing the yacht against the horizon",
+            "duration": 3,
+            "entityNames": [
+              "full-size mahogany sailing yacht",
+              "sea opens around it"
+            ],
+            "dialogueUnitIds": [],
+            "sourceQuote": "The sea opens around it."
+          }
+        ],
+        "continuity": [
+          {
+            "entityName": "OCEAN",
+            "key": "appearance",
+            "value": "Blue water, calm and expansive, lit by the first rays of dawn",
+            "intentionalChange": false,
+            "sourceQuote": "EXT. OCEAN - DAWN"
+          },
+          {
+            "entityName": "same paper boat floats alone",
+            "key": "prop_state",
+            "value": "Now a full-size mahogany sailing yacht, moving gracefully through the water",
+            "intentionalChange": true,
+            "sourceQuote": "The same paper boat floats alone in the blue water. Its folded paper stretches into canvas; its bow curves into polished timber. The tiny vessel grows into a full-size mahogany sailing yacht. The sea opens around it."
+          },
+          {
+            "entityName": "blue water",
+            "key": "appearance",
+            "value": "Reflecting the dawn, shimmering with gentle ripples around the yacht",
+            "intentionalChange": false,
+            "sourceQuote": "The same paper boat floats alone in the blue water."
+          },
+          {
+            "entityName": "Its folded paper stretches into",
+            "key": "prop_material",
+            "value": "Canvas, taut and weathered, catching the morning light",
+            "intentionalChange": true,
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "entityName": "canvas; its bow curves into",
+            "key": "prop_material",
+            "value": "Polished timber, smooth and gleaming, shaped like a classic yacht bow",
+            "intentionalChange": true,
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "entityName": "polished timber",
+            "key": "appearance",
+            "value": "Reflective, warm-toned wood, catching the golden dawn light",
+            "intentionalChange": false,
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "entityName": "tiny vessel grows into",
+            "key": "prop_state",
+            "value": "Now a full-size mahogany sailing yacht, sails unfurled, gliding through the water",
+            "intentionalChange": true,
+            "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+          },
+          {
+            "entityName": "full-size mahogany sailing yacht",
+            "key": "prop_state",
+            "value": "Sailing alone, surrounded by the open sea, no other vessels in sight",
+            "intentionalChange": false,
+            "sourceQuote": "The sea opens around it."
+          },
+          {
+            "entityName": "sea opens around it",
+            "key": "appearance",
+            "value": "The ocean parts gently around the yacht, creating a natural corridor of water",
+            "intentionalChange": false,
+            "sourceQuote": "The sea opens around it."
+          }
+        ]
+      },
+      "rawValue": {
+        "sceneId": "scene_002_ddaf2281",
+        "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+        "summary": "A paper boat transforms into a grand yacht as dawn breaks over the ocean — a visual metaphor for hope rising from memory’s wreckage, witnessed in silence and awe",
+        "story": {
+          "about": "A humble paper boat, abandoned in a workshop, becomes a majestic sailing yacht on the open sea — symbolizing the resurrection of lost dreams through time and perspective",
+          "whyCare": "The viewer cares because the transformation mirrors inner renewal — the quiet power of imagination to resurrect what was broken or forgotten",
+          "hook": "The same paper boat floats alone in the blue water — but it is no longer paper. It is now a full-size mahogany sailing yacht, and the sea opens around it",
+          "beginning": "The scene opens with the paper boat drifting alone in the blue water, its form still recognizable but now imbued with new dimensions",
+          "development": "The camera reveals how its folded paper has become canvas, its bow polished timber — each element evolving into something grander, more enduring",
+          "tension": "The transformation is silent, almost magical — the viewer wonders if this is memory, wish, or reality — and whether the sea will protect or consume it",
+          "payoff": "The yacht sails freely, surrounded by the vast ocean — a visual resolution that suggests rebirth, not just restoration, of what was lost",
+          "ending": "The sea opens around it — no one watches, no one speaks — the yacht exists in perfect solitude, a monument to quiet triumph",
+          "withheld": "The origin of the boat, the identity of its creator, and the nature of the transformation remain unspoken — leaving the mystery of creation and meaning intact",
+          "amplify": [
+            "Emphasize the contrast between the small, fragile paper boat and the immense, polished yacht",
+            "Use slow, sweeping camera movements to mirror the expansion of the vessel",
+            "Let the dawn light wash over the yacht, highlighting its new materiality and scale"
+          ],
+          "remove": [
+            "Any dialogue or narration — the transformation must be felt, not explained",
+            "Any visual clutter — keep the frame focused solely on the boat and the sea",
+            "Any sense of urgency or conflict — the tone must be serene, reverent, and contemplative"
+          ]
+        },
+        "shots": [
+          {
+            "shotId": "shot_001",
+            "action": "Wide establishing shot of the ocean at dawn, the paper boat floating alone in the blue water",
+            "reason": "To establish the setting and introduce the transformed object as the emotional and visual center",
+            "camera": "Dolly out from the horizon",
+            "framing": "Wide shot, low angle, emphasizing the vastness of the sea",
+            "duration": 3,
+            "entityNames": [
+              "OCEAN",
+              "same paper boat floats alone",
+              "blue water"
+            ],
+            "dialogueUnitIds": [],
+            "sourceQuote": "EXT. OCEAN - DAWN"
+          },
+          {
+            "shotId": "shot_002",
+            "action": "Slow zoom into the boat, revealing its folded paper now stretched into canvas",
+            "reason": "To visually confirm the metamorphosis — the paper is no longer paper, but fabric, ready for wind and sail",
+            "camera": "Push-in with shallow depth of field",
+            "framing": "Medium close-up, focusing on the texture transition",
+            "duration": 2,
+            "entityNames": [
+              "same paper boat floats alone",
+              "Its folded paper stretches into",
+              "canvas; its bow curves into"
+            ],
+            "dialogueUnitIds": [],
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "shotId": "shot_003",
+            "action": "Extreme close-up on the bow, now polished timber, reflecting the dawn light",
+            "reason": "To highlight the material evolution — the bow is no longer paper, but a crafted, enduring part of a ship",
+            "camera": "Macro lens, static",
+            "framing": "Extreme close-up, focus on the curve and sheen",
+            "duration": 2,
+            "entityNames": [
+              "polished timber",
+              "tiny vessel grows into",
+              "full-size mahogany sailing yacht"
+            ],
+            "dialogueUnitIds": [],
+            "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+          },
+          {
+            "shotId": "shot_004",
+            "action": "Pull back to reveal the full yacht, sailing alone in the open sea",
+            "reason": "To complete the transformation and show the scale of the miracle — the boat is now a vessel of majesty",
+            "camera": "Dolly back, high angle",
+            "framing": "Wide shot, showing the yacht against the horizon",
+            "duration": 3,
+            "entityNames": [
+              "full-size mahogany sailing yacht",
+              "sea opens around it"
+            ],
+            "dialogueUnitIds": [],
+            "sourceQuote": "The sea opens around it."
+          }
+        ],
+        "continuity": [
+          {
+            "entityName": "OCEAN",
+            "key": "appearance",
+            "value": "Blue water, calm and expansive, lit by the first rays of dawn",
+            "intentionalChange": false,
+            "sourceQuote": "EXT. OCEAN - DAWN"
+          },
+          {
+            "entityName": "same paper boat floats alone",
+            "key": "prop_state",
+            "value": "Now a full-size mahogany sailing yacht, moving gracefully through the water",
+            "intentionalChange": true,
+            "sourceQuote": "The same paper boat floats alone in the blue water. Its folded paper stretches into canvas; its bow curves into polished timber. The tiny vessel grows into a full-size mahogany sailing yacht. The sea opens around it."
+          },
+          {
+            "entityName": "blue water",
+            "key": "appearance",
+            "value": "Reflecting the dawn, shimmering with gentle ripples around the yacht",
+            "intentionalChange": false,
+            "sourceQuote": "The same paper boat floats alone in the blue water."
+          },
+          {
+            "entityName": "Its folded paper stretches into",
+            "key": "prop_material",
+            "value": "Canvas, taut and weathered, catching the morning light",
+            "intentionalChange": true,
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "entityName": "canvas; its bow curves into",
+            "key": "prop_material",
+            "value": "Polished timber, smooth and gleaming, shaped like a classic yacht bow",
+            "intentionalChange": true,
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "entityName": "polished timber",
+            "key": "appearance",
+            "value": "Reflective, warm-toned wood, catching the golden dawn light",
+            "intentionalChange": false,
+            "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+          },
+          {
+            "entityName": "tiny vessel grows into",
+            "key": "prop_state",
+            "value": "Now a full-size mahogany sailing yacht, sails unfurled, gliding through the water",
+            "intentionalChange": true,
+            "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+          },
+          {
+            "entityName": "full-size mahogany sailing yacht",
+            "key": "prop_state",
+            "value": "Sailing alone, surrounded by the open sea, no other vessels in sight",
+            "intentionalChange": false,
+            "sourceQuote": "The sea opens around it."
+          },
+          {
+            "entityName": "sea opens around it",
+            "key": "appearance",
+            "value": "The ocean parts gently around the yacht, creating a natural corridor of water",
+            "intentionalChange": false,
+            "sourceQuote": "The sea opens around it."
+          }
+        ]
+      },
+      "contractRepairs": [],
+      "model": "Qwen/Qwen3-VL-8B-Instruct",
+      "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+      "settings": {
+        "dtype": "bfloat16",
+        "attention": "sdpa",
+        "do_sample": false,
+        "max_tokens": 3200
+      },
+      "evidenceSha256": null,
+      "frameEvidence": [],
+      "seconds": 84.08371452699998,
+      "gpu": "NVIDIA L40S"
+    }
+  ]
+}

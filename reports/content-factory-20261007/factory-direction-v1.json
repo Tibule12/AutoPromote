@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "title": "The idea that refused to stay on paper",
+  "story": {
+    "about": "The gap between the world you imagine and the material you have to make it. A small paper boat escapes a blank page and survives an ocean; the final reveal shows this world was made from a brief and edited in AutoPromote.",
+    "whyCare": "Everyone has an idea they cannot yet turn into something others can see. The fragile boat makes that struggle visible.",
+    "hook": "A paper boat on a desk moves as the desk becomes an ocean. Impossible but immediately readable.",
+    "beginning": "A single ordinary sheet becomes a boat; one idea, no footage.",
+    "development": "The boat becomes the central subject of a much larger cinematic world.",
+    "tension": "A dark wave threatens the fragile boat. Will the idea survive becoming real?",
+    "payoff": "A warm path of light opens across the ocean; the boat survives. The camera reveals the created world as editable material in the real AutoPromote Studio.",
+    "ending": "The finished world fills the screen again: A brief. No footage. AutoPromote.",
+    "withheld": "The origin of the footage and the AutoPromote identity until the payoff.",
+    "amplify": [
+      "The first impossible desk-to-ocean movement",
+      "The small boat against the dark wave",
+      "The calm after the storm",
+      "The reveal of this exact footage in the real Studio"
+    ],
+    "remove": [
+      "Random technology abstractions",
+      "Feature lists",
+      "Fake creator testimonials",
+      "Unrelated podcast material",
+      "Generic lens shots",
+      "Unmotivated particle overlays"
+    ]
+  },
+  "script": [
+    {
+      "beatId": "hook",
+      "action": "A paper boat on a desk moves as the desk becomes an ocean. Impossible but immediately readable.",
+      "sound": "Dry paper texture and a restrained ticking pulse at the desk; ocean and a low tense swell for the storm; a deliberate near-silence before a warm harmonic resolution. Original instrumental score, no imitation voice or placeholder beeps."
+    },
+    {
+      "beatId": "development",
+      "action": "The boat becomes the central subject of a much larger cinematic world.",
+      "sound": "Dry paper texture and a restrained ticking pulse at the desk; ocean and a low tense swell for the storm; a deliberate near-silence before a warm harmonic resolution. Original instrumental score, no imitation voice or placeholder beeps."
+    },
+    {
+      "beatId": "tension",
+      "action": "A dark wave threatens the fragile boat. Will the idea survive becoming real?",
+      "sound": "Dry paper texture and a restrained ticking pulse at the desk; ocean and a low tense swell for the storm; a deliberate near-silence before a warm harmonic resolution. Original instrumental score, no imitation voice or placeholder beeps."
+    },
+    {
+      "beatId": "payoff",
+      "action": "A warm path of light opens across the ocean; the boat survives. The camera reveals the created world as editable material in the real AutoPromote Studio.",
+      "sound": "Dry paper texture and a restrained ticking pulse at the desk; ocean and a low tense swell for the storm; a deliberate near-silence before a warm harmonic resolution. Original instrumental score, no imitation voice or placeholder beeps."
+    },
+    {
+      "beatId": "reveal",
+      "action": "The finished world fills the screen again: A brief. No footage. AutoPromote.",
+      "sound": "Dry paper texture and a restrained ticking pulse at the desk; ocean and a low tense swell for the storm; a deliberate near-silence before a warm harmonic resolution. Original instrumental score, no imitation voice or placeholder beeps."
+    },
+    {
+      "beatId": "ending",
+      "action": "The finished world fills the screen again: A brief. No footage. AutoPromote.",
+      "sound": "Dry paper texture and a restrained ticking pulse at the desk; ocean and a low tense swell for the storm; a deliberate near-silence before a warm harmonic resolution. Original instrumental score, no imitation voice or placeholder beeps."
+    }
+  ],
+  "assets": [
+    {
+      "assetId": "paper-awakens",
+      "type": "video",
+      "beatId": "hook",
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+      "reason": "Advance the hook in the paper voyage",
+      "duration": 5.041666666666667,
+      "provider": "wan",
+      "seed": 2026100711,
+      "acceptanceCriteria": [
+        "The complete folded boat stays visually coherent",
+        "The intended hook action is visible",
+        "The framing advances the assigned story moment"
+      ]
+    },
+    {
+      "assetId": "ocean-voyage",
+      "type": "video",
+      "beatId": "development",
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Wide low cinematic view of a tiny ivory origami sailboat sailing across a vast deep blue ocean at twilight. The folded paper hull remains rigid and intact. Long gentle waves dwarf the little boat; amber light glows on the distant horizon. The camera travels steadily beside the boat close to the water. Beautiful scale contrast, believable moving water. One uninterrupted five-second shot.",
+      "reason": "Advance the development in the paper voyage",
+      "duration": 5.041666666666667,
+      "provider": "wan",
+      "seed": 2026100712,
+      "acceptanceCriteria": [
+        "The complete folded boat stays visually coherent",
+        "The intended development action is visible",
+        "The framing advances the assigned story moment"
+      ]
+    },
+    {
+      "assetId": "storm-question",
+      "type": "video",
+      "beatId": "tension",
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. A small ivory origami sailboat rides up a towering dark ocean swell. The sea is deep petrol blue under heavy storm clouds; a narrow amber light remains far away. Low close camera beside the hull makes the fragile paper boat feel small against the moving wall of water. The boat stays sharply folded, visible and intact, no sinking, no tearing. Slow dramatic forward camera movement. One uninterrupted five-second shot.",
+      "reason": "Advance the tension in the paper voyage",
+      "duration": 5.041666666666667,
+      "provider": "wan",
+      "seed": 2026100713,
+      "acceptanceCriteria": [
+        "The complete folded boat stays visually coherent",
+        "The intended tension action is visible",
+        "The framing advances the assigned story moment"
+      ]
+    },
+    {
+      "assetId": "light-path",
+      "type": "video",
+      "beatId": "payoff",
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. A dark ocean becomes calm as a narrow golden path of reflected sunlight opens across the waves. A small ivory origami sailboat with crisp triangular sail floats steadily toward the warm amber horizon. The camera slowly rises behind the boat revealing the luminous path and immense quiet sea. Emotional relief, tactile paper and realistic water, restrained cinematic atmosphere. One uninterrupted five-second shot.",
+      "reason": "Advance the payoff in the paper voyage",
+      "duration": 5.041666666666667,
+      "provider": "wan",
+      "seed": 2026100714,
+      "acceptanceCriteria": [
+        "The complete folded boat stays visually coherent",
+        "The intended payoff action is visible",
+        "The framing advances the assigned story moment"
+      ]
+    },
+    {
+      "assetId": "world-on-desk",
+      "type": "video",
+      "beatId": "reveal",
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. A small ivory origami sailboat floats in a beautiful circular pool of deep blue ocean water on a dark wooden desk. The camera slowly pulls back from the boat and water to reveal that an entire miniature ocean world is contained on the desk beside a single blank sheet of paper. Strong amber side light, dark studio background. All geometry stable, realistic miniature water, no text or screens. One uninterrupted five-second shot.",
+      "reason": "Advance the reveal in the paper voyage",
+      "duration": 5.041666666666667,
+      "provider": "wan",
+      "seed": 2026100715,
+      "acceptanceCriteria": [
+        "The complete folded boat stays visually coherent",
+        "The intended reveal action is visible",
+        "The framing advances the assigned story moment"
+      ]
+    },
+    {
+      "assetId": "identity",
+      "type": "motion",
+      "beatId": "ending",
+      "prompt": "AutoPromote",
+      "reason": "Identify the platform after the created world and its process have been revealed",
+      "duration": 3,
+      "provider": "motion",
+      "seed": 20261007,
+      "acceptanceCriteria": [
+        "AutoPromote is correctly spelled and legible",
+        "The identity fits a quiet ending"
+      ]
+    },
+    {
+      "assetId": "score",
+      "type": "audio",
+      "beatId": "hook",
+      "prompt": "Dry paper texture and a restrained ticking pulse at the desk; ocean and a low tense swell for the storm; a deliberate near-silence before a warm harmonic resolution. Original instrumental score, no imitation voice or placeholder beeps.",
+      "reason": "Connect the fragile idea, tension and resolution through a designed original score",
+      "duration": 36,
+      "provider": "original_audio",
+      "seed": 2026100711,
+      "acceptanceCriteria": [
+        "Audible stereo instrumental score",
+        "No clipped samples",
+        "Correct sample rate and duration"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "outputId": "paper-voyage-hero",
+      "aspect": "16:9",
+      "purpose": "A brief with no footage becomes a finished visual world. Founder marketing draft.",
+      "musicAssetId": "score",
+      "sequence": [
+        {
+          "assetId": "paper-awakens",
+          "start": 2.5,
+          "duration": 2.5,
+          "reason": "Start close to the first impossible motion"
+        },
+        {
+          "assetId": "ocean-voyage",
+          "start": 0,
+          "duration": 3,
+          "reason": "Expand the scale of the idea"
+        },
+        {
+          "assetId": "storm-question",
+          "start": 0.5,
+          "duration": 3.5,
+          "reason": "Put the fragile idea under pressure"
+        },
+        {
+          "assetId": "light-path",
+          "start": 0,
+          "duration": 4.5,
+          "reason": "Provide the warm visual resolution"
+        },
+        {
+          "assetId": "world-on-desk",
+          "start": 0,
+          "duration": 4.5,
+          "reason": "Reveal the created world as a miniature idea"
+        },
+        {
+          "assetId": "identity",
+          "start": 0.1,
+          "duration": 2.8,
+          "reason": "End with a clear platform identity"
+        }
+      ]
+    }
+  ],
+  "plannerProvenance": {
+    "origin": "model_generated",
+    "producer": "Codex creative direction from the founder brief",
+    "basis": "Explicit source brief and inspected raw assets; candidate direction will be revised before final selection"
+  }
+}

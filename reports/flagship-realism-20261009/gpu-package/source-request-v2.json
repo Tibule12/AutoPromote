@@ -1,0 +1,20 @@
+{
+  "deadlineEpoch": 1791536400,
+  "sourceBrief": "The Small Boat: replace the rejected front-facing conditioned source with a newly generated broadside paper schooner. One navy/ivory folded hull/sails faces right in photographic blue sea with warm side light. Must inspect direction, readable paper folds, connected hull and sea horizon before any moving transformation test.",
+  "images": [
+    {
+      "id": "paper-side-c",
+      "seed": 20261009073,
+      "duration": 1,
+      "prompt": "A macro photograph of a miniature origami schooner floating in real deep blue sea. One long navy folded paper hull, two cream triangular folded paper sails. Broadside profile, bow right, stern left. Low camera; horizon behind the boat. Warm afternoon side light, creased paper fibres, realistic water, shallow optical depth.",
+      "negative_prompt": "front view, symmetric front, real yacht, wood, canvas, duplicate vessel, extra hull, cartoon, illustration, plastic, text, watermark"
+    },
+    {
+      "id": "paper-side-d",
+      "seed": 20261009074,
+      "duration": 1,
+      "prompt": "A macro photograph of a miniature origami schooner floating in real deep blue sea. One long navy folded paper hull, two cream triangular folded paper sails. Broadside profile, bow right, stern left. Low camera; horizon behind the boat. Warm afternoon side light, creased paper fibres, realistic water, shallow optical depth.",
+      "negative_prompt": "front view, symmetric front, real yacht, wood, canvas, duplicate vessel, extra hull, cartoon, illustration, plastic, text, watermark"
+    }
+  ]
+}

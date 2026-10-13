@@ -1,0 +1,22 @@
+{
+  "tool": "Retained authored deterministic stereo synthesis with editorial interval removal",
+  "model": "authored synthesis, no inferred music",
+  "sourceBrief": "source-brief.txt",
+  "settings": {
+    "sourceSha256": "22ad192dd7dc13b6bd91007a23c8f04baa4e062e99c2efaddc837c2d7aa1a0c5",
+    "removedRange": [
+      13.75,
+      19.5
+    ],
+    "channels": 2,
+    "sampleRate": 48000,
+    "duration": 51,
+    "identStart": 46,
+    "identImpactAt": 49.2
+  },
+  "artifact": {
+    "sha256": "e21838722d939d93d46acedca7c45b620c1648b01000ec1202f7eb1c08bfba5a",
+    "duration": 51
+  },
+  "limitation": "Objective timing/headroom only; no listening approval."
+}

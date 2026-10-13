@@ -1,0 +1,16 @@
+{
+  "acceptedFullTake": false,
+  "acceptedInterval": {
+    "start": 0,
+    "end": 3.75
+  },
+  "artifactSha256": "96362c0e985724e0ad79da43ce2bc4de4f714dbfa0e16d908e4e3b0dfdfb355c",
+  "reviewer": "Codex visual inspection",
+  "evidence": "boat-storm-v5-review.jpg",
+  "observations": [
+    "Recognisable pointed paper hull rides physically breaking waves.",
+    "Foam changes across frames; a larger wave approaches in the background.",
+    "After about four seconds paper folds visibly deform; that interval is rejected."
+  ],
+  "limitation": "No founder approval; desk and storm boat are both paper boats but fold identity differs."
+}

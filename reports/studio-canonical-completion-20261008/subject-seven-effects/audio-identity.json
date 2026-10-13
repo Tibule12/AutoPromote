@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-08T20:04:25.222962+00:00",
+  "scope": "Exact decoded PCM comparison against the same retained reviewed subject proxy; no new listening claim",
+  "newPcmSha256": "ce38b943d66369580b27cfbcb6805d56ddfd03d5ed4e087fd8f2bf8ed6cd2cd3",
+  "reviewedPcmSha256": "ce38b943d66369580b27cfbcb6805d56ddfd03d5ed4e087fd8f2bf8ed6cd2cd3",
+  "sameDecodedAudio": true,
+  "newBytes": 532480,
+  "reviewedBytes": 532480,
+  "result": "PASS"
+}

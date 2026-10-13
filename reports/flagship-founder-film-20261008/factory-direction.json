@@ -1,0 +1,858 @@
+{
+  "schemaVersion": 1,
+  "title": "One Edit",
+  "story": {
+    "about": "One unsolved creator problem becomes a creative system.",
+    "whyCare": "The familiar cost of fixing one thing only to expose the next.",
+    "hook": "Enter the finished ocean world before learning how it was built.",
+    "beginning": "Two cameras refuse to stay with one conversation.",
+    "development": "Each fix opens a larger media workflow problem.",
+    "tension": "Failures and zero GPU capacity close the route.",
+    "payoff": "A verified breakthrough opens story-driven creation, followed by the origin of this very film.",
+    "ending": "An original vector-based dimensional AutoPromote ident.",
+    "withheld": "The full identity and construction of the hook until the final third.",
+    "amplify": [
+      "Failure silence",
+      "Capacity door opening",
+      "Return to the hook",
+      "Clean self-reveal"
+    ],
+    "remove": [
+      "Disconnected footage",
+      "Invented GPU emails",
+      "Unqualified public readiness claims"
+    ]
+  },
+  "script": [
+    {
+      "beatId": "cold-open",
+      "action": "Camera flies through suspended film gates into a moving generated ocean. The edit line becomes a physical illuminated route. The destination remains unexplained.",
+      "sound": "I thought I was fixing one edit."
+    },
+    {
+      "beatId": "origin",
+      "action": "Two real conversation frames on separate glass film strips. Warm sound pulses disagree, then align. One line connects both.",
+      "sound": "Two cameras. One conversation. They refused to stay together."
+    },
+    {
+      "beatId": "cascade",
+      "action": "Camera follows the now-aligned line into a render gate. The gate fractures; the next frames peel away. Genuine historical render errors appear on the fragments.",
+      "sound": "Fix the timing. Lose the sound. Fix the sound. Break the render."
+    },
+    {
+      "beatId": "problems",
+      "action": "Same conversation branches into different frame sizes. Caption words occupy depth. Camera follows the central line as the structures multiply.",
+      "sound": "Then captions. Clips. New formats. Every answer opened another problem."
+    },
+    {
+      "beatId": "failure",
+      "action": "A real error receipt becomes a large dark architectural panel. Failures stack in depth, crowding the route. Movement stops. Sound drops to a single unresolved pulse.",
+      "sound": "Some days, the only thing that finished was the error log."
+    },
+    {
+      "beatId": "quota",
+      "action": "Camera pushes past archived L4 denial into a monumental extruded zero. No invented emails or repeated RTX requests. Archive dates and GPU classes remain legible.",
+      "sound": "Even the machines said no. But I couldn't leave it there."
+    },
+    {
+      "beatId": "breakthrough",
+      "action": "Zero dissolves into separated geometry, revealing 3000 milliGPU and the verified RTX PRO 6000 execution receipt. A narrow warm seam opens into a violet-lit space.",
+      "sound": "Then one door opened. And the question changed."
+    },
+    {
+      "beatId": "director",
+      "action": "Accepted takes rise from the route; story beats and timed audio assemble in spatial layers using the current film manifest. Real generated yacht footage runs within a dimensional gate.",
+      "sound": "What if the system could understand the story? Create the missing shot. Find the cut. Build the sound."
+    },
+    {
+      "beatId": "magic",
+      "action": "Return to the opening gate from the opposite side. Camera pulls back and reveals its source take, sound and the same coherent final edit line.",
+      "sound": "Bring it together. I didn't know I was building this."
+    },
+    {
+      "beatId": "reveal",
+      "action": "Graphic reconstruction of this film’s canonical sequence alongside a retained real Studio image. Clear final sentence, restrained camera movement and breathing space. This is not a live UI recording of this project.",
+      "sound": "The film you just watched was created by AutoPromote."
+    },
+    {
+      "beatId": "ident",
+      "action": "Dark anticipation; original vector A/P components emerge in staggered extruded layers, grazing light and reflected material. Controlled camera resolves; outline-derived wordmark locks at impact and holds for 1.5 seconds.",
+      "sound": "Sound rise, synchronized lockup impact and clean hold."
+    }
+  ],
+  "assets": [
+    {
+      "assetId": "cold-open",
+      "type": "video",
+      "beatId": "cold-open",
+      "duration": 4,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. Show a finished world immediately; ask how an editing problem became this.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Show a finished world immediately; ask how an editing problem became this.",
+      "provider": "reuse",
+      "libraryRef": "cold-open",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. Show a finished world immediately; ask how an editing problem became this."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "origin",
+      "type": "video",
+      "beatId": "origin",
+      "duration": 6,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. Make sync understandable to a stranger through one human conversation, not interface instructions.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Make sync understandable to a stranger through one human conversation, not interface instructions.",
+      "provider": "reuse",
+      "libraryRef": "origin",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. Make sync understandable to a stranger through one human conversation, not interface instructions."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "cascade",
+      "type": "video",
+      "beatId": "cascade",
+      "duration": 7,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. Each fix causes a consequence, building frustration.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Each fix causes a consequence, building frustration.",
+      "provider": "reuse",
+      "libraryRef": "cascade",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. Each fix causes a consequence, building frustration."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "problems",
+      "type": "video",
+      "beatId": "problems",
+      "duration": 6,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. The original problem grows larger than the founder expected.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. The original problem grows larger than the founder expected.",
+      "provider": "reuse",
+      "libraryRef": "problems",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. The original problem grows larger than the founder expected."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "failure",
+      "type": "video",
+      "beatId": "failure",
+      "duration": 6,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. Let a setback hurt; hold briefly rather than racing through a decorative code montage.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Let a setback hurt; hold briefly rather than racing through a decorative code montage.",
+      "provider": "reuse",
+      "libraryRef": "failure",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. Let a setback hurt; hold briefly rather than racing through a decorative code montage."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "quota",
+      "type": "video",
+      "beatId": "quota",
+      "duration": 7,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. External constraint becomes the lowest point; persistence is the emotional turn.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. External constraint becomes the lowest point; persistence is the emotional turn.",
+      "provider": "reuse",
+      "libraryRef": "quota",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. External constraint becomes the lowest point; persistence is the emotional turn."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "breakthrough",
+      "type": "video",
+      "beatId": "breakthrough",
+      "duration": 6,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs.",
+      "provider": "reuse",
+      "libraryRef": "breakthrough",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "director",
+      "type": "video",
+      "beatId": "director",
+      "duration": 7,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. Move from repairs to creative decisions, with real sources and editorial data.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Move from repairs to creative decisions, with real sources and editorial data.",
+      "provider": "reuse",
+      "libraryRef": "director",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. Move from repairs to creative decisions, with real sources and editorial data."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "magic",
+      "type": "video",
+      "beatId": "magic",
+      "duration": 6,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. Reinterpret the hook as a constructed film instead of an unrelated spectacle.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Reinterpret the hook as a constructed film instead of an unrelated spectacle.",
+      "provider": "reuse",
+      "libraryRef": "magic",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. Reinterpret the hook as a constructed film instead of an unrelated spectacle."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "reveal",
+      "type": "video",
+      "beatId": "reveal",
+      "duration": 6,
+      "prompt": "Usable in the private rough: upright source-bound picture and complete motion take. Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering.",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering.",
+      "provider": "reuse",
+      "libraryRef": "reveal",
+      "acceptanceCriteria": [
+        "Usable in the private rough: upright source-bound picture and complete motion take. Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "ident",
+      "type": "video",
+      "beatId": "ident",
+      "duration": 5,
+      "prompt": "Private revised ident: exact original contours, layered depth, macro-to-lockup camera, later wordmark, dark anticipation and a fully visible clean hold. This is not founder-approved premium art direction.",
+      "reason": "Private revised ident: exact original contours, layered depth, macro-to-lockup camera, later wordmark, dark anticipation and a fully visible clean hold. This is not founder-approved premium art direction.",
+      "provider": "reuse",
+      "libraryRef": "ident",
+      "acceptanceCriteria": [
+        "Private revised ident: exact original contours, layered depth, macro-to-lockup camera, later wordmark, dark anticipation and a fully visible clean hold. This is not founder-approved premium art direction."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-cold-open",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 2.175,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-cold-open",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-origin",
+      "type": "audio",
+      "beatId": "origin",
+      "duration": 4.4,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-origin",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-cascade",
+      "type": "audio",
+      "beatId": "cascade",
+      "duration": 4.55,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-cascade",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-problems",
+      "type": "audio",
+      "beatId": "problems",
+      "duration": 5.075,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-problems",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-failure",
+      "type": "audio",
+      "beatId": "failure",
+      "duration": 3.675,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-failure",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-quota",
+      "type": "audio",
+      "beatId": "quota",
+      "duration": 3.325,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-quota",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-breakthrough",
+      "type": "audio",
+      "beatId": "breakthrough",
+      "duration": 3.225,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-breakthrough",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-director",
+      "type": "audio",
+      "beatId": "director",
+      "duration": 6.1,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-director",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-magic",
+      "type": "audio",
+      "beatId": "magic",
+      "duration": 3.075,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-magic",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-reveal",
+      "type": "audio",
+      "beatId": "reveal",
+      "duration": 3.4,
+      "prompt": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt.",
+      "provider": "reuse",
+      "libraryRef": "vo-reveal",
+      "acceptanceCriteria": [
+        "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "score",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 66,
+      "prompt": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "provider": "reuse",
+      "libraryRef": "score",
+      "acceptanceCriteria": [
+        "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "cues",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 66,
+      "prompt": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "provider": "reuse",
+      "libraryRef": "cues",
+      "acceptanceCriteria": [
+        "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "score-cutdown",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 27,
+      "prompt": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "provider": "reuse",
+      "libraryRef": "score-cutdown",
+      "acceptanceCriteria": [
+        "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "cues-cutdown",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 27,
+      "prompt": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "provider": "reuse",
+      "libraryRef": "cues-cutdown",
+      "acceptanceCriteria": [
+        "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "score-teaser",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 10,
+      "prompt": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "provider": "reuse",
+      "libraryRef": "score-teaser",
+      "acceptanceCriteria": [
+        "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "cues-teaser",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 10,
+      "prompt": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision.",
+      "provider": "reuse",
+      "libraryRef": "cues-teaser",
+      "acceptanceCriteria": [
+        "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "score-final",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 53.75,
+      "prompt": "Pitch-preserving per-scene arrangement follows the tighter 53.75-second story; source notes and timings remain editable. Narration stays at its original speed.",
+      "reason": "Pitch-preserving per-scene arrangement follows the tighter 53.75-second story; source notes and timings remain editable. Narration stays at its original speed.",
+      "provider": "reuse",
+      "libraryRef": "score-final",
+      "acceptanceCriteria": [
+        "Pitch-preserving per-scene arrangement follows the tighter 53.75-second story; source notes and timings remain editable. Narration stays at its original speed."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "cues-final",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 53.75,
+      "prompt": "Pitch-preserving per-scene arrangement follows the tighter 53.75-second story; source notes and timings remain editable. Narration stays at its original speed.",
+      "reason": "Pitch-preserving per-scene arrangement follows the tighter 53.75-second story; source notes and timings remain editable. Narration stays at its original speed.",
+      "provider": "reuse",
+      "libraryRef": "cues-final",
+      "acceptanceCriteria": [
+        "Pitch-preserving per-scene arrangement follows the tighter 53.75-second story; source notes and timings remain editable. Narration stays at its original speed."
+      ],
+      "seed": 20261008
+    }
+  ],
+  "outputs": [
+    {
+      "outputId": "one-edit-hero",
+      "aspect": "16:9",
+      "purpose": "One editing problem grows through real failures into a creative system; the film reveals its own AutoPromote assembly.",
+      "musicAssetId": "score-final",
+      "musicVolume": 0.75,
+      "sequence": [
+        {
+          "assetId": "cold-open",
+          "start": 0.6,
+          "duration": 3,
+          "reason": "Show a finished world immediately; ask how an editing problem became this."
+        },
+        {
+          "assetId": "origin",
+          "start": 0.65,
+          "duration": 5.25,
+          "reason": "Make sync understandable to a stranger through one human conversation, not interface instructions."
+        },
+        {
+          "assetId": "cascade",
+          "start": 1.45,
+          "duration": 5.5,
+          "reason": "Each fix causes a consequence, building frustration."
+        },
+        {
+          "assetId": "problems",
+          "start": 0.2,
+          "duration": 5.75,
+          "reason": "The original problem grows larger than the founder expected."
+        },
+        {
+          "assetId": "failure",
+          "start": 0.4,
+          "duration": 4.5,
+          "reason": "Let a setback hurt; hold briefly rather than racing through a decorative code montage."
+        },
+        {
+          "assetId": "quota",
+          "start": 1.5,
+          "duration": 4.75,
+          "reason": "External constraint becomes the lowest point; persistence is the emotional turn."
+        },
+        {
+          "assetId": "breakthrough",
+          "start": 1,
+          "duration": 4.25,
+          "reason": "A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs."
+        },
+        {
+          "assetId": "director",
+          "start": 0.2,
+          "duration": 6.75,
+          "reason": "Move from repairs to creative decisions, with real sources and editorial data."
+        },
+        {
+          "assetId": "magic",
+          "start": 0.4,
+          "duration": 4,
+          "reason": "Reinterpret the hook as a constructed film instead of an unrelated spectacle."
+        },
+        {
+          "assetId": "reveal",
+          "start": 0.5,
+          "duration": 5,
+          "reason": "Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering."
+        },
+        {
+          "assetId": "ident",
+          "start": 0,
+          "duration": 5,
+          "reason": "A dedicated editable brand sequence, not a flat logo fade."
+        }
+      ],
+      "audioCues": [
+        {
+          "assetId": "vo-cold-open",
+          "kind": "voiceover",
+          "startTime": 0.35,
+          "trimStart": 0,
+          "duration": 2.175,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-origin",
+          "kind": "voiceover",
+          "startTime": 3.35,
+          "trimStart": 0,
+          "duration": 4.4,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-cascade",
+          "kind": "voiceover",
+          "startTime": 8.6,
+          "trimStart": 0,
+          "duration": 4.55,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-problems",
+          "kind": "voiceover",
+          "startTime": 14.05,
+          "trimStart": 0,
+          "duration": 5.075,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-failure",
+          "kind": "voiceover",
+          "startTime": 20,
+          "trimStart": 0,
+          "duration": 3.675,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-quota",
+          "kind": "voiceover",
+          "startTime": 24.3,
+          "trimStart": 0,
+          "duration": 3.325,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-breakthrough",
+          "kind": "voiceover",
+          "startTime": 29.15,
+          "trimStart": 0,
+          "duration": 3.225,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-director",
+          "kind": "voiceover",
+          "startTime": 33.3,
+          "trimStart": 0,
+          "duration": 6.1,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-magic",
+          "kind": "voiceover",
+          "startTime": 40.05,
+          "trimStart": 0,
+          "duration": 3.075,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-reveal",
+          "kind": "voiceover",
+          "startTime": 44.3,
+          "trimStart": 0,
+          "duration": 3.4,
+          "volume": 0.94
+        },
+        {
+          "assetId": "cues-final",
+          "kind": "sfx",
+          "startTime": 0,
+          "trimStart": 0,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues-final",
+          "kind": "sfx",
+          "startTime": 12,
+          "trimStart": 12,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues-final",
+          "kind": "sfx",
+          "startTime": 24,
+          "trimStart": 24,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues-final",
+          "kind": "sfx",
+          "startTime": 36,
+          "trimStart": 36,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues-final",
+          "kind": "sfx",
+          "startTime": 48,
+          "trimStart": 48,
+          "duration": 5.75,
+          "volume": 0.8
+        }
+      ],
+      "captionSegments": [],
+      "plannedBlackRanges": [
+        {
+          "start": 48.75,
+          "end": 50.25,
+          "reason": "Intentional dark anticipation in the dedicated five-second AutoPromote ident."
+        }
+      ]
+    },
+    {
+      "outputId": "one-edit-cutdown",
+      "aspect": "16:9",
+      "purpose": "27-second origin, constraint, breakthrough, creative question and self-reveal.",
+      "musicAssetId": "score-cutdown",
+      "musicVolume": 0.65,
+      "sequence": [
+        {
+          "assetId": "cold-open",
+          "start": 0.3,
+          "duration": 3,
+          "reason": "Impressive opening with the original small problem"
+        },
+        {
+          "assetId": "quota",
+          "start": 3,
+          "duration": 3.5,
+          "reason": "A single zero-capacity obstacle"
+        },
+        {
+          "assetId": "breakthrough",
+          "start": 1,
+          "duration": 4,
+          "reason": "Real verified capacity grant"
+        },
+        {
+          "assetId": "director",
+          "start": 0.4,
+          "duration": 6.5,
+          "reason": "Missing-shot generation becomes story assembly"
+        },
+        {
+          "assetId": "reveal",
+          "start": 0.4,
+          "duration": 5,
+          "reason": "Self-referential payoff"
+        },
+        {
+          "assetId": "ident",
+          "start": 0,
+          "duration": 5,
+          "reason": "Complete reusable brand sequence"
+        }
+      ],
+      "audioCues": [
+        {
+          "assetId": "vo-cold-open",
+          "kind": "voiceover",
+          "startTime": 0.2,
+          "duration": 2.175,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-quota",
+          "kind": "voiceover",
+          "startTime": 3.1,
+          "duration": 3.325,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-breakthrough",
+          "kind": "voiceover",
+          "startTime": 6.65,
+          "duration": 3.225,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-director",
+          "kind": "voiceover",
+          "startTime": 10.7,
+          "trimStart": 0,
+          "duration": 6.1,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-reveal",
+          "kind": "voiceover",
+          "startTime": 17.35,
+          "duration": 3.4,
+          "volume": 0.94
+        },
+        {
+          "assetId": "cues-cutdown",
+          "kind": "sfx",
+          "startTime": 0,
+          "trimStart": 0,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues-cutdown",
+          "kind": "sfx",
+          "startTime": 12,
+          "trimStart": 12,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues-cutdown",
+          "kind": "sfx",
+          "startTime": 24,
+          "trimStart": 24,
+          "duration": 3,
+          "volume": 0.8
+        }
+      ],
+      "captionSegments": [],
+      "plannedBlackRanges": [
+        {
+          "start": 22,
+          "end": 23.5,
+          "reason": "Intentional dark anticipation in the complete brand ident."
+        }
+      ]
+    },
+    {
+      "outputId": "one-edit-teaser",
+      "aspect": "16:9",
+      "purpose": "10-second teaser connects the opening world directly to the created-by reveal and short brand lockup.",
+      "musicAssetId": "score-teaser",
+      "musicVolume": 0.6,
+      "sequence": [
+        {
+          "assetId": "cold-open",
+          "start": 0.7,
+          "duration": 3,
+          "reason": "Open inside the finished world"
+        },
+        {
+          "assetId": "reveal",
+          "start": 1,
+          "duration": 4,
+          "reason": "Answer where the film came from"
+        },
+        {
+          "assetId": "ident",
+          "start": 2,
+          "duration": 3,
+          "reason": "Use resolving geometry and clean hold"
+        }
+      ],
+      "audioCues": [
+        {
+          "assetId": "vo-reveal",
+          "kind": "voiceover",
+          "startTime": 2.65,
+          "duration": 3.4,
+          "volume": 0.94
+        },
+        {
+          "assetId": "cues-teaser",
+          "kind": "sfx",
+          "startTime": 0,
+          "trimStart": 0,
+          "duration": 10,
+          "volume": 0.8
+        }
+      ],
+      "captionSegments": []
+    }
+  ]
+}

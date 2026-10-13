@@ -1,0 +1,851 @@
+{
+  "savedAt": 1791530767014,
+  "revision": 161,
+  "aspect": "16:9",
+  "smartCrop": true,
+  "modes": [
+    {
+      "id": "reframe-mode-c642395a-625d-4228-a5f1-0757b296fc01",
+      "mode": "off",
+      "time": 0
+    }
+  ],
+  "frame": {
+    "insetPercent": 2.5,
+    "radiusPercent": 6,
+    "background": "studio_black",
+    "enabled": false
+  },
+  "finish": {
+    "precisionGrade": true,
+    "exposureStops": 0,
+    "lift": 0,
+    "gamma": 1,
+    "gain": 1,
+    "tint": 0,
+    "preset": null,
+    "brightness": 1.02,
+    "contrast": 1.04,
+    "saturation": 0.95,
+    "temperature": -0.03,
+    "sharpness": 0.1,
+    "vignette": 0,
+    "blur": 0,
+    "blurMode": "edge",
+    "blurStart": -1,
+    "blurEnd": -1,
+    "zoom": 1,
+    "zoomAnchor": "center",
+    "overlayType": "",
+    "overlayOpacity": 0.4,
+    "overlayColor": "#000000",
+    "filmGrain": 0,
+    "chromaticAberration": 0,
+    "vhsTracking": 0,
+    "lightLeak": 0,
+    "letterbox": 0,
+    "fadeIn": 0,
+    "fadeOut": 0
+  },
+  "captionStyle": "minimal",
+  "captions": [
+    {
+      "id": "transcript-caption-0",
+      "text": "Hello, my lovely viewers at home.",
+      "start": 1.22,
+      "end": 4.26,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-1",
+      "text": "It has truly been a long time.",
+      "start": 4.26,
+      "end": 5.98,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-2",
+      "text": "I have missed you so much,",
+      "start": 5.98,
+      "end": 7.54,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-3-cue-1",
+      "text": "and I hope you missed us as",
+      "start": 7.54,
+      "end": 9.6925,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-3-cue-2",
+      "text": "well.",
+      "start": 9.6925,
+      "end": 10,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-4-cue-1",
+      "text": "I am thrilled to tell you we",
+      "start": 10,
+      "end": 12.411111111111111,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-4-cue-2",
+      "text": "are back.",
+      "start": 12.411111111111111,
+      "end": 13.1,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-5",
+      "text": "We are back, like we never left.",
+      "start": 13.1,
+      "end": 15.54,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-6",
+      "text": "I welcome you to another episode",
+      "start": 15.54,
+      "end": 18.4,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-7",
+      "text": "of Unmuted Podcast.",
+      "start": 18.4,
+      "end": 21.14,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-8",
+      "text": "Every week, we will",
+      "start": 21.14,
+      "end": 22.8,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-9",
+      "text": "dive into deep, raw",
+      "start": 22.8,
+      "end": 24.82,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-10",
+      "text": "and authentic conversations",
+      "start": 24.82,
+      "end": 27.5,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-11",
+      "text": "with community arts leaders and members.",
+      "start": 27.5,
+      "end": 29.82,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-12",
+      "text": "Uncovering their untold stories,",
+      "start": 29.82,
+      "end": 32.42,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-13",
+      "text": "layer by layer, truth by truth.",
+      "start": 32.42,
+      "end": 35.14,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-14",
+      "text": "Are you ready? Fasten your seatbelts.",
+      "start": 35.14,
+      "end": 37.5,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-15",
+      "text": "I am your host.",
+      "start": 37.5,
+      "end": 40.65,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-16",
+      "text": "Today is truly a special one,",
+      "start": 40.65,
+      "end": 43.98,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-17-cue-1",
+      "text": "I am sitting across from a sensational",
+      "start": 43.98,
+      "end": 46.4825,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-17-cue-2",
+      "text": "guest.",
+      "start": 46.4825,
+      "end": 46.84,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-18",
+      "text": "Welcome to our studio.",
+      "start": 46.84,
+      "end": 49.08,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-19",
+      "text": "Thank you. My name is Siphamandla.",
+      "start": 49.08,
+      "end": 53.18,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-20-cue-1",
+      "text": "I live in Harare, Khayelitsha.",
+      "start": 53.18,
+      "end": 55.03,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-20-cue-2",
+      "text": "I am happy to be here.",
+      "start": 55.03,
+      "end": 57.25,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-21",
+      "text": "First and foremost, thank you so much.",
+      "start": 57.25,
+      "end": 59.72,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-22",
+      "text": "thank you for accepting our invitation.",
+      "start": 59.72,
+      "end": 61.76,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-23",
+      "text": "It means a lot to us.",
+      "start": 61.76,
+      "end": 63.98,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-24",
+      "text": "Let us get into it.",
+      "start": 63.98,
+      "end": 66.9,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-25",
+      "text": "I want you to take us back.",
+      "start": 66.9,
+      "end": 69.42,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-26",
+      "text": "Many people know you as a comedian,",
+      "start": 69.42,
+      "end": 71.5,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-27",
+      "text": "someone who always makes us laugh.",
+      "start": 71.5,
+      "end": 76.4,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-28",
+      "text": "I want us to go deeper.",
+      "start": 76.4,
+      "end": 78.2,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-29",
+      "text": "Can you please tell us",
+      "start": 78.2,
+      "end": 80.08,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-30",
+      "text": "where you were born and raised?",
+      "start": 80.08,
+      "end": 83.12,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-31",
+      "text": "What was your childhood like?",
+      "start": 83.12,
+      "end": 86.04,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-32",
+      "text": "I was born here in Cape Town.",
+      "start": 86.04,
+      "end": 88.6,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-33-cue-1",
+      "text": "Then I moved to Durban at two",
+      "start": 90.22,
+      "end": 92.91111111111111,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-33-cue-2",
+      "text": "months old,",
+      "start": 92.91111111111111,
+      "end": 93.68,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-34",
+      "text": "with my grandmother.",
+      "start": 93.68,
+      "end": 96.4,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-35",
+      "text": "I was a church-going child.",
+      "start": 96.4,
+      "end": 99.78,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-36",
+      "text": "I loved my friends and playing,",
+      "start": 99.78,
+      "end": 102.72,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-37",
+      "text": "like every other child.",
+      "start": 102.72,
+      "end": 106.26,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-38-cue-1",
+      "text": "I grew up well.",
+      "start": 106.26,
+      "end": 107.84,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-38-cue-2",
+      "text": "Everything was going well.",
+      "start": 107.84,
+      "end": 109.42,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-39",
+      "text": "I love that!",
+      "start": 109.42,
+      "end": 112.82,
+      "language": "en",
+      "speaker": "guest",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-40-cue-1",
+      "text": "You are a singer — a great",
+      "start": 112.82,
+      "end": 115.3225,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-40-cue-2",
+      "text": "one!",
+      "start": 115.3225,
+      "end": 115.68,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-41",
+      "text": "On that note,",
+      "start": 115.68,
+      "end": 117.32,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-42",
+      "text": "I want you",
+      "start": 117.32,
+      "end": 118.58,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    },
+    {
+      "id": "transcript-caption-43",
+      "text": "to take us back…",
+      "start": 118.58,
+      "end": 120,
+      "language": "en",
+      "speaker": "host",
+      "reviewRequired": false
+    }
+  ],
+  "keys": [
+    {
+      "easing": "hold",
+      "id": "motion-key-df8851f1-4c25-4a7e-afa4-744d24c1a4b5",
+      "targetId": "main-video",
+      "property": "x",
+      "value": 50,
+      "time": 0
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-5d0b8893-2ed8-4fff-9f6e-6dbb5aac7df2",
+      "targetId": "main-video",
+      "property": "y",
+      "value": 50,
+      "time": 0
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-00783e69-18e6-4e67-9ae1-cb0878f92bad",
+      "targetId": "main-video",
+      "property": "scale",
+      "value": 1,
+      "time": 0
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-f63ea81b-e187-49c8-bdb3-b2353c4f9a12",
+      "targetId": "main-video",
+      "property": "rotation",
+      "value": 0,
+      "time": 0
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-675f0e17-b204-4dac-a613-b95913d92bf7",
+      "targetId": "main-video",
+      "property": "opacity",
+      "value": 1,
+      "time": 0
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-34b2b142-46cd-44fc-8d2c-0dca618b8db9",
+      "targetId": "main-video",
+      "property": "cropX",
+      "value": 0,
+      "time": 0
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-91805320-affd-450e-b5a6-38ed0796eed4",
+      "targetId": "main-video",
+      "property": "cropY",
+      "value": 0,
+      "time": 0
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-496f818d-2570-46f5-b023-7f8b3a09c5f8",
+      "targetId": "main-video",
+      "property": "x",
+      "value": 50,
+      "time": 52.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-f547b0cd-60f3-4004-83a4-a81fb7f1624f",
+      "targetId": "main-video",
+      "property": "y",
+      "value": 50,
+      "time": 52.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-59261f7b-400f-4e0f-9f89-9ff08655fb83",
+      "targetId": "main-video",
+      "property": "scale",
+      "value": 1.16,
+      "time": 52.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-6bb4bb1a-0551-4f3e-9ab4-77587bbd6f42",
+      "targetId": "main-video",
+      "property": "rotation",
+      "value": 0,
+      "time": 52.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-c8831717-0117-4c08-8fe5-5c11cdc6dacf",
+      "targetId": "main-video",
+      "property": "opacity",
+      "value": 1,
+      "time": 52.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-0fbf3e84-6dd5-43d6-a1b9-dd6374394c70",
+      "targetId": "main-video",
+      "property": "cropX",
+      "value": 0,
+      "time": 52.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-a1ca59aa-53a8-4846-bc2e-21b86d40ce47",
+      "targetId": "main-video",
+      "property": "cropY",
+      "value": 0,
+      "time": 52.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-fc104151-93ba-4c4c-8353-26b7fda16370",
+      "targetId": "main-video",
+      "property": "x",
+      "value": 50,
+      "time": 63.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-a7928b44-6867-4f07-8f8a-085c7c5b76f3",
+      "targetId": "main-video",
+      "property": "y",
+      "value": 50,
+      "time": 63.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-4dd89785-55f1-4b50-a84e-f4edc8fa02e2",
+      "targetId": "main-video",
+      "property": "scale",
+      "value": 1,
+      "time": 63.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-a5f731b8-2323-4df8-afb0-60bf1599e0cc",
+      "targetId": "main-video",
+      "property": "rotation",
+      "value": 0,
+      "time": 63.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-b7114788-a2a4-4652-a417-bd296a5bfbaa",
+      "targetId": "main-video",
+      "property": "opacity",
+      "value": 1,
+      "time": 63.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-612190bb-ec6d-46e8-a40a-441a2154a4b4",
+      "targetId": "main-video",
+      "property": "cropX",
+      "value": 0,
+      "time": 63.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-3f4c982c-26bd-4b78-9428-d97876e09cf7",
+      "targetId": "main-video",
+      "property": "cropY",
+      "value": 0,
+      "time": 63.5
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-630a7f33-75b9-4d97-b206-a0ae20a00e2e",
+      "targetId": "main-video",
+      "property": "x",
+      "value": 50,
+      "time": 85.75
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-8445f4dd-4774-4c69-a368-c0432e0a93c9",
+      "targetId": "main-video",
+      "property": "y",
+      "value": 50,
+      "time": 85.75
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-c13b81e3-e254-40b5-8b7e-d9052daa0e81",
+      "targetId": "main-video",
+      "property": "scale",
+      "value": 1.16,
+      "time": 85.75
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-143e9f41-734a-4e8f-bcef-04ab21016a33",
+      "targetId": "main-video",
+      "property": "rotation",
+      "value": 0,
+      "time": 85.75
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-7c4421ca-3c00-43be-b186-772cbdc6e7aa",
+      "targetId": "main-video",
+      "property": "opacity",
+      "value": 1,
+      "time": 85.75
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-9102d04c-176e-4b20-937e-9427823d20dd",
+      "targetId": "main-video",
+      "property": "cropX",
+      "value": 0,
+      "time": 85.75
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-a4d93ddd-a1d9-46f1-9ee6-b73a5631d90e",
+      "targetId": "main-video",
+      "property": "cropY",
+      "value": 0,
+      "time": 85.75
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-72071994-9e6d-47a2-83cc-f6fad5882938",
+      "targetId": "main-video",
+      "property": "x",
+      "value": 50,
+      "time": 105.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-3021e3b6-d5b5-4bbf-bf1a-bea5b3c9fb19",
+      "targetId": "main-video",
+      "property": "y",
+      "value": 50,
+      "time": 105.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-504f5a36-77f0-4dd0-8a28-262ca53a8bac",
+      "targetId": "main-video",
+      "property": "scale",
+      "value": 1,
+      "time": 105.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-183b849c-558f-4873-aa86-9be660d79297",
+      "targetId": "main-video",
+      "property": "rotation",
+      "value": 0,
+      "time": 105.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-e4ea4d71-0762-4be7-a50c-ce51726f3469",
+      "targetId": "main-video",
+      "property": "opacity",
+      "value": 1,
+      "time": 105.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-4066817c-0d25-4102-93fd-a27578596b6a",
+      "targetId": "main-video",
+      "property": "cropX",
+      "value": 0,
+      "time": 105.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-0a1bdc21-263c-4306-8b6e-d6d596ca5b7e",
+      "targetId": "main-video",
+      "property": "cropY",
+      "value": 0,
+      "time": 105.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-0810233c-749c-4645-a654-34b9d99cd5a3",
+      "targetId": "main-video",
+      "property": "x",
+      "value": 50,
+      "time": 110.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-fd776ddd-0210-4636-9068-024ed964398d",
+      "targetId": "main-video",
+      "property": "y",
+      "value": 50,
+      "time": 110.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-6e38cda5-7a91-4a13-afc2-3e5a426124eb",
+      "targetId": "main-video",
+      "property": "scale",
+      "value": 1.16,
+      "time": 110.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-766cbbba-39be-472f-9ea9-73c2e02d3076",
+      "targetId": "main-video",
+      "property": "rotation",
+      "value": 0,
+      "time": 110.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-aad57740-34e9-417f-8125-8c353d2090ce",
+      "targetId": "main-video",
+      "property": "opacity",
+      "value": 1,
+      "time": 110.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-4b6f64c0-76f4-415a-a44a-c15769f6d446",
+      "targetId": "main-video",
+      "property": "cropX",
+      "value": 0,
+      "time": 110.25
+    },
+    {
+      "easing": "hold",
+      "id": "motion-key-b3137132-e3a8-4e40-842a-c3007cd57e55",
+      "targetId": "main-video",
+      "property": "cropY",
+      "value": 0,
+      "time": 110.25
+    }
+  ],
+  "job": "a82eea947322015121934a6c6ced30cbdab8e15e"
+}

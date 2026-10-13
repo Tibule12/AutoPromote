@@ -1,0 +1,20 @@
+{
+  "status": "pending_whole_film_creative_review",
+  "artifact": {
+    "path": "outputs/e48f2172787a5ea39a8041cb/generated-footage-proof/v15/final.mp4",
+    "sha256": "dbf6fe853b22ad65a79aa055572d79cf0dccef90cff84c0d517dc35f643a5aaa",
+    "bytes": 6605358,
+    "duration": 11.583333,
+    "codec": "h264",
+    "container": "mp4",
+    "fps": 24,
+    "width": 1920,
+    "height": 1080,
+    "hasAudio": true
+  },
+  "editArtifact": {
+    "path": "outputs/e48f2172787a5ea39a8041cb/generated-footage-proof/v15/studio-project.json",
+    "sha256": "9583ace023fc6c28bb5d3560ef8122bb19d075e0db1be4bfefda42ec9611bc2e"
+  },
+  "documentHash": "5353c05676337a1448d557fd0a5196628a881f68c2ba30beb486d3df5eccd884"
+}

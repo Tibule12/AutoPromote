@@ -1,0 +1,304 @@
+{
+  "project": {
+    "id": "factory-paper-voyage",
+    "name": "Paper voyage · generated source assembly",
+    "snapshot": {
+      "timeline": [
+        {
+          "id": "voyage-1",
+          "sourceClipId": "paper-awakens",
+          "name": "paper awakens",
+          "startRequest": 0,
+          "endRequest": 5.041666666666667,
+          "duration": 5.041666666666667,
+          "url": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+          "contentHash": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278"
+        },
+        {
+          "id": "voyage-2",
+          "sourceClipId": "ocean-voyage",
+          "name": "Ocean voyage · macro take",
+          "startRequest": 0,
+          "endRequest": 5.041666666666667,
+          "duration": 5.041666666666667,
+          "url": "http://127.0.0.1:5008/factory-media/generated/ocean-voyage.mp4",
+          "contentHash": "ac204d63725f76dd54194550e7037a3317275d1f91a67cd43cae0ddfa30097fa"
+        }
+      ],
+      "orderedClips": [
+        {
+          "id": "voyage-1",
+          "sourceClipId": "paper-awakens",
+          "name": "paper awakens",
+          "startRequest": 0,
+          "endRequest": 5.041666666666667,
+          "duration": 5.041666666666667,
+          "url": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+          "contentHash": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+          "start": 0,
+          "end": 5.041666666666667,
+          "sourceDuration": 5.041666666666667
+        },
+        {
+          "id": "voyage-2",
+          "sourceClipId": "ocean-voyage",
+          "name": "Ocean voyage · macro take",
+          "startRequest": 0,
+          "endRequest": 5.041666666666667,
+          "duration": 5.041666666666667,
+          "url": "http://127.0.0.1:5008/factory-media/generated/ocean-voyage.mp4",
+          "contentHash": "ac204d63725f76dd54194550e7037a3317275d1f91a67cd43cae0ddfa30097fa",
+          "start": 0,
+          "end": 5.041666666666667,
+          "sourceDuration": 5.041666666666667
+        }
+      ],
+      "selectedClipId": "voyage-1",
+      "reframeAspect": "16:9",
+      "exportSettings": {
+        "resolution": "1080p",
+        "fps": 24
+      },
+      "overlays": [],
+      "autoCaptions": false,
+      "captionSegments": [],
+      "motionScenes": [],
+      "threeDScenes": [],
+      "soundEffects": [],
+      "speedKeyframes": [],
+      "trackStates": {},
+      "projectMedia": [
+        {
+          "id": "paper-awakens",
+          "name": "paper awakens",
+          "url": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+          "duration": 5.041666666666667,
+          "status": "existing",
+          "isPrimary": true
+        },
+        {
+          "id": "ocean-voyage",
+          "name": "Ocean voyage · macro take",
+          "url": "http://127.0.0.1:5008/factory-media/generated/ocean-voyage.mp4",
+          "duration": 5.041666666666667,
+          "status": "existing"
+        }
+      ],
+      "timelineDockHeight": 360,
+      "studioDocument": {
+        "schemaVersion": 1,
+        "projectId": "factory-paper-voyage",
+        "revision": 0,
+        "clock": {
+          "ticksPerSecond": 90000,
+          "interval": "half_open"
+        },
+        "output": {
+          "aspectRatio": "16:9",
+          "requestedResolution": "1080p",
+          "frameRate": {
+            "numerator": 24,
+            "denominator": 1
+          },
+          "codec": "h264",
+          "audioCodec": "aac",
+          "audioSampleRate": null,
+          "audioSampleRatePolicy": "worker_selected"
+        },
+        "assets": [
+          {
+            "assetId": "source:paper-awakens:sha256:7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+            "sourceId": "paper-awakens",
+            "contentHash": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+            "identityState": "hash_verified"
+          },
+          {
+            "assetId": "source:ocean-voyage:sha256:ac204d63725f76dd54194550e7037a3317275d1f91a67cd43cae0ddfa30097fa",
+            "sourceId": "ocean-voyage",
+            "contentHash": "ac204d63725f76dd54194550e7037a3317275d1f91a67cd43cae0ddfa30097fa",
+            "identityState": "hash_verified"
+          }
+        ],
+        "clipOccurrences": [
+          {
+            "occurrenceId": "voyage-1",
+            "assetId": "source:paper-awakens:sha256:7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 453750
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 453750
+            },
+            "timeMapId": "map:voyage-1",
+            "playback": {
+              "direction": "forward",
+              "freeze": false,
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              }
+            }
+          },
+          {
+            "occurrenceId": "voyage-2",
+            "assetId": "source:ocean-voyage:sha256:ac204d63725f76dd54194550e7037a3317275d1f91a67cd43cae0ddfa30097fa",
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 453750
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 453750,
+              "endTick": 907500
+            },
+            "timeMapId": "map:voyage-2",
+            "playback": {
+              "direction": "forward",
+              "freeze": false,
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              }
+            }
+          }
+        ],
+        "timeMaps": [
+          {
+            "timeMapId": "map:voyage-1",
+            "occurrenceId": "voyage-1",
+            "segments": [
+              {
+                "sourceRange": {
+                  "space": "source",
+                  "startTick": 0,
+                  "endTick": 453750
+                },
+                "clipLocalRange": {
+                  "space": "clip_local",
+                  "startTick": 0,
+                  "endTick": 453750
+                },
+                "programmeRange": {
+                  "space": "programme",
+                  "startTick": 0,
+                  "endTick": 453750
+                },
+                "rate": {
+                  "numerator": 1,
+                  "denominator": 1
+                },
+                "direction": "forward",
+                "freeze": false
+              }
+            ]
+          },
+          {
+            "timeMapId": "map:voyage-2",
+            "occurrenceId": "voyage-2",
+            "segments": [
+              {
+                "sourceRange": {
+                  "space": "source",
+                  "startTick": 0,
+                  "endTick": 453750
+                },
+                "clipLocalRange": {
+                  "space": "clip_local",
+                  "startTick": 0,
+                  "endTick": 453750
+                },
+                "programmeRange": {
+                  "space": "programme",
+                  "startTick": 453750,
+                  "endTick": 907500
+                },
+                "rate": {
+                  "numerator": 1,
+                  "denominator": 1
+                },
+                "direction": "forward",
+                "freeze": false
+              }
+            ]
+          }
+        ],
+        "layers": [],
+        "linkedTiming": {
+          "cues": {
+            "soundEffects": [],
+            "voiceovers": [],
+            "adjustmentLayers": []
+          },
+          "keys": {
+            "motionKeyframes": [],
+            "finishKeyframes": [],
+            "reframeKeyframes": [],
+            "reframeModeCuts": [],
+            "speakerFocusCuts": []
+          }
+        },
+        "audioGraph": {
+          "legacySnapshotRef": "audioRemix",
+          "routes": [],
+          "routing": {
+            "muteOriginalAudio": false,
+            "musicDucking": false,
+            "musicDuckingStrength": 0,
+            "musicTrackId": null
+          }
+        },
+        "constraints": {
+          "locks": []
+        },
+        "styleRef": null,
+        "analysisRefs": [],
+        "projectIntelligenceRefs": [],
+        "programmeSpeedKeys": [],
+        "fallbackSpeed": 1,
+        "outputTimeMap": [
+          {
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 907500
+            },
+            "outputRange": {
+              "space": "output",
+              "startTick": 0,
+              "endTick": 907500
+            },
+            "rateNumerator": 1000000,
+            "rateDenominator": 1000000
+          }
+        ],
+        "journal": [],
+        "idempotency": {},
+        "directorReviewJournal": [],
+        "compatibility": {
+          "legacySnapshotVersion": 1,
+          "projection": "clip_occurrences_canonical_other_fields_legacy",
+          "layerComposition": "separate_worker_stages"
+        }
+      }
+    },
+    "versions": []
+  },
+  "clip": {
+    "id": "voyage-1",
+    "sourceClipId": "paper-awakens",
+    "name": "paper awakens",
+    "startRequest": 0,
+    "endRequest": 5.041666666666667,
+    "duration": 5.041666666666667,
+    "url": "http://127.0.0.1:5008/factory-media/generated/paper-awakens.mp4",
+    "contentHash": "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278",
+    "start": 0,
+    "end": 5.041666666666667,
+    "sourceDuration": 5.041666666666667
+  }
+}

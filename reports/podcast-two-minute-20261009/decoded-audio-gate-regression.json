@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-09T09:39:33.168Z",
+  "beforeResult": "REJECTED",
+  "actualError": "Decoded audio lasts 119.904s despite 120.000000s stream metadata",
+  "oldOutput": "./reports/podcast-two-minute-20261009/vfx/previous-75d6e6823e2fb19f080cdce3215356a05b9f3ded479bb88cd7a2ff885ab0d69a.mp4",
+  "scope": "Same immutable failed native output; final replay pending",
+  "afterResult": "PASS",
+  "actualDecodedAudio": {
+    "samples": 5760000,
+    "sampleRate": 48000,
+    "seconds": 120,
+    "toleranceSeconds": 0.04466666666666667,
+    "passed": true
+  },
+  "correctedOutputSha256": "5f2b71f5b19046f37fe3482ae4b86afd636edde5946daba4a9f15c4dfd80face"
+}

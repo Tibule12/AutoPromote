@@ -1,0 +1,80 @@
+{
+  "template": "autopromote-folded-aperture-ident-v6",
+  "revision": "v8-physical-pivots-complete-lockup",
+  "mode": "preview",
+  "duration": 4.5,
+  "font": "/work/font.ttf",
+  "render": {
+    "width": 1280,
+    "height": 720,
+    "samples": 64
+  },
+  "camera": {
+    "macroLens": 75,
+    "lockupLens": 54,
+    "start": [
+      -3.62,
+      -2.9,
+      0.72
+    ],
+    "startTarget": [
+      -3.4,
+      0,
+      0.5
+    ],
+    "end": [
+      -0.9,
+      -11.5,
+      0.92
+    ],
+    "endTarget": [
+      -0.9,
+      0,
+      0.03
+    ]
+  },
+  "timing": {
+    "assemblyStart": 0.18,
+    "assemblyDuration": 2,
+    "cameraStart": 0.12,
+    "cameraDuration": 2.25,
+    "wordmarkStart": 2.12,
+    "wordmarkDuration": 0.4,
+    "lightStart": 0.1,
+    "lightRise": 0.25,
+    "impactAt": 2.77
+  },
+  "materials": {
+    "structure": "#40516b",
+    "structureRoughness": 0.19,
+    "face": "#6171a0",
+    "faceRoughness": 0.16,
+    "glass": "#b9bbd7",
+    "glassRoughness": 0.07,
+    "transmission": 0.52
+  },
+  "lighting": {
+    "keyPower": 1850,
+    "rimPower": 1100,
+    "warmPower": 750,
+    "fillPower": 1050
+  },
+  "soundCues": [
+    {
+      "type": "machined_material_rise",
+      "at": 0.15,
+      "duration": 2.62
+    },
+    {
+      "type": "identity_impact",
+      "at": 2.77
+    },
+    {
+      "type": "clean_hold",
+      "at": 2.9,
+      "duration": 1.6
+    }
+  ],
+  "sourceBrief": "Private AutoPromote Small Boat opening identity. Physical folded geometry and illuminated depth foreshadow the paper-to-sail transformation. Begin with a brief dark anticipation then show readable machined edges in close view, unfold layers around their own physical pivots and pull back to the complete original identity. Hold the logo clearly. Fix the blank opening and disconnected world-origin rotation of the preceding take. Editable timing, camera, material, lighting and sound; no flat fade or decorative particle substitute. Complete final framing must include every logo blade and wordmark glyph with a safe margin. This corrects the cropped v7 preview, whose evidence is preserved.",
+  "deadlineEpoch": 0
+}

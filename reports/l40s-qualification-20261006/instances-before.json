@@ -1,0 +1,15 @@
+{
+  "workspaces": [
+    {
+      "name": "autopromote-l40s-staging",
+      "id": "xgh6wcu74",
+      "status": "RUNNING",
+      "build_status": "COMPLETED",
+      "shell_status": "READY",
+      "health_status": "HEALTHY",
+      "instance_type": "l40s-48gb.1x",
+      "instance_kind": "gpu",
+      "gpu": "L40S"
+    }
+  ]
+}

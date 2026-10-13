@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "artifactSha256": "418cb6b640f46609e77bc4928311ffe832fdf7ec50da91060d4f610045e72ca5",
+  "reviewer": "Codex inspection of sixteen time-ordered frames",
+  "reason": "Water visibly floods the workbench, but around 2.5 seconds the real yacht fades in behind and overlaps the still-intact paper boat. Paper edges do not fold or deform into the yacht sail/hull; the superimposed vessels constitute a dissolve rather than coherent metamorphosis. The later yacht/wake is usable footage, but this complete take fails the assigned transformation role.",
+  "evidence": "paper-to-real-v8-review.jpg",
+  "evidenceSha256": "6c0050db6dcf28827b99107b8be7dbe34eb70407f570af2eace05b8de5f572c1",
+  "revisionInstructions": "Use connected mesh deformation, material conversion and one scene/camera; do not accept replacement or overlap as transformation."
+}

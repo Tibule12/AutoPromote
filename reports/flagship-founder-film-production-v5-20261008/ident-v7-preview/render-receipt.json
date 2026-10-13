@@ -1,0 +1,126 @@
+{
+  "status": "GENERATED_PENDING_CREATIVE_REVIEW",
+  "model": "AutoPromote original folded-aperture ident / Blender Cycles",
+  "modelRevision": "4.5.9 LTS",
+  "sourceBrief": "Private AutoPromote Small Boat opening identity. Physical folded geometry and illuminated depth foreshadow the paper-to-sail transformation. Begin with a brief dark anticipation then show readable machined edges in close view, unfold layers around their own physical pivots and pull back to the complete original identity. Hold the logo clearly. Fix the blank opening and disconnected world-origin rotation of the preceding take. Editable timing, camera, material, lighting and sound; no flat fade or decorative particle substitute.",
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "settings": {
+    "template": "autopromote-folded-aperture-ident-v6",
+    "revision": "v7-physical-pivots-and-readable-opening",
+    "mode": "preview",
+    "duration": 4.5,
+    "font": "/work/font.ttf",
+    "render": {
+      "width": 1280,
+      "height": 720,
+      "samples": 64
+    },
+    "camera": {
+      "macroLens": 75,
+      "lockupLens": 54,
+      "start": [
+        -3.62,
+        -2.9,
+        0.72
+      ],
+      "startTarget": [
+        -3.4,
+        0,
+        0.5
+      ],
+      "end": [
+        -0.12,
+        -10.2,
+        0.92
+      ],
+      "endTarget": [
+        -0.12,
+        0,
+        0.03
+      ]
+    },
+    "timing": {
+      "assemblyStart": 0.18,
+      "assemblyDuration": 2,
+      "cameraStart": 0.12,
+      "cameraDuration": 2.25,
+      "wordmarkStart": 2.12,
+      "wordmarkDuration": 0.4,
+      "lightStart": 0.1,
+      "lightRise": 0.25,
+      "impactAt": 2.77
+    },
+    "materials": {
+      "structure": "#40516b",
+      "structureRoughness": 0.19,
+      "face": "#6171a0",
+      "faceRoughness": 0.16,
+      "glass": "#b9bbd7",
+      "glassRoughness": 0.07,
+      "transmission": 0.52
+    },
+    "lighting": {
+      "keyPower": 1850,
+      "rimPower": 1100,
+      "warmPower": 750,
+      "fillPower": 1050
+    },
+    "soundCues": [
+      {
+        "type": "machined_material_rise",
+        "at": 0.15,
+        "duration": 2.62
+      },
+      {
+        "type": "identity_impact",
+        "at": 2.77
+      },
+      {
+        "type": "clean_hold",
+        "at": 2.9,
+        "duration": 1.6
+      }
+    ],
+    "sourceBrief": "Private AutoPromote Small Boat opening identity. Physical folded geometry and illuminated depth foreshadow the paper-to-sail transformation. Begin with a brief dark anticipation then show readable machined edges in close view, unfold layers around their own physical pivots and pull back to the complete original identity. Hold the logo clearly. Fix the blank opening and disconnected world-origin rotation of the preceding take. Editable timing, camera, material, lighting and sound; no flat fade or decorative particle substitute.",
+    "deadlineEpoch": 1791489600
+  },
+  "scriptSha256": "3e1fd3711d65d141e46fb913548c408d5053a9f76e4f5524ccb8e701e9002b62",
+  "nativeSceneSha256": "3e65d7577130eb3e719f2969b4d80b2343628b9e17752eeb0e04b81ca989723d",
+  "renderedFrames": [
+    0,
+    12,
+    32,
+    66,
+    107
+  ],
+  "fps": 24,
+  "renderSeconds": 4.071059220000279,
+  "impactAt": 2.77,
+  "resolvedTiming": {
+    "assemblyStart": 0.18,
+    "assemblyDuration": 2,
+    "cameraStart": 0.12,
+    "cameraDuration": 2.25,
+    "wordmarkStart": 2.12,
+    "wordmarkDuration": 0.4,
+    "lightStart": 0.1,
+    "lightRise": 0.25,
+    "impactAt": 2.77
+  },
+  "editable": [
+    "original symbol geometry",
+    "fold positions",
+    "material transmission",
+    "camera path",
+    "lighting and timing",
+    "wordmark animation",
+    "sound cue timing"
+  ]
+}

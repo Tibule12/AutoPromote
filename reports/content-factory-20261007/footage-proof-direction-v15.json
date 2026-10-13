@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "title": "Imagined, then made: private generated-footage proof",
+  "story": {
+    "about": "An imagined sailing shot becomes generated moving footage and editable Studio material, without recorded footage.",
+    "whyCare": "A creator can begin with an idea even when there is nothing to shoot or upload.",
+    "hook": "A full-size mahogany yacht cuts through real-looking moving water as the voice says One idea. No footage.",
+    "beginning": "Give the actual generated yacht shot enough space for its motion and material details to register.",
+    "development": "Show the exact generated source material in the actual AutoPromote Studio.",
+    "tension": "How did a brief become footage, and can that footage be edited as real source material?",
+    "payoff": "The Studio source reveal supports the spoken origin: This started with a brief. No camera. No footage.",
+    "ending": "The editable cinematic AutoPromote studio ident resolves the creation proof.",
+    "withheld": "The tool identity and creation method until the actual Studio reveal.",
+    "amplify": [
+      "Moving yacht, bow spray and water",
+      "The generated sources in the actual Studio",
+      "Timed brand impact after the final narration"
+    ],
+    "remove": [
+      "Rejected paper-to-yacht transformations",
+      "Claims that a cut is a transformation",
+      "Repeated vessel shots",
+      "Feature lists",
+      "Unqualified public-release and full script-to-film claims"
+    ]
+  },
+  "script": [
+    {
+      "beatId": "hook",
+      "action": "A full-size mahogany yacht moves through waves. One idea. No footage.",
+      "sound": "Opening narration and a restrained generated score."
+    },
+    {
+      "beatId": "reveal",
+      "action": "The exact generated sources are editable in the real AutoPromote Studio.",
+      "sound": "This started with a brief. No camera. No footage."
+    },
+    {
+      "beatId": "ending",
+      "action": "The cinematic AutoPromote ident resolves.",
+      "sound": "Original timed ident impact."
+    }
+  ],
+  "assets": [],
+  "outputs": []
+}

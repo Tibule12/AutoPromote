@@ -1,0 +1,7 @@
+{
+  "oldPid": 395713,
+  "replacementPid": 412996,
+  "deadlineEpoch": 1791489600,
+  "fix": "Detect idle NVIDIA Docker device reservations before VM stop",
+  "verifiedForeignContainer": "autopromote-studio-qa-media"
+}

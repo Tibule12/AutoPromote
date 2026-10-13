@@ -1,0 +1,43 @@
+# Vertical cycling edit and actual Studio timeline — 10 October 2026
+
+One new private **20-second, 720×1280, 24 fps / 480-frame** cycling film is available. It uses the shared `cycling_rhythm_v1` **1.0.2** definition, hash `efcdf13fa2055544297a1253e390e5f55c4b6c03e8d916ad7867c0661fb6772a`. Earlier 1.0.0/1.0.1 definitions and failed observations remain preserved. This is a private creative review output, not an approved public showcase or hero.
+
+- [Watch the finished movie](proof/launch-template/cycling-rhythm-20261010/cycling/final.mp4).
+- [Watch it playing in the real Studio with the full editable timeline](proof/launch-template/cycling-rhythm-20261010/cycling/edited-in-studio.mp4).
+- [Studio and timeline screenshot](proof/launch-template/cycling-rhythm-20261010/cycling-studio.png), [timeline detail](proof/launch-template/cycling-rhythm-20261010/cycling-timeline.png).
+- [Canonical editable document](proof/launch-template/cycling-rhythm-20261010/cycling-document.json), [owned project save](proof/launch-template/cycling-rhythm-20261010/cycling-project.private.json), [render/retrieval receipt](proof/launch-template/cycling-rhythm-20261010/cycling/render-receipt.json).
+
+## What was edited
+
+The native signed-in local App applied the template through its real controls, using owned uploads; added sampled SFX and a Tape Stop through Sound controls; changed gain; exercised undo/redo; saved; cold reopened the same canonical hash; previewed raw source edits; submitted the existing renderer; and recovered the finished job. No auth, project, request or worker response was mocked. Existing local credit bypass remains active, so charging is unqualified.
+
+The three inputs are retained Mixkit camera recordings: `person-on-a-bicycle-starts-to-ride-on-a-cycling-40904.mp4`, `silhouette-in-front-of-the-sun-of-a-cyclist-outdoors-40901.mp4`, and `two-mountain-bikers-jumping-off-ramps-in-a-forest-44330.mp4`. Their SHA256 values are respectively `d3cb2f443cd26fdd9ac5519097f53205a4e4d6998f25db896d12a9f33c2b958e`, `247122d10a32dcea1237d556046c4264fa64c04e5a0794355e853cf44fcddcd9`, and `d07546bc23b4cf91f47fde03f6409700b8f64408fd87e2ab1d8f486b41ec7bc8`. This turn's scene-score audit found no internal cuts above 0.30; sampled action frames were inspected. This does not claim exhaustive human review of every raw frame. The **13 clip occurrences and their 12 editorial cut boundaries** are authored by the shared template, rather than imported as a pre-edited montage.
+
+The native project contains **16 editable graphics** (15 text layers and the logo), 13 held main-scale keys, 25 manually authored framing keys with explicit cut handling, music and **17 individually editable sound cues**. Punch-ins and pans are deterministic authored edits, not AI subject tracking. Music is the retained `Need for speed` / Mixkit 369 recording. Two sampled whoosh/impact accents supplement template cues and the native Tape Stop. The previously retained inventory remains **12 source clips, four distinct music choices and 21 sound choices**; no purchase or new stock download occurred. [Material inventory](proof/launch-template/materials-editing-20261010/material-inventory.json) and [retained audio provenance/license receipts](proof/launch-template/materials-editing-20261010/materials/receipts.json) still apply. Raw stock is not redistributed as a customer library/template pack. VELO is a fictional test brand.
+
+## Shared repairs exercised
+
+1. Source metadata now keeps full source duration separate from trimmed occurrence duration. Native close/reopen retains the intended 20-second edit instead of lengthening selected clips.
+2. Mixed-aspect CPU exports apply owned manual portrait framing to each raw source before concatenation. Earlier exports baked black bars into the intermediate. Source-to-programme clock offsets retain the authored pans. The corrected movie fills the portrait canvas; sampled output frames were inspected.
+3. Applying a template invalidates stale completed output immediately. Editing while completed-job recovery is still checking also clears its saved mapping, so a cold reopen cannot silently restore the older film as the new preview.
+4. The owned completed-attempt response preserves the server's output SHA256 for exact export recovery. Invalid/missing hashes are not fabricated. The QA observer now handles an already-completed process response as well as polled completion.
+
+These extend the shared Studio document/compiler/renderer and normal controls. The existing timeline layout and Cam Combiner are preserved. Director uses the same pinned instantiation adapter; CPU tests establish equivalent canonical decisions, not a new native Director creative run this turn.
+
+## Evidence and limits
+
+Native apply/history and cold recovery pass. Before export materialized local audio, canonical hash was `8a190bb7290ba427736cc97335ad35cd31613be08f4a6a0797f202e599c13bc1`. The final materialized project and timeline recording bind hash `22910c97897bd99c0c61459820f0607adf473a2a21137399a2968427ecd180d8` and project `viral-project-892775d1-71f0-4532-9e3d-0539899ec01b`.
+
+Latest completed job: `viral_a58ad44e995ec9fd470ecf2c67e12d21a385f4e2f1ba4955768709200ce09152`. Output SHA256: `58575b9dee1fe995d8aa6f89df278d501faece0d0403071aa6bbc3045f37f234`, 10,250,144 bytes. Full picture/audio decode passes. Three native CPU export submissions completed during correction: R2 15:26:27–15:29:18 UTC (rejected baked bars); R3 15:43:31–15:46:18 UTC; R4 15:55:11–15:59:07 UTC. R3/R4 produce byte-identical corrected pixels/sound from separately bound native requests. These windows include orchestration/polling and are not pure encoder runtime measurements.
+
+The movie was retrieved via the owner-bound signed storage URL with an HTTP client, and its bytes match the server hash. **Native browser download is not qualified:** both CDP and direct Playwright attempts failed; the latest direct attempt reports `download.saveAs: Target page, context or browser has been closed`. Successful storage retrieval is not relabelled as a native download. Native UI recovery of the completed owned job and full Studio playback do pass. The recording captures the real headless, muted Studio at 24 fps and includes its exact export soundtrack muxed at the observed playback-start offset; it is not a live audio recording or a human listening review. The movie plays to its actual 20-second end with the canonical timeline visible and unchanged. Screen capture alone does not establish smooth predictive playback.
+
+**Raw-source preview remains slow:** 19.5 seconds of programme took **26.748 seconds**, with 371 frame callbacks, 12 waiting/loadedmetadata events, 13 playing events and zero stalled events. [Actual raw-source receipt](proof/launch-template/cycling-rhythm-20261010/predictive-playback.json). The guard rejects final-file playback as pre-final evidence. The earlier `r3-predictive` frames/receipt and `r3-predictive-playback.json` played the old finished film and are **invalid as pre-final evidence**; the subsequent raw-source observations supersede them. Thirteen sampled raw-source stage frames are retained under `predictive/`. Whole-stage raster/audio parity is not qualified by those samples.
+
+Seventy-six focused guards pass: 28 template/showroom, 15 CPU reframe/multicam, nine timeline metadata/helpers, four focused Studio, 13 render recovery, and seven owned render-attempt route tests. The optimized normal local App build, generated Director kernel match and record/whitespace checks pass. These test scopes do not promote all Studio controls or creative quality.
+
+## Remaining blockers and next task
+
+The next bounded shared S02 slice is raw-source switching latency, preserving source ownership/trim clocks and the edit, followed by repeat measurement without screencasting. Separately reproduce native headless download failure without resubmitting a render or allocating a GPU. Pair the actual preview and final at mapped cut/title/framing clocks and check sound timing; full picture/audio parity remains open. Founder full-film/sound review and creative revisions are still required before any public-release proposal. Template qualification, production publication adapters/authentication handoff and the normal-account model runtime lifecycle remain incomplete. No PRO/production/creative promotion or public catalogue entry is made.
+
+**Models executed this turn: none. GPU jobs/hours: zero.** All three export attempts use local CPU/libx264. No production deployment, main merge, paid infrastructure start or frontend redesign occurred. Local QA services are stopped after handoff checks; retained movies/projects remain available.

@@ -1,0 +1,40 @@
+{
+  "startedAt": "2026-10-08T16:22:38.522Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008 r12",
+  "status": "FAIL",
+  "steps": [
+    "Native Reset transform removes the QA tilt, zoom, offsets and main-video keys",
+    "Frame off/on history is shared with the enabled Color inspector checkbox",
+    "Normal Save, new App load and saved project reopen retain the exact framing decisions"
+  ],
+  "documentSha256": "9ce5a9772f6683a0789ceb488a882da98da7b2fb2a5510abae4e6fba4c662a6f",
+  "framingDecisions": {
+    "mainTransform": {
+      "id": "main-video",
+      "name": "Main video",
+      "type": "video",
+      "x": 50,
+      "y": 50,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "cropX": 0,
+      "cropY": 0
+    },
+    "mainFrame": {
+      "insetPercent": 2.5,
+      "radiusPercent": 6,
+      "background": "studio_black",
+      "enabled": false
+    },
+    "aspect": "16:9",
+    "mode": "center"
+  },
+  "error": "page.waitForFunction: Timeout 20000ms exceeded.",
+  "finishedAt": "2026-10-08T16:24:09.134Z"
+}

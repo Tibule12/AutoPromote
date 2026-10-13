@@ -1,0 +1,9 @@
+{
+  "observedAt": "2026-10-08T11:25:21.868641+00:00",
+  "command": "brev ls",
+  "instance": "autopromote-l40s-staging",
+  "instanceId": "xgh6wcu74",
+  "gpu": "L40S",
+  "state": "STOPPED",
+  "jobsStartedThisBlock": 0
+}

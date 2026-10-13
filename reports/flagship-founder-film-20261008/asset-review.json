@@ -1,0 +1,199 @@
+{
+  "version": 2,
+  "status": "ACCEPTED_FOR_PRIVATE_REVIEW_ASSEMBLY",
+  "pictureEvidenceSha256": "250c20cdb9d9837f910f2d81b49ab1c6a6d5abbc02b91151f040af65b6fb0b47",
+  "assets": [
+    {
+      "assetId": "cold-open",
+      "accepted": true,
+      "artifactSha256": "b9b4ec175754a8554331f69b3d50b1bd16d7e8743bf083bf7fa2681523b9bde8",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Show a finished world immediately; ask how an editing problem became this.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "origin",
+      "accepted": true,
+      "artifactSha256": "1a1a97057b0a586e181173399fe3e3d98ed2bbf200aea9db609ebca53b7ef79c",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Make sync understandable to a stranger through one human conversation, not interface instructions.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "cascade",
+      "accepted": true,
+      "artifactSha256": "d2a44c94570b1aad329d2733ee064a11fe1ccacdbdb747b473b3165dec61bc33",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Each fix causes a consequence, building frustration.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "problems",
+      "accepted": true,
+      "artifactSha256": "e692746ce67fda59318af042890a109b84ce57a4abad65596ced7075780bffa1",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. The original problem grows larger than the founder expected.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "failure",
+      "accepted": true,
+      "artifactSha256": "67ebd3aa72303ad08f99bccc4ecc379af29d68750e482556392b1063c78e3bce",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Let a setback hurt; hold briefly rather than racing through a decorative code montage.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "quota",
+      "accepted": true,
+      "artifactSha256": "8a8492ada843f4d804743c9d643e4c7ba9601e363b4c037f7b0932ab4550cffa",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. External constraint becomes the lowest point; persistence is the emotional turn.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "breakthrough",
+      "accepted": true,
+      "artifactSha256": "07083bf511f13cc8dc17e25b7c841cabe21b51195f8ed6963cf7555e85223c19",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "director",
+      "accepted": true,
+      "artifactSha256": "a5ce73f6f41b495932e0044cbfcfa4c5ea1e2cc9d470281e1cc12bba4ed251c8",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Move from repairs to creative decisions, with real sources and editorial data.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "magic",
+      "accepted": true,
+      "artifactSha256": "7d632405c500864d58694c3f26c4e8cd5408a5f6d8fe47cadde7073d71c64dbb",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Reinterpret the hook as a constructed film instead of an unrelated spectacle.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "reveal",
+      "accepted": true,
+      "artifactSha256": "8920401919b6dd3ea2c5a0552daf588920acd7b83ea43be5209d0fed45189461",
+      "reason": "Usable in the private rough: upright source-bound picture and complete motion take. Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering.",
+      "scope": "rough assembly; final creative acceptance is separate"
+    },
+    {
+      "assetId": "ident",
+      "accepted": true,
+      "artifactSha256": "e30ad7c9b1800e381322f0fe6036d70bd8acb6b7f8ad845db8bc2b59561a66b8",
+      "reason": "Private revised ident: exact original contours, layered depth, macro-to-lockup camera, later wordmark, dark anticipation and a fully visible clean hold. This is not founder-approved premium art direction.",
+      "scope": "accepted as final private review take; founder creative acceptance pending",
+      "evidenceSha256": "a9749bc4fde5500600a3c5f217bf3afe3bd23d1081a27042c55349d4f1ca31bb"
+    },
+    {
+      "assetId": "vo-cold-open",
+      "accepted": true,
+      "artifactSha256": "b81f0a3ba05220b7e85c81b2eb596da37cb07b92eea4ad92c0df3b2853a47e80",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "vo-origin",
+      "accepted": true,
+      "artifactSha256": "87ccf9d8c3f4da55aa3189a6d0887e8180c3ed954bec34a565e0b66f312d9b45",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "vo-cascade",
+      "accepted": true,
+      "artifactSha256": "983858a242fbac92dc1173689057f0882a5fbb715d3d533703e9043a4d4796c4",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "vo-problems",
+      "accepted": true,
+      "artifactSha256": "aed6f30d50579233ffa627716cefc45392431efc95a3fd30af9e3ea8d8fecd2b",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "vo-failure",
+      "accepted": true,
+      "artifactSha256": "90e1326401f5d98303da9fe78ed85da6605baabc47a4cdf96117dae096b0ac2e",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "vo-quota",
+      "accepted": true,
+      "artifactSha256": "3677901cbffbbf11741f023b6aa67cd419d826dba5511158eb50b3eba12f4f91",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "vo-breakthrough",
+      "accepted": true,
+      "artifactSha256": "c81c56ed7512a554e8af218dde94d2d8df9bf470f0280b79ab4317f3f70fcc2d",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "vo-director",
+      "accepted": true,
+      "artifactSha256": "8c69f9c77b5fd0b8f8944312f399a5aef1bf6770a22059695c0ba727248a1117",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "vo-magic",
+      "accepted": true,
+      "artifactSha256": "a4177157a9f82de1728a32482b8eaf346b1920e8aa2743d9c3e8d99be5a8b4de",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "vo-reveal",
+      "accepted": true,
+      "artifactSha256": "43ec9f03541b141676c92863769213ae0fe664655a9e3f1b31a6506a8155b139",
+      "reason": "Standard disclosed synthetic narration; actual audio duration fits the reviewed scene without overlap. Text and preset are bound to the generator receipt."
+    },
+    {
+      "assetId": "score",
+      "accepted": true,
+      "artifactSha256": "bffffb1f38b2e8d4d1f7407778ba9ca0d59fd7610c15f34f3d8452577237e7a4",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+    },
+    {
+      "assetId": "cues",
+      "accepted": true,
+      "artifactSha256": "38f91567327b4e71af69971396366174fbb3efd717f578aa84261e644ecf20e9",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+    },
+    {
+      "assetId": "score-cutdown",
+      "accepted": true,
+      "artifactSha256": "1cd239be8505cd31d457f2f82a9b4c2ed626bb2f713454d1dce7146d8159953f",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+    },
+    {
+      "assetId": "cues-cutdown",
+      "accepted": true,
+      "artifactSha256": "6b1a38cfb87b898cc2f52ff120d95c22d6fdf4c9357e70f9f7a545b1dd9bda51",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+    },
+    {
+      "assetId": "score-teaser",
+      "accepted": true,
+      "artifactSha256": "e444e8e85c3c36f710cbddbdd166b7931b087e13a6f98a8ee9ab0927a45f6a50",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+    },
+    {
+      "assetId": "cues-teaser",
+      "accepted": true,
+      "artifactSha256": "925952f7002fe363a107fec70dc9ad20caac0c5f5a80eeb5b607b9f5f7215f5d",
+      "reason": "Original deterministic story-timed sound stem with an editable plan; valid stereo PCM transport. Musical and emotional acceptance remains a founder listening decision."
+    },
+    {
+      "assetId": "score-final",
+      "accepted": true,
+      "artifactSha256": "00a535e1d56d7537f2fa869b1e1e8400cfbaabea98363862e13186b75f573d6c",
+      "reason": "Pitch-preserving per-scene arrangement follows the tighter 53.75-second story; source notes and timings remain editable. Narration stays at its original speed."
+    },
+    {
+      "assetId": "cues-final",
+      "accepted": true,
+      "artifactSha256": "3a723566bf16ead2256d31d23a53784083ada840ab06c7542b8a2152d6e5c3a1",
+      "reason": "Pitch-preserving per-scene arrangement follows the tighter 53.75-second story; source notes and timings remain editable. Narration stays at its original speed."
+    }
+  ],
+  "observedWeaknesses": [
+    "Repeated source carriers can feel like a motion-design slideshow rather than live development.",
+    "Some quota evidence is too small to read at playback size.",
+    "Old ident uses staggered letter scaling and front-facing glow; replace with material layers and macro camera.",
+    "The returning ocean gate overstays its function; shorten repeated holds in final."
+  ]
+}

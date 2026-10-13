@@ -1,0 +1,45 @@
+{
+  "startedAt": "2026-10-08T16:10:53.220Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008 r10",
+  "status": "FAIL",
+  "steps": [
+    "Native Reset transform removes the QA tilt, zoom, offsets and main-video keys",
+    "Frame off/on history is shared with the enabled Color inspector checkbox",
+    "Normal Save, new App load and saved project reopen retain the exact framing decisions"
+  ],
+  "documentSha256": "d9b39cf5cc562657aea381b1066505bf374c08ce7c1783d52af4ec12e73d3865",
+  "framingDecisions": {
+    "mainTransform": {
+      "id": "main-video",
+      "name": "Main video",
+      "type": "video",
+      "x": 50,
+      "y": 50,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "cropX": 0,
+      "cropY": 0
+    },
+    "mainFrame": {
+      "insetPercent": 2.5,
+      "radiusPercent": 6,
+      "background": "studio_black",
+      "enabled": false
+    },
+    "aspect": "16:9",
+    "mode": "center"
+  },
+  "previewFrame": {
+    "width": 728.875,
+    "height": 409.984375,
+    "radius": "0px"
+  },
+  "error": "Video processing failed: Request failed with status code 500 - Worker says: Framing could not reproduce the reviewed edit: Podcast timeline preflight failed: Podcast output needs one rounded main frame in preview and export",
+  "finishedAt": "2026-10-08T16:13:03.326Z"
+}

@@ -1,0 +1,186 @@
+{
+  "status": "WAITING_FOR_TRANSFORMATION_VISUAL_REVIEW",
+  "assets": [
+    {
+      "assetId": "paper-start",
+      "type": "video",
+      "beatId": "hook",
+      "path": "generated/boat-launch-v4-qualified.mp4",
+      "receipt": "generated/boat-launch-v4-qualified-receipt.json",
+      "audioRole": null,
+      "review": "selected-reviews/paper-start.json"
+    },
+    {
+      "assetId": "paper-to-real",
+      "type": "video",
+      "beatId": "transformation",
+      "path": "assets/founder-paper-real-continuity-v8/video.mp4",
+      "receipt": "assets/founder-paper-real-continuity-v8/generation-receipt.json",
+      "audioRole": null,
+      "review": "selected-reviews/paper-to-real.json"
+    },
+    {
+      "assetId": "real-vessel",
+      "type": "video",
+      "beatId": "voyage",
+      "path": "generated/real-voyage-v6.mp4",
+      "receipt": "generated/real-voyage-v6-receipt.json",
+      "audioRole": null,
+      "review": "selected-reviews/real-vessel.json"
+    },
+    {
+      "assetId": "studio-ui",
+      "type": "ui",
+      "beatId": "reveal",
+      "path": "ui/studio-source-assembly-v17/video.mp4",
+      "receipt": "ui/studio-source-assembly-v17/receipt.json",
+      "audioRole": null,
+      "review": "selected-reviews/studio-ui.json"
+    },
+    {
+      "assetId": "identity",
+      "type": "three_d",
+      "beatId": "ending",
+      "path": "idents/cinematic-v2/ident.mp4",
+      "receipt": "idents/cinematic-v2/receipt.json",
+      "audioRole": "brand_ident",
+      "review": "selected-reviews/identity.json",
+      "reusableArtifacts": [
+        {
+          "role": "native_scene",
+          "path": "idents/cinematic-v2/autopromote-ident.blend",
+          "sha256": "3b56f8815b98d67eaa795f68dd5adf0375a22e293d7790d07dc543f89ed39e62"
+        },
+        {
+          "role": "audio_source",
+          "path": "idents/cinematic-v2/ident.wav",
+          "sha256": "b9a35a694ed0eb449154f96bcf57ac3b14de7812972064c16cb2cad1f31f2d4a"
+        }
+      ]
+    },
+    {
+      "assetId": "score",
+      "type": "audio",
+      "beatId": "transformation",
+      "path": "assets/founder-music-v7/audio.wav",
+      "receipt": "assets/founder-music-v7/receipt.json",
+      "audioRole": "music",
+      "review": "selected-reviews/score.json"
+    },
+    {
+      "assetId": "material-sound",
+      "type": "audio",
+      "beatId": "transformation",
+      "path": "audio/transformation-v8/sound.wav",
+      "receipt": "audio/transformation-v8/receipt.json",
+      "audioRole": "sfx",
+      "review": "selected-reviews/material-sound.json"
+    },
+    {
+      "assetId": "one-idea",
+      "type": "audio",
+      "beatId": "hook",
+      "path": "narration-cpu/one-idea.wav",
+      "receipt": "narration-cpu/one-idea-receipt.json",
+      "audioRole": "voiceover",
+      "review": "selected-reviews/one-idea.json"
+    },
+    {
+      "assetId": "brief-no-footage",
+      "type": "audio",
+      "beatId": "reveal",
+      "path": "narration-cpu/brief-no-footage.wav",
+      "receipt": "narration-cpu/brief-no-footage-receipt.json",
+      "audioRole": "voiceover",
+      "review": "selected-reviews/brief-no-footage.json"
+    }
+  ],
+  "output": {
+    "outputId": "one-world-transforms",
+    "aspect": "16:9",
+    "purpose": "Private founder cinematic candidate: an ordinary paper boat continuously becomes a real yacht and open sea, then these generated sources appear in the existing Studio before the brand resolves. Never treat a cut as the transformation.",
+    "musicAssetId": "score",
+    "musicVolume": 0.55,
+    "sequence": [
+      {
+        "assetId": "paper-start",
+        "start": 0,
+        "duration": 1.25,
+        "reason": "A recognisable ordinary paper boat establishes the material before change."
+      },
+      {
+        "assetId": "paper-to-real",
+        "start": 0,
+        "duration": 7.5625,
+        "reason": "The connected transformation is the creative event, with geometry, material, water and camera continuity."
+      },
+      {
+        "assetId": "real-vessel",
+        "start": 0,
+        "duration": 5.0625,
+        "reason": "Let the full-size yacht and moving bow wake make the payoff clear."
+      },
+      {
+        "assetId": "studio-ui",
+        "start": 0,
+        "duration": 3,
+        "reason": "Show actual generated source material editable in the existing AutoPromote Studio."
+      },
+      {
+        "assetId": "identity",
+        "start": 0,
+        "duration": 3.5,
+        "reason": "Resolve the story with a cinematic editable AutoPromote studio identity."
+      }
+    ],
+    "audioCues": [
+      {
+        "assetId": "one-idea",
+        "kind": "voiceover",
+        "startTime": 0.05,
+        "duration": 2.325,
+        "trimStart": 0,
+        "volume": 0.9
+      },
+      {
+        "assetId": "material-sound",
+        "kind": "sfx",
+        "startTime": 0,
+        "duration": 14,
+        "trimStart": 0,
+        "volume": 1
+      },
+      {
+        "assetId": "brief-no-footage",
+        "kind": "voiceover",
+        "startTime": 13.9,
+        "duration": 3.65,
+        "trimStart": 0,
+        "volume": 0.9
+      }
+    ],
+    "captionSegments": [
+      {
+        "start": 0.05,
+        "end": 2.375,
+        "text": "One idea. No footage.",
+        "captionIcon": "none",
+        "captionAccent": "#a18aff"
+      },
+      {
+        "start": 13.9,
+        "end": 15.55,
+        "text": "This started with a brief.",
+        "captionIcon": "none",
+        "captionAccent": "#a18aff"
+      },
+      {
+        "start": 15.55,
+        "end": 17.55,
+        "text": "No camera. No footage.",
+        "captionIcon": "none",
+        "captionAccent": "#a18aff"
+      }
+    ]
+  }
+}

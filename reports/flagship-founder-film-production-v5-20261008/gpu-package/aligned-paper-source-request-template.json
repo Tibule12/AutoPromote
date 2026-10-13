@@ -1,0 +1,16 @@
+{
+  "deadlineEpoch": 0,
+  "sourceBrief": "Correct the rejected two-object transformation by aligning the paper endpoint to the actual target yacht composition. Preserve source framing and a single hull/sail silhouette while changing its materials into folded paper. Reference-conditioned still only; neither cinematic transformation nor moving footage is approved by this generation.",
+  "images": [
+    {
+      "id": "paper-yacht-aligned-source",
+      "seed": 20261008232,
+      "duration": 2,
+      "reference_image": "/work/assets/lastImage.png",
+      "reference_image_sha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462",
+      "strength": 0.72,
+      "prompt": "Photographic origami sailing yacht made entirely of folded navy and ivory paper, afloat on blue ocean. One angular creased paper hull, paper mast, two triangular folded paper sails. Port side view, bow points right, distant horizon, warm sunlight. Visible paper fibres and folds, real water. No wood or fabric.",
+      "negative_prompt": "wood, fabric, canvas texture, smooth rounded hull, second boat, duplicate vessel, cartoon, CGI render, orange miniature, melting paper, detached mast, text, watermark"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-08T19:41:32.776390+00:00",
+  "status": "SCOPED_EXACT_TAIL_AND_CUT_PASS_FULL_PARITY_FAIL",
+  "actualStudioUserFlow": true,
+  "outputSha256": "b85f9953ac69902783e11f331c33c5a662e1a4ece5679da34ad393df0b2f2b40",
+  "nativeToolRecovery": "PASS: Pacing selected and 1x/2x controls used after owned completed render recovery; 6s edit preserved",
+  "tail": {
+    "avg_frame_rate": "60/1",
+    "duration": "6.000000",
+    "nb_frames": "360",
+    "result": "PASS: exactly 360 frames / 6 seconds"
+  },
+  "independentFullDecode": true,
+  "visualReviewedFrames": [
+    0.25,
+    0.75,
+    1.55
+  ],
+  "cut": "Subject effects present before 1.5s and absent at 1.55s; saved title remains visible across source split",
+  "remaining": [
+    "3D font/material/vertical appearance differs",
+    "Tracked callout clipped in final",
+    "Dense source-frame/matte and audio parity remain unqualified"
+  ],
+  "newGpuUsed": false,
+  "newInferencePosts": 0,
+  "readinessPromotion": false,
+  "creativeApproval": false
+}

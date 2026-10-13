@@ -1,0 +1,44 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "failure",
+  "inputIdentity": "b66ee158db1b11fb789334283892219a408fc845e42e33b8708d72fa859fab7d",
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "settings": {
+    "width": 1920,
+    "height": 1080,
+    "samples": 24,
+    "fps": 24
+  },
+  "duration": 4.5,
+  "sourceHashes": {
+    "reports/studio-stability-20261007/media/podcast-12s.mp4": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+    "reports/content-factory-20261007/generated/real-voyage-v6.mp4": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+    "reports/flagship-founder-film-20261008/source-brief.txt": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+    "reports/flagship-founder-film-20261008/textures/font.ttf": "28c4c189a44803b1986fd16074187034dc6d94ad35f5e87de13dd0e786b70b73",
+    "reports/flagship-founder-film-20261008/textures/error.png": "5e9e71a8844723a21205efe77ccadfb54cb7f70d2397abd6b8e136589973cae9"
+  },
+  "sourceBrief": {
+    "path": "source-brief.txt",
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c"
+  },
+  "scriptSha256": "d165ab0526c6fc30d87b1781779df0533bf738452d2ec4f72966349cde8dd59f",
+  "seconds": 1.5275586889999886,
+  "nativeScene": "scene.blend",
+  "scope": "Authored NVIDIA raw scene; retained video provenance, not arbitrary-brief autonomy",
+  "editable": [
+    "camera",
+    "lights",
+    "materials",
+    "physical reveal transforms",
+    "timing",
+    "source image sequence"
+  ],
+  "proceduralGeometry": "Versioned script reproduces folded picture deformation"
+}

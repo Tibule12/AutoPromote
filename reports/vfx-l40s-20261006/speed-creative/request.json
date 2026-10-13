@@ -1,0 +1,45 @@
+{
+  "video_url": "http://127.0.0.1:8765/podcast-source-45s.mp4",
+  "start_time": 17,
+  "end_time": 23,
+  "auto_captions": false,
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "source",
+    "fps": 30
+  },
+  "speed_segments": [
+    {
+      "id": "slow",
+      "start_time": 0,
+      "end_time": 2,
+      "rate": 0.5
+    },
+    {
+      "id": "fast",
+      "start_time": 2,
+      "end_time": 4,
+      "rate": 2
+    },
+    {
+      "id": "natural",
+      "start_time": 4,
+      "end_time": 6,
+      "rate": 1
+    }
+  ],
+  "creative_plan": {
+    "version": 1,
+    "enabled": true,
+    "intensity": "clean",
+    "effects": [
+      {
+        "id": "motion-echo",
+        "preset": "beat_echo",
+        "start_time": 0.5,
+        "end_time": 3,
+        "intensity": "clean"
+      }
+    ]
+  }
+}

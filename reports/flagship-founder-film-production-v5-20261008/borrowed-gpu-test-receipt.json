@@ -1,0 +1,17 @@
+{
+  "startedAt": "2026-10-08T17:12:32.504079+00:00",
+  "cutoffEpoch": 1791489600,
+  "qaPause": "Graceful SIGTERM to idle uvicorn after completed requests; 0% compute/encode/decode; no CUDA process",
+  "stages": [
+    {
+      "script": "run-sailor-source-on-l40s.sh",
+      "exitCode": 0
+    },
+    {
+      "script": "run-morph-i2v-on-l40s.sh",
+      "exitCode": 0
+    }
+  ],
+  "qaRestorePid": 433335,
+  "completedAt": "2026-10-08T17:29:57.949560+00:00"
+}

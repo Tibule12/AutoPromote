@@ -1,0 +1,349 @@
+{
+  "video_url": "http://127.0.0.1:8765/generated/paper-awakens.mp4",
+  "start_time": 0,
+  "end_time": 34.2,
+  "overlays": [],
+  "auto_captions": true,
+  "timeline_segments": [
+    {
+      "id": "paper-voyage-story-1",
+      "source_clip_id": "paper-awakens",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/generated/paper-awakens.mp4"
+    },
+    {
+      "id": "paper-voyage-story-2",
+      "source_clip_id": "paper-awakens",
+      "start_time": 3,
+      "end_time": 5,
+      "duration": 2,
+      "url": "http://127.0.0.1:8765/generated/paper-awakens.mp4"
+    },
+    {
+      "id": "paper-voyage-story-3",
+      "source_clip_id": "ocean-environment",
+      "start_time": 0.4,
+      "end_time": 2.1,
+      "duration": 1.7,
+      "url": "http://127.0.0.1:8765/generated/ocean-scale-v2.mp4"
+    },
+    {
+      "id": "paper-voyage-story-4",
+      "source_clip_id": "failed-storm",
+      "start_time": 0,
+      "end_time": 3.5,
+      "duration": 3.5,
+      "url": "http://127.0.0.1:8765/generated/storm-question.mp4"
+    },
+    {
+      "id": "paper-voyage-story-5",
+      "source_clip_id": "storm-action",
+      "start_time": 0.8,
+      "end_time": 4.8,
+      "duration": 4,
+      "url": "http://127.0.0.1:8765/generated/storm-action-v2.mp4"
+    },
+    {
+      "id": "paper-voyage-story-6",
+      "source_clip_id": "light-return",
+      "start_time": 1,
+      "end_time": 5,
+      "duration": 4,
+      "url": "http://127.0.0.1:8765/generated/golden-return-v2.mp4"
+    },
+    {
+      "id": "paper-voyage-story-7",
+      "source_clip_id": "world-on-desk",
+      "start_time": 0,
+      "end_time": 5,
+      "duration": 5,
+      "url": "http://127.0.0.1:8765/generated/world-on-desk.mp4"
+    },
+    {
+      "id": "paper-voyage-story-8",
+      "source_clip_id": "studio-ui",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/ui/studio-source-assembly-v5/video.mp4"
+    },
+    {
+      "id": "paper-voyage-story-9",
+      "source_clip_id": "storm-action",
+      "start_time": 2,
+      "end_time": 4,
+      "duration": 2,
+      "url": "http://127.0.0.1:8765/generated/storm-action-v2.mp4"
+    },
+    {
+      "id": "paper-voyage-story-10",
+      "source_clip_id": "light-return",
+      "start_time": 2,
+      "end_time": 5,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/generated/golden-return-v2.mp4"
+    },
+    {
+      "id": "paper-voyage-story-11",
+      "source_clip_id": "identity",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/motion/identity/video.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 0.72,
+  "caption_segments": [
+    {
+      "id": "caption-1",
+      "start_time": 0.15,
+      "end_time": 2.15,
+      "text": "You can see it in your head.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    },
+    {
+      "id": "caption-2",
+      "start_time": 2.8,
+      "end_time": 4.949999999999999,
+      "text": "But there's nothing to upload.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    },
+    {
+      "id": "caption-3",
+      "start_time": 5,
+      "end_time": 7.7,
+      "text": "So we gave Auto Promote one idea.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    },
+    {
+      "id": "caption-4",
+      "start_time": 7.8,
+      "end_time": 10.05,
+      "text": "We rejected what didn't work.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    },
+    {
+      "id": "caption-5",
+      "start_time": 11.3,
+      "end_time": 13.950000000000001,
+      "text": "A paper boat that refuses to sink.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    },
+    {
+      "id": "caption-6",
+      "start_time": 15.5,
+      "end_time": 17.475,
+      "text": "It made the raw material.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    },
+    {
+      "id": "caption-7",
+      "start_time": 20.3,
+      "end_time": 23.95,
+      "text": "This started with a brief. No camera. No footage.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    },
+    {
+      "id": "caption-8",
+      "start_time": 25.3,
+      "end_time": 28.025000000000002,
+      "text": "Then Auto Promote edited the story.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    },
+    {
+      "id": "caption-9",
+      "start_time": 28.8,
+      "end_time": 30.85,
+      "text": "From a brief... to this.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    },
+    {
+      "id": "caption-10",
+      "start_time": 31.5,
+      "end_time": 34.1,
+      "text": "This film was made with Auto Promote.",
+      "caption_icon": "none",
+      "caption_accent": "#a18aff"
+    }
+  ],
+  "creative_intent": "No-footage problem, actual rejected generation, corrected action, Studio assembly and finished voyage. Private founder story and making-of candidate.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/audio/campaign/score.wav",
+  "music_name": "score",
+  "music_volume": 0.25,
+  "music_ducking": false,
+  "music_fade_in": 0.25,
+  "music_fade_out": 0.6,
+  "music_loop": false,
+  "sound_effects": [
+    {
+      "id": "paper-voyage-story-audio-1",
+      "name": "see-in-head",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/see-in-head.wav",
+      "startTime": 0.15,
+      "duration": 2,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-story-audio-2",
+      "name": "nothing-to-upload",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/nothing-to-upload.wav",
+      "startTime": 2.8,
+      "duration": 2.15,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-story-audio-3",
+      "name": "gave-one-idea",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/gave-one-idea.wav",
+      "startTime": 5,
+      "duration": 2.7,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-story-audio-4",
+      "name": "reject-weak",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/reject-weak.wav",
+      "startTime": 7.8,
+      "duration": 2.25,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-story-audio-5",
+      "name": "boat-refuses",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/boat-refuses.wav",
+      "startTime": 11.3,
+      "duration": 2.65,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-story-audio-6",
+      "name": "made-material",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/made-material.wav",
+      "startTime": 15.5,
+      "duration": 1.975,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-story-audio-7",
+      "name": "brief-no-footage",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/brief-no-footage.wav",
+      "startTime": 20.3,
+      "duration": 3.65,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-story-audio-8",
+      "name": "edited-story",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/edited-story.wav",
+      "startTime": 25.3,
+      "duration": 2.725,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-story-audio-9",
+      "name": "brief-to-this",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/brief-to-this.wav",
+      "startTime": 28.8,
+      "duration": 2.05,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "paper-voyage-story-audio-10",
+      "name": "made-with",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/narration-cpu/made-with.wav",
+      "startTime": 31.5,
+      "duration": 2.6,
+      "trimStart": 0,
+      "volume": 0.85,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "mute_audio": true
+}

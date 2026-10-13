@@ -1,0 +1,250 @@
+{
+  "at": "2026-10-08T08:12:16.376305+00:00",
+  "verifiedReferences": 47,
+  "unmatchedReferences": [
+    {
+      "case": "compositing",
+      "path": "reports/studio-stability-20261007/compositing/download.mp4",
+      "retainedAttempt": null,
+      "knownPreexistingUnusableAttempt": true,
+      "reason": "Historical filename reused before this continuation; results.json already marks artifactValidation.usableToQualifyPass=false. Current compositing PASS uses fresh matching Oct 8 evidence."
+    }
+  ],
+  "verified": [
+    {
+      "case": "final_render",
+      "path": "reports/studio-stability-20261007/final_render/download.mp4",
+      "sha256": "792366e4495b3c9c621bc90c1d6fe0c711195efd78aeae097f26c7aa758603fa"
+    },
+    {
+      "case": "captions",
+      "path": "reports/studio-stability-20261007/captions/download.mp4",
+      "sha256": "a5e9a83b2a56b1b60fad0dc6d2ab9471d4af817ca8891be79277b26b94fe6336"
+    },
+    {
+      "case": "captions",
+      "path": "reports/studio-stability-20261007/hour/captions/download.mp4",
+      "sha256": "a55c92114196f16fac1ad7f013e73045e1040f08bc197f20c7d489a779aea28c"
+    },
+    {
+      "case": "captions",
+      "path": "reports/studio-stability-20261008/captions/previous-de04a95e8906f8575628f434b1d40c5343498ce1277aaee8bce4ddc33b510ca8.mp4",
+      "sha256": "de04a95e8906f8575628f434b1d40c5343498ce1277aaee8bce4ddc33b510ca8"
+    },
+    {
+      "case": "captions",
+      "path": "reports/studio-stability-20261008/captions/download.mp4",
+      "sha256": "d7723a0b27c85c17c2ff8b65c3f58d8f963490c62ccc256f9da371901b2f1778"
+    },
+    {
+      "case": "reframing",
+      "path": "reports/studio-stability-20261007/reframing/download.mp4",
+      "sha256": "2b2560e4be5cf5d8bc8736fdb10eefb42ad13699d19fe5fc06d0371deabc7e83"
+    },
+    {
+      "case": "reframing",
+      "path": "reports/studio-stability-20261007/hour/reframing/download.mp4",
+      "sha256": "470f829334552efaed19dd38adc4750406237a1c16272c11b792dca211103a86"
+    },
+    {
+      "case": "reframing",
+      "path": "reports/studio-stability-20261008/reframing/previous-dd83c7e13e6c0b0c120bae3bee7a7e3ec5d6c8e129761bb718435880e12d08ca.mp4",
+      "sha256": "dd83c7e13e6c0b0c120bae3bee7a7e3ec5d6c8e129761bb718435880e12d08ca"
+    },
+    {
+      "case": "reframing",
+      "path": "reports/studio-stability-20261008/reframing/download.mp4",
+      "sha256": "dd83c7e13e6c0b0c120bae3bee7a7e3ec5d6c8e129761bb718435880e12d08ca"
+    },
+    {
+      "case": "overlays",
+      "path": "reports/studio-stability-20261007/motion_graphics/download.mp4",
+      "sha256": "017d844bc689701ee244f65bfa6e869a072f8164cc1b7e4ead56ece18e5bfbdc"
+    },
+    {
+      "case": "motion_graphics",
+      "path": "reports/studio-stability-20261007/motion_graphics/download.mp4",
+      "sha256": "017d844bc689701ee244f65bfa6e869a072f8164cc1b7e4ead56ece18e5bfbdc"
+    },
+    {
+      "case": "masking",
+      "path": "reports/studio-stability-20261007/compositing/download.mp4",
+      "sha256": "ca884e269ce769ccb77f59fb5c732d1d39ff3ca3b21aa0c343ab680d91776682"
+    },
+    {
+      "case": "masking",
+      "path": "reports/studio-stability-20261008/vfx/download.mp4",
+      "sha256": "a4d0ebd4306b0c14120a7c3f3e20c50099b50787d5c5081f94d3fa84c47f10e9"
+    },
+    {
+      "case": "tracking",
+      "path": "reports/studio-stability-20261007/compositing/download.mp4",
+      "sha256": "ca884e269ce769ccb77f59fb5c732d1d39ff3ca3b21aa0c343ab680d91776682"
+    },
+    {
+      "case": "tracking",
+      "path": "reports/studio-stability-20261008/vfx/download.mp4",
+      "sha256": "a4d0ebd4306b0c14120a7c3f3e20c50099b50787d5c5081f94d3fa84c47f10e9"
+    },
+    {
+      "case": "depth_occlusion",
+      "path": "reports/studio-stability-20261007/compositing/download.mp4",
+      "sha256": "ca884e269ce769ccb77f59fb5c732d1d39ff3ca3b21aa0c343ab680d91776682"
+    },
+    {
+      "case": "depth_occlusion",
+      "path": "reports/studio-stability-20261008/vfx/download.mp4",
+      "sha256": "a4d0ebd4306b0c14120a7c3f3e20c50099b50787d5c5081f94d3fa84c47f10e9"
+    },
+    {
+      "case": "segmentation",
+      "path": "reports/studio-stability-20261007/compositing/download.mp4",
+      "sha256": "ca884e269ce769ccb77f59fb5c732d1d39ff3ca3b21aa0c343ab680d91776682"
+    },
+    {
+      "case": "segmentation",
+      "path": "reports/studio-stability-20261008/vfx/download.mp4",
+      "sha256": "a4d0ebd4306b0c14120a7c3f3e20c50099b50787d5c5081f94d3fa84c47f10e9"
+    },
+    {
+      "case": "three_d",
+      "path": "reports/studio-stability-20261008/three_d/nvidia-preview/preview-4228a404-1c5c-4e38-9203-94881fe54b17.mp4",
+      "sha256": "a86dac7a549a37d0cde367b342e968345a100c772f1c64701f36c934c597eed8"
+    },
+    {
+      "case": "three_d",
+      "path": "reports/studio-stability-20261008/three_d/nvidia-preview/preview-977894ed-fec6-4aaf-916d-00b199bbed7b.mp4",
+      "sha256": "11ae448686136713fbf252a33f718e6c95aae373c79c5f21fc35b46dbe908c2e"
+    },
+    {
+      "case": "three_d",
+      "path": "reports/studio-stability-20261008/three_d/previous-cea213c58991e1aa7d91e0e7ce35ee4dd80fd2ba131541bb669b6d95cf7e0483.mp4",
+      "sha256": "cea213c58991e1aa7d91e0e7ce35ee4dd80fd2ba131541bb669b6d95cf7e0483"
+    },
+    {
+      "case": "three_d",
+      "path": "reports/studio-stability-20261008/three_d/previous-35dd534bcf041738538be9c89f2c08b3d575d1d43a6e9ac0b9d14d0f42b7184e.mp4",
+      "sha256": "35dd534bcf041738538be9c89f2c08b3d575d1d43a6e9ac0b9d14d0f42b7184e"
+    },
+    {
+      "case": "three_d",
+      "path": "reports/studio-stability-20261008/three_d/download.mp4",
+      "sha256": "35dd534bcf041738538be9c89f2c08b3d575d1d43a6e9ac0b9d14d0f42b7184e"
+    },
+    {
+      "case": "blender",
+      "path": "reports/studio-stability-20261008/three_d/nvidia-preview/preview-4228a404-1c5c-4e38-9203-94881fe54b17.mp4",
+      "sha256": "a86dac7a549a37d0cde367b342e968345a100c772f1c64701f36c934c597eed8"
+    },
+    {
+      "case": "blender",
+      "path": "reports/studio-stability-20261008/three_d/nvidia-preview/preview-977894ed-fec6-4aaf-916d-00b199bbed7b.mp4",
+      "sha256": "11ae448686136713fbf252a33f718e6c95aae373c79c5f21fc35b46dbe908c2e"
+    },
+    {
+      "case": "compositing",
+      "path": "reports/studio-stability-20261007/compositing/download.mp4",
+      "sha256": "ca884e269ce769ccb77f59fb5c732d1d39ff3ca3b21aa0c343ab680d91776682"
+    },
+    {
+      "case": "compositing",
+      "path": "reports/studio-stability-20261008/vfx/download.mp4",
+      "sha256": "a4d0ebd4306b0c14120a7c3f3e20c50099b50787d5c5081f94d3fa84c47f10e9"
+    },
+    {
+      "case": "vfx",
+      "path": "reports/studio-stability-20261007/compositing/download.mp4",
+      "sha256": "ca884e269ce769ccb77f59fb5c732d1d39ff3ca3b21aa0c343ab680d91776682"
+    },
+    {
+      "case": "vfx",
+      "path": "reports/studio-stability-20261008/vfx/download.mp4",
+      "sha256": "a4d0ebd4306b0c14120a7c3f3e20c50099b50787d5c5081f94d3fa84c47f10e9"
+    },
+    {
+      "case": "vfx",
+      "path": "reports/studio-stability-20261008/vfx/download.mp4",
+      "sha256": "a4d0ebd4306b0c14120a7c3f3e20c50099b50787d5c5081f94d3fa84c47f10e9"
+    },
+    {
+      "case": "audio",
+      "path": "reports/studio-stability-20261007/motion_graphics/download.mp4",
+      "sha256": "017d844bc689701ee244f65bfa6e869a072f8164cc1b7e4ead56ece18e5bfbdc"
+    },
+    {
+      "case": "save_reload",
+      "path": "reports/studio-stability-20261007/save_reload/download.mp4",
+      "sha256": "017d844bc689701ee244f65bfa6e869a072f8164cc1b7e4ead56ece18e5bfbdc"
+    },
+    {
+      "case": "save_reload",
+      "path": "reports/studio-stability-20261008/reload-download/download.mp4",
+      "sha256": "dd83c7e13e6c0b0c120bae3bee7a7e3ec5d6c8e129761bb718435880e12d08ca"
+    },
+    {
+      "case": "project_revisions",
+      "path": "reports/studio-stability-20261007/motion_graphics/download.mp4",
+      "sha256": "017d844bc689701ee244f65bfa6e869a072f8164cc1b7e4ead56ece18e5bfbdc"
+    },
+    {
+      "case": "export",
+      "path": "reports/studio-stability-20261007/final_render/download.mp4",
+      "sha256": "792366e4495b3c9c621bc90c1d6fe0c711195efd78aeae097f26c7aa758603fa"
+    },
+    {
+      "case": "export",
+      "path": "reports/studio-stability-20261008/export/download.mp4",
+      "sha256": "b6ecfcab0c28f6fa4472d8f93010f92eecf0fc90d8b03685cbd39d5a2cf433a3"
+    },
+    {
+      "case": "cuts_speed",
+      "path": "reports/studio-stability-20261007/cuts_speed/download.mp4",
+      "sha256": "da9151c7659e6d90a7ca0af601fbc5f87a2996c9dd20e9b9dda6b216823ad885"
+    },
+    {
+      "case": "cuts_speed",
+      "path": "reports/studio-stability-20261008/cuts_speed/download.mp4",
+      "sha256": "595ff74cc346bf18cfa70cc4c131395218f33be83e79a3487f1f925681a29684"
+    },
+    {
+      "case": "b_roll",
+      "path": "reports/studio-stability-20261007/b_roll/download.mp4",
+      "sha256": "f9dee830fa84b419407f5679e2f20594a7fe6af3c6524187c3553c1c4d7b117c"
+    },
+    {
+      "case": "color",
+      "path": "reports/studio-stability-20261007/motion_graphics/download.mp4",
+      "sha256": "017d844bc689701ee244f65bfa6e869a072f8164cc1b7e4ead56ece18e5bfbdc"
+    },
+    {
+      "case": "audio_restoration",
+      "path": "reports/studio-stability-20261007/motion_graphics/download.mp4",
+      "sha256": "017d844bc689701ee244f65bfa6e869a072f8164cc1b7e4ead56ece18e5bfbdc"
+    },
+    {
+      "case": "voiceover_sfx",
+      "path": "reports/studio-stability-20261007/motion_graphics/download.mp4",
+      "sha256": "017d844bc689701ee244f65bfa6e869a072f8164cc1b7e4ead56ece18e5bfbdc"
+    },
+    {
+      "case": "voiceover_sfx",
+      "path": "reports/studio-stability-20261007/voiceover_sfx/download.mp4",
+      "sha256": "d40545b628ffcb27ea8ea31b1da8c1ce246b90fd88aa91464642edd1e4fc4cc5"
+    },
+    {
+      "case": "voiceover_sfx",
+      "path": "reports/studio-stability-20261008/voiceover_sfx/download.mp4",
+      "sha256": "c3a89709108ec7d9e35a8337b6dc694638e4556f1e417fc0accc2f84e7ec220a"
+    },
+    {
+      "case": "director",
+      "path": "reports/studio-stability-20261007/director/download.mp4",
+      "sha256": "8f69f657c71abbcbc6e4aa1515f61b55bf7ade54c96e3383d977cb7c242949e8"
+    },
+    {
+      "case": "director",
+      "path": "reports/studio-stability-20261008/director/download.mp4",
+      "sha256": "1f2742d8a8168111229a826d713611864cae1117bbd9f92fc485a192e3b7b289"
+    }
+  ]
+}

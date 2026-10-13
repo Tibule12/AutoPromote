@@ -1,0 +1,30 @@
+{
+  "startedAt": "2026-10-08T12:46:13.544Z",
+  "projectName": "Studio trim clock QA 20261008 r4",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "renderJobsStarted": 0,
+  "checks": [
+    {
+      "id": "native_trim_2_to_8",
+      "result": "PASS",
+      "at": "2026-10-08T12:47:37.575Z"
+    },
+    {
+      "id": "paused_end_clock",
+      "result": "PASS",
+      "at": "2026-10-08T12:47:38.009Z"
+    },
+    {
+      "id": "timing_lock_and_undo",
+      "result": "PASS",
+      "at": "2026-10-08T12:47:52.808Z"
+    }
+  ],
+  "status": "FAIL",
+  "error": "page.waitForFunction: Timeout 20000ms exceeded.",
+  "finishedAt": "2026-10-08T12:48:28.102Z"
+}

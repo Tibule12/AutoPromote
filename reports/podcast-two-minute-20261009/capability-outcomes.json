@@ -1,0 +1,511 @@
+{
+  "at": "2026-10-09T10:28:52.867338+00:00",
+  "realAuth": true,
+  "headlessMuted": true,
+  "mocksQualify": false,
+  "readiness": "NOT_READY",
+  "statusScope": "PASS is scoped execution evidence; not all twelve gates or creative/production approval.",
+  "retainedBaselineUntouched": true,
+  "cases": [
+    {
+      "id": "media_ingest",
+      "capability": "Media ingest",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "PASS",
+      "failureFound": "None in tested 12s MP4",
+      "fixApplied": "None",
+      "retestResult": "Oct9: normal signed-in upload of the owned120s derived background source; used by actual final.",
+      "remainingIssue": "Original34-minute master preserved; final uses a120s derived source. MOV/VFR, interruptions and all claimed media remain unqualified.",
+      "userFacingSeverity": "None in tested flow",
+      "executionScope": "October9 native owned derived-source ingest",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/background-assembly.json",
+        "reports/podcast-two-minute-20261009/final-render-receipt.json"
+      ]
+    },
+    {
+      "id": "preview",
+      "capability": "Preview",
+      "testedEndToEnd": true,
+      "gpuUsed": false,
+      "status": "PASS",
+      "failureFound": "Paused finished result resumed after seek fromEOF; cold download buffered whole file and failed transport.",
+      "fixApplied": "Clear stale Play intent on finished-video end/paused scrub; owner-checked attachment download bypasses blob buffering.",
+      "retestResult": "Oct9: normal cold reopen with rendering worker offline; paused97.5s decoded candle frame and repeat native download with identical SHA.",
+      "remainingIssue": "Scoped edited-file playback passes. Predictive browser/final raster and 3D/matte/retimed audio remain unqualified.",
+      "userFacingSeverity": "None in scoped playback; high for broader predictive parity",
+      "executionScope": "October9 native cold recovery",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/final-worker-offline-recovery.json"
+      ]
+    },
+    {
+      "id": "final_render",
+      "capability": "Final render",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "NVENC intermediate mux dropped buffered final frames; loudnorm flush introduced104ms AAC packet-time jump.",
+      "fixApplied": "Use canonical duration for intermediate mux; set48kHz continuous audio sample time before programme trim.",
+      "retestResult": "Oct9: same edit native render/repeat download;120s,1080p24,2880frames,5760000audio samples; full decode and sampled picture review pass.",
+      "remainingIssue": "Fresh human listening/creative approval and broad codecs, media, matte temporal quality and production operations unqualified.",
+      "userFacingSeverity": "None in tested render path; broader qualification high",
+      "executionScope": "October9 native120s NVIDIA final",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/final-render-receipt.json",
+        "reports/podcast-two-minute-20261009/final-output-review.json",
+        "reports/podcast-two-minute-20261009/final-audio-clock-retest.json"
+      ]
+    },
+    {
+      "id": "captions",
+      "capability": "Captions",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "FAIL",
+      "failureFound": "Automatic multilingual ASR wording still repeats/errors. FullscreenB-roll covered early-burned captions.",
+      "fixApplied": "Manual51 English cues and source-pause hold; burn captions after media composition.",
+      "retestResult": "Oct9: corrected manual wording/timing survives cold save; final captions visible over church cutaway; actual coverage preflight passes.",
+      "remainingIssue": "Automatic ASR remains BROKEN. English is authored condensation/translation; fresh source-language listening and all animation/layout parity unqualified.",
+      "userFacingSeverity": "High for automatic captions",
+      "executionScope": "October9 manual workflow; retained actual CUDA ASR failure",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/final-output-review.json",
+        "reports/podcast-two-minute-20261009/final-preflight-cold-recovery.json",
+        "reports/studio-stability-20261008/results.json#/cases/3"
+      ]
+    },
+    {
+      "id": "reframing",
+      "capability": "Reframing",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Vertical source-sized output follows correct faces but default watermark is visibly clipped at right edge Oct 8: changing 16:9 analysis to 9:16 reused centered coordinates and cropped the speaker face out.",
+      "fixApplied": "Source resolution canvas handling repaired earlier; automatic face/camera path verified Bound timed watermark placement by the full asset dimensions; narrow canvases use a feasible safe margin. Corrected the local QA worker entrypoint after a package-import failure. Remove platform watermark per user instruction. Preserve detected face centres in source coordinates and reproject them on aspect/zoom changes; manual corrections discard detector anchors.",
+      "retestResult": "Oct9 held manual poses at six source camera cuts saved and sampled in final; automatic face following remains retained Oct8 evidence.",
+      "remainingIssue": "One podcast; no new automatic face analysis qualification. Broader automatic/parity and varied faces remain unqualified.",
+      "userFacingSeverity": "None within tested flow",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/4"
+      ]
+    },
+    {
+      "id": "overlays",
+      "capability": "Overlays",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "No-background text crashed FFmpeg",
+      "fixApplied": "Renderer CSS transparency conversion",
+      "retestResult": "Retained Oct7\u20138: Real combined edit output visually verified",
+      "remainingIssue": "Single 12-second H.264 flow; other presets, complex stacks and production hosting unqualified",
+      "userFacingSeverity": "None in tested flow",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/5"
+      ]
+    },
+    {
+      "id": "motion_graphics",
+      "capability": "Motion graphics",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Combined graph failed because title background CSS transparent was invalid FFmpeg color",
+      "fixApplied": "Convert transparent to black@0.0 in renderer color sanitizer",
+      "retestResult": "Retained Oct7\u20138: Same normal edit rendered, After played, downloaded and fully decoded; actual motion visible",
+      "remainingIssue": "Single 12-second H.264 flow; other presets, complex stacks and production hosting unqualified",
+      "userFacingSeverity": "None in tested flow",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/6"
+      ]
+    },
+    {
+      "id": "masking",
+      "capability": "Masking / subject isolation",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Point tuples could not be stored in Firestore; final export compared a transcoded source hash and stretched mixed frame-rate segments.",
+      "fixApplied": "Persist canonical scene JSON; preserve reviewed source bytes; normalize assembly segments to a shared 30 fps clock.",
+      "retestResult": "Oct9:12 native10s1080p24 SAM2 background-tone previews; owned receipt SHA/full decode and sampled review. Final uses assembled derived background media.",
+      "remainingIssue": "Background-tone subset only. Fullscreen120s final flattens SAM2 effects; two saved source-background projects retain controls. Complex hair/occlusion/depth-map and all live combinations unqualified.",
+      "userFacingSeverity": "None within tested scope",
+      "executionScope": "October9 background-tone subset; other effects retained Oct8",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/gpu-background-receipts.json",
+        "reports/podcast-two-minute-20261009/background-assembly.json"
+      ]
+    },
+    {
+      "id": "tracking",
+      "capability": "Tracking",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Point tuples could not be stored in Firestore; final export compared a transcoded source hash and stretched mixed frame-rate segments.",
+      "fixApplied": "Persist canonical scene JSON; preserve reviewed source bytes; normalize assembly segments to a shared 30 fps clock.",
+      "retestResult": "Retained Oct7\u20138: normal signed-in SAM2 preview, tracked callout, save/reopen, 12s export/download and inspected pixels. October9 background tone does not qualify a new tracking-control test.",
+      "remainingIssue": "Only the retained 3s attached-callout slice passes. New trackers, retiming, long motion and tracking with generated media remain unqualified.",
+      "userFacingSeverity": "None within tested scope",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/8"
+      ]
+    },
+    {
+      "id": "depth_occlusion",
+      "capability": "Depth / occlusion",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "BLOCKED",
+      "failureFound": "Point tuples could not be stored in Firestore; final export compared a transcoded source hash and stretched mixed frame-rate segments.",
+      "fixApplied": "Persist canonical scene JSON; preserve reviewed source bytes; normalize assembly segments to a shared 30 fps clock.",
+      "retestResult": "Retained Oct7\u20138: mask-derived text-behind-torso occlusion worked in a native 3s slice and 12s export. No new depth-map execution on October9.",
+      "remainingIssue": "Retained mask-derived occlusion passes; full depth-map editing and complex temporal occlusion remain unqualified. Background tone is not a depth-map test.",
+      "userFacingSeverity": "High for full depth workflows",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/9"
+      ]
+    },
+    {
+      "id": "segmentation",
+      "capability": "Segmentation",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Point tuples could not be stored in Firestore; final export compared a transcoded source hash and stretched mixed frame-rate segments.",
+      "fixApplied": "Persist canonical scene JSON; preserve reviewed source bytes; normalize assembly segments to a shared 30 fps clock.",
+      "retestResult": "Oct9:12 native10s1080p24 SAM2 background-tone previews; owned receipt SHA/full decode and sampled review. Final uses assembled derived background media.",
+      "remainingIssue": "Background-tone subset only. Fullscreen120s final flattens SAM2 effects; two saved source-background projects retain controls. Complex hair/occlusion/depth-map and all live combinations unqualified.",
+      "userFacingSeverity": "None within tested scope",
+      "executionScope": "October9 background-tone subset; other effects retained Oct8",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/gpu-background-receipts.json",
+        "reports/podcast-two-minute-20261009/background-assembly.json"
+      ]
+    },
+    {
+      "id": "three_d",
+      "capability": "3D",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "HQ returned 503 without a retained NVIDIA dispatch. Saved scene revisions were truncated; reopening cleared render receipts, a recovery panel covered controls, and completed-video scrubbing replaced the output with source footage.",
+      "fixApplied": "Connect existing owned 3D jobs to bounded retained NVIDIA transport with strict OptiX/private output and transfer checks. Bound scene revision tokens; preserve per-project render recovery; treat project opening as hydration; use existing After/export controls without the duplicate completed panel; seek the finished file using its edited clock.",
+      "retestResult": "Retained Oct7\u20138: Two real Studio HQ previews on NVIDIA L40S/OptiX. Preview and ARGB alpha decode/hash checks; 1s title composited over a real 12s source, native export reviewed. Cold reopen restores editable scene and the title at a paused 0.5s frame; native download has identical SHA. Switching away and back recovers the correct result.",
+      "remainingIssue": "One cinematic-title scene only, not creative approval. Other presets/assets/materials/poses and all controls are unqualified; support text has limited contrast on this background. Audio reactivity remains blocked. In-process QA dispatch is not production-durable across API restarts.",
+      "userFacingSeverity": "None within this tested scene; production and unsupported-control blockers remain",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/11"
+      ]
+    },
+    {
+      "id": "blender",
+      "capability": "Blender rendering",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "HQ returned 503 without a retained NVIDIA dispatch. Saved scene revisions were truncated; reopening cleared render receipts, a recovery panel covered controls, and completed-video scrubbing replaced the output with source footage.",
+      "fixApplied": "Connect existing owned 3D jobs to bounded retained NVIDIA transport with strict OptiX/private output and transfer checks. Bound scene revision tokens; preserve per-project render recovery; treat project opening as hydration; use existing After/export controls without the duplicate completed panel; seek the finished file using its edited clock.",
+      "retestResult": "Retained Oct7\u20138: Two real Studio HQ previews on NVIDIA L40S/OptiX. Preview and ARGB alpha decode/hash checks; 1s title composited over a real 12s source, native export reviewed. Cold reopen restores editable scene and the title at a paused 0.5s frame; native download has identical SHA. Switching away and back recovers the correct result.",
+      "remainingIssue": "One cinematic-title scene only, not creative approval. Other presets/assets/materials/poses and all controls are unqualified; support text has limited contrast on this background. Audio reactivity remains blocked. In-process QA dispatch is not production-durable across API restarts.",
+      "userFacingSeverity": "None within this tested scene; production and unsupported-control blockers remain",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/12"
+      ]
+    },
+    {
+      "id": "compositing",
+      "capability": "Compositing",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Point tuples could not be stored in Firestore; final export compared a transcoded source hash and stretched mixed frame-rate segments.",
+      "fixApplied": "Persist canonical scene JSON; preserve reviewed source bytes; normalize assembly segments to a shared 30 fps clock.",
+      "retestResult": "Oct9:12 native10s1080p24 SAM2 background-tone previews; owned receipt SHA/full decode and sampled review. Final uses assembled derived background media.",
+      "remainingIssue": "Background-tone subset only. Fullscreen120s final flattens SAM2 effects; two saved source-background projects retain controls. Complex hair/occlusion/depth-map and all live combinations unqualified.",
+      "userFacingSeverity": "None within tested scope",
+      "executionScope": "October9 background-tone subset; other effects retained Oct8",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/gpu-background-receipts.json",
+        "reports/podcast-two-minute-20261009/background-assembly.json"
+      ]
+    },
+    {
+      "id": "vfx",
+      "capability": "VFX",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Point tuples could not be stored in Firestore; final export compared a transcoded source hash and stretched mixed frame-rate segments.",
+      "fixApplied": "Persist canonical scene JSON; preserve reviewed source bytes; normalize assembly segments to a shared 30 fps clock.",
+      "retestResult": "Oct9:12 native10s1080p24 SAM2 background-tone previews; owned receipt SHA/full decode and sampled review. Final uses assembled derived background media.",
+      "remainingIssue": "Background-tone subset only. Fullscreen120s final flattens SAM2 effects; two saved source-background projects retain controls. Complex hair/occlusion/depth-map and all live combinations unqualified.",
+      "userFacingSeverity": "None within tested scope",
+      "executionScope": "October9 background-tone subset; other effects retained Oct8",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/gpu-background-receipts.json",
+        "reports/podcast-two-minute-20261009/background-assembly.json"
+      ]
+    },
+    {
+      "id": "audio",
+      "capability": "Audio",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "BLOCKED",
+      "failureFound": "Actual104ms AAC packet jump fixed. Processing-reference correlation0.987 below uncalibrated0.99target.",
+      "fixApplied": "48kHz sample clock after restoration/mix; independently count decoded audio samples.",
+      "retestResult": "Oct9:120s decoded audio, continuous AAC packets, zero full-scale samples. No fresh human listening for this delivery.",
+      "remainingIssue": "Human listening and restoration fidelity remain unqualified; prior listening approval was for other clips.",
+      "userFacingSeverity": "Medium: listening/fidelity review pending",
+      "executionScope": "October9 technical audio only",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/final-audio-clock-retest.json",
+        "reports/podcast-two-minute-20261009/final-worker-audio-reference-review.json"
+      ]
+    },
+    {
+      "id": "generated_image",
+      "capability": "Generated image assets",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "No normal Studio entry to the cached NVIDIA generation provider",
+      "fixApplied": "None; no new feature or external provider added",
+      "retestResult": "Retained Oct7\u20138: Normal authenticated Studio reachability check confirms the missing path",
+      "remainingIssue": "Private Factory remains disabled/founder-only. Idea-to-Video is a separate external/stock pipeline, unqualified in this NVIDIA sprint.",
+      "userFacingSeverity": "High",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/16"
+      ]
+    },
+    {
+      "id": "generated_video",
+      "capability": "Generated video assets",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Ungrounded plans, static motion and microphone mismatch rejected; incidental candle count initially misused as source requirement.",
+      "fixApplied": "Bind exact saved cue IDs/subjects/time; keep source requirements separate from incidental prompt details; same-SHA system recheck/owner acceptance.",
+      "retestResult": "Oct9: real Qwen/WanL40S church take accepted natively; V2 duration undo/redo/save/reopen, captioned final placement and export pass.",
+      "remainingIssue": "Only one private founder illustration. Microphone excluded. Ordinary-user automatic B-roll, generated image/raw paths, broader formats and production unqualified.",
+      "userFacingSeverity": "High for general users; none in this tested private take",
+      "executionScope": "October9 real private founder bridge",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/candle-native-acceptance.json",
+        "reports/podcast-two-minute-20261009/generated-broll-cold-recovery.json",
+        "reports/podcast-two-minute-20261009/final-output-review.json"
+      ]
+    },
+    {
+      "id": "generated_raw",
+      "capability": "Generated raw content",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "No normal Studio entry to the cached NVIDIA generation provider",
+      "fixApplied": "None; no new feature or external provider added",
+      "retestResult": "Retained Oct7\u20138: Normal authenticated Studio reachability check confirms the missing path",
+      "remainingIssue": "Private Factory remains disabled/founder-only. Idea-to-Video is a separate external/stock pipeline, unqualified in this NVIDIA sprint.",
+      "userFacingSeverity": "High",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/18"
+      ]
+    },
+    {
+      "id": "save_reload",
+      "capability": "Save / reload",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Stale render playback intent and recovered large-file blob download failed.",
+      "fixApplied": "Paused-result intent repair; owned attachment access independent of GPU.",
+      "retestResult": "Oct9: revision173 retains51 cues, exact generatedSHA/3sduration, grade/held transforms and MasterAAC256/24fps. Native cold result playback/download pass offline.",
+      "remainingIssue": "Same browser only; cloud conflict/cross-device/missing media unqualified.",
+      "userFacingSeverity": "None within tested scope",
+      "executionScope": "October9 normal native cold flow",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/final-saved-state-audit.json",
+        "reports/podcast-two-minute-20261009/final-worker-offline-recovery.json"
+      ]
+    },
+    {
+      "id": "project_revisions",
+      "capability": "Project revisions",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "No failure in local checkpoint restore",
+      "fixApplied": "None",
+      "retestResult": "Oct9: generated duration3\u21924s Undo/Redo/Undo and native saved/cold state pass. Earlier checkpoint/Director revisions retained.",
+      "remainingIssue": "No new server conflict/cross-device revision qualification.",
+      "userFacingSeverity": "None within tested scope",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/20"
+      ]
+    },
+    {
+      "id": "export",
+      "capability": "Export",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "FAIL",
+      "failureFound": "AAC bitrate ignored (fixed); videoBitrate/targetFileSizeMb/audioCodec/colorSpace still ignored by final consumer.",
+      "fixApplied": "AAC128/192/256/320 consumer implemented; native attachment download and exact audio sample gate repaired.",
+      "retestResult": "Oct9 selectedSource/24fps/H264/Master/AAC256 native output and sameSHA offline recovery/download pass.",
+      "remainingIssue": "Four active professional delivery controls remain ignored; broader export is PARTIAL, despite tested profile passing.",
+      "userFacingSeverity": "High for professional delivery settings",
+      "executionScope": "October9 selected profile and confirmed source consumer gaps",
+      "evidence": [
+        "reports/podcast-two-minute-20261009/final-render-receipt.json",
+        "reports/podcast-two-minute-20261009/final-worker-offline-recovery.json",
+        "python_media_worker/main_media_server.py"
+      ]
+    },
+    {
+      "id": "cuts_speed",
+      "capability": "Cuts / trim / speed",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "BLOCKED",
+      "failureFound": "TrimEnd ignored deliberate edits within100ms of sourceEOF.",
+      "fixApplied": "Use numerical EOF epsilon; keep minimum clip/EOF guards.",
+      "retestResult": "Oct9 native end120s saved/reopened and rendered exact. Other cuts/speed scopes retained.",
+      "remainingIssue": "Global and keyed speed/captions/masks/audio combinations still lack complete parity qualification.",
+      "userFacingSeverity": "Unqualified",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/22"
+      ]
+    },
+    {
+      "id": "b_roll",
+      "capability": "B-roll / multi-source",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "None found in tested flow",
+      "fixApplied": "None",
+      "retestResult": "Oct9 generated3s V2 church cutaway, native adjustment/history/save/cold reopen and final captioned placement pass.",
+      "remainingIssue": "One generated overlay. Multiple sources, music/transitions and every-user automatic selection/insertion unqualified.",
+      "userFacingSeverity": "None within tested scope",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/23"
+      ]
+    },
+    {
+      "id": "color",
+      "capability": "Color / finish",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "None in retained scoped flow",
+      "fixApplied": "None",
+      "retestResult": "Oct9 native precision grade and held framing saved/cold reopened and final samples visually reviewed.",
+      "remainingIssue": "Subtle grade on this podcast only; all presets, scopes/LUTs, color-management and temporal parity unqualified.",
+      "userFacingSeverity": "None in tested flow",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/24"
+      ]
+    },
+    {
+      "id": "audio_restoration",
+      "capability": "Audio restoration",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "BLOCKED",
+      "failureFound": "Actual104ms AAC packet jump fixed. Processing-reference correlation0.987 below uncalibrated0.99target.",
+      "fixApplied": "48kHz sample clock after restoration/mix; independently count decoded audio samples.",
+      "retestResult": "Oct9:120s decoded audio, continuous AAC packets, zero full-scale samples. No fresh human listening for this delivery.",
+      "remainingIssue": "Human listening and restoration fidelity remain unqualified; prior listening approval was for other clips.",
+      "userFacingSeverity": "Medium: listening/fidelity review pending",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/25"
+      ]
+    },
+    {
+      "id": "voiceover_sfx",
+      "capability": "Voice-over / SFX",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "BLOCKED",
+      "failureFound": "No upload, rendered-clock or full-decode failure in this imported WAV flow.",
+      "fixApplied": "None needed in the tested import; existing mute and fade controls used.",
+      "retestResult": "Retained Oct7\u20138: Real owned speech WAV import, original audio muted, 0.2s fades, actual GPU 12s export/native download; full decode and representative footage checked.",
+      "remainingIssue": "New mixed output has no human listening acceptance; microphone capture and complex mixes remain unqualified.",
+      "userFacingSeverity": "Unqualified",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/26"
+      ]
+    },
+    {
+      "id": "three_d_audio",
+      "capability": "3D audio reactivity",
+      "testedEndToEnd": false,
+      "gpuUsed": false,
+      "status": "BLOCKED",
+      "failureFound": "The existing HQ renderer does not receive or apply a real audio envelope.",
+      "fixApplied": "HQ dispatch repaired for ordinary 3D; no fabricated audio response or new preset added.",
+      "retestResult": "Retained Oct7\u20138: Ordinary NVIDIA HQ path works. Existing advanced control explicitly remains ineffective in exported audio-reactive frames.",
+      "remainingIssue": "Actual source-audio analysis, envelope transport and final-frame modulation remain unimplemented/unqualified.",
+      "userFacingSeverity": "High",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/27"
+      ]
+    },
+    {
+      "id": "director",
+      "capability": "Director / analysis",
+      "testedEndToEnd": true,
+      "gpuUsed": true,
+      "status": "PASS",
+      "failureFound": "Reviewable proposal was inside a CSS-hidden compact timeline",
+      "fixApplied": "Moved the existing review panel into the visible inspector; preserved all source/reviewer/revision guards",
+      "retestResult": "Retained Oct7\u20138: Real source cuts at 4.7/5.2s; visible exact split preview; server revision and signed-in approval both HTTP201; actual split applied and 12s export decoded/reviewed. Oct 8 headless: real source cuts 4.7/5.2s, reviewable split, authenticated server revision 201 and approval 201, applied split and actual 12s landscape export/download; picture inspected. This is the supported source-analysis Director, not free-form NVIDIA browser planning.",
+      "remainingIssue": "One supported split only; free-form planning, all trims, conflicts/rejection recovery and multi-user behavior unqualified.",
+      "userFacingSeverity": "None within tested scope",
+      "executionScope": "Retained October7\u20138 execution; no new all-feature rerun on October9",
+      "evidence": [
+        "reports/studio-stability-20261008/results.json#/cases/28"
+      ]
+    }
+  ],
+  "gpuState": {
+    "at": "2026-10-09T10:01:40.397225+00:00",
+    "instance": "autopromote-l40s-staging",
+    "instanceId": "xgh6wcu74",
+    "authorizedHardCutoffSast": "2026-10-09T13:00:00+02:00",
+    "noOtherRunningGpuJobsObserved": true,
+    "ownedRenderWorkerStopped": true,
+    "guestPoweroffCommandAccepted": true,
+    "subsequentSshConnectionClosed": true,
+    "providerStoppedStateConfirmed": false,
+    "billingStopConfirmed": false,
+    "cloudApiBlocker": "Repeated authenticated Brev ls/stop and direct exact-instance API requests returned EOF or timed out; unauthenticated endpoint401 was reachable. Precise provider-side cause unconfirmed.",
+    "independentStopWatchdogPid": 103220,
+    "remoteDeadlineFallbackWasArmed": "2026-10-09T10:59:00Z",
+    "gpuRestartedAfterCompletedRender": false,
+    "updatedAt": "2026-10-09T10:27:37.499118+00:00",
+    "stopRetryStartsImmediately": true,
+    "stopRetryLog": "/home/tibule12/.local/share/autopromote/podcast-two-minute-20261009/gpu-stop-retry-1300.log",
+    "replacementWatchdogVerifiedAlive": true,
+    "latestBrevStateProbe": "12:25 SAST: bounded status request timed out; no provider stop confirmation."
+  }
+}

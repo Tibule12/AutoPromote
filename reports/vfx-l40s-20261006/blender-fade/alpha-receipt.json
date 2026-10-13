@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "frame_count": 24,
+  "samples": [
+    {
+      "index": 0,
+      "alpha_max": 0,
+      "alpha_sum": 0
+    },
+    {
+      "index": 1,
+      "alpha_max": 107,
+      "alpha_sum": 217035
+    },
+    {
+      "index": 6,
+      "alpha_max": 255,
+      "alpha_sum": 1084963
+    },
+    {
+      "index": 12,
+      "alpha_max": 255,
+      "alpha_sum": 1166762
+    },
+    {
+      "index": 22,
+      "alpha_max": 204,
+      "alpha_sum": 933779
+    },
+    {
+      "index": 23,
+      "alpha_max": 128,
+      "alpha_sum": 585672
+    }
+  ]
+}

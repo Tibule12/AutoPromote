@@ -1,0 +1,444 @@
+{
+  "status": "PASS",
+  "environment": "Local Chromium / software WebGL; no production login or deployment",
+  "video": "editing-film.webm",
+  "checks": [
+    {
+      "label": "Public root uses the actual App/router and a Three.js WebGL hero"
+    },
+    {
+      "label": "Kinetic headline runs real finite mask, blur, scale and gradient animations",
+      "animationCount": 4,
+      "matteCount": 3
+    },
+    {
+      "label": "Unconfigured After Effects asset slots fetch no authored media or Lottie runtime"
+    },
+    {
+      "label": "Opening sequence: 01-camera-entry",
+      "engine": "three.js r186",
+      "meshCount": "61",
+      "renderCount": "66",
+      "drawCalls": "11",
+      "time": "3.297",
+      "camera": "0.043,0.320,11.720",
+      "speaker": "host",
+      "videoTime": "0.000",
+      "cutCount": "0",
+      "captionLetters": "0",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "1",
+      "verticalCount": "0",
+      "running": "true"
+    },
+    {
+      "label": "Opening sequence: 02-timeline-assembly",
+      "engine": "three.js r186",
+      "meshCount": "61",
+      "renderCount": "181",
+      "drawCalls": "38",
+      "time": "8.733",
+      "camera": "0.000,0.320,11.648",
+      "speaker": "host",
+      "videoTime": "0.000",
+      "cutCount": "8",
+      "captionLetters": "0",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "true"
+    },
+    {
+      "label": "Opening sequence: 03-speaker-and-sync",
+      "engine": "three.js r186",
+      "meshCount": "61",
+      "renderCount": "235",
+      "drawCalls": "45",
+      "time": "11.996",
+      "camera": "0.000,0.320,11.648",
+      "speaker": "guest",
+      "videoTime": "1.153",
+      "cutCount": "8",
+      "captionLetters": "0",
+      "selected": "false",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "true"
+    },
+    {
+      "label": "Opening sequence: 04-director-and-captions",
+      "engine": "three.js r186",
+      "meshCount": "61",
+      "renderCount": "306",
+      "drawCalls": "56",
+      "time": "16.183",
+      "camera": "0.000,0.320,11.648",
+      "speaker": "host",
+      "videoTime": "0.273",
+      "cutCount": "8",
+      "captionLetters": "23",
+      "selected": "true",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "true"
+    },
+    {
+      "label": "Opening sequence: 05-selected-range-lift",
+      "engine": "three.js r186",
+      "meshCount": "61",
+      "renderCount": "368",
+      "drawCalls": "64",
+      "time": "19.780",
+      "camera": "0.000,0.320,11.473",
+      "speaker": "host",
+      "videoTime": "0.273",
+      "cutCount": "8",
+      "captionLetters": "23",
+      "selected": "true",
+      "cropAspect": "0.562",
+      "matteCount": "0",
+      "verticalCount": "0",
+      "running": "true"
+    },
+    {
+      "label": "Opening sequence: 06-vertical-export",
+      "engine": "three.js r186",
+      "meshCount": "61",
+      "renderCount": "443",
+      "drawCalls": "59",
+      "time": "24.000",
+      "camera": "0.000,0.320,11.348",
+      "speaker": "host",
+      "videoTime": "0.273",
+      "cutCount": "8",
+      "captionLetters": "23",
+      "selected": "true",
+      "cropAspect": "hidden",
+      "matteCount": "0",
+      "verticalCount": "3",
+      "running": "false"
+    },
+    {
+      "label": "Opening film holds after completion instead of rendering forever"
+    },
+    {
+      "label": "Desktop 1440×900 has no horizontal overflow",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "overflow": []
+    },
+    {
+      "label": "Replay, pause and resume control the real animation clock"
+    },
+    {
+      "label": "Pinned scroll chapter 1",
+      "target": 2.8,
+      "top": 0.390625
+    },
+    {
+      "label": "Pinned scroll chapter 2",
+      "target": 8.5,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 3",
+      "target": 10.8,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 4",
+      "target": 12.2,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 5",
+      "target": 15,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 6",
+      "target": 17,
+      "top": 0
+    },
+    {
+      "label": "Animated crop guide reaches 9:16 while the subject remains framed",
+      "ratio": 0.562
+    },
+    {
+      "label": "Pinned scroll chapter 7",
+      "target": 20,
+      "top": 0
+    },
+    {
+      "label": "Pinned scroll chapter 8",
+      "target": 24,
+      "top": 0
+    },
+    {
+      "label": "Offscreen hero stops rendering while the visitor reads later sections"
+    },
+    {
+      "label": "Existing podcast demo plays; Escape closes it and restores focus"
+    },
+    {
+      "label": "Sign In opens the existing form and disposes the homepage GPU resources"
+    },
+    {
+      "label": "Start Creating opens the existing registration flow"
+    },
+    {
+      "label": "desktop-1920 renders the animated product story without overflow",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "overflow": []
+    },
+    {
+      "label": "tablet-820 renders the animated product story without overflow",
+      "width": 820,
+      "scrollWidth": 820,
+      "overflow": []
+    },
+    {
+      "label": "tablet-820 mobile navigation scrolls without changing the HashRouter route"
+    },
+    {
+      "label": "mobile-390 renders the animated product story without overflow",
+      "width": 390,
+      "scrollWidth": 390,
+      "overflow": []
+    },
+    {
+      "label": "Mobile retains the pinned editing story and vertical transformation",
+      "width": 390,
+      "scrollWidth": 390,
+      "overflow": []
+    },
+    {
+      "label": "mobile-390 mobile navigation scrolls without changing the HashRouter route"
+    },
+    {
+      "label": "Reduced motion loads no WebGL, runs no animations and retains all eight editing chapters",
+      "width": 390,
+      "scrollWidth": 390,
+      "overflow": []
+    },
+    {
+      "label": "A device without WebGL keeps the editor preview and working CTAs"
+    },
+    {
+      "label": "Existing authenticated dashboard renders with a local test user; homepage styles and WebGL are absent"
+    },
+    {
+      "label": "No uncaught page exceptions or browser console errors"
+    }
+  ],
+  "frames": [
+    {
+      "name": "01-camera-entry",
+      "sha256": "09430e5baa00948f0f4a8290770b3dff8b476fbf40c8fbb11df5c498807d5d16",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "61",
+        "renderCount": "66",
+        "drawCalls": "11",
+        "time": "3.297",
+        "camera": "0.043,0.320,11.720",
+        "speaker": "host",
+        "videoTime": "0.000",
+        "cutCount": "0",
+        "captionLetters": "0",
+        "selected": "false",
+        "cropAspect": "hidden",
+        "matteCount": "1",
+        "verticalCount": "0",
+        "running": "true"
+      }
+    },
+    {
+      "name": "02-timeline-assembly",
+      "sha256": "1f0b5d0d2ec8e79b4aab4d394e93a6482580c12e298fa750c979dec5754bfb96",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "61",
+        "renderCount": "181",
+        "drawCalls": "38",
+        "time": "8.733",
+        "camera": "0.000,0.320,11.648",
+        "speaker": "host",
+        "videoTime": "0.000",
+        "cutCount": "8",
+        "captionLetters": "0",
+        "selected": "false",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "true"
+      }
+    },
+    {
+      "name": "03-speaker-and-sync",
+      "sha256": "1b2ab4e42a3f5f057f7e83b42ed3be1e6a70177cf248c06397ec26c12fd959b4",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "61",
+        "renderCount": "235",
+        "drawCalls": "45",
+        "time": "11.996",
+        "camera": "0.000,0.320,11.648",
+        "speaker": "guest",
+        "videoTime": "1.153",
+        "cutCount": "8",
+        "captionLetters": "0",
+        "selected": "false",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "true"
+      }
+    },
+    {
+      "name": "04-director-and-captions",
+      "sha256": "4b0c8be7b4382eb73ede04ebe2b8c3652e7e2ea9c7a2c1f954aca2c4c2a6ea16",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "61",
+        "renderCount": "306",
+        "drawCalls": "56",
+        "time": "16.183",
+        "camera": "0.000,0.320,11.648",
+        "speaker": "host",
+        "videoTime": "0.273",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "true",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "true"
+      }
+    },
+    {
+      "name": "05-selected-range-lift",
+      "sha256": "2494d11da9f7dbee538e352c1d1971a74bc5c3ca29d879690098c5d117642836",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "61",
+        "renderCount": "368",
+        "drawCalls": "64",
+        "time": "19.780",
+        "camera": "0.000,0.320,11.473",
+        "speaker": "host",
+        "videoTime": "0.273",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "true",
+        "cropAspect": "0.562",
+        "matteCount": "0",
+        "verticalCount": "0",
+        "running": "true"
+      }
+    },
+    {
+      "name": "06-vertical-export",
+      "sha256": "03cdb2ff95a776dc18eccab8dffb3aa61788681e1c9b32c86b31b39800d45d95",
+      "scene": {
+        "engine": "three.js r186",
+        "meshCount": "61",
+        "renderCount": "443",
+        "drawCalls": "59",
+        "time": "24.000",
+        "camera": "0.000,0.320,11.348",
+        "speaker": "host",
+        "videoTime": "0.273",
+        "cutCount": "8",
+        "captionLetters": "23",
+        "selected": "true",
+        "cropAspect": "hidden",
+        "matteCount": "0",
+        "verticalCount": "3",
+        "running": "false"
+      }
+    },
+    {
+      "name": "scroll-1",
+      "sha256": "0d0fcea7e77c543e7759130828ed2e486a98f5ca65df4bc29db5b4c40b95cb0f"
+    },
+    {
+      "name": "scroll-2",
+      "sha256": "d29c976b5daa7f17a96443a41c40dccfde3be24c0d76a6d3c6e597974791be18"
+    },
+    {
+      "name": "scroll-3",
+      "sha256": "34c391737046a8bfcc5ae8378d057961f9a0e6683b2c5a9ed4b59c5ba7a6997b"
+    },
+    {
+      "name": "scroll-4",
+      "sha256": "2cd8ba79ff97bbd17697aaed2bab107783a5447a2914fc2c39987d5a7241503e"
+    },
+    {
+      "name": "scroll-5",
+      "sha256": "99ddde58ce33fe6cd008b0b05ae3dc6f71d174eeb2c9353ed23846318453c627"
+    },
+    {
+      "name": "scroll-6",
+      "sha256": "c7fccaed44fff2b86763af977064e5802c134e8cf9faffccb60334dd6177062e"
+    },
+    {
+      "name": "scroll-7",
+      "sha256": "f7ade2317da52fbeed60959a7f2cfa7e68433ff4b77881161375e064676a11cc"
+    },
+    {
+      "name": "scroll-8",
+      "sha256": "ff8196553b325c466ff9d221cdb4bc31e9508e7a04ac87e43da28e67bc983da7"
+    },
+    {
+      "name": "podcast-demo",
+      "sha256": "24a1d486267900b834de5e7aac5faaaad4781993664cc358221556848223b628"
+    },
+    {
+      "name": "sign-in",
+      "sha256": "cf18dfa7c1387158b814ef948e81a23c8a785756d2b515f499f30ea60ccb3a36"
+    },
+    {
+      "name": "registration",
+      "sha256": "0e70307a8040110bfa2d33fdc83518705ad29e32aacfd5d144aaf8c58383c43b"
+    },
+    {
+      "name": "desktop-1920",
+      "sha256": "07c7236cf403d7ded04221b5c553444f4a0bc812570d9cde89060e53798fa611"
+    },
+    {
+      "name": "tablet-820",
+      "sha256": "42c3d6a576404377517d3f31f73bda3f42767ba064edc845b12efcab081ff5f8"
+    },
+    {
+      "name": "mobile-390",
+      "sha256": "ae5a9ba9b3150c062927ca53042ad4988265dafcb7c341951ed686e4c5d04f1e"
+    },
+    {
+      "name": "mobile-editor",
+      "sha256": "04726ce63fb328876338e1fe587363cd4db1c81471bbc0179fc35bbd93678987"
+    },
+    {
+      "name": "mobile-scroll-reframe",
+      "sha256": "c18800275ec4893c6a0bb44af48aee65d46caa31520af03a59619644630fc95d"
+    },
+    {
+      "name": "reduced-motion",
+      "sha256": "9637d259c7a54ee7e43dc9afad8e495b6c5ffd2486aa96f7d4b0b98a1e2b89aa"
+    },
+    {
+      "name": "no-webgl-fallback",
+      "sha256": "7ed4a066afbe920cc4fdf0f48f9221aa8971a63f82231c2be2a1a881d491e588"
+    },
+    {
+      "name": "dashboard-local-fixture",
+      "sha256": "265d601f32e68016aac8e382be81dab0017c6154c4ec608aff0ad3e7c6d8d2dd"
+    }
+  ],
+  "errors": []
+}

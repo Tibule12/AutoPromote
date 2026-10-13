@@ -1,0 +1,25 @@
+{
+  "recorded_at": "2026-10-06T03:04:43.218768+00:00",
+  "source_title": "People recording a podcast in a studio",
+  "creator": "Ruben Velasco",
+  "item_page": "https://mixkit.co/free-stock-video/people-recording-a-podcast-in-a-studio-2948/",
+  "download": "https://assets.mixkit.co/videos/2948/2948-720.mp4",
+  "license": "https://mixkit.co/license/#videoFree",
+  "original_sha256": "7f316929add60ab05cb3edaa91a5acf6bdc4bbe9c2001676238e010fb2ca17c3",
+  "original_bytes": 3011749,
+  "video_encoding": "H.264, 1280x720, 24 fps, CRF 24, faststart, no audio",
+  "poster": "Frame at one second, WebP quality 82",
+  "assets": [
+    {
+      "file": "frontend/public/landing/podcast-conversation.mp4",
+      "bytes": 1232922,
+      "sha256": "260f7e4abfa68e51cafd244c19ee51b8b455f068ea0858f1faafa2b8a5cfeb40"
+    },
+    {
+      "file": "frontend/public/landing/podcast-conversation.webp",
+      "bytes": 69358,
+      "sha256": "8295000dfedef60acc1d718a500ca79edbc0d20fa653944440e24b820d6e885e"
+    }
+  ],
+  "disclosure": "Real stock footage. Camera and social views are digital crops of one recording. Illustrative captions/analysis/audio; not a customer endorsement, an actual backend result or an After Effects render."
+}

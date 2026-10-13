@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-09T09:41:59.994543+00:00",
+  "scope": "Final decoded mono signal versus independently filtered source with the actual saved Natural restoration and repaired sample clock; technical only.",
+  "referenceSeconds": 120.0,
+  "finalSeconds": 120.0,
+  "lagMs": 0.0,
+  "alignedCorrelation": 0.9875800683014033,
+  "minimumAudibleOneSecondCorrelation": 0.9346514372474728,
+  "peak": 0.9621459245681763,
+  "fullScaleSamples": 0,
+  "passed": false,
+  "humanListening": false
+}

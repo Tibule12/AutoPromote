@@ -1,0 +1,16 @@
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s][A
+
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  7.56it/s][A
+
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  5.40it/s][A
+Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  7.15it/s]
+{"event": "full_video_refinement_loaded", "strength": 0.5, "frames": 121, "spatialFactor": 16}
+{"event": "full_video_refinement_step", "step": 1, "seconds": 155.1316832199991}
+{"event": "full_video_refinement_step", "step": 6, "seconds": 193.51001999099753}
+{"event": "full_video_refinement_step", "step": 11, "seconds": 232.17546907499855}
+{"event": "full_video_refinement_step", "step": 16, "seconds": 270.92444662900016}
+243765, python3, 17918 MiB
+
+Loading pipeline components...: 100%|██████████| 5/5 [01:00<00:00,  8.40s/it]
+Loading pipeline components...: 100%|██████████| 5/5 [01:00<00:00, 12.18s/it]

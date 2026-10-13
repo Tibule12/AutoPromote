@@ -1,0 +1,59 @@
+{
+  "status": "CAPTURED_SCOPED_TIMING_GUARDS_PASS_RASTER_CONFORMANCE_UNQUALIFIED",
+  "scope": "Minimal caption with icon, DejaVu Sans/Noto fonts, one saved 12s source. Not all caption styles or retimed cues.",
+  "nativeTimes": [
+    1,
+    1.1,
+    1.3,
+    2.9,
+    3,
+    3.1,
+    3.5,
+    3.9,
+    4,
+    4.9,
+    5,
+    5.5,
+    7,
+    7.1,
+    7.5,
+    8.9,
+    9,
+    10
+  ],
+  "nativeCaptionPresenceHalfOpenChecksPassed": 18,
+  "unexpectedWordAnimationOrTransform": false,
+  "fontSizeCssAtPreview": "12.5232px",
+  "staticWhiteCoreDiagnostics": {
+    "ROI": [
+      60,
+      330,
+      285,
+      353
+    ],
+    "threshold": 230,
+    "preview": {
+      "bbox": [
+        67,
+        336,
+        278,
+        351
+      ],
+      "pixels": 78
+    },
+    "final": {
+      "bbox": [
+        67,
+        336,
+        271,
+        345
+      ],
+      "pixels": 43
+    },
+    "qualification": "Encoded white-core edges differ with antialiasing. This diagnostic does not establish a pass/fail tolerance for all glyphs."
+  },
+  "visualReview": "Text wording, font scale and white colour now materially match at 7.5s; residual line-end/baseline and edge/fade raster conformance remain to qualify.",
+  "documentSha256": "50e7a49b20f2560cc44d9b76a0aa21aabb9fb0b5bd3ede236161cc725c57189a",
+  "outputSha256": "d82c620ab2e6dd82cf689f14e5990cdb6469a33337323a719eadd5f395b60e40",
+  "gpuJobsStarted": 0
+}

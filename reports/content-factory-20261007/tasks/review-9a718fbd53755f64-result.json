@@ -1,0 +1,98 @@
+{
+  "fingerprint": "c791ca101fd3e580dd50345b6b351ebf90623f2488c61c4a9cdcb64ef267c1e1",
+  "result": {
+    "id": "review-9a718fbd53755f64",
+    "value": {
+      "accepted": false,
+      "reason": "The sail and mast are not consistently in frame throughout the sequence, and the sea becomes a solid white surface at the end, violating two key criteria. The transformation also lacks clear geometry deformation as described in the prompt, appearing more like a cutout replacement than a shape-key morphing process. The final frame shows the hull floating above water, but the water is not visibly blue and reflective as required, instead being white and non-reflective, which contradicts the final '",
+      "revisionInstructions": "Ensure the sail and mast remain fully in frame throughout the entire duration. Modify the final environment to maintain a visibly blue and reflective water surface, not a solid white one. Implement a true shape-key deformation for the hull and sail, showing progressive geometric changes rather than abrupt replacements. Verify all frames visually match these requirements before submission",
+      "criteria": [
+        {
+          "criterion": "Paper hull and central fold visibly change shape and material into one timber sailing vessel",
+          "passed": false,
+          "observation": "Transformation appears as a cutout replacement rather than a shape-key deformation; no visible geometry morphing between frames"
+        },
+        {
+          "criterion": "The whole sail and mast remain in frame",
+          "passed": false,
+          "observation": "Sail and mast are partially or fully out of frame in multiple frames (e.g., 0.000s, 1.200s, 2.400s), failing to stay consistently in frame"
+        },
+        {
+          "criterion": "The hull floats above the visible water surface at the ending",
+          "passed": false,
+          "observation": "Final frame shows hull floating above water, but the water is not visibly blue and reflective — it is a solid white surface, violating the requirement"
+        },
+        {
+          "criterion": "The sea remains visibly blue and reflective rather than becoming a solid white surface",
+          "passed": false,
+          "observation": "Water surface becomes solid white and non-reflective in later frames (e.g., 4.800s, 5.920s), contradicting the requirement for blue and reflective water"
+        }
+      ]
+    },
+    "rawValue": {
+      "accepted": false,
+      "reason": "The sail and mast are not consistently in frame throughout the sequence, and the sea becomes a solid white surface at the end, violating two key criteria. The transformation also lacks clear geometry deformation as described in the prompt, appearing more like a cutout replacement than a shape-key morphing process. The final frame shows the hull floating above water, but the water is not visibly blue and reflective as required, instead being white and non-reflective, which contradicts the final '",
+      "revisionInstructions": "Ensure the sail and mast remain fully in frame throughout the entire duration. Modify the final environment to maintain a visibly blue and reflective water surface, not a solid white one. Implement a true shape-key deformation for the hull and sail, showing progressive geometric changes rather than abrupt replacements. Verify all frames visually match these requirements before submission",
+      "criteria": [
+        {
+          "criterion": "Paper hull and central fold visibly change shape and material into one timber sailing vessel",
+          "passed": false,
+          "observation": "Transformation appears as a cutout replacement rather than a shape-key deformation; no visible geometry morphing between frames"
+        },
+        {
+          "criterion": "The whole sail and mast remain in frame",
+          "passed": false,
+          "observation": "Sail and mast are partially or fully out of frame in multiple frames (e.g., 0.000s, 1.200s, 2.400s), failing to stay consistently in frame"
+        },
+        {
+          "criterion": "The hull floats above the visible water surface at the ending",
+          "passed": false,
+          "observation": "Final frame shows hull floating above water, but the water is not visibly blue and reflective — it is a solid white surface, violating the requirement"
+        },
+        {
+          "criterion": "The sea remains visibly blue and reflective rather than becoming a solid white surface",
+          "passed": false,
+          "observation": "Water surface becomes solid white and non-reflective in later frames (e.g., 4.800s, 5.920s), contradicting the requirement for blue and reflective water"
+        }
+      ]
+    },
+    "contractRepairs": [],
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 2400
+    },
+    "evidenceSha256": "1ec47e668d8ca2a7af51e5768cb337538c2676fd61ab89764acd0f4a12a740b3",
+    "frameEvidence": [
+      {
+        "timestamp": 0,
+        "sha256": "fc0f8fa84c949780197e2e3a1e16299f567fbdc997a2e6d5a3b8b07b1c849d0a"
+      },
+      {
+        "timestamp": 1.2,
+        "sha256": "22f25a6c61144b703269067c21d42ad1eb55fb140bc357c0ee43224bf3f3b562"
+      },
+      {
+        "timestamp": 2.4,
+        "sha256": "39015a562c1038127a38013619f681329e36977e4ae82982d4695568c201abaf"
+      },
+      {
+        "timestamp": 3.6,
+        "sha256": "516fc15ada2bef1545e97cf8292d41bae8e970e98234164fe72f9cd26f7ff5db"
+      },
+      {
+        "timestamp": 4.8,
+        "sha256": "c93970d5e3e81e3420c1db5c95c83e2845ec391b660bcdfc26ba44fd915596e6"
+      },
+      {
+        "timestamp": 5.92,
+        "sha256": "5645735ddf14e5a16ebbe4337e8ae256fa3e6111f7f039f1080ce6c334ba8254"
+      }
+    ],
+    "seconds": 22.726387483999133,
+    "gpu": "NVIDIA L40S"
+  }
+}

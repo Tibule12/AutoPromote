@@ -1,0 +1,148 @@
+{
+  "url": "http://localhost:5000/",
+  "text": "CREATE\nViral Clip Studio\n🔈\nExplain This Tab\nThulani Mtshwelo\ntmtshwelo21@gmail.com\nAutoPromote\nCreator workspace\nOverview\n\nCREATE\n\nCam Combiner\nFind Viral Clips\nViral Clip Studio\nSmart Promo\nIdea-to-Video\n\nPUBLISH\n\nPublisher\nQueue\n\nMEASURE\n\nAnalytics\n\nSETTINGS\n\nConnections\nTeam\nBilling\nSecurity\nNeed help getting started?\nVisit the docs →\nSign out\nCREATE\nViral Clip Studio\n\nEdit detected moments on the full timeline, refine hooks, and render short clips.\n\nOpen saved project\nStudio canonical visual QA 20261008Studio stereo delivery 20261008Studio shared-state 20261008\n☁️\nBring your footage into Studio\n\nChoose one video or several scenes and camera takes. The first video opens the editor; the rest appear in your project library.\n\nChoose Videos",
+  "controls": [
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": "Notifications",
+      "text": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Overview",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Cam Combiner",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Find Viral Clips",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Viral Clip Studio",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Smart Promo",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Idea-to-Video",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Publisher",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Queue",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Analytics",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Connections",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Team",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Billing",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Security",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": null,
+      "text": "Sign out",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Studio canonical visual QA 20261008",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Studio stereo delivery 20261008",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "button",
+      "label": null,
+      "text": "Studio shared-state 20261008",
+      "options": null
+    },
+    {
+      "tag": "INPUT",
+      "type": "file",
+      "label": null,
+      "text": null,
+      "placeholder": "",
+      "options": null
+    },
+    {
+      "tag": "BUTTON",
+      "type": "submit",
+      "label": "Open Chat",
+      "text": "",
+      "options": null
+    }
+  ],
+  "media": []
+}

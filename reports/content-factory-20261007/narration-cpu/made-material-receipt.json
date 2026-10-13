@@ -1,0 +1,32 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "made-material",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "It made the raw material.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 0.98,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/work/narration-cpu/made-material.wav",
+    "sha256": "518681c76c6a4eb62b9a6bd860fa081bcb708e5d6c38099bc3f4636a7e4128d3",
+    "duration": 1.975,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cpu",
+  "gpu": null,
+  "phonemes": [
+    "\u02cc\u026at m\u02ccAd \u00f0\u0259 \u0279\u02c8\u0254 m\u0259t\u02c8\u026a\u0279i\u0259l."
+  ],
+  "seconds": 0.7769303169998238,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

@@ -1,0 +1,24 @@
+{
+  "model": "original-procedural-ident-sound",
+  "modelRevision": "ident-score-v1",
+  "tool": "AutoPromote original ident sound design",
+  "seed": 20261008215,
+  "sourceBrief": "Private AutoPromote Small Boat opening identity. Physical folded geometry and illuminated depth foreshadow the paper-to-sail transformation. Begin with a brief dark anticipation then show readable machined edges in close view, unfold layers around their own physical pivots and pull back to the complete original identity. Hold the logo clearly. Fix the blank opening and disconnected world-origin rotation of the preceding take. Editable timing, camera, material, lighting and sound; no flat fade or decorative particle substitute. Complete final framing must include every logo blade and wordmark glyph with a safe margin. This corrects the cropped v7 preview, whose evidence is preserved.",
+  "settings": {
+    "style": "cinematic",
+    "duration": 4.5,
+    "sampleRate": 48000,
+    "impactAt": 2.77,
+    "stems": [
+      "rising air",
+      "impact",
+      "resolving four-note resonance"
+    ]
+  },
+  "artifact": {
+    "path": "reports/flagship-founder-film-production-v5-20261008/audio/ident-v8/ident.wav",
+    "sha256": "8bb142a54fe04264e466aa0e07c167d5b6af29ad8da06c13670bd4f02ba4a02d",
+    "duration": 4.5
+  },
+  "status": "GENERATED_PENDING_LISTENING_REVIEW"
+}

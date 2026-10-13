@@ -1,0 +1,27 @@
+{
+  "accepted": false,
+  "reason": "Reject the steering action. Photographic surfaces and face stability are useful, but the hands leave the wheel and mime a control that does not exist. It cannot supply the human story payoff.",
+  "reviewer": "Codex decoded-frame and native keyframe inspection",
+  "modelRevision": "private visual review 2026-10-08",
+  "evidenceSha256": "a575f9ef7e78f7dc41542805b82907e9dabd0e187e64abde4a754d048f8837b8",
+  "artifactSha256": "d58eb15cfc05d687b023b03b98b10dc40dbb7019165bd6d6c2275cef70508fdf",
+  "criteria": [
+    {
+      "criterion": "Photographic person, boat fittings and moving water",
+      "passed": true,
+      "observation": "Stable face, clothing and deck/water textures in all 49 decoded frames and native-resolution keyframes."
+    },
+    {
+      "criterion": "A physically connected, purposeful steering adjustment",
+      "passed": false,
+      "observation": "The right hand leaves the actual wheel then both fists move around an invisible control in front of the torso; no coherent grip/rotation response."
+    },
+    {
+      "criterion": "The sailor commits her attention to the horizon",
+      "passed": false,
+      "observation": "Gaze stays substantially toward the camera with a brief side glance, rather than completing the planned look toward open water."
+    }
+  ],
+  "revisionInstructions": "Keep the source-supported right hand on the wheel and left hand on the rail throughout. Animate an intentional head turn toward open water and body balance against the swell; do not request a second grip or ungrounded hand choreography. Preserve this rejected take and use a new artifact identity.",
+  "limitations": "Decoded visual inspection, not a completed soundtrack/whole-film viewer review."
+}

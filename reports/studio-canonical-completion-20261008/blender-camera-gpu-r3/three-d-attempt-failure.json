@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-08T18:19:11.809385+00:00",
+  "status": "FAIL_GPU_LOCK_RACE",
+  "realAuth": true,
+  "noMocks": true,
+  "acceptedJobId": "29d3304d-1cc3-4a5d-97a2-050622273b15",
+  "rootCause": "Unconfirmed: the saved API log truncated the SSH error before the exit code/stderr. Actual accepted HQ job failed; no GPU receipt was delivered. The independently identified preflight/acquisition race is now bounded, lease deadline retained, and future failures log code/signal/stderr.",
+  "ui": "The HQ 3D render failed. Retry after checking the scene asset.",
+  "remaining": "Native rerun reached the real daily preview limit (r4), so GPU execution and the original failure cause remain unqualified.",
+  "previousAttribution": "Post-preflight lock race was inferred from the nonblocking dispatch design and competing work, but its actual exit code was not retained."
+}

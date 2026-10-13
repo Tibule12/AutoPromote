@@ -108,7 +108,7 @@ return {{effect,pcm:Array.from(synthesizeEffect(effect,48000))}};}})));'''
         )
         exec(compile(ast.Module(body=[handler], type_ignores=[]), "render-handler", "exec"), namespace)
         request = SimpleNamespace(motionGraphics={"version": 99}, sound_effects=[],
-                                  timeline_segments=[], async_mode=False)
+                                  timeline_segments=[], composition_plan=None, async_mode=False)
         with self.assertRaises(HttpError) as error:
             asyncio.run(namespace["render_viral_clip"](request))
         self.assertEqual(error.exception.status_code, 422)

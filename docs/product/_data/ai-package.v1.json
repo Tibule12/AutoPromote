@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "product_version": "1.2.0",
-  "knowledge_version": "1.0.4",
-  "updated_at": "2026-10-13",
+  "knowledge_version": "1.0.5",
+  "updated_at": "2026-10-13T17:56:53.682Z",
   "release_channel": "development",
   "catalogue": "knowledge.public.v1.json",
   "controls": "controls.public.v1.json",

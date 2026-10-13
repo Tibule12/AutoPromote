@@ -1,0 +1,32 @@
+{
+  "startedAt": "2026-10-08T09:58:21.908Z",
+  "projectName": "Studio canonical visual QA 20261008",
+  "sourceName": "Studio shared-state 20261008",
+  "realAuthRequired": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "gpuJobsStarted": 0,
+  "renderSubmitted": false,
+  "previewFinalParity": "BLOCKED: no authorized running render worker",
+  "steps": [
+    "Normal reframe controls: enabled, 4:5, preserve full source",
+    "SRT import; reviewed words/speaker/language; Minimal; custom 35/70 position and #abcdef accent; actual caption timeline",
+    "Normal main video transforms and keyframe at caption boundary"
+  ],
+  "originalProjectsBefore": [
+    {
+      "id": "viral-project-e510956a-a160-4c2a-857d-b735d7898a0a",
+      "name": "Studio stereo delivery 20261008",
+      "snapshotSha256": "d4229ca90077f81255aa1290d5a48b749fe69a71a93f5b8ecc48833be8331809"
+    },
+    {
+      "id": "viral-project-f28cae5c-969d-4753-8e2b-395dd40b991e",
+      "name": "Studio shared-state 20261008",
+      "snapshotSha256": "fe6f5f1c943e60a82a72ed49022061c373c069aa81bbfe4018ff498cd06e0a85"
+    }
+  ],
+  "stateFlow": "FAIL",
+  "error": "Range gesture missed its target",
+  "finishedAt": "2026-10-08T09:59:04.695Z"
+}

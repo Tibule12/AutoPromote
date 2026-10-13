@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "completedAt": "2026-10-06T19:31:17.850Z",
+  "checks": [
+    "Actual podcast source and NVIDIA caption draft open as a 20-second edit",
+    "Timeline scrub preserves the matching source picture at 19.08 seconds",
+    "An actual pointer command splits the real podcast into editable sequence clips",
+    "The real production payload builder preserves split timing, caption review and chosen framing"
+  ],
+  "pageErrors": [],
+  "externalRequests": [],
+  "scope": "Production Studio and payload builder on localhost, real podcast and real L40S caption artifact; explicit review copy; cloud traffic blocked; no production authentication or deployment"
+}

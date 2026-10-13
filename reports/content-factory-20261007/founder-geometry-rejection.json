@@ -1,0 +1,17 @@
+{
+  "status": "founder_rejected_for_boat_role",
+  "at": "2026-10-07T08:58:14.626064+00:00",
+  "userNote": "this is not a boat",
+  "reason": "The central object reads as a folded bird/crane with a long spike rather than a recognisable boat. The operator wrongly qualified its geometry. Dependent films require source replacement.",
+  "rejectedArtifact": {
+    "path": "images/boat-at-sea-reference.png",
+    "sha256": "a597b88c7503974ff3ba32545cb9e5aeea526839bc7227eef42e0e478ee0d75f"
+  },
+  "affectedSourceRoles": [
+    "paper-awakens",
+    "light-return",
+    "world-on-desk",
+    "ocean-environment"
+  ],
+  "action": "Stop owned storm-boat-v3 generation; keep NVIDIA instance running until authorized 14:00 SAST cutoff."
+}

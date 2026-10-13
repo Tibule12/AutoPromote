@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "title": "From paper to the open sea",
+  "story": {
+    "about": "A tiny folded paper idea becomes a full-size real sailing vessel and a cinematic voyage.",
+    "whyCare": "You can imagine a film without having the footage or a crew to shoot it.",
+    "hook": "A paper boat on a workbench gains water; a decisive transformation reveals a full-size real yacht.",
+    "beginning": "One small recognisable paper boat and a blank sheet.",
+    "development": "Water lifts the idea; paper folds give way to timber, canvas sails and real rigging.",
+    "tension": "Can this tiny imagined thing become a believable world? The yacht meets open-sea scale and waves.",
+    "payoff": "A real vessel cuts through moving ocean under opening light. The actual generated shots appear inside AutoPromote Studio.",
+    "ending": "A cinematic AutoPromote ident resolves the reveal that this began with an idea and no recorded footage.",
+    "withheld": "The real vessel until after the paper setup; the tool identity until the creation reveal.",
+    "amplify": [
+      "The material and scale change from paper to real timber and canvas",
+      "The real bow cutting physically moving waves",
+      "The reveal of these exact shots as editable generated sources"
+    ],
+    "remove": [
+      "Paper boat surviving as the final payoff",
+      "Bird-like folded geometry",
+      "Repeated water shots",
+      "Unrelated features",
+      "Claims of unattended creative success"
+    ]
+  },
+  "script": [
+    {
+      "beatId": "hook",
+      "action": "One idea. No footage. A tiny paper boat gains a world.",
+      "sound": "Tactile paper, low pulse, restrained voice."
+    },
+    {
+      "beatId": "transformation",
+      "action": "The paper boat becomes a real yacht at sea.",
+      "sound": "A single motivated material and scale reveal; ocean rush and rising score."
+    },
+    {
+      "beatId": "voyage",
+      "action": "A full-size real boat cuts through the sea and reaches opening sunlight.",
+      "sound": "Bow wake, broad harmonic opening; space for the visual."
+    },
+    {
+      "beatId": "reveal",
+      "action": "Show the actual source shots in AutoPromote Studio.",
+      "sound": "This started with a brief. No camera. No footage."
+    },
+    {
+      "beatId": "ending",
+      "action": "Cinematic AutoPromote studio ident.",
+      "sound": "Existing timed original ident impact."
+    }
+  ],
+  "assets": [],
+  "outputs": [
+    {
+      "outputId": "paper-voyage-hero",
+      "aspect": "16:9",
+      "purpose": "A brief with no footage becomes a finished visual world. Founder marketing draft.",
+      "musicAssetId": "score",
+      "sequence": [
+        {
+          "assetId": "paper-awakens",
+          "start": 2.5,
+          "duration": 2.5,
+          "reason": "Start close to the first impossible motion"
+        },
+        {
+          "assetId": "ocean-voyage",
+          "start": 0,
+          "duration": 3,
+          "reason": "Expand the scale of the idea"
+        },
+        {
+          "assetId": "storm-question",
+          "start": 0.5,
+          "duration": 3.5,
+          "reason": "Put the fragile idea under pressure"
+        },
+        {
+          "assetId": "light-path",
+          "start": 0,
+          "duration": 4.5,
+          "reason": "Provide the warm visual resolution"
+        },
+        {
+          "assetId": "world-on-desk",
+          "start": 0,
+          "duration": 4.5,
+          "reason": "Reveal the created world as a miniature idea"
+        },
+        {
+          "assetId": "identity",
+          "start": 0.1,
+          "duration": 2.8,
+          "reason": "End with a clear platform identity"
+        }
+      ]
+    }
+  ],
+  "plannerProvenance": {
+    "origin": "model_generated",
+    "producer": "Codex creative direction from the founder brief",
+    "basis": "Explicit source brief and inspected raw assets; candidate direction will be revised before final selection"
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "status": "PRIVATE_PROTOTYPE_PENDING_WHOLE_FILM_AND_LISTENING_REVIEW",
+  "assets": [
+    {
+      "assetId": "real-vessel",
+      "type": "video",
+      "beatId": "hook",
+      "path": "generated/real-voyage-v6.mp4",
+      "receipt": "generated/real-voyage-v6-receipt.json",
+      "audioRole": null,
+      "review": "selected-reviews/real-vessel.json"
+    },
+    {
+      "assetId": "identity",
+      "type": "three_d",
+      "beatId": "ending",
+      "path": "idents/cinematic-v2/ident.mp4",
+      "receipt": "idents/cinematic-v2/receipt.json",
+      "audioRole": "brand_ident",
+      "review": "selected-reviews/identity.json",
+      "reusableArtifacts": [
+        {
+          "role": "native_scene",
+          "path": "idents/cinematic-v2/autopromote-ident.blend",
+          "sha256": "3b56f8815b98d67eaa795f68dd5adf0375a22e293d7790d07dc543f89ed39e62"
+        },
+        {
+          "role": "audio_source",
+          "path": "idents/cinematic-v2/ident.wav",
+          "sha256": "b9a35a694ed0eb449154f96bcf57ac3b14de7812972064c16cb2cad1f31f2d4a"
+        }
+      ]
+    },
+    {
+      "assetId": "score",
+      "type": "audio",
+      "beatId": "hook",
+      "path": "assets/founder-music-v8/audio.wav",
+      "receipt": "assets/founder-music-v8/receipt.json",
+      "audioRole": "music",
+      "review": "selected-reviews/score-v8.json"
+    },
+    {
+      "assetId": "one-idea",
+      "type": "audio",
+      "beatId": "hook",
+      "path": "narration-processed-v11/one-idea.wav",
+      "receipt": "narration-processed-v11/one-idea-receipt.json",
+      "audioRole": "voiceover",
+      "review": "selected-reviews/one-idea-v11.json"
+    },
+    {
+      "assetId": "brief-no-footage",
+      "type": "audio",
+      "beatId": "reveal",
+      "path": "narration-cpu/brief-no-footage.wav",
+      "receipt": "narration-cpu/brief-no-footage-receipt.json",
+      "audioRole": "voiceover",
+      "review": "selected-reviews/brief-no-footage.json"
+    },
+    {
+      "assetId": "continuous-transform",
+      "type": "video",
+      "beatId": "hook",
+      "path": "assets/founder-control-transform-v17/video.mp4",
+      "receipt": "assets/founder-control-transform-v17/receipt.json",
+      "review": "selected-reviews/control-transform-v17.json"
+    },
+    {
+      "assetId": "transformation-sound",
+      "type": "audio",
+      "audioRole": "sfx",
+      "beatId": "hook",
+      "path": "audio/transformation-v21/sound.wav",
+      "receipt": "audio/transformation-v21/receipt.json",
+      "review": "selected-reviews/transformation-sound-v21.json"
+    }
+  ],
+  "output": {
+    "outputId": "continuous-transformation-prototype",
+    "aspect": "16:9",
+    "purpose": "Private continuous paper-to-yacht transformation prototype with visible early-structure defects. Not approved public marketing or proof of full autonomous movie generation.",
+    "musicAssetId": "score",
+    "musicVolume": 0.25,
+    "sequence": [
+      {
+        "assetId": "continuous-transform",
+        "start": 0,
+        "duration": 5.0625,
+        "reason": "Make the transformation itself the story event, preserving the connected changing vessel."
+      },
+      {
+        "assetId": "real-vessel",
+        "start": 0.0625,
+        "duration": 3,
+        "reason": "Match the endpoint yacht into its moving ocean continuation for the payoff."
+      },
+      {
+        "assetId": "identity",
+        "start": 0,
+        "duration": 3.5,
+        "reason": "Resolve the impossible journey with the editable AutoPromote studio ident."
+      }
+    ],
+    "audioCues": [
+      {
+        "assetId": "one-idea",
+        "kind": "voiceover",
+        "startTime": 0.05,
+        "duration": 2.325,
+        "trimStart": 0,
+        "volume": 0.9
+      },
+      {
+        "assetId": "brief-no-footage",
+        "kind": "voiceover",
+        "startTime": 5,
+        "duration": 3.65,
+        "trimStart": 0,
+        "volume": 0.9
+      },
+      {
+        "assetId": "transformation-sound",
+        "kind": "sfx",
+        "startTime": 0,
+        "duration": 8.0625,
+        "trimStart": 0,
+        "volume": 0.65
+      }
+    ],
+    "captionSegments": [
+      {
+        "start": 0.05,
+        "end": 2.375,
+        "text": "One idea. No footage.",
+        "captionIcon": "none",
+        "captionAccent": "#ffffff"
+      },
+      {
+        "start": 5,
+        "end": 6.65,
+        "text": "This started with a brief.",
+        "captionIcon": "none",
+        "captionAccent": "#ffffff"
+      },
+      {
+        "start": 6.65,
+        "end": 8.65,
+        "text": "No camera. No footage.",
+        "captionIcon": "none",
+        "captionAccent": "#ffffff"
+      }
+    ],
+    "captionScale": 1,
+    "captionStyle": "minimal"
+  }
+}

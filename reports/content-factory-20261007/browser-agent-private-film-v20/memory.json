@@ -1,0 +1,40 @@
+{
+  "identity": "c10580a78c538f02b52c12b8c12d08c13de5b76755ca0dae2a513d13f8512806",
+  "actions": [
+    {
+      "signature": "47d349c3a62a2ed812f6559252acfccf355357220bf52fc8a933643b076f1b99",
+      "operationKey": "operation:download-reviewed-film",
+      "type": "click",
+      "target": {
+        "role": "link",
+        "name": "Download the film"
+      },
+      "expect": [
+        {
+          "type": "download",
+          "value": "final.mp4"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T13:34:35.129Z",
+      "reason": "The observed page exposes the reviewed film as its download; retain the bytes and compare the source hash.",
+      "planner": null,
+      "afterState": "732320371dd7b91ff99f6328f0e464ee224ff1d3829abc2366abe9435decf5b4"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:3096/review.html",
+      "pageId": "page-1",
+      "at": "2026-10-07T13:33:25.811Z"
+    },
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:3096/review.html",
+      "pageId": "page-1",
+      "at": "2026-10-07T13:34:35.042Z"
+    }
+  ],
+  "status": "running"
+}

@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-08T06:11:00Z",
+  "instance": "autopromote-l40s-staging",
+  "gpu": "NVIDIA L40S",
+  "status": "STOPPED",
+  "plannedStopBy": "2026-10-08T06:55:00Z",
+  "authorization": "Fresh user instruction to prioritize GPU QA",
+  "transport": "NVIDIA gateway; direct host route unavailable",
+  "headlessOnly": true,
+  "stoppedAt": "2026-10-08T06:37:07.878803+00:00",
+  "workersStopped": true,
+  "sshForwardsClosed": true,
+  "automaticStopWatchdogCancelledAfterConfirmedStop": true
+}

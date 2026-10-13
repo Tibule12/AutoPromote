@@ -1,0 +1,236 @@
+{
+  "algorithm": "SHA-256",
+  "pathsRelativeTo": "repository root",
+  "files": [
+    {
+      "path": "docs/viral-studio-rtx-qualification-20261006.md",
+      "bytes": 894,
+      "sha256": "cb5f7b65355ad95e2e9f044ad195675ab99eb9df0f2d6cb22226f3f5cd9f5af8"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/README.md",
+      "bytes": 10507,
+      "sha256": "38b8ad406430a5c9ce6324742e55f9fec73ea2f287a88cfa77a9e41a21f92be2"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/authentication-verification.json",
+      "bytes": 191,
+      "sha256": "91f9b89ee4e47379fd7e66b17b328e18e376516effce4f89b168dbb8f61b6970"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/autopromote-cc6d3-quota-before-raw.json",
+      "bytes": 67847,
+      "sha256": "51fca4096dd824d15af42e24373ed684fa8303ae0ca7291ad47604f4ac2aed2f"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/autopromote-staging-2026-quota-before-raw.json",
+      "bytes": 67687,
+      "sha256": "b23f8fcecea9943fe9f309cbb076362b4a105f3bfc8ab769b06a5bdf2a363f38"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/billable-instance-time.json",
+      "bytes": 1529,
+      "sha256": "099a867590510eca67ad9f05e7e6fb238bd8532954dfe2e0c6c12badd6352afa"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/bucket-iam-before.json",
+      "bytes": 1288,
+      "sha256": "af91d9445d6cb907bac90d37182484e80a9ee10ec97c4844926ca6bdd3405214"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/cost-estimate.json",
+      "bytes": 1175,
+      "sha256": "a054529010c7af7197142eeb55bdaf3e7418e94cb0b20d1025b530d6dea1242f"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/creation-attempt.json",
+      "bytes": 5411,
+      "sha256": "6dd5ef86f4f0d5d1d95bc5418baa461a1d882e9ebaac4fe808422110adc889f3"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/creation-command.txt",
+      "bytes": 747,
+      "sha256": "263bdea81c0e327ce762b288b258dbcf033972992491fd9e40ca9373c486bef9"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/creation-stderr.txt",
+      "bytes": 280,
+      "sha256": "5f07a3aeaa0fac2207a2206a8dc8f5bb4da7696161db6b2a8b54d3fe7d055736"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/creation-stdout.txt",
+      "bytes": 2944,
+      "sha256": "6e6404bdf5a02b3a65ad35d56d5b461c4758d449f1457c7383f1093ecbf85bb4"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/cuda-proof.json",
+      "bytes": 221,
+      "sha256": "fcdcae1fe662be61fc600c679538b03f3234a737f22072efd7bb7ce768436861"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/execution-final.json",
+      "bytes": 19616,
+      "sha256": "3c57550ed902f7672774f252ef3b842b2e465f9e137744a8b5e14dee2cd6dcb2"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/execution-list-final.json",
+      "bytes": 19612,
+      "sha256": "aecc488e12bde969f6f09678c521610e5587bc9d973a565709c7dea8b6605567"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/execution-logs.json",
+      "bytes": 13414,
+      "sha256": "d3be113ebcb0cdd0f729e362ffd528180d5bc5d28bd4bdf11fa63a60511a5c9f"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/execution-observation.json",
+      "bytes": 19201,
+      "sha256": "91192abf90e89ec1bf455949a4dacc99f38cf5cdf6cad101b5a4b8248c2a7825"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/execution-request.json",
+      "bytes": 18717,
+      "sha256": "444b128f7a22afd97a36be3bfc61bb6500612ed429bbcfade473ef9f45b0ff3e"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/execution-v2-final.json",
+      "bytes": 18000,
+      "sha256": "5f368f22cdbbbc287acc8c358df5617d6a89a9077accaadc53c957275ec7edd4"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/ffmpeg-hardware-decode.txt",
+      "bytes": 4033,
+      "sha256": "4ad25027af577f872483d253d726cefd302688d315929c962961030837701a0d"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/ffmpeg-transcode.txt",
+      "bytes": 4881,
+      "sha256": "e39bd655691fc8504ce74ba6718d95429f116aa6ec7551456ed5a7fff03a6092"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/fixture-manifest.json",
+      "bytes": 3833,
+      "sha256": "d0a9b82430a0e3f54bb7ed93b8e9b2691b398f12bf662b5d622e261358b42a96"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/fixture-upload.json",
+      "bytes": 656,
+      "sha256": "8ddb2d328573ad80a73a4ee9c3a1bce8e28158fa0673e38eb634ac14c62347ec"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/gpu-receipt.json",
+      "bytes": 69398,
+      "sha256": "2dfbbe613051682f715e5f77a1ed319133ef7d0540bedfa59a12e3d9b3937137"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/input.mp4",
+      "bytes": 29533,
+      "sha256": "807f0f361f03c0a4936733c8c69d1232e6f4620791d3af12b0998978d008473b"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/inspection-before.json",
+      "bytes": 33797,
+      "sha256": "baa5d7bf9d8f9cb164cc33ae68d3db7eb9bb3a49f39a2056db133f83f42c40aa"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/job-created.json",
+      "bytes": 3410,
+      "sha256": "17da506208b58d971c46c0cebad4fcc833eb7fad87c3bb97b041f1956cbb6197"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/job-effective.json",
+      "bytes": 17568,
+      "sha256": "6addf5f8becc1799c6141405165519e76e53686317247dca78d4cba021abb1ed"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/job-final.json",
+      "bytes": 18448,
+      "sha256": "b50f43eb3f187cff7668ff5be9c2fd187c7b83807247bde4b6884d7e1563a40d"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/job-iam.json",
+      "bytes": 323,
+      "sha256": "8ede5880aa6d82cbc5a97f54aa27afa33f3da063ec2a061394b1c6e6d45f172f"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/nvidia-smi-identity.csv",
+      "bytes": 71,
+      "sha256": "dc0f41d07f600eda3c6a69b2587907a8a154c2c8ad1de1904d432790e9c1b67f"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/nvidia-smi.txt",
+      "bytes": 1689,
+      "sha256": "639dcf879c735d209354b4f677acaf682215d7538257e6e7f2ac0ce3bbf7b7f5"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/output-download.json",
+      "bytes": 672,
+      "sha256": "85704b681cfbd75446ba870d984b9345296ba2bc2d7ab3aedf7f316355254e58"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/output-frame.png",
+      "bytes": 72111,
+      "sha256": "46a83b35d5133182539ca3f0c58cd3e125e6858aa97c4bbd1c55158ac0a29ae5"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/output-probe.json",
+      "bytes": 2366,
+      "sha256": "9b4e9b219a3123121fac159fe64cf206414e8990e7d8f8e3d5c972388ec5830d"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/output.mp4",
+      "bytes": 62029,
+      "sha256": "d50237bacfd706eedfa2c03112bf3b1ccb699b9ddc4a183e14fe6d8a16ada6c2"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/pre-execution-verification.json",
+      "bytes": 647,
+      "sha256": "6856a8e8bae5dc05fb23f991de6dd757b461bf3f73322d18b95d64cdffa96fd7"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/production-protection.json",
+      "bytes": 4714,
+      "sha256": "f1930eecbdce2bf19e1d8be3e33d1d9c2657ded21d97f009b52908541ef1283c"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/qualification-update-command.txt",
+      "bytes": 14496,
+      "sha256": "c555f486556f2a81c71f9c65cec9bed048dc5f8b2863ef2ebf34dd1bc288760f"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/qualification-update.json",
+      "bytes": 32872,
+      "sha256": "7854f8632450f23c220082c2c1c2e6e2c76e7d90ec2be0d64fc29cba52f181ad"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/quota-after-create.json",
+      "bytes": 68103,
+      "sha256": "30f6cc0ed79a956e84de4ab35249fd5463ccb0f7695433d27d3fa63060cd459d"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/receipt-download.json",
+      "bytes": 417,
+      "sha256": "ef2c7e2f7b0c6cc156c81b4fd86f06b74ef33605c067359da25f0b1c3522bec1"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/renderer-image-before.json",
+      "bytes": 2673,
+      "sha256": "e1dacc3349c8560d0439487157678d5d8b18b32bc257ea4779664453a3db6065"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/tasks-final.json",
+      "bytes": 17010,
+      "sha256": "295d59ff5c2524b0ed0b8d943aad0db679bfafb8614909cf25527801e48a9227"
+    },
+    {
+      "path": "reports/rtx-pro-6000-qualification-20261006/verification-summary.json",
+      "bytes": 3332,
+      "sha256": "d8d23707c96a46a81ae7719fc37ac67b6abe145d50af16da996558ba86f04254"
+    },
+    {
+      "path": "studio_3d_renderer/qualify_gpu.py",
+      "bytes": 10291,
+      "sha256": "4334b75628bd307f0a08881cbe15d10350abe0a8363b724b4580c5cc709d4cc6"
+    }
+  ]
+}

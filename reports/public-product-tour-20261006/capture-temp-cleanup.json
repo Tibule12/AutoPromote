@@ -1,0 +1,41 @@
+{
+  "removedTaskGeneratedFailedCaptures": [
+    {
+      "file": "page@41a2bc5646ddcd5c195a04671f5d080e.webm",
+      "bytes": 1352310
+    },
+    {
+      "file": "page@dd48522be3f4abeb93bd5978ce8be776.webm",
+      "bytes": 2367296
+    },
+    {
+      "file": "page@7a4105dcbff22544564c0cef69a9174a.webm",
+      "bytes": 3658645
+    },
+    {
+      "file": "page@95b35b3c773ca5c0955492e8dd8cd8c9.webm",
+      "bytes": 3070655
+    },
+    {
+      "file": "page@b19e1edfa6e41b6d01d46df1751ae74a.webm",
+      "bytes": 2819896
+    },
+    {
+      "file": "page@d9ee79583fa59bf9ac31c006c3b896cb.webm",
+      "bytes": 2708399
+    },
+    {
+      "file": "page@049a1653f84212751512ccd682f8176a.webm",
+      "bytes": 1370883
+    },
+    {
+      "file": "page@4b2bc7621802ee6a64923c2878026e2d.webm",
+      "bytes": 1378605
+    },
+    {
+      "file": "page@6732955a3f4d3e589778aa529cfb0077.webm",
+      "bytes": 2799492
+    }
+  ],
+  "preservedSource": "raw/application-workflow.webm"
+}

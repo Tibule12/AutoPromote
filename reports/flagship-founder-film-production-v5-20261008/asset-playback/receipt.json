@@ -1,0 +1,40 @@
+{
+  "status": "PASS_PLAYBACK_ONLY",
+  "at": "2026-10-08T19:57:31.325Z",
+  "headless": true,
+  "muted": true,
+  "results": [
+    {
+      "id": "sailor",
+      "path": "helm-response-i2v-720p/sailor-holds-course-looks-to-sea/video.mp4",
+      "sha256": "4c0cc8ff183a396523d2c49137100f7b23a9c89a967a1d8ef730b22b109b92cd",
+      "playback": {
+        "duration": 3.0625,
+        "width": 1280,
+        "height": 720,
+        "playbackRate": 1,
+        "ended": true,
+        "decodedFrames": 49,
+        "droppedFrames": 0
+      },
+      "rangeStatus": 206
+    },
+    {
+      "id": "ident",
+      "path": "ident-v8-full/ident-v8-with-sound.mp4",
+      "sha256": "c175f403cef6dac0cc11dc2fd765764a10df27f584a62dd2a94d0063d9ca1594",
+      "playback": {
+        "duration": 4.5,
+        "width": 1280,
+        "height": 720,
+        "playbackRate": 1,
+        "ended": true,
+        "decodedFrames": 108,
+        "droppedFrames": 0
+      },
+      "rangeStatus": 206
+    }
+  ],
+  "errors": [],
+  "scope": "Actual Chromium 1x playback to completion and ranged media delivery. No app/sign-in change, human listening, contextual continuity, whole-film creative approval or ordinary-user Studio qualification."
+}

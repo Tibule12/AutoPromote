@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.4 • 2026-10-13
+Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -76,7 +76,7 @@ Splits a canonical clip occurrence at the mapped output playhead; source ranges 
 
 **Guides:** [Put text behind a person](../task-guides/task-text_behind.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## Trim a clip
 
@@ -187,7 +187,7 @@ Stores ordinary text, image and video overlays as editable canonical layers. Arb
 
 **Guides:** No task guide in V1.
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## 2D layer transforms
 
@@ -247,10 +247,10 @@ Adds property keys to a selected ordinary layer, moves them in the timeline and 
 
 **Workflow**
 
-1. Select an ordinary editable layer and open Motion; set its initial pose.
-2. Move the playhead and choose Add transform keyframe; change the next pose.
-3. Expand native property lanes, move/nudge keys, adjust easing/curve and play the actual motion.
-4. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
+1. Show motion keyframes in the timeline and expand an ordinary visual layer, including a layer without animation keys.
+2. Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.
+3. Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.
+4. Owning-track locks prevent changes. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -270,7 +270,7 @@ Adds property keys to a selected ordinary layer, moves them in the timeline and 
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## Motion easing
 
@@ -762,7 +762,7 @@ Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX bus
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Add B-roll](../task-guides/task-add_broll.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## Voiceover takes
 
@@ -873,7 +873,7 @@ Places sound cues on the native timeline. Included sound-design presets synthesi
 
 **Guides:** [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## Voice repair
 
@@ -1288,7 +1288,7 @@ Instantiates a pinned draft template into ordinary editable clips, layers, keyfr
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Use a creative template](../task-guides/task-use_template.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## Studio playback preview
 
@@ -1362,7 +1362,7 @@ Compiles the canonical project into the existing deterministic final path. Outpu
 
 **Guides:** [Turn an image into a cinematic scene](../task-guides/task-image_cinematic.md), [Export a final film](../task-guides/task-final_export.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## Export and download
 
@@ -1512,7 +1512,7 @@ Preserves canonical revision and provenance for manual edits, Director proposals
 
 **Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Export a final film](../task-guides/task-final_export.md)
 
-**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2
+**Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
 ## B-roll placement
 

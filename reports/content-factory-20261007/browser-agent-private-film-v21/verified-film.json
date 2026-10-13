@@ -1,0 +1,21 @@
+{
+  "status": "VERIFIED_PRIVATE_VIEWING_AND_DOWNLOAD",
+  "artifact": "outputs/local-cpu/transformation-prototype/v21/final.mp4",
+  "artifactSha256": "10b7a0377e61e73ce01cbf1299dbf597c617bca48e0dcd48fb25908803db46e3",
+  "downloadedSha256": "10b7a0377e61e73ce01cbf1299dbf597c617bca48e0dcd48fb25908803db46e3",
+  "downloadedBytes": 9642871,
+  "playback": {
+    "duration": 11.583333,
+    "width": 1920,
+    "height": 1080,
+    "currentTime": 6,
+    "readyState": 4,
+    "decodedFrames": 40,
+    "mutedForHeadlessCheck": true
+  },
+  "rangeStatus": 206,
+  "errors": [],
+  "operatorJournal": "memory.json",
+  "reasoning": "Manually reasoned observation/action; no NVIDIA model run claimed.",
+  "limitation": "Actual headless picture playback, seeking and download verification; no human sound/creative acceptance claimed."
+}

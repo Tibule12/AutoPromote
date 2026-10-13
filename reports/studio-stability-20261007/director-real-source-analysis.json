@@ -1,0 +1,324 @@
+{
+  "engine": "opencv-yunet-source-shot-follow",
+  "mode": "source_shots",
+  "identity": "foreground-per-shot-not-person-identification",
+  "start": 0,
+  "end": 12,
+  "sceneCuts": [
+    4.7,
+    5.2
+  ],
+  "reviewRequired": true,
+  "cutPolicy": "follow-dominant-foreground-face-at-source-cuts",
+  "decodeFailures": [],
+  "tracks": {
+    "solo": {
+      "keyframes": [
+        {
+          "time": 0,
+          "x": 66.581,
+          "y": 24.064,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 0.5,
+          "x": 68.581,
+          "y": 24.942,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 1,
+          "x": 69.585,
+          "y": 24.997,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 1.5,
+          "x": 68.947,
+          "y": 26.145,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 2,
+          "x": 68.483,
+          "y": 25.931,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 2.5,
+          "x": 67.97,
+          "y": 25.764,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 3,
+          "x": 68.068,
+          "y": 24.813,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 3.5,
+          "x": 68.344,
+          "y": 25.064,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 4,
+          "x": 68.665,
+          "y": 25.307,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 4.5,
+          "x": 69.548,
+          "y": 26.318,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 4.7,
+          "x": 26.851,
+          "y": 29.527,
+          "origin": "face_detection",
+          "cut": true,
+          "reviewRequired": true
+        },
+        {
+          "time": 5,
+          "x": 27.374,
+          "y": 29.701,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 5.2,
+          "x": 68.974,
+          "y": 28.344,
+          "origin": "face_detection",
+          "cut": true,
+          "reviewRequired": true
+        },
+        {
+          "time": 5.5,
+          "x": 68.925,
+          "y": 27.926,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 6,
+          "x": 68.949,
+          "y": 27.042,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 6.5,
+          "x": 68.572,
+          "y": 26.342,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 7,
+          "x": 68.396,
+          "y": 26.577,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 7.5,
+          "x": 68.905,
+          "y": 27.393,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 8,
+          "x": 69.055,
+          "y": 27.496,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 8.5,
+          "x": 68.922,
+          "y": 26.272,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 9,
+          "x": 68.89,
+          "y": 26.623,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 9.5,
+          "x": 68.302,
+          "y": 26.725,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 10,
+          "x": 67.904,
+          "y": 27.159,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 10.5,
+          "x": 67.952,
+          "y": 27.386,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 11,
+          "x": 67.998,
+          "y": 27.341,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        },
+        {
+          "time": 11.5,
+          "x": 68.265,
+          "y": 26.445,
+          "origin": "face_detection",
+          "cut": false,
+          "reviewRequired": false
+        }
+      ],
+      "missing": [],
+      "coverage": 1
+    }
+  },
+  "editPlan": {
+    "version": 1,
+    "sourceRange": {
+      "start": 0,
+      "end": 12
+    },
+    "timelineCuts": [
+      {
+        "time": 0,
+        "mode": "speaker_track",
+        "zoom": 1.099,
+        "origin": "source_shot_analysis",
+        "reviewRequired": false
+      },
+      {
+        "time": 4.7,
+        "mode": "speaker_track",
+        "zoom": 1.102,
+        "origin": "source_shot_analysis",
+        "reviewRequired": false
+      },
+      {
+        "time": 5.2,
+        "mode": "speaker_track",
+        "zoom": 1.102,
+        "origin": "source_shot_analysis",
+        "reviewRequired": false
+      }
+    ],
+    "captionPlacementCuts": [
+      {
+        "time": 0,
+        "placement": "bottom_center",
+        "origin": "face_safe_analysis"
+      },
+      {
+        "time": 4.7,
+        "placement": "bottom_center",
+        "origin": "face_safe_analysis"
+      },
+      {
+        "time": 5.2,
+        "placement": "bottom_center",
+        "origin": "face_safe_analysis"
+      }
+    ],
+    "splitSuggestions": [],
+    "temporalCutawayCandidates": [],
+    "mainFrame": {
+      "enabled": true,
+      "shape": "round",
+      "insetPercent": 2.5,
+      "radiusPercent": 10,
+      "background": "studio_black"
+    },
+    "preflight": {
+      "passed": true,
+      "warnings": [
+        "No synchronized two-speaker view was found; use separate camera feeds for a live split."
+      ],
+      "reactionWindowsUsedForSplit": false
+    }
+  },
+  "sourceShotArtifact": {
+    "artifactHash": "3c33237027b5dffa72cbc92c4fedf3e815bff357b00c3a17469881090c0159d6",
+    "sourceSha256": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+    "projectId": "viral-project-66faf0ea-6b23-48c9-9b9b-2e88f9197177",
+    "sourceAssetId": "source:main",
+    "analysisRange": {
+      "space": "source",
+      "startTick": 0,
+      "endTick": 1080000
+    },
+    "createdAt": "2026-10-07T19:00:41.205Z"
+  },
+  "analysisArtifact": {
+    "artifactHash": "ea4614cacdaea6fe9d9939c11cd50b6ef78ebd7e6489fdcc273cfc5bcb0a4935",
+    "projectId": "viral-project-66faf0ea-6b23-48c9-9b9b-2e88f9197177",
+    "sourceAssetId": "source:main",
+    "sourceSha256": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+    "analysisType": "source_shots",
+    "modelRevision": "opencv-yunet-source-shot-follow",
+    "configHash": "261886e8277db10afef158e216c14e7fa2ac98951814e73d09213b8df5a6a820",
+    "contentHash": "586aad337d520e88e4111be4075ead33612f1c52a6e3b484c934594b9f9db935",
+    "dependencyHashes": [
+      "3c33237027b5dffa72cbc92c4fedf3e815bff357b00c3a17469881090c0159d6"
+    ],
+    "analysisRange": {
+      "space": "source",
+      "startTick": 0,
+      "endTick": 1080000
+    },
+    "createdAt": "2026-10-07T19:00:41.995Z"
+  }
+}

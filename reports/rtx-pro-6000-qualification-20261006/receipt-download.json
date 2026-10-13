@@ -1,0 +1,5 @@
+{
+  "exitCode": 0,
+  "stderr": "Copying gs://autopromote-cc6d3-viral-studio-3d/temp_studio_3d/qualification/rtx-20261006-160331/receipt.json to file:///home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/rtx-pro-6000-qualification-20261006/gpu-receipt.json\n  \n......\n",
+  "source": "gs://autopromote-cc6d3-viral-studio-3d/temp_studio_3d/qualification/rtx-20261006-160331/receipt.json"
+}

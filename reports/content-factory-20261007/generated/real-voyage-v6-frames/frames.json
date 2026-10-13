@@ -1,0 +1,65 @@
+{
+  "sourceSha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+  "frames": [
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "56df21037160c556c7e5967e89e72efe78854f2d397408fdfdad4eacb9f5a592"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-02.png",
+      "timestamp": 0.4602272727272727,
+      "sha256": "cfbb0f3f3ad1ad23ef0efcf221e022ca2beb62941f393fbf90daf4f78118cca2"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-03.png",
+      "timestamp": 0.9204545454545454,
+      "sha256": "690e7e372bb52dd0edf269ab8e3dbfeeb00f36f80b45e68b79daf54dc12d0ae3"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-04.png",
+      "timestamp": 1.3806818181818181,
+      "sha256": "ae511dd14f2926438b00c9c2f306e424ff4fc0a4b692ded2ef958bbe18bad676"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-05.png",
+      "timestamp": 1.8409090909090908,
+      "sha256": "a9d0102044f5d4d12283c3ab2125dec9e8e05c1105869de6511f0fb3b278a807"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-06.png",
+      "timestamp": 2.3011363636363638,
+      "sha256": "8d999f9d9063328867d5df5bbcab5681b441d99dfff9fe0ccd35585e56576e50"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-07.png",
+      "timestamp": 2.7613636363636362,
+      "sha256": "a9eaee6a5d209f28fe43e9e257a1a167ed8a29170a4833a43046c5cb7337cd72"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-08.png",
+      "timestamp": 3.221590909090909,
+      "sha256": "4ac1b8e5eb2d105056203137a6a3718e5823774b4135e334342cb240a8429a8b"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-09.png",
+      "timestamp": 3.6818181818181817,
+      "sha256": "05ba5805c4ccb26868192b5f9168fbe316afcf51ae07a63ea43f171dc771ac51"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-10.png",
+      "timestamp": 4.142045454545454,
+      "sha256": "39c08367b850f78d6f7d88bcad9a0285b42d83eb7b95523f76b8ae6791f06cbb"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-11.png",
+      "timestamp": 4.6022727272727275,
+      "sha256": "fa4d05a93461164aabae2b199db3f27b149fbda1b97ea5c29c7546af6f813340"
+    },
+    {
+      "path": "reports/content-factory-20261007/generated/real-voyage-v6-frames/frame-12.png",
+      "timestamp": 4.9825,
+      "sha256": "50e4439b7e8542235253cc4cb6c7cb223918a958101ff71d8fa386d2b6b39d3c"
+    }
+  ]
+}

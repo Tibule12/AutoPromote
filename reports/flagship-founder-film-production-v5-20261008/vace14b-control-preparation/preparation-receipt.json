@@ -1,0 +1,12 @@
+{
+  "status": "PREPARED_CPU_ONLY_PENDING_NVIDIA_GENERATION",
+  "sourceControlSha256": "0f5016cbf1e8af1d327eae9715d14394b26606f9be0919f294890ac0858088fa",
+  "preparedControlSha256": "d3a51fd4d1a0a78f93b9365c0a612ea98e48c87f65f0316b1c86574d14915b39",
+  "firstImageSha256": "b3eb1b794e787906cf7539ed5bd0df180c9c16c98e90364ae320cc455ecb0115",
+  "lastImageSha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462",
+  "requestTemplateSha256": "46b7c2b76a719ded129b6260ddb34ae47f87085bd1160655497d276ab0d873fb",
+  "generatorSha256": "fe265325defee0cea02381f2ebb870f2aee9a808788a7bb9e19dced2f537c220",
+  "frameCount": 81,
+  "fps": 16,
+  "review": "Not a generated image or film; no creative acceptance."
+}

@@ -1,0 +1,23 @@
+{
+  "readyForGpu": true,
+  "fullMovingPreviewReviewed": true,
+  "preview": "outputs/proxy/final.mp4",
+  "scope": "Full native movement sequence rendered locally before GPU; independent full decode, 16 programme-time visual samples, object/camera animation and sound envelope review. No founder creative approval or audio listening claim.",
+  "story": "One active stroke motivates the timeline and card grid; the grid unfolds into a dimensional ribbon; the ring becomes a layered horizon; that light contracts into a monogram and wordmark.",
+  "checks": {
+    "story": true,
+    "motivatedTransitions": true,
+    "singleWorld": true,
+    "escalation": true,
+    "independentUiActivation": true,
+    "real3DWow": "A straight component/timeline unfolds into a polished twisting loop, surrounded by moving rails and perspective cards.",
+    "stillImageZoomSlideshow": false,
+    "endingPaysOffOpening": true,
+    "soundEscalation": "One musical motif, progressive harmony/rhythm, structural rises and a single final hit; measured stereo peak/RMS without clipping."
+  },
+  "limitations": [
+    "480x270 / 12fps native proxy source, encoded at 640x360 / 24fps for shared-worker compatibility; final is full 1920x1080 / 24fps native frames.",
+    "Low-sample proxy denoising softens small UI text; final uses 24 OptiX samples.",
+    "Optional narration remains on-screen text with separate insertion windows."
+  ]
+}

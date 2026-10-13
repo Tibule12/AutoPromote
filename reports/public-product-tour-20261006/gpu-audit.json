@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-06T03:46:07.500928+00:00",
+  "project": "autopromote-cc6d3",
+  "region": "us-central1",
+  "regionalL4Quotas": [
+    {
+      "limit": 16.0,
+      "metric": "NVIDIA_L4_GPUS",
+      "usage": 0.0
+    },
+    {
+      "limit": 16.0,
+      "metric": "PREEMPTIBLE_NVIDIA_L4_GPUS",
+      "usage": 0.0
+    },
+    {
+      "limit": 9.223372036854776e+18,
+      "metric": "COMMITTED_NVIDIA_L4_GPUS",
+      "usage": 0.0
+    }
+  ],
+  "globalGpuMetricsReturned": [],
+  "computeInstances": [],
+  "localGpu": "name, memory.total [MiB], memory.free [MiB], driver_version\nQuadro M1200, 4096 MiB, 3920 MiB, 580.173.02",
+  "modelInferenceTested": false,
+  "cloudInfrastructureChanges": 0,
+  "quotaMeaning": "Compute Engine regional limits. Does not verify Cloud Run quotas, allocation or zone capacity. Project-info returned no global GPU metric.",
+  "cloudGpuProvisionedByThisWork": false
+}

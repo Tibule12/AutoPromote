@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-09T09:02:52.828Z",
+  "passed": true,
+  "realNormalEntry": true,
+  "beforeRevision": 173,
+  "afterRevision": 173,
+  "verified": [
+    "Master/AAC256 actual controls",
+    "caption37 hold90.22s",
+    "51 captions",
+    "held motion/grade/frame/aspect",
+    "one generated exact-SHA3s clip",
+    "full audio coverage preflight"
+  ],
+  "humanListening": false,
+  "sourceEnd": 120
+}

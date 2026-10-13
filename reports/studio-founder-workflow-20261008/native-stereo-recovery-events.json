@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-08T09:55:15.513Z",
+  "events": [
+    {
+      "path": "/api/media/studio-assets/resolve",
+      "status": 200
+    },
+    {
+      "path": "/api/media/viral-render-attempt/0bdd4e36-c184-4ac1-8ba4-b2c912c09bcb",
+      "status": 200
+    },
+    {
+      "path": "/api/media/credits",
+      "status": 200
+    },
+    {
+      "path": "/api/media/studio-assets/resolve",
+      "status": 200
+    }
+  ]
+}

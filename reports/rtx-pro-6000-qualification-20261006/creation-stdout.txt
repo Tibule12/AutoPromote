@@ -1,0 +1,88 @@
+{
+  "apiVersion": "run.googleapis.com/v1",
+  "kind": "Job",
+  "metadata": {
+    "annotations": {
+      "run.googleapis.com/client-name": "gcloud",
+      "run.googleapis.com/client-version": "587.0.0",
+      "run.googleapis.com/creator": "tmtshwelo21@gmail.com",
+      "run.googleapis.com/lastModifier": "tmtshwelo21@gmail.com",
+      "run.googleapis.com/operation-id": "96fec409-62d8-49a6-831b-bf1c0f9ae241"
+    },
+    "creationTimestamp": "2026-10-06T16:00:15.280490Z",
+    "generation": 1,
+    "labels": {
+      "cloud.googleapis.com/location": "us-central1",
+      "product": "autopromote",
+      "production-traffic": "false",
+      "purpose": "gpu-qualification",
+      "run.googleapis.com/lastUpdatedTime": "2026-10-06T16:00:15.280490Z"
+    },
+    "name": "viral-studio-rtx-qualification",
+    "namespace": "341498038874",
+    "resourceVersion": "AAZdLhgtxvQ",
+    "selfLink": "/apis/run.googleapis.com/v1/namespaces/341498038874/jobs/viral-studio-rtx-qualification",
+    "uid": "56e68238-9df0-4053-a954-294fc3aa1d80"
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "annotations": {
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "587.0.0",
+          "run.googleapis.com/execution-environment": "gen2",
+          "run.googleapis.com/gpu-zonal-redundancy-disabled": "true"
+        },
+        "labels": {
+          "client.knative.dev/nonce": "wof_del_xub",
+          "product": "autopromote",
+          "production-traffic": "false",
+          "purpose": "gpu-qualification"
+        }
+      },
+      "spec": {
+        "parallelism": 1,
+        "taskCount": 1,
+        "template": {
+          "spec": {
+            "containers": [
+              {
+                "args": [
+                  "-c",
+                  "raise SystemExit('Qualification fixture has not been armed; no workload executed')"
+                ],
+                "command": [
+                  "/opt/renderer-venv/bin/python3"
+                ],
+                "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/viral-studio-3d-renderer@sha256:6b97198c6770c8f211caf8b018be7dc85290035ba5a3922580a4a324179ed522",
+                "resources": {
+                  "limits": {
+                    "cpu": "20",
+                    "memory": "80Gi",
+                    "nvidia.com/gpu": "1"
+                  }
+                }
+              }
+            ],
+            "maxRetries": 0,
+            "nodeSelector": {
+              "run.googleapis.com/accelerator": "nvidia-rtx-pro-6000"
+            },
+            "serviceAccountName": "viral-studio-3d-renderer@autopromote-cc6d3.iam.gserviceaccount.com",
+            "timeoutSeconds": "300"
+          }
+        }
+      }
+    }
+  },
+  "status": {
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-06T16:00:15.776648Z",
+        "status": "True",
+        "type": "Ready"
+      }
+    ],
+    "observedGeneration": 1
+  }
+}

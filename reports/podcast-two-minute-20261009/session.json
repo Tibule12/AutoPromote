@@ -1,0 +1,49 @@
+{
+  "userRequest": "Take two minutes from full podcast; edit background, color grade and captions; professional results",
+  "userGpuInstruction": "User: increase GPU time to 01:00 pm",
+  "authorizedAtUtc": "2026-10-09T03:59:54Z",
+  "hardStopSast": "2026-10-09T13:00:00+02:00",
+  "deadlineEpoch": 1791543600,
+  "instance": "autopromote-l40s-staging",
+  "instanceId": "xgh6wcu74",
+  "watchdogPid": 103220,
+  "stopEarlierWhenWorkComplete": true,
+  "source": "/home/tibule12/Videos/cam-combiner-5050c706-a6cb-48bc-ac43-8fa54f21bc1a.mp4",
+  "state": "DELIVERY_READY_FOR_REVIEW_CLOUD_STOP_CONFIRMATION_BLOCKED",
+  "newInstanceCreated": false,
+  "googleGpuExecutionStarted": false,
+  "completedBackgroundSections": 12,
+  "hardGpuStopSast": "2026-10-09T13:00:00+02:00",
+  "continuousOriginalAudioDecodedSampleEquality": true,
+  "gpuExtension": {
+    "authorizedBy": "User: Extend GPU time to 11:00 am",
+    "at": "2026-10-09T06:07:07.940702+00:00",
+    "deadlineEpoch": 1791536400,
+    "cutoffSast": "2026-10-09T11:00:00+02:00",
+    "watchdogPid": 9189
+  },
+  "gpuCutoffWatchdogPid": 103220,
+  "gpuStopRequestSast": "Immediate retries after guest poweroff",
+  "initialGpuWindow": {
+    "userGpuInstruction": "stop GPU in two hours",
+    "authorizedAtUtc": "2026-10-09T03:59:54Z",
+    "hardStopSast": "2026-10-09T07:59:54+02:00",
+    "deadlineEpoch": 1791536400,
+    "watchdogPid": 9189
+  },
+  "gpuAuthorizationHistory": [
+    {
+      "userInstruction": "Extend GPU time to 11:00 am",
+      "deadlineEpoch": 1791536400,
+      "watchdogPid": 45402
+    }
+  ],
+  "gpuStopAttempt": "Owned worker stopped and guest poweroff accepted. Subsequent SSH closed. Brev provider STOPPED/billing unconfirmed because authenticated control-plane requests EOF/time out; bounded independent retries run immediately.",
+  "finalOutputSha256": "5f2b71f5b19046f37fe3482ae4b86afd636edde5946daba4a9f15c4dfd80face",
+  "guestPoweredOff": true,
+  "providerStoppedConfirmed": false,
+  "billingStopConfirmed": false,
+  "outputReview": "Ready for review; no fresh human listening/creative approval.",
+  "updatedAt": "2026-10-09T10:28:52.820101+00:00",
+  "finalOperatingHandoff": "Final operating handoff: selected 120s native delivery and same-job, worker-offline, paused 97.5s recovery/repeat browser download PASS with identical SHA. Owner/path/object metadata checks precede separate signed attachment access, avoiding failed full-file blob buffering. Seven render-attempt route checks PASS, including offline readiness rejecting queueing before credit charge or phantom job; these are engineering tests, separately from native E2E. Tracking evidence remains the retained attached-callout test; mask-derived text occlusion is distinct from unqualified full depth-map editing. No new full tracking/depth execution is inferred from background-tone previews. Provider STOPPED/billing remains unconfirmed. Immediate bounded cloud-stop retries replace the waiting watchdog; guest and owned worker are already off. No restart or generation occurs. Full Studio NOT READY; next S02 then S03."
+}

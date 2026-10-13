@@ -1,0 +1,447 @@
+{
+  "provider": "AutoPromote authored CPU synthesis",
+  "seed": 20261009,
+  "sampleRate": 48000,
+  "channels": 2,
+  "duration": 38,
+  "sha256": "ee42b4a75802188d6c4e53ae149bea0313b113033cd21cf96fea199231f8cf68",
+  "notes": [
+    {
+      "at": 0.0,
+      "midi": 48,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.39
+    },
+    {
+      "at": 0.0,
+      "midi": 55,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.13
+    },
+    {
+      "at": 0.0,
+      "midi": 60,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.13
+    },
+    {
+      "at": 0.0,
+      "midi": 63,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.39
+    },
+    {
+      "at": 8.0,
+      "midi": 46,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.39
+    },
+    {
+      "at": 8.0,
+      "midi": 53,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.13
+    },
+    {
+      "at": 8.0,
+      "midi": 58,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.13
+    },
+    {
+      "at": 8.0,
+      "midi": 65,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.39
+    },
+    {
+      "at": 15.0,
+      "midi": 43,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.39
+    },
+    {
+      "at": 15.0,
+      "midi": 50,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.13
+    },
+    {
+      "at": 15.0,
+      "midi": 55,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.13
+    },
+    {
+      "at": 15.0,
+      "midi": 62,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.39
+    },
+    {
+      "at": 21.0,
+      "midi": 48,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.39
+    },
+    {
+      "at": 21.0,
+      "midi": 55,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.13
+    },
+    {
+      "at": 21.0,
+      "midi": 60,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.13
+    },
+    {
+      "at": 21.0,
+      "midi": 67,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.39
+    },
+    {
+      "at": 25.0,
+      "midi": 53,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.39
+    },
+    {
+      "at": 25.0,
+      "midi": 60,
+      "duration": 7.8,
+      "pad": true,
+      "pan": -0.13
+    },
+    {
+      "at": 25.0,
+      "midi": 65,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.13
+    },
+    {
+      "at": 25.0,
+      "midi": 69,
+      "duration": 7.8,
+      "pad": true,
+      "pan": 0.39
+    },
+    {
+      "at": 32.0,
+      "midi": 48,
+      "duration": 6,
+      "pad": true,
+      "pan": -0.39
+    },
+    {
+      "at": 32.0,
+      "midi": 55,
+      "duration": 6,
+      "pad": true,
+      "pan": -0.13
+    },
+    {
+      "at": 32.0,
+      "midi": 60,
+      "duration": 6,
+      "pad": true,
+      "pan": 0.13
+    },
+    {
+      "at": 32.0,
+      "midi": 64,
+      "duration": 6,
+      "pad": true,
+      "pan": 0.39
+    },
+    {
+      "at": 32.0,
+      "midi": 67,
+      "duration": 6,
+      "pad": true,
+      "pan": 0.65
+    },
+    {
+      "at": 1.8,
+      "midi": 72,
+      "duration": 2.8,
+      "pad": false,
+      "pan": -0.22
+    },
+    {
+      "at": 3.7,
+      "midi": 79,
+      "duration": 2.8,
+      "pad": false,
+      "pan": -0.22
+    },
+    {
+      "at": 5.6,
+      "midi": 75,
+      "duration": 2.8,
+      "pad": false,
+      "pan": -0.22
+    },
+    {
+      "at": 7.5,
+      "midi": 74,
+      "duration": 2.8,
+      "pad": false,
+      "pan": -0.22
+    },
+    {
+      "at": 8.0,
+      "midi": 72,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.39574329864935276
+    },
+    {
+      "at": 8.625,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.2868805507982983
+    },
+    {
+      "at": 9.25,
+      "midi": 75,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.06955579415217343
+    },
+    {
+      "at": 9.875,
+      "midi": 82,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.17406618318767952
+    },
+    {
+      "at": 10.5,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.35187830398866804
+    },
+    {
+      "at": 11.125,
+      "midi": 74,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.3966544709900317
+    },
+    {
+      "at": 11.75,
+      "midi": 72,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.291465990330868
+    },
+    {
+      "at": 12.375,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.07608186650676516
+    },
+    {
+      "at": 13.0,
+      "midi": 72,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.16806681473065638
+    },
+    {
+      "at": 13.625,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.34867384322532236
+    },
+    {
+      "at": 14.25,
+      "midi": 75,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.3974564404531051
+    },
+    {
+      "at": 14.875,
+      "midi": 82,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.2959711864092575
+    },
+    {
+      "at": 15.5,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.08258699277511865
+    },
+    {
+      "at": 16.125,
+      "midi": 74,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.16202117582632733
+    },
+    {
+      "at": 16.75,
+      "midi": 72,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.3453733891231623
+    },
+    {
+      "at": 17.375,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.398148986248491
+    },
+    {
+      "at": 18.0,
+      "midi": 72,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.3003948987086704
+    },
+    {
+      "at": 18.625,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.08906938203198371
+    },
+    {
+      "at": 19.25,
+      "midi": 75,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.15593093089855145
+    },
+    {
+      "at": 19.875,
+      "midi": 82,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.3419778503296674
+    },
+    {
+      "at": 20.5,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.3987319177115197
+    },
+    {
+      "at": 21.125,
+      "midi": 74,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.30473590933759637
+    },
+    {
+      "at": 21.75,
+      "midi": 72,
+      "duration": 1.6,
+      "pad": false,
+      "pan": 0.0955272496118331
+    },
+    {
+      "at": 22.375,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.1497977566516648
+    },
+    {
+      "at": 23.0,
+      "midi": 72,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.3384881616700683
+    },
+    {
+      "at": 23.625,
+      "midi": 79,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.3992050743554254
+    },
+    {
+      "at": 24.25,
+      "midi": 75,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.30899302317310817
+    },
+    {
+      "at": 24.875,
+      "midi": 82,
+      "duration": 1.6,
+      "pad": false,
+      "pan": -0.10195881760019845
+    },
+    {
+      "at": 25.5,
+      "midi": 79,
+      "duration": 3,
+      "pad": false,
+      "pan": 0.0
+    },
+    {
+      "at": 27.0,
+      "midi": 79,
+      "duration": 3,
+      "pad": false,
+      "pan": 0.0
+    },
+    {
+      "at": 28.5,
+      "midi": 79,
+      "duration": 3,
+      "pad": false,
+      "pan": 0.0
+    },
+    {
+      "at": 30.0,
+      "midi": 79,
+      "duration": 3,
+      "pad": false,
+      "pan": 0.0
+    },
+    {
+      "at": 34.6,
+      "midi": 84,
+      "duration": 3,
+      "pad": false,
+      "pan": 0.0
+    }
+  ],
+  "unmasteredSha256": "2233d10393441733f34bd3fca013481a4043464b7a6aa19c3039afbf68fa1928",
+  "masterGainDb": 8,
+  "purpose": "Measured prior complete mix at -28.3 LUFS. Raise both reusable stems by 8 dB for a -20.3 LUFS cinematic web mix; maintain transition balance and headroom."
+}

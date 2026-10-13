@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-12T21:53:39.669Z",
+  "service": "thulani-api",
+  "url": "https://thulani-api-jddzncgt2a-uc.a.run.app",
+  "ready": "True",
+  "revision": "thulani-api-00021-joc",
+  "schedulerEnvironment": {
+    "NODE_ENV": "production"
+  },
+  "readOnly": true,
+  "noDeploy": true
+}

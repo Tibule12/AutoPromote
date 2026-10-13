@@ -1,0 +1,15 @@
+{
+  "baselineFileCount": 163,
+  "missingPreexistingFiles": [],
+  "changedPreexistingFiles": [
+    "frontend/src/components/StudioProTimeline.js",
+    "frontend/src/components/ViralClipStudio.js",
+    "frontend/src/components/__tests__/StudioProTimeline.test.js",
+    "python_media_worker/main_media_server.py",
+    "frontend/src/components/StudioTimeline.css",
+    "src/services/studioSubjectVfxService.js",
+    "test/studioSubjectVfxService.jest.test.js"
+  ],
+  "logoAssetsChanged": [],
+  "noResetCleanCommitPushOrDeployment": true
+}

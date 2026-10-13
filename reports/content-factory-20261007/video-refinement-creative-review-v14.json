@@ -1,0 +1,7 @@
+{
+  "accepted": false,
+  "artifactSha256": "8ed5a5be0df1144f3c96a8ac385126cabf8ae5a8b82750532d374ee7ff7559e5",
+  "reviewer": "root 16 decoded-frame review",
+  "reason": "Continuous geometry survives, but the water remains a flat expanding disc, the scene is miniature CGI, and the final boat has no convincing full-size ocean world. Higher denoise strength did not create the requested realism.",
+  "frames": "video-refinement-frames-v14/frames.json"
+}

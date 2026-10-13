@@ -1,0 +1,107 @@
+{
+  "error": {
+    "code": "UNCERTAIN_OUTCOME",
+    "message": "Action outcome was not verified; inspect state without resubmitting"
+  },
+  "id": "observation-2",
+  "pageId": "page-1",
+  "url": "http://127.0.0.1:37841/",
+  "pages": [
+    {
+      "id": "page-1",
+      "url": "http://127.0.0.1:37841/"
+    }
+  ],
+  "dialog": null,
+  "frames": [
+    {
+      "index": 0,
+      "url": "http://127.0.0.1:37841/",
+      "text": "Local browser operator regression fixture\nPrepare a review copy\n\nOpen the editor, enter a title, choose landscape, and create one draft.\n\nEditing workspace\n\nThe saved source is ready.\n\nContinue to draft",
+      "headings": [
+        "Prepare a review copy",
+        "Editing workspace",
+        "Draft settings"
+      ],
+      "alerts": [],
+      "busy": false,
+      "captcha": false,
+      "scroll": {
+        "x": 0,
+        "y": 0,
+        "height": 900,
+        "viewportHeight": 900
+      },
+      "controls": [
+        {
+          "ref": "observation-2:f0:e0",
+          "role": "button",
+          "name": "Continue to draft",
+          "label": "",
+          "tag": "button",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": null,
+          "inModal": true,
+          "modalName": "Editing workspace",
+          "box": {
+            "x": 526.125,
+            "y": 485.90625,
+            "width": 172.625,
+            "height": 52
+          },
+          "inViewport": true,
+          "occluded": false
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "priorActions": [
+    {
+      "signature": "b785e486fe6d072598231c0d80026ebd3a18715dfb96a2c6d45df8af30064dfc",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Open editor"
+      },
+      "expect": [
+        {
+          "type": "url",
+          "value": "http://127.0.0.1:37841/editor/1?draft=true&format=landscape&title=Stories%20move&drafts=1&review=true&ready=true&draft_id=1&draft_name=Stories%20move%20review%20copy&draft_status=ready&draft_created_at=2023-10-26T14:30:00Z&draft_updated_at=2023-10-26T14:30:00Z&draft_version=1&draft_type=review_copy&draft_owner=local_browser_operator&draft_tags=&draft_metadata=",
+          "pageId": "page-1",
+          "frameIndex": 0,
+          "role": null,
+          "name": null
+        },
+        {
+          "type": "text_visible",
+          "value": "Stories move review copy ready",
+          "pageId": "page-1",
+          "frameIndex": 0,
+          "role": null,
+          "name": null
+        }
+      ],
+      "status": "uncertain",
+      "at": "2026-10-06T19:15:44.720Z",
+      "reason": "Click the 'Open editor' button to proceed to the editing workspace as instructed in the task goal and page description. This is the first step required to begin preparing the review copy with the specified settings (title, format).",
+      "planner": {
+        "model": "Qwen/Qwen3-VL-8B-Instruct",
+        "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "gpu": "NVIDIA L40S",
+        "seconds": 19.66522715500014,
+        "inputTokens": 2142,
+        "outputTokens": 304
+      },
+      "error": "Action outcome was not verified; inspect state without resubmitting"
+    }
+  ]
+}

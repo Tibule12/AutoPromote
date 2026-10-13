@@ -1,0 +1,742 @@
+[
+  {
+    "keys": [
+      "id",
+      "name",
+      "createdAt",
+      "snapshot",
+      "versions",
+      "updatedAt"
+    ],
+    "snapshotKeys": [
+      "orderedClips",
+      "projectMedia",
+      "angleGroups",
+      "activeAngleGroupId",
+      "selectedClipId",
+      "overlays",
+      "activeOverlayId",
+      "videoFit",
+      "safeFaceFraming",
+      "faceAnchorPreset",
+      "autoCaptions",
+      "captionStyle",
+      "captionPosition",
+      "captionScale",
+      "captionTextOverride",
+      "captionSegments",
+      "translateCaptionsToEnglish",
+      "previewSpeed",
+      "pacingLevel",
+      "creativeIntent",
+      "creativeEffectsEnabled",
+      "creativePreset",
+      "creativeIntensity",
+      "finishFx",
+      "podcastVisualizer",
+      "finishKeyframes",
+      "beatSnapEnabled",
+      "contentProfile",
+      "cutRangeStart",
+      "cutRangeEnd",
+      "joinTransition",
+      "joinTransitionDuration",
+      "smartCrop",
+      "smartCropMode",
+      "reframeAspect",
+      "speakerTrackZoom",
+      "reframeKeyframes",
+      "speakerStackFraming",
+      "speakerStackSourceIds",
+      "speakerStackOffsets",
+      "speakerStackSources",
+      "speakerStackCameraCount",
+      "speakerStackLayout",
+      "speakerStackSyncConfirmed",
+      "speakerFocusCuts",
+      "reframeModeCuts",
+      "activeReframeKeyframeId",
+      "enhanceQuality",
+      "silenceRemoval",
+      "silenceThreshold",
+      "minSilenceDuration",
+      "removeWatermark",
+      "watermarkMode",
+      "brandWatermark",
+      "brandWatermarkVariant",
+      "brandWatermarkText",
+      "mainFrame",
+      "exportSettings",
+      "manualWatermarkRegions",
+      "activeWatermarkRegionId",
+      "addHook",
+      "hookText",
+      "hookTemplate",
+      "hookIntroSeconds",
+      "hookStartTime",
+      "hookEndTime",
+      "hookBlurBackground",
+      "hookDarkOverlay",
+      "hookFreezeFrame",
+      "hookZoomScale",
+      "hookTextAnimation",
+      "hookPreviewLoop",
+      "hookFocusPoint",
+      "addMusic",
+      "muteOriginalAudio",
+      "musicSelection",
+      "musicSearchMode",
+      "safeSearch",
+      "musicVolume",
+      "musicDucking",
+      "musicDuckingStrength",
+      "musicTrack",
+      "soundEffects",
+      "audioRemix",
+      "activeSoundEffectId",
+      "extractedAudio",
+      "bRollCadence",
+      "timeline",
+      "activeTimelineIndex",
+      "timelineZoom",
+      "timelineEditTool",
+      "timelineSnapping",
+      "linkedSelection",
+      "rippleMode",
+      "trackStates",
+      "motionKeyframes",
+      "motionScenes",
+      "threeDScenes",
+      "subjectVfxScenes",
+      "motionTargetId",
+      "compositeTargetId",
+      "mainTransform",
+      "audioKeyframes",
+      "speedKeyframes",
+      "voiceovers",
+      "adjustmentLayers",
+      "compoundClips",
+      "audioAutomationSource",
+      "audioRestoration",
+      "proxySettings",
+      "stabilization",
+      "advancedColor",
+      "creatorPreview",
+      "splitExportEnabled",
+      "splitExportHooks",
+      "studioDocument"
+    ],
+    "studioDocument": {
+      "schemaVersion": 1,
+      "projectId": "viral-project-4ea6a2f1-3574-43c0-ad64-cbc2f2c65b0c",
+      "revision": 1,
+      "clock": {
+        "ticksPerSecond": 90000,
+        "interval": "half_open"
+      },
+      "output": {
+        "aspectRatio": "9:16",
+        "requestedResolution": "source",
+        "frameRate": {
+          "numerator": 30,
+          "denominator": 1
+        },
+        "codec": "h264",
+        "audioCodec": "aac",
+        "audioSampleRate": null,
+        "audioSampleRatePolicy": "worker_selected"
+      },
+      "assets": [
+        {
+          "assetId": "source:main",
+          "sourceId": "main",
+          "storagePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791393337266_podcast-12s.mp4",
+          "identityState": "legacy_reference_unverified"
+        }
+      ],
+      "clipOccurrences": [
+        {
+          "occurrenceId": "main",
+          "assetId": "source:main",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 1080000
+          },
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 1080000
+          },
+          "timeMapId": "map:main",
+          "playback": {
+            "direction": "forward",
+            "freeze": false,
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        }
+      ],
+      "timeMaps": [
+        {
+          "timeMapId": "map:main",
+          "occurrenceId": "main",
+          "segments": [
+            {
+              "sourceRange": {
+                "space": "source",
+                "startTick": 0,
+                "endTick": 1080000
+              },
+              "clipLocalRange": {
+                "space": "clip_local",
+                "startTick": 0,
+                "endTick": 1080000
+              },
+              "programmeRange": {
+                "space": "programme",
+                "startTick": 0,
+                "endTick": 1080000
+              },
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              },
+              "direction": "forward",
+              "freeze": false
+            }
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "layerId": "1-cue-1",
+          "type": "caption",
+          "legacyCollection": "captionSegments",
+          "compositionStage": "worker_caption",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 0,
+            "endTick": 306000
+          },
+          "sourceId": "main",
+          "parameters": {
+            "text": "STUDIO QA CAPTION",
+            "reviewRequired": true,
+            "textReviewed": true,
+            "speaker": "unknown",
+            "placement": "bottom_center"
+          }
+        },
+        {
+          "layerId": "1-cue-2",
+          "type": "caption",
+          "legacyCollection": "captionSegments",
+          "compositionStage": "worker_caption",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 306000,
+            "endTick": 660600
+          },
+          "sourceId": "main",
+          "parameters": {
+            "text": "ewe iwayini iwayini iwayini iwayini iwayini iwayini",
+            "reviewRequired": true,
+            "textReviewed": false,
+            "speaker": "unknown",
+            "placement": "bottom_center"
+          }
+        },
+        {
+          "layerId": "1-cue-3",
+          "type": "caption",
+          "legacyCollection": "captionSegments",
+          "compositionStage": "worker_caption",
+          "sourceRange": {
+            "space": "source",
+            "startTick": 660600,
+            "endTick": 1078200
+          },
+          "sourceId": "main",
+          "parameters": {
+            "text": "iwayini iwayini iwayini iwayini iwayini iwayini",
+            "reviewRequired": true,
+            "textReviewed": false,
+            "speaker": "unknown",
+            "placement": "bottom_center"
+          }
+        }
+      ],
+      "linkedTiming": {
+        "cues": {
+          "soundEffects": [],
+          "voiceovers": [],
+          "adjustmentLayers": []
+        },
+        "keys": {
+          "motionKeyframes": [],
+          "finishKeyframes": [],
+          "reframeKeyframes": [
+            {
+              "atProgrammeTick": 0,
+              "parameters": {
+                "x": 74.2556342857143,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-e27f416e-0fae-4891-af20-4b7d7897dd55"
+              }
+            },
+            {
+              "atProgrammeTick": 45000,
+              "parameters": {
+                "x": 77.18134857142857,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-5dfa78a3-a8ef-4247-90a5-aa4c152c7038"
+              }
+            },
+            {
+              "atProgrammeTick": 90000,
+              "parameters": {
+                "x": 78.65005714285714,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-9dd0cb92-123f-4310-a7bc-f253e8cf3195"
+              }
+            },
+            {
+              "atProgrammeTick": 135000,
+              "parameters": {
+                "x": 77.71675428571429,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-3f4e780b-3223-469c-a9d0-bd540ab1ef69"
+              }
+            },
+            {
+              "atProgrammeTick": 180000,
+              "parameters": {
+                "x": 77.03798857142857,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-96945f71-1b36-4552-9eca-41763b1174df"
+              }
+            },
+            {
+              "atProgrammeTick": 225000,
+              "parameters": {
+                "x": 76.28754285714285,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-816caf51-7ea9-4187-97be-268d2ffdf945"
+              }
+            },
+            {
+              "atProgrammeTick": 270000,
+              "parameters": {
+                "x": 76.43090285714285,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-28e4c6cb-cb2c-45d2-b773-d5ac04253f69"
+              }
+            },
+            {
+              "atProgrammeTick": 315000,
+              "parameters": {
+                "x": 76.83465142857142,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-872d814b-49ba-47ab-b083-6ed68bb54005"
+              }
+            },
+            {
+              "atProgrammeTick": 360000,
+              "parameters": {
+                "x": 77.30422857142858,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-9c4780b9-68a5-482c-8298-a1426ecb44c7"
+              }
+            },
+            {
+              "atProgrammeTick": 405000,
+              "parameters": {
+                "x": 78.59593142857143,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-8db863f7-7b25-4f15-85ab-c4ca8de39a81"
+              }
+            },
+            {
+              "atProgrammeTick": 423000,
+              "parameters": {
+                "x": 16.136319999999998,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": true,
+                "reviewRequired": true,
+                "id": "detected-face-5ab4b6f7-1ed0-448d-a403-eb18fab9bc53"
+              }
+            },
+            {
+              "atProgrammeTick": 450000,
+              "parameters": {
+                "x": 16.901394285714282,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-2280717e-6987-4d0f-81f1-2cc4f096ae57"
+              }
+            },
+            {
+              "atProgrammeTick": 468000,
+              "parameters": {
+                "x": 77.75625142857143,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": true,
+                "reviewRequired": true,
+                "id": "detected-face-8b2c9c99-395b-4aef-b0e6-cb2d3d7a5306"
+              }
+            },
+            {
+              "atProgrammeTick": 495000,
+              "parameters": {
+                "x": 77.68457142857143,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-f60a9ceb-d276-4d10-954c-b08704856656"
+              }
+            },
+            {
+              "atProgrammeTick": 540000,
+              "parameters": {
+                "x": 77.71968,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-cf14e021-b509-47e3-8d8c-6bb4ea485d27"
+              }
+            },
+            {
+              "atProgrammeTick": 585000,
+              "parameters": {
+                "x": 77.16818285714287,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-b0e38e6a-113b-4ec3-8487-05c34d647b2a"
+              }
+            },
+            {
+              "atProgrammeTick": 630000,
+              "parameters": {
+                "x": 76.91072,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-2a448e88-808b-4fae-8997-5ffd49978f9f"
+              }
+            },
+            {
+              "atProgrammeTick": 675000,
+              "parameters": {
+                "x": 77.65531428571428,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-ef10cf92-e0b6-4ce6-9910-3c0e125ac3b2"
+              }
+            },
+            {
+              "atProgrammeTick": 720000,
+              "parameters": {
+                "x": 77.87474285714286,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-1f5f4209-5ba7-425d-b463-b854c73a61e8"
+              }
+            },
+            {
+              "atProgrammeTick": 765000,
+              "parameters": {
+                "x": 77.68018285714285,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-fecb8608-1284-43b7-8161-22f1a46903ca"
+              }
+            },
+            {
+              "atProgrammeTick": 810000,
+              "parameters": {
+                "x": 77.63337142857144,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-acb12a3f-b080-4111-a35f-b02424cdc6ca"
+              }
+            },
+            {
+              "atProgrammeTick": 855000,
+              "parameters": {
+                "x": 76.77321142857144,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-68c21ecd-65d1-4b97-8ad8-abab75d553d9"
+              }
+            },
+            {
+              "atProgrammeTick": 900000,
+              "parameters": {
+                "x": 76.19099428571428,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-3e624bab-2a4d-4bae-9d12-2adff618b6a8"
+              }
+            },
+            {
+              "atProgrammeTick": 945000,
+              "parameters": {
+                "x": 76.26121142857143,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-caed9b0a-d509-4c1b-8257-28e096839f45"
+              }
+            },
+            {
+              "atProgrammeTick": 990000,
+              "parameters": {
+                "x": 76.32850285714287,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-21a0fccc-df43-4d03-b0bd-9365ee84b9aa"
+              }
+            },
+            {
+              "atProgrammeTick": 1035000,
+              "parameters": {
+                "x": 76.71908571428571,
+                "y": 50,
+                "origin": "face_detection",
+                "cut": false,
+                "reviewRequired": false,
+                "id": "detected-face-c15e247f-ea95-42c8-851c-5c6dfc57432d"
+              }
+            }
+          ],
+          "reframeModeCuts": [
+            {
+              "atProgrammeTick": 0,
+              "parameters": {
+                "id": "analyzed-shot-5035e273-f063-4874-b478-86244d3acc0a",
+                "mode": "speaker_track",
+                "zoom": 1.099
+              }
+            },
+            {
+              "atProgrammeTick": 423000,
+              "parameters": {
+                "id": "analyzed-shot-628a25ea-e325-4cb4-b434-c360cd355c15",
+                "mode": "speaker_track",
+                "zoom": 1.102
+              }
+            },
+            {
+              "atProgrammeTick": 468000,
+              "parameters": {
+                "id": "analyzed-shot-13a03f40-8201-45d3-bcef-1d1bb31c7d3a",
+                "mode": "speaker_track",
+                "zoom": 1.102
+              }
+            }
+          ],
+          "speakerFocusCuts": [],
+          "audioKeyframes.originalAudio": [],
+          "audioKeyframes.masterPodcast": [],
+          "audioKeyframes.voiceover": [],
+          "audioKeyframes.music": [],
+          "audioKeyframes.broll": [],
+          "audioKeyframes.sfx": []
+        }
+      },
+      "audioGraph": {
+        "legacySnapshotRef": "audioRemix",
+        "routes": [
+          {
+            "trackId": "video",
+            "state": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          {
+            "trackId": "adjustment",
+            "state": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          {
+            "trackId": "graphics",
+            "state": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          {
+            "trackId": "broll",
+            "state": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          {
+            "trackId": "captions",
+            "state": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          {
+            "trackId": "originalAudio",
+            "state": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          {
+            "trackId": "voiceover",
+            "state": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          {
+            "trackId": "music",
+            "state": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          },
+          {
+            "trackId": "sfx",
+            "state": {
+              "visible": true,
+              "locked": false,
+              "muted": false,
+              "solo": false
+            }
+          }
+        ],
+        "routing": {
+          "muteOriginalAudio": false,
+          "musicDucking": true,
+          "musicDuckingStrength": 0.35,
+          "musicTrackId": null
+        }
+      },
+      "constraints": {
+        "locks": []
+      },
+      "styleRef": null,
+      "analysisRefs": [],
+      "projectIntelligenceRefs": [],
+      "programmeSpeedKeys": [],
+      "fallbackSpeed": 1,
+      "outputTimeMap": [
+        {
+          "programmeRange": {
+            "space": "programme",
+            "startTick": 0,
+            "endTick": 1080000
+          },
+          "outputRange": {
+            "space": "output",
+            "startTick": 0,
+            "endTick": 1080000
+          },
+          "rateNumerator": 1000000,
+          "rateDenominator": 1000000
+        }
+      ],
+      "journal": [],
+      "idempotency": {},
+      "directorReviewJournal": [],
+      "compatibility": {
+        "legacySnapshotVersion": 1,
+        "projection": "clip_occurrences_canonical_other_fields_legacy",
+        "layerComposition": "separate_worker_stages"
+      }
+    },
+    "timeline": [
+      {
+        "id": "main",
+        "name": "podcast-12s.mp4",
+        "url": "https://storage.googleapis.com/autopromote-cc6d3.firebasestorage.app/uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791393337266_podcast-12s.mp4",
+        "storagePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791393337266_podcast-12s.mp4",
+        "sourceStoragePath": "uploads/videos/bf04dPKELvVMivWoUyLsAVyw2sg2/1791393337266_podcast-12s.mp4",
+        "duration": 12,
+        "startRequest": 0,
+        "endRequest": 12
+      }
+    ]
+  }
+]

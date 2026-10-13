@@ -1,0 +1,33 @@
+{
+  "status": "GENERATED_PENDING_LISTENING_REVIEW",
+  "model": "original-transformation-sound-design",
+  "modelRevision": "fold-water-rise-impact-v2",
+  "tool": "AutoPromote CPU sound design",
+  "seed": 20261008216,
+  "settings": {
+    "duration": 10.0625,
+    "payoffAt": 3.5,
+    "foldTimes": [
+      0.84,
+      1.295,
+      1.855,
+      2.3800000000000003,
+      2.94
+    ],
+    "sampleRate": 48000,
+    "channels": 2,
+    "components": [
+      "fold transients",
+      "continuous water bed",
+      "material riser",
+      "pre-reveal breath",
+      "pitched reveal impact"
+    ]
+  },
+  "artifact": {
+    "path": "reports/flagship-founder-film-production-v5-20261008/audio/transformation/sound.wav",
+    "sha256": "1c43295dee3291747d235407a39ecd735e0b50a0558fd98a32f7ff9c72daecd6",
+    "duration": 10.0625
+  },
+  "limitation": "Measured sound design; listening judgment belongs to the final edit and founder review."
+}

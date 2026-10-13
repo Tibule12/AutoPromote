@@ -1,0 +1,35 @@
+{
+  "sourceSha256": "bf381bed009d94bf93ea8d1e697df94bb45393034bb072ed5571ed9500e79ffd",
+  "frames": [
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/podcast-two-minute-20261009/generated-broll/a82eea947322015121934a6c6ced30cbdab8e15e/assets/br-a82eea94732201512193-shot-1/video.mp4-frames/frame-01.png",
+      "timestamp": 0.0,
+      "sha256": "855278358a98bdf53de49a304b7bb85af54958672127742398e2ad05979f7978"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/podcast-two-minute-20261009/generated-broll/a82eea947322015121934a6c6ced30cbdab8e15e/assets/br-a82eea94732201512193-shot-1/video.mp4-frames/frame-02.png",
+      "timestamp": 1.0083334000000002,
+      "sha256": "59dc69efde8936f016ccc488af74bd944db2e1f3f7255c50b29cbbe61d4dbb09"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/podcast-two-minute-20261009/generated-broll/a82eea947322015121934a6c6ced30cbdab8e15e/assets/br-a82eea94732201512193-shot-1/video.mp4-frames/frame-03.png",
+      "timestamp": 2.0166668000000003,
+      "sha256": "612e64ab0d610f66f5438d3c56c400808a9ce0d18d37203f6aa296a6edfc7efc"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/podcast-two-minute-20261009/generated-broll/a82eea947322015121934a6c6ced30cbdab8e15e/assets/br-a82eea94732201512193-shot-1/video.mp4-frames/frame-04.png",
+      "timestamp": 3.0250002,
+      "sha256": "773e70c50d59e57bd1bceb8894e4b2adca94612e0c32c4aa2b3c8d8b3155d1ca"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/podcast-two-minute-20261009/generated-broll/a82eea947322015121934a6c6ced30cbdab8e15e/assets/br-a82eea94732201512193-shot-1/video.mp4-frames/frame-05.png",
+      "timestamp": 4.033333600000001,
+      "sha256": "902eba040a064d560012c17ed8020716a23a00f939508f8462bc3c1db2a6a4e2"
+    },
+    {
+      "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/podcast-two-minute-20261009/generated-broll/a82eea947322015121934a6c6ced30cbdab8e15e/assets/br-a82eea94732201512193-shot-1/video.mp4-frames/frame-06.png",
+      "timestamp": 4.961667,
+      "sha256": "c085ed4563ce45a0641db865d6a1e4de5ba754a5e3927292ac059a52acdaba85"
+    }
+  ]
+}

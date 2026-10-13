@@ -1,0 +1,33 @@
+{
+  "artifact": {
+    "path": "reports/content-factory-20261007/motion/before-label/video.mp4",
+    "sha256": "957c9bc84a6f194c9732750184e906e14184d61f8ffcc152a0a31ed8438fef4c",
+    "duration": 1.5
+  },
+  "model": "AutoPromote Studio motion renderer",
+  "modelRevision": "viral_motion_graphics/v1",
+  "tool": "Studio motion raw-asset adapter",
+  "settings": {
+    "scene": {
+      "id": "factory-title",
+      "preset": "title",
+      "design": "editorial",
+      "canvasMode": "standalone",
+      "canvasColor": "#080b10",
+      "text": "First attempt",
+      "secondary": "Clouds. No real danger.",
+      "color": "#d6b782",
+      "startTime": 0,
+      "duration": 1.5,
+      "x": 50,
+      "y": 50,
+      "scale": 1,
+      "easing": "smooth"
+    },
+    "fps": 24,
+    "width": 1280,
+    "height": 704,
+    "frames": 36
+  },
+  "status": "GENERATED_PENDING_REVIEW"
+}

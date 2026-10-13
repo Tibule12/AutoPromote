@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-10-08T13:41:55.527Z",
+  "projectName": "Studio paired visual QA 20261008 r15",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "gpuJobsStarted": 0,
+  "status": "FAIL",
+  "pairs": [],
+  "fullCoveragePreflight": "Possible uncovered audio: 0.0–2.8s, 5.2–6.8s, 9.2–12.0s. Caption these phrases, or choose Selected phrases if the gaps are intentional.",
+  "documentSha256": "93f10c34becf1ca25b4b6d626b28e5087ceab756097bad51db7a79af448dca10",
+  "error": "Expected values to be strictly equal:\n\n'full' !== 'selected'\n",
+  "finishedAt": "2026-10-08T13:43:10.767Z"
+}

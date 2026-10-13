@@ -1,0 +1,41 @@
+{
+  "status": "EXTRACTED_PENDING_LISTENING_REVIEW",
+  "sourceBrief": "Private The Small Boat real-world payoff; physical marine ambience from licensed field recordings.",
+  "model": "licensed field recording source trim",
+  "modelRevision": "ffmpeg-trim-resample-v1",
+  "tool": "AutoPromote audio source preparation; normalized for existing PCM review contract",
+  "origin": "recorded_sound_trim",
+  "parentProvenance": {
+    "path": "sea-recording-preview.mp3",
+    "sha256": "4763c1949f77cb921d6fa9242b154f518335cc4a424b5deccb98b762e1bf2db7",
+    "bytes": 1541280,
+    "origin": "recorded_sound_preview",
+    "creator": "Tom_Kaszuba",
+    "sourceUrl": "https://cdn.freesound.org/previews/659/659002_11673893-hq.mp3",
+    "license": "CC0-1.0",
+    "licenseEvidence": "https://freesound.org/people/Tom_Kaszuba/sounds/659002/",
+    "retrievedAt": "2026-10-09T06:25:41.481510+00:00",
+    "limitation": "Public compressed HQ preview; not the full-resolution source recording."
+  },
+  "parentSha256": "4763c1949f77cb921d6fa9242b154f518335cc4a424b5deccb98b762e1bf2db7",
+  "sourceRange": {
+    "start": 11,
+    "duration": 8
+  },
+  "settings": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "sampleFormat": "pcm_s16le",
+    "trimStart": 11,
+    "duration": 8,
+    "gainBeforePcmConversion": 0.7
+  },
+  "artifact": {
+    "path": "audio/sea-bed-safe.wav",
+    "sha256": "658ee9f2c92e70e64f23f1d9ad7f88cc5059265f7cbb7dbbb336331d77942420",
+    "duration": 8
+  },
+  "listeningApproval": false,
+  "parentArtifact": null,
+  "correction": "Earlier 16-bit PCM conversion clipped one decoded MP3 peak. This separate take attenuates the original floating decoder output before PCM conversion. Earlier trims retained."
+}

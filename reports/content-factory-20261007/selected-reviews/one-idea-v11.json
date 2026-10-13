@@ -1,0 +1,18 @@
+{
+  "accepted": true,
+  "artifactSha256": "6469b6cd3f59304c34e34a1640fcba734e5166918301cbff3062ecf495af8f0f",
+  "evidenceSha256": "6469b6cd3f59304c34e34a1640fcba734e5166918301cbff3062ecf495af8f0f",
+  "reviewer": "AutoPromote decoded audio measurements",
+  "reason": "Measured original stereo audio: peak 0.427, RMS 0.062, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+  "measurements": {
+    "accepted": true,
+    "reason": "Measured original stereo audio: peak 0.427, RMS 0.062, clipped samples 0.000000. Technical check only; emotional effectiveness requires review in the final film.",
+    "peak": 0.4271240234375,
+    "rms": 0.062305675748035465,
+    "clippedFraction": 0.0,
+    "channels": 2,
+    "sampleRate": 48000,
+    "duration": 2.325
+  },
+  "limitation": "Technical role acceptance only; final listening is required."
+}

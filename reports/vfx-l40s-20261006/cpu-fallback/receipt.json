@@ -1,0 +1,184 @@
+{
+  "status": "PASS",
+  "cuda_devices": 0,
+  "caption_device": "cpu",
+  "compute_type": "int8_float32",
+  "encoder": "libx264",
+  "elapsed_seconds": 17.884584870000253,
+  "caption_segments": 13,
+  "validation": {
+    "status": "passed",
+    "media": {
+      "duration": 4.017007,
+      "size": 370947,
+      "video": {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 640,
+        "height": 360,
+        "avg_frame_rate": "24/1"
+      },
+      "audio": {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0"
+      }
+    },
+    "duration": {
+      "expected": 4.0,
+      "actual": 4.017,
+      "delta": 0.017,
+      "tolerance": 0.45
+    },
+    "audio_expected": true,
+    "picture_timing": {
+      "duration": 4.0,
+      "container_duration": 4.017,
+      "delta": 0.017,
+      "tolerance": 0.1
+    },
+    "black_ranges": [],
+    "browser_delivery": "h264_yuv420p_faststart"
+  },
+  "render_result": {
+    "status": "completed",
+    "progress": 100,
+    "detail": "Render complete",
+    "job_id": "4ef59634-9231-4880-b9d9-b8fd5a5cf479",
+    "output_path": "/work/tmp/4ef59634-9231-4880-b9d9-b8fd5a5cf479_viral.mp4",
+    "output_url": "file:///work/cpu-fallback-output/export.mp4",
+    "thumbnail_url": null,
+    "cover_frame": null,
+    "thumbnail_frame": null,
+    "brand_watermark": true,
+    "caption_review_copy": true,
+    "brand_watermark_receipt": {
+      "enabled": true,
+      "status": "burned_in",
+      "asset": "autopromote_viral_clip_studio_lockup",
+      "placement": "top_right_safe_zone",
+      "style": "transparent_logo_lockup",
+      "variant": "studio",
+      "movement_schedule": [],
+      "caption_review_copy": true,
+      "delivery": {
+        "resolution": "source",
+        "width": 640,
+        "height": 360,
+        "fps": 24,
+        "codec": "h264",
+        "encoder": "libx264",
+        "quality": "high",
+        "crf": 19,
+        "preset": "veryfast"
+      }
+    },
+    "output_settings": {
+      "resolution": "source",
+      "width": 640,
+      "height": 360,
+      "fps": 24,
+      "codec": "h264",
+      "encoder": "libx264",
+      "quality": "high",
+      "crf": 19,
+      "preset": "veryfast"
+    },
+    "watermark_text": "AutoPromote \u00b7 Viral Clip Studio",
+    "audio_proof": {
+      "expected": true,
+      "verified": true,
+      "codec": "aac",
+      "channels": 2,
+      "sample_rate": 44100,
+      "duration_seconds": 4.017
+    },
+    "media_validation": {
+      "duration": 4.017007,
+      "size": 370947,
+      "video": {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 640,
+        "height": 360,
+        "avg_frame_rate": "24/1"
+      },
+      "audio": {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0"
+      }
+    },
+    "final_quality_gate": {
+      "status": "passed",
+      "media": {
+        "duration": 4.017007,
+        "size": 370947,
+        "video": {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 640,
+          "height": 360,
+          "avg_frame_rate": "24/1"
+        },
+        "audio": {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0"
+        }
+      },
+      "duration": {
+        "expected": 4.017,
+        "actual": 4.017,
+        "delta": 0.0,
+        "tolerance": 0.45
+      },
+      "audio_expected": true,
+      "picture_timing": {
+        "duration": 4.0,
+        "container_duration": 4.017,
+        "delta": 0.017,
+        "tolerance": 0.1
+      },
+      "black_ranges": [],
+      "browser_delivery": "h264_yuv420p_faststart"
+    },
+    "duration": 4.017007,
+    "speed_plan": [
+      {
+        "start_time": 0.0,
+        "end_time": 4.017007,
+        "rate": 1.0
+      }
+    ],
+    "creative_receipt": {
+      "status": "not_requested",
+      "fallback": "clean",
+      "effects": []
+    },
+    "professional_cleanup": {
+      "status": "disabled"
+    },
+    "audio_restoration": null,
+    "audio_automation": {},
+    "audio_track_states": {},
+    "audio_remix_receipt": {
+      "version": 1,
+      "enabled": false,
+      "status": "not_requested"
+    },
+    "studio_plan_validation": {
+      "valid": false,
+      "errors": [
+        "legacy_request_without_plan"
+      ]
+    }
+  },
+  "scope": "Actual short podcast, automatic CPU/int8 and libx264, offline container, no cloud credentials"
+}

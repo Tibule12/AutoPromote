@@ -1,0 +1,46 @@
+{
+  "kind": "actual canonical adapter execution; no media render or real-user E2E",
+  "timestamp": "2026-10-08T09:16:03.589Z",
+  "beforeBundleSha256": "fff51a58257eb8308f2f7ea123c324c329ee6d7b4253ed262331c5bef24e88ce",
+  "afterBundleSha256": "34a1db955922290e54d14d8e3a6c1f6a1b89867e1f11f7e368ada2788f6f1f30",
+  "checks": [
+    {
+      "name": "3D camera",
+      "before": "DROPPED",
+      "after": 65,
+      "result": "FIXED_STATE_BOUNDARY"
+    },
+    {
+      "name": "3D asset",
+      "before": "DROPPED",
+      "after": "owned/mesh.glb",
+      "result": "FIXED_STATE_BOUNDARY"
+    },
+    {
+      "name": "HQ job",
+      "before": "DROPPED",
+      "after": "owned-job",
+      "result": "FIXED_STATE_BOUNDARY"
+    },
+    {
+      "name": "audio gain",
+      "before": "DROPPED",
+      "after": 0,
+      "result": "FIXED_STATE_BOUNDARY"
+    },
+    {
+      "name": "audio fade",
+      "before": "DROPPED",
+      "after": 0.4,
+      "result": "FIXED_STATE_BOUNDARY"
+    },
+    {
+      "name": "audio media",
+      "before": "DROPPED",
+      "after": "owned/cue.wav",
+      "result": "FIXED_STATE_BOUNDARY"
+    }
+  ],
+  "gpuUsed": false,
+  "visualParityVerified": false
+}

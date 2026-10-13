@@ -1,0 +1,491 @@
+{
+  "sourceSha256": "043aa65f330df292d18f85b0c0e9ecd28da83610b2f32c76bedffe82989aad86",
+  "modelPath": "/models",
+  "device": "cpu",
+  "computeType": "int8",
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 13.22,
+      "text": " is the end of the day of the day of the day of the day of the day",
+      "avgLogProbability": -1.073346996307373,
+      "noSpeechProbability": 6.399706611003031e-13,
+      "words": [
+        {
+          "word": " is",
+          "start": 0.0,
+          "end": 0.64,
+          "probability": 0.0011274286080151796
+        },
+        {
+          "word": " the",
+          "start": 0.64,
+          "end": 2.56,
+          "probability": 0.13054946064949036
+        },
+        {
+          "word": " end",
+          "start": 2.56,
+          "end": 2.56,
+          "probability": 0.03226495534181595
+        },
+        {
+          "word": " of",
+          "start": 2.56,
+          "end": 4.22,
+          "probability": 0.3385952115058899
+        },
+        {
+          "word": " the",
+          "start": 4.22,
+          "end": 4.24,
+          "probability": 0.6668351292610168
+        },
+        {
+          "word": " day",
+          "start": 4.24,
+          "end": 4.26,
+          "probability": 0.17430368065834045
+        },
+        {
+          "word": " of",
+          "start": 4.26,
+          "end": 4.28,
+          "probability": 0.18058821558952332
+        },
+        {
+          "word": " the",
+          "start": 4.28,
+          "end": 4.28,
+          "probability": 0.4286505877971649
+        },
+        {
+          "word": " day",
+          "start": 4.28,
+          "end": 4.28,
+          "probability": 0.6870545744895935
+        },
+        {
+          "word": " of",
+          "start": 4.28,
+          "end": 4.36,
+          "probability": 0.5820349454879761
+        },
+        {
+          "word": " the",
+          "start": 4.36,
+          "end": 4.36,
+          "probability": 0.6166921257972717
+        },
+        {
+          "word": " day",
+          "start": 4.36,
+          "end": 4.36,
+          "probability": 0.8540169596672058
+        },
+        {
+          "word": " of",
+          "start": 4.36,
+          "end": 4.36,
+          "probability": 0.7387746572494507
+        },
+        {
+          "word": " the",
+          "start": 4.36,
+          "end": 4.36,
+          "probability": 0.6971817016601562
+        },
+        {
+          "word": " day",
+          "start": 4.36,
+          "end": 4.36,
+          "probability": 0.9200679063796997
+        },
+        {
+          "word": " of",
+          "start": 4.36,
+          "end": 13.22,
+          "probability": 0.8224259614944458
+        },
+        {
+          "word": " the",
+          "start": 13.22,
+          "end": 13.22,
+          "probability": 0.7756720781326294
+        },
+        {
+          "word": " day",
+          "start": 13.22,
+          "end": 13.22,
+          "probability": 0.9470135569572449
+        }
+      ]
+    },
+    {
+      "start": 13.22,
+      "end": 18.88,
+      "text": " that is the end of the day of the day of the day of the day of the day",
+      "avgLogProbability": -1.0891694114321755,
+      "noSpeechProbability": 5.07851302244261e-13,
+      "words": [
+        {
+          "word": " that",
+          "start": 13.22,
+          "end": 13.54,
+          "probability": 0.0019026483641937375
+        },
+        {
+          "word": " is",
+          "start": 13.54,
+          "end": 16.88,
+          "probability": 0.1572771519422531
+        },
+        {
+          "word": " the",
+          "start": 16.88,
+          "end": 16.9,
+          "probability": 0.19644077122211456
+        },
+        {
+          "word": " end",
+          "start": 16.9,
+          "end": 16.9,
+          "probability": 0.05524206906557083
+        },
+        {
+          "word": " of",
+          "start": 16.9,
+          "end": 17.64,
+          "probability": 0.40421220660209656
+        },
+        {
+          "word": " the",
+          "start": 17.64,
+          "end": 17.64,
+          "probability": 0.5762516856193542
+        },
+        {
+          "word": " day",
+          "start": 17.64,
+          "end": 17.68,
+          "probability": 0.16582326591014862
+        },
+        {
+          "word": " of",
+          "start": 17.68,
+          "end": 17.74,
+          "probability": 0.1829620748758316
+        },
+        {
+          "word": " the",
+          "start": 17.74,
+          "end": 17.74,
+          "probability": 0.4237399995326996
+        },
+        {
+          "word": " day",
+          "start": 17.74,
+          "end": 17.74,
+          "probability": 0.6935968995094299
+        },
+        {
+          "word": " of",
+          "start": 17.74,
+          "end": 17.74,
+          "probability": 0.6395049095153809
+        },
+        {
+          "word": " the",
+          "start": 17.74,
+          "end": 17.74,
+          "probability": 0.6460019946098328
+        },
+        {
+          "word": " day",
+          "start": 17.74,
+          "end": 17.74,
+          "probability": 0.8298497200012207
+        },
+        {
+          "word": " of",
+          "start": 17.74,
+          "end": 18.68,
+          "probability": 0.7966873645782471
+        },
+        {
+          "word": " the",
+          "start": 18.68,
+          "end": 18.68,
+          "probability": 0.7508118748664856
+        },
+        {
+          "word": " day",
+          "start": 18.68,
+          "end": 18.68,
+          "probability": 0.8902312517166138
+        },
+        {
+          "word": " of",
+          "start": 18.68,
+          "end": 18.68,
+          "probability": 0.8266627192497253
+        },
+        {
+          "word": " the",
+          "start": 18.68,
+          "end": 18.68,
+          "probability": 0.8126616477966309
+        },
+        {
+          "word": " day",
+          "start": 18.68,
+          "end": 18.88,
+          "probability": 0.9317976236343384
+        }
+      ]
+    },
+    {
+      "start": 20.040000000000003,
+      "end": 22.72,
+      "text": " is the end of the day of the day of the day of the day of the day",
+      "avgLogProbability": -1.0338545262813568,
+      "noSpeechProbability": 3.4581479390130565e-13,
+      "words": [
+        {
+          "word": " is",
+          "start": 20.040000000000003,
+          "end": 20.080000000000002,
+          "probability": 0.0009788573952391744
+        },
+        {
+          "word": " the",
+          "start": 20.080000000000002,
+          "end": 20.12,
+          "probability": 0.11796855181455612
+        },
+        {
+          "word": " end",
+          "start": 20.12,
+          "end": 20.14,
+          "probability": 0.039181120693683624
+        },
+        {
+          "word": " of",
+          "start": 20.14,
+          "end": 20.14,
+          "probability": 0.27651116251945496
+        },
+        {
+          "word": " the",
+          "start": 20.14,
+          "end": 20.42,
+          "probability": 0.6706783175468445
+        },
+        {
+          "word": " day",
+          "start": 20.42,
+          "end": 20.44,
+          "probability": 0.18837891519069672
+        },
+        {
+          "word": " of",
+          "start": 20.44,
+          "end": 20.46,
+          "probability": 0.17484943568706512
+        },
+        {
+          "word": " the",
+          "start": 20.46,
+          "end": 20.48,
+          "probability": 0.4496423602104187
+        },
+        {
+          "word": " day",
+          "start": 20.48,
+          "end": 20.5,
+          "probability": 0.6944273710250854
+        },
+        {
+          "word": " of",
+          "start": 20.5,
+          "end": 20.52,
+          "probability": 0.6210939288139343
+        },
+        {
+          "word": " the",
+          "start": 20.52,
+          "end": 20.54,
+          "probability": 0.6444135904312134
+        },
+        {
+          "word": " day",
+          "start": 20.54,
+          "end": 20.56,
+          "probability": 0.8703406453132629
+        },
+        {
+          "word": " of",
+          "start": 20.56,
+          "end": 20.78,
+          "probability": 0.7661120891571045
+        },
+        {
+          "word": " the",
+          "start": 20.78,
+          "end": 20.92,
+          "probability": 0.7709347009658813
+        },
+        {
+          "word": " day",
+          "start": 20.92,
+          "end": 20.94,
+          "probability": 0.9271972179412842
+        },
+        {
+          "word": " of",
+          "start": 20.94,
+          "end": 22.44,
+          "probability": 0.8431271314620972
+        },
+        {
+          "word": " the",
+          "start": 22.44,
+          "end": 22.7,
+          "probability": 0.8553330898284912
+        },
+        {
+          "word": " day",
+          "start": 22.7,
+          "end": 22.72,
+          "probability": 0.9483593106269836
+        }
+      ]
+    },
+    {
+      "start": 23.240000000000002,
+      "end": 23.92,
+      "text": " that is the end of the day of the day of the day of the day of the day",
+      "avgLogProbability": -1.0627460479736328,
+      "noSpeechProbability": 2.8767952104692684e-13,
+      "words": [
+        {
+          "word": " that",
+          "start": 23.240000000000002,
+          "end": 23.32,
+          "probability": 0.00453990139067173
+        },
+        {
+          "word": " is",
+          "start": 23.32,
+          "end": 23.34,
+          "probability": 0.188302680850029
+        },
+        {
+          "word": " the",
+          "start": 23.34,
+          "end": 23.34,
+          "probability": 0.20572364330291748
+        },
+        {
+          "word": " end",
+          "start": 23.34,
+          "end": 23.34,
+          "probability": 0.03096937946975231
+        },
+        {
+          "word": " of",
+          "start": 23.34,
+          "end": 23.34,
+          "probability": 0.297480970621109
+        },
+        {
+          "word": " the",
+          "start": 23.34,
+          "end": 23.46,
+          "probability": 0.6351165771484375
+        },
+        {
+          "word": " day",
+          "start": 23.46,
+          "end": 23.48,
+          "probability": 0.18273082375526428
+        },
+        {
+          "word": " of",
+          "start": 23.48,
+          "end": 23.52,
+          "probability": 0.15232416987419128
+        },
+        {
+          "word": " the",
+          "start": 23.52,
+          "end": 23.62,
+          "probability": 0.41701769828796387
+        },
+        {
+          "word": " day",
+          "start": 23.62,
+          "end": 23.62,
+          "probability": 0.7851975560188293
+        },
+        {
+          "word": " of",
+          "start": 23.62,
+          "end": 23.62,
+          "probability": 0.5925813317298889
+        },
+        {
+          "word": " the",
+          "start": 23.62,
+          "end": 23.62,
+          "probability": 0.7270739674568176
+        },
+        {
+          "word": " day",
+          "start": 23.62,
+          "end": 23.62,
+          "probability": 0.8925482034683228
+        },
+        {
+          "word": " of",
+          "start": 23.62,
+          "end": 23.62,
+          "probability": 0.7677552700042725
+        },
+        {
+          "word": " the",
+          "start": 23.62,
+          "end": 23.64,
+          "probability": 0.8381319046020508
+        },
+        {
+          "word": " day",
+          "start": 23.64,
+          "end": 23.64,
+          "probability": 0.930394172668457
+        },
+        {
+          "word": " of",
+          "start": 23.64,
+          "end": 23.64,
+          "probability": 0.7741369605064392
+        },
+        {
+          "word": " the",
+          "start": 23.64,
+          "end": 23.9,
+          "probability": 0.8253741264343262
+        },
+        {
+          "word": " day",
+          "start": 23.9,
+          "end": 23.92,
+          "probability": 0.9434012770652771
+        }
+      ]
+    }
+  ],
+  "text": "is the end of the day of the day of the day of the day of the day that is the end of the day of the day of the day of the day of the day is the end of the day of the day of the day of the day of the day that is the end of the day of the day of the day of the day of the day",
+  "seconds": 126.99312955300047,
+  "limitation": "ASR verifies recoverable speech in actual audio; it is not a human listening or emotional-quality judgment."
+}

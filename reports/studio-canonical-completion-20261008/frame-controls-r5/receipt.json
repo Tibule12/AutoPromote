@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-10-08T14:10:19.890Z",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocks": true,
+  "gpuJobsStarted": 0,
+  "projectName": "Studio framing controls QA 20261008 r5",
+  "status": "FAIL",
+  "steps": [
+    "Native Reset transform removes the QA tilt, zoom, offsets and main-video keys",
+    "Frame off/on history is shared with the enabled Color inspector checkbox"
+  ],
+  "error": "Cannot project main without source media.",
+  "finishedAt": "2026-10-08T14:11:00.309Z"
+}

@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-12T21:28:03.536175+00:00",
+  "actions": [
+    {
+      "path": "/home/tibule12/.cache/ms-playwright/chromium_headless_shell-1217",
+      "bytes": 267716541,
+      "scope": "Regenerable unused headless-shell download / previous local build; active Chromium, app build, authentication, projects, models and proofs retained."
+    },
+    {
+      "path": "reports/model-capability-runtime-v1-20261009/proof/launch-template/local-app.previous",
+      "bytes": 51606114,
+      "scope": "Regenerable unused headless-shell download / previous local build; active Chromium, app build, authentication, projects, models and proofs retained."
+    }
+  ],
+  "additionalInactiveLocalBuilds": [
+    {
+      "path": "reports/model-capability-runtime-v1-20261009/proof/launch-template/local-app.previous",
+      "releasedLogicalBytes": 51607497
+    },
+    {
+      "path": "reports/model-capability-runtime-v1-20261009/proof/launch-template/local-app.playback-direct-trial",
+      "releasedLogicalBytes": 51514344
+    }
+  ],
+  "preserved": "Active local App, all login profiles/authentication, source media, projects, finished films, native proof and actual model checkpoints"
+}

@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-08T19:07:09.542Z",
+  "status": "SCOPED_CUT_AND_TITLE_PASS_FULL_PARITY_FAIL",
+  "outputSha256": "0cf758b24cb800df4797783eced663c20b7826d2c9ed5bb9c608f2846d955f46",
+  "actualStudioUserFlow": true,
+  "newRenderSubmissionsDuringRecovery": 0,
+  "freshGpuUsed": false,
+  "reusedReviewedGpuSubjectJob": "b9de374e-cfd5-49d5-9dce-79351b1fe877",
+  "reviewedPairs": [
+    {
+      "programmeTime": 0.25,
+      "sourceTime": 0.5,
+      "result": "FAIL",
+      "observations": "Reviewed subject pixels present in both; 3D glyph/vertical/material appearance differs; exported tracked label is clipped."
+    },
+    {
+      "programmeTime": 0.75,
+      "sourceTime": 1.5,
+      "result": "PARTIAL",
+      "observations": "Legacy split title is visible in both; subject effects present; exported tracked label clipped."
+    },
+    {
+      "programmeTime": 1.45,
+      "sourceTime": 2.9,
+      "result": "PARTIAL",
+      "observations": "Subject effects present before mapped end in both; title appears in both; tracked label clipping persists."
+    },
+    {
+      "programmeTime": 1.55,
+      "sourceTime": 3.1,
+      "result": "SCOPED_PASS",
+      "observations": "Subject effects are absent after mapped end in both; split title remains visible in both."
+    }
+  ],
+  "technical": "Native actual download and independent full decode PASS: 6s container,1280x720,60fps,AAC stereo. Video stream is 5.966667s/358frames; 2-frame tail discrepancy requires investigation before exact clock promotion.",
+  "remaining": [
+    "3D font/material/vertical geometry",
+    "Tracked-label clipping and full source-transform conformance",
+    "Video tail two-frame discrepancy",
+    "Full listening and dense frame/matte comparisons"
+  ],
+  "readinessPromotion": false,
+  "creativeApproval": false
+}

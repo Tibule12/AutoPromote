@@ -1,0 +1,179 @@
+{
+  "fingerprint": "8ef682763b30c6b628d6d00870730dddc8165e1f35603aecd063f761d4a9c75d",
+  "result": {
+    "id": "plan-autonomous-found-1",
+    "value": {
+      "schemaVersion": 1,
+      "title": "The Origami Ocean",
+      "story": {
+        "about": "A fragile ivory origami boat sails an immense digital ocean, surviving a crushing wave to reveal AutoPromote’s power in transforming minimal input into boundless potential",
+        "whyCare": "Founders need to see how AutoPromote turns small ideas into scalable realities — visually, emotionally, and technically — before committing resources",
+        "hook": "A paper boat becomes an ocean. Not metaphor. Reality. And it survives the storm",
+        "beginning": "An empty desk becomes a vast, deep blue ocean under a soft overhead light. The tiny ivory origami boat drifts calmly, framed by the immensity of the digital sea",
+        "development": "A towering wall of water curls toward the boat — a physical threat that seems impossible to survive. The boat remains intact, untouched by the wave’s force",
+        "tension": "The wave crashes inches from the boat, but the vessel holds. The camera pulls back to reveal the scale — the boat is a speck against the ocean’s fury",
+        "payoff": "The wave recedes into golden calm. The boat glides forward, unharmed. The screen fades to black, then reveals the AutoPromote logo in amber-lit motion typography",
+        "ending": "The final frame shows the AutoPromote identity card: clean, bold, and centered — no animation, no sound — just the brand name as a promise fulfilled",
+        "withheld": "The brand name is withheld until the final resolution, reinforcing that the transformation is the core message, not the logo",
+        "amplify": [
+          "Show scale through aerial framing",
+          "Emphasize physical danger with realistic water physics",
+          "Use golden calm to contrast the storm",
+          "Make the boat feel fragile yet resilient",
+          "Keep visuals cinematic, not static",
+          "Avoid any hint of AI-generated clouds or fantasy",
+          "Ensure the motion card is purely typographic",
+          "Use restrained electronic score to mirror emotional arc"
+        ],
+        "remove": [
+          "Any mention of 'AI' or 'automation' in visuals",
+          "Customer testimonials or fictional product shots",
+          "Orchestral or vocal elements in audio",
+          "Text overlays during action sequences",
+          "Static paper boat imagery",
+          "Unnecessary camera zooms or pans",
+          "Non-essential environmental clutter",
+          "Any reference to 'factory' or 'public feature' in copy"
+        ]
+      },
+      "script": [
+        {
+          "beatId": "intro-beat-01",
+          "action": "Establish the desk as an ocean, boat drifting center-frame",
+          "sound": "Original audio: low ambient pad begins, subtle tension swell"
+        },
+        {
+          "beatId": "storm-beat-02",
+          "action": "Wave curls toward boat, camera tracks the threat",
+          "sound": "Original audio: rising tension motif, heartbeat-like percussion"
+        },
+        {
+          "beatId": "calm-beat-03",
+          "action": "Wave recedes, boat glides into golden calm, fade to black",
+          "sound": "Original audio: resolution motif, warm synth pads resolve"
+        }
+      ],
+      "assets": [
+        {
+          "assetId": "wan-ocean-wide",
+          "type": "video",
+          "beatId": "intro-beat-01",
+          "prompt": "Aerial wide shot of a tiny ivory origami boat floating on a vast deep blue ocean. Desk surface is now seamless water. Camera slowly drifts backward, emphasizing scale. Soft daylight, no clouds. Boat occupies less than 15% of frame. Water ripples gently, reflecting sky. No text or sound. Cinematic, immersive, silent",
+          "reason": "Establishes the visual metaphor and scale immediately. Sets tone for transformation",
+          "duration": 5.04,
+          "provider": "wan",
+          "acceptanceCriteria": [
+            "Boat visible and intact",
+            "Less than 15% of frame occupied",
+            "No text or sound",
+            "Water texture realistic",
+            "Camera movement smooth",
+            "Lighting consistent with daylight",
+            "No visible desk edges",
+            "No CGI artifacts"
+          ],
+          "seed": 42
+        },
+        {
+          "assetId": "wan-wave-threat",
+          "type": "video",
+          "beatId": "storm-beat-02",
+          "prompt": "Close tracking shot of a steep curling wall of ocean water approaching a tiny intact ivory origami boat. Water crashes inches away, but boat remains undamaged. Camera follows wave’s motion, then pulls back slightly to show scale. Sunlight glints off water. No text or sound. High detail on water texture and boat material",
+          "reason": "Creates visceral tension and proves the boat’s resilience. Physical danger is key",
+          "duration": 5.04,
+          "provider": "wan",
+          "acceptanceCriteria": [
+            "Wave physically threatens boat",
+            "Boat remains intact",
+            "Camera tracks wave motion",
+            "Water physics realistic",
+            "Lighting dynamic with sun glint",
+            "No text or sound",
+            "Boat material clearly visible",
+            "No CGI artifacts"
+          ],
+          "seed": 1337
+        },
+        {
+          "assetId": "motion-end-card",
+          "type": "motion",
+          "beatId": "calm-beat-03",
+          "prompt": "AutoPromote",
+          "reason": "Clean, bold identity reveal. Amber details on dark background. No animation beyond text appearance. Pure branding",
+          "duration": 5.04,
+          "provider": "motion",
+          "acceptanceCriteria": [
+            "Text reads 'AutoPromote' exactly",
+            "Amber accents on dark background",
+            "No animation beyond text fade-in",
+            "No sound",
+            "Centered alignment",
+            "High contrast",
+            "No extra graphics",
+            "No motion blur"
+          ],
+          "seed": 777
+        },
+        {
+          "assetId": "original-score",
+          "type": "audio",
+          "beatId": "intro-beat-01",
+          "prompt": "",
+          "reason": "Full 15-second instrumental score. Restrained electronic tension → resolution. No orchestral or vocal elements. Stereo, correct sample rate, no clips",
+          "duration": 15,
+          "provider": "original_audio",
+          "acceptanceCriteria": [
+            "Stereo instrumental score",
+            "No clipped samples",
+            "Correct sample rate",
+            "Duration matches output",
+            "Tension builds then resolves",
+            "No vocal or orchestral elements",
+            "No silence gaps",
+            "No distortion"
+          ],
+          "seed": 0
+        }
+      ],
+      "outputs": [
+        {
+          "outputId": "promo-output-01",
+          "aspect": "16:9",
+          "purpose": "Private founder marketing review",
+          "musicAssetId": "original-score",
+          "sequence": [
+            {
+              "assetId": "wan-ocean-wide",
+              "start": 0,
+              "duration": 5.04,
+              "reason": "Intro establishes the visual metaphor and scale"
+            },
+            {
+              "assetId": "wan-wave-threat",
+              "start": 5.04,
+              "duration": 5.04,
+              "reason": "Storm sequence creates tension and proves survival"
+            },
+            {
+              "assetId": "motion-end-card",
+              "start": 10.08,
+              "duration": 5.04,
+              "reason": "Final identity reveal after resolution"
+            }
+          ]
+        }
+      ]
+    },
+    "model": "Qwen/Qwen3-VL-8B-Instruct",
+    "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "settings": {
+      "dtype": "bfloat16",
+      "attention": "sdpa",
+      "do_sample": false,
+      "max_tokens": 4500
+    },
+    "evidenceSha256": null,
+    "seconds": 88.54335754800013,
+    "gpu": "NVIDIA L40S"
+  }
+}

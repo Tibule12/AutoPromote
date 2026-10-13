@@ -1,0 +1,21 @@
+{
+  "status": "READY_FOR_VISUAL_REVIEW",
+  "verifiedAt": "2026-10-06T03:58:39.089184+00:00",
+  "branch": "agent/director-analysis-staging-browser-v1",
+  "head": "7f7530ad746050c094bfc78d0921190da98d2098",
+  "testsPassed": 20,
+  "browserChecksPassed": 11,
+  "lintFiles": 44,
+  "lintErrors": 0,
+  "lintWarnings": 0,
+  "protectedFilesUnchanged": 11,
+  "compiledSourceMapMatches": 24,
+  "productionBuild": "PASS",
+  "encoder": "h264_nvenc",
+  "videoGeneratedByModel": false,
+  "movieDurationSeconds": 36.0,
+  "movieBytes": 6561633,
+  "cloudInfrastructureChanges": 0,
+  "pushed": false,
+  "deployed": false
+}

@@ -1,0 +1,100 @@
+{
+  "checkedAt": "2026-10-12T20:03:33.904Z",
+  "authenticatedAppOpened": true,
+  "observations": [
+    {
+      "path": "/api/platform/status",
+      "httpStatus": 200,
+      "rawPlatformKeys": [
+        "twitter",
+        "youtube",
+        "facebook",
+        "instagram",
+        "tiktok",
+        "spotify",
+        "reddit",
+        "discord",
+        "linkedin",
+        "telegram",
+        "pinterest",
+        "snapchat"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "platform": "TikTok",
+      "status": "Connected",
+      "connected": true
+    },
+    {
+      "platform": "YouTube",
+      "status": "Connected",
+      "connected": true
+    },
+    {
+      "platform": "Instagram",
+      "status": "Connected",
+      "connected": true
+    },
+    {
+      "platform": "Facebook",
+      "status": "Connected",
+      "connected": true
+    },
+    {
+      "platform": "LinkedIn",
+      "status": "Connected",
+      "connected": true
+    },
+    {
+      "platform": "Reddit",
+      "status": "Connected",
+      "connected": true
+    }
+  ],
+  "platforms": {
+    "tiktok": {
+      "connected": true,
+      "publishReady": true,
+      "reauthRecommended": false,
+      "hasAccessToken": true,
+      "hasOpenId": true,
+      "missingScopes": [],
+      "hasInstagramBusinessAccount": false,
+      "observed": true
+    },
+    "youtube": {
+      "connected": true,
+      "missingScopes": [],
+      "hasInstagramBusinessAccount": false,
+      "observed": true
+    },
+    "instagram": {
+      "connected": true,
+      "missingScopes": [],
+      "hasInstagramBusinessAccount": true,
+      "observed": true
+    },
+    "facebook": {
+      "connected": true,
+      "missingScopes": [],
+      "hasInstagramBusinessAccount": true,
+      "observed": true
+    },
+    "linkedin": {
+      "connected": true,
+      "missingScopes": [],
+      "hasInstagramBusinessAccount": false,
+      "observed": true
+    },
+    "reddit": {
+      "connected": true,
+      "missingScopes": [],
+      "hasInstagramBusinessAccount": false,
+      "observed": true
+    }
+  },
+  "externalWrites": 0,
+  "schedulesCreated": 0
+}

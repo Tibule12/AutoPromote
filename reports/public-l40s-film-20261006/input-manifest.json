@@ -1,0 +1,37 @@
+[
+  {
+    "name": "render-public-l40s-film.py",
+    "bytes": 13105,
+    "sha256": "faa6100ec856ccfc7f9cb899d365db6cf9aec571b035f46d624f82c884178383"
+  },
+  {
+    "name": "application-workflow.webm",
+    "bytes": 3420371,
+    "sha256": "908e119a43005eafa221aa16f41fc4061b33121d0542ab743385dd3e99127f8d"
+  },
+  {
+    "name": "podcast-conversation.mp4",
+    "bytes": 1232922,
+    "sha256": "260f7e4abfa68e51cafd244c19ee51b8b455f068ea0858f1faafa2b8a5cfeb40"
+  },
+  {
+    "name": "capture-receipt.json",
+    "bytes": 4172,
+    "sha256": "cdb10b3b53646f915a35a0e264cf2457cb7ae8e33c2ad1908e9b00b6d90cf0dd"
+  },
+  {
+    "name": "brand-bold.ttf",
+    "bytes": 708920,
+    "sha256": "5c1247acef7f2b8522a31742c76d6adcb5569bacc0be7ceaa4dc39dd252ce895"
+  },
+  {
+    "name": "brand-regular.ttf",
+    "bytes": 1844796,
+    "sha256": "350badd6ab6a58e7fd7a0ea2ae0c10174941a08e1cd06b3c6010e10b3d5ae319"
+  },
+  {
+    "name": "bold-font-license.txt",
+    "bytes": 3859,
+    "sha256": "63d3ba759d12804c5b31a9d5940d855c1820d1f5999e6b0872eb1c7ff045fbc9"
+  }
+]

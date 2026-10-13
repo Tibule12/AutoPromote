@@ -1,0 +1,155 @@
+{
+  "sourceBrief": "source-brief.txt",
+  "principle": "Raw sources are pending review until actual decoded frames and assigned story role pass.",
+  "assets": [
+    {
+      "assetId": "vessel",
+      "type": "three_d",
+      "provider": "blender",
+      "duration": 7,
+      "purpose": "Continuous physical paper-to-yacht transformation, reused for opening and payoff",
+      "acceptanceCriteria": [
+        "Opening is recognisably a folded paper boat",
+        "Same hull and sail visibly change continuously",
+        "Material and scale changes remain coherent with camera and water",
+        "Final yacht remains above believable moving water",
+        "No disc edge, missing horizon, popping parts or broken silhouettes"
+      ],
+      "native": "paper-yacht.blend",
+      "finalSelection": "SELECTED_FOR_PRIVATE_ROUGH"
+    },
+    {
+      "assetId": "ident",
+      "type": "three_d",
+      "provider": "brand_ident",
+      "duration": 5,
+      "directions": [
+        "cinematic",
+        "compute",
+        "minimal"
+      ],
+      "acceptanceCriteria": [
+        "Opening stays dark and intentional",
+        "Original geometry/proportions are maintained",
+        "Layer/material reveal and lighting have visible depth",
+        "Camera settles at 3.2 seconds and logo holds clearly",
+        "Sound rise and impact resolve at lockup"
+      ],
+      "native": "scene.blend",
+      "finalSelection": "SELECTED_FOR_PRIVATE_ROUGH"
+    },
+    {
+      "assetId": "origin",
+      "type": "video",
+      "provider": "authored_3d_with_actual_sources",
+      "duration": 5.25,
+      "purpose": "Make sync understandable to a stranger through one human conversation, not interface instructions.",
+      "acceptanceCriteria": [
+        "Assigned story information is clear at normal playback",
+        "Text is readable and pictures move",
+        "No camera roll or tiny repeated carrier layout"
+      ],
+      "native": "scene.blend",
+      "finalSelection": "SELECTED_FOR_PRIVATE_ROUGH"
+    },
+    {
+      "assetId": "cascade",
+      "type": "video",
+      "provider": "authored_3d_with_actual_sources",
+      "duration": 5.5,
+      "purpose": "Each fix causes a consequence, building frustration.",
+      "acceptanceCriteria": [
+        "Assigned story information is clear at normal playback",
+        "Text is readable and pictures move",
+        "No camera roll or tiny repeated carrier layout"
+      ],
+      "native": "scene.blend",
+      "finalSelection": "SELECTED_FOR_PRIVATE_ROUGH"
+    },
+    {
+      "assetId": "problems",
+      "type": "video",
+      "provider": "authored_3d_with_actual_sources",
+      "duration": 5.75,
+      "purpose": "The original problem grows larger than the founder expected.",
+      "acceptanceCriteria": [
+        "Assigned story information is clear at normal playback",
+        "Text is readable and pictures move",
+        "No camera roll or tiny repeated carrier layout"
+      ],
+      "native": "scene.blend",
+      "finalSelection": "REJECTED_FROM_ASSEMBLY"
+    },
+    {
+      "assetId": "failure",
+      "type": "video",
+      "provider": "authored_3d_with_actual_sources",
+      "duration": 4.5,
+      "purpose": "Let a setback hurt; hold briefly rather than racing through a decorative code montage.",
+      "acceptanceCriteria": [
+        "Assigned story information is clear at normal playback",
+        "Text is readable and pictures move",
+        "No camera roll or tiny repeated carrier layout"
+      ],
+      "native": "scene.blend",
+      "finalSelection": "SELECTED_FOR_PRIVATE_ROUGH"
+    },
+    {
+      "assetId": "quota",
+      "type": "video",
+      "provider": "authored_3d_with_actual_sources",
+      "duration": 4.75,
+      "purpose": "External constraint becomes the lowest point; persistence is the emotional turn.",
+      "acceptanceCriteria": [
+        "Assigned story information is clear at normal playback",
+        "Text is readable and pictures move",
+        "No camera roll or tiny repeated carrier layout"
+      ],
+      "native": "scene.blend",
+      "finalSelection": "SELECTED_FOR_PRIVATE_ROUGH"
+    },
+    {
+      "assetId": "breakthrough",
+      "type": "video",
+      "provider": "authored_3d_with_actual_sources",
+      "duration": 4.25,
+      "purpose": "A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs.",
+      "acceptanceCriteria": [
+        "Assigned story information is clear at normal playback",
+        "Text is readable and pictures move",
+        "No camera roll or tiny repeated carrier layout"
+      ],
+      "native": "scene.blend",
+      "finalSelection": "SELECTED_FOR_PRIVATE_ROUGH"
+    },
+    {
+      "assetId": "director",
+      "type": "video",
+      "provider": "authored_3d_with_actual_sources",
+      "duration": 6.75,
+      "purpose": "Move from repairs to creative decisions, with real sources and editorial data.",
+      "acceptanceCriteria": [
+        "Assigned story information is clear at normal playback",
+        "Text is readable and pictures move",
+        "No camera roll or tiny repeated carrier layout"
+      ],
+      "native": "scene.blend",
+      "finalSelection": "SELECTED_FOR_PRIVATE_ROUGH"
+    },
+    {
+      "assetId": "reveal",
+      "type": "video",
+      "provider": "authored_3d_with_actual_sources",
+      "duration": 5.0,
+      "purpose": "Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering.",
+      "acceptanceCriteria": [
+        "Assigned story information is clear at normal playback",
+        "Text is readable and pictures move",
+        "No camera roll or tiny repeated carrier layout"
+      ],
+      "native": "scene.blend",
+      "finalSelection": "SELECTED_FOR_PRIVATE_ROUGH"
+    }
+  ],
+  "selectionNote": "The problems portrait montage remained visually occluded after regeneration and was removed; all selected visual sources are byte-bound in asset-review.json. Technical selection does not imply flagship creative acceptance."
+}

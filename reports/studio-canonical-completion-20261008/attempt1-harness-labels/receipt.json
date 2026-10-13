@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-10-08T11:10:22.662Z",
+  "projectName": "Studio canonical decisions QA 20261008",
+  "sourceName": "Studio shared-state 20261008",
+  "realAuthRequired": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "gpuJobsStarted": 0,
+  "renderSubmitted": false,
+  "previewFinalParity": "UNVERIFIED: separate paired output work follows state recovery",
+  "steps": [],
+  "stateFlow": "FAIL",
+  "error": "locator.fill: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('Hook text', { exact: true })\u001b[22m\n",
+  "finishedAt": "2026-10-08T11:11:07.076Z"
+}

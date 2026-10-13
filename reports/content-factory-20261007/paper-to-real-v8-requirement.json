@@ -1,0 +1,80 @@
+{
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "requirement": {
+    "assetId": "paper-to-real",
+    "type": "video",
+    "beatId": "transformation",
+    "provider": "wan",
+    "videoModel": "wan_i2v_a14b",
+    "duration": 7.5625,
+    "seed": 20261007138,
+    "referenceAssetId": "paper-start",
+    "referenceTime": 1.25,
+    "lastReferenceAssetId": "real-vessel",
+    "lastReferenceTime": 0,
+    "reason": "The transformation is the creative event; the starting and ending geometry come from actual adjacent shots.",
+    "prompt": "Single uninterrupted cinematic shot, one camera, no editing. The small traditional folded paper boat points to the right. Its central triangular fold physically unfolds upward, stretches and becomes the matching cream canvas triangular mainsail. Simultaneously the two folded paper hull sides expand, thicken and turn into dark polished mahogany planking, maintaining the same right-pointing bow and three-quarter angle. A wooden mast and taut rigging grow along the existing fold creases. The paper material visibly develops wood grain and woven canvas texture through several intermediate states. Fine fibres lift into sunlit spray. Real liquid water swells around the hull, floods and overtakes the workbench; the wooden surface bends down into deep moving ocean waves, the distant workshop dissolves organically into open sky and horizon behind the growing sail. The camera continuously tracks beside the same right-pointing boat, gently rising as the tiny folded vessel gains full yacht scale. The hull stays in the centre of the frame throughout. Amber light and reflections travel continuously across paper, wood, canvas and water. By the final two seconds the paper is completely gone: the exact classic mahogany yacht from the ending image cuts a powerful white bow wake in a vast real sea. Continuous visible material and environmental metamorphosis, coherent boat geometry, graceful camera movement, photoreal texture and atmosphere.",
+    "acceptanceCriteria": [
+      "Paper folds visibly become real canvas and timber through coherent intermediate states.",
+      "Water, camera direction, lighting and the subject retain continuity across the transformation.",
+      "The ending matches the actual full-size yacht reference; no simple cut or dissolve substitutes for the transformation."
+    ],
+    "negativePrompt": "cut, hard cut, jump cut, editing, montage, scene change, dissolve between clips, crossfade, sudden replacement, second boat, two boats, duplicate hull, full paper boat at end, toy yacht, printed blue mat, plastic water, flat sheet of water, miniature on table at end, crane, bird, impossible rigging, melted hull, flicker, text, watermark, cartoon, stationary image"
+  },
+  "priorAssets": [
+    {
+      "assetId": "paper-start",
+      "type": "video",
+      "status": "accepted",
+      "artifact": {
+        "path": "generated/boat-launch-v4-qualified.mp4",
+        "sha256": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+        "bytes": 3420183,
+        "duration": 3.625,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 24,
+        "width": 1280,
+        "height": 704,
+        "hasAudio": false
+      },
+      "review": {
+        "accepted": true,
+        "reviewer": "Codex visual inspection",
+        "reason": "A coherent traditional paper boat and water opening; flying tail excluded.",
+        "evidenceSha256": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66"
+      },
+      "provenance": {
+        "origin": "server_generated",
+        "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea."
+      }
+    },
+    {
+      "assetId": "real-vessel",
+      "type": "video",
+      "status": "accepted",
+      "artifact": {
+        "path": "generated/real-voyage-v6.mp4",
+        "sha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+        "bytes": 2041470,
+        "duration": 5.0625,
+        "codec": "h264",
+        "container": "mp4",
+        "fps": 16,
+        "width": 832,
+        "height": 480,
+        "hasAudio": false
+      },
+      "review": {
+        "accepted": true,
+        "reviewer": "Codex visual inspection",
+        "reason": "Full-size timber yacht with coherent rigging, canvas, moving wake and natural sea; camera pushes closer, not an aerial reveal.",
+        "evidenceSha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb"
+      },
+      "provenance": {
+        "origin": "server_generated",
+        "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea."
+      }
+    }
+  ]
+}

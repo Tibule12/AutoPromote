@@ -1,0 +1,16 @@
+{
+  "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#workflow').getByRole('button', { name: /Retry product tour/ }) to be visible\u001b[22m\n",
+  "checks": [
+    "Reduced motion keeps the actual tour behind explicit user intent and requests no film",
+    "02 Studio: chapter seek, decoded moving footage and active control verified",
+    "01 Uploads: chapter seek, decoded moving footage and active control verified",
+    "03 Schedule: chapter seek, decoded moving footage and active control verified",
+    "04 Analytics: chapter seek, decoded moving footage and active control verified",
+    "Scrolling away pauses tour playback",
+    "Watch Demo opens the full tour; Escape releases its decoder and restores focus",
+    "Tour at 1920px: readable chapter controls, playback and no horizontal overflow",
+    "Tour at 390px: readable chapter controls, playback and no horizontal overflow",
+    "Original sign-in route works and releases tour media"
+  ],
+  "errors": []
+}

@@ -1,0 +1,17 @@
+{
+  "capturedAt": "2026-10-08T08:13:42.002162+00:00",
+  "nvidiaInstance": "autopromote-l40s-staging",
+  "instanceId": "xgh6wcu74",
+  "independentlyVerifiedState": "STOPPED",
+  "verification": "brev ls",
+  "qaLocalPorts": {
+    "5000": "closed",
+    "5100": "closed",
+    "8008": "closed",
+    "8009": "closed",
+    "8010": "closed",
+    "9229": "closed"
+  },
+  "pendingQaGpuJobs": false,
+  "originalUserProcessesUntouched": true
+}

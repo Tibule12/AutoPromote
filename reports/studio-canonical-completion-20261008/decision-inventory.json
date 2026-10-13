@@ -1,0 +1,589 @@
+{
+  "scope": "Serialization inventory; does not qualify any active control or rendered result",
+  "snapshotFieldCount": 115,
+  "unclassified": [],
+  "fields": [
+    {
+      "field": "orderedClips",
+      "owner": "editGraph owned media/angle/audio records",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "projectMedia",
+      "owner": "editGraph owned media/angle/audio records",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "angleGroups",
+      "owner": "editGraph owned media/angle/audio records",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "activeAngleGroupId",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "selectedClipId",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "overlays",
+      "owner": "layers",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "activeOverlayId",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "videoFit",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "safeFaceFraming",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "faceAnchorPreset",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "autoCaptions",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "captionStyle",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "captionPosition",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "captionScale",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "captionTextOverride",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "captionCoverageMode",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "captionSegments",
+      "owner": "layers",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "translateCaptionsToEnglish",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "previewSpeed",
+      "owner": "fallbackSpeed/programmeSpeedKeys/outputTimeMap",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "pacingLevel",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "creativeIntent",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "creativeEffectsEnabled",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "creativePreset",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "creativeIntensity",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "finishFx",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "podcastVisualizer",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "finishKeyframes",
+      "owner": "linkedTiming",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "beatSnapEnabled",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "contentProfile",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "cutRangeStart",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "cutRangeEnd",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "joinTransition",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "joinTransitionDuration",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "smartCrop",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "smartCropMode",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "reframeAspect",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speakerTrackZoom",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "reframeKeyframes",
+      "owner": "linkedTiming",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speakerStackFraming",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speakerStackSourceIds",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speakerStackOffsets",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speakerStackSources",
+      "owner": "visualGraph.cameraSources",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speakerStackCameraCount",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speakerStackLayout",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speakerStackSyncConfirmed",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speakerFocusCuts",
+      "owner": "linkedTiming",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "reframeModeCuts",
+      "owner": "linkedTiming",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "activeReframeKeyframeId",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "enhanceQuality",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "silenceRemoval",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "silencePreview",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "silenceThreshold",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "minSilenceDuration",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "removeWatermark",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "watermarkMode",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "brandWatermark",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "mainFrame",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "exportSettings",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "manualWatermarkRegions",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "activeWatermarkRegionId",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "addHook",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookText",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookTemplate",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookIntroSeconds",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookStartTime",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookEndTime",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookBlurBackground",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookDarkOverlay",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookFreezeFrame",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookZoomScale",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookTextAnimation",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "hookPreviewLoop",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "hookFocusPoint",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "addMusic",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "muteOriginalAudio",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "musicSelection",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "musicSearchMode",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "safeSearch",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "musicVolume",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "musicDucking",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "musicDuckingStrength",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "musicTrack",
+      "owner": "audioGraph.music + editGraph.musicMix",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "soundEffects",
+      "owner": "linkedTiming",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "audioRemix",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "activeSoundEffectId",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "extractedAudio",
+      "owner": "editGraph owned media/angle/audio records",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "bRollCadence",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "timeline",
+      "owner": "assets/clipOccurrences + occurrence parameters",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "activeTimelineIndex",
+      "owner": "editGraph.hookBinding when hook enabled; otherwise UI selection",
+      "classification": "CONDITIONAL_DECISION"
+    },
+    {
+      "field": "timelineZoom",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "timelineEditTool",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "timelineSnapping",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "linkedSelection",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "rippleMode",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "trackStates",
+      "owner": "audioGraph.routes",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "motionKeyframes",
+      "owner": "linkedTiming",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "motionScenes",
+      "owner": "layers",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "threeDScenes",
+      "owner": "layers",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "subjectVfxScenes",
+      "owner": "layers",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "motionTargetId",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "compositeTargetId",
+      "owner": "legacy snapshot: selection, pending action or editor preference",
+      "classification": "UI_CONTEXT"
+    },
+    {
+      "field": "mainTransform",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "audioKeyframes",
+      "owner": "linkedTiming",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "speedKeyframes",
+      "owner": "fallbackSpeed/programmeSpeedKeys/outputTimeMap",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "voiceovers",
+      "owner": "linkedTiming",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "adjustmentLayers",
+      "owner": "linkedTiming",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "compoundClips",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "audioAutomationSource",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "audioRestoration",
+      "owner": "audioGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "proxySettings",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "stabilization",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "advancedColor",
+      "owner": "visualGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "creatorPreview",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "splitExportEnabled",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    },
+    {
+      "field": "splitExportHooks",
+      "owner": "editGraph.settings",
+      "classification": "CANONICAL_DECISION"
+    }
+  ],
+  "remainingQualification": [
+    "Nested field validation/consumer audit",
+    "Unified hook/silence/output clock",
+    "Global composition order",
+    "3D access-expiry/HQ compatibility",
+    "Owned LUT/proxy/generation artifact binding"
+  ]
+}

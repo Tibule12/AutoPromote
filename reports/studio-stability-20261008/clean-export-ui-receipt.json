@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-08T05:55:45.672Z",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "gpuUsed": false,
+  "requests": [
+    {
+      "brandWatermark": false,
+      "captionReviewCopy": true
+    }
+  ],
+  "project": "Studio QA 20261008 clean portrait",
+  "output": "reports/studio-stability-20261008/export/download.mp4",
+  "technical": {
+    "passed": true,
+    "sha256": "b6ecfcab0c28f6fa4472d8f93010f92eecf0fc90d8b03685cbd39d5a2cf433a3",
+    "bytes": 1072122,
+    "seconds": 12,
+    "video": {
+      "width": 404,
+      "height": 720,
+      "codec": "h264",
+      "fps": "30/1",
+      "duration": "12.000000",
+      "pixelFormat": "yuv420p"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "96000",
+      "duration": "12.000000"
+    },
+    "independentFullDecode": true,
+    "contactSheet": "reports/studio-stability-20261008/export/download.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "visualReview": {
+    "platformWatermark": "PASS: no AutoPromote mark in six inspected frames",
+    "draftLabel": "PASS: both label lines stay readable within portrait bounds",
+    "composition": "FAIL: speaker face falls outside the crop after changing the wide analysis to 9:16; separate aspect regression in progress",
+    "captions": "QA marker cues visible; wording accuracy is not an ASR test"
+  },
+  "actualProjectName": "Studio QA 20261008 Director copyStudio QA 20261008 clean portrait",
+  "namingNote": "Harness typed during asynchronous duplication. Duplicate completion wait and busy project-name field added; historical snapshot retained."
+}

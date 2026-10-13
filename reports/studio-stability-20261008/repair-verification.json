@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-08T08:09:43.317594+00:00",
+  "realAuth": true,
+  "headless": true,
+  "muted": true,
+  "noMocksQualifyAsEndToEnd": true,
+  "nvidiaInstanceState": "STOPPED",
+  "priorEvidencePreserved": true,
+  "backendGuardTests": 34,
+  "frontendTimelineAnd3DModelTests": 29,
+  "frontendRecoveryTests": 20,
+  "selectedStudioHydrationAndCompletedSeekTests": 2,
+  "selectedStudioSuiteSkipped": 97,
+  "pythonCaptionMetadataAndCudaGuards": 10,
+  "pythonSpecPoseAndAlphaTests": 30,
+  "scope": "One real 12s podcast, one founder account, one cinematic-title scene. No new listening acceptance. Canonical final exports retain actual h264_nvenc metadata; same-byte recovery after GPU shutdown is not proof of a fresh CPU encode."
+}

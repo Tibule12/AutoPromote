@@ -1,0 +1,16 @@
+{
+  "accepted": true,
+  "artifactSha256": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+  "reviewer": "Codex visual inspection of time-ordered frames",
+  "reason": "Correct traditional folded boat is intact through the ordinary setup and reviewed water opening. The flying tail is excluded.",
+  "evidenceSha256": "b4d5f59ea0f69da67b11a2e53603c00d65afd62190ace649ff3badb4cb86a692",
+  "evidence": "generated/boat-launch-v4-review.jpg",
+  "criteria": [
+    {
+      "criterion": "Assigned raw story role",
+      "passed": true,
+      "observation": "Correct traditional folded boat is intact through the ordinary setup and reviewed water opening. The flying tail is excluded."
+    }
+  ],
+  "limitation": "Private raw-role selection, not whole-film creative approval or public feature release."
+}

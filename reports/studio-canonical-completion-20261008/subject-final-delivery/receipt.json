@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-10-08T13:05:15.737Z",
+  "realAuth": true,
+  "noMocks": true,
+  "newGpuJobsStarted": 0,
+  "status": "FAIL",
+  "reviewBasis": [
+    "Recorded six-frame subject/edge/occlusion/track inspection of the owned preview",
+    "Decoded PCM identical to the 3-second subject preview the user accepted; gpu/subject/audio-continuity.json"
+  ],
+  "creativeApproval": false,
+  "previewJobId": "b9de374e-cfd5-49d5-9dce-79351b1fe877",
+  "error": "locator.evaluate: NotSupportedError: The element has no supported sources.",
+  "finishedAt": "2026-10-08T13:05:46.534Z",
+  "gpuRequestsObserved": []
+}

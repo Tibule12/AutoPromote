@@ -1,0 +1,11 @@
+{
+  "status": "blocked",
+  "reason": {
+    "code": "INVALID_ACTION",
+    "message": "Unsupported action"
+  },
+  "steps": 4,
+  "evidence": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/browser-agent-nvidia-20261006/dynamic-workflow-fixed",
+  "submissions": 0,
+  "scope": "Local dynamic regression fixture, actual offline L40S vision inference; no production requests"
+}

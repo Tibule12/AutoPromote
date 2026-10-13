@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-08T09:56:19.546Z",
+  "projectName": "Studio stereo delivery 20261008",
+  "studioProjectId": "viral-project-e510956a-a160-4c2a-857d-b735d7898a0a",
+  "jobId": "viral_5f9ee3b0a5fdf6fd6ed1cb556086ff32c2b20a594fba3aa5e84c5653b0ee62f2",
+  "normalAccount": true,
+  "authBypass": false,
+  "mocks": false,
+  "recoveredThroughSavedProject": true,
+  "newRenderSubmittedDuringRecovery": false,
+  "browser": {
+    "headless": true,
+    "muted": true,
+    "dedicatedTab": true
+  },
+  "download": {
+    "nativeCompleted": true,
+    "suggestedFilename": "viral_clip_rendered.mp4",
+    "bytes": 2134451
+  },
+  "technical": {
+    "passed": true,
+    "sha256": "19ca1ce213096e76ac407723dee3d87b2ed406dcd7d31cd2068a437dc4b0ad9f",
+    "bytes": 2134451,
+    "seconds": 12,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "30/1",
+      "duration": "12.000000",
+      "pixelFormat": "yuv420p"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "12.000000"
+    },
+    "independentFullDecode": true,
+    "contactSheet": "reports/studio-founder-workflow-20261008/native-stereo-delivery/download.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "scope": "Owned native CPU fallback delivery diagnostic. No generated footage, GPU render, pre-final parity or human listening acceptance.",
+  "encoderEvidence": {
+    "value": "Lavc60.31.102 libx264",
+    "source": "Actual downloaded video stream encoder metadata",
+    "deviceScope": "CPU fallback; no NVIDIA render"
+  }
+}

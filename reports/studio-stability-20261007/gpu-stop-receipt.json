@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-07T19:20:13.135015+00:00",
+  "instance": "autopromote-l40s-staging",
+  "id": "xgh6wcu74",
+  "status": "STOPPED",
+  "source": "brev ls independent read after stop",
+  "mainWorkerIdleBeforeStop": true,
+  "mainWorkerStopped": true,
+  "vfxWorkerStopped": true,
+  "disksAndModelCachesRetained": true
+}

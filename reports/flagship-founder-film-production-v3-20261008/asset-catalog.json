@@ -1,0 +1,56 @@
+[
+  {
+    "assetId": "vessel",
+    "path": "vessel-full/video.mp4",
+    "type": "video",
+    "receipt": "vessel-full/render-receipt.json"
+  },
+  {
+    "assetId": "ident",
+    "path": "ident-full/video.mp4",
+    "type": "video",
+    "receipt": "ident-full/render-receipt.json"
+  },
+  {
+    "assetId": "origin",
+    "path": "story-v3/assets/origin/video.mp4",
+    "type": "video",
+    "receipt": "story-v3/assets/origin/render-receipt.json"
+  },
+  {
+    "assetId": "cascade",
+    "path": "story-v3/assets/cascade/video.mp4",
+    "type": "video",
+    "receipt": "story-v3/assets/cascade/render-receipt.json"
+  },
+  {
+    "assetId": "failure",
+    "path": "story-v3/assets/failure/video.mp4",
+    "type": "video",
+    "receipt": "story-v3/assets/failure/render-receipt.json"
+  },
+  {
+    "assetId": "quota",
+    "path": "story-v3/assets/quota/video.mp4",
+    "type": "video",
+    "receipt": "story-v3/assets/quota/render-receipt.json"
+  },
+  {
+    "assetId": "breakthrough",
+    "path": "story-v3/assets/breakthrough/video.mp4",
+    "type": "video",
+    "receipt": "story-v3/assets/breakthrough/render-receipt.json"
+  },
+  {
+    "assetId": "director",
+    "path": "story-v3/assets/director/video.mp4",
+    "type": "video",
+    "receipt": "story-v3/assets/director/render-receipt.json"
+  },
+  {
+    "assetId": "reveal",
+    "path": "story-v3/assets/reveal/video.mp4",
+    "type": "video",
+    "receipt": "story-v3/assets/reveal/render-receipt.json"
+  }
+]

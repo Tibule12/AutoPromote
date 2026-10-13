@@ -1,0 +1,16 @@
+{
+  "accepted": true,
+  "artifactSha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+  "reviewer": "Codex visual inspection of time-ordered frames",
+  "reason": "A coherent full-size mahogany yacht has cream canvas sails, rigging, moving bow spray and wake throughout. Camera tracks and pushes closer; this is not an aerial/wide reveal.",
+  "evidenceSha256": "161e4ca8b619f45e89d59d7e3f190ba4f52a3fdf77bed9f5e1c4dc04b04dc310",
+  "evidence": "generated/real-voyage-v6-review.jpg",
+  "criteria": [
+    {
+      "criterion": "Assigned raw story role",
+      "passed": true,
+      "observation": "A coherent full-size mahogany yacht has cream canvas sails, rigging, moving bow spray and wake throughout. Camera tracks and pushes closer; this is not an aerial/wide reveal."
+    }
+  ],
+  "limitation": "Private raw-role selection, not whole-film creative approval or public feature release."
+}

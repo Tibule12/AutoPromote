@@ -1,0 +1,8 @@
+{
+  "scope": "Real lossless FFmpeg speed-clock regression; not Studio qualification",
+  "sourceFrames": 180,
+  "deliveryFrames": 180,
+  "matchingOrderedSourceFrames": 90,
+  "expectedMatchingFrames": 180,
+  "result": "FAIL"
+}

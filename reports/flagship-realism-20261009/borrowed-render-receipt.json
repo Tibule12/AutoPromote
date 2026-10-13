@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-10-09T07:12:57.542202+00:00",
+  "deadlineEpoch": 1791536400,
+  "stage": "existing Factory/Director/NVENC scene assembly",
+  "stages": [
+    {
+      "script": "existing render-transformation.js v30",
+      "exitCode": 0
+    }
+  ],
+  "preflight": {
+    "gpu": "NVIDIA L40S, 0 %, 0 %, 0 %, 1 MiB",
+    "cudaProcesses": "",
+    "containerNames": [],
+    "idleServiceGracefulShutdownRequested": false
+  },
+  "restoredMediaPid": 30663,
+  "completedAt": "2026-10-09T07:14:17.667049+00:00"
+}

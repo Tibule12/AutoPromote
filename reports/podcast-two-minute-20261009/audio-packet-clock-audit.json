@@ -1,0 +1,74 @@
+{
+  "first": [
+    {
+      "codec_type": "audio",
+      "stream_index": 1,
+      "pts": -1024,
+      "pts_time": "-0.010667",
+      "dts": -1024,
+      "dts_time": "-0.010667",
+      "duration": 1024,
+      "duration_time": "0.010667",
+      "size": "23",
+      "pos": "480008",
+      "flags": "KD_",
+      "side_data_list": [
+        {
+          "side_data_type": "Skip Samples",
+          "skip_samples": 1024,
+          "discard_padding": 0,
+          "skip_reason": 0,
+          "discard_reason": 0
+        }
+      ]
+    },
+    {
+      "codec_type": "audio",
+      "stream_index": 1,
+      "pts": 0,
+      "pts_time": "0.000000",
+      "dts": 0,
+      "dts_time": "0.000000",
+      "duration": 1024,
+      "duration_time": "0.010667",
+      "size": "6",
+      "pos": "485466",
+      "flags": "K__"
+    }
+  ],
+  "last": [
+    {
+      "codec_type": "audio",
+      "stream_index": 1,
+      "pts": 11518746,
+      "pts_time": "119.986937",
+      "dts": 11518746,
+      "dts_time": "119.986937",
+      "duration": 1024,
+      "duration_time": "0.010667",
+      "size": "428",
+      "pos": "167124614",
+      "flags": "K__"
+    },
+    {
+      "codec_type": "audio",
+      "stream_index": 1,
+      "pts": 11519770,
+      "pts_time": "119.997604",
+      "dts": 11519770,
+      "dts_time": "119.997604",
+      "duration": 230,
+      "duration_time": "0.002396",
+      "size": "184",
+      "pos": "167125042",
+      "flags": "K__"
+    }
+  ],
+  "packets": 11242,
+  "gaps": [],
+  "failure": "One AAC packet at117.088s declares0.114937s for1024samples at96kHz; actualPCM only119.904s although stream metadata says120s.",
+  "reproducedBy": "Real worker FFmpeg with the saved Natural restoration settings",
+  "rootCause": "loudnorm tail-flush timestamps propagate into AAC delivery; programme trim follows timestamp time instead of a continuous decoded sample clock.",
+  "fix": "After restoration/mixing, resample48000Hz, setPTS fromsamplecount, applyexisting120s padding/trim and reset samplePTS.",
+  "regressionEvidence": "gpu-worker-audio-clock-regression.json"
+}

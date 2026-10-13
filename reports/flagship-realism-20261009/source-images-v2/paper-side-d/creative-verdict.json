@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "artifactSha256": "f12c87faca3925c6afc77865f879e50fb38112c9676b1ab66f1c25c43aed97e1",
+  "reason": "A cream central folded shape sits on a blue textured cloth-like surface. No navy hull, connected side-profile schooner, or photographic sea horizon. It is not a usable aligned endpoint.",
+  "reviewer": "Codex native still inspection",
+  "sourceBriefStatus": "Rejected before video generation",
+  "nextDecision": "Use evaluated connected native geometry and a matched camera/sea plate; do not treat a prompt as a geometric constraint or repeat video inference on this failed source.",
+  "publicApproved": false
+}

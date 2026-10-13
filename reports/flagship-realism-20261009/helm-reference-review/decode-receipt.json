@@ -1,0 +1,51 @@
+{
+  "status": "DECODED_PENDING_VISUAL_REVIEW",
+  "artifactSha256": "4c0cc8ff183a396523d2c49137100f7b23a9c89a967a1d8ef730b22b109b92cd",
+  "stream": {
+    "width": 1280,
+    "height": 720,
+    "avg_frame_rate": "16/1",
+    "duration": "3.062500",
+    "nb_frames": "49"
+  },
+  "decodedFrames": 49,
+  "allFramesIncluded": true,
+  "nativeFrames": [
+    0,
+    8,
+    16,
+    24,
+    32,
+    40,
+    48
+  ],
+  "detailRegions": {},
+  "largestChanges": [
+    {
+      "fromFrame": 30,
+      "toFrame": 31,
+      "meanAbsolutePixelChange": 17.648565538194443
+    },
+    {
+      "fromFrame": 31,
+      "toFrame": 32,
+      "meanAbsolutePixelChange": 15.984580439814815
+    },
+    {
+      "fromFrame": 35,
+      "toFrame": 36,
+      "meanAbsolutePixelChange": 15.457747395833334
+    },
+    {
+      "fromFrame": 9,
+      "toFrame": 10,
+      "meanAbsolutePixelChange": 14.881622902199075
+    },
+    {
+      "fromFrame": 47,
+      "toFrame": 48,
+      "meanAbsolutePixelChange": 14.812805989583333
+    }
+  ],
+  "limitation": "All-frame evidence and motion diagnostics only. A reviewer must judge anatomy, physical contact, vessel geometry, water interaction, scene continuity and story. Playback and listening are separate."
+}

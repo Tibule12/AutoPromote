@@ -1,0 +1,40 @@
+{
+  "status": "GENERATED_PENDING_VISUAL_REVIEW",
+  "model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+  "modelRevision": "596658fd9ca6b7b71d5057529bbf319ecbc61d74",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "shot": {
+    "name": "boat-storm-v5",
+    "seed": 2026100795,
+    "reference_image": "/work/native-images/boat-storm-v4/image.png",
+    "storyRole": "The fragile paper boat actually confronts the ocean threat",
+    "prompt": "The same single traditional ivory paper boat rides the crest of a powerful moving ocean wave. Keep the open folded hull and low triangular fold exactly intact and recognisable. The boat tilts and rises naturally with the moving water, its hull remains in contact with the water surface, the wave swells and rolls beneath it, white spray peels sideways from the crest. The low camera tracks alongside the boat, keeping it fully visible in the centre lower half, while a much larger curling wave grows in the background. Realistic physical buoyancy, textured flowing dark blue water, windblown spray, overcast storm light, narrow amber rim on tactile paper. Increasing physical danger and scale contrast, continuous cinematic movement. No floating in air, no disappearing boat, no other boats, no morphing into a bird, no text."
+  },
+  "prompt": "The same single traditional ivory paper boat rides the crest of a powerful moving ocean wave. Keep the open folded hull and low triangular fold exactly intact and recognisable. The boat tilts and rises naturally with the moving water, its hull remains in contact with the water surface, the wave swells and rolls beneath it, white spray peels sideways from the crest. The low camera tracks alongside the boat, keeping it fully visible in the centre lower half, while a much larger curling wave grows in the background. Realistic physical buoyancy, textured flowing dark blue water, windblown spray, overcast storm light, narrow amber rim on tactile paper. Increasing physical danger and scale contrast, continuous cinematic movement. No floating in air, no disappearing boat, no other boats, no morphing into a bird, no text.",
+  "seed": 2026100795,
+  "tool": "AutoPromote NVIDIA conditioned-video adapter",
+  "referenceImageSha256": "5294d662ca6b1cbdef201986a2b7c969e49ad741c412f9b910148a94c1d3231f",
+  "settings": {
+    "width": 832,
+    "height": 480,
+    "frames": 81,
+    "fps": 16,
+    "steps": 40,
+    "guidance": 3.5,
+    "dtype": "bfloat16; VAE float32",
+    "cpuOffload": true
+  },
+  "gpu": "NVIDIA L40S",
+  "torch": "2.7.1+cu126",
+  "diffusers": "0.36.0",
+  "seconds": 1038.4632268999994,
+  "peakCudaAllocatedBytes": 33080833536,
+  "peakCudaReservedBytes": 35961962496,
+  "artifact": {
+    "path": "/work/conditioned-video/boat-storm-v5/video.mp4",
+    "sha256": "96362c0e985724e0ad79da43ce2bc4de4f714dbfa0e16d908e4e3b0dfdfb355c",
+    "duration": 5.0625,
+    "bytes": 1607274
+  },
+  "completedAt": "2026-10-07T09:44:55.627931+00:00"
+}

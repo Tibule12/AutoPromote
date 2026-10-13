@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-08T05:30:07.620Z",
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "technical": {
+    "passed": true,
+    "sha256": "32ca011d8b47e1a411a789efeb5ebf7e783f01b619ca17075d47b00404cdb85a",
+    "bytes": 1009706,
+    "seconds": 12,
+    "video": {
+      "width": 404,
+      "height": 720,
+      "codec": "h264",
+      "fps": "30/1",
+      "duration": "12.000000",
+      "pixelFormat": "yuv420p"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "96000",
+      "duration": "12.000000"
+    },
+    "independentFullDecode": true,
+    "contactSheet": "reports/studio-stability-20261008/captions/previous-32ca011d8b47e1a411a789efeb5ebf7e783f01b619ca17075d47b00404cdb85a.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "duplicateLiveCaptions": false,
+  "initialHarnessMismatch": "The normal new project defaults to 9:16; the first harness incorrectly expected 1280x720. The actual 404x720 output is valid for that selection. Visual review remains separate.",
+  "output": "reports/studio-stability-20261008/captions/previous-32ca011d8b47e1a411a789efeb5ebf7e783f01b619ca17075d47b00404cdb85a.mp4"
+}

@@ -1,0 +1,67 @@
+{
+  "startedAt": "2026-10-08T11:51:12.515Z",
+  "projectName": "Studio paired visual QA 20261008 r5",
+  "headless": true,
+  "muted": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "gpuJobsStarted": 0,
+  "status": "FAIL",
+  "pairs": [
+    {
+      "outputTime": 1,
+      "preFinalSource": {
+        "currentTime": 1,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-1.png"
+    },
+    {
+      "outputTime": 3.5,
+      "preFinalSource": {
+        "currentTime": 3.5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-3.5.png"
+    },
+    {
+      "outputTime": 5.5,
+      "preFinalSource": {
+        "currentTime": 5.5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-5.5.png"
+    },
+    {
+      "outputTime": 7.5,
+      "preFinalSource": {
+        "currentTime": 7.5,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-7.5.png"
+    },
+    {
+      "outputTime": 10,
+      "preFinalSource": {
+        "currentTime": 10,
+        "readyState": 4,
+        "width": 1280,
+        "height": 720
+      },
+      "preview": "preview-10.png"
+    }
+  ],
+  "fullCoveragePreflight": "Possible uncovered audio: 0.0–2.8s, 5.2–6.8s, 9.2–12.0s. Caption these phrases, or choose Selected phrases if the gaps are intentional.",
+  "documentSha256": "3c669bf29e97ede80441943657e84e80384f4fa7fef017658b1428f7ae824090",
+  "error": "Video processing failed: Request failed with status code 500 - Worker says: Command '['ffmpeg', '-hide_banner', '-loglevel', 'error', '-i', '/tmp/tmp/viral_619b2c1b64d3a43937ca495051b855a0e64fec06a82e979a4a0baa4190614aa1_cropped.mp4', '-vf', \"format=rgb24,lutrgb=r='clip((pow(max(0,val/255*1.08000000+0.00000000),1.00000000)-0.5)*1.08000000+0.5,0,1)*255':g='clip((pow(max(0,val/255*1.08000000+0.00000000),1.00000000)-0.5)*1.08000000+0.5,0,1)*255':b='clip((pow(max(0,val/255*1.08000000+0.00000000),1.00000000)-0.5)*1.08000000+0.5,0,1)*255',colorchannelmixer=rr=1.00000000:rg=0.00000000:rb=0.00000000:gr=0.00000000:gg=1.00000000:gb=0.00000000:br=0.00000000:bg=0.00000000:bb=1.00000000,format=yuv420p,setsar=1,scale=w='max(2,trunc(576*(max(0.1,min(8,(if(lt(t,3.00000000),1.10000000,1.10000000))*1.00000000)))/2)*2)':h='max(2,trunc(720*(max(0.1,min(8,(if(lt(t,3.00000000),1.10000000,1.10000000))*1.00000000)))/2)*2)':eval=frame,pad=w='max(iw,576)':h='max(ih,720)':x=(ow-iw)/2:y=(oh-ih)/2:eval=frame:color=black,crop=576:720:x='max(0,(trunc(576*(max(0.1,min(8,(if(lt(t,3.00000000),1.10000000,1.10000000))*1.00000000)))/2)*2-576)/2)':y='max(0,(trunc(720*(max(0.1,min(8,(if(lt(t,3.00000000),1.10000000,1.10000000))*1.00000000)))/2)*2-720)/2)',rotate=angle='PI/180*(if(lt(t,3.00000000),4.00000000,4.00000000))':ow=576:oh=720:c=black,pad=1728:2160:576:720:color=black,crop=576:720:x='576-((if(lt(t,3.00000000),45.00000000,45.00000000))-50)*576/100':y='720-((if(lt(t,3.00000000),55.00000000,55.00000000))-50)*720/100',format=gbrp,geq=r='r(X,Y)*((if(lt(t,3.00000000),1.00000000,1.00000000))*gte(X,W*(if(lt(t,3.00000000),0.00000000,0.00000000))/100)*lte(X,W*(1-(if(lt(t,3.00000000),0.00000000,0.00000000))/100))*gte(Y,H*(if(lt(t,3.00000000),0.00000000,0.00000000))/100)*lte(Y,H*(1-(if(lt(t,3.00000000),0.00000000,0.00000000))/100)))':g='g(X,Y)*((if(lt(t,3.00000000),1.00000000,1.00000000))*gte(X,W*(if(lt(t,3.00000000),0.00000000,0.00000000))/100)*lte(X,W*(1-(if(lt(t,3.00000000),0.00000000,0.00000000))/100))*gte(Y,H*(if(lt(t,3.00000000),0.00000000,0.00000000))/100)*lte(Y,H*(1-(if(lt(t,3.00000000),0.00000000,0.00000000))/100)))':b='b(X,Y)*((if(lt(t,3.00000000),1.00000000,1.00000000))*gte(X,W*(if(lt(t,3.00000000),0.00000000,0.00000000))/100)*lte(X,W*(1-(if(lt(t,3.00000000),0.00000000,0.00000000))/100))*gte(Y,H*(if(lt(t,3.00000000),0.00000000,0.00000000))/100)*lte(Y,H*(1-(if(lt(t,3.00000000),0.00000000,0.00000000))/100)))',format=yuv420p,setsar=1\", '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '19', '-pix_fmt', 'yuv420p', '-c:a', 'copy', '-movflags', '+faststart', '-y', '/tmp/tmp/viral_619b2c1b64d3a43937ca495051b855a0e64fec06a82e979a4a0baa4190614aa1_finish.mp4']' returned non-zero exit status 234.",
+  "finishedAt": "2026-10-08T11:52:39.734Z"
+}

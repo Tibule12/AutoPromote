@@ -1,0 +1,88 @@
+{
+  "task": "S01 canonical visual state, shared render compilers, native combined recovery and S04 removal of misleading active 3D controls",
+  "readinessPromotion": false,
+  "gpuJobsStarted": 0,
+  "servicesStarted": false,
+  "headlessMuted": true,
+  "browserMuteProof": {
+    "headless": true,
+    "muteAudioArgument": true,
+    "scope": "Browser-level mute; application media muted property may change during normal playback"
+  },
+  "tests": {
+    "modelHelper": 68,
+    "server": 36,
+    "selectedProductionComponent": 8,
+    "threeDPanel": 11,
+    "totalPassed": 123,
+    "componentOtherCasesSkipped": 93,
+    "capabilityRegistry": 5
+  },
+  "stateFlow": {
+    "status": "PASS",
+    "receipt": "browser-flow/receipt.json",
+    "revision": 256,
+    "documentSha256": "7b701df7cb0421e9c3f62a72b4e37eb284fbd46f8b2e6d8ce3527dd3fbdfcbc3",
+    "originalProjectsUnchanged": true
+  },
+  "nativeFullRender": {
+    "status": "BLOCKED",
+    "receipt": "render-flow/receipt.json",
+    "cause": "Active 3D scene requires HQ preview; no GPU session started",
+    "renderSubmitted": false
+  },
+  "native2DVariant": {
+    "status": "FAIL",
+    "receipt": "render-flow-2d/receipt.json",
+    "cause": "Real worker rejects two manually imported cues because audible speech has uncovered ranges; no output was delivered"
+  },
+  "liveUnsupported3DControls": "PASS: all nine disabled controls checked through normal Studio in separately duplicated CPU edit",
+  "visualReview": "Reviewed native recovered-state screenshots; no produced final output or paired media proof",
+  "audioListening": "No new listening approval. Earlier user approval remains limited to the exact earlier clips.",
+  "sharedBundleCheck": "PASS",
+  "contractMatrixValidation": "VALID",
+  "remainingTask": "S01: hook/transition/silence/mask and remaining render decisions, durable camera media binding; then S02 paired preview/final conformance",
+  "qaTabsClosedAfterEvidence": true,
+  "servicesStopped": false,
+  "timestamp": "2026-10-08T10:35:17.204885+00:00",
+  "sourceSha256": {
+    "frontend/src/components/studioProjectDocument.js": "542c07a92fa1a063e56236f3e68e7521105f08402e1c3895b9aff1ecd1db69a4",
+    "frontend/src/components/studioRenderCompiler.js": "32ed3377fa503f7983b5cbca65a5f10fb10661ef7b871f045573fe2121d685fe",
+    "frontend/src/components/studioTrimTransaction.js": "b16363f90bec8b7ba9c8a02190ad6f097fc73e24ebbca35c16289e3ed6710a50",
+    "frontend/src/components/ViralClipStudio.js": "7b39621772a5af094b1e87ae706966e70f560d4b169a6152afc7fbe9ac19d5d2",
+    "frontend/src/components/threeD/Studio3DPanel.js": "3c49ef3824231f7f55bb880f19ceb1ba9eb36965d2298433f0b37485f98ecca3",
+    "frontend/src/components/threeD/studio3DParity.js": "f1941d64ec4befe17f602a7831d41b054195af1e5513690699cc3492c0021e49",
+    "frontend/src/components/studioCapabilities.js": "74769c00d6116c4f8ab8853827ce55cdec2e62b906fa74fb9528e48a06a5eaa1",
+    "src/services/studioProjectRevisionService.js": "be908198c42cb18069b5748fc202b8d52b228aaf2f45617c52e9a650845f25ca",
+    "src/generated/studioDirectorReplayKernel.cjs": "e6bafce6464442dcc0cc534e4792cc71030c580b72abea0c131d44cbda150e23",
+    "scripts/studio-director-replay-entry.js": "970eed57d6e447c10616336b529d86b49fcba3f32127d027a1d360afbf66820e",
+    "test/e2e/playwright/studio-stability/canonical-visual-reopen.js": "5601b026bb32f63c704c4dd4c04105a7151d30de6860f71ba02b93f2c252f336",
+    "test/e2e/playwright/studio-stability/canonical-visual-export.js": "ff4fec665524a7691084298e8976388020cfb83d574dcbb18231b89beefde54e"
+  },
+  "logSha256": {
+    "browser-range-failure.log": "da25524581f9159a670beda5a9852c4353de114d5eee3ed9300180fc9e6133e5",
+    "component-tests.log": "7d0b6a0394c5f9e3979863e479f7fa0879255f8363ef7f11c309ec1f358a617e",
+    "3d-registry-version-initial-failure.log": "9c0756fe23618da8f5915cfc73b4437d1c4b50f33e5fd40cde655f2c20adff0a",
+    "initial-component-failures.log": "2c3f9fe472a4c2c30c2f3edfdb44c586dce469a67ee549ccb13a59331b459bea",
+    "browser-hydration-failure.log": "c01e56962171f95ec3b045a8a43d99aba92ad02890b7303eef67eeeea626a4a8",
+    "browser-framing-failure.log": "607cceb3ed5bb700a6c90df8b36430b9008716eee576d3e46cb04783898257b5",
+    "browser-initial-aborted.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "export-2d-caption-coverage-failure.log": "e97acf0a7ccd1d394d2bea0ab5f6e29b5acaf4f7b845bf2fcb3745def280c748",
+    "initial-visual-model-failures.log": "ffafc2558324fdee5ddfde741990f8a992d2eb9d533f021958c7dfa4d97f0ea1",
+    "framing-regression-retest.log": "bad1dcbf9b1d8e380ee034b22377e2e6f96453b20b7657b863ac7bcc1d65aad4",
+    "capability-registry-tests.log": "77f3a94080c5edd97e3c3f553103dda5588e4dea5c34bf10c982de4a929ba15f",
+    "kernel-build.log": "0ec73941c3683c3a79973aaf2af812e59b9a600578e569fcb3e549634fec545b",
+    "capability-registry-initial-failure.log": "21d77098b8c194fe7500fe5c73ed9543f44e5c8f5a7d0afcacdba1e62b71abd3",
+    "browser-history-failure.log": "5c1460eb951a029a76adb30ea5b7e4e12dfd6cf21200ee8ef658f41780d5e4f1",
+    "export-3d-blocked.log": "fe0a7042906a60cc4b3ba7fb6e113f7791d533f2bf1f4b976097be25b57e26a7",
+    "export-tab-selection-failure.log": "17eb204d287a703b98d2fa883b55c1eb36dc46dd767a6b0209a9725171c03d0b",
+    "model-tests.log": "d637a18287abfb116ea4166edbc05a6e0d5e84173ea178016dc04a1bafd050ed",
+    "export-preview-selector-failure.log": "e7e8e524e0830df2e91ad933c2c9981e938f204f564414d1e332f9867ad93e67",
+    "browser-final.log": "cba162c939dc8821828eecc931dc57af5e62ad20f4fd7d97a6efea164846046c",
+    "3d-controls-tests.log": "471b0a466752bc25cd816ffabdf70cf0533cb51e259bbdbdab6f2de9efb5fda7",
+    "server-tests.log": "31d9cc392779ada19bccc8777b025c1361b7cbf576494b4d3bbd30d901e55c84",
+    "kernel-check.log": "075736a8f955867d00faaaf3686a2a5f5847cb70b64c7725d5ef220d7fb4cf37",
+    "contract-validation.log": "4d4437efedf32de38857901ca5c36821d3e0ce66eb26f42085878df723f68712",
+    "3d-controls-final.log": "c2fa39821cff8ae5a00b82df7c38f3f7511647f7685b8c2d7c142ad72ff6ae2a"
+  }
+}

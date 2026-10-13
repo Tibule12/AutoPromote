@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "sha256": "d40545b628ffcb27ea8ea31b1da8c1ce246b90fd88aa91464642edd1e4fc4cc5",
+  "bytes": 4255285,
+  "seconds": 12,
+  "video": {
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "fps": "30/1",
+    "duration": "12.000000",
+    "pixelFormat": "yuv420p"
+  },
+  "audio": {
+    "codec": "aac",
+    "channels": 1,
+    "sampleRate": "48000",
+    "duration": "12.000000"
+  },
+  "independentFullDecode": true,
+  "contactSheet": "reports/studio-stability-20261007/voiceover_sfx/download.mp4.frames.jpg",
+  "scope": "Technical only. Pixel and listening review are separate required evidence."
+}

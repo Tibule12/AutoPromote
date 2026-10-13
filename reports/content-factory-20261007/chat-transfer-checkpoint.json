@@ -1,0 +1,19 @@
+{
+  "checkedAtSAST": "2026-10-07T19:04:23.452659+02:00",
+  "state": "STOPPED_AT_USER_REQUEST",
+  "scopeOfThisTurn": "handoff documentation only",
+  "gpuStatus": "STOPPED",
+  "gpuEvidence": "Fresh brev ls in handoff turn: autopromote-l40s-staging / xgh6wcu74 / STOPPED / NOT READY",
+  "localPreviewPorts": {
+    "3096": {
+      "acceptingConnections": false
+    },
+    "5009": {
+      "acceptingConnections": false
+    }
+  },
+  "lastUnfinishedWork": "New AP cinematic ident: no new native scene, render, sound or Factory integration completed after the static logo delivery.",
+  "authoritativeHandoff": "docs/HANDOFF-START-HERE-20261007.md",
+  "historicalMoviePythonRuntimeExists": false,
+  "historicalIsolatedRendererExists": false
+}

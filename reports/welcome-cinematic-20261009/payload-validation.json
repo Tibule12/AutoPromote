@@ -1,0 +1,91 @@
+{
+  "status": "PASS",
+  "duration": 38,
+  "finalFrames": 912,
+  "timelineSegments": 5,
+  "titleLayers": 7,
+  "directorOperations": 5,
+  "proxyFullDecode": true,
+  "audioMeasurements": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "peak": 0.6840224266052246,
+    "rms": 0.07698647677898407,
+    "clippedSamples": 0,
+    "duration": 38.016,
+    "limitation": "Objective decoded measurements; listening and speech comprehension require founder review."
+  },
+  "canonicalClock": 90000,
+  "workerSourceSha256": "5bdea4cae17459a2b9e746eba5a160e49980b5bcd21118ede5e31516a45bd8e2",
+  "finalPayloadSha256": "872ac07fb542a820ddda8a4ff236ceaeb89304212692ff067cf4a65d43cfc5af",
+  "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+  "gpuStarted": false,
+  "pinnedContainerPreflight": {
+    "sameImmutableImage": true,
+    "cpuBlenderFrame": true,
+    "workerImport": true,
+    "finalRequestPydantic": true,
+    "missingLibrariesFixed": [
+      "libSM.so.6",
+      "libICE.so.6"
+    ],
+    "libraryBundleSha256": "0ad9751ece48b0d032f69d8c66d74c6824bf6443c49d41ed9992becc350e91aa"
+  },
+  "priorAttempt": "First failed execution is terminal with zero active executions and retained logs; no frames were generated.",
+  "referenceContainerCpuPass": true,
+  "referencePydanticPass": true,
+  "photographicSourceHashes": [
+    {
+      "path": "assets/founder-studio.png",
+      "sha256": "d535accaff029e6ded7a8ef45945e38ae4f350db4ba6d4d819e03d2fe8905581",
+      "prompt": "Fictional adult male founder in black hoodie, thoughtful three-quarter portrait on right third, premium creative studio with violet/magenta practical lighting, warm background points and dark negative space on left. Photoreal cinematic editorial still, no text or UI.",
+      "originalImagegenOutput": "exec-bd742e4b-17e6-4076-8ac4-b978f209ea06.png",
+      "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+    },
+    {
+      "path": "assets/founder-story.png",
+      "sha256": "5c2e8bed70b5ee3075ed279e64b7fe6a6f663bb5c7876de6e12663973bb9aae9",
+      "prompt": "Same fictional adult founder and black hoodie, left-third three-quarter profile on a mountain overlook at golden sunrise, misty lake, natural expression, violet shadow palette and warm horizon. Photoreal cinematic editorial still, no text or UI.",
+      "originalImagegenOutput": "exec-b3ea63fb-45aa-4838-b1e9-0e7e411704a0.png",
+      "role": "Reusable texture embedded into native animated media surface; not a full-scene slideshow frame"
+    },
+    {
+      "path": "assets/founder-foreground.png",
+      "sha256": "f8017dcba506160feda90b81c3f45ee0c078918282684bbadd0d53572f09da06",
+      "prompt": "Preserve exact fictional seated founder, original canvas and pose. Remove background to transparent alpha, retain the close rocky ledge. Clean compositing cutout.",
+      "originalImagegenOutput": "exec-d2b9291b-cf83-432e-94af-b02aa392594e.png",
+      "reference": "assets/founder-story.png",
+      "role": "Independent native depth layer"
+    },
+    {
+      "path": "assets/story-landscape.png",
+      "sha256": "e86ee995cfafc1f76149024b1ff5c49095e4af2e61d86fd66255c20bb5d1860d",
+      "prompt": "Remove founder and close foreground ledge; reconstruct continuous background mountains and misty lake. Preserve golden sunrise and violet shadows, composition and camera.",
+      "originalImagegenOutput": "exec-64ff54c3-50df-468d-94e0-c9f9afe7168f.png",
+      "reference": "assets/founder-story.png",
+      "role": "Independent native depth layer"
+    }
+  ],
+  "proxyEncoder": "h264_nvenc",
+  "note": "Native proxy frames rendered on CPU. Existing local Studio compositor selected available local NVENC; no Cloud Run execution was active during proxy generation.",
+  "denoiserCorrection": {
+    "nativeSceneUnchanged": true,
+    "rayTracingBackend": "OptiX verified on RTX PRO 6000 before denoiser failure",
+    "denoiser": "OPENIMAGEDENOISE_CPU",
+    "samePinnedContainer1080CpuProof": "reference-oidn-preflight.log",
+    "authorSha256": "48ed4831bd0454e4f3daccb33d2b3e7c9d050119557a446b7cfc2bc0ae31abde",
+    "source": "https://developer.blender.org/docs/release_notes/4.1/cycles/"
+  },
+  "performanceCorrection": {
+    "sameNativeScene": true,
+    "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+    "persistentData": true,
+    "denoisingQuality": "BALANCED",
+    "denoisingPrefilter": "FAST",
+    "pinned1080CpuPass": true,
+    "beforeCpuFrameSeconds": 19.76,
+    "afterCpuFrameSeconds": 9.93,
+    "boundedTaskSeconds": 3300,
+    "nativeStageDeadlineSeconds": 3000
+  }
+}

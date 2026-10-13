@@ -1,0 +1,229 @@
+{
+  "outputId": "paper-voyage-story",
+  "aspect": "16:9",
+  "purpose": "No-footage problem, actual rejected generation, corrected action, Studio assembly and finished voyage. Private founder story and making-of candidate.",
+  "musicAssetId": "score",
+  "musicVolume": 0.25,
+  "sequence": [
+    {
+      "assetId": "paper-awakens",
+      "start": 0,
+      "duration": 3,
+      "reason": "Ordinary material poses the no-footage problem"
+    },
+    {
+      "assetId": "paper-awakens",
+      "start": 3,
+      "duration": 2,
+      "reason": "Reveal the first impossible movement"
+    },
+    {
+      "assetId": "ocean-environment",
+      "start": 0.4,
+      "duration": 1.7,
+      "reason": "An idea begins gaining a world"
+    },
+    {
+      "assetId": "failed-storm",
+      "start": 0,
+      "duration": 3.5,
+      "reason": "Show why the first attempt failed, explicitly framed by narration"
+    },
+    {
+      "assetId": "storm-action",
+      "start": 0.8,
+      "duration": 4,
+      "reason": "Replace vague clouds with actual physical wave action"
+    },
+    {
+      "assetId": "light-return",
+      "start": 1,
+      "duration": 4,
+      "reason": "An intact boat reaches the light"
+    },
+    {
+      "assetId": "world-on-desk",
+      "start": 0,
+      "duration": 5,
+      "reason": "Reveal the entire miniature world emerging from paper"
+    },
+    {
+      "assetId": "studio-ui",
+      "start": 0,
+      "duration": 1.2,
+      "reason": "The actual source material becomes an editable Studio story"
+    },
+    {
+      "assetId": "storm-action",
+      "start": 2,
+      "duration": 2,
+      "reason": "Replay the threat within the finished story"
+    },
+    {
+      "assetId": "light-return",
+      "start": 2,
+      "duration": 3,
+      "reason": "Deliver the survival payoff"
+    },
+    {
+      "assetId": "identity",
+      "start": 0,
+      "duration": 3.5,
+      "reason": "Resolve the no-footage question with AutoPromote"
+    }
+  ],
+  "audioCues": [
+    {
+      "assetId": "see-in-head",
+      "kind": "voiceover",
+      "startTime": 0.15,
+      "duration": 2,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "nothing-to-upload",
+      "kind": "voiceover",
+      "startTime": 2.8,
+      "duration": 2.15,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "gave-one-idea",
+      "kind": "voiceover",
+      "startTime": 5,
+      "duration": 2.7,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "reject-weak",
+      "kind": "voiceover",
+      "startTime": 7.8,
+      "duration": 2.25,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "boat-refuses",
+      "kind": "voiceover",
+      "startTime": 11.3,
+      "duration": 2.65,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "made-material",
+      "kind": "voiceover",
+      "startTime": 15.5,
+      "duration": 1.975,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "brief-no-footage",
+      "kind": "voiceover",
+      "startTime": 20.3,
+      "duration": 3.65,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "edited-story",
+      "kind": "voiceover",
+      "startTime": 23.3,
+      "duration": 2.725,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "brief-to-this",
+      "kind": "voiceover",
+      "startTime": 26.8,
+      "duration": 2.05,
+      "trimStart": 0,
+      "volume": 0.85
+    },
+    {
+      "assetId": "made-with",
+      "kind": "voiceover",
+      "startTime": 29.8,
+      "duration": 2.6,
+      "trimStart": 0,
+      "volume": 0.85
+    }
+  ],
+  "captionSegments": [
+    {
+      "start": 0.15,
+      "end": 2.15,
+      "text": "You can see it in your head.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 2.8,
+      "end": 4.949999999999999,
+      "text": "But there's nothing to upload.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 5,
+      "end": 7.7,
+      "text": "So we gave Auto Promote one idea.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 7.8,
+      "end": 10.05,
+      "text": "We rejected what didn't work.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 11.3,
+      "end": 13.950000000000001,
+      "text": "A paper boat that refuses to sink.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 15.5,
+      "end": 17.475,
+      "text": "It made the raw material.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 20.3,
+      "end": 23.95,
+      "text": "This started with a brief. No camera. No footage.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 23.3,
+      "end": 26.025000000000002,
+      "text": "Then Auto Promote edited the story.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 26.8,
+      "end": 28.85,
+      "text": "From a brief... to this.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    },
+    {
+      "start": 29.8,
+      "end": 32.4,
+      "text": "This film was made with Auto Promote.",
+      "captionIcon": "none",
+      "captionAccent": "#a18aff"
+    }
+  ]
+}

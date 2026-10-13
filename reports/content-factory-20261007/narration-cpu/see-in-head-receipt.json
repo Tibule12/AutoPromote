@@ -1,0 +1,32 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "see-in-head",
+  "type": "audio",
+  "audioRole": "voiceover",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "You can see it in your head.",
+  "model": "hexgrad/Kokoro-82M",
+  "modelRevision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "tool": "AutoPromote NVIDIA narration adapter",
+  "origin": "synthetic_brand_narration",
+  "settings": {
+    "voice": "af_heart",
+    "speed": 0.98,
+    "sampleRate": 48000,
+    "loudnessTargetLUFS": -18
+  },
+  "artifact": {
+    "path": "/work/narration-cpu/see-in-head.wav",
+    "sha256": "12498140512843cadc0359ab51d7af802764eeb741960aa9a685fce2866a4455",
+    "duration": 2.0,
+    "container": "wav",
+    "codec": "pcm_s16le"
+  },
+  "device": "cpu",
+  "gpu": null,
+  "phonemes": [
+    "j\u02ccu k\u00e6n s\u02c8i \u026at \u026an j\u028a\u0279 h\u02c8\u025bd."
+  ],
+  "seconds": 0.758234703999733,
+  "disclosure": "Generated narration using a standard licensed model preset; no founder voice or real person's identity is represented."
+}

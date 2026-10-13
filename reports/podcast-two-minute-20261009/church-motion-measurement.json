@@ -1,0 +1,28 @@
+{
+  "method": "Decoded luma frames and windowed phase correlation",
+  "times": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    4.99
+  ],
+  "analysisDimensions": [
+    320,
+    176
+  ],
+  "firstLastTranslationAtNativePixels": [
+    0,
+    0
+  ],
+  "firstLastMeanLumaDifference": 1.7077414772727273,
+  "successiveMeanLumaDifferences": [
+    1.4343217329545455,
+    0.9192649147727273,
+    0.8731889204545454,
+    0.8839488636363636,
+    0.8377840909090909
+  ],
+  "scope": "Measured pixel movement, not human creative acceptance or exact camera-trajectory proof."
+}

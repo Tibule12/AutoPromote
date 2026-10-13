@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-08T06:32:13.577Z",
+  "events": [
+    {
+      "path": "/api/media/transcribe-source",
+      "status": 200,
+      "error": "Full-source transcription started"
+    },
+    {
+      "path": "/api/media/status/74c7e73a-d926-4613-b738-b4a0fc20686e",
+      "status": 200,
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/74c7e73a-d926-4613-b738-b4a0fc20686e",
+      "status": 200,
+      "jobStatus": "completed"
+    }
+  ],
+  "captions": [
+    {
+      "label": "Caption copy",
+      "text": ""
+    },
+    {
+      "label": "Caption 1 text",
+      "text": "utshwala eyonke into yamutshwa"
+    },
+    {
+      "label": "Caption 2 text",
+      "text": "ewe iwayini iwayini iwayini iwayini iwayini iwayini"
+    },
+    {
+      "label": "Caption 3 text",
+      "text": "iwayini iwayini iwayini iwayini iwayini iwayini"
+    }
+  ],
+  "msg": "3 timestamped captions available as a preview draft · spoken languages preserved automatically · 3 draft lines need wording review · English · 3 lines need review · approve flagged lines before final render",
+  "wordingApproved": false,
+  "realAuth": true,
+  "noMocks": true
+}

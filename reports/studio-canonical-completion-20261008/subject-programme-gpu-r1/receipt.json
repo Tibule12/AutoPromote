@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-08T18:41:22.530Z",
+  "projectName": "Studio subject speed NVIDIA QA 20261008 r11",
+  "realAuth": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "graphChanges": 0,
+  "inferenceJobsStarted": 0,
+  "status": "FAIL",
+  "events": [],
+  "samples": [],
+  "error": "locator.waitFor: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('navigation', { name: 'Creative tools' }) to be visible\u001b[22m\n",
+  "finishedAt": "2026-10-08T18:41:43.472Z"
+}

@@ -1,0 +1,17 @@
+{
+  "status": "PROVIDER_CONFIRMED_STOPPED",
+  "observedAt": "2026-10-08T20:03:21.682118+00:00",
+  "authorizedCutoffEpoch": 1791489600,
+  "authorizedCutoffSast": "2026-10-08T22:00:00+02:00",
+  "instance": "autopromote-l40s-staging",
+  "providerState": "STOPPED",
+  "providerEvidence": "brev-cutoff-status-private.json",
+  "lastPreCutoffReservationEvidence": "gpu-pre-cutoff-observation.json",
+  "lastPreCutoffComputePids": [],
+  "postCutoffSshObservation": "Cutoff-time probe timed out; provider independently confirmed STOPPED. SSH failure alone was not treated as proof.",
+  "ownFilmGpuJobs": "All completed before cutoff; none launched after cutoff",
+  "manualVmStopSent": false,
+  "stopInitiator": "Unconfirmed; instance already STOPPED when independently checked",
+  "monitor": "Already exited",
+  "preservation": "Existing artifacts, model files, application changes and CPU fallbacks retained."
+}

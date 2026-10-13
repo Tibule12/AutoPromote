@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-08T18:24:05.068056+00:00",
+  "result": "FAIL_PREVIEW_FINAL_PARITY",
+  "actualNativeDelivery": "PASS_SCOPED_TECHNICAL_ONLY",
+  "nativeReceipt": "receipt.json",
+  "finalSha256": "bb31674ce3e35c9fcc429e88b300d9e4bb86b817066baecce4d5138b75a6a94d",
+  "gpuInferenceReused": true,
+  "freshGpuEncoding": false,
+  "reviewedPairs": [
+    0.25,
+    0.75,
+    1.55,
+    3.75
+  ],
+  "findings": [
+    "Reviewed source-bound subject pixels now appear in pre-final programme.",
+    "Saved source-bound title was omitted after split because preview only matched new occurrence IDs; compatibility binding fix has two passing guards, normal visibility retest is running.",
+    "3D font, vertical alignment and materials still differ despite measured camera correction.",
+    "Subject range ends correctly in the pre-speed and speed-only intermediates. Both title compositing plus 60fps conversion and isolated 30-to-60fps conversion reproduce the delayed picture/cut. Full sequential decoding agrees with seek extraction."
+  ],
+  "rootDiagnostics": [
+    "intermediate-3.1.png",
+    "speed-stage-1.55.png",
+    "diagnostic-title-only-1.55.png",
+    "title-sequential-1.55.png",
+    "final-source-clock-diagnostic.json"
+  ],
+  "remaining": "Frame-rate conversion/mux clock delay root cause remains under investigation; the title alone is not its cause. Split-source title visibility native retest passes. Full mix listening unqualified."
+}

@@ -1,0 +1,56 @@
+{
+  "sourceVideo": "/work/assets/founder-video-transform-v14/reference.mp4",
+  "sourceVideoSha256": "1732614db0b563b4756c33b793e016c59515774884076134f6b4e9c415945ead",
+  "reference": {
+    "assetId": "native-motion-guide",
+    "artifact": {
+      "path": "assets/founder-native-transform-v12/video.mp4",
+      "sha256": "1732614db0b563b4756c33b793e016c59515774884076134f6b4e9c415945ead",
+      "bytes": 4987124,
+      "duration": 6,
+      "codec": "h264",
+      "container": "mp4",
+      "fps": 24,
+      "width": 1280,
+      "height": 720,
+      "hasAudio": false
+    },
+    "provenance": {
+      "model": "Blender connected paper-to-yacht transformation",
+      "modelRevision": "4.5.9 LTS",
+      "settings": {
+        "template": "paper_to_yacht",
+        "deadlineEpoch": 1791381600,
+        "duration": 6,
+        "fps": 24,
+        "width": 1280,
+        "height": 720,
+        "seed": 20261007139,
+        "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea."
+      },
+      "nativeSceneSha256": "51a724d5378a03109c0151ae6967f8cce106a1b12d6627a5edf0be5cddd26772"
+    },
+    "firstImage": {
+      "operation": "decode first frame, no generation",
+      "parentArtifact": "generated/boat-launch-v4-qualified.mp4",
+      "parentSha256": "0136956d2b6465fceb8af75a9f45c79c14f71fa568d3c1075df163ea185d6f66",
+      "imageSha256": "b3eb1b794e787906cf7539ed5bd0df180c9c16c98e90364ae320cc455ecb0115"
+    },
+    "lastImage": {
+      "operation": "decode first frame, no generation",
+      "parentArtifact": "generated/real-voyage-v6.mp4",
+      "parentSha256": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+      "imageSha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462"
+    }
+  },
+  "sourceBrief": "A real cinematic voyage begins as a folded paper boat. AutoPromote generates the raw material from an idea and uses its existing Director and render pipeline to make the film. The reveal is a full-size working boat at sea, not a paper boat surviving at sea.",
+  "prompt": "Single continuous live-action cinematic practical-effects shot of one recognisable boat transforming. The ivory paper boat floats on a workbench. Its folded bow and sides unfold and curve into a dark mahogany hull. The central triangular folded paper stretches upward into cream canvas sails as a mast and rope rigging emerge. Timber grain, brass, seams and wet reflections replace paper fibres progressively. The camera pulls back without cutting while the living water expands into a deep-blue ocean, swallowing the workbench and revealing the scale of a full-size twelve-metre sailing yacht. Natural large waves, a moving bow wake and spray, rich sunrise light. The same connected object occupies the picture throughout its material and geometric transformation. Photographic materials and lighting, coherent escalating camera motion, premium cinematic impossible transformation.",
+  "negativePrompt": "cut, fade, dissolve, two boats, duplicate vessel, model boat, toy, plastic, cartoon, CGI, flat water, flat studio, render, smooth plastic, oversaturated, blurry, low detail, text, logo, watermark",
+  "strength": 0.8,
+  "seed": 20261007181,
+  "deadlineEpoch": 1791381600,
+  "firstImage": "/work/assets/founder-guided-transform-v16/firstImage.png",
+  "firstImageSha256": "b3eb1b794e787906cf7539ed5bd0df180c9c16c98e90364ae320cc455ecb0115",
+  "lastImage": "/work/assets/founder-guided-transform-v16/lastImage.png",
+  "lastImageSha256": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462"
+}

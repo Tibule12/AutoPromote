@@ -1,0 +1,150 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "assetId": "origin",
+  "inputIdentity": "58dee4453e6a5bf96bf9fc00ed0ef571c619a123abccf0774726b16ed6d94160",
+  "device": {
+    "backend": "OPTIX",
+    "devices": [
+      "NVIDIA L40S"
+    ],
+    "gpu_verified": true,
+    "denoiser": "OPTIX"
+  },
+  "settings": {
+    "width": 1920,
+    "height": 1080,
+    "samples": 24,
+    "fps": 24
+  },
+  "duration": 5.25,
+  "sourceHashes": {
+    "reports/studio-stability-20261007/media/podcast-12s.mp4": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+    "reports/content-factory-20261007/generated/real-voyage-v6.mp4": "54e4102b5fa6df99491cee642dac927732fcd1860a119b213a3ffa97650e61bb",
+    "reports/flagship-founder-film-20261008/source-brief.txt": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+    "reports/flagship-founder-film-20261008/textures/font.ttf": "28c4c189a44803b1986fd16074187034dc6d94ad35f5e87de13dd0e786b70b73",
+    "reports/flagship-founder-film-20261008/textures/error.png": "5e9e71a8844723a21205efe77ccadfb54cb7f70d2397abd6b8e136589973cae9"
+  },
+  "sourceBrief": {
+    "path": "source-brief.txt",
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c"
+  },
+  "scriptSha256": "f232f0b656d217402acd0c88abba5299cb1440538910c2b7a8ea6a056cd0d238",
+  "seconds": 78.84599893999984,
+  "nativeScene": "scene.blend",
+  "scope": "Authored NVIDIA raw scene; retained video provenance, not arbitrary-brief autonomy",
+  "editable": [
+    "camera",
+    "lights",
+    "materials",
+    "physical reveal transforms",
+    "timing",
+    "source image sequence"
+  ],
+  "proceduralGeometry": "Versioned script reproduces folded picture deformation",
+  "nativeSceneSha256": "040439d919d269b66df09452c01c95d273d449a167942293bc1f2eebd033b225",
+  "reusableArtifacts": [
+    {
+      "role": "native_scene",
+      "path": "story-v3/assets/origin/scene.blend",
+      "sha256": "040439d919d269b66df09452c01c95d273d449a167942293bc1f2eebd033b225"
+    },
+    {
+      "role": "rendered_source",
+      "path": "story-v3/assets/origin/video.mp4",
+      "sha256": "ff2171bf6c166b3b1d020e19f84f1f61168def04d10350b26da49c5cb659a960"
+    }
+  ],
+  "artifact": {
+    "path": "story-v3/assets/origin/video.mp4",
+    "sha256": "ff2171bf6c166b3b1d020e19f84f1f61168def04d10350b26da49c5cb659a960",
+    "duration": 5.25,
+    "fps": 24,
+    "encoder": "h264_nvenc",
+    "probe": {
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+          "profile": "Main",
+          "codec_type": "video",
+          "codec_tag_string": "avc1",
+          "codec_tag": "0x31637661",
+          "width": 1920,
+          "height": 1080,
+          "coded_width": 1920,
+          "coded_height": 1080,
+          "closed_captions": 0,
+          "film_grain": 0,
+          "has_b_frames": 2,
+          "sample_aspect_ratio": "1:1",
+          "display_aspect_ratio": "16:9",
+          "pix_fmt": "yuv420p",
+          "level": 40,
+          "chroma_location": "left",
+          "field_order": "progressive",
+          "refs": 1,
+          "is_avc": "true",
+          "nal_length_size": "4",
+          "id": "0x1",
+          "r_frame_rate": "24/1",
+          "avg_frame_rate": "24/1",
+          "time_base": "1/12288",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 64512,
+          "duration": "5.250000",
+          "bit_rate": "15994371",
+          "bits_per_raw_sample": "8",
+          "nb_frames": "126",
+          "extradata_size": 52,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0
+          },
+          "tags": {
+            "language": "und",
+            "handler_name": "VideoHandler",
+            "vendor_id": "[0][0][0][0]",
+            "encoder": "Lavc60.31.102 h264_nvenc"
+          }
+        }
+      ],
+      "format": {
+        "filename": "/film/story-v3/assets/origin/video.mp4",
+        "nb_streams": 1,
+        "nb_programs": 0,
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "format_long_name": "QuickTime / MOV",
+        "start_time": "0.000000",
+        "duration": "5.250000",
+        "size": "10498811",
+        "bit_rate": "15998188",
+        "probe_score": 100,
+        "tags": {
+          "major_brand": "isom",
+          "minor_version": "512",
+          "compatible_brands": "isomiso2avc1mp41",
+          "encoder": "Lavf60.16.100"
+        }
+      }
+    },
+    "fullDecode": true
+  }
+}

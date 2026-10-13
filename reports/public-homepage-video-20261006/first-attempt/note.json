@@ -1,0 +1,3 @@
+{
+  "reason": "Initial browser gate included the separate Watch Demo video in its source-release assertion, although that video was outside the new scene controller. The assertion now captures scene videos explicitly. The separate public demo also now pauses and unloads on close, with unit and browser regression coverage. Initial build predates that additional cleanup."
+}

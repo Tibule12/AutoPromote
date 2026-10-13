@@ -1,0 +1,78 @@
+{
+  "message": "locator.evaluate: Error: Edited monitor has no decoded frame\n    at eval (eval at evaluate (:302:30), <anonymous>:2:38)",
+  "errors": [],
+  "url": "http://127.0.0.1:5009/?fixture=factory",
+  "state": {
+    "media": [
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/ocean-voyage.mp4",
+        "readyState": 1,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/ocean-voyage.mp4",
+        "readyState": 1,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/ocean-voyage.mp4",
+        "readyState": 1,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "",
+        "readyState": 0,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/ocean-voyage.mp4",
+        "readyState": 1,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/ocean-voyage.mp4",
+        "readyState": 1,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/ocean-voyage.mp4",
+        "readyState": 1,
+        "paused": true,
+        "time": 0.8,
+        "seeking": true
+      },
+      {
+        "src": "http://127.0.0.1:5009/factory-media/generated/ocean-voyage.mp4",
+        "readyState": 1,
+        "paused": true,
+        "time": 0,
+        "seeking": false
+      }
+    ],
+    "slider": "5.05",
+    "loading": [
+      "🔒 Rounded frame locked",
+      "Loading edited preview…",
+      "✓Project saved locally with media, captions, layers and render settings."
+    ]
+  }
+}

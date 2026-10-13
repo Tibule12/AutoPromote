@@ -1,0 +1,250 @@
+{
+  "error": null,
+  "id": "observation-4",
+  "pageId": "page-1",
+  "url": "http://127.0.0.1:41117/",
+  "pages": [
+    {
+      "id": "page-1",
+      "url": "http://127.0.0.1:41117/"
+    }
+  ],
+  "dialog": null,
+  "frames": [
+    {
+      "index": 0,
+      "url": "http://127.0.0.1:41117/",
+      "text": "Local browser operator regression fixture\nPrepare a review copy\n\nOpen the editor, enter a title, choose landscape, and create one draft.\n\nDraft settings\nFilm title\nFormat\nPortrait\nLandscape\n\nScroll down to the draft action after editing the settings.\n\nCreate review copy\n\nReady for editing",
+      "headings": [
+        "Prepare a review copy",
+        "Draft settings"
+      ],
+      "alerts": [],
+      "busy": false,
+      "captcha": false,
+      "scroll": {
+        "x": 0,
+        "y": 0,
+        "height": 1537,
+        "viewportHeight": 900
+      },
+      "controls": [
+        {
+          "ref": "observation-4:f0:e0",
+          "role": "textbox",
+          "name": "Film title",
+          "label": "Film title",
+          "tag": "input",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": false,
+          "expanded": null,
+          "selected": null,
+          "value": "Stories move",
+          "options": null,
+          "href": null,
+          "inModal": false,
+          "context": "Draft settings",
+          "modalName": "",
+          "box": {
+            "x": 54,
+            "y": 305.03125,
+            "width": 288,
+            "height": 52
+          },
+          "inViewport": true,
+          "occluded": false
+        },
+        {
+          "ref": "observation-4:f0:e1",
+          "role": "combobox",
+          "name": "Format",
+          "label": "Format Portrait Landscape",
+          "tag": "select",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "Portrait",
+          "options": [
+            {
+              "label": "Portrait",
+              "value": "Portrait",
+              "disabled": false
+            },
+            {
+              "label": "Landscape",
+              "value": "Landscape",
+              "disabled": false
+            }
+          ],
+          "href": null,
+          "inModal": false,
+          "context": "Draft settings",
+          "modalName": "",
+          "box": {
+            "x": 115.09375,
+            "y": 387.03125,
+            "width": 137,
+            "height": 52
+          },
+          "inViewport": true,
+          "occluded": false
+        },
+        {
+          "ref": "observation-4:f0:e2",
+          "role": "button",
+          "name": "Create review copy",
+          "label": "",
+          "tag": "button",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": null,
+          "inModal": false,
+          "context": "Draft settings",
+          "modalName": "",
+          "box": {
+            "x": 54,
+            "y": 1371.03125,
+            "width": 186.734375,
+            "height": 52
+          },
+          "inViewport": false,
+          "occluded": true
+        },
+        {
+          "ref": "observation-4:f0:e3",
+          "role": "status",
+          "name": "Ready for editing",
+          "label": "",
+          "tag": "p",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": null,
+          "inModal": false,
+          "context": "Draft settings",
+          "modalName": "",
+          "box": {
+            "x": 44,
+            "y": 1451.03125,
+            "width": 850,
+            "height": 24
+          },
+          "inViewport": false,
+          "occluded": true
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "priorActions": [
+    {
+      "signature": "50338780b98f416e3abf7fcfc21ae1885d35393fd5bc2c9dd9fcfcc10afb9706",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Open editor"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "role": null,
+          "name": null,
+          "value": "b20522cca9b5cdc233dc0d3c808e54914195234dfe22ddd9e0e63d3f9a3aabb3",
+          "pageId": "page-1",
+          "frameIndex": 0
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-06T19:44:29.084Z",
+      "reason": "Open the editor to start preparing the review copy as instructed",
+      "planner": {
+        "model": "Qwen/Qwen3-VL-8B-Instruct",
+        "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "gpu": "NVIDIA L40S",
+        "seconds": 13.095614101001047,
+        "inputTokens": 2528,
+        "outputTokens": 114
+      },
+      "afterState": "c931e6e71e6186af540a70de1932cf758605796e3cade70fce51be4d761b9a4c"
+    },
+    {
+      "signature": "acfc274bb2bdc84c799ec5934bccd9c623fb6cb7a21effde9dd0230d51555f8b",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Continue to draft"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "role": null,
+          "name": null,
+          "value": "c931e6e71e6186af540a70de1932cf758605796e3cade70fce51be4d761b9a4c",
+          "pageId": "page-1",
+          "frameIndex": 0
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-06T19:44:52.604Z",
+      "reason": "Proceed to the draft workspace to continue preparing the review copy as instructed",
+      "planner": {
+        "model": "Qwen/Qwen3-VL-8B-Instruct",
+        "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "gpu": "NVIDIA L40S",
+        "seconds": 13.141185765000046,
+        "inputTokens": 2914,
+        "outputTokens": 116
+      },
+      "afterState": "b116a1eb8712f9258a2d384b8b80156d3858d3f3f895f85588b571c680c8ee64"
+    },
+    {
+      "signature": "b68aba005b777fde4973ea3981bc4ffb175ecced21d2a348db436dcd507f7089",
+      "operationKey": null,
+      "type": "fill",
+      "target": {
+        "role": "textbox",
+        "name": "Film title"
+      },
+      "expect": [
+        {
+          "type": "value",
+          "role": "textbox",
+          "name": "Film title",
+          "value": "Stories move",
+          "pageId": "page-1",
+          "frameIndex": 0
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-06T19:45:19.192Z",
+      "reason": "Enter 'Stories move' into the Film title field as required by the task goal",
+      "planner": {
+        "model": "Qwen/Qwen3-VL-8B-Instruct",
+        "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "gpu": "NVIDIA L40S",
+        "seconds": 14.666919080998923,
+        "inputTokens": 3710,
+        "outputTokens": 122
+      },
+      "afterState": "b116a1eb8712f9258a2d384b8b80156d3858d3f3f895f85588b571c680c8ee64"
+    }
+  ]
+}

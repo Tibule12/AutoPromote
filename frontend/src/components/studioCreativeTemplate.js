@@ -2,10 +2,13 @@ import definition from "../templates/product_launch_cinematic_v1.json";
 import cyclingDefinition from "../templates/cycling_rhythm_v1.json";
 import cyclingSecondDefinition from "../templates/cycling_rhythm_v1.0.1.json";
 import cyclingInitialDefinition from "../templates/cycling_rhythm_v1.0.0.json";
+import editorialLaunch from "../templates/product_launch_cinematic_v1.1.0.json";
+import refinedEditorialLaunch from "../templates/product_launch_cinematic_v1.1.1.json";
+import composedEditorialLaunch from "../templates/product_launch_cinematic_v1.1.2.json";
 import { adaptStudioSnapshotToDocument, projectStudioEditableStateToSnapshot } from "./studioProjectDocument";
 
 export const PRODUCT_LAUNCH_TEMPLATE = definition;
-export const STUDIO_CREATIVE_TEMPLATES = [definition, cyclingDefinition, cyclingSecondDefinition, cyclingInitialDefinition];
+export const STUDIO_CREATIVE_TEMPLATES = [definition, composedEditorialLaunch, refinedEditorialLaunch, editorialLaunch, cyclingDefinition, cyclingSecondDefinition, cyclingInitialDefinition];
 export const stableTemplateJson = value => JSON.stringify(value, (_key, item) =>
   item && typeof item === "object" && !Array.isArray(item)
     ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
@@ -51,6 +54,7 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
     fail("TEMPLATE_INPUT_INVALID", "Unknown template input.");
   for (const slot of template.inputSlots) {
     const binding = bindings[slot.id];
+    if (!slot.required && !binding) continue;
     if (slot.type === "text") {
       if (typeof binding !== "string" || !binding.trim() || binding.length > 64 || /[<>]/.test(binding) ||
           [...binding].some(character => character.charCodeAt(0) <= 8))
@@ -78,8 +82,8 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
     return { id: `${projectId}:shot:${index + 1}`, sourceClipId: asset.id, name: asset.name || shot.slot,
       contentHash: asset.contentHash, storagePath: asset.storagePath, url: asset.url,
       startRequest: start, endRequest: start + shot.duration, duration: shot.duration, sourceDuration: asset.duration,
-      transitionIn: index === recipe.sequence.length - 1 ? "soft_dip" : "clean_cut",
-      transitionOut: "clean_cut", transitionDuration: index === recipe.sequence.length - 1 ? .125 : .04 };
+      transitionIn: shot.transitionIn || (index === recipe.sequence.length - 1 ? "soft_dip" : "clean_cut"),
+      transitionOut: shot.transitionOut || "clean_cut", transitionDuration: shot.transitionDuration ?? (index === recipe.sequence.length - 1 ? .125 : .04) };
   });
   const portrait = aspect === "9:16";
   const overlays = recipe.titles.flatMap(title => {
@@ -88,9 +92,9 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
     if (!text) return [];
     return [{ id: `${projectId}:${title.id}`, type: "text", name: title.id, text,
       x: title.x, y: title.y, anchorX: title.align === "center" ? 50 : 0, anchorY: 50,
-      width: portrait ? 80 : 36, fontFamily: "Inter", fontWeight: title.weight || 900,
+      width: title.width ?? (portrait ? 80 : 36), fontFamily: "Inter", fontWeight: title.weight || 900,
       textAlign: title.align || "left", color: title.colour === "brand" ? bindings.brandColour : "#ffffff",
-      bg: "transparent", shadow: "strong", scale: title.scale * (portrait ? (title.portraitScale ?? .52) : 1), opacity: 1,
+      bg: "transparent", shadow: title.shadow || "strong", scale: title.scale * (portrait ? (title.portraitScale ?? .52) : 1), opacity: 1,
       rotation: 0, startTime: title.start, duration: title.duration,
       animation: { enter: "none", exit: "none" } }];
   });
@@ -100,17 +104,27 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
     mediaFit: "contain", opacity: 1, scale: 1, rotation: 0, ...recipe.logo });
   overlays[overlays.length - 1].startTime = recipe.logo.start;
   delete overlays[overlays.length - 1].start;
+  delete overlays[overlays.length - 1].motion;
   const motionKeyframes = overlays.flatMap(layer => {
     const start = layer.startTime, end = start + layer.duration;
+    const authoredTitle = recipe.titles.find(title => `${projectId}:${title.id}` === layer.id);
+    const motion = (authoredTitle ? authoredTitle.motion : recipe.logo.motion) || {};
+    const enter = motion.enterSeconds ?? recipe.animation.enterSeconds;
+    const settle = motion.settleSeconds ?? recipe.animation.settleSeconds;
+    const exit = motion.exitSeconds ?? recipe.animation.exitSeconds;
     const key = (property, time, value, easing = "bezier") => ({
       id: `${layer.id}:${property}:${Math.round(time * 90000)}`, targetId: layer.id,
-      property, time, value, easing, curve: recipe.animation.curve });
-    return [key("opacity", start, 0), key("opacity", start + recipe.animation.enterSeconds, 1),
-      key("opacity", end - recipe.animation.exitSeconds, 1, "linear"), key("opacity", end, 0, "linear"),
-      key("scale", start, layer.scale * (1 + .12 * intensity)),
-      key("scale", start + recipe.animation.settleSeconds, layer.scale),
-      key("y", start, layer.y + 1.6 * intensity), key("y", start + recipe.animation.enterSeconds, layer.y)];
+      property, time, value, easing, curve: motion.curve || recipe.animation.curve });
+    return [key("opacity", start, 0), key("opacity", start + enter, 1),
+      key("opacity", end - exit, 1, "linear"), key("opacity", end, 0, "linear"),
+      key("scale", start, layer.scale * (motion.enterScale ?? (1 + .12 * intensity))),
+      key("scale", start + settle, layer.scale),
+      key("y", start, layer.y + (motion.enterY ?? 1.6 * intensity)), key("y", start + enter, layer.y),
+      ...(motion.enterX !== undefined ? [key("x", start, layer.x + motion.enterX), key("x", start + settle, layer.x)] : [])];
   });
+  (recipe.sourceKeyframes || []).forEach((pose, index) => motionKeyframes.push({
+    ...copy(pose), id: `${projectId}:source-pose:${index}`, targetId: "main-video",
+  }));
   let programmeTime = 0;
   recipe.sequence.forEach((shot, index) => {
     if (shot.scale !== undefined) motionKeyframes.push({
@@ -120,30 +134,37 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
     programmeTime += shot.duration;
   });
   const media = [...new Map([...template.inputSlots].sort((a, b) =>
-    Number(b.type === "video") - Number(a.type === "video")).filter(slot => ["video", "image", "audio"].includes(slot.type))
+    Number(b.type === "video") - Number(a.type === "video")).filter(slot => bindings[slot.id] && ["video", "image", "audio"].includes(slot.type))
     .map(slot => [bindings[slot.id].id, copy(bindings[slot.id])])).values()];
   const metadata = { schemaVersion: 1, templateRef: copy(templateRef), ownerUid,
-    instantiatedBy: actor, bindings: Object.fromEntries(template.inputSlots.map(slot => [slot.id,
+    instantiatedBy: actor, bindings: Object.fromEntries(template.inputSlots.filter(slot => bindings[slot.id]).map(slot => [slot.id,
       typeof bindings[slot.id] === "string" ? bindings[slot.id]
         : { assetId: bindings[slot.id].id, contentHash: bindings[slot.id].contentHash,
           storagePath: bindings[slot.id].storagePath, trimStart: Number(bindings[slot.id].trimStart || 0) }])),
     intensity, aspect, qualified: false };
   const snapshot = { projectMedia: media, timeline, orderedClips: timeline.map(clip => ({ ...clip,
     start: clip.startRequest, end: clip.endRequest })), selectedClipId: timeline[0].id,
-    reframeAspect: aspect, smartCrop: portrait && !!recipe.framing,
-    smartCropMode: portrait && recipe.framing ? recipe.framing.mode : "off",
-    ...(portrait && recipe.framing ? { reframeKeyframes: copy(recipe.framing.positions) } : {}), videoFit: "cover",
+    reframeAspect: aspect, smartCrop: !!recipe.framing && (portrait || !!recipe.framing.forceAspect),
+    smartCropMode: recipe.framing && (portrait || recipe.framing.forceAspect) ? recipe.framing.mode : "off",
+    ...(recipe.framing && (portrait || recipe.framing.forceAspect) ? { reframeKeyframes: copy(recipe.framing.positions) } : {}), videoFit: "cover",
     mainTransform: { id: "main-video", type: "video", x: 50, y: 50, scale: 1, rotation: 0, opacity: 1 },
     mainFrame: { enabled: false }, overlays, motionKeyframes, motionScenes: [], threeDScenes: [],
+    ...(recipe.finish ? { finishFx: copy(recipe.finish) } : {}),
     speedKeyframes: [], previewSpeed: 1, autoCaptions: false, captionSegments: [],
     addHook: false, brandWatermark: false, muteOriginalAudio: true,
     addMusic: true, musicTrack: { ...copy(bindings.music), volume: recipe.music.volume,
       fadeIn: recipe.music.fadeIn, fadeOut: recipe.music.fadeOut, loop: false }, musicVolume: recipe.music.volume,
     musicLoop: false, musicFadeIn: recipe.music.fadeIn, musicFadeOut: recipe.music.fadeOut,
     musicDucking: false, musicDuckingStrength: 0,
-    soundEffects: recipe.soundCues.map((cue, index) => ({ id: `${projectId}:sound:${index}`,
-      builtIn: true, enabled: true, kind: "sfx", tone: cue.tone, name: cue.tone,
-      startTime: cue.time, duration: cue.duration, volume: cue.volume, fadeIn: .01, fadeOut: .04 })),
+    soundEffects: recipe.soundCues.map((cue, index) => {
+      const asset = cue.slot && bindings[cue.slot];
+      return { id: `${projectId}:sound:${index}`, enabled: true, kind: "sfx",
+        builtIn: !asset, tone: asset ? "custom" : cue.tone, name: asset?.name || cue.tone,
+        ...(asset ? { url: asset.url, sourceStoragePath: asset.storagePath,
+          sourceMediaId: asset.id, contentHash: asset.contentHash, trimStart: cue.trimStart || 0 } : {}),
+        startTime: cue.time, duration: cue.duration, volume: cue.volume,
+        fadeIn: cue.fadeIn ?? .01, fadeOut: cue.fadeOut ?? .04 };
+    }),
     audioKeyframes: {}, trackStates: {}, creativeTemplateInstance: metadata,
     exportSettings: { resolution, fps: 24, codec: "h264", audioCodec: "aac", audioBitrate: "256" } };
   const document = adaptStudioSnapshotToDocument({ snapshot, projectId });

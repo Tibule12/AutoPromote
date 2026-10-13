@@ -1,0 +1,35 @@
+{
+  "accepted": true,
+  "reason": "Accept as a private visual asset for the source-supported helm response: the sailor keeps both grips connected to real props, balances with the vessel and deliberately turns toward open water. This does not approve the full film or establish that this deck matches the wide yacht.",
+  "reviewer": "Codex all-decoded-frame and native keyframe inspection",
+  "modelRevision": "private visual review 2026-10-08",
+  "evidenceSha256": "3979d97fb535b014853c4bd21d573df8d13e2e92ac6f8773fce2017981735978",
+  "artifactSha256": "4c0cc8ff183a396523d2c49137100f7b23a9c89a967a1d8ef730b22b109b92cd",
+  "criteria": [
+    {
+      "criterion": "Photographic person, boat fittings and moving water",
+      "passed": true,
+      "observation": "All 49 decoded frames retain photographic face, clothing, helm, rail and ocean. Native frames 0,23,32,48 were inspected at 1280x720."
+    },
+    {
+      "criterion": "Both grips stay connected to existing physical props",
+      "passed": true,
+      "observation": "The hand at screen right remains at the wooden wheel rim; the hand at screen left stays on the timber rail. The prior invisible-control pantomime is gone."
+    },
+    {
+      "criterion": "Intentional attention turns from camera toward open water",
+      "passed": true,
+      "observation": "The head turns toward screen left during the first second and continues looking across the sea. Body angle adjusts with the swell, retaining both grips."
+    }
+  ],
+  "scope": "Private generated visual asset, restrained helm-response action only",
+  "wholeFilmCreativeApproval": false,
+  "publicApproved": false,
+  "integrationConstraints": [
+    "Match deck, sail/canopy, rigging and light against the accepted wide yacht before continuity approval. Orange overhead fabric enters the upper edge; do not claim it matches the cream wide sail without review.",
+    "This is 3.0625 seconds of genuine generated motion at native 1280x720/16fps. It has no source soundtrack; add coherent sea/wind in the existing edit.",
+    "No rope hauling or large steering adjustment is established."
+  ],
+  "limitations": "All-decoded-frame/native keyframe visual inspection plus actual Chromium 1x playback to completion. Contextual wide-yacht continuity and the finished-film soundtrack/listening remain pending.",
+  "playbackEvidence": "asset-playback/receipt.json"
+}

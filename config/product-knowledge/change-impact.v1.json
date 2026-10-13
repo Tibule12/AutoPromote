@@ -403,6 +403,42 @@
         "src/services/linkedinService.js"
       ],
       "reason": "Integrate current main Publisher/Schedule UI and review bounded LinkedIn credential and Reddit native video confirmation repairs. Keep PARTIAL; per-post recovery does not qualify universal delivery or Studio readiness."
+    },
+    {
+      "feature_id": "studio.keyframes",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioProTimeline.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/studioMotionProperties.js"
+      ],
+      "reason": "Consolidate isolated property controls and exact newly added draft template versions. Retain readiness and creative-review limits; no new qualification or public approval."
+    },
+    {
+      "feature_id": "studio.templates",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "config/creative-templates/registry.v1.json",
+        "frontend/src/components/studioCreativeTemplate.js",
+        "frontend/src/components/StudioLaunchTemplatePanel.js"
+      ],
+      "reason": "Consolidate isolated property controls and exact newly added draft template versions. Retain readiness and creative-review limits; no new qualification or public approval."
     }
   ]
 }

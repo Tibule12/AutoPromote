@@ -1,0 +1,19 @@
+{
+  "status": "OUTPUT_CLOCK_FADE_SUBSET_PASS",
+  "source": "paired-speed-2x-r1/receipt.json",
+  "retest": "paired-speed-2x-r2/receipt.json",
+  "failure": "At 2x preview fade used source-clock 100/150ms, while real ASS export used output-clock 100/150ms.",
+  "fix": "Map current source occurrence and clipped cue boundaries through the shared 90kHz programme/output speed map. Supports trim/repeated occurrence and speed-segment boundary arithmetic.",
+  "evidence": {
+    "preFixPreviewOpacityAtOutput1_55": 1,
+    "postFixPreviewOpacityAtOutput1_55": 0.5,
+    "preFixPreviewOpacityAtOutput4_45": 0.666667,
+    "postFixPreviewOpacityAtOutput4_45": 0.333333,
+    "realUserSampleCount": 13,
+    "nativeOutputSha256": "b46947b5e08e66e03ace6d062fbcc9f5769ea9c9cd1e649d8f8e1d6fd250e193",
+    "nativeDurationSeconds": 6,
+    "cpuRendererOutputUnchanged": true
+  },
+  "visualInspection": "Actual r1 final and r2 pre-final screenshots inspected at 1.55 and 4.45 output seconds. Caption fades now follow the delivered clock; level whole-source frame and titles retained.",
+  "limits": "Full pixel/raster comparison has frame-quantization and glyph-layout differences; this only qualifies cue presence and fade clock. Full-mix human listening, ramps in the actual Studio browser and all styles remain unqualified."
+}

@@ -1,0 +1,17 @@
+{
+  "status": "FAIL_PREVIEW_FINAL_PARITY",
+  "reviewedAt": "2026-10-08T17:16:03.224270+00:00",
+  "nativeDelivery": "PASS_TECHNICAL_ONLY",
+  "gpuEncoder": "h264_nvenc",
+  "duration": 6,
+  "fps": 60,
+  "sourceTime": 0.5,
+  "outputTime": 0.25,
+  "preview": "preview-0.25.png",
+  "final": "final-0.25.png",
+  "reproducedFailure": "Programme monitor omits the current reviewed SAM2 text-behind, tracked callout, background grade and depth result; same-edit NVIDIA delivery includes them. 3D proxy text geometry and sizing also differ from Blender final.",
+  "rootCause": "Programme canvas decodes original source and alternate cameras, but never consumes source-bound subjectVfxScenes reviewed frames. Three.js and Blender use different camera projections and text geometry.",
+  "fixStatus": "Source-bound reviewed programme decoder and transient-link history exclusion implemented; same-flow r5 real retest running. 3D mismatch remains open.",
+  "inferenceJobsStarted": 0,
+  "remaining": "Whole-edit parity, 3D raster/staging/fade and audio listening unqualified."
+}

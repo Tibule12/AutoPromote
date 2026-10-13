@@ -1,0 +1,4649 @@
+{
+  "at": "2026-10-08T05:56:48.392Z",
+  "headless": true,
+  "realAuth": true,
+  "noMocks": true,
+  "gpuUsed": false,
+  "scope": "Existing control reachability/layout only; no feature output qualification",
+  "tools": [
+    {
+      "tool": "Moments",
+      "guide": "Moments controls\n\nChoose a source range. Review Director suggestions before applying them to the timeline.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorTell it how the clip should feel\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2726 MAKE IT HIT",
+          "disabled": false,
+          "testId": "make-it-hit-button"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Auto",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Talk / Story",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Beauty / Fashion",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Fitness / Dance",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Food / DIY",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Travel / Lifestyle",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Gaming / Tech",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Off",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2726Auto Story",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u224bMotion Sculpture",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25ebBeat Echo",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25c7Reality Break",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25d0Tracked Reveal",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Clean",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Bold",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Unreal",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2702Remove boring parts",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u03dfIncrease energy",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25a5Show proof",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u21bbMake it loop",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Calm creative pacing",
+          "text": "Calm",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Balanced creative pacing",
+          "text": "Balanced",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Energetic creative pacing",
+          "text": "Energetic",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "4 creative improvements ready to review",
+          "text": "4 improvements readyReview every suggestion before render\u203a",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Preview captionsVisible instantly in After and Split. Before stays untouched.",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Translate captions to EnglishOff preserves multilingual speech exactly as spoken.",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Regenerate speech captions",
+          "disabled": false,
+          "testId": "generate-live-transcript"
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Caption copy",
+          "disabled": false
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Full lyrics or script",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Draft caption language",
+          "disabled": false,
+          "options": [
+            "Language needs review",
+            "isiXhosa",
+            "English",
+            "isiZulu",
+            "Mixed languages"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Draft caption voice",
+          "disabled": false,
+          "options": [
+            "Speaker needs review",
+            "Choir",
+            "Host",
+            "Guest",
+            "Speaker A",
+            "Speaker B"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Create timed lyric draft",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Add [Choir singing] sound cue",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "+ Add line",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u26a1 Remove All Filler Words (0)",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25b6",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 1 start",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 1 end",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 1 speaker",
+          "disabled": false,
+          "options": [
+            "Speaker needs review",
+            "Choir",
+            "Host",
+            "Guest",
+            "Speaker A",
+            "Speaker B"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 1 language",
+          "disabled": false,
+          "options": [
+            "Language needs review",
+            "isiXhosa",
+            "English",
+            "isiZulu",
+            "Mixed languages"
+          ]
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Caption 1 text",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 1 placement",
+          "disabled": false,
+          "options": [
+            "Auto safe region",
+            "Left shoulder",
+            "Right shoulder",
+            "Background wall \u00b7 left",
+            "Background wall \u00b7 centre",
+            "Background wall \u00b7 right",
+            "Top left",
+            "Top centre",
+            "Top right",
+            "Middle left",
+            "Dead centre",
+            "Middle right",
+            "Bottom left",
+            "Bottom centre",
+            "Bottom right",
+            "Free position"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Auto reaction",
+          "text": "\u2728",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Laugh",
+          "text": "\ud83d\ude02",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Fire",
+          "text": "\ud83d\udd25",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Love",
+          "text": "\u2764\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wow",
+          "text": "\ud83d\ude2e",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Applause",
+          "text": "\ud83d\udc4f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "One hundred",
+          "text": "\ud83d\udcaf",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Watch this",
+          "text": "\ud83d\udc40",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Crown",
+          "text": "\ud83d\udc51",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Mic",
+          "text": "\ud83c\udf99\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Phone / online",
+          "text": "\ud83d\udcf1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Music / choir",
+          "text": "\ud83c\udfb5",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Place / journey",
+          "text": "\ud83d\udccd",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Payoff",
+          "text": "\u26a1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "No emoji",
+          "text": "\u2205",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "color",
+          "label": "Caption 1 accent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2702\ufe0f Cut Video",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Delete caption 1",
+          "text": "\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25b6",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 2 start",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 2 end",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 2 speaker",
+          "disabled": false,
+          "options": [
+            "Speaker needs review",
+            "Choir",
+            "Host",
+            "Guest",
+            "Speaker A",
+            "Speaker B"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 2 language",
+          "disabled": false,
+          "options": [
+            "Language needs review",
+            "isiXhosa",
+            "English",
+            "isiZulu",
+            "Mixed languages"
+          ]
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Caption 2 text",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 2 placement",
+          "disabled": false,
+          "options": [
+            "Auto safe region",
+            "Left shoulder",
+            "Right shoulder",
+            "Background wall \u00b7 left",
+            "Background wall \u00b7 centre",
+            "Background wall \u00b7 right",
+            "Top left",
+            "Top centre",
+            "Top right",
+            "Middle left",
+            "Dead centre",
+            "Middle right",
+            "Bottom left",
+            "Bottom centre",
+            "Bottom right",
+            "Free position"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Auto reaction",
+          "text": "\u2728",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Laugh",
+          "text": "\ud83d\ude02",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Fire",
+          "text": "\ud83d\udd25",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Love",
+          "text": "\u2764\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wow",
+          "text": "\ud83d\ude2e",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Applause",
+          "text": "\ud83d\udc4f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "One hundred",
+          "text": "\ud83d\udcaf",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Watch this",
+          "text": "\ud83d\udc40",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Crown",
+          "text": "\ud83d\udc51",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Mic",
+          "text": "\ud83c\udf99\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Phone / online",
+          "text": "\ud83d\udcf1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Music / choir",
+          "text": "\ud83c\udfb5",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Place / journey",
+          "text": "\ud83d\udccd",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Payoff",
+          "text": "\u26a1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "No emoji",
+          "text": "\u2205",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "color",
+          "label": "Caption 2 accent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2702\ufe0f Cut Video",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Delete caption 2",
+          "text": "\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25b6",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 3 start",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 3 end",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 3 speaker",
+          "disabled": false,
+          "options": [
+            "Speaker needs review",
+            "Choir",
+            "Host",
+            "Guest",
+            "Speaker A",
+            "Speaker B"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 3 language",
+          "disabled": false,
+          "options": [
+            "Language needs review",
+            "isiXhosa",
+            "English",
+            "isiZulu",
+            "Mixed languages"
+          ]
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Caption 3 text",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 3 placement",
+          "disabled": false,
+          "options": [
+            "Auto safe region",
+            "Left shoulder",
+            "Right shoulder",
+            "Background wall \u00b7 left",
+            "Background wall \u00b7 centre",
+            "Background wall \u00b7 right",
+            "Top left",
+            "Top centre",
+            "Top right",
+            "Middle left",
+            "Dead centre",
+            "Middle right",
+            "Bottom left",
+            "Bottom centre",
+            "Bottom right",
+            "Free position"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Auto reaction",
+          "text": "\u2728",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Laugh",
+          "text": "\ud83d\ude02",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Fire",
+          "text": "\ud83d\udd25",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Love",
+          "text": "\u2764\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wow",
+          "text": "\ud83d\ude2e",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Applause",
+          "text": "\ud83d\udc4f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "One hundred",
+          "text": "\ud83d\udcaf",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Watch this",
+          "text": "\ud83d\udc40",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Crown",
+          "text": "\ud83d\udc51",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Mic",
+          "text": "\ud83c\udf99\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Phone / online",
+          "text": "\ud83d\udcf1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Music / choir",
+          "text": "\ud83c\udfb5",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Place / journey",
+          "text": "\ud83d\udccd",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Payoff",
+          "text": "\u26a1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "No emoji",
+          "text": "\u2205",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "color",
+          "label": "Caption 3 accent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2702\ufe0f Cut Video",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Delete caption 3",
+          "text": "\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Rainbow Flow",
+          "text": "AaWORDRainbow FlowEvery spoken word carries the colour beat",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Watch Me",
+          "text": "AaWORDWatch MeDims the sentence and makes the live word command the frame",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wall Type",
+          "text": "AaWORDWall TypeLow-profile typography for open background space",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Story Pop",
+          "text": "AaWORDStory PopEditorial card + semantic accent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bold Pop",
+          "text": "AaWORDBold PopPunchy active-word scale",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Karaoke",
+          "text": "AaWORDKaraokeProgressive spoken-word fill",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Neon Glow",
+          "text": "AaWORDNeon GlowElectric outlined emphasis",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bounce",
+          "text": "AaWORDBouncePlayful vertical word punch",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Minimal",
+          "text": "AaWORDMinimalQuiet premium subtitle",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Big Headline",
+          "text": "AaWORDBig HeadlineOversized uppercase impact",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Subtitle Card",
+          "text": "AaWORDSubtitle CardBroadcast-style readable card",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Comic Punch",
+          "text": "AaWORDComic PunchBold yellow social energy",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Gradient Pop",
+          "text": "AaWORDGradient PopColour-rich creator highlight",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Typewriter",
+          "text": "AaWORDTypewriterMeasured word-by-word reveal",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Editorial Serif",
+          "text": "AaWORDEditorial SerifElegant documentary voice",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Sticker Stack",
+          "text": "AaWORDSticker StackLayered creator sticker treatment",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Marker Swipe",
+          "text": "AaWORDMarker SwipeHighlighter-strip emphasis",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Glass Caption",
+          "text": "AaWORDGlass CaptionFrosted premium floating card",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "News Flash",
+          "text": "AaWORDNews FlashUrgent broadcast headline energy",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Luxury Quote",
+          "text": "AaWORDLuxury QuoteRefined fashion-film typography",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Retro Tape",
+          "text": "AaWORDRetro TapeWarm analogue poster character",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Top left",
+          "text": "\u2196",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Top centre",
+          "text": "\u2191",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Top right",
+          "text": "\u2197",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Middle left",
+          "text": "\u2190",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Dead centre",
+          "text": "\u2022",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Middle right",
+          "text": "\u2192",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bottom left",
+          "text": "\u2199",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bottom centre",
+          "text": "\u2193",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bottom right",
+          "text": "\u2198",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Left shoulder",
+          "text": "\u2199Left shoulder",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Right shoulder",
+          "text": "\u2198Right shoulder",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wall left",
+          "text": "\u25e7Wall left",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wall centre",
+          "text": "\u25a3Wall centre",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wall right",
+          "text": "\u25e8Wall right",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Amber",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Violet",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Aqua",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Rose",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Lemon",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Mint",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Blue",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "White",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Caption size100%",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "CC Preview Captions",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Cut",
+      "guide": "Cut controls\n\nSelect a video clip for trim, split, delete and precision edits. Ripple edits move the following clips; slip edits change the source range.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2702\ufe0f Split at playhead",
+          "disabled": false,
+          "testId": "inspector-cut-split"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u23ee\ufe0f Trim start to here",
+          "disabled": false,
+          "testId": "inspector-cut-trim-start"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u23ed\ufe0f Trim end to here",
+          "disabled": false,
+          "testId": "inspector-cut-trim-end"
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Precision edit nudge",
+          "disabled": false,
+          "options": [
+            "1 frame",
+            "0.10s",
+            "0.25s",
+            "1.00s"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "ripple earlier",
+          "text": "\u2212",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "ripple later",
+          "text": "+",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "roll earlier",
+          "text": "\u2212",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "roll later",
+          "text": "+",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "slip earlier",
+          "text": "\u2212",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "slip later",
+          "text": "+",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "slide earlier",
+          "text": "\u2212",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "slide later",
+          "text": "+",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "jcut earlier",
+          "text": "\u2212",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "jcut later",
+          "text": "+",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "lcut earlier",
+          "text": "\u2212",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "lcut later",
+          "text": "+",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Link source video and audioTurn off for independent J-cuts, L-cuts and audio slips.",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "[ Mark remove startAt playhead",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Mark remove end ]At playhead",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Remove from time",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Remove to time",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Auto",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Clean Cut",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Soft Dip",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Energy Flash",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Dissolve",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Film Dip",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Whip Pan",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Zoom Push",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Blur Morph",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Luma Wipe",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Light Leak",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Film Burn",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "RGB Glitch",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Transition duration0.18s",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Clear marks",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Preview lead-in",
+          "disabled": true
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Stabilize shaky footageMotion analysis smooths camera shake before reframing.",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2702 Remove marked part & preview join",
+          "disabled": true,
+          "testId": "remove-marked-range"
+        }
+      ]
+    },
+    {
+      "tool": "Hook",
+      "guide": "Hook controls\n\nSet opening text, style, focus and timing. This changes the opening of the clip, not the underlying source file.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Enable opening hookOff removes every hook treatment while keeping Signature effects.",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Try another",
+          "disabled": false
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Hook textTHIS CHANGES FAST17/120 \u00b7 keep it clear enough to read in one glance",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Blur Reveal",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Zoom Focus",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Freeze frame",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Duration3.0s",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Preview once",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Select focal point",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2726 Apply Hook",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Reframe",
+      "guide": "Reframe controls\n\nSet aspect, framing mode, subject position and zoom. Review the whole clip for faces cut off by the crop.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Enable Auto ReframeFollow a reviewed subject, preserve the full source, or compose synchronized cameras.",
+          "disabled": false,
+          "testId": "auto-reframe-toggle"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "9:16TikTok \u00b7 Reels \u00b7 Shorts",
+          "disabled": false,
+          "testId": "reframe-aspect-9-16"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "4:5Instagram feed",
+          "disabled": false,
+          "testId": "reframe-aspect-4-5"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "1:1Square social",
+          "disabled": false,
+          "testId": "reframe-aspect-1-1"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "16:9YouTube \u00b7 landscape",
+          "disabled": false,
+          "testId": "reframe-aspect-16-9"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Solo Speaker",
+          "disabled": false,
+          "testId": "reframe-follow-subject"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Show Everyone",
+          "disabled": false,
+          "testId": "reframe-preserve-frame"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Multi-Camera",
+          "disabled": true,
+          "testId": "reframe-speaker-stack"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "+ Add angle",
+          "disabled": false,
+          "testId": "add-clean-speaker-angle"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "2 camerasTop / bottom",
+          "disabled": false,
+          "testId": "multicam-layout-2"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "3 camerasHero + duo",
+          "disabled": false,
+          "testId": "multicam-layout-3"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "4+ sourcesRoute any 4 \u00b7 2 \u00d7 2",
+          "disabled": false,
+          "testId": "multicam-layout-4"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Top / BottomEqual stacked speakers",
+          "disabled": false,
+          "testId": "multicam-composition-stack_2"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "50 / 50Left and right split",
+          "disabled": false,
+          "testId": "multicam-composition-split_2"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Picture in pictureOne full, one rounded PIP",
+          "disabled": false,
+          "testId": "multicam-composition-pip_2"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Speaker + reactionReviewed focus cuts",
+          "disabled": false,
+          "testId": "multicam-composition-active_2"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Speaker spotlightFull-frame reviewed cuts",
+          "disabled": false,
+          "testId": "multicam-composition-spotlight_2"
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Top speaker source",
+          "disabled": false,
+          "options": [
+            "Choose a clean angle",
+            "podcast-12s.mp4"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Bottom speaker source",
+          "disabled": false,
+          "options": [
+            "Choose a clean angle",
+            "podcast-12s.mp4"
+          ]
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Top angle start",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Bottom angle start",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Angles share the same source timecode",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Detect & follow face",
+          "disabled": false,
+          "testId": "analyze-speaker-faces"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Follow existing camera cuts",
+          "disabled": false,
+          "testId": "analyze-source-shots"
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Speaker zoom",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Picture fill for this camera shot",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "+ Add here",
+          "disabled": false,
+          "testId": "add-reframe-keyframe"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83d\udc64 Left Speaker",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83d\udc64 Right Speaker",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83d\udd04 Alternate Speakers",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25b6 Preview 16:9 Framing",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Captions",
+      "guide": "Captions controls\n\nSelect a CC block to edit its words and timing. Set style, size and placement; review wording before publishing.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Preview captionsVisible instantly in After and Split. Before stays untouched.",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Translate captions to EnglishOff preserves multilingual speech exactly as spoken.",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Regenerate speech captions",
+          "disabled": false,
+          "testId": "generate-live-transcript"
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Caption copy",
+          "disabled": false
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Full lyrics or script",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Draft caption language",
+          "disabled": false,
+          "options": [
+            "Language needs review",
+            "isiXhosa",
+            "English",
+            "isiZulu",
+            "Mixed languages"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Draft caption voice",
+          "disabled": false,
+          "options": [
+            "Speaker needs review",
+            "Choir",
+            "Host",
+            "Guest",
+            "Speaker A",
+            "Speaker B"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Create timed lyric draft",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Add [Choir singing] sound cue",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "+ Add line",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u26a1 Remove All Filler Words (0)",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25b6",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 1 start",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 1 end",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 1 speaker",
+          "disabled": false,
+          "options": [
+            "Speaker needs review",
+            "Choir",
+            "Host",
+            "Guest",
+            "Speaker A",
+            "Speaker B"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 1 language",
+          "disabled": false,
+          "options": [
+            "Language needs review",
+            "isiXhosa",
+            "English",
+            "isiZulu",
+            "Mixed languages"
+          ]
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Caption 1 text",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 1 placement",
+          "disabled": false,
+          "options": [
+            "Auto safe region",
+            "Left shoulder",
+            "Right shoulder",
+            "Background wall \u00b7 left",
+            "Background wall \u00b7 centre",
+            "Background wall \u00b7 right",
+            "Top left",
+            "Top centre",
+            "Top right",
+            "Middle left",
+            "Dead centre",
+            "Middle right",
+            "Bottom left",
+            "Bottom centre",
+            "Bottom right",
+            "Free position"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Auto reaction",
+          "text": "\u2728",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Laugh",
+          "text": "\ud83d\ude02",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Fire",
+          "text": "\ud83d\udd25",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Love",
+          "text": "\u2764\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wow",
+          "text": "\ud83d\ude2e",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Applause",
+          "text": "\ud83d\udc4f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "One hundred",
+          "text": "\ud83d\udcaf",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Watch this",
+          "text": "\ud83d\udc40",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Crown",
+          "text": "\ud83d\udc51",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Mic",
+          "text": "\ud83c\udf99\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Phone / online",
+          "text": "\ud83d\udcf1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Music / choir",
+          "text": "\ud83c\udfb5",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Place / journey",
+          "text": "\ud83d\udccd",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Payoff",
+          "text": "\u26a1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "No emoji",
+          "text": "\u2205",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "color",
+          "label": "Caption 1 accent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2702\ufe0f Cut Video",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Delete caption 1",
+          "text": "\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25b6",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 2 start",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 2 end",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 2 speaker",
+          "disabled": false,
+          "options": [
+            "Speaker needs review",
+            "Choir",
+            "Host",
+            "Guest",
+            "Speaker A",
+            "Speaker B"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 2 language",
+          "disabled": false,
+          "options": [
+            "Language needs review",
+            "isiXhosa",
+            "English",
+            "isiZulu",
+            "Mixed languages"
+          ]
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Caption 2 text",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 2 placement",
+          "disabled": false,
+          "options": [
+            "Auto safe region",
+            "Left shoulder",
+            "Right shoulder",
+            "Background wall \u00b7 left",
+            "Background wall \u00b7 centre",
+            "Background wall \u00b7 right",
+            "Top left",
+            "Top centre",
+            "Top right",
+            "Middle left",
+            "Dead centre",
+            "Middle right",
+            "Bottom left",
+            "Bottom centre",
+            "Bottom right",
+            "Free position"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Auto reaction",
+          "text": "\u2728",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Laugh",
+          "text": "\ud83d\ude02",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Fire",
+          "text": "\ud83d\udd25",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Love",
+          "text": "\u2764\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wow",
+          "text": "\ud83d\ude2e",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Applause",
+          "text": "\ud83d\udc4f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "One hundred",
+          "text": "\ud83d\udcaf",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Watch this",
+          "text": "\ud83d\udc40",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Crown",
+          "text": "\ud83d\udc51",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Mic",
+          "text": "\ud83c\udf99\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Phone / online",
+          "text": "\ud83d\udcf1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Music / choir",
+          "text": "\ud83c\udfb5",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Place / journey",
+          "text": "\ud83d\udccd",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Payoff",
+          "text": "\u26a1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "No emoji",
+          "text": "\u2205",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "color",
+          "label": "Caption 2 accent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2702\ufe0f Cut Video",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Delete caption 2",
+          "text": "\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25b6",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 3 start",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Caption 3 end",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 3 speaker",
+          "disabled": false,
+          "options": [
+            "Speaker needs review",
+            "Choir",
+            "Host",
+            "Guest",
+            "Speaker A",
+            "Speaker B"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 3 language",
+          "disabled": false,
+          "options": [
+            "Language needs review",
+            "isiXhosa",
+            "English",
+            "isiZulu",
+            "Mixed languages"
+          ]
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "label": "Caption 3 text",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Caption 3 placement",
+          "disabled": false,
+          "options": [
+            "Auto safe region",
+            "Left shoulder",
+            "Right shoulder",
+            "Background wall \u00b7 left",
+            "Background wall \u00b7 centre",
+            "Background wall \u00b7 right",
+            "Top left",
+            "Top centre",
+            "Top right",
+            "Middle left",
+            "Dead centre",
+            "Middle right",
+            "Bottom left",
+            "Bottom centre",
+            "Bottom right",
+            "Free position"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Auto reaction",
+          "text": "\u2728",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Laugh",
+          "text": "\ud83d\ude02",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Fire",
+          "text": "\ud83d\udd25",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Love",
+          "text": "\u2764\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wow",
+          "text": "\ud83d\ude2e",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Applause",
+          "text": "\ud83d\udc4f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "One hundred",
+          "text": "\ud83d\udcaf",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Watch this",
+          "text": "\ud83d\udc40",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Crown",
+          "text": "\ud83d\udc51",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Mic",
+          "text": "\ud83c\udf99\ufe0f",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Phone / online",
+          "text": "\ud83d\udcf1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Music / choir",
+          "text": "\ud83c\udfb5",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Place / journey",
+          "text": "\ud83d\udccd",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Payoff",
+          "text": "\u26a1",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "No emoji",
+          "text": "\u2205",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "color",
+          "label": "Caption 3 accent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2702\ufe0f Cut Video",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Delete caption 3",
+          "text": "\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Rainbow Flow",
+          "text": "AaWORDRainbow FlowEvery spoken word carries the colour beat",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Watch Me",
+          "text": "AaWORDWatch MeDims the sentence and makes the live word command the frame",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wall Type",
+          "text": "AaWORDWall TypeLow-profile typography for open background space",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Story Pop",
+          "text": "AaWORDStory PopEditorial card + semantic accent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bold Pop",
+          "text": "AaWORDBold PopPunchy active-word scale",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Karaoke",
+          "text": "AaWORDKaraokeProgressive spoken-word fill",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Neon Glow",
+          "text": "AaWORDNeon GlowElectric outlined emphasis",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bounce",
+          "text": "AaWORDBouncePlayful vertical word punch",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Minimal",
+          "text": "AaWORDMinimalQuiet premium subtitle",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Big Headline",
+          "text": "AaWORDBig HeadlineOversized uppercase impact",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Subtitle Card",
+          "text": "AaWORDSubtitle CardBroadcast-style readable card",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Comic Punch",
+          "text": "AaWORDComic PunchBold yellow social energy",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Gradient Pop",
+          "text": "AaWORDGradient PopColour-rich creator highlight",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Typewriter",
+          "text": "AaWORDTypewriterMeasured word-by-word reveal",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Editorial Serif",
+          "text": "AaWORDEditorial SerifElegant documentary voice",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Sticker Stack",
+          "text": "AaWORDSticker StackLayered creator sticker treatment",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Marker Swipe",
+          "text": "AaWORDMarker SwipeHighlighter-strip emphasis",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Glass Caption",
+          "text": "AaWORDGlass CaptionFrosted premium floating card",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "News Flash",
+          "text": "AaWORDNews FlashUrgent broadcast headline energy",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Luxury Quote",
+          "text": "AaWORDLuxury QuoteRefined fashion-film typography",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Retro Tape",
+          "text": "AaWORDRetro TapeWarm analogue poster character",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Top left",
+          "text": "\u2196",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Top centre",
+          "text": "\u2191",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Top right",
+          "text": "\u2197",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Middle left",
+          "text": "\u2190",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Dead centre",
+          "text": "\u2022",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Middle right",
+          "text": "\u2192",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bottom left",
+          "text": "\u2199",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bottom centre",
+          "text": "\u2193",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Bottom right",
+          "text": "\u2198",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Left shoulder",
+          "text": "\u2199Left shoulder",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Right shoulder",
+          "text": "\u2198Right shoulder",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wall left",
+          "text": "\u25e7Wall left",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wall centre",
+          "text": "\u25a3Wall centre",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Wall right",
+          "text": "\u25e8Wall right",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Amber",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Violet",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Aqua",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Rose",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Lemon",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Mint",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Blue",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "White",
+          "text": "",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Caption size100%",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "CC Preview Captions",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Graphics",
+      "guide": "Graphics controls\n\nSelect a text or image layer to edit position, size, opacity and timing. The layer appears only during its timeline range.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "H1HeadlineBold hook copy",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25a4Lower thirdName and context",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "TAGLabelShort callout",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Motion",
+      "guide": "Motion controls\n\nEdit a motion graphic\u2019s text, timing and keyframes. Use the playhead to check its entrance, movement and exit.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Motion + sound",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "3D Motion",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Logo & layers",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83c\udfaf Viral Punch-Ins",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Transform keyframes",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Auto-generate motion beats",
+          "text": "\u26a1 Generate Beats",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "All",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Hooks & Badges",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Text & Titles",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Stats & Timers",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Social & CTAs",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add AutoPromote launch ident",
+          "text": "AutoPromote launch identA cinematic logo build with orbit energy and a precision wordmark reveal",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Impact title",
+          "text": "Impact titleA bold reveal with an expanding accent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Word cascade",
+          "text": "Word cascadeWords build into a complete statement",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Number reveal",
+          "text": "Number revealCount up to your own figure",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Versus card",
+          "text": "Versus cardTwo ideas, one animated comparison",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Speaker intro",
+          "text": "Speaker introName and role, introduced with a sweep",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Focus callout",
+          "text": "Focus calloutAn animated pointer and label",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Viral hook badge",
+          "text": "Viral hook badgeAttention pill for opening hook statements",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Retention timer",
+          "text": "Retention timerProgress line keeping viewers watching to the end",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Social quote card",
+          "text": "Social quote cardVerified creator quote & testimonial badge",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Subscribe CTA",
+          "text": "Subscribe CTACall to action with notification bell",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Moving brand",
+          "text": "Moving brandYour handle glides between two safe positions",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Composite",
+      "guide": "Composite controls\n\nChoose the source and subject, then set masking, foreground or background treatment. Generate and review the processed layer before export.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Subject effect source clip",
+          "disabled": false,
+          "options": [
+            "Add effects to a clip\u2026",
+            "podcast-12s.mp4 \u00b7 12.0s"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\uff0b Adjustment layer",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25a3 Compound selection",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Composite targetSelect a layerMain video",
+          "disabled": false,
+          "options": [
+            "Select a layer",
+            "Main video"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Blend modeNormalMultiplyScreenOverlaySoft lightHard lightDifferenceColor dodgeLuminosity",
+          "disabled": false,
+          "options": [
+            "Normal",
+            "Multiply",
+            "Screen",
+            "Overlay",
+            "Soft light",
+            "Hard light",
+            "Difference",
+            "Color dodge",
+            "Luminosity"
+          ]
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Enable maskShape, feather and animate the visible region.",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Key a colorRemove green, blue or a sampled backdrop.",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Remove backgroundCreates a subject matte; original pixels stay untouched.",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Track layer to motionAttach graphics or masks to a face, object or point.",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Eye-contact correctionGently redirects off-camera reading toward the lens.",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Natural face polishBalances exposure and detail without changing identity.",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Studio background refinementRepairs distracting patches while preserving the real set.",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Creator FX",
+      "guide": "Creator FX controls\n\nTune the selected effect and its timing. Browser studies use simplified previews; inspect a rendered result before relying on the effect.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Layers",
+          "disabled": false,
+          "testId": "creator-section-layers"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Motion",
+          "disabled": false,
+          "testId": "creator-section-motion"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Audio",
+          "disabled": false,
+          "testId": "creator-section-audio"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Multicam",
+          "disabled": false,
+          "testId": "creator-section-podcast"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Reactions",
+          "disabled": false,
+          "testId": "creator-section-reactions"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Introductions",
+          "disabled": false,
+          "testId": "creator-section-intros"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Context",
+          "disabled": false,
+          "testId": "creator-section-context"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Text",
+          "disabled": false,
+          "testId": "creator-section-text"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Compositing",
+          "disabled": false,
+          "testId": "creator-section-composite"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Creator FX",
+          "disabled": false,
+          "testId": "creator-section-effects"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Templates + AI",
+          "disabled": false,
+          "testId": "creator-section-assist"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Freeze reactionBrowser preview",
+          "disabled": false,
+          "testId": "creator-demo-reaction_freeze"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Freeze + punchBrowser preview",
+          "disabled": false,
+          "testId": "creator-demo-reaction_punch"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Reaction montageBrowser preview",
+          "disabled": false,
+          "testId": "creator-demo-reaction_montage"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Instant replayBrowser preview",
+          "disabled": false,
+          "testId": "creator-demo-instant_replay"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Slow replayBrowser preview",
+          "disabled": false,
+          "testId": "creator-demo-slow_replay"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Resume programmeContinue video",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Reaction freeze duration",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Clear preview",
+          "disabled": true,
+          "testId": "creator-clear-preview"
+        }
+      ]
+    },
+    {
+      "tool": "Pacing",
+      "guide": "Pacing controls\n\nSet speed and pacing on the selected range. Check the resulting duration and listen to speech after changing speed.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "0.5\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "0.75\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "1\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "1.15\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "1.25\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "1.5\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "2\u00d7",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Fine speed1.00\u00d7Pitch stays preserved so voices remain natural.",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Calm",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Balanced",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Energetic",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Remove dead airMarks long pauses for the final edit without changing your source.",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u26a1 Detect & Ripple-Cut Dead Air",
+          "disabled": false,
+          "testId": "pacing-ripple-cut-silences"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25c6 Add 1.00\u00d7 point at 0.00s",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "B-roll",
+      "guide": "B-roll controls\n\nAdd or select an insert. Set its source trim, layout, duration, end behavior and audio mix to control when it covers the main video.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Sparse",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Balanced",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Frequent",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Plan whole clip",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Review transcript",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\uff0bUpload B-rollOne or multiple MP4, MOV or WEBM files",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83d\uddbcAttach an imageTimed full screen, picture-in-picture or side by side",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Color",
+      "guide": "Color controls\n\nAdjust color and finishing layers. Compare Before and After; check the rendered file for the final appearance.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Curve \u00b7 shadows0",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Curve \u00b7 midtones0",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Curve \u00b7 highlights0",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "HSL \u00b7 hue0",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "HSL \u00b7 saturation0",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "HSL \u00b7 luminance0",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Reset",
+          "disabled": true
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Rounded main footage",
+          "disabled": true
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Canvas margin",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Corner curve",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "True black",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Soft blur",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25d0Studio Natural",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83c\udf99\ufe0fPodcast Pro",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83c\udfacDark Interview",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83c\udf05Warm Cinematic",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u26a1Viral High Contrast",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83d\udcacSoft Talk",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Exposure",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Contrast",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Saturation",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Warmth",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Clarity",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Vignette",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Precision RGB grade",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25c6 Add grade keyframe",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83e\uddf2 Magnetic beats",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "RGB Parade",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Luma",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Film grain",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "RGB edge",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "VHS tracking",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Light leak",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Off",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u3030Neon wave",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25a5Voice bars",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25c9Pulse ring",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "color",
+          "label": "Visualizer glow color",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "top",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "bottom",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Voice response",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Sound",
+      "guide": "Sound controls\n\nSelect an audio clip to edit timing, level and fades. Adjust restoration and remix settings, then listen to the rendered mix.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "AI Creative DirectorReturn to story direction\u2637",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25d2Slowed + ReverbDeep, spacious and cinematic",
+          "disabled": false,
+          "testId": "audio-remix-preset-slowed_reverb"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2197Sped UpFast, bright social energy",
+          "disabled": false,
+          "testId": "audio-remix-preset-sped_up"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25c9Deep VoiceHeavy chest & sub resonance",
+          "disabled": false,
+          "testId": "audio-remix-preset-deep_voice"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2726NightcoreHigh, fast and electric",
+          "disabled": false,
+          "testId": "audio-remix-preset-nightcore"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u266cAmapiano SpaceSub-bass log-drum & wide room",
+          "disabled": false,
+          "testId": "audio-remix-preset-amapiano_space"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25ceWarm VocalSmooth singing and clear speech",
+          "disabled": false,
+          "testId": "audio-remix-preset-warm_vocal"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u26a1Bass BoostMaximum sub slam and 808 punch",
+          "disabled": false,
+          "testId": "audio-remix-preset-bass_boost"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u2615Lo-Fi ChillWarm tape low-end & soft highs",
+          "disabled": false,
+          "testId": "audio-remix-preset-lo_fi"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u260fTelephoneVintage radio & narrow bandpass",
+          "disabled": false,
+          "testId": "audio-remix-preset-telephone"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u221e8D SpatialImmersive 3D surround soundstage",
+          "disabled": false,
+          "testId": "audio-remix-preset-spatial_8d"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Increase remix speed",
+          "text": "\u2303",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Decrease remix speed",
+          "text": "\u2304",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Increase voice pitch",
+          "text": "\u2303",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Decrease voice pitch",
+          "text": "\u2304",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Reset",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Bass equalizer",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Clarity equalizer",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Air equalizer",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Reverb equalizer",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Auto",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Choir",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Speech",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Music",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Full Mix",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Voice",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Music",
+          "disabled": true
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Output gain",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Keep Pitch",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Level Match",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Remix intensity",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u21b6 Before",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25b6 Preview Remix",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u27f3 Loop 8s",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Remix export quality",
+          "disabled": false,
+          "options": [
+            "Studio \u00b7 256 kbps",
+            "Preview \u00b7 160 kbps"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83e\uddf2 Magnetic Beats ON",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83c\udfb5 Align Sequence Cuts to Beats",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u26a1 Snap B-Roll to Beats",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83c\udfaf On Drops (4 Bars)",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\ud83c\udfaf Every Bar",
+          "disabled": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "natural",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "podcast",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "noisy room",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "broadcast",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Use voice repair on export",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Voice isolationReduce room, music bleed and competing noise.",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Denoise22%",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "De-esser18%",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "EQ low0 dB",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "EQ mid0 dB",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "EQ high0 dB",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Hum removal50Hz",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Compressor35%",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Limiter ceiling-1.0 dB",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "range",
+          "label": "Loudness target-14 LUFS",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Record at playhead",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Automation sourceOriginal audioMaster podcast audioVoice-overMusicB-roll audioSound effects",
+          "disabled": false,
+          "options": [
+            "Original audio",
+            "Master podcast audio",
+            "Voice-over",
+            "Music",
+            "B-roll audio",
+            "Sound effects"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\u25c6 Add volume keyframe at 0.00s",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Whoosh at playhead",
+          "text": "\ud83d\udca8Whoosh+ at playhead",
+          "disabled": false,
+          "testId": "sound-effect-preset-whoosh"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Impact at playhead",
+          "text": "\ud83d\udca5Impact+ at playhead",
+          "disabled": false,
+          "testId": "sound-effect-preset-impact"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Pop at playhead",
+          "text": "\ud83e\udee7Pop+ at playhead",
+          "disabled": false,
+          "testId": "sound-effect-preset-pop"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Click at playhead",
+          "text": "\ud83d\uddb1\ufe0fClick+ at playhead",
+          "disabled": false,
+          "testId": "sound-effect-preset-click"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "Add Riser at playhead",
+          "text": "\ud83d\ude80Riser+ at playhead",
+          "disabled": false,
+          "testId": "sound-effect-preset-riser"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "\uff0bUploadYour own SFX",
+          "disabled": false
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "label": "Keep original audioVoice and room sound remain present outside cutaway rules.",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "tool": "Export",
+      "guide": "Export controls\n\nSet resolution, frame rate, codec and quality. Render first, review the actual output, then download it. Studio exports have no AutoPromote watermark.",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Generate 3 hooks",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Download",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "TikTok",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Reels",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Shorts",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Export resolution",
+          "disabled": false,
+          "options": [
+            "720p",
+            "1080p",
+            "4K",
+            "Source size"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Export frame rate",
+          "disabled": false,
+          "options": [
+            "Source",
+            "24 fps",
+            "25 fps",
+            "30 fps",
+            "50 fps",
+            "60 fps"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Export codec",
+          "disabled": false,
+          "options": [
+            "H.264 \u00b7 compatible",
+            "H.265 \u00b7 smaller"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Export quality",
+          "disabled": false,
+          "options": [
+            "Draft",
+            "Balanced",
+            "High",
+            "Master"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Export video bitrate",
+          "disabled": false,
+          "options": [
+            "Auto for quality",
+            "5 Mbps",
+            "8 Mbps",
+            "12 Mbps",
+            "20 Mbps",
+            "40 Mbps"
+          ]
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "label": "Target file size megabytes",
+          "disabled": false
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Export audio codec",
+          "disabled": false,
+          "options": [
+            "AAC",
+            "Opus",
+            "PCM \u00b7 lossless"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Export audio bitrate",
+          "disabled": false,
+          "options": [
+            "128 kbps",
+            "192 kbps",
+            "256 kbps",
+            "320 kbps"
+          ]
+        },
+        {
+          "tag": "SELECT",
+          "type": "select-one",
+          "label": "Export color space",
+          "disabled": false,
+          "options": [
+            "Rec.709",
+            "sRGB",
+            "Display P3",
+            "HDR10"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "label": "",
+          "text": "Render Again",
+          "disabled": false
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "label": "",
+          "text": "Render caption review copy (draft, not publishable)",
+          "disabled": false,
+          "testId": "render-caption-review-copy"
+        }
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 640
+      },
+      "frame": {
+        "x": 425.671875,
+        "y": 152,
+        "width": 266.65625,
+        "height": 149.984375,
+        "top": 152,
+        "right": 692.328125,
+        "bottom": 301.984375,
+        "left": 425.671875
+      },
+      "timeline": {
+        "x": 0,
+        "y": 360,
+        "width": 1366,
+        "height": 280,
+        "top": 360,
+        "right": 1366,
+        "bottom": 640,
+        "left": 0
+      },
+      "sidebar": {
+        "x": 1046,
+        "y": 52,
+        "width": 320,
+        "height": 308,
+        "top": 52,
+        "right": 1366,
+        "bottom": 360,
+        "left": 1046
+      },
+      "trackScroll": {
+        "clientHeight": 172,
+        "scrollHeight": 200
+      },
+      "rows": [
+        {
+          "id": "video",
+          "box": {
+            "x": 1,
+            "y": 437,
+            "width": 1354,
+            "height": 64,
+            "top": 437,
+            "right": 1355,
+            "bottom": 501,
+            "left": 1
+          }
+        },
+        {
+          "id": "captions",
+          "box": {
+            "x": 1,
+            "y": 501,
+            "width": 1354,
+            "height": 54,
+            "top": 501,
+            "right": 1355,
+            "bottom": 555,
+            "left": 1
+          }
+        },
+        {
+          "id": "originalAudio",
+          "box": {
+            "x": 1,
+            "y": 555,
+            "width": 1354,
+            "height": 54,
+            "top": 555,
+            "right": 1355,
+            "bottom": 609,
+            "left": 1
+          }
+        }
+      ],
+      "captionBlocks": 0,
+      "watermarks": 0
+    },
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "frame": {
+        "x": 311.890625,
+        "y": 152,
+        "width": 494.21875,
+        "height": 277.984375,
+        "top": 152,
+        "right": 806.109375,
+        "bottom": 429.984375,
+        "left": 311.890625
+      },
+      "timeline": {
+        "x": 0,
+        "y": 488,
+        "width": 1366,
+        "height": 280,
+        "top": 488,
+        "right": 1366,
+        "bottom": 768,
+        "left": 0
+      },
+      "sidebar": {
+        "x": 1046,
+        "y": 52,
+        "width": 320,
+        "height": 436,
+        "top": 52,
+        "right": 1366,
+        "bottom": 488,
+        "left": 1046
+      },
+      "trackScroll": {
+        "clientHeight": 172,
+        "scrollHeight": 200
+      },
+      "rows": [
+        {
+          "id": "video",
+          "box": {
+            "x": 1,
+            "y": 565,
+            "width": 1354,
+            "height": 64,
+            "top": 565,
+            "right": 1355,
+            "bottom": 629,
+            "left": 1
+          }
+        },
+        {
+          "id": "captions",
+          "box": {
+            "x": 1,
+            "y": 629,
+            "width": 1354,
+            "height": 54,
+            "top": 629,
+            "right": 1355,
+            "bottom": 683,
+            "left": 1
+          }
+        },
+        {
+          "id": "originalAudio",
+          "box": {
+            "x": 1,
+            "y": 683,
+            "width": 1354,
+            "height": 54,
+            "top": 683,
+            "right": 1355,
+            "bottom": 737,
+            "left": 1
+          }
+        }
+      ],
+      "captionBlocks": 0,
+      "watermarks": 0
+    },
+    {
+      "viewport": {
+        "width": 1854,
+        "height": 961
+      },
+      "frame": {
+        "x": 384.328125,
+        "y": 152,
+        "width": 837.328125,
+        "height": 470.984375,
+        "top": 152,
+        "right": 1221.65625,
+        "bottom": 622.984375,
+        "left": 384.328125
+      },
+      "timeline": {
+        "x": 0,
+        "y": 681,
+        "width": 1854,
+        "height": 280,
+        "top": 681,
+        "right": 1854,
+        "bottom": 961,
+        "left": 0
+      },
+      "sidebar": {
+        "x": 1534,
+        "y": 52,
+        "width": 320,
+        "height": 629,
+        "top": 52,
+        "right": 1854,
+        "bottom": 681,
+        "left": 1534
+      },
+      "trackScroll": {
+        "clientHeight": 160,
+        "scrollHeight": 220
+      },
+      "rows": [
+        {
+          "id": "video",
+          "box": {
+            "x": 1,
+            "y": 774,
+            "width": 1842,
+            "height": 80,
+            "top": 774,
+            "right": 1843,
+            "bottom": 854,
+            "left": 1
+          }
+        },
+        {
+          "id": "captions",
+          "box": {
+            "x": 1,
+            "y": 854,
+            "width": 1842,
+            "height": 54,
+            "top": 854,
+            "right": 1843,
+            "bottom": 908,
+            "left": 1
+          }
+        },
+        {
+          "id": "originalAudio",
+          "box": {
+            "x": 1,
+            "y": 908,
+            "width": 1842,
+            "height": 54,
+            "top": 908,
+            "right": 1843,
+            "bottom": 962,
+            "left": 1
+          }
+        }
+      ],
+      "captionBlocks": 0,
+      "watermarks": 0
+    }
+  ],
+  "captionLaneCountCorrection": {
+    "at": "2026-10-08T06:45:46.902546+00:00",
+    "originalZeroWasSelectorError": true,
+    "actualColdReloadCueBlocks": 3,
+    "evidence": "clean-reload-receipt.json and browser/different-project-no-stale-output.png",
+    "fixedSelector": "[data-testid^=\"pro-captions-clip-\"]"
+  }
+}

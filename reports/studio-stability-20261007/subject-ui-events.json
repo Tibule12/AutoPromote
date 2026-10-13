@@ -1,0 +1,35 @@
+[
+  {
+    "at": "2026-10-07T18:09:07.523Z",
+    "path": "/api/media/studio-subject-vfx",
+    "httpStatus": 422,
+    "message": "3 INVALID_ARGUMENT: Property scene contains an invalid nested entity."
+  },
+  {
+    "at": "2026-10-07T18:11:34.189Z",
+    "path": "/api/media/studio-subject-vfx",
+    "httpStatus": 202,
+    "jobId": "8f665ad5-341f-4cc8-86ee-f084617985d5"
+  },
+  {
+    "at": "2026-10-07T18:11:38.533Z",
+    "path": "/api/media/studio-subject-vfx/8f665ad5-341f-4cc8-86ee-f084617985d5",
+    "httpStatus": 200,
+    "jobId": "8f665ad5-341f-4cc8-86ee-f084617985d5",
+    "status": "processing"
+  },
+  {
+    "at": "2026-10-07T18:11:44.443Z",
+    "path": "/api/media/studio-subject-vfx/8f665ad5-341f-4cc8-86ee-f084617985d5",
+    "httpStatus": 200,
+    "jobId": "8f665ad5-341f-4cc8-86ee-f084617985d5",
+    "status": "processing"
+  },
+  {
+    "at": "2026-10-07T18:11:52.981Z",
+    "path": "/api/media/studio-subject-vfx/8f665ad5-341f-4cc8-86ee-f084617985d5",
+    "httpStatus": 200,
+    "jobId": "8f665ad5-341f-4cc8-86ee-f084617985d5",
+    "status": "failed"
+  }
+]

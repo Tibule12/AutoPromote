@@ -1,0 +1,55 @@
+{
+  "command": [
+    "gcloud",
+    "storage",
+    "buckets",
+    "get-iam-policy",
+    "gs://autopromote-cc6d3-viral-studio-3d",
+    "--format=json"
+  ],
+  "exit_code": 0,
+  "stderr": "",
+  "data": {
+    "bindings": [
+      {
+        "members": [
+          "projectEditor:autopromote-cc6d3",
+          "projectOwner:autopromote-cc6d3"
+        ],
+        "role": "roles/storage.legacyBucketOwner"
+      },
+      {
+        "members": [
+          "projectViewer:autopromote-cc6d3"
+        ],
+        "role": "roles/storage.legacyBucketReader"
+      },
+      {
+        "members": [
+          "projectEditor:autopromote-cc6d3",
+          "projectOwner:autopromote-cc6d3"
+        ],
+        "role": "roles/storage.legacyObjectOwner"
+      },
+      {
+        "members": [
+          "projectViewer:autopromote-cc6d3"
+        ],
+        "role": "roles/storage.legacyObjectReader"
+      },
+      {
+        "members": [
+          "serviceAccount:viral-studio-3d-renderer@autopromote-cc6d3.iam.gserviceaccount.com"
+        ],
+        "role": "roles/storage.objectCreator"
+      },
+      {
+        "members": [
+          "serviceAccount:viral-studio-3d-renderer@autopromote-cc6d3.iam.gserviceaccount.com"
+        ],
+        "role": "roles/storage.objectViewer"
+      }
+    ],
+    "etag": "CAQ="
+  }
+}

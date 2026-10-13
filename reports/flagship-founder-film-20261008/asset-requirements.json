@@ -1,0 +1,1258 @@
+{
+  "sourceBriefSha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+  "assets": [
+    {
+      "assetId": "cold-open",
+      "type": "video",
+      "duration": 4,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Show a finished world immediately; ask how an editing problem became this.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/cold-open/video.mp4",
+        "sha256": "b9b4ec175754a8554331f69b3d50b1bd16d7e8743bf083bf7fa2681523b9bde8",
+        "duration": 4,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/cold-open/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 4,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "bef71905260d49fdd1ee974c8dd1ea12393e00c23fd34310fa1da26c84ff0334",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "cold-open",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 4,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 59.624316330000056,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/cold-open/video.mp4",
+            "sha256": "b9b4ec175754a8554331f69b3d50b1bd16d7e8743bf083bf7fa2681523b9bde8",
+            "duration": 4,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "cold-open",
+        "at": 0,
+        "duration": 3.0,
+        "vo": "I thought I was fixing one edit.",
+        "voAt": 0.35,
+        "shot": "Camera flies through suspended film gates into a moving generated ocean. The edit line becomes a physical illuminated route. The destination remains unexplained.",
+        "purpose": "Show a finished world immediately; ask how an editing problem became this.",
+        "originalAt": 0,
+        "originalDuration": 4,
+        "sourceStart": 0.6
+      }
+    },
+    {
+      "assetId": "origin",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Make sync understandable to a stranger through one human conversation, not interface instructions.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/origin/video.mp4",
+        "sha256": "1a1a97057b0a586e181173399fe3e3d98ed2bbf200aea9db609ebca53b7ef79c",
+        "duration": 6,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/origin/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 6,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "61b7f3d2957fe39c56e9ba5c98cc8f6eb7296c399640bb175ea05e65ddc540dd",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "origin",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 6,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 107.15683543900013,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/origin/video.mp4",
+            "sha256": "1a1a97057b0a586e181173399fe3e3d98ed2bbf200aea9db609ebca53b7ef79c",
+            "duration": 6,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "origin",
+        "at": 3.0,
+        "duration": 5.25,
+        "vo": "Two cameras. One conversation. They refused to stay together.",
+        "voAt": 0.35,
+        "shot": "Two real conversation frames on separate glass film strips. Warm sound pulses disagree, then align. One line connects both.",
+        "purpose": "Make sync understandable to a stranger through one human conversation, not interface instructions.",
+        "originalAt": 4,
+        "originalDuration": 6,
+        "sourceStart": 0.65
+      }
+    },
+    {
+      "assetId": "cascade",
+      "type": "video",
+      "duration": 7,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Each fix causes a consequence, building frustration.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/cascade/video.mp4",
+        "sha256": "d2a44c94570b1aad329d2733ee064a11fe1ccacdbdb747b473b3165dec61bc33",
+        "duration": 7,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/cascade/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 7,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "7e0e0855b7081c0999c2229499127fa1407674fd0b4414822505f70a3329d1ad",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "cascade",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 7,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 127.66652167500001,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/cascade/video.mp4",
+            "sha256": "d2a44c94570b1aad329d2733ee064a11fe1ccacdbdb747b473b3165dec61bc33",
+            "duration": 7,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "cascade",
+        "at": 8.25,
+        "duration": 5.5,
+        "vo": "Fix the timing. Lose the sound. Fix the sound. Break the render.",
+        "voAt": 0.35,
+        "shot": "Camera follows the now-aligned line into a render gate. The gate fractures; the next frames peel away. Genuine historical render errors appear on the fragments.",
+        "purpose": "Each fix causes a consequence, building frustration.",
+        "originalAt": 10,
+        "originalDuration": 7,
+        "sourceStart": 1.45
+      }
+    },
+    {
+      "assetId": "problems",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "The original problem grows larger than the founder expected.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/problems/video.mp4",
+        "sha256": "e692746ce67fda59318af042890a109b84ce57a4abad65596ced7075780bffa1",
+        "duration": 6,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/problems/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 6,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "749f142adb052e4c581cc2de3e6afc3afe9ee519fb12664a2adff0ab9ea289f5",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "problems",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 6,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 112.10291248099998,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/problems/video.mp4",
+            "sha256": "e692746ce67fda59318af042890a109b84ce57a4abad65596ced7075780bffa1",
+            "duration": 6,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "problems",
+        "at": 13.75,
+        "duration": 5.75,
+        "vo": "Then captions. Clips. New formats. Every answer opened another problem.",
+        "voAt": 0.3,
+        "shot": "Same conversation branches into different frame sizes. Caption words occupy depth. Camera follows the central line as the structures multiply.",
+        "purpose": "The original problem grows larger than the founder expected.",
+        "originalAt": 17,
+        "originalDuration": 6,
+        "sourceStart": 0.2
+      }
+    },
+    {
+      "assetId": "failure",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Let a setback hurt; hold briefly rather than racing through a decorative code montage.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/failure/video.mp4",
+        "sha256": "67ebd3aa72303ad08f99bccc4ecc379af29d68750e482556392b1063c78e3bce",
+        "duration": 6,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/failure/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 6,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "e8d74900d45d49181c21862b764a624b3c981418986c8a95149bea6cf7a7a830",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "failure",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 6,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 79.51249007000001,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/failure/video.mp4",
+            "sha256": "67ebd3aa72303ad08f99bccc4ecc379af29d68750e482556392b1063c78e3bce",
+            "duration": 6,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "failure",
+        "at": 19.5,
+        "duration": 4.5,
+        "vo": "Some days, the only thing that finished was the error log.",
+        "voAt": 0.5,
+        "shot": "A real error receipt becomes a large dark architectural panel. Failures stack in depth, crowding the route. Movement stops. Sound drops to a single unresolved pulse.",
+        "purpose": "Let a setback hurt; hold briefly rather than racing through a decorative code montage.",
+        "originalAt": 23,
+        "originalDuration": 6,
+        "sourceStart": 0.4
+      }
+    },
+    {
+      "assetId": "quota",
+      "type": "video",
+      "duration": 7,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "External constraint becomes the lowest point; persistence is the emotional turn.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/quota/video.mp4",
+        "sha256": "8a8492ada843f4d804743c9d643e4c7ba9601e363b4c037f7b0932ab4550cffa",
+        "duration": 7,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/quota/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 7,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "3a7b431cc08aca138ddb12a88cfa96dbead1d354170524a14c54cfaf730cae57",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "quota",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 7,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 118.63983740599997,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/quota/video.mp4",
+            "sha256": "8a8492ada843f4d804743c9d643e4c7ba9601e363b4c037f7b0932ab4550cffa",
+            "duration": 7,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "quota",
+        "at": 24.0,
+        "duration": 4.75,
+        "vo": "Even the machines said no. But I couldn't leave it there.",
+        "voAt": 0.3,
+        "shot": "Camera pushes past archived L4 denial into a monumental extruded zero. No invented emails or repeated RTX requests. Archive dates and GPU classes remain legible.",
+        "purpose": "External constraint becomes the lowest point; persistence is the emotional turn.",
+        "originalAt": 29,
+        "originalDuration": 7,
+        "sourceStart": 1.5
+      }
+    },
+    {
+      "assetId": "breakthrough",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/breakthrough/video.mp4",
+        "sha256": "07083bf511f13cc8dc17e25b7c841cabe21b51195f8ed6963cf7555e85223c19",
+        "duration": 6,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/breakthrough/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 6,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "a0be0158591adb7b57b10816149feb7fa20e6af5198c29e04c44301695b719e7",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "breakthrough",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 6,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 90.91611989800003,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/breakthrough/video.mp4",
+            "sha256": "07083bf511f13cc8dc17e25b7c841cabe21b51195f8ed6963cf7555e85223c19",
+            "duration": 6,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "breakthrough",
+        "at": 28.75,
+        "duration": 4.25,
+        "vo": "Then one door opened. And the question changed.",
+        "voAt": 0.4,
+        "shot": "Zero dissolves into separated geometry, revealing 3000 milliGPU and the verified RTX PRO 6000 execution receipt. A narrow warm seam opens into a violet-lit space.",
+        "purpose": "A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs.",
+        "originalAt": 36,
+        "originalDuration": 6,
+        "sourceStart": 1
+      }
+    },
+    {
+      "assetId": "director",
+      "type": "video",
+      "duration": 7,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Move from repairs to creative decisions, with real sources and editorial data.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/director/video.mp4",
+        "sha256": "a5ce73f6f41b495932e0044cbfcfa4c5ea1e2cc9d470281e1cc12bba4ed251c8",
+        "duration": 7,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/director/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 7,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "1e116164996ce7caa79627fa26da9e54a2c41c1ad466d766a9d2765e33646146",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "director",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 7,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 96.50246760699997,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/director/video.mp4",
+            "sha256": "a5ce73f6f41b495932e0044cbfcfa4c5ea1e2cc9d470281e1cc12bba4ed251c8",
+            "duration": 7,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "director",
+        "at": 33.0,
+        "duration": 6.75,
+        "vo": "What if the system could understand the story? Create the missing shot. Find the cut. Build the sound.",
+        "voAt": 0.3,
+        "shot": "Accepted takes rise from the route; story beats and timed audio assemble in spatial layers using the current film manifest. Real generated yacht footage runs within a dimensional gate.",
+        "purpose": "Move from repairs to creative decisions, with real sources and editorial data.",
+        "originalAt": 42,
+        "originalDuration": 7,
+        "sourceStart": 0.2
+      }
+    },
+    {
+      "assetId": "magic",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Reinterpret the hook as a constructed film instead of an unrelated spectacle.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/magic/video.mp4",
+        "sha256": "7d632405c500864d58694c3f26c4e8cd5408a5f6d8fe47cadde7073d71c64dbb",
+        "duration": 6,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/magic/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 6,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "137b6808de1f5cdfdbdd5ef1cb7beaabf3f3bc9605c2e2c28e47e1edb531af74",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "magic",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 6,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 89.92040988300005,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/magic/video.mp4",
+            "sha256": "7d632405c500864d58694c3f26c4e8cd5408a5f6d8fe47cadde7073d71c64dbb",
+            "duration": 6,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "magic",
+        "at": 39.75,
+        "duration": 4.0,
+        "vo": "Bring it together. I didn't know I was building this.",
+        "voAt": 0.3,
+        "shot": "Return to the opening gate from the opposite side. Camera pulls back and reveals its source take, sound and the same coherent final edit line.",
+        "purpose": "Reinterpret the hook as a constructed film instead of an unrelated spectacle.",
+        "originalAt": 49,
+        "originalDuration": 6,
+        "sourceStart": 0.4
+      }
+    },
+    {
+      "assetId": "reveal",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/reveal/video.mp4",
+        "sha256": "8920401919b6dd3ea2c5a0552daf588920acd7b83ea43be5209d0fed45189461",
+        "duration": 6,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/reveal/scene.blend"
+      },
+      "provenance": {
+        "model": "Authored AutoPromote template / Blender Cycles",
+        "modelRevision": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+        "settings": {
+          "duration": 6,
+          "fps": 24,
+          "samples": 16,
+          "width": 1280,
+          "height": 720
+        },
+        "tool": "AutoPromote Studio Blender / original founder-film template",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "5d1c1456bbb33cb2ed96b368b8b455d326d4eba095eec6714a7ae0ff694fbea8",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_REVIEW",
+          "assetId": "reveal",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "settings": {
+            "duration": 6,
+            "fps": 24,
+            "samples": 16,
+            "width": 1280,
+            "height": 720
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true,
+            "denoiser": "OPTIX"
+          },
+          "tool": "AutoPromote Studio Blender / original founder-film template",
+          "nativeScene": "scene.blend",
+          "scriptSha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+          "provenance": "Original authored spatial sequence; archived true records; retained AI-generated ocean source",
+          "seconds": 87.79135782999992,
+          "editable": [
+            "camera quaternion curves",
+            "actual logo Bezier geometry",
+            "staggered layer timing",
+            "materials",
+            "lighting",
+            "physical source carriers",
+            "film route",
+            "sound cue plan"
+          ],
+          "artifact": {
+            "path": "/film/assets/reveal/video.mp4",
+            "sha256": "8920401919b6dd3ea2c5a0552daf588920acd7b83ea43be5209d0fed45189461",
+            "duration": 6,
+            "fps": 24,
+            "container": "mp4",
+            "codec": "h264",
+            "nativeScene": "scene.blend"
+          }
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "reveal",
+        "at": 43.75,
+        "duration": 5.0,
+        "vo": "The film you just watched was created by AutoPromote.",
+        "voAt": 0.55,
+        "shot": "Graphic reconstruction of this film\u2019s canonical sequence alongside a retained real Studio image. Clear final sentence, restrained camera movement and breathing space. This is not a live UI recording of this project.",
+        "purpose": "Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering.",
+        "originalAt": 55,
+        "originalDuration": 6,
+        "sourceStart": 0.5
+      }
+    },
+    {
+      "assetId": "ident",
+      "type": "video",
+      "duration": 5,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "A dedicated editable brand sequence, not a flat logo fade.",
+      "status": "GENERATED_ACCEPTED_FOR_PRIVATE_ASSEMBLY_CREATIVE_ACCEPTANCE_PENDING",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true,
+      "artifact": {
+        "path": "assets/ident-final/video.mp4",
+        "sha256": "e30ad7c9b1800e381322f0fe6036d70bd8acb6b7f8ad845db8bc2b59561a66b8",
+        "duration": 5,
+        "container": "mp4",
+        "codec": "h264",
+        "fps": 24,
+        "hasAudio": false,
+        "native": "assets/ident-final/scene.blend"
+      },
+      "provenance": {
+        "model": "Original exact SVG Beziers / Blender Cycles OptiX",
+        "modelRevision": "Blender 4.5.9 / original-logo-v1",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "fps": 24,
+          "duration": 5,
+          "samples": 24,
+          "gpuRenderedFrames": 118,
+          "editorialHoldFrames": 2,
+          "holdReason": "Last two frames deliberately retain the clean locked identity; no missing-frame recovery or extra GPU work claimed.",
+          "template": {
+            "template": "autopromote-original-vector-studio-ident-v3",
+            "version": 3,
+            "logoGeometry": "assets/brand/autopromote-original-v1/logo-geometry.json",
+            "duration": 5,
+            "fps": 24,
+            "timing": {
+              "anticipationEnd": 0.4,
+              "symbolLayersResolve": 2.25,
+              "wordmarkLock": 3.25,
+              "cleanHold": 1.8
+            },
+            "camera": {
+              "worldUp": [
+                0,
+                1,
+                0
+              ],
+              "lens": 56,
+              "symbolTargetX": -3.8,
+              "macroDistance": 2.8,
+              "lockupDistance": 18.8,
+              "resolveSeconds": 3.2
+            },
+            "materials": {
+              "symbol": "original two-tone anodized violet",
+              "wordmark": "readable platinum",
+              "backLayers": 3,
+              "glassTransmission": 0.55,
+              "glassIOR": 1.46,
+              "bevel": 0.008
+            },
+            "lighting": {
+              "key": 1700,
+              "rim": 2100,
+              "sweep": 2300,
+              "lockupFill": 1400,
+              "darkOpening": true
+            },
+            "particles": {
+              "enabled": false
+            },
+            "soundCues": [
+              {
+                "type": "rise",
+                "at": 0.25,
+                "duration": 2.95
+              },
+              {
+                "type": "impact",
+                "at": 3.2
+              }
+            ],
+            "editableNative": "scene.blend",
+            "scalePolicy": "uniform; exact original Bezier contours; no raster tracing"
+          }
+        },
+        "tool": "AutoPromote Studio Blender",
+        "sourceBrief": "I want you to create the flagship AutoPromote welcome-page film.\n\nThis is NOT a generic SaaS promo.\nThis is NOT a feature montage.\nThis is NOT \u201clook at our AI features.\u201d\n\nI want AutoPromote to tell the story of how AutoPromote itself was built.\n\nCORE IDEA\n=========\nThe viewer should watch a cinematic development story:\n\none problem\n\u2192 more problems\n\u2192 repeated failures\n\u2192 obsession\n\u2192 breakthroughs\n\u2192 AutoPromote becoming bigger than the original idea\n\u2192 AI Director / generation / GPU capability\n\u2192 final reveal:\n\n\u201cThe film you just watched was created by AutoPromote.\u201d\n\nThat final reveal is important.\n\nThe advertisement itself must become proof of the product.\n\nSTORY DIRECTION\n===============\nThe film should feel personal, cinematic and real.\n\nStart small.\n\nAutoPromote originally came from trying to solve painful creator/media workflow problems.\n\nShow the progression:\n\n- multi-camera footage\n- syncing\n- audio drift\n- automatic camera switching\n- rendering problems\n- captions\n- social clips\n- reframing\n- creator workflow\n- VFX\n- AI Director\n- generated content\n- GPU problems\n- failed quota attempts\n- infrastructure work\n- debugging\n- finally getting serious GPU execution\n- AutoPromote beginning to create, understand and edit content itself\n\nDo NOT turn this into a boring chronological documentary.\n\nFind the emotional story inside the development journey.\n\nThere should be:\n- curiosity\n- frustration\n- escalation\n- setbacks\n- breakthrough\n- transformation\n- payoff\n\nHOOK\n====\nThe first few seconds must be strong enough that a stranger stays.\n\nDo not begin with:\n\u201cAutoPromote is an AI platform\u2026\u201d\n\nFind a cinematic hook.\n\nPossible direction:\n\n\u201cI was trying to solve one editing problem.\nI didn\u2019t know I was building this.\u201d\n\nThen immediately show something visually impressive from the finished system.\n\nSTORY PRINCIPLE\n===============\nThe viewer must always understand:\n\nWhat is happening?\nWhy does it matter?\nWhat changed?\nWhat are we waiting to see next?\n\nNo random montage.\nNo disconnected generated clips.\nNo meaningless VFX.\n\nEvery shot must advance the story.\n\nCREATIVE STANDARD\n=================\nI want \u201chow the hell did they make that?\u201d moments.\n\nUse the strongest capabilities we have where they improve the story:\n\n- generated raw footage\n- cinematic AI imagery/video\n- Blender / 3D\n- motion graphics\n- tracked typography\n- masking / occlusion\n- depth\n- compositing\n- UI integrated into real scenes\n- screen recordings\n- animated emails/screenshots/logs\n- particles / atmosphere\n- dramatic lighting\n- match transitions\n- transformations\n- sound design\n- music\n- voice-over if appropriate\n\nBut DO NOT throw effects everywhere.\n\nThe effects must reinforce the story.\n\nEXAMPLE\n=======\nIf we show GPU quota failure:\n\nDo not simply show a screenshot.\n\nTurn the screenshot into a scene:\n- camera pushes into the email\n- surrounding UI disappears into darkness\n- quota \u201c0\u201d becomes visually dominant\n- failed requests stack up\n- sound becomes tense\n- then transition into the breakthrough\n- \u201c0\u201d transforms into \u201c3000 milliGPU\u201d\n- environment changes\n- RTX PRO 6000 reveal lands with proper payoff\n\nThat is the level of storytelling I mean.\n\nAUTOPROMOTE DEVELOPMENT MATERIAL\n================================\nUse real development material where useful:\n\n- screenshots\n- logs\n- failed renders\n- UI\n- source code\n- Cloud Run\n- GPU quota journey\n- NVIDIA L40S\n- RTX PRO 6000\n- AutoPromote Studio\n- Cam Combiner\n- Viral Clip Studio\n- Director work\n- generated assets\n\nYou can generate missing raw material when needed.\n\nDo not require me to be a content creator or provide lots of footage.\n\nGenerate the supporting material yourself.\n\nFILM STRUCTURE\n==============\nBuild roughly:\n\n1. COLD OPEN\nShow an impressive finished AutoPromote moment first.\n\n2. ORIGIN\n\u201cI was trying to solve one problem.\u201d\n\n3. PROBLEM GROWS\nMulti-camera, sync, drift, editing, clips, captions, publishing.\n\n4. BUILD / FAILURE\nCode, broken renders, failed ideas, infrastructure problems.\n\n5. EXPANSION\nAutoPromote stops being just one editing tool and becomes a creative system.\n\n6. GPU / BREAKTHROUGH\nShow the fight for GPU access and the eventual breakthrough visually.\n\n7. MAGIC\nNow demonstrate what AutoPromote has become:\nunderstanding, generating, editing, transforming, rendering.\n\n8. REVEAL\nTell the viewer:\n\u201cThe film you just watched was made by AutoPromote.\u201d\n\n9. BRAND ENDING\nPremium AutoPromote ident / logo lockup.\n\nDo not use a weak fade-in logo.\nThe ending needs a proper premium brand moment.\n\nLENGTH\n======\nPrimary hero:\n45\u201375 seconds.\n\nAlso generate:\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- clean hero-page loop if useful\n\nWORKFLOW\n========\nDo NOT jump straight into final rendering.\n\nFirst create:\n\n1. story treatment\n2. narration/script\n3. scene-by-scene storyboard\n4. shot/asset requirements\n5. generated/raw assets\n6. rough assembly\n7. review\n8. creative fixes\n9. final render\n\nUse AutoPromote itself wherever possible.\n\nThe point is to prove the platform can create its own marketing.\n\nSELF-REVIEW\n===========\nAfter every rough render, review it like a viewer.\n\nAsk:\n\n- Does this make sense?\n- Is there a real story?\n- Is the hook strong?\n- Does anything feel boring?\n- Are there confusing sections?\n- Is the payoff worth waiting for?\n- Are effects helping or distracting?\n- Does the final reveal land?\n- Would someone ask how this was made?\n\nIf not:\nfix it and rerender.\n\nDo not accept \u201ctechnically successful.\u201d\n\nQUALITY BAR\n===========\nThe final result should feel closer to:\n\n- premium technology launch film\n- cinematic founder story\n- modern motion-design studio piece\n- film trailer energy\n\nNOT:\n- startup slideshow\n- random AI montage\n- Canva promo\n- feature-demo screen recording\n- generic SaaS commercial\n\nIMPORTANT\n=========\nDo not spend hours polishing one tiny effect while the whole story is weak.\n\nPrioritize:\nstory\n\u2192 pacing\n\u2192 shot choice\n\u2192 transformation\n\u2192 sound\n\u2192 effects\n\u2192 polish\n\nDELIVERABLES\n============\nReturn:\n\n- final story treatment\n- final script\n- storyboard\n- asset list\n- generated assets\n- rough cut\n- final hero film\n- 20\u201330 sec cutdown\n- 8\u201312 sec teaser\n- welcome-page recommendation\n- what AutoPromote generated itself\n- what AutoPromote edited itself\n- remaining weaknesses\n\nFINAL SUCCESS CONDITION\n=======================\nThe film must make AutoPromote feel like something alive that grew out of real problems.\n\nThe strongest final reaction should be:\n\n\u201cWait \u2014 AutoPromote made THIS?\u201d\n\nStart with the story treatment and storyboard first.\nDo not render until the story is coherent.",
+        "sourceBriefHash": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+        "reviewHash": "bd7da4ea6e6b55a1dd78a5760849e264873b063676aa13a16a8a79d9a401e7ef",
+        "sourceLineage": {
+          "sourceSha256": "1aa5a79d7e06a1aba9010a1b52a9ec84241c2e5652420fa1f79a098d55d1b16a"
+        },
+        "generationReceipt": {
+          "status": "GENERATED_PENDING_FOUNDER_REVIEW",
+          "assetId": "ident",
+          "sourceBrief": {
+            "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+            "artifact": "source-brief.txt"
+          },
+          "model": "Original exact SVG Beziers / Blender Cycles OptiX",
+          "modelRevision": "Blender 4.5.9 / original-logo-v1",
+          "tool": "AutoPromote Studio Blender",
+          "settings": {
+            "width": 1920,
+            "height": 1080,
+            "fps": 24,
+            "duration": 5,
+            "samples": 24,
+            "gpuRenderedFrames": 118,
+            "editorialHoldFrames": 2,
+            "holdReason": "Last two frames deliberately retain the clean locked identity; no missing-frame recovery or extra GPU work claimed.",
+            "template": {
+              "template": "autopromote-original-vector-studio-ident-v3",
+              "version": 3,
+              "logoGeometry": "assets/brand/autopromote-original-v1/logo-geometry.json",
+              "duration": 5,
+              "fps": 24,
+              "timing": {
+                "anticipationEnd": 0.4,
+                "symbolLayersResolve": 2.25,
+                "wordmarkLock": 3.25,
+                "cleanHold": 1.8
+              },
+              "camera": {
+                "worldUp": [
+                  0,
+                  1,
+                  0
+                ],
+                "lens": 56,
+                "symbolTargetX": -3.8,
+                "macroDistance": 2.8,
+                "lockupDistance": 18.8,
+                "resolveSeconds": 3.2
+              },
+              "materials": {
+                "symbol": "original two-tone anodized violet",
+                "wordmark": "readable platinum",
+                "backLayers": 3,
+                "glassTransmission": 0.55,
+                "glassIOR": 1.46,
+                "bevel": 0.008
+              },
+              "lighting": {
+                "key": 1700,
+                "rim": 2100,
+                "sweep": 2300,
+                "lockupFill": 1400,
+                "darkOpening": true
+              },
+              "particles": {
+                "enabled": false
+              },
+              "soundCues": [
+                {
+                  "type": "rise",
+                  "at": 0.25,
+                  "duration": 2.95
+                },
+                {
+                  "type": "impact",
+                  "at": 3.2
+                }
+              ],
+              "editableNative": "scene.blend",
+              "scalePolicy": "uniform; exact original Bezier contours; no raster tracing"
+            }
+          },
+          "device": {
+            "backend": "OPTIX",
+            "devices": [
+              "NVIDIA L40S"
+            ],
+            "gpu_verified": true
+          },
+          "nativeScene": "scene.blend",
+          "nativeSceneSha256": "d6cc8394a7768541ee04c4e31428fa1b39caa474176305c2f034668191f7d7c4",
+          "scriptSha256": "ad57b0a5fca01ee2dbe00a554b69512939c01996900348a0c1b47b8325046384",
+          "artifact": {
+            "path": "assets/ident-final/video.mp4",
+            "sha256": "e30ad7c9b1800e381322f0fe6036d70bd8acb6b7f8ad845db8bc2b59561a66b8",
+            "duration": 5,
+            "fps": 24,
+            "codec": "h264",
+            "container": "mp4"
+          },
+          "generationWindow": "06:50:53\u201307:50:53 UTC; post-cutoff resume refused before rendering; last 2 frames are a deliberate CPU hold."
+        },
+        "origin": "authored_3d_with_retained_generated_and_archival_sources",
+        "directionHash": "f0a07b1a77a484a9ea4e5ae08dfa905801595ca99faed812d91564671943176a"
+      },
+      "finalHeroUse": {
+        "id": "ident",
+        "at": 48.75,
+        "duration": 5.0,
+        "vo": null,
+        "shot": "Dark anticipation; original vector A/P components emerge in staggered extruded layers, grazing light and reflected material. Controlled camera resolves; outline-derived wordmark locks at impact and holds for 1.5 seconds.",
+        "purpose": "A dedicated editable brand sequence, not a flat logo fade.",
+        "originalAt": 61,
+        "originalDuration": 5,
+        "sourceStart": 0
+      }
+    },
+    {
+      "assetId": "narration",
+      "type": "audio",
+      "generation": "Kokoro-82M standard af_heart on CPU",
+      "status": "GENERATED_PRIVATE_REVIEW",
+      "libraryAssetIds": [
+        "vo-cold-open",
+        "vo-origin",
+        "vo-cascade",
+        "vo-problems",
+        "vo-failure",
+        "vo-quota",
+        "vo-breakthrough",
+        "vo-director",
+        "vo-magic",
+        "vo-reveal"
+      ],
+      "provenanceRef": "accepted-asset-library.json"
+    },
+    {
+      "assetId": "score-and-cues",
+      "type": "audio",
+      "generation": "original editable synthesis with narrative timing; no generic loop",
+      "status": "GENERATED_PRIVATE_REVIEW",
+      "libraryAssetIds": [
+        "score",
+        "cues",
+        "score-cutdown",
+        "cues-cutdown",
+        "score-teaser",
+        "cues-teaser",
+        "score-final",
+        "cues-final"
+      ],
+      "provenanceRef": "accepted-asset-library.json"
+    }
+  ],
+  "retainedSources": [
+    "real-voyage-v6.mp4",
+    "podcast-host.webp",
+    "podcast-guest.webp",
+    "RTX quota before/after and gpu-receipt.json",
+    "archived L4 quota denial",
+    "original-v1 logo-geometry.json"
+  ],
+  "acceptance": [
+    "coherent visual continuity",
+    "readable facts",
+    "no malformed original logo",
+    "source evidence hashes",
+    "no narration overlaps",
+    "sound not silent or clipped",
+    "no private tokens or personal data in textures"
+  ],
+  "status": "PRIVATE_REVIEW_ASSETS_COMPLETE_PUBLIC_CREATIVE_GATE_FAILED",
+  "initialRequirements": "asset-requirements-initial.json",
+  "acceptedAssetLibrary": "accepted-asset-library.json",
+  "limitations": "final-self-review.md"
+}

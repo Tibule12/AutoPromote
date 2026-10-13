@@ -1,0 +1,27 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "artifact": {
+    "path": "reports/content-factory-20261007/audio/hero-v3/paper.wav",
+    "sha256": "070e984e80050f0ef0a77b4a7e768d4913890df56abb809d42ae1d24db321c53",
+    "duration": 24.0,
+    "fps": 24,
+    "container": "wav",
+    "codec": "pcm_s16le",
+    "sampleRate": 48000,
+    "channels": 2,
+    "peak": 0.0827327404120383,
+    "rms": 0.0017919828244890661
+  },
+  "model": "original-procedural-composition",
+  "modelRevision": "paper-voyage-score-v1",
+  "tool": "AutoPromote Content Factory original audio",
+  "settings": {
+    "sampleRate": 48000,
+    "tempo": 96,
+    "duration": 24.0,
+    "payoffAt": 8.2,
+    "motif": "minor tension to warm resolution",
+    "stereo": true
+  },
+  "seed": 2026100721
+}

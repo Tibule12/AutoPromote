@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-10-12T21:53:55.512Z",
+  "url": "https://thulani-api-jddzncgt2a-uc.a.run.app",
+  "health": [
+    {
+      "route": "/api/health",
+      "error": "TimeoutError",
+      "message": "The operation was aborted due to timeout"
+    },
+    {
+      "route": "/ready",
+      "httpStatus": 200,
+      "ok": true
+    }
+  ],
+  "noJobsSubmitted": true
+}

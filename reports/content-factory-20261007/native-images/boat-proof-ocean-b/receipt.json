@@ -1,0 +1,31 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "Correct the founder-rejected crane-shaped object. Establish a clearly recognisable traditional folded paper boat before any further motion production. Its fragile, ordinary material will carry the impossible ocean story.",
+  "prompt": "Photographic close view of ONE traditional handmade origami paper boat, the instantly recognizable child folded-paper boat shape: a long broad open faceted hull with pointed bow and pointed stern, raised folded triangular walls along both sides, a LOW central triangular folded peak. Matte ivory paper, clean crisp folds, visible paper fibres. It is a BOAT with an open hollow hull, not an origami crane or bird. The entire boat is visible with comfortable space around it, no cropped bow or stern. The boat floats naturally on deep blue ocean ripples. Low camera at hull height, dramatic overcast sky, a far warm amber break in the clouds, soft water reflections, slight spray, cinematic 35mm lens, natural physical scale, no desk, no other boats, no sun glare, no lettering.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 2026100783,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16"
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "native_generated_image",
+  "artifact": {
+    "path": "/work/native-images/boat-proof-ocean-b/video.mp4",
+    "sha256": "1a8e835b4d15de60cf423e3536d775829e1e4badd2631cfb6b2bb0a36f536dbf",
+    "duration": 3.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/native-images/boat-proof-ocean-b/image.png",
+      "sha256": "4269a1de4fb4fe94681309801fc7722edad42417c8bc245ffbfebe790a570194"
+    }
+  ],
+  "seconds": 5.2206228619998
+}

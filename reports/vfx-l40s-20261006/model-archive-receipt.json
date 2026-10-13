@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "copied_files": 208,
+  "bytes": 69320267095,
+  "source": "/tmp/autopromote-studio-l40s-20261006/models",
+  "retained_archive": "/data/autopromote-l40s-20261006/models",
+  "verification": "Successful file copies and matching relative files/sizes, original pinned model receipts preserved; not a second full model hash audit"
+}

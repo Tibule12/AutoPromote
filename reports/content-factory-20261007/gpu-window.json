@@ -1,0 +1,24 @@
+{
+  "instance": "autopromote-l40s-staging",
+  "authorized_hours": 3,
+  "started_at": "2026-10-07T05:50:59.644909+00:00",
+  "deadline_epoch": 1791381600.0,
+  "deadline_utc": "2026-10-07T14:00:00+00:00",
+  "deadline_sast": "2026-10-07T16:00:00+02:00",
+  "authorization": "User selected 3 hours for the fresh NVIDIA Content Factory session.",
+  "watchdog_pid": 137413,
+  "stop_cancelled_by_user_at_epoch": 1791363002.8313282,
+  "authorization_update": "User: no i give two more hours. Extend the previous 14:00 SAST cutoff by two hours to 16:00 SAST.",
+  "extension_cutoff_pending": false,
+  "original_deadline_epoch": 1791363059.6449072,
+  "original_deadline_utc": "2026-10-07T08:50:59.644907+00:00",
+  "deadline_history": [
+    {
+      "deadline_epoch": 1791374400.0,
+      "deadline_utc": "2026-10-07T12:00:00+00:00",
+      "deadline_sast": "2026-10-07T14:00:00+02:00",
+      "replaced_by_user_at": "2026-10-07T11:51:12.997859+00:00"
+    }
+  ],
+  "previous_watchdog_pid": 98507
+}

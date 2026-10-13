@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-08T06:28:55.134Z",
+  "gpuUsed": true,
+  "visualReview": {
+    "passed": true,
+    "notes": "Six frames: intended speaker retained, text occludes behind torso, callout follows movement; coarse segmentation edges remain."
+  },
+  "listeningReview": {
+    "passed": true,
+    "source": "User previously accepted byte-identical 3-second preview"
+  },
+  "sha256": "fa90d4e44ab9cffce3c5dd24cc42c2abf5ad2c8b4935435e3875d5edd7496ba0"
+}

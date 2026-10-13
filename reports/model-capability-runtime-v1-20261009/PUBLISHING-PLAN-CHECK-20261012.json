@@ -1,0 +1,104 @@
+{
+  "at": "2026-10-12T21:03:12.028Z",
+  "results": [
+    {
+      "platforms": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "facebook",
+        "linkedin",
+        "reddit"
+      ],
+      "httpStatus": 200,
+      "readiness": {
+        "allowed": false,
+        "tierId": "premium",
+        "tierName": "Creator",
+        "upload": {
+          "isPaid": true,
+          "limit": 20,
+          "used": 0,
+          "remaining": 20,
+          "monthKey": "2026-10"
+        },
+        "platformLimit": 5,
+        "promotionQuota": {
+          "enforced": true,
+          "limit": 150,
+          "used": 0,
+          "remaining": 150
+        },
+        "requiredDistributionTasks": 6,
+        "publishMode": "queued_new_upload",
+        "code": "PLATFORM_LIMIT_EXCEEDED",
+        "message": "Your Creator plan is limited to 5 platform(s) per post.",
+        "context": {
+          "tier": "premium",
+          "limit": 5,
+          "attempted": 6,
+          "upgrade_required": true,
+          "suggested_tier": "PRO"
+        }
+      }
+    },
+    {
+      "platforms": [
+        "tiktok",
+        "youtube",
+        "instagram",
+        "facebook",
+        "linkedin"
+      ],
+      "httpStatus": 200,
+      "readiness": {
+        "allowed": true,
+        "tierId": "premium",
+        "tierName": "Creator",
+        "upload": {
+          "isPaid": true,
+          "limit": 20,
+          "used": 0,
+          "remaining": 20,
+          "monthKey": "2026-10"
+        },
+        "platformLimit": 5,
+        "promotionQuota": {
+          "enforced": true,
+          "limit": 150,
+          "used": 0,
+          "remaining": 150
+        },
+        "requiredDistributionTasks": 5,
+        "publishMode": "queued_new_upload"
+      }
+    },
+    {
+      "platforms": [
+        "reddit"
+      ],
+      "httpStatus": 200,
+      "readiness": {
+        "allowed": true,
+        "tierId": "premium",
+        "tierName": "Creator",
+        "upload": {
+          "isPaid": true,
+          "limit": 20,
+          "used": 0,
+          "remaining": 20,
+          "monthKey": "2026-10"
+        },
+        "platformLimit": 5,
+        "promotionQuota": {
+          "enforced": true,
+          "limit": 150,
+          "used": 0,
+          "remaining": 150
+        },
+        "requiredDistributionTasks": 1,
+        "publishMode": "queued_new_upload"
+      }
+    }
+  ]
+}

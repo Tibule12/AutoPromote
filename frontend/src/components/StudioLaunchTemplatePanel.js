@@ -39,7 +39,8 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('Sign in before applying a template.');
-      const mediaType = slot === 'logo' ? 'image' : slot === 'music' ? 'audio' : 'video';
+      const mediaType = template.inputSlots.find(input => input.id === slot)?.type;
+      if (!['image', 'audio', 'video'].includes(mediaType)) throw new Error('Unsupported template media input.');
       const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
       const contentHash = [...new Uint8Array(digest)].map(n => n.toString(16).padStart(2, '0')).join('');
       let duration = 0;
@@ -65,8 +66,11 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('Sign in before applying a template.');
+      const supplied = { ...copy, ...slots };
+      const bindings = Object.fromEntries(template.inputSlots.filter(input => supplied[input.id] !== undefined)
+        .map(input => [input.id, supplied[input.id]]));
       const options = { template, templateRef: await studioTemplateReference(template),
-        ownerUid: user.uid, projectId, bindings: { ...copy, ...slots }, actor, aspect };
+        ownerUid: user.uid, projectId, bindings, actor, aspect };
       if (actor === 'director') {
         setProposal(await proposeStudioDirectorTemplate({ ...options, intent: template.categoryIds[0] }));
         setStatus('Director selected the launch edit from your brief. Review before applying.');
@@ -100,13 +104,15 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
         : <textarea aria-label={({ headline: 'Launch headline', featureOne: 'Feature one', featureTwo: 'Feature two',
           callToAction: 'Launch CTA' })[key]} value={value} rows={2} onChange={e => { setProposal(null); setCopy(c => ({ ...c, [key]: e.target.value })); }} />}
     </label>)}
-    {['hookFootage', 'productFootage', 'detailFootage', 'logo', 'music'].map(slot => <label key={slot}
+    {template.inputSlots.filter(input => ['image', 'audio', 'video'].includes(input.type)).map(input => {
+      const slot = input.id;
+      return <label key={slot}
       style={{ display: 'block', marginTop: 8 }}>{slot}
       <select aria-label={`Select ${slot}`} value={slots[slot]?.id || ''}
         onChange={e => { setProposal(null); const asset = media.find(a => a.id === e.target.value);
           if (asset) setSlots(c => ({ ...c, [slot]: { ...asset } })); }}><option value="">Choose saved media</option>
         {media.filter(a => a.storagePath && a.contentHash &&
-          (a.mediaType || a.type) === (slot === 'logo' ? 'image' : slot === 'music' ? 'audio' : 'video'))
+          (a.mediaType || a.type) === input.type)
           .map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select>
       {slot.endsWith('Footage') && slots[slot] && <label>Source in-point (seconds)
         <input type="number" min="0" step="0.125" aria-label={`${slot} in-point`}
@@ -115,10 +121,11 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
             setSlots(current => ({ ...current, [slot]: { ...current[slot], trimStart: value } }));
           }} /></label>}
       <input aria-label={`Upload ${slot}`} type="file" disabled={busy}
-        accept={slot === 'logo' ? 'image/png,image/webp' : slot === 'music' ? 'audio/*' : 'video/*'}
+        accept={input.type === 'image' ? 'image/png,image/webp' : input.type === 'audio' ? 'audio/*' : 'video/*'}
         onChange={e => bindFile(slot, e.target.files[0])} />
       {slots[slot] && <small>{slots[slot].name}</small>}
-    </label>)}
+    </label>;
+    })}
     <button type="button" disabled={busy} onClick={() => apply('manual')}>Apply launch template</button>
     <button type="button" disabled={busy} onClick={() => apply('director')}>Director: select launch edit</button>
     {proposal && <div role="region" aria-label="Director launch selection">

@@ -1,0 +1,197 @@
+{
+  "identity": "a194a2f17719365fd394cd3b61af60f26d340ff110725100ab9c759d910545b4",
+  "actions": [
+    {
+      "signature": "c9a906e126349f3f4180d51fc3e8cc76e70dd398250233476063593bbf81dfd7",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Show media"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Hide media"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:47:02.228Z",
+      "reason": "Open the observed Show media control",
+      "planner": null,
+      "afterState": "9885264073e8b10a7827a5e0f185ba5f7765c2fd6b80adda8ac26f9646b05a0d"
+    },
+    {
+      "signature": "10975673f6eb88f4bd51c8773e42d6d06c48fea8a2746e80e2ffe52d1fa4cb22",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Paper to real · generated source assembly"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "value": "01d2b4721fdee2af6b8e7ce2a030e115cadb3e128838cbf20349823ecd238aa1"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:47:34.361Z",
+      "reason": "Open the observed Paper to real · generated source assembly control",
+      "planner": null,
+      "afterState": "f6090ef3f33081e6cc64ce381a0e26332cd5e91277ec06797e22cc81e6757978"
+    },
+    {
+      "signature": "ebcd7dcd2c281c37d9741df5f749d6c9b9897189971d86ed24ee52664dd585f6",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Open saved project (2)"
+      },
+      "expect": [
+        {
+          "type": "state_changed",
+          "value": "cd5e47523269e9afdcae0f641b35c0020b1b4a9c1200fa020145743b03487e45"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:48:04.200Z",
+      "reason": "Open the observed Open saved project control",
+      "planner": null,
+      "afterState": "4c230fa1d78b38c4bd02b69ab92234f4fa047b0b38b13d2737d0605e22a1e3ed"
+    },
+    {
+      "signature": "625d6a4826d8ba84fbae3f401150b935b5575b8c1c5fcc59eaa4b5123c2c5c97",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Paper to real · generated source assembly 10/7/2026, 12:46:39 PM"
+      },
+      "expect": [
+        {
+          "type": "text_visible",
+          "value": "Real yacht · generated moving footage"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:48:32.993Z",
+      "reason": "Open the original source assembly from the observed project library",
+      "planner": null,
+      "afterState": "ff20570e903679ebdf4229d062873acc3a2291277c2268102149fad830f21ca9"
+    },
+    {
+      "signature": "f78246a25fbde10e6f9ffe8ab5b77c8ba7581e83571b7b38107dd74e35f8ecae",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Hide media"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Show media"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:48:57.738Z",
+      "reason": "Open the observed Hide media control",
+      "planner": null,
+      "afterState": "716f7bd36deddffd6ef630fca7829a7bd5db0868a64675eb873b406aa992cc61"
+    },
+    {
+      "signature": "25e492bc217487835ab913c5d16d245e5eb184443eb41f43fbf9db001f809e61",
+      "operationKey": null,
+      "type": "click",
+      "target": {
+        "role": "button",
+        "name": "Pause edited preview"
+      },
+      "expect": [
+        {
+          "type": "visible",
+          "role": "button",
+          "name": "Play edited preview"
+        }
+      ],
+      "status": "verified",
+      "at": "2026-10-07T10:49:34.030Z",
+      "reason": "Open the observed Pause edited preview control",
+      "planner": null,
+      "afterState": "c5190ba7f4ddac711977678be6e913426affa0f3f814184267737669959c408a"
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-1",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:46:53.118Z"
+    },
+    {
+      "id": "observation-2",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:47:19.533Z"
+    },
+    {
+      "id": "observation-3",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:47:27.532Z"
+    },
+    {
+      "id": "observation-4",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:47:49.183Z"
+    },
+    {
+      "id": "observation-5",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:47:57.509Z"
+    },
+    {
+      "id": "observation-6",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:48:18.962Z"
+    },
+    {
+      "id": "observation-7",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:48:25.235Z"
+    },
+    {
+      "id": "observation-8",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:48:50.599Z"
+    },
+    {
+      "id": "observation-9",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:49:12.072Z"
+    },
+    {
+      "id": "observation-10",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:49:25.757Z"
+    },
+    {
+      "id": "observation-11",
+      "url": "http://127.0.0.1:5009/?fixture=factory",
+      "pageId": "page-1",
+      "at": "2026-10-07T10:49:39.703Z"
+    }
+  ],
+  "status": "running"
+}

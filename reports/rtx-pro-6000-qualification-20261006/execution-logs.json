@@ -1,0 +1,335 @@
+{
+  "checkedAt": "2026-10-06T16:07:41.667669+00:00",
+  "command": [
+    "gcloud",
+    "logging",
+    "read",
+    "resource.type=\"cloud_run_job\" AND resource.labels.job_name=\"viral-studio-rtx-qualification\" AND labels.\"run.googleapis.com/execution_name\"=\"viral-studio-rtx-qualification-n6wjc\"",
+    "--project=autopromote-cc6d3",
+    "--limit=100",
+    "--order=asc",
+    "--format=json"
+  ],
+  "exitCode": 0,
+  "stderr": "",
+  "data": [
+    {
+      "insertId": "6ac51c7f00046ead8554da50",
+      "jsonPayload": {
+        "elapsedSeconds": 1.0906,
+        "event": "qualification_step",
+        "exitCode": 0,
+        "tool": "/usr/bin/nvidia-smi"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:23.308009660Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:23.290477Z"
+    },
+    {
+      "insertId": "6ac51c8000095415cbbe48f3",
+      "jsonPayload": {
+        "elapsedSeconds": 1.3212,
+        "event": "qualification_step",
+        "exitCode": 0,
+        "tool": "/usr/bin/nvidia-smi"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:24.634312255Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:24.611349Z"
+    },
+    {
+      "insertId": "6ac51c8500050072db7ed5b4",
+      "jsonPayload": {
+        "elapsedSeconds": 3.4782,
+        "event": "qualification_step",
+        "exitCode": 0,
+        "tool": "ffmpeg"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:29.629161498Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:29.327794Z"
+    },
+    {
+      "insertId": "6ac51c85000748e13ed5e481",
+      "jsonPayload": {
+        "elapsedSeconds": 0.1496,
+        "event": "qualification_step",
+        "exitCode": 0,
+        "tool": "ffmpeg"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:29.629161498Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:29.477409Z"
+    },
+    {
+      "insertId": "6ac51c850007e7aca627a5fc",
+      "jsonPayload": {
+        "elapsedSeconds": 0.0406,
+        "event": "qualification_step",
+        "exitCode": 0,
+        "tool": "ffmpeg"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:29.629161498Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:29.518060Z"
+    },
+    {
+      "insertId": "6ac51c85000884280aa006b0",
+      "jsonPayload": {
+        "elapsedSeconds": 0.0401,
+        "event": "qualification_step",
+        "exitCode": 0,
+        "tool": "ffmpeg"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:29.629161498Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:29.558120Z"
+    },
+    {
+      "insertId": "6ac51c8600054da58e8757aa",
+      "jsonPayload": {
+        "elapsedSeconds": 0.643,
+        "event": "qualification_step",
+        "exitCode": 0,
+        "tool": "ffmpeg"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:30.628455690Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:30.347557Z"
+    },
+    {
+      "insertId": "6ac51c8600063278a92f90cc",
+      "jsonPayload": {
+        "elapsedSeconds": 0.0587,
+        "event": "qualification_step",
+        "exitCode": 0,
+        "tool": "ffprobe"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:30.628455690Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:30.406136Z"
+    },
+    {
+      "insertId": "6ac51c86000d47c88cded4b9",
+      "jsonPayload": {
+        "elapsedSeconds": 0.4641,
+        "event": "qualification_step",
+        "exitCode": 0,
+        "tool": "ffmpeg"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:30.960105714Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:30.870344Z"
+    },
+    {
+      "insertId": "6ac51c870001d3d9b940613e",
+      "jsonPayload": {
+        "elapsedSeconds": 8.7667,
+        "error": null,
+        "event": "qualification_complete",
+        "execution": "viral-studio-rtx-qualification-n6wjc",
+        "receipt": "gs://autopromote-cc6d3-viral-studio-3d/temp_studio_3d/qualification/rtx-20261006-160331/receipt.json",
+        "status": "PASS"
+      },
+      "labels": {
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fstdout",
+      "receiveTimestamp": "2026-10-06T16:06:31.293205792Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "timestamp": "2026-10-06T16:06:31.119769Z"
+    },
+    {
+      "insertId": "6ac51c870005b2055599dda3",
+      "labels": {
+        "container_name": "worker",
+        "instanceId": "0010dd8607f69a649d3ddc85c7f7a3f9e34c2006a46edae2564584213699c4802b094a5be837dd10a482ab60838c99d9adf1bc8635dab304142caf7d8549e2bcdf9e30fa8ade766d71499f51b1ee647c3a3b1b2b67f6a5bf11b23201dc00",
+        "product": "autopromote",
+        "production-traffic": "false",
+        "purpose": "gpu-qualification",
+        "run.googleapis.com/execution_name": "viral-studio-rtx-qualification-n6wjc",
+        "run.googleapis.com/task_attempt": "0",
+        "run.googleapis.com/task_index": "0"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+      "receiveTimestamp": "2026-10-06T16:06:31.383203331Z",
+      "resource": {
+        "labels": {
+          "job_name": "viral-studio-rtx-qualification",
+          "location": "us-central1",
+          "project_id": "autopromote-cc6d3"
+        },
+        "type": "cloud_run_job"
+      },
+      "severity": "INFO",
+      "textPayload": "Container called exit(0).",
+      "timestamp": "2026-10-06T16:06:31.373149Z"
+    }
+  ]
+}

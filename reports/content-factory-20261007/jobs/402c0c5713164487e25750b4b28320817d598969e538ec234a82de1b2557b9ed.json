@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "jobId": "402c0c5713164487e25750b4b28320817d598969e538ec234a82de1b2557b9ed",
+  "ownerUid": "founder-local",
+  "fingerprint": "403dde58550171ce9de988adf2920183e9d6273762ccf29d745f7d8203ac2360",
+  "requestId": "paper-world-founder-autonomous-v1",
+  "brief": {
+    "brief": "Create one 18–21 second AutoPromote welcome film about an ordinary idea finding a world, surviving a threat and becoming a finished story. I provide no recorded footage. Use the private generated raw library, preserving generation provenance. Open with paper-awakens at source 2.5 for 2.5 seconds. Use ocean-environment ONLY source 0.4 duration 1.7 seconds; later footage is overexposed. Use storm-action for visibly breaking wave action, light-return source 2 for 3 seconds for the SAME boat in golden calm, then world-on-desk to reveal the miniature origin. End with actual Studio UI and identity. Withhold AutoPromote until the payoff. Use the original score and the available brief-no-footage narration as a voiceover cue near the Studio reveal, fitting its complete duration; do not cut off speech. At most eight asset requirements. Every reused asset must keep an exact libraryRef, match its type and have current story-specific acceptance criteria. The absence of a boat in the wave cutaway is intentional; do not claim it is physically inside that shot. Do not imply the private factory is public. Do not pad with random effects. Return only one 16:9 welcome_hero output.",
+    "targets": [
+      "welcome_hero",
+      "short_promo",
+      "story_promo"
+    ],
+    "maxAssetAttempts": 2
+  },
+  "status": "cancelled",
+  "stage": "stopped",
+  "attempts": 3,
+  "createdAt": "2026-10-07T07:55:59.840Z",
+  "updatedAt": "2026-10-07T08:23:24.585Z",
+  "lease": null,
+  "cancelled": true,
+  "direction": null,
+  "assets": [],
+  "outputs": [],
+  "events": [
+    {
+      "at": "2026-10-07T07:58:29.126Z",
+      "stage": "stopped",
+      "detail": "failed"
+    },
+    {
+      "at": "2026-10-07T08:10:30.305Z",
+      "stage": "stopped",
+      "detail": "failed"
+    },
+    {
+      "at": "2026-10-07T08:23:38.027Z",
+      "stage": "stopped",
+      "detail": "cancelled"
+    }
+  ],
+  "failure": {
+    "code": "ABORT_ERR",
+    "message": "The operation was aborted"
+  },
+  "private": true
+}

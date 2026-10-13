@@ -1,0 +1,97 @@
+{
+  "stack": {
+    "x": 550.125,
+    "y": 484.78125,
+    "width": 301.75,
+    "height": 19.828125
+  },
+  "pill": {
+    "x": 550.125,
+    "y": 484.78125,
+    "width": 301.75,
+    "height": 19.828125
+  },
+  "fontSize": "14.5778px",
+  "fontFamily": "\"DejaVu Sans\", sans-serif",
+  "fontWeight": "400",
+  "lineHeight": "16.9102px",
+  "letterSpacing": "normal",
+  "padding": "0px",
+  "text": "☎Reviewed timeline words verified",
+  "words": [
+    {
+      "text": "Reviewed",
+      "fontSize": "14.5778px",
+      "fontFamily": "\"DejaVu Sans\", sans-serif",
+      "letterSpacing": "normal",
+      "box": {
+        "x": 591.484375,
+        "y": 485.78125,
+        "width": 70.171875,
+        "height": 17
+      },
+      "transform": "none"
+    },
+    {
+      "text": "timeline",
+      "fontSize": "14.5778px",
+      "fontFamily": "\"DejaVu Sans\", sans-serif",
+      "letterSpacing": "normal",
+      "box": {
+        "x": 680.413330078125,
+        "y": 508.9768981933594,
+        "width": 30.2178955078125,
+        "height": 11.000274658203125
+      },
+      "transform": "matrix(0.498097, -0.0435779, 0.0435779, 0.498097, 0, 15)"
+    },
+    {
+      "text": "words",
+      "fontSize": "14.5778px",
+      "fontFamily": "\"DejaVu Sans\", sans-serif",
+      "letterSpacing": "normal",
+      "box": {
+        "x": 730.125,
+        "y": 485.78125,
+        "width": 43.390625,
+        "height": 17
+      },
+      "transform": "none"
+    },
+    {
+      "text": "verified",
+      "fontSize": "14.5778px",
+      "fontFamily": "\"DejaVu Sans\", sans-serif",
+      "letterSpacing": "normal",
+      "box": {
+        "x": 778.15625,
+        "y": 485.78125,
+        "width": 55,
+        "height": 17
+      },
+      "transform": "none"
+    }
+  ],
+  "documentFonts": [
+    {
+      "family": "StudioMotion",
+      "status": "unloaded"
+    },
+    {
+      "family": "Studio Inter",
+      "status": "unloaded"
+    },
+    {
+      "family": "Studio Inter",
+      "status": "unloaded"
+    },
+    {
+      "family": "Studio Inter",
+      "status": "unloaded"
+    },
+    {
+      "family": "Studio Inter",
+      "status": "loaded"
+    }
+  ]
+}

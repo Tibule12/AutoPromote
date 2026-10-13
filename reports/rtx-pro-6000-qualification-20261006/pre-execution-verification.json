@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-06T16:03:47.990611+00:00",
+  "checks": {
+    "oneTask": true,
+    "parallelismOne": true,
+    "zeroRetries": true,
+    "timeout300": true,
+    "gpuOne": true,
+    "cpu20": true,
+    "memory80Gi": true,
+    "acceleratorExact": true,
+    "zonalRedundancyOff": true,
+    "gen2": true,
+    "existingSA": true,
+    "samePinnedImage": true,
+    "exactQualificationSource": true,
+    "noExecutionsYet": true,
+    "noPublicJobBinding": true
+  },
+  "allPassed": true,
+  "jobScaling": "Jobs have no warm minimum; one manually invoked execution only. Task/parallelism bounds are per execution, not a global cross-execution lock."
+}

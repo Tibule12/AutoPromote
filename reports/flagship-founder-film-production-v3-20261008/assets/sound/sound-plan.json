@@ -1,0 +1,795 @@
+{
+  "tool": "original deterministic audio synthesis / CPU",
+  "model": "authored synthesis, no inferred music",
+  "sourceBrief": "source-brief.txt",
+  "seed": 20261008,
+  "storyFunction": "unresolved conversation motif \u2192 obstruction silence \u2192 harmonic release \u2192 brand lockup impact",
+  "notes": [
+    {
+      "at": 0,
+      "midi": 60,
+      "duration": 2.8,
+      "amplitude": 0.075,
+      "instrument": "keys",
+      "pan": -0.12
+    },
+    {
+      "at": 1.5,
+      "midi": 67,
+      "duration": 2.8,
+      "amplitude": 0.075,
+      "instrument": "keys",
+      "pan": -0.12
+    },
+    {
+      "at": 3,
+      "midi": 63,
+      "duration": 2.8,
+      "amplitude": 0.075,
+      "instrument": "keys",
+      "pan": -0.12
+    },
+    {
+      "at": 4.5,
+      "midi": 62,
+      "duration": 2.8,
+      "amplitude": 0.075,
+      "instrument": "keys",
+      "pan": -0.12
+    },
+    {
+      "at": 6,
+      "midi": 60,
+      "duration": 2.8,
+      "amplitude": 0.075,
+      "instrument": "keys",
+      "pan": -0.12
+    },
+    {
+      "at": 7.5,
+      "midi": 67,
+      "duration": 2.8,
+      "amplitude": 0.075,
+      "instrument": "keys",
+      "pan": -0.12
+    },
+    {
+      "at": 9,
+      "midi": 63,
+      "duration": 2.8,
+      "amplitude": 0.075,
+      "instrument": "keys",
+      "pan": -0.12
+    },
+    {
+      "at": 8.25,
+      "midi": 48,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": -0.5
+    },
+    {
+      "at": 8.25,
+      "midi": 55,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": -0.25
+    },
+    {
+      "at": 8.25,
+      "midi": 60,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": 0.0
+    },
+    {
+      "at": 8.25,
+      "midi": 63,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": 0.25
+    },
+    {
+      "at": 13.75,
+      "midi": 46,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": -0.5
+    },
+    {
+      "at": 13.75,
+      "midi": 53,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": -0.25
+    },
+    {
+      "at": 13.75,
+      "midi": 58,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": 0.0
+    },
+    {
+      "at": 13.75,
+      "midi": 62,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": 0.25
+    },
+    {
+      "at": 19.5,
+      "midi": 43,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": -0.5
+    },
+    {
+      "at": 19.5,
+      "midi": 50,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": -0.25
+    },
+    {
+      "at": 19.5,
+      "midi": 55,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": 0.0
+    },
+    {
+      "at": 19.5,
+      "midi": 58,
+      "duration": 5.4,
+      "amplitude": 0.04,
+      "instrument": "bowed",
+      "pan": 0.25
+    },
+    {
+      "at": 28.75,
+      "midi": 48,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.5
+    },
+    {
+      "at": 28.75,
+      "midi": 55,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.25
+    },
+    {
+      "at": 28.75,
+      "midi": 60,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.0
+    },
+    {
+      "at": 28.75,
+      "midi": 64,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.25
+    },
+    {
+      "at": 33,
+      "midi": 53,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.5
+    },
+    {
+      "at": 33,
+      "midi": 60,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.25
+    },
+    {
+      "at": 33,
+      "midi": 65,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.0
+    },
+    {
+      "at": 33,
+      "midi": 69,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.25
+    },
+    {
+      "at": 39.75,
+      "midi": 55,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.5
+    },
+    {
+      "at": 39.75,
+      "midi": 62,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.25
+    },
+    {
+      "at": 39.75,
+      "midi": 67,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.0
+    },
+    {
+      "at": 39.75,
+      "midi": 71,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.25
+    },
+    {
+      "at": 46.75,
+      "midi": 48,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.5
+    },
+    {
+      "at": 46.75,
+      "midi": 55,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.25
+    },
+    {
+      "at": 46.75,
+      "midi": 60,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.0
+    },
+    {
+      "at": 46.75,
+      "midi": 64,
+      "duration": 5.4,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.25
+    },
+    {
+      "at": 51.75,
+      "midi": 48,
+      "duration": 5,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.5
+    },
+    {
+      "at": 51.75,
+      "midi": 55,
+      "duration": 5,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": -0.25
+    },
+    {
+      "at": 51.75,
+      "midi": 60,
+      "duration": 5,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.0
+    },
+    {
+      "at": 51.75,
+      "midi": 64,
+      "duration": 5,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.25
+    },
+    {
+      "at": 51.75,
+      "midi": 67,
+      "duration": 5,
+      "amplitude": 0.045,
+      "instrument": "bowed",
+      "pan": 0.5
+    },
+    {
+      "at": 8.25,
+      "midi": 60,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 8.875,
+      "midi": 67,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 9.5,
+      "midi": 63,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 10.125,
+      "midi": 70,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 10.75,
+      "midi": 60,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 11.375,
+      "midi": 67,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 12.0,
+      "midi": 63,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 12.625,
+      "midi": 70,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 13.25,
+      "midi": 60,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 13.875,
+      "midi": 67,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 14.5,
+      "midi": 63,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 15.125,
+      "midi": 70,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 15.75,
+      "midi": 60,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 16.375,
+      "midi": 67,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 17.0,
+      "midi": 63,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 17.625,
+      "midi": 70,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 18.25,
+      "midi": 60,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 18.875,
+      "midi": 67,
+      "duration": 1.6,
+      "amplitude": 0.025,
+      "instrument": "keys",
+      "pan": 0.25
+    },
+    {
+      "at": 30.0,
+      "midi": 60,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.19760632481857238
+    },
+    {
+      "at": 30.5,
+      "midi": 67,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.15862544789145705
+    },
+    {
+      "at": 31.0,
+      "midi": 72,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.08080752906461301
+    },
+    {
+      "at": 31.5,
+      "midi": 76,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.016794891138349366
+    },
+    {
+      "at": 32.0,
+      "midi": 74,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.11028533624833813
+    },
+    {
+      "at": 32.5,
+      "midi": 67,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.17677408470916614
+    },
+    {
+      "at": 33.0,
+      "midi": 64,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.19998237202145344
+    },
+    {
+      "at": 33.5,
+      "midi": 72,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.1742280000338353
+    },
+    {
+      "at": 34.0,
+      "midi": 60,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.10581653722400478
+    },
+    {
+      "at": 34.5,
+      "midi": 67,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.011497495620984913
+    },
+    {
+      "at": 35.0,
+      "midi": 72,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.0856365338992302
+    },
+    {
+      "at": 35.5,
+      "midi": 76,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.1618037532423813
+    },
+    {
+      "at": 36.0,
+      "midi": 74,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.19835577068862317
+    },
+    {
+      "at": 36.5,
+      "midi": 67,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.1863433775709411
+    },
+    {
+      "at": 37.0,
+      "midi": 64,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.1287076266713999
+    },
+    {
+      "at": 37.5,
+      "midi": 72,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.03955975992729246
+    },
+    {
+      "at": 38.0,
+      "midi": 60,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.059273715741877064
+    },
+    {
+      "at": 38.5,
+      "midi": 67,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.14359491855432882
+    },
+    {
+      "at": 39.0,
+      "midi": 72,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.19275907725681757
+    },
+    {
+      "at": 39.5,
+      "midi": 76,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.1947290911389956
+    },
+    {
+      "at": 40.0,
+      "midi": 74,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.14902263209586977
+    },
+    {
+      "at": 40.5,
+      "midi": 67,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.06683023536968412
+    },
+    {
+      "at": 41.0,
+      "midi": 64,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.0317245337609418
+    },
+    {
+      "at": 41.5,
+      "midi": 72,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.12251203059509395
+    },
+    {
+      "at": 42.0,
+      "midi": 60,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.18330430958312677
+    },
+    {
+      "at": 42.5,
+      "midi": 67,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.19921730062391882
+    },
+    {
+      "at": 43.0,
+      "midi": 72,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.16635494852571966
+    },
+    {
+      "at": 43.5,
+      "midi": 76,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": -0.09276310319676548
+    },
+    {
+      "at": 44.0,
+      "midi": 74,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.0035403850210827155
+    },
+    {
+      "at": 44.5,
+      "midi": 67,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.09897706351052563
+    },
+    {
+      "at": 45.0,
+      "midi": 64,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.1701807049068237
+    },
+    {
+      "at": 45.5,
+      "midi": 72,
+      "duration": 1.8,
+      "amplitude": 0.032,
+      "instrument": "keys",
+      "pan": 0.1997181744823541
+    }
+  ],
+  "cues": [
+    {
+      "at": 0,
+      "type": "low impact",
+      "power": 0.13
+    },
+    {
+      "at": 8.6,
+      "type": "low impact",
+      "power": 0.13
+    },
+    {
+      "at": 19.7,
+      "type": "low impact",
+      "power": 0.13
+    },
+    {
+      "at": 30.9,
+      "type": "low impact",
+      "power": 0.24
+    },
+    {
+      "at": 44.4,
+      "type": "low impact",
+      "power": 0.24
+    },
+    {
+      "at": 54.95,
+      "type": "low impact",
+      "power": 0.24
+    },
+    {
+      "at": 27.1,
+      "duration": 3.8,
+      "type": "sound rise"
+    },
+    {
+      "at": 52.1,
+      "duration": 2.85,
+      "type": "sound rise"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "reports/flagship-founder-film-production-v3-20261008/assets/sound/score.wav",
+      "sha256": "22ad192dd7dc13b6bd91007a23c8f04baa4e062e99c2efaddc837c2d7aa1a0c5",
+      "duration": 56.75,
+      "sampleRate": 48000,
+      "channels": 2,
+      "peak": 0.16454520466247122
+    },
+    {
+      "path": "reports/flagship-founder-film-production-v3-20261008/assets/sound/cues.wav",
+      "sha256": "b6cb076a7ebc1376e586db2339363f76aa1d5eb2f1f7ae57ecdd3fc79be86c7a",
+      "duration": 56.75,
+      "sampleRate": 48000,
+      "channels": 2,
+      "peak": 0.20445267269625972
+    }
+  ],
+  "status": "GENERATED_PENDING_REVIEW",
+  "settings": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "duration": 56.75
+  }
+}

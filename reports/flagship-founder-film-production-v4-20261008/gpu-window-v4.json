@@ -1,0 +1,15 @@
+{
+  "authorizedBy": "user continue and confirmed credits yes",
+  "startedVmHere": true,
+  "vm": "autopromote-l40s-staging",
+  "gpu": "NVIDIA L40S",
+  "deadlineEpoch": 1791477488,
+  "deadlineSast": "2026-10-08T18:38:08+02:00",
+  "scope": "one bounded VACE transformation first; further GPU work only after visual review",
+  "createdAtUtc": "2026-10-08T15:59:42.956639+00:00",
+  "status": "VM_STOPPED_BEFORE_CUTOFF",
+  "stopRequestedAtUtc": "2026-10-08T16:36:16+00:00",
+  "stoppedConfirmedAtUtc": "2026-10-08T16:37:00+00:00",
+  "lastRemoteProbe": "No NVIDIA compute process and no exclusive AutoPromote GPU container",
+  "brevStopConfirmed": "STOPPED"
+}

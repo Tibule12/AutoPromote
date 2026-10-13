@@ -1,0 +1,33 @@
+{
+  "status": "SOURCE_BORDER_IDENTITY_PASS",
+  "scope": "The frame-off native final preserves the embedded source border; this is not complete preview/final pixel qualification.",
+  "source": "reports/studio-stability-20261007/media/podcast-12s.mp4",
+  "sourceSha256": "716bf2ba4b50ed1ae9c8590121a9e5d899f3ab0abeddafb4a8247f00e73f446a",
+  "sourceTime": 7.5,
+  "frames": {
+    "original-7.5.png": {
+      "middleRowContentX": [
+        32,
+        1247
+      ],
+      "middleColumnContentY": [
+        32,
+        687
+      ]
+    },
+    "final-7.5.png": {
+      "middleRowContentX": [
+        32,
+        1247
+      ],
+      "middleColumnContentY": [
+        32,
+        687
+      ]
+    }
+  },
+  "visualInspection": "Original and native final inspected. Source already has black margin and rounded corners. Final is level, preserves full speaker and source geometry; reviewed second caption is visible. No second main frame is applied.",
+  "nativeOutputSha256": "d370af32419efe82ec6f7cd71d842bf114294f42ccc24f814aaa71409e9ec515",
+  "r11HarnessFailure": "Post-delivery assertion wrongly compared the complete delivery envelope against compiler-owned core fields. Export and download completed; failed harness receipt retained.",
+  "remaining": "Cold preview seek verification pending; no blanket framing/media approval."
+}

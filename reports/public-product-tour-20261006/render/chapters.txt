@@ -1,0 +1,4 @@
+file '/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/public-product-tour-20261006/render/01-uploads.mp4'
+file '/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/public-product-tour-20261006/render/02-studio.mp4'
+file '/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/public-product-tour-20261006/render/03-schedule.mp4'
+file '/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/public-product-tour-20261006/render/04-analytics.mp4'

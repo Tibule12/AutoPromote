@@ -1,0 +1,882 @@
+[
+  {
+    "className": "",
+    "text": "Quick",
+    "height": 26,
+    "width": 122,
+    "fontSize": "11px",
+    "padding": "3px 8px"
+  },
+  {
+    "className": "is-active",
+    "text": "Creator",
+    "height": 26,
+    "width": 122,
+    "fontSize": "11px",
+    "padding": "3px 8px"
+  },
+  {
+    "className": "",
+    "text": "Signature",
+    "height": 26,
+    "width": 122,
+    "fontSize": "11px",
+    "padding": "3px 8px"
+  },
+  {
+    "className": "tool-btn tool-btn-compact",
+    "text": "↶ Undo",
+    "height": 28,
+    "width": 60.171875,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "tool-btn tool-btn-compact",
+    "text": "↷ Redo",
+    "height": 28,
+    "width": 59.5625,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "close-btn",
+    "text": "×",
+    "height": 28,
+    "width": 28,
+    "fontSize": "18px",
+    "padding": "0px"
+  },
+  {
+    "className": "",
+    "text": "✦\nMoments",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "✂\nCut",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "⌁\nHook",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "is-active",
+    "text": "⌗\nReframe",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "CC\nCaptions",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "T\nGraphics",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "◆\nMotion",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "◫\nComposite",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "✺\nCreator FX",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "≋\nPacing",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "▣\nB-roll",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "◐\nColor",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "♫\nSound",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "⇧\nExport",
+    "height": 42,
+    "width": 55,
+    "fontSize": "13.3333px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "creative-director-heading",
+    "text": "AI CREATIVE DIRECTOR\nReturn to story direction\n☷",
+    "height": 24,
+    "width": 272,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "make-it-hit-button",
+    "text": "✦ MAKE IT HIT",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "is-active",
+    "text": "Auto",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "5px 7px"
+  },
+  {
+    "className": "",
+    "text": "Talk / Story",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "5px 7px"
+  },
+  {
+    "className": "",
+    "text": "Beauty / Fashion",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "5px 7px"
+  },
+  {
+    "className": "",
+    "text": "Fitness / Dance",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "5px 7px"
+  },
+  {
+    "className": "",
+    "text": "Food / DIY",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "5px 7px"
+  },
+  {
+    "className": "",
+    "text": "Travel / Lifestyle",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "5px 7px"
+  },
+  {
+    "className": "",
+    "text": "Gaming / Tech",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "5px 7px"
+  },
+  {
+    "className": "",
+    "text": "Off",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "is-active",
+    "text": "✦Auto Story",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "7px 3px"
+  },
+  {
+    "className": "",
+    "text": "≋Motion Sculpture",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "7px 3px"
+  },
+  {
+    "className": "",
+    "text": "◫Beat Echo",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "7px 3px"
+  },
+  {
+    "className": "",
+    "text": "◇Reality Break",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "7px 3px"
+  },
+  {
+    "className": "",
+    "text": "◐Tracked Reveal",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "7px 3px"
+  },
+  {
+    "className": "",
+    "text": "Clean",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "is-active",
+    "text": "Bold",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "",
+    "text": "Unreal",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "",
+    "text": "✂Remove boring parts",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "is-active",
+    "text": "ϟIncrease energy",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "",
+    "text": "▥Show proof",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "",
+    "text": "↻Make it loop",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "",
+    "text": "Calm",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "is-active",
+    "text": "Balanced",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "",
+    "text": "Energetic",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "creative-improvements-card",
+    "text": "5 improvements readyReview every suggestion before render›",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "9px 10px"
+  },
+  {
+    "className": "",
+    "text": "✂Cut",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "✦Hook",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "is-active",
+    "text": "⌗Reframe",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "CCCaptions",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "TGraphics",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "◆Motion",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "◫Composite",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "✺Creator FX",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "≋Pacing",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "▣B-roll",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "◐Color",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "",
+    "text": "♫Sound",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "4px 2px"
+  },
+  {
+    "className": "is-active",
+    "text": "9:16\nTikTok · Reels · Shorts",
+    "height": 42,
+    "width": 63,
+    "fontSize": "11.52px",
+    "padding": "5px 6px"
+  },
+  {
+    "className": "",
+    "text": "4:5\nInstagram feed",
+    "height": 42,
+    "width": 63,
+    "fontSize": "11.52px",
+    "padding": "5px 6px"
+  },
+  {
+    "className": "",
+    "text": "1:1\nSquare social",
+    "height": 42,
+    "width": 63,
+    "fontSize": "11.52px",
+    "padding": "5px 6px"
+  },
+  {
+    "className": "",
+    "text": "16:9\nYouTube · landscape",
+    "height": 42,
+    "width": 63,
+    "fontSize": "11.52px",
+    "padding": "5px 6px"
+  },
+  {
+    "className": "is-active",
+    "text": "Solo Speaker",
+    "height": 37.5,
+    "width": 85.328125,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "",
+    "text": "Show Everyone",
+    "height": 37.5,
+    "width": 85.328125,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "",
+    "text": "Multi-Camera",
+    "height": 37.5,
+    "width": 85.34375,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 48,
+    "width": 46.171875,
+    "fontSize": "11.52px",
+    "padding": "5px 8px"
+  },
+  {
+    "className": "is-active",
+    "text": "",
+    "height": 50,
+    "width": 75.328125,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 50,
+    "width": 75.328125,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 50,
+    "width": 75.34375,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "is-active",
+    "text": "",
+    "height": 57,
+    "width": 118,
+    "fontSize": "11.52px",
+    "padding": "6px 8px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 57,
+    "width": 118,
+    "fontSize": "11.52px",
+    "padding": "6px 8px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 57.5,
+    "width": 118,
+    "fontSize": "11.52px",
+    "padding": "6px 8px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 57.5,
+    "width": 118,
+    "fontSize": "11.52px",
+    "padding": "6px 8px"
+  },
+  {
+    "className": "",
+    "text": "",
+    "height": 71,
+    "width": 118,
+    "fontSize": "11.52px",
+    "padding": "6px 8px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "Detect & follow face",
+    "height": 28,
+    "width": 240,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "Follow existing camera cuts",
+    "height": 28,
+    "width": 240,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "",
+    "text": "+ Add here",
+    "height": 28,
+    "width": 79.40625,
+    "fontSize": "11.52px",
+    "padding": "7px 9px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "👤 Left Speaker",
+    "height": 28,
+    "width": 101.09375,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "👤 Right Speaker",
+    "height": 28,
+    "width": 109.03125,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "mini-toggle-btn",
+    "text": "🔄 Alternate Speakers",
+    "height": 28,
+    "width": 134.3125,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "inspector-primary-action",
+    "text": "▶ Preview 9:16 Framing",
+    "height": 28,
+    "width": 264,
+    "fontSize": "11px",
+    "padding": "4px 8px"
+  },
+  {
+    "className": "clip-action-btn",
+    "text": "Add Placeholder Beat",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-action-btn",
+    "text": "Add Beat at Playhead",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-action-btn broll-upload-btn",
+    "text": "📹 Upload B-Roll Clips",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "campaign-set-card",
+    "text": "Stop ScrollStory • ProofLead with the moment most likely to earn the first pause.Viral Score 18",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.3333px",
+    "padding": "14px"
+  },
+  {
+    "className": "family-cluster-card active",
+    "text": "Story • Proof1 angleProof around proofThis moment travels because it has enough clarity to recut into multiple social angles.",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.3333px",
+    "padding": "14px"
+  },
+  {
+    "className": "clip-guidance-variant-card",
+    "text": "Curiosity CutLead with tension and let the answer arrive a beat later.2.0s - 7.6s",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.3333px",
+    "padding": "12px"
+  },
+  {
+    "className": "clip-guidance-variant-card",
+    "text": "Authority CutTrim the setup and open on the clearest confident statement.2.5s - 7.8s",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.3333px",
+    "padding": "12px"
+  },
+  {
+    "className": "clip-guidance-variant-card",
+    "text": "Payoff FirstJump closer to the reward and use contrast to keep it replayable.3.1s - 8.0s",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.3333px",
+    "padding": "12px"
+  },
+  {
+    "className": "clip-action-btn",
+    "text": "Use in Editor",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-action-btn clip-action-btn-primary",
+    "text": "Apply Hook",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-jump-btn",
+    "text": "Jump to start",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-jump-btn",
+    "text": "Jump to end",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-action-btn clip-action-btn-primary",
+    "text": "Improve Clip",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-action-btn",
+    "text": "Use in Editor",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-action-btn clip-action-btn-primary",
+    "text": "Apply Hook",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-action-btn",
+    "text": "Curiosity Cut",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "clip-action-btn clip-action-btn-primary",
+    "text": "Improve Clip",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.84px",
+    "padding": "8px 10px"
+  },
+  {
+    "className": "tool-btn",
+    "text": "📝 Add Text",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.76px",
+    "padding": "12px 14px"
+  },
+  {
+    "className": "tool-btn",
+    "text": "📹 Add Video",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.76px",
+    "padding": "12px 14px"
+  },
+  {
+    "className": "tool-btn",
+    "text": "🖼️ Add Image",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.76px",
+    "padding": "12px 14px"
+  },
+  {
+    "className": "tool-btn",
+    "text": "📐 Fit: FILL",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.76px",
+    "padding": "12px 14px"
+  },
+  {
+    "className": "tool-btn ",
+    "text": "🧠 Safe Face Framing: OFF",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.76px",
+    "padding": "12px 14px"
+  },
+  {
+    "className": "tool-btn",
+    "text": "🎯 Anchor: Center",
+    "height": 0,
+    "width": 0,
+    "fontSize": "13.76px",
+    "padding": "12px 14px"
+  },
+  {
+    "className": "",
+    "text": "Generate 3 hooks",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  },
+  {
+    "className": "is-active",
+    "text": "Download",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "8px 6px"
+  },
+  {
+    "className": "",
+    "text": "TikTok",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "8px 6px"
+  },
+  {
+    "className": "",
+    "text": "Reels",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "8px 6px"
+  },
+  {
+    "className": "",
+    "text": "Shorts",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "8px 6px"
+  },
+  {
+    "className": "export-btn",
+    "text": "Render Final Clip",
+    "height": 0,
+    "width": 0,
+    "fontSize": "11.52px",
+    "padding": "0px"
+  }
+]

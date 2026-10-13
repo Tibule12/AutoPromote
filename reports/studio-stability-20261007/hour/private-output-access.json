@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-10-07T22:02:25.256179+00:00",
+  "method": "Actual anonymous unsigned HTTPS GET with Range bytes=0-0",
+  "httpStatus": 403,
+  "object": "studio/exports/<normal signed-in owner>/viral_480980b02da6dfd432492301b487f30c8f4e838ad93e0954187977abf1526fe3/render.mp4",
+  "signedOwnerStudioDownload": "Passed with worker stopped; see offline-download.json",
+  "scope": "This new output only; no cross-account end-to-end test."
+}

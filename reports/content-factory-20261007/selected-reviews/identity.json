@@ -1,0 +1,16 @@
+{
+  "accepted": true,
+  "artifactSha256": "2f97dc971ff1c0fdf7d9a057cb3abf4626907423d92fb6b6eccb916c457dcf05",
+  "reviewer": "Codex visual inspection of time-ordered frames",
+  "reason": "Extruded AutoPromote wordmark resolves through travelling studio light, reflections and restrained glow; editable native scene and timed impact sound are retained.",
+  "evidenceSha256": "c4a5749bbd34c52494498d4909c802db72740192f90221088225d2414a359e41",
+  "evidence": "idents/cinematic-v2/review.jpg",
+  "criteria": [
+    {
+      "criterion": "Assigned raw story role",
+      "passed": true,
+      "observation": "Extruded AutoPromote wordmark resolves through travelling studio light, reflections and restrained glow; editable native scene and timed impact sound are retained."
+    }
+  ],
+  "limitation": "Private raw-role selection, not whole-film creative approval or public feature release."
+}

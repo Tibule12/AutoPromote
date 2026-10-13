@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "creativeDirection": {
+    "schemaVersion": 1,
+    "title": "The idea that refused to stay on paper",
+    "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+    "about": "The gap between the world you imagine and the material you have to make it. A small paper boat escapes a blank page and survives an ocean; the final reveal shows this world was made from a brief and edited in AutoPromote.",
+    "whyCare": "Everyone has an idea they cannot yet turn into something others can see. The fragile boat makes that struggle visible.",
+    "hook": "A paper boat on a desk moves as the desk becomes an ocean. Impossible but immediately readable.",
+    "beginning": "A single ordinary sheet becomes a boat; one idea, no footage.",
+    "development": "The boat becomes the central subject of a much larger cinematic world.",
+    "tension": "A dark wave threatens the fragile boat. Will the idea survive becoming real?",
+    "payoff": "A warm path of light opens across the ocean; the boat survives. The camera reveals the created world as editable material in the real AutoPromote Studio.",
+    "ending": "The finished world fills the screen again: A brief. No footage. AutoPromote.",
+    "withheld": "The origin of the footage and the AutoPromote identity until the payoff.",
+    "amplify": [
+      "The first impossible desk-to-ocean movement",
+      "The small boat against the dark wave",
+      "The calm after the storm",
+      "The reveal of this exact footage in the real Studio"
+    ],
+    "remove": [
+      "Random technology abstractions",
+      "Feature lists",
+      "Fake creator testimonials",
+      "Unrelated podcast material",
+      "Generic lens shots",
+      "Unmotivated particle overlays"
+    ],
+    "soundDirection": "Dry paper texture and a restrained ticking pulse at the desk; ocean and a low tense swell for the storm; a deliberate near-silence before a warm harmonic resolution. Original instrumental score, no imitation voice or placeholder beeps.",
+    "reviewCriteria": [
+      "Boat remains recognisable and intact",
+      "Each shot advances the voyage",
+      "No unreadable generated lettering",
+      "Hook is readable without sound",
+      "Storm feels threatening without chaotic geometry",
+      "Payoff gives a complete ending",
+      "AutoPromote reveal uses actual product UI"
+    ]
+  },
+  "settings": {
+    "steps": 50,
+    "frame_count": 121,
+    "width": 1280,
+    "height": 704,
+    "fps": 24,
+    "guidance_scale": 5,
+    "modelRevision": "b8fff7315c768468a5333511427288870b2e9635"
+  },
+  "shots": [
+    {
+      "name": "paper-awakens",
+      "seed": 2026100711,
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+      "storyRole": "hook",
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "negative_prompt": "text, words, letters, logos, watermark, illegible writing, multiple boats, melted paper, torn paper, deformed sail, deformed boat, cartoon, illustration, oversaturated, excessive glow, shaky camera, flickering, sudden cuts, low quality, blurry"
+    },
+    {
+      "name": "ocean-voyage",
+      "seed": 2026100712,
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Wide low cinematic view of a tiny ivory origami sailboat sailing across a vast deep blue ocean at twilight. The folded paper hull remains rigid and intact. Long gentle waves dwarf the little boat; amber light glows on the distant horizon. The camera travels steadily beside the boat close to the water. Beautiful scale contrast, believable moving water. One uninterrupted five-second shot.",
+      "storyRole": "development",
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "negative_prompt": "text, words, letters, logos, watermark, illegible writing, multiple boats, melted paper, torn paper, deformed sail, deformed boat, cartoon, illustration, oversaturated, excessive glow, shaky camera, flickering, sudden cuts, low quality, blurry"
+    },
+    {
+      "name": "storm-question",
+      "seed": 2026100713,
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. A small ivory origami sailboat rides up a towering dark ocean swell. The sea is deep petrol blue under heavy storm clouds; a narrow amber light remains far away. Low close camera beside the hull makes the fragile paper boat feel small against the moving wall of water. The boat stays sharply folded, visible and intact, no sinking, no tearing. Slow dramatic forward camera movement. One uninterrupted five-second shot.",
+      "storyRole": "tension",
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "negative_prompt": "text, words, letters, logos, watermark, illegible writing, multiple boats, melted paper, torn paper, deformed sail, deformed boat, cartoon, illustration, oversaturated, excessive glow, shaky camera, flickering, sudden cuts, low quality, blurry"
+    },
+    {
+      "name": "light-path",
+      "seed": 2026100714,
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. A dark ocean becomes calm as a narrow golden path of reflected sunlight opens across the waves. A small ivory origami sailboat with crisp triangular sail floats steadily toward the warm amber horizon. The camera slowly rises behind the boat revealing the luminous path and immense quiet sea. Emotional relief, tactile paper and realistic water, restrained cinematic atmosphere. One uninterrupted five-second shot.",
+      "storyRole": "payoff",
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "negative_prompt": "text, words, letters, logos, watermark, illegible writing, multiple boats, melted paper, torn paper, deformed sail, deformed boat, cartoon, illustration, oversaturated, excessive glow, shaky camera, flickering, sudden cuts, low quality, blurry"
+    },
+    {
+      "name": "world-on-desk",
+      "seed": 2026100715,
+      "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. A small ivory origami sailboat floats in a beautiful circular pool of deep blue ocean water on a dark wooden desk. The camera slowly pulls back from the boat and water to reveal that an entire miniature ocean world is contained on the desk beside a single blank sheet of paper. Strong amber side light, dark studio background. All geometry stable, realistic miniature water, no text or screens. One uninterrupted five-second shot.",
+      "storyRole": "reveal",
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "negative_prompt": "text, words, letters, logos, watermark, illegible writing, multiple boats, melted paper, torn paper, deformed sail, deformed boat, cartoon, illustration, oversaturated, excessive glow, shaky camera, flickering, sudden cuts, low quality, blurry"
+    }
+  ]
+}

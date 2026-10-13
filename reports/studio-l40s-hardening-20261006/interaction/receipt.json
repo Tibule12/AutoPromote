@@ -1,0 +1,336 @@
+{
+  "passed": true,
+  "completedAt": "2026-10-06T17:29:40.716Z",
+  "scope": "Local production component and native video fixture; real IndexedDB; no sign-in, cloud uploads, analysis or export jobs",
+  "checks": [
+    {
+      "label": "Native 12-second source retains its selected 2–8-second range"
+    },
+    {
+      "label": "Metadata event preserves the paused editing frame"
+    },
+    {
+      "label": "Paused scrub reaches the trimmed end without looping"
+    },
+    {
+      "label": "Native playback loops at the trimmed end instead of continuing into excluded footage"
+    },
+    {
+      "label": "Keyboard Undo and Redo restore the complete trim"
+    },
+    {
+      "label": "Keyboard library navigation selects the matching accessible pane"
+    },
+    {
+      "label": "IndexedDB checkpoint survives reload and restores the selected trim"
+    },
+    {
+      "label": "Escape closes the open menu before closing the expanded preview"
+    },
+    {
+      "label": "1440x1000 timeline fits the screen",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timeline": {
+        "x": 0,
+        "y": 730,
+        "width": 1440,
+        "height": 270,
+        "right": 1440,
+        "bottom": 1000
+      },
+      "monitor": {
+        "x": 64,
+        "y": 46,
+        "width": 1056,
+        "height": 674,
+        "right": 1120,
+        "bottom": 720
+      },
+      "picture": {
+        "x": 453.40625,
+        "y": 158,
+        "width": 276.1875,
+        "height": 491,
+        "right": 729.59375,
+        "bottom": 649
+      },
+      "transport": {
+        "x": 89,
+        "y": 657,
+        "width": 1005,
+        "height": 42,
+        "right": 1094,
+        "bottom": 699
+      },
+      "close": {
+        "x": 1402,
+        "y": 8.5,
+        "width": 28,
+        "height": 28,
+        "right": 1430,
+        "bottom": 36.5
+      }
+    },
+    {
+      "label": "1000x800 timeline fits the screen",
+      "viewport": {
+        "width": 1000,
+        "height": 800
+      },
+      "timeline": {
+        "x": 0,
+        "y": 530,
+        "width": 1000,
+        "height": 270,
+        "right": 1000,
+        "bottom": 800
+      },
+      "monitor": {
+        "x": 64,
+        "y": 46,
+        "width": 616,
+        "height": 474,
+        "right": 680,
+        "bottom": 520
+      },
+      "picture": {
+        "x": 294.65625,
+        "y": 164,
+        "width": 154.6875,
+        "height": 275,
+        "right": 449.34375,
+        "bottom": 439
+      },
+      "transport": {
+        "x": 94,
+        "y": 447,
+        "width": 556,
+        "height": 42,
+        "right": 650,
+        "bottom": 489
+      },
+      "close": {
+        "x": 962,
+        "y": 8.5,
+        "width": 28,
+        "height": 28,
+        "right": 990,
+        "bottom": 36.5
+      }
+    },
+    {
+      "label": "820x1024 timeline fits the screen",
+      "viewport": {
+        "width": 820,
+        "height": 1024
+      },
+      "timeline": {
+        "x": 0,
+        "y": 695,
+        "width": 820,
+        "height": 270,
+        "right": 820,
+        "bottom": 965
+      },
+      "monitor": {
+        "x": 0,
+        "y": 155,
+        "width": 820,
+        "height": 520,
+        "right": 820,
+        "bottom": 675
+      },
+      "picture": {
+        "x": 314.9375,
+        "y": 256,
+        "width": 190.125,
+        "height": 338,
+        "right": 505.0625,
+        "bottom": 594
+      },
+      "transport": {
+        "x": 30,
+        "y": 602,
+        "width": 760,
+        "height": 42,
+        "right": 790,
+        "bottom": 644
+      },
+      "close": {
+        "x": 772,
+        "y": 8,
+        "width": 36,
+        "height": 36,
+        "right": 808,
+        "bottom": 44
+      }
+    },
+    {
+      "label": "820x1024 media library remains reachable and fits the screen"
+    },
+    {
+      "label": "768x1024 timeline fits the screen",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "timeline": {
+        "x": 0,
+        "y": 695,
+        "width": 768,
+        "height": 270,
+        "right": 768,
+        "bottom": 965
+      },
+      "monitor": {
+        "x": 0,
+        "y": 155,
+        "width": 768,
+        "height": 520,
+        "right": 768,
+        "bottom": 675
+      },
+      "picture": {
+        "x": 288.9375,
+        "y": 256,
+        "width": 190.125,
+        "height": 338,
+        "right": 479.0625,
+        "bottom": 594
+      },
+      "transport": {
+        "x": 30,
+        "y": 602,
+        "width": 708,
+        "height": 42,
+        "right": 738,
+        "bottom": 644
+      },
+      "close": {
+        "x": 630,
+        "y": 8,
+        "width": 36,
+        "height": 36,
+        "right": 666,
+        "bottom": 44
+      }
+    },
+    {
+      "label": "768x1024 media library remains reachable and fits the screen"
+    },
+    {
+      "label": "390x844 timeline fits the screen",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "timeline": {
+        "x": 0,
+        "y": 573.875,
+        "width": 390,
+        "height": 270,
+        "right": 390,
+        "bottom": 843.875
+      },
+      "monitor": {
+        "x": 0,
+        "y": 115,
+        "width": 390,
+        "height": 438.875,
+        "right": 390,
+        "bottom": 553.875
+      },
+      "picture": {
+        "x": 146.375,
+        "y": 260,
+        "width": 97.234375,
+        "height": 172.859375,
+        "right": 243.609375,
+        "bottom": 432.859375
+      },
+      "transport": {
+        "x": 30,
+        "y": 440.875,
+        "width": 330,
+        "height": 82,
+        "right": 360,
+        "bottom": 522.875
+      },
+      "close": {
+        "x": 252,
+        "y": 8,
+        "width": 36,
+        "height": 36,
+        "right": 288,
+        "bottom": 44
+      }
+    },
+    {
+      "label": "390x844 media library remains reachable and fits the screen"
+    },
+    {
+      "label": "844x390 timeline fits the screen",
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "timeline": {
+        "x": 0,
+        "y": 230,
+        "width": 844,
+        "height": 160,
+        "right": 844,
+        "bottom": 390
+      },
+      "monitor": {
+        "x": 64,
+        "y": -200,
+        "width": 460,
+        "height": 420,
+        "right": 524,
+        "bottom": 220
+      },
+      "picture": {
+        "x": 248.4375,
+        "y": -63,
+        "width": 91.125,
+        "height": 162,
+        "right": 339.5625,
+        "bottom": 99
+      },
+      "transport": {
+        "x": 94,
+        "y": 107,
+        "width": 400,
+        "height": 82,
+        "right": 494,
+        "bottom": 189
+      },
+      "close": {
+        "x": 806,
+        "y": 8.5,
+        "width": 28,
+        "height": 28,
+        "right": 834,
+        "bottom": 36.5
+      }
+    }
+  ],
+  "pageErrors": [],
+  "apiRequests": [],
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "edb453663ccf43b97d09d8e19764576f8858936da182e2ffaff3ae919e765b14",
+    "frontend/src/components/ViralClipStudio.css": "eaee907e8be6fb25fdca1e77e0fc6051e4000f40544e49b29edc4981510f8f96",
+    "frontend/src/components/StudioControlMenu.js": "c90884ac27b7adbd6db86163709cbe1078f9de24e1ceaee8cad753b358e94033",
+    "frontend/src/components/StudioProTimeline.js": "51734df235a9997653594b41d24866e80e2dde0ef41f9c2311967533442bb207",
+    "frontend/src/components/studioOverlayTiming.js": "7f9d851e39d752473a80eb80a525448dd93752eabc4466e7c711daccd50a20f8",
+    "scripts/run-studio-interaction-preview.js": "f33fa4e0c69429dc98b185d9fd6751299d4b13b274ec08ac8cfc9ec2860ee1ad",
+    "test/e2e/playwright/run-studio-interactions.js": "7f082423b1d18a497b83c82098e060f2c5d9fd2baaeb0bd35a413d17a3b3982e",
+    "test/e2e/playwright/studio-interaction-entry.jsx": "90d8c2595e697f6b42a87d50bf615844930863d072a485032c343460bdec3d4b"
+  },
+  "bundleSha256": "be7233e7a179a1091569c5cff14dcefda824d1ce1c7ad0e4387df91ea64deace",
+  "fixtureSha256": "02827c6f2d1a5fde0fd1d193f7ec63c3f00b359a808d831472ed4a7af2053e2b"
+}

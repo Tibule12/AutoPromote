@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-08T12:36:27.451Z",
+  "events": [
+    {
+      "path": "/api/media/process",
+      "status": 200
+    }
+  ],
+  "messages": [
+    "Preview",
+    "↻ Preview synced",
+    "Set resolution, frame rate, codec and quality. Render first, review the actual output, then download it. Studio exports have no AutoPromote watermark.",
+    "Queued for Rendering...✕ Cancel Render",
+    "Shared project state reviewed",
+    "Reviewed timeline words verified"
+  ],
+  "gpuJobsStarted": 0
+}

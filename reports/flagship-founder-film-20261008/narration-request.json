@@ -1,0 +1,59 @@
+{
+  "deadlineEpoch": 1791445853,
+  "sourceBrief": {
+    "path": "source-brief.txt",
+    "sha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c"
+  },
+  "lines": [
+    {
+      "id": "cold-open",
+      "text": "I thought I was fixing one edit.",
+      "speed": 1.04
+    },
+    {
+      "id": "origin",
+      "text": "Two cameras. One conversation. They refused to stay together.",
+      "speed": 1.04
+    },
+    {
+      "id": "cascade",
+      "text": "Fix the timing. Lose the sound. Fix the sound. Break the render.",
+      "speed": 1.04
+    },
+    {
+      "id": "problems",
+      "text": "Then captions. Clips. New formats. Every answer opened another problem.",
+      "speed": 1.04
+    },
+    {
+      "id": "failure",
+      "text": "Some days, the only thing that finished was the error log.",
+      "speed": 1.04
+    },
+    {
+      "id": "quota",
+      "text": "Even the machines said no. But I couldn't leave it there.",
+      "speed": 1.04
+    },
+    {
+      "id": "breakthrough",
+      "text": "Then one door opened. And the question changed.",
+      "speed": 1.04
+    },
+    {
+      "id": "director",
+      "text": "What if the system could understand the story? Create the missing shot. Find the cut. Build the sound.",
+      "speed": 1.04
+    },
+    {
+      "id": "magic",
+      "text": "Bring it together. I didn't know I was building this.",
+      "speed": 1.04
+    },
+    {
+      "id": "reveal",
+      "text": "The film you just watched was created by AutoPromote.",
+      "speed": 1.04
+    }
+  ]
+}

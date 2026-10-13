@@ -1,0 +1,46 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "tool": "Original AutoPromote score arrangement / CPU",
+  "model": "authored narrative synthesis",
+  "modelRevision": "5e82cfdb9631cd819eeb6c4eb751ff774caf158069fbcd8801a50104a59c30a1",
+  "settings": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "sourceRanges": [
+      [
+        0,
+        3
+      ],
+      [
+        29,
+        3.5
+      ],
+      [
+        36,
+        4
+      ],
+      [
+        42,
+        6.5
+      ],
+      [
+        55,
+        5
+      ],
+      [
+        61,
+        5
+      ]
+    ],
+    "boundaryFadesSeconds": 0.035
+  },
+  "sourceLineage": {
+    "sourcePath": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/flagship-founder-film-20261008/assets/sound/cues.wav",
+    "sourceSha256": "38f91567327b4e71af69971396366174fbb3efd717f578aa84261e644ecf20e9"
+  },
+  "artifact": {
+    "path": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/flagship-founder-film-20261008/assets/sound/cues-cutdown.wav",
+    "duration": 27.0,
+    "sha256": "6b1a38cfb87b898cc2f52ff120d95c22d6fdf4c9357e70f9f7a545b1dd9bda51"
+  }
+}

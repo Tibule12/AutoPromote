@@ -1,0 +1,65 @@
+[
+  {
+    "assetId": "idea-on-paper",
+    "type": "image",
+    "status": "GENERATED_PENDING_REVIEW",
+    "origin": "derived_video_still",
+    "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+    "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+    "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+    "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+    "seed": 2026100711,
+    "settings": {
+      "sourceTime": 1.9
+    },
+    "artifact": {
+      "path": "reports/content-factory-20261007/images/idea-on-paper.png",
+      "sha256": "9f7c3dc2281d41ef543aa044fa20581699d52230e018d048115bed2957a1a80d"
+    },
+    "dependencies": [
+      "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278"
+    ]
+  },
+  {
+    "assetId": "idea-awakens",
+    "type": "image",
+    "status": "GENERATED_PENDING_REVIEW",
+    "origin": "derived_video_still",
+    "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+    "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+    "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+    "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+    "seed": 2026100711,
+    "settings": {
+      "sourceTime": 3.2
+    },
+    "artifact": {
+      "path": "reports/content-factory-20261007/images/idea-awakens.png",
+      "sha256": "361b5998cb849d531a60a9d6158f0439b5cc293011d7b1979342bb4ae80bc9fe"
+    },
+    "dependencies": [
+      "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278"
+    ]
+  },
+  {
+    "assetId": "idea-afloat",
+    "type": "image",
+    "status": "GENERATED_PENDING_REVIEW",
+    "origin": "derived_video_still",
+    "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+    "prompt": "Photoreal cinematic miniature world, tactile ivory origami paper boat with one crisp triangular sail and sharply folded hull, no writing on the paper. Warm amber practical light against deep petrol-blue shadows, natural film contrast, 35mm commercial cinematography. The same single small ivory paper boat is the only hero object. Extreme close-up at table level. A small ivory origami sailboat rests on a dark wooden desk beside one blank sheet of paper. A thin shimmering pool of water slowly spreads underneath the boat; the boat lifts gently and floats as the desk surface becomes a deep blue ocean. An impossible transformation shown with physically convincing water and crisp stable folds. Slow controlled camera push. Quiet amber light from the left. One uninterrupted five-second shot.",
+    "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+    "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+    "seed": 2026100711,
+    "settings": {
+      "sourceTime": 4.8
+    },
+    "artifact": {
+      "path": "reports/content-factory-20261007/images/idea-afloat.png",
+      "sha256": "15147e938c9001643a25ca5d7161db89b4bf3507f7f326517c32655664bdcd5a"
+    },
+    "dependencies": [
+      "7fd8e4a2b7ccef15a96d0a0d08b73117e56024cdaea9798028f78ad8703ad278"
+    ]
+  }
+]

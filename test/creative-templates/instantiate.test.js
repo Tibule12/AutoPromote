@@ -77,7 +77,7 @@ test('cycling uses a separately pinned definition in the same editable graph and
   assert.equal(result.snapshot.reframeAspect, '9:16');
   assert.equal(result.snapshot.smartCrop, true);
   assert(result.snapshot.reframeKeyframes.some(k => k.cut && k.x !== 50));
-  assert(result.snapshot.reframeKeyframes.every(k => k.origin === 'manual')); 
+  assert(result.snapshot.reframeKeyframes.every(k => k.origin === 'manual'));
   assert.deepEqual(result.document.clipOccurrences, director.document.clipOccurrences);
   assert.equal(director.startsModelJob, false);
   const finish = studio.compileStudioFinishForRender(result.document, result.snapshot);
@@ -95,4 +95,36 @@ test('cycling refuses a mutated definition even when the caller supplies its mat
     templateRef: {templateId:template.templateId,version:template.version,definitionHash:hash(template)},
     ownerUid:'customer-a',projectId:'cycling-mutated',bindings:bindings(),aspect:'9:16' }),
   { code: 'TEMPLATE_IDENTITY_MISMATCH' });
+});
+
+test('editorial launch adapts distinct brands and optional owned sound through the same Director/native graph', async () => {
+  const template = registry.templates.find(t => t.templateId === 'product_launch_cinematic_v1' && t.version === '1.1.2');
+  const templateRef = require('../../src/creativeTemplates/contract').referenceFor(template);
+  for (const [index, headline] of ['CRAFT.\nNOT ROUTINE.', 'FEEL.\nEVERY FREQUENCY.'].entries()) {
+    const options = { ...args(), templateRef, projectId: `editorial-${index}` };
+    options.bindings.headline = headline;
+    if (index) {
+      options.bindings.transitionSfx = owned('custom-sweep', 'audio');
+      options.bindings.revealSfx = owned('custom-reveal', 'audio');
+    }
+    const manual = await instantiateTemplate(options);
+    const director = await instantiateDirectorTemplate({ ...options, selection: { templateRef } });
+    assert.deepEqual(director.document.clipOccurrences, manual.document.clipOccurrences);
+    assert.deepEqual(director.document.layers, manual.document.layers);
+    assert.equal(manual.document.outputTimeMap.at(-1).outputRange.endTick, 1800000);
+    assert.equal(manual.snapshot.overlays.find(l => l.name === 'hook-line-1').text, headline.split('\n')[0]);
+    assert.equal(manual.snapshot.smartCrop, true);
+    assert.equal(manual.snapshot.smartCropMode, 'speaker_track');
+    assert.equal(manual.snapshot.reframeKeyframes[0].x, 50);
+    const finish = studio.compileStudioFinishForRender(manual.document, manual.snapshot);
+    assert(finish.motion.keyframes.some(k => k.property === 'opacity' && k.value === .17));
+    assert(finish.motion.keyframes.some(k => k.property === 'scale' && k.value === 1.085));
+    const sampled = manual.snapshot.soundEffects.filter(c => !c.builtIn);
+    assert.equal(sampled.length, index ? 4 : 0);
+    assert(sampled.every(c => c.sourceStoragePath.startsWith('uploads/audios/customer-a/')));
+    assert.deepEqual(manual.snapshot.creativeTemplateInstance.templateRef, templateRef);
+    const projected = studio.projectStudioEditableStateToSnapshot(manual.document, manual.snapshot);
+    assert.equal(hash(studio.adaptStudioSnapshotToDocument({ snapshot: projected,
+      projectId: manual.projectId, previousDocument: manual.document })), manual.documentHash);
+  }
 });

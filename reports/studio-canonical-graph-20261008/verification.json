@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-10-08T09:20:31.745630+00:00",
+  "task": "S01 bounded canonical media/3D/audio state migration",
+  "readinessPromotion": false,
+  "realUserEndToEndRuns": 0,
+  "gpuJobsStarted": 0,
+  "browserStarted": false,
+  "visualAudioParity": "NOT_RUN",
+  "tests": {
+    "modelHelper": 60,
+    "server": 35,
+    "selectedProductionComponent": 5,
+    "componentSkipped": 95,
+    "totalPassed": 100
+  },
+  "sharedBundleCheck": "PASS",
+  "contractMatrixValidation": "VALID",
+  "sourceSha256": {
+    "frontend/src/components/studioProjectDocument.js": "c3fa02a7b531a3c4911108d283ddcc067cc71541fc72a5d4cdc88d038609f856",
+    "frontend/src/components/ViralClipStudio.js": "293ee6f81b38eb1ae29ac77a0361eaaa4637f7e6ea6a9dfa31a4bcdcb507cce4",
+    "frontend/src/components/studioVoiceover.js": "243399fc273806b05759dfae1af37731cdaa64633f03d684cf9b31a7e87217fd",
+    "src/services/studioProjectRevisionService.js": "c1de688806c8218f4915215b298b715b08e181231c76c2254cee10482986f874",
+    "src/generated/studioDirectorReplayKernel.cjs": "574ed90aaf9469f3a911fd001e4ed8ad019959c1474cc4e251809e6188a7e426",
+    "scripts/studio-director-replay-entry.js": "d504e706264f0320b2523e5bb0c58f06fb79c919cc9317f34de93044877dc103",
+    "frontend/src/components/__tests__/studioCanonicalMedia.test.js": "33af4f9c9e102a7504da638da6b49caec5c29da0811188d67c009aa20d11064e",
+    "test/studioDirectorReplayService.jest.test.js": "89cb21593cde6e1f4acaf285768488cae8187af88664b1bc0a88e0dea983e6c8"
+  },
+  "logSha256": {
+    "model-tests.log": "d7b39165ce371344276d6ba0311decdc73d1daf4849fc7dbc8a46463598d7aac",
+    "server-tests.log": "778ebbf6ccd57d12381d5d3902ec9b73dac15d14f888b8a65697c8e5d0d11677",
+    "component-tests.log": "02a2fa83520d4bf52e9a8982aa7907c4485912576810b4874ea0629eed12a4f3"
+  },
+  "remainingTask": "S01: finish/main-transform, full caption styling and reframe/camera state contracts, then remaining render decisions"
+}

@@ -1,0 +1,48 @@
+{
+  "bucket": "autopromote-cc6d3-viral-studio-3d",
+  "private": true,
+  "outputs": [
+    {
+      "path": "AutoPromote-editable-project.zip",
+      "object": "founder_films/welcome-cinematic-20261009/v5/delivery/AutoPromote-editable-project.zip",
+      "bytes": 119528305,
+      "sha256": "a3f182e0d60e4948002f8359f16940c8c8b89cb1e12d1138f0e87b70bc06bdb8",
+      "generation": "1791538405534290"
+    },
+    {
+      "path": "outputs/final/project.json",
+      "object": "founder_films/welcome-cinematic-20261009/v5/delivery/outputs/final/project.json",
+      "bytes": 93566,
+      "sha256": "0a694f833e778f2d14f6cd7c143b7d7c98c7cfaa537fbbe6bd961822e0e985e1",
+      "generation": "1791538407162935"
+    },
+    {
+      "path": "outputs/final/studio-saved-project.json",
+      "object": "founder_films/welcome-cinematic-20261009/v5/delivery/outputs/final/studio-saved-project.json",
+      "bytes": 42284,
+      "sha256": "715c01a0abc77e11ca939eba117b68a0e93e3a362d21191e23ba9be14935e31b",
+      "generation": "1791538409271040"
+    },
+    {
+      "path": "README.md",
+      "object": "founder_films/welcome-cinematic-20261009/v5/delivery/README.md",
+      "bytes": 1956,
+      "sha256": "624fa380f289e3f9577d64d5b9a852caabb657696c3650497e9f91ded9f0deaa",
+      "generation": "1791538411084159"
+    },
+    {
+      "path": "gpu-zero-after.json",
+      "object": "founder_films/welcome-cinematic-20261009/v5/delivery/gpu-zero-after.json",
+      "bytes": 637,
+      "sha256": "7c8c972f2aca23fcbe595635d28e68a2f6e762788cf59a5420e7ccb5d97a7d30",
+      "generation": "1791538411732827"
+    },
+    {
+      "path": "cloud-time-accounting.json",
+      "object": "founder_films/welcome-cinematic-20261009/v5/delivery/cloud-time-accounting.json",
+      "bytes": 8406,
+      "sha256": "2e9ecf1a9ac84fccb14eb066f46e3add0d248ebeaffae216a374aedb3e9290dd",
+      "generation": "1791538412412678"
+    }
+  ]
+}

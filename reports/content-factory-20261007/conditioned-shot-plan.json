@@ -1,0 +1,37 @@
+{
+  "settings": {
+    "steps": 50,
+    "frame_count": 121,
+    "width": 1280,
+    "height": 704,
+    "fps": 24,
+    "guidance_scale": 5,
+    "modelRevision": "b8fff7315c768468a5333511427288870b2e9635"
+  },
+  "shots": [
+    {
+      "name": "ocean-scale-v2",
+      "seed": 2026100761,
+      "reference_image": "/work/images/idea-afloat.png",
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "storyRole": "development",
+      "prompt": "The camera rapidly cranes upward and pulls far back from the same single ivory origami boat with one tall triangular folded paper sail. The dark desk surface falls out of view as an immense deep blue moving ocean expands around the small intact boat. By the middle of the shot the complete boat is tiny, below fifteen percent of the frame, surrounded by vast sweeping ocean waves and a distant warm amber horizon. A coherent physical impossible miniature world unfolds into full cinematic scale. The paper sail and folded hull retain their exact shape and remain visible. One uninterrupted smooth five-second shot. No extra boats, no words or screens."
+    },
+    {
+      "name": "storm-action-v2",
+      "seed": 2026100762,
+      "reference_image": "/work/native-images/storm-keyart-v2/image.png",
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "storyRole": "tension",
+      "prompt": "This enormous dark blue curling ocean wave moves forcefully forward. The towering crest curls over, white sea spray peels from the top and crashes down into the turbulent foreground, foam surges toward the low camera. The thick curling water wall fills the frame, with physically convincing moving water and powerful scale. A warm narrow rim light makes the crest readable against deep blue storm atmosphere. One smooth uninterrupted dramatic five-second shot of a threatening wave approaching, no cut, no new objects, no boats, no text, no slow static cloud shot."
+    },
+    {
+      "name": "golden-return-v2",
+      "seed": 2026100763,
+      "reference_image": "/work/images/idea-afloat.png",
+      "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+      "storyRole": "payoff",
+      "prompt": "The same single small ivory origami boat with one tall triangular paper sail floats intact on the deep blue water. The camera rises smoothly behind the boat and reveals a long luminous golden path of reflected sunrise ahead. The sea becomes spacious and calm, warm amber light grows across the crisp folded paper and ocean ripples. The boat glides toward the distant golden horizon as the camera pulls back slightly to show the complete hull and sail. The miniature desk disappears out of frame, leaving an immense peaceful ocean. Emotional relief after danger, tactile stable paper folds, physically realistic moving water. One uninterrupted five-second shot, no other objects, no writing."
+    }
+  ]
+}

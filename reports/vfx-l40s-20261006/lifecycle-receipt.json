@@ -1,0 +1,14 @@
+{
+  "instance": "autopromote-l40s-staging",
+  "instance_id": "xgh6wcu74",
+  "original_deadline_utc": "2026-10-06T20:02:25Z",
+  "stop_command_completed_by_utc": "2026-10-06T20:01:56Z",
+  "stop_command_exit_code": 0,
+  "verified_at_utc": "2026-10-06T20:03:51Z",
+  "verified_brev_status": "STOPPED",
+  "storage_deleted": false,
+  "new_instances_created": 0,
+  "google_jobs_launched": 0,
+  "gpu_jobs_started_after_cutoff": 0,
+  "model_archive": "/data/autopromote-l40s-20261006/models"
+}

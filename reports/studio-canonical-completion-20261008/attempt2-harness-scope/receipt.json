@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-10-08T11:12:07.744Z",
+  "projectName": "Studio canonical decisions QA 20261008",
+  "sourceName": "Studio shared-state 20261008",
+  "realAuthRequired": true,
+  "noMocks": true,
+  "headless": true,
+  "muted": true,
+  "gpuJobsStarted": 0,
+  "renderSubmitted": false,
+  "previewFinalParity": "UNVERIFIED: separate paired output work follows state recovery",
+  "steps": [],
+  "stateFlow": "FAIL",
+  "error": "locator.fill: Error: strict mode violation: getByLabel('Hook text', { exact: true }) resolved to 2 elements:\n    1) <textarea rows=\"3\" maxlength=\"120\" aria-label=\"Hook text\" placeholder=\"Give viewers a reason to stay\">WATCH WHAT HAPPENS NEXT</textarea> aka getByRole('textbox', { name: 'Hook text' })\n    2) <textarea rows=\"3\" aria-label=\"Hook text\" placeholder=\"Type a curiosity hook that earns the next 3 seconds\">WATCH WHAT HAPPENS NEXT</textarea> aka getByPlaceholder('Type a curiosity hook that')\n\nCall log:\n\u001b[2m  - waiting for getByLabel('Hook text', { exact: true })\u001b[22m\n",
+  "finishedAt": "2026-10-08T11:12:29.857Z"
+}

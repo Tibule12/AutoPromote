@@ -1,0 +1,95 @@
+{
+  "version": 3,
+  "title": "One idea. An entire creative world.",
+  "duration": 38,
+  "fps": 24,
+  "aspect": "16:9",
+  "sourceConcepts": {
+    "exactImagesLocated": false,
+    "search": [
+      "workspace assets",
+      "frontend/public",
+      "reports",
+      "attachments",
+      "Downloads/Pictures"
+    ],
+    "equivalents": "Four user supplied concepts rebuilt as native editable geometry, UV media surfaces, animated typography, independently moving UI, AP sculpture and physical studio. Two photographic equivalents derived with imagegen; full reference plates are never slideshow inputs.",
+    "inlineReferenceImagesReceived": 4
+  },
+  "scenes": [
+    {
+      "id": "idea",
+      "at": 0,
+      "duration": 8,
+      "concept": "AutoPromote Creative Studio Workspace",
+      "line": "Every great story starts as an idea.",
+      "textAt": 2.1,
+      "textDuration": 4.9,
+      "transition": "The active timeline grows out of the first idea stroke; library cards rise from that same plane."
+    },
+    {
+      "id": "structure",
+      "at": 8,
+      "duration": 7,
+      "concept": "AutoPromote Motion Graphics / VFX Library",
+      "line": "But ideas need structure.",
+      "textAt": 9.3,
+      "textDuration": 4.0,
+      "transition": "The component grid folds into dimensional rails as its central line unfolds into a ribbon."
+    },
+    {
+      "id": "motion",
+      "at": 15,
+      "duration": 10,
+      "concept": "AutoPromote 3D Creative Dashboard",
+      "line": "Structure becomes motion.",
+      "textAt": 15.8,
+      "textDuration": 3.7,
+      "secondLine": "Motion becomes experience.",
+      "secondAt": 20.2,
+      "secondDuration": 3.6,
+      "transition": "The ribbon opens into a horizon; the rails become the contours of the story world."
+    },
+    {
+      "id": "impact",
+      "at": 25,
+      "duration": 7,
+      "concept": "AutoPromote Stories That Move Brands",
+      "line": "And experience becomes a story people remember.",
+      "textAt": 26.0,
+      "textDuration": 4.8,
+      "transition": "The horizon contracts into the final single luminous stroke while dimensional AP contours assemble."
+    },
+    {
+      "id": "autopromote",
+      "at": 32,
+      "duration": 6,
+      "concept": "AutoPromote brand lockup",
+      "line": "This is AutoPromote.",
+      "textAt": 32.5,
+      "textDuration": 2.0,
+      "secondLine": "Ideas into motion.",
+      "secondAt": 35.0,
+      "secondDuration": 3.0,
+      "transition": "Anticipation, rim-light travel, monogram assembly, brand hit and clean final hold."
+    }
+  ],
+  "voiceover": "Not generated: the optional narration is retained verbatim as separately editable title layers with clean insertion windows.",
+  "sound": "Original deterministic stereo score and separate ambient/UI/transition/brand cues; one motif develops harmonically, increases rhythm at the unfolding and resolves at 34.6 seconds.",
+  "gpuPlan": {
+    "job": "viral-studio-rtx-qualification",
+    "project": "autopromote-cc6d3",
+    "region": "us-central1",
+    "count": 1,
+    "stages": [
+      "Native Blender Cycles OptiX scene rendering",
+      "NVENC generated source encoding",
+      "Existing AutoPromote RenderViralRequest composition, titles, stereo mix and NVENC final export"
+    ],
+    "previewBeforeDispatch": true,
+    "newGpuInfrastructure": false,
+    "warmInstances": 0,
+    "maxTaskSeconds": 3300,
+    "automaticRetries": 0
+  }
+}

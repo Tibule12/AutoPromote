@@ -1,0 +1,12 @@
+{
+  "status": "FAILED",
+  "startedAt": "2026-10-09T08:05:54.586821+00:00",
+  "execution": "viral-studio-rtx-qualification-78m5m",
+  "stages": [],
+  "gpuCount": 1,
+  "prefix": "founder_films/welcome-cinematic-20261009/v1",
+  "gpuIdentity": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB",
+  "error": "CalledProcessError(127, ['/tmp/welcome-native/blender-4.5.9-linux-x64/blender', '-b', '-t', '16', '-noaudio', '--python', '/tmp/welcome-native/film/assets/author_welcome_world.py', '--', '--root', '/tmp/welcome-native/film', '--mode', 'frames', '--device', 'optix', '--width', '1920', '--samples', '24'])",
+  "finishedAt": "2026-10-09T08:06:36.619849+00:00",
+  "workloadSeconds": 42.033028431
+}

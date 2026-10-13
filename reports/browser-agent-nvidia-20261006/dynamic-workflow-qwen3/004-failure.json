@@ -1,0 +1,67 @@
+{
+  "error": {
+    "code": 1,
+    "message": "Command failed: ssh -T -o RequestTTY=no autopromote-l40s-staging for browser_planner_attempt in $(seq 1 55); do if test -f /tmp/autopromote-studio-l40s-20261006/browser-spool/d42520f0-c364-4242-a46b-cfde960f1180.response.json; then cat /tmp/autopromote-studio-l40s-20261006/browser-spool/d42520f0-c364-4242-a46b-cfde960f1180.response.json || exit 1; exit 0; fi; sleep 1; done; exit 1\n"
+  },
+  "id": "observation-8",
+  "pageId": "page-1",
+  "url": "http://127.0.0.1:42477/",
+  "pages": [
+    {
+      "id": "page-1",
+      "url": "http://127.0.0.1:42477/"
+    }
+  ],
+  "dialog": null,
+  "frames": [
+    {
+      "index": 0,
+      "url": "http://127.0.0.1:42477/",
+      "text": "Local browser operator regression fixture\nPrepare a review copy\n\nOpen the editor, enter a title, choose landscape, and create one draft.\n\nOpen editor",
+      "headings": [
+        "Prepare a review copy",
+        "Editing workspace",
+        "Draft settings"
+      ],
+      "alerts": [],
+      "busy": false,
+      "captcha": false,
+      "scroll": {
+        "x": 0,
+        "y": 0,
+        "height": 900,
+        "viewportHeight": 900
+      },
+      "controls": [
+        {
+          "ref": "observation-8:f0:e0",
+          "role": "button",
+          "name": "Open editor",
+          "label": "",
+          "tag": "button",
+          "type": "",
+          "submitsForm": false,
+          "disabled": false,
+          "checked": null,
+          "expanded": null,
+          "selected": null,
+          "value": "",
+          "options": null,
+          "href": null,
+          "inModal": false,
+          "modalName": "",
+          "box": {
+            "x": 54,
+            "y": 217.21875,
+            "width": 129.78125,
+            "height": 52
+          },
+          "inViewport": true,
+          "occluded": false
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "priorActions": []
+}

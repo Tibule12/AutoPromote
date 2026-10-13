@@ -1,0 +1,13 @@
+{
+  "deadlineEpoch": 0,
+  "sourceBrief": "Private AutoPromote flagship film The Small Boat: after a paper boat becomes one photoreal navy-hulled yacht, one sailor hauls a connected mainsheet as a real swell approaches. Human effort makes the transformation matter. No feature narration or public claim. Source art is only accepted after visual review.",
+  "images": [
+    {
+      "id": "sailor-connected-sheet",
+      "seed": 20261008228,
+      "duration": 2,
+      "prompt": "Photoreal 35mm film frame on a dark navy sailing yacht. One Black woman sailor in navy jacket with cream collar braces on wet teak deck, hauling a taut white mainsheet with both hands through a visible deck block connected to the cream sail boom. Blue ocean swell, warm low sun, natural spray, credible rigging and anatomy.",
+      "negative_prompt": "second person, extra arms, extra hands, missing fingers, loose rope, disconnected rope, posing, closed eyes, flat water, fake spray, toy boat, CGI render, cartoon, text, watermark"
+    }
+  ]
+}

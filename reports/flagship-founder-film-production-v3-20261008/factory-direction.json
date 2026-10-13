@@ -1,0 +1,775 @@
+{
+  "schemaVersion": 1,
+  "title": "One Edit",
+  "story": {
+    "about": "One unsolved editing problem becomes a creative system.",
+    "whyCare": "A familiar frustration changes into an unexpected creative possibility.",
+    "hook": "Enter a transformed world and withhold its ordinary paper origin.",
+    "beginning": "One conversation and two drifting sound signals.",
+    "development": "Each fix opens a larger problem.",
+    "tension": "Failed renders and zero capacity stop the route.",
+    "payoff": "The ordinary paper hull and sail become a full vessel in one coherent world.",
+    "ending": "The film names AutoPromote before its layered native identity resolves.",
+    "withheld": "The hook’s source and the film’s production identity.",
+    "amplify": [
+      "Failure silence",
+      "The route reopening",
+      "Physical transformation",
+      "Identity lockup"
+    ],
+    "remove": [
+      "Repeated frames",
+      "Warped-video substitutions",
+      "Long technical paragraphs",
+      "Unrelated effects"
+    ]
+  },
+  "script": [
+    {
+      "beatId": "cold-open",
+      "action": "Enter the final three seconds of the same transformed vessel, withholding its paper origin.",
+      "sound": "I thought I was fixing one edit."
+    },
+    {
+      "beatId": "origin",
+      "action": "A retained moving conversation fills the frame. Two differently timed amber/violet waveform rows align below it.",
+      "sound": "Two cameras. One conversation. They refused to stay together."
+    },
+    {
+      "beatId": "cascade",
+      "action": "The moving conversation and SYNC / SOUND / RENDER labels are interrupted by a physical dark shutter and a red FAILED lockup.",
+      "sound": "Fix the timing. Lose the sound. Fix the sound. Break the render."
+    },
+    {
+      "beatId": "failure",
+      "action": "An archived graphic reconstruction of render errors sits in depth beside the illuminated word AGAIN. This is not an unmodified error screenshot.",
+      "sound": "Some days, the only thing that finished was the error log."
+    },
+    {
+      "beatId": "quota",
+      "action": "A large extruded zero on a dark stage with NO CAPACITY. The narration carries the setback; no quota email, archive date or GPU class is shown in this shot.",
+      "sound": "Even the machines said no. But I couldn't leave it there."
+    },
+    {
+      "beatId": "breakthrough",
+      "action": "The extruded zero and physical panels move aside to show retained generated yacht footage. 3000 milliGPU labels the historical capacity; this is not a new grant or 3000 physical GPUs.",
+      "sound": "Then one door opened. And the question changed."
+    },
+    {
+      "beatId": "director",
+      "action": "STORY / SHOT / CUT / SOUND labels resolve over the retained conversation, then the retained generated yacht becomes the chosen source. This is an authored concept visualization, not a recording of a live Director plan.",
+      "sound": "What if the system could understand the story? Create the missing shot. Find the cut. Build the sound."
+    },
+    {
+      "beatId": "magic",
+      "action": "One continuous folded-paper hull and sail become timber and canvas while the workbench sinks into a deep ocean; the camera follows the same vessel.",
+      "sound": "Bring it together. I didn't know I was building this."
+    },
+    {
+      "beatId": "reveal",
+      "action": "The created-by sentence resolves on a dark dimensional field, with restrained camera movement. No live Studio UI/project recording is represented.",
+      "sound": "The film you just watched was created by AutoPromote."
+    },
+    {
+      "beatId": "ident",
+      "action": "Original exact logo contours emerge as titanium, optical-black, anodized-violet and glass layers; grazing light and a macro-to-lockup camera resolve at 3.2s, followed by a clean static hold.",
+      "sound": "Rise and impact at the identity lockup."
+    }
+  ],
+  "assets": [
+    {
+      "assetId": "vessel",
+      "type": "video",
+      "beatId": "magic",
+      "duration": 7,
+      "prompt": "Select for rough assembly: connected hull/sail transformation and safe framing. Physical CG finish remains below the premium flagship bar.",
+      "reason": "Select for rough assembly: connected hull/sail transformation and safe framing. Physical CG finish remains below the premium flagship bar.",
+      "provider": "reuse",
+      "libraryRef": "vessel",
+      "acceptanceCriteria": [
+        "Select for rough assembly: connected hull/sail transformation and safe framing. Physical CG finish remains below the premium flagship bar."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "ident",
+      "type": "video",
+      "beatId": "ident",
+      "duration": 5,
+      "prompt": "Select for rough assembly: original vector proportions, layered titanium/glass geometry, moving macro camera and clean readable hold. No founder brand approval.",
+      "reason": "Select for rough assembly: original vector proportions, layered titanium/glass geometry, moving macro camera and clean readable hold. No founder brand approval.",
+      "provider": "reuse",
+      "libraryRef": "ident",
+      "acceptanceCriteria": [
+        "Select for rough assembly: original vector proportions, layered titanium/glass geometry, moving macro camera and clean readable hold. No founder brand approval."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "origin",
+      "type": "video",
+      "beatId": "origin",
+      "duration": 5.25,
+      "prompt": "Select moving retained conversation with visibly converging sound signals for the opening problem.",
+      "reason": "Select moving retained conversation with visibly converging sound signals for the opening problem.",
+      "provider": "reuse",
+      "libraryRef": "origin",
+      "acceptanceCriteria": [
+        "Select moving retained conversation with visibly converging sound signals for the opening problem."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "cascade",
+      "type": "video",
+      "beatId": "cascade",
+      "duration": 5.5,
+      "prompt": "Select readable sync/sound/render consequences and FAILED interruption for escalation.",
+      "reason": "Select readable sync/sound/render consequences and FAILED interruption for escalation.",
+      "provider": "reuse",
+      "libraryRef": "cascade",
+      "acceptanceCriteria": [
+        "Select readable sync/sound/render consequences and FAILED interruption for escalation."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "failure",
+      "type": "video",
+      "beatId": "failure",
+      "duration": 4.5,
+      "prompt": "Select readable AGAIN and archived error reconstruction for the emotional setback.",
+      "reason": "Select readable AGAIN and archived error reconstruction for the emotional setback.",
+      "provider": "reuse",
+      "libraryRef": "failure",
+      "acceptanceCriteria": [
+        "Select readable AGAIN and archived error reconstruction for the emotional setback."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "quota",
+      "type": "video",
+      "beatId": "quota",
+      "duration": 4.75,
+      "prompt": "Select extruded zero and NO CAPACITY for the low point. No live quota grant or archive email is represented.",
+      "reason": "Select extruded zero and NO CAPACITY for the low point. No live quota grant or archive email is represented.",
+      "provider": "reuse",
+      "libraryRef": "quota",
+      "acceptanceCriteria": [
+        "Select extruded zero and NO CAPACITY for the low point. No live quota grant or archive email is represented."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "breakthrough",
+      "type": "video",
+      "beatId": "breakthrough",
+      "duration": 4.25,
+      "prompt": "Select capacity-wall release into retained generated yacht footage; historical 3000 milliGPU is capacity, not a hardware count.",
+      "reason": "Select capacity-wall release into retained generated yacht footage; historical 3000 milliGPU is capacity, not a hardware count.",
+      "provider": "reuse",
+      "libraryRef": "breakthrough",
+      "acceptanceCriteria": [
+        "Select capacity-wall release into retained generated yacht footage; historical 3000 milliGPU is capacity, not a hardware count."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "director",
+      "type": "video",
+      "beatId": "director",
+      "duration": 6.75,
+      "prompt": "Select story/shot/cut/sound concept visualization; this is not a live UI recording or proof of arbitrary autonomous planning.",
+      "reason": "Select story/shot/cut/sound concept visualization; this is not a live UI recording or proof of arbitrary autonomous planning.",
+      "provider": "reuse",
+      "libraryRef": "director",
+      "acceptanceCriteria": [
+        "Select story/shot/cut/sound concept visualization; this is not a live UI recording or proof of arbitrary autonomous planning."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "reveal",
+      "type": "video",
+      "beatId": "reveal",
+      "duration": 5,
+      "prompt": "Select the readable created-by sentence; production attribution is qualified by actual Factory/Director/renderer receipts and assistant-directed source creation.",
+      "reason": "Select the readable created-by sentence; production attribution is qualified by actual Factory/Director/renderer receipts and assistant-directed source creation.",
+      "provider": "reuse",
+      "libraryRef": "reveal",
+      "acceptanceCriteria": [
+        "Select the readable created-by sentence; production attribution is qualified by actual Factory/Director/renderer receipts and assistant-directed source creation."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-cold-open",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 2.175,
+      "prompt": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "provider": "reuse",
+      "libraryRef": "vo-cold-open",
+      "acceptanceCriteria": [
+        "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-origin",
+      "type": "audio",
+      "beatId": "origin",
+      "duration": 4.4,
+      "prompt": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "provider": "reuse",
+      "libraryRef": "vo-origin",
+      "acceptanceCriteria": [
+        "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-cascade",
+      "type": "audio",
+      "beatId": "cascade",
+      "duration": 4.55,
+      "prompt": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "provider": "reuse",
+      "libraryRef": "vo-cascade",
+      "acceptanceCriteria": [
+        "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-failure",
+      "type": "audio",
+      "beatId": "failure",
+      "duration": 3.675,
+      "prompt": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "provider": "reuse",
+      "libraryRef": "vo-failure",
+      "acceptanceCriteria": [
+        "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-quota",
+      "type": "audio",
+      "beatId": "quota",
+      "duration": 3.325,
+      "prompt": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "provider": "reuse",
+      "libraryRef": "vo-quota",
+      "acceptanceCriteria": [
+        "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-breakthrough",
+      "type": "audio",
+      "beatId": "breakthrough",
+      "duration": 3.225,
+      "prompt": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "provider": "reuse",
+      "libraryRef": "vo-breakthrough",
+      "acceptanceCriteria": [
+        "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-director",
+      "type": "audio",
+      "beatId": "director",
+      "duration": 6.1,
+      "prompt": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "provider": "reuse",
+      "libraryRef": "vo-director",
+      "acceptanceCriteria": [
+        "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-magic",
+      "type": "audio",
+      "beatId": "magic",
+      "duration": 3.075,
+      "prompt": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "provider": "reuse",
+      "libraryRef": "vo-magic",
+      "acceptanceCriteria": [
+        "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "vo-reveal",
+      "type": "audio",
+      "beatId": "reveal",
+      "duration": 3.4,
+      "prompt": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "reason": "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance.",
+      "provider": "reuse",
+      "libraryRef": "vo-reveal",
+      "acceptanceCriteria": [
+        "Select retained standard-preset narration of the exact scripted line, with verified duration and headroom. No founder identity or listening acceptance."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "score",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 51,
+      "prompt": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "provider": "reuse",
+      "libraryRef": "score",
+      "acceptanceCriteria": [
+        "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "cues",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 51,
+      "prompt": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "provider": "reuse",
+      "libraryRef": "cues",
+      "acceptanceCriteria": [
+        "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "score-cutdown",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 26.5,
+      "prompt": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "provider": "reuse",
+      "libraryRef": "score-cutdown",
+      "acceptanceCriteria": [
+        "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "cues-cutdown",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 26.5,
+      "prompt": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "provider": "reuse",
+      "libraryRef": "cues-cutdown",
+      "acceptanceCriteria": [
+        "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "score-teaser",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 10,
+      "prompt": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "provider": "reuse",
+      "libraryRef": "score-teaser",
+      "acceptanceCriteria": [
+        "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open."
+      ],
+      "seed": 20261008
+    },
+    {
+      "assetId": "cues-teaser",
+      "type": "audio",
+      "beatId": "cold-open",
+      "duration": 10,
+      "prompt": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "reason": "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open.",
+      "provider": "reuse",
+      "libraryRef": "cues-teaser",
+      "acceptanceCriteria": [
+        "Select authored stereo score/effect stem with verified peaks, duration and synchronized story/lockup cues. Listening acceptance remains open."
+      ],
+      "seed": 20261008
+    }
+  ],
+  "outputs": [
+    {
+      "outputId": "one-edit-hero",
+      "aspect": "16:9",
+      "purpose": "An ordinary editing problem grows through setbacks into a creative system; the physical transformation earns the opening image and the created-by reveal.",
+      "musicAssetId": "score",
+      "musicVolume": 0.75,
+      "sequence": [
+        {
+          "assetId": "vessel",
+          "start": 4,
+          "duration": 3,
+          "reason": "Open inside the payoff and create a question about how it was made."
+        },
+        {
+          "assetId": "origin",
+          "start": 0,
+          "duration": 5.25,
+          "reason": "Make sync understandable to a stranger through one human conversation, not interface instructions."
+        },
+        {
+          "assetId": "cascade",
+          "start": 0,
+          "duration": 5.5,
+          "reason": "Each fix causes a consequence, building frustration."
+        },
+        {
+          "assetId": "failure",
+          "start": 0,
+          "duration": 4.5,
+          "reason": "Let a setback hurt; hold briefly rather than racing through a decorative code montage."
+        },
+        {
+          "assetId": "quota",
+          "start": 0,
+          "duration": 4.75,
+          "reason": "External constraint becomes the lowest point; persistence is the emotional turn."
+        },
+        {
+          "assetId": "breakthrough",
+          "start": 0,
+          "duration": 4.25,
+          "reason": "A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs."
+        },
+        {
+          "assetId": "director",
+          "start": 0,
+          "duration": 6.75,
+          "reason": "Move from repairs to creative decisions, with real sources and editorial data."
+        },
+        {
+          "assetId": "vessel",
+          "start": 0,
+          "duration": 7,
+          "reason": "Complete the opening world through connected visible geometry, material and scale change."
+        },
+        {
+          "assetId": "reveal",
+          "start": 0,
+          "duration": 5,
+          "reason": "Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering."
+        },
+        {
+          "assetId": "ident",
+          "start": 0,
+          "duration": 5,
+          "reason": "A dedicated editable brand sequence, not a flat logo fade."
+        }
+      ],
+      "audioCues": [
+        {
+          "assetId": "vo-cold-open",
+          "kind": "voiceover",
+          "startTime": 0.35,
+          "trimStart": 0,
+          "duration": 2.175,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-origin",
+          "kind": "voiceover",
+          "startTime": 3.35,
+          "trimStart": 0,
+          "duration": 4.4,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-cascade",
+          "kind": "voiceover",
+          "startTime": 8.6,
+          "trimStart": 0,
+          "duration": 4.55,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-failure",
+          "kind": "voiceover",
+          "startTime": 14.25,
+          "trimStart": 0,
+          "duration": 3.675,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-quota",
+          "kind": "voiceover",
+          "startTime": 18.55,
+          "trimStart": 0,
+          "duration": 3.325,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-breakthrough",
+          "kind": "voiceover",
+          "startTime": 23.4,
+          "trimStart": 0,
+          "duration": 3.225,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-director",
+          "kind": "voiceover",
+          "startTime": 27.55,
+          "trimStart": 0,
+          "duration": 6.1,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-magic",
+          "kind": "voiceover",
+          "startTime": 34.3,
+          "trimStart": 0,
+          "duration": 3.075,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-reveal",
+          "kind": "voiceover",
+          "startTime": 41.55,
+          "trimStart": 0,
+          "duration": 3.4,
+          "volume": 0.94
+        },
+        {
+          "assetId": "cues",
+          "kind": "sfx",
+          "startTime": 0,
+          "trimStart": 0,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues",
+          "kind": "sfx",
+          "startTime": 12,
+          "trimStart": 12,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues",
+          "kind": "sfx",
+          "startTime": 24,
+          "trimStart": 24,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues",
+          "kind": "sfx",
+          "startTime": 36,
+          "trimStart": 36,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues",
+          "kind": "sfx",
+          "startTime": 48,
+          "trimStart": 48,
+          "duration": 3,
+          "volume": 0.8
+        }
+      ],
+      "captionSegments": [],
+      "plannedBlackRanges": [
+        {
+          "start": 46,
+          "end": 46.55,
+          "reason": "Dedicated ident dark anticipation before the structural lighting reveal."
+        }
+      ]
+    },
+    {
+      "outputId": "one-edit-cutdown",
+      "aspect": "16:9",
+      "purpose": "26.5-second problem, capacity obstacle, breakthrough, connected transformation and self-referential ending.",
+      "musicAssetId": "score-cutdown",
+      "musicVolume": 0.68,
+      "sequence": [
+        {
+          "assetId": "origin",
+          "start": 0,
+          "duration": 3,
+          "reason": "One small editing problem"
+        },
+        {
+          "assetId": "quota",
+          "start": 0,
+          "duration": 3.5,
+          "reason": "The capacity obstacle"
+        },
+        {
+          "assetId": "breakthrough",
+          "start": 0,
+          "duration": 3.5,
+          "reason": "The route opens"
+        },
+        {
+          "assetId": "vessel",
+          "start": 0,
+          "duration": 7,
+          "reason": "Earn the changed creative ambition"
+        },
+        {
+          "assetId": "reveal",
+          "start": 0,
+          "duration": 4.5,
+          "reason": "Name who made this"
+        },
+        {
+          "assetId": "ident",
+          "start": 0,
+          "duration": 5,
+          "reason": "Complete clean brand resolution"
+        }
+      ],
+      "audioCues": [
+        {
+          "assetId": "vo-cold-open",
+          "kind": "voiceover",
+          "startTime": 0.15,
+          "trimStart": 0,
+          "duration": 2.175,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-quota",
+          "kind": "voiceover",
+          "startTime": 3.1,
+          "trimStart": 0,
+          "duration": 3.325,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-breakthrough",
+          "kind": "voiceover",
+          "startTime": 6.65,
+          "trimStart": 0,
+          "duration": 3.225,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-magic",
+          "kind": "voiceover",
+          "startTime": 10.3,
+          "trimStart": 0,
+          "duration": 3.075,
+          "volume": 0.94
+        },
+        {
+          "assetId": "vo-reveal",
+          "kind": "voiceover",
+          "startTime": 17.35,
+          "trimStart": 0,
+          "duration": 3.4,
+          "volume": 0.94
+        },
+        {
+          "assetId": "cues-cutdown",
+          "kind": "sfx",
+          "startTime": 0,
+          "trimStart": 0,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues-cutdown",
+          "kind": "sfx",
+          "startTime": 12,
+          "trimStart": 12,
+          "duration": 12,
+          "volume": 0.8
+        },
+        {
+          "assetId": "cues-cutdown",
+          "kind": "sfx",
+          "startTime": 24,
+          "trimStart": 24,
+          "duration": 2.5,
+          "volume": 0.8
+        }
+      ],
+      "captionSegments": [],
+      "plannedBlackRanges": [
+        {
+          "start": 21.5,
+          "end": 22.05,
+          "reason": "Complete dedicated ident anticipation."
+        }
+      ]
+    },
+    {
+      "outputId": "one-edit-teaser",
+      "aspect": "16:9",
+      "purpose": "10-second transformation event, clear created-by payoff and resolving brand lockup.",
+      "musicAssetId": "score-teaser",
+      "musicVolume": 0.65,
+      "sequence": [
+        {
+          "assetId": "vessel",
+          "start": 3.5,
+          "duration": 3,
+          "reason": "Transforming world"
+        },
+        {
+          "assetId": "reveal",
+          "start": 0,
+          "duration": 4,
+          "reason": "Production identity"
+        },
+        {
+          "assetId": "ident",
+          "start": 2,
+          "duration": 3,
+          "reason": "Resolving ident and readable hold"
+        }
+      ],
+      "audioCues": [
+        {
+          "assetId": "vo-reveal",
+          "kind": "voiceover",
+          "startTime": 3.15,
+          "trimStart": 0,
+          "duration": 3.4,
+          "volume": 0.94
+        },
+        {
+          "assetId": "cues-teaser",
+          "kind": "sfx",
+          "startTime": 0,
+          "trimStart": 0,
+          "duration": 10,
+          "volume": 0.8
+        }
+      ],
+      "captionSegments": []
+    }
+  ]
+}

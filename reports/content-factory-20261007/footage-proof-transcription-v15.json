@@ -1,0 +1,99 @@
+{
+  "sourceSha256": "dbf6fe853b22ad65a79aa055572d79cf0dccef90cff84c0d517dc35f643a5aaa",
+  "modelPath": "/models/studio-whisper",
+  "device": "cpu",
+  "computeType": "int8",
+  "vadFilter": true,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 7.94,
+      "text": " one idea no footage this started with a brief no camera no footage",
+      "avgLogProbability": -0.3514161149660746,
+      "noSpeechProbability": 5.905213124046682e-11,
+      "words": [
+        {
+          "word": " one",
+          "start": 0.0,
+          "end": 0.58,
+          "probability": 0.24543075263500214
+        },
+        {
+          "word": " idea",
+          "start": 0.58,
+          "end": 0.86,
+          "probability": 0.808597981929779
+        },
+        {
+          "word": " no",
+          "start": 0.86,
+          "end": 1.42,
+          "probability": 0.9942465424537659
+        },
+        {
+          "word": " footage",
+          "start": 1.42,
+          "end": 1.72,
+          "probability": 0.9848508834838867
+        },
+        {
+          "word": " this",
+          "start": 1.72,
+          "end": 2.86,
+          "probability": 0.911691427230835
+        },
+        {
+          "word": " started",
+          "start": 5.42,
+          "end": 5.72,
+          "probability": 0.9803438186645508
+        },
+        {
+          "word": " with",
+          "start": 5.72,
+          "end": 5.9,
+          "probability": 0.9927772283554077
+        },
+        {
+          "word": " a",
+          "start": 5.9,
+          "end": 6.0,
+          "probability": 0.998853325843811
+        },
+        {
+          "word": " brief",
+          "start": 6.0,
+          "end": 6.2,
+          "probability": 0.9759635925292969
+        },
+        {
+          "word": " no",
+          "start": 6.2,
+          "end": 6.82,
+          "probability": 0.9923380017280579
+        },
+        {
+          "word": " camera",
+          "start": 6.82,
+          "end": 7.18,
+          "probability": 0.9051901698112488
+        },
+        {
+          "word": " no",
+          "start": 7.18,
+          "end": 7.66,
+          "probability": 0.9982106685638428
+        },
+        {
+          "word": " footage",
+          "start": 7.66,
+          "end": 7.94,
+          "probability": 0.9966721534729004
+        }
+      ]
+    }
+  ],
+  "text": "one idea no footage this started with a brief no camera no footage",
+  "seconds": 20.829232387000957,
+  "limitation": "ASR verifies recoverable speech in actual audio; it is not a human listening or emotional-quality judgment."
+}

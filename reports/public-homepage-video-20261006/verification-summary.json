@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "verified_at": "2026-10-06T03:14:16.816085+00:00",
+  "browser_checks": 36,
+  "media_failure_cases": 2,
+  "homepage_tests": 16,
+  "lint_files": 39,
+  "lint_errors": 0,
+  "lint_warnings": 0,
+  "production_build": "PASS",
+  "protected_files_unchanged": 11,
+  "source_hashes_match_build": true,
+  "preview_url": "http://127.0.0.1:3095",
+  "preview_http_status": 200,
+  "cloud_gpu_used": false,
+  "push_merge_deployment": "None"
+}

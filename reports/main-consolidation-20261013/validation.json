@@ -1,0 +1,71 @@
+{
+  "at": "2026-10-13T18:03:55.006Z",
+  "request": "Push all repository changes to main",
+  "integrationBranch": "agent/main-consolidation-20261013",
+  "preservedWorkingTrees": true,
+  "included": [
+    "Existing Studio/render/Director/model-runtime changes",
+    "Product knowledge and read-only assistance",
+    "Publishing, scheduling, LinkedIn/Reddit queue repairs and capped TikTok CI repair",
+    "Individual property animation with existing native evidence",
+    "Draft product-launch definitions 1.1.0, 1.1.1 and 1.1.2",
+    "Dependency security remediation 832d11ee",
+    "Portable reports and exact retained contract media fixtures"
+  ],
+  "mergeResolution": {
+    "file": "package.json",
+    "undici": "^7.29.1",
+    "ajv": "6.15.0",
+    "lockRootMatches": true
+  },
+  "checks": {
+    "nodeContractTests": {
+      "passed": 91,
+      "failed": 0
+    },
+    "frontendTests": {
+      "suites": 8,
+      "passed": 60,
+      "failed": 0
+    },
+    "serverTests": {
+      "suites": 9,
+      "passed": 92,
+      "failed": 0
+    },
+    "workerTests": {
+      "passed": 85,
+      "failed": 0,
+      "encoder": "CPU"
+    },
+    "optimizedFrontendBuild": "PASS with CI E2E bypass configuration; local-only output is excluded from Git",
+    "cappedTikTokBrowserTest": "PASS: 1 real headless browser test with CI mocks",
+    "studioContract": "PASS; original readiness unchanged",
+    "knowledgeGeneratedFiles": "PASS: 42 current files",
+    "directorReplayBundle": "PASS: matches frontend kernel",
+    "localPreflight": "PASS",
+    "basicSanity": "PASS",
+    "routeImports": "PASS",
+    "secretScan": "PASS",
+    "whitespace": "PASS"
+  },
+  "integrationTestFixes": [
+    "Check concat stream-copy and 600-second duration by their option names instead of a stale positional slice.",
+    "Pin the CPU profile test to CPU to avoid dependence on compiled NVENC availability.",
+    "Supply the actual composition_plan request field in the isolated render-handler fixture."
+  ],
+  "knowledgeReview": "Version 1.0.5 records individual property controls and exact draft-template bindings. Documentation source review does not grant product, creative or production qualification.",
+  "exclusions": [
+    "Credentials and private browser/session/media state",
+    "Disposable dependency/build caches and copied compiled bundles",
+    "Generated diagnostic media/archives/traces except four exact retained qualification fixtures"
+  ],
+  "reportTransportRedaction": [
+    "Remove signed query parameters from a copied saved-document report; original local evidence is preserved."
+  ],
+  "limitations": [
+    "This is an integration check, not a complete repository regression or new professional/creative qualification.",
+    "No new GPU/model/render jobs were started for consolidation."
+  ],
+  "githubChecks": "Pending after main push; local checks are recorded above."
+}

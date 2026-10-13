@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-09T07:48:21.296170+00:00",
+  "jobId": "a82eea947322015121934a6c6ced30cbdab8e15e",
+  "firstShot": {
+    "sha256": "bf381bed009d94bf93ea8d1e697df94bb45393034bb072ed5571ed9500e79ffd",
+    "technicalDecode": "PASS",
+    "nativeSystemReview": "REJECTED",
+    "imported": false,
+    "failure": "Planned dolly motion did not occur. Decoded first/last phase correlation measured zero translation; low luma differences alone do not prove useful motion. Initial contact-sheet judgement was too generous.",
+    "evidence": "church-motion-measurement.json"
+  },
+  "secondShot": {
+    "imported": false,
+    "state": "CANCELLED_BY_QA",
+    "failure": "Invented living room/books/toy from abstract childhood wording. Stopped only the owned shot-2 container before completing inference; preserved original plan and any partial files."
+  },
+  "fixes": [
+    "Require a concrete subject quoted literally from its supporting cue.",
+    "Exclude abstract childhood statements and existing accepted beats.",
+    "Prompt explicitly requires continuous physical action and an appreciable camera move.",
+    "Use a B-roll-specific negative prompt instead of suppressing natural candle movement with the old blanket flickering negative.",
+    "Full-decode every new generated shot before model visual review."
+  ],
+  "retest": "Normal Studio generation restarted after the rejected/cancelled job reached partial; new model output still pending.",
+  "humanCreativeApproval": false
+}

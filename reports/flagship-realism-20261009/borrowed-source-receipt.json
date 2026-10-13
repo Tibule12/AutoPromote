@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-10-09T07:19:52.013196+00:00",
+  "deadlineEpoch": 1791536400,
+  "stage": "matched-direction paper source images",
+  "stages": [
+    {
+      "script": "run-sources.sh",
+      "exitCode": 0
+    }
+  ],
+  "preflight": {
+    "gpu": "NVIDIA L40S, 0 %, 0 %, 0 %, 1 MiB",
+    "cudaProcesses": "",
+    "containerNames": [],
+    "idleServiceGracefulShutdownRequested": false
+  },
+  "restoredMediaPid": 33328,
+  "completedAt": "2026-10-09T07:20:53.066532+00:00"
+}

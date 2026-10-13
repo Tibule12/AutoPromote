@@ -1,0 +1,102 @@
+{
+  "video_url": "http://127.0.0.1:8765/assets/cold-open/video.mp4",
+  "start_time": 0,
+  "end_time": 10,
+  "overlays": [],
+  "auto_captions": false,
+  "timeline_segments": [
+    {
+      "id": "one-edit-teaser-1",
+      "source_clip_id": "cold-open",
+      "start_time": 0.7,
+      "end_time": 3.7,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/assets/cold-open/video.mp4"
+    },
+    {
+      "id": "one-edit-teaser-2",
+      "source_clip_id": "reveal",
+      "start_time": 1,
+      "end_time": 5,
+      "duration": 4,
+      "url": "http://127.0.0.1:8765/assets/reveal/video.mp4"
+    },
+    {
+      "id": "one-edit-teaser-3",
+      "source_clip_id": "ident",
+      "start_time": 2,
+      "end_time": 5,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/assets/ident/video.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "caption_style": "minimal",
+  "caption_position": "bottom",
+  "caption_scale": 0.72,
+  "caption_segments": [],
+  "creative_intent": "10-second teaser connects the opening world directly to the created-by reveal and short brand lockup.",
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "smart_crop": true,
+  "smart_crop_mode": "safe_fit",
+  "brand_watermark": false,
+  "output_settings": {
+    "resolution": "1080p",
+    "fps": 24,
+    "codec": "h264",
+    "audioCodec": "aac"
+  },
+  "add_music": true,
+  "music_url": "http://127.0.0.1:8765/assets/sound/score-teaser.wav",
+  "music_name": "score-teaser",
+  "music_volume": 0.6,
+  "music_ducking": false,
+  "music_fade_in": 0.25,
+  "music_fade_out": 0.6,
+  "music_loop": false,
+  "sound_effects": [
+    {
+      "id": "one-edit-teaser-audio-1",
+      "name": "vo-reveal",
+      "kind": "voiceover",
+      "url": "http://127.0.0.1:8765/assets/narration/reveal.wav",
+      "startTime": 2.65,
+      "duration": 3.4,
+      "trimStart": 0,
+      "volume": 0.94,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    },
+    {
+      "id": "one-edit-teaser-audio-2",
+      "name": "cues-teaser",
+      "kind": "sfx",
+      "url": "http://127.0.0.1:8765/assets/sound/cues-teaser.wav",
+      "startTime": 0,
+      "duration": 10,
+      "trimStart": 0,
+      "volume": 0.8,
+      "fadeIn": 0.02,
+      "fadeOut": 0.05,
+      "enabled": true
+    }
+  ],
+  "motionGraphics": {
+    "version": 1,
+    "scenes": []
+  },
+  "mute_audio": true
+}

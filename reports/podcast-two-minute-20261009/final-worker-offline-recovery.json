@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-09T10:13:51.286Z",
+  "passed": true,
+  "renderWorkerOffline": true,
+  "cloudInstanceStopped": false,
+  "exactJobId": "viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+  "normalColdEntry": true,
+  "exportSettingsPreserved": true,
+  "seek": {
+    "ready": 4,
+    "duration": 120,
+    "time": 97.5,
+    "paused": true,
+    "error": null,
+    "path": "/autopromote-cc6d3.firebasestorage.app/studio/exports/bf04dPKELvVMivWoUyLsAVyw2sg2/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c/render.mp4"
+  },
+  "download": {
+    "nativeCompleted": true,
+    "bytes": 167074643,
+    "sha256": "5f2b71f5b19046f37fe3482ae4b86afd636edde5946daba4a9f15c4dfd80face"
+  },
+  "humanListening": false
+}

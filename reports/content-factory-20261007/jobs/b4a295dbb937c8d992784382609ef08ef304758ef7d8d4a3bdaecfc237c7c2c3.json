@@ -1,0 +1,1325 @@
+{
+  "schemaVersion": 1,
+  "workflow": "screenplay_production",
+  "jobId": "b4a295dbb937c8d992784382609ef08ef304758ef7d8d4a3bdaecfc237c7c2c3",
+  "productionId": "b4a295dbb937c8d992784382609ef08ef304758ef7d8d4a3bdaecfc237c7c2c3",
+  "ownerUid": "founder-local",
+  "requestId": "film-one-sheet-20261007",
+  "fingerprint": "a5be352c1fe7855d9a7790b5e4b186493cac6ef9067b67ed6c258eabb661060b",
+  "private": true,
+  "status": "needs_scene_revision",
+  "stage": "scene_002_ddaf2281",
+  "screenplay": {
+    "schemaVersion": 1,
+    "title": "One Sheet",
+    "source": {
+      "text": "Title: One Sheet\n\nINT. WORKSHOP - NIGHT\n\nA paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow.\n\nEXT. OCEAN - DAWN\n\nThe same paper boat floats alone in the blue water. Its folded paper stretches into canvas; its bow curves into polished timber. The tiny vessel grows into a full-size mahogany sailing yacht. The sea opens around it.\n",
+      "sha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+      "format": "fountain",
+      "offsetUnit": "utf16_code_units"
+    },
+    "scenes": [
+      {
+        "sceneId": "scene_001_3ffc412e",
+        "ordinal": 1,
+        "heading": "INT. WORKSHOP - NIGHT",
+        "locationId": "location_e7fec7a8facf5315f7bc",
+        "interiorExterior": "INT.",
+        "timeOfDay": "NIGHT",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 18,
+          "end": 165
+        },
+        "blocks": [
+          {
+            "kind": "action",
+            "text": "A paper boat rests on a dark timber desk. One crease catches a thin line of light. A bead of water touches the folded bow.",
+            "sourceRef": {
+              "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+              "start": 41,
+              "end": 163
+            }
+          }
+        ],
+        "dialogueUnits": [],
+        "status": "needs_plan_revision",
+        "plan": {
+          "props": [
+            {
+              "name": "paper boat",
+              "sourceQuote": "A paper boat rests on a dark timber desk."
+            },
+            {
+              "name": "dark timber desk",
+              "sourceQuote": "A paper boat rests on a dark timber desk."
+            },
+            {
+              "name": "One crease",
+              "sourceQuote": "One crease catches a thin line of light."
+            },
+            {
+              "name": "thin line of light",
+              "sourceQuote": "One crease catches a thin line of light."
+            },
+            {
+              "name": "bead of water",
+              "sourceQuote": "A bead of water touches the folded bow."
+            },
+            {
+              "name": "folded bow",
+              "sourceQuote": "A bead of water touches the folded bow."
+            }
+          ],
+          "characterDesigns": [],
+          "sceneId": "scene_001_3ffc412e",
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "summary": "A solitary paper boat on a dark desk symbolizes lost dreams, illuminated by a single ray of light and touched by water — a quiet meditation on fragility and memory in a silent workshop at night",
+          "story": {
+            "about": "A paper boat on a desk, caught between stillness and impermanence, becomes a metaphor for a forgotten dream or a moment suspended in time",
+            "whyCare": "The viewer cares because the image evokes loss, beauty, and the quiet weight of memory — universal emotions tied to objects that hold meaning",
+            "hook": "A paper boat rests on a dark timber desk — fragile, alone, yet charged with unseen history",
+            "beginning": "The scene opens with a still life: a paper boat, a crease, a bead of water — all elements frozen in a moment of quiet tension",
+            "development": "The camera lingers on the details — the light catching the crease, the water touching the bow — suggesting something about to be revealed or already lost",
+            "tension": "The stillness implies a past event or an impending change — the water may be a tear, a memory, or a sign of decay",
+            "payoff": "The image remains unresolved — the boat stays untouched, the water still, the light unchanged — leaving the audience to wonder what was lost and whether it can be reclaimed",
+            "ending": "The scene ends without action, reinforcing the theme of silence and the permanence of absence",
+            "withheld": "The identity of the owner, the reason for the boat’s presence, and the nature of the water are never revealed — keeping the mystery intact",
+            "amplify": [
+              "Emphasize the contrast between the darkness of the desk and the thin line of light",
+              "Highlight the delicate motion of the bead of water as it touches the bow",
+              "Use shallow depth of field to isolate the paper boat from the surrounding workshop"
+            ],
+            "remove": [
+              "Any suggestion of movement or sound — the scene must remain silent and still",
+              "Any visual clutter — keep the frame minimal to preserve the emotional weight",
+              "Any text or narration — let the image speak for itself"
+            ]
+          },
+          "shots": [
+            {
+              "shotId": "shot_001",
+              "action": "Establishing wide shot of the dark workshop, focusing on the paper boat resting on the desk",
+              "reason": "To ground the viewer in the setting and introduce the central prop as the emotional anchor",
+              "camera": "Static wide-angle lens",
+              "framing": "Full shot including the desk and surrounding shadows",
+              "duration": 3,
+              "entityNames": [
+                "WORKSHOP",
+                "paper boat",
+                "dark timber desk"
+              ],
+              "dialogueUnitIds": [],
+              "sourceQuote": "INT. WORKSHOP - NIGHT",
+              "entityIds": [
+                "location_e7fec7a8facf5315f7bc",
+                "prop_cd3c864b728e179a6032",
+                "prop_ace87f2d4928564c0bc4"
+              ],
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 18,
+                "end": 39,
+                "quote": "INT. WORKSHOP - NIGHT"
+              },
+              "origin": "creative_shot_plan",
+              "status": "requires_generation",
+              "requiredAssets": [
+                {
+                  "kind": "video",
+                  "status": "requires_generation"
+                }
+              ]
+            },
+            {
+              "shotId": "shot_002",
+              "action": "Close-up on the paper boat, slowly panning across its surface to reveal the crease catching the light",
+              "reason": "To draw attention to the symbolic detail — the crease as a scar or memory",
+              "camera": "Dolly-in slow push",
+              "framing": "Medium close-up, shallow focus",
+              "duration": 2,
+              "entityNames": [
+                "paper boat",
+                "One crease",
+                "thin line of light"
+              ],
+              "dialogueUnitIds": [],
+              "sourceQuote": "One crease catches a thin line of light.",
+              "entityIds": [
+                "prop_cd3c864b728e179a6032",
+                "prop_8d360cfc3d3c095cc46d",
+                "prop_b275101dabaa2a5a5d0f"
+              ],
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 83,
+                "end": 123,
+                "quote": "One crease catches a thin line of light."
+              },
+              "origin": "creative_shot_plan",
+              "status": "requires_generation",
+              "requiredAssets": [
+                {
+                  "kind": "video",
+                  "status": "requires_generation"
+                }
+              ]
+            },
+            {
+              "shotId": "shot_003",
+              "action": "Extreme close-up on the bead of water touching the folded bow, held for a beat before it begins to move",
+              "reason": "To emphasize the fragility and potential transformation — the water as a catalyst or witness",
+              "camera": "Macro lens, static",
+              "framing": "Extreme close-up, focus on the bead",
+              "duration": 2,
+              "entityNames": [
+                "bead of water",
+                "folded bow"
+              ],
+              "dialogueUnitIds": [],
+              "sourceQuote": "A bead of water touches the folded bow.",
+              "entityIds": [
+                "prop_07cc45c54e6080804255",
+                "prop_4c5c82943ec8a3d52f5e"
+              ],
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 124,
+                "end": 163,
+                "quote": "A bead of water touches the folded bow."
+              },
+              "origin": "creative_shot_plan",
+              "status": "requires_generation",
+              "requiredAssets": [
+                {
+                  "kind": "video",
+                  "status": "requires_generation"
+                }
+              ]
+            }
+          ],
+          "continuity": [
+            {
+              "entityName": "WORKSHOP",
+              "key": "appearance",
+              "value": "Dark, empty, lit only by ambient light filtering through a window or skylight",
+              "intentionalChange": false,
+              "sourceQuote": "INT. WORKSHOP - NIGHT",
+              "entityId": "location_e7fec7a8facf5315f7bc",
+              "sceneId": "scene_001_3ffc412e",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 18,
+                "end": 39,
+                "quote": "INT. WORKSHOP - NIGHT"
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "paper boat",
+              "key": "prop_state",
+              "value": "Still, undisturbed, slightly crumpled at the bow",
+              "intentionalChange": false,
+              "sourceQuote": "A paper boat rests on a dark timber desk.",
+              "entityId": "prop_cd3c864b728e179a6032",
+              "sceneId": "scene_001_3ffc412e",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 41,
+                "end": 82,
+                "quote": "A paper boat rests on a dark timber desk."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "dark timber desk",
+              "key": "prop_material",
+              "value": "Polished dark wood, grain visible under dim lighting",
+              "intentionalChange": false,
+              "sourceQuote": "A paper boat rests on a dark timber desk.",
+              "entityId": "prop_ace87f2d4928564c0bc4",
+              "sceneId": "scene_001_3ffc412e",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 41,
+                "end": 82,
+                "quote": "A paper boat rests on a dark timber desk."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "One crease",
+              "key": "prop_state",
+              "value": "Faint, curved, catching a thin line of light",
+              "intentionalChange": false,
+              "sourceQuote": "One crease catches a thin line of light.",
+              "entityId": "prop_8d360cfc3d3c095cc46d",
+              "sceneId": "scene_001_3ffc412e",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 83,
+                "end": 123,
+                "quote": "One crease catches a thin line of light."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "thin line of light",
+              "key": "appearance",
+              "value": "Vertical beam, casting a soft glow on the crease, source off-screen",
+              "intentionalChange": false,
+              "sourceQuote": "One crease catches a thin line of light.",
+              "entityId": "prop_b275101dabaa2a5a5d0f",
+              "sceneId": "scene_001_3ffc412e",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 83,
+                "end": 123,
+                "quote": "One crease catches a thin line of light."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "bead of water",
+              "key": "prop_state",
+              "value": "Suspended above the folded bow, about to fall or already beginning to slide",
+              "intentionalChange": false,
+              "sourceQuote": "A bead of water touches the folded bow.",
+              "entityId": "prop_07cc45c54e6080804255",
+              "sceneId": "scene_001_3ffc412e",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 124,
+                "end": 163,
+                "quote": "A bead of water touches the folded bow."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "folded bow",
+              "key": "prop_state",
+              "value": "Tightly folded, slightly damp, reflecting the light",
+              "intentionalChange": false,
+              "sourceQuote": "A bead of water touches the folded bow.",
+              "entityId": "prop_4c5c82943ec8a3d52f5e",
+              "sceneId": "scene_001_3ffc412e",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 124,
+                "end": 163,
+                "quote": "A bead of water touches the folded bow."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            }
+          ],
+          "entityBibleHash": "75f4b1b25e4295c6ea11ad3eee053491bb2211f240e0b78f749c636c0467e563",
+          "dialogueUnits": [],
+          "origin": "model_generated_scene_plan",
+          "limitation": "A plan establishes intended continuity. Generated pixels and dialogue audio require separate verification; planning is not a finished movie.",
+          "planHash": "4120e0ee51efa23cc8ad4393241f84b542d5a22bfe89f092b15f77fb13886b0f"
+        },
+        "plannerProvenance": {
+          "model": "Qwen/Qwen3-VL-8B-Instruct",
+          "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+          "settings": [
+            {
+              "dtype": "bfloat16",
+              "attention": "sdpa",
+              "do_sample": false,
+              "max_tokens": 1600
+            },
+            {
+              "dtype": "bfloat16",
+              "attention": "sdpa",
+              "do_sample": false,
+              "max_tokens": 3200
+            }
+          ],
+          "stages": [
+            {
+              "id": "scene-entities",
+              "seconds": 6.641954637000026
+            },
+            {
+              "id": "scene-shots",
+              "seconds": 61.80199141899993
+            }
+          ],
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "origin": "nvidia_screenplay_scene_planning"
+        },
+        "planReview": {
+          "accepted": false,
+          "reason": "The written plan invents lost-dreams/memory backstory absent from the screenplay, registers lighting and object parts as independent props, and chooses stillness without a concrete dramatic purpose. Its source quotes pass the contract, but that does not make this strong storytelling.",
+          "reviewer": "Codex written-plan creative inspection",
+          "planHash": "4120e0ee51efa23cc8ad4393241f84b542d5a22bfe89f092b15f77fb13886b0f",
+          "at": "2026-10-07T13:46:10.368Z",
+          "scope": "Creative inspection of a written scene plan; not generated-pixel or human listening evidence."
+        }
+      },
+      {
+        "sceneId": "scene_002_ddaf2281",
+        "ordinal": 2,
+        "heading": "EXT. OCEAN - DAWN",
+        "locationId": "location_d8d28567e28a71a911f0",
+        "interiorExterior": "EXT.",
+        "timeOfDay": "DAWN",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 165,
+          "end": 401
+        },
+        "blocks": [
+          {
+            "kind": "action",
+            "text": "The same paper boat floats alone in the blue water. Its folded paper stretches into canvas; its bow curves into polished timber. The tiny vessel grows into a full-size mahogany sailing yacht. The sea opens around it.",
+            "sourceRef": {
+              "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+              "start": 184,
+              "end": 400
+            }
+          }
+        ],
+        "dialogueUnits": [],
+        "status": "needs_plan_revision",
+        "plan": {
+          "props": [
+            {
+              "name": "same paper boat floats alone",
+              "sourceQuote": "The same paper boat floats alone in the blue water."
+            },
+            {
+              "name": "blue water",
+              "sourceQuote": "The same paper boat floats alone in the blue water."
+            },
+            {
+              "name": "Its folded paper stretches into",
+              "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+            },
+            {
+              "name": "canvas; its bow curves into",
+              "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+            },
+            {
+              "name": "polished timber",
+              "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+            },
+            {
+              "name": "tiny vessel grows into",
+              "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+            },
+            {
+              "name": "full-size mahogany sailing yacht",
+              "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+            },
+            {
+              "name": "sea opens around it",
+              "sourceQuote": "The sea opens around it."
+            }
+          ],
+          "characterDesigns": [],
+          "sceneId": "scene_002_ddaf2281",
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "summary": "A paper boat transforms into a grand yacht as dawn breaks over the ocean — a visual metaphor for hope rising from memory’s wreckage, witnessed in silence and awe",
+          "story": {
+            "about": "A humble paper boat, abandoned in a workshop, becomes a majestic sailing yacht on the open sea — symbolizing the resurrection of lost dreams through time and perspective",
+            "whyCare": "The viewer cares because the transformation mirrors inner renewal — the quiet power of imagination to resurrect what was broken or forgotten",
+            "hook": "The same paper boat floats alone in the blue water — but it is no longer paper. It is now a full-size mahogany sailing yacht, and the sea opens around it",
+            "beginning": "The scene opens with the paper boat drifting alone in the blue water, its form still recognizable but now imbued with new dimensions",
+            "development": "The camera reveals how its folded paper has become canvas, its bow polished timber — each element evolving into something grander, more enduring",
+            "tension": "The transformation is silent, almost magical — the viewer wonders if this is memory, wish, or reality — and whether the sea will protect or consume it",
+            "payoff": "The yacht sails freely, surrounded by the vast ocean — a visual resolution that suggests rebirth, not just restoration, of what was lost",
+            "ending": "The sea opens around it — no one watches, no one speaks — the yacht exists in perfect solitude, a monument to quiet triumph",
+            "withheld": "The origin of the boat, the identity of its creator, and the nature of the transformation remain unspoken — leaving the mystery of creation and meaning intact",
+            "amplify": [
+              "Emphasize the contrast between the small, fragile paper boat and the immense, polished yacht",
+              "Use slow, sweeping camera movements to mirror the expansion of the vessel",
+              "Let the dawn light wash over the yacht, highlighting its new materiality and scale"
+            ],
+            "remove": [
+              "Any dialogue or narration — the transformation must be felt, not explained",
+              "Any visual clutter — keep the frame focused solely on the boat and the sea",
+              "Any sense of urgency or conflict — the tone must be serene, reverent, and contemplative"
+            ]
+          },
+          "shots": [
+            {
+              "shotId": "shot_001",
+              "action": "Wide establishing shot of the ocean at dawn, the paper boat floating alone in the blue water",
+              "reason": "To establish the setting and introduce the transformed object as the emotional and visual center",
+              "camera": "Dolly out from the horizon",
+              "framing": "Wide shot, low angle, emphasizing the vastness of the sea",
+              "duration": 3,
+              "entityNames": [
+                "OCEAN",
+                "same paper boat floats alone",
+                "blue water"
+              ],
+              "dialogueUnitIds": [],
+              "sourceQuote": "EXT. OCEAN - DAWN",
+              "entityIds": [
+                "location_d8d28567e28a71a911f0",
+                "prop_217b5d57473be5d0b20d",
+                "prop_79c5b53398916ebaf8c7"
+              ],
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 165,
+                "end": 182,
+                "quote": "EXT. OCEAN - DAWN"
+              },
+              "origin": "creative_shot_plan",
+              "status": "requires_generation",
+              "requiredAssets": [
+                {
+                  "kind": "video",
+                  "status": "requires_generation"
+                }
+              ]
+            },
+            {
+              "shotId": "shot_002",
+              "action": "Slow zoom into the boat, revealing its folded paper now stretched into canvas",
+              "reason": "To visually confirm the metamorphosis — the paper is no longer paper, but fabric, ready for wind and sail",
+              "camera": "Push-in with shallow depth of field",
+              "framing": "Medium close-up, focusing on the texture transition",
+              "duration": 2,
+              "entityNames": [
+                "same paper boat floats alone",
+                "Its folded paper stretches into",
+                "canvas; its bow curves into"
+              ],
+              "dialogueUnitIds": [],
+              "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber.",
+              "entityIds": [
+                "prop_217b5d57473be5d0b20d",
+                "prop_c89613406348b8f8839d",
+                "prop_958746732c67933515ca"
+              ],
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 236,
+                "end": 312,
+                "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+              },
+              "origin": "creative_shot_plan",
+              "status": "requires_generation",
+              "requiredAssets": [
+                {
+                  "kind": "video",
+                  "status": "requires_generation"
+                }
+              ]
+            },
+            {
+              "shotId": "shot_003",
+              "action": "Extreme close-up on the bow, now polished timber, reflecting the dawn light",
+              "reason": "To highlight the material evolution — the bow is no longer paper, but a crafted, enduring part of a ship",
+              "camera": "Macro lens, static",
+              "framing": "Extreme close-up, focus on the curve and sheen",
+              "duration": 2,
+              "entityNames": [
+                "polished timber",
+                "tiny vessel grows into",
+                "full-size mahogany sailing yacht"
+              ],
+              "dialogueUnitIds": [],
+              "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht.",
+              "entityIds": [
+                "prop_612c422b458fdf5dce07",
+                "prop_c0bcf3bcad710398cfb3",
+                "prop_3b0e51b6a921c5584793"
+              ],
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 313,
+                "end": 375,
+                "quote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+              },
+              "origin": "creative_shot_plan",
+              "status": "requires_generation",
+              "requiredAssets": [
+                {
+                  "kind": "video",
+                  "status": "requires_generation"
+                }
+              ]
+            },
+            {
+              "shotId": "shot_004",
+              "action": "Pull back to reveal the full yacht, sailing alone in the open sea",
+              "reason": "To complete the transformation and show the scale of the miracle — the boat is now a vessel of majesty",
+              "camera": "Dolly back, high angle",
+              "framing": "Wide shot, showing the yacht against the horizon",
+              "duration": 3,
+              "entityNames": [
+                "full-size mahogany sailing yacht",
+                "sea opens around it"
+              ],
+              "dialogueUnitIds": [],
+              "sourceQuote": "The sea opens around it.",
+              "entityIds": [
+                "prop_3b0e51b6a921c5584793",
+                "prop_09b636b0735d894df767"
+              ],
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 376,
+                "end": 400,
+                "quote": "The sea opens around it."
+              },
+              "origin": "creative_shot_plan",
+              "status": "requires_generation",
+              "requiredAssets": [
+                {
+                  "kind": "video",
+                  "status": "requires_generation"
+                }
+              ]
+            }
+          ],
+          "continuity": [
+            {
+              "entityName": "OCEAN",
+              "key": "appearance",
+              "value": "Blue water, calm and expansive, lit by the first rays of dawn",
+              "intentionalChange": false,
+              "sourceQuote": "EXT. OCEAN - DAWN",
+              "entityId": "location_d8d28567e28a71a911f0",
+              "sceneId": "scene_002_ddaf2281",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 165,
+                "end": 182,
+                "quote": "EXT. OCEAN - DAWN"
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "same paper boat floats alone",
+              "key": "prop_state",
+              "value": "Now a full-size mahogany sailing yacht, moving gracefully through the water",
+              "intentionalChange": true,
+              "sourceQuote": "The same paper boat floats alone in the blue water. Its folded paper stretches into canvas; its bow curves into polished timber. The tiny vessel grows into a full-size mahogany sailing yacht. The sea opens around it.",
+              "entityId": "prop_217b5d57473be5d0b20d",
+              "sceneId": "scene_002_ddaf2281",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 184,
+                "end": 400,
+                "quote": "The same paper boat floats alone in the blue water. Its folded paper stretches into canvas; its bow curves into polished timber. The tiny vessel grows into a full-size mahogany sailing yacht. The sea opens around it."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "blue water",
+              "key": "appearance",
+              "value": "Reflecting the dawn, shimmering with gentle ripples around the yacht",
+              "intentionalChange": false,
+              "sourceQuote": "The same paper boat floats alone in the blue water.",
+              "entityId": "prop_79c5b53398916ebaf8c7",
+              "sceneId": "scene_002_ddaf2281",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 184,
+                "end": 235,
+                "quote": "The same paper boat floats alone in the blue water."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "Its folded paper stretches into",
+              "key": "prop_material",
+              "value": "Canvas, taut and weathered, catching the morning light",
+              "intentionalChange": true,
+              "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber.",
+              "entityId": "prop_c89613406348b8f8839d",
+              "sceneId": "scene_002_ddaf2281",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 236,
+                "end": 312,
+                "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "canvas; its bow curves into",
+              "key": "prop_material",
+              "value": "Polished timber, smooth and gleaming, shaped like a classic yacht bow",
+              "intentionalChange": true,
+              "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber.",
+              "entityId": "prop_958746732c67933515ca",
+              "sceneId": "scene_002_ddaf2281",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 236,
+                "end": 312,
+                "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "polished timber",
+              "key": "appearance",
+              "value": "Reflective, warm-toned wood, catching the golden dawn light",
+              "intentionalChange": false,
+              "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber.",
+              "entityId": "prop_612c422b458fdf5dce07",
+              "sceneId": "scene_002_ddaf2281",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 236,
+                "end": 312,
+                "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "tiny vessel grows into",
+              "key": "prop_state",
+              "value": "Now a full-size mahogany sailing yacht, sails unfurled, gliding through the water",
+              "intentionalChange": true,
+              "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht.",
+              "entityId": "prop_c0bcf3bcad710398cfb3",
+              "sceneId": "scene_002_ddaf2281",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 313,
+                "end": 375,
+                "quote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "full-size mahogany sailing yacht",
+              "key": "prop_state",
+              "value": "Sailing alone, surrounded by the open sea, no other vessels in sight",
+              "intentionalChange": false,
+              "sourceQuote": "The sea opens around it.",
+              "entityId": "prop_3b0e51b6a921c5584793",
+              "sceneId": "scene_002_ddaf2281",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 376,
+                "end": 400,
+                "quote": "The sea opens around it."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            },
+            {
+              "entityName": "sea opens around it",
+              "key": "appearance",
+              "value": "The ocean parts gently around the yacht, creating a natural corridor of water",
+              "intentionalChange": false,
+              "sourceQuote": "The sea opens around it.",
+              "entityId": "prop_09b636b0735d894df767",
+              "sceneId": "scene_002_ddaf2281",
+              "sourceRef": {
+                "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+                "start": 376,
+                "end": 400,
+                "quote": "The sea opens around it."
+              },
+              "origin": "planned_requirement",
+              "previousValue": null,
+              "status": "requires_visual_verification"
+            }
+          ],
+          "entityBibleHash": "c602b18925321888fab4c5e0373c30bc5dc47d5deca9bf6be016a6e0c6a73ae8",
+          "dialogueUnits": [],
+          "origin": "model_generated_scene_plan",
+          "limitation": "A plan establishes intended continuity. Generated pixels and dialogue audio require separate verification; planning is not a finished movie.",
+          "planHash": "56b57329ddd5c78d55e1acc575efa5013dfdbb0b29594f99ac9abcb1765e3184"
+        },
+        "plannerProvenance": {
+          "model": "Qwen/Qwen3-VL-8B-Instruct",
+          "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+          "settings": [
+            {
+              "dtype": "bfloat16",
+              "attention": "sdpa",
+              "do_sample": false,
+              "max_tokens": 1600
+            },
+            {
+              "dtype": "bfloat16",
+              "attention": "sdpa",
+              "do_sample": false,
+              "max_tokens": 3200
+            }
+          ],
+          "stages": [
+            {
+              "id": "scene-entities",
+              "seconds": 10.470370273000071
+            },
+            {
+              "id": "scene-shots",
+              "seconds": 84.08371452699998
+            }
+          ],
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "origin": "nvidia_screenplay_scene_planning"
+        },
+        "planReview": {
+          "accepted": false,
+          "reason": "The written plan reveals the finished yacht in its hook and divides the transformation into four separate shots. It creates new prop identities from action fragments instead of resolving the same transforming vessel. This hides the requested continuous creative event and invents renewal-from-memory symbolism.",
+          "reviewer": "Codex written-plan creative inspection",
+          "planHash": "56b57329ddd5c78d55e1acc575efa5013dfdbb0b29594f99ac9abcb1765e3184",
+          "at": "2026-10-07T13:46:10.386Z",
+          "scope": "Creative inspection of a written scene plan; not generated-pixel or human listening evidence."
+        }
+      }
+    ],
+    "entities": [
+      {
+        "entityId": "location_e7fec7a8facf5315f7bc",
+        "kind": "location",
+        "name": "WORKSHOP",
+        "origin": "script_heading",
+        "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b"
+      },
+      {
+        "entityId": "location_d8d28567e28a71a911f0",
+        "kind": "location",
+        "name": "OCEAN",
+        "origin": "script_heading",
+        "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b"
+      },
+      {
+        "entityId": "prop_cd3c864b728e179a6032",
+        "kind": "prop",
+        "name": "paper boat",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 41,
+          "end": 82,
+          "quote": "A paper boat rests on a dark timber desk."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_ace87f2d4928564c0bc4",
+        "kind": "prop",
+        "name": "dark timber desk",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 41,
+          "end": 82,
+          "quote": "A paper boat rests on a dark timber desk."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_8d360cfc3d3c095cc46d",
+        "kind": "prop",
+        "name": "One crease",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 83,
+          "end": 123,
+          "quote": "One crease catches a thin line of light."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_b275101dabaa2a5a5d0f",
+        "kind": "prop",
+        "name": "thin line of light",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 83,
+          "end": 123,
+          "quote": "One crease catches a thin line of light."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_07cc45c54e6080804255",
+        "kind": "prop",
+        "name": "bead of water",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 124,
+          "end": 163,
+          "quote": "A bead of water touches the folded bow."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_4c5c82943ec8a3d52f5e",
+        "kind": "prop",
+        "name": "folded bow",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 124,
+          "end": 163,
+          "quote": "A bead of water touches the folded bow."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_217b5d57473be5d0b20d",
+        "kind": "prop",
+        "name": "same paper boat floats alone",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 184,
+          "end": 235,
+          "quote": "The same paper boat floats alone in the blue water."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_79c5b53398916ebaf8c7",
+        "kind": "prop",
+        "name": "blue water",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 184,
+          "end": 235,
+          "quote": "The same paper boat floats alone in the blue water."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_c89613406348b8f8839d",
+        "kind": "prop",
+        "name": "Its folded paper stretches into",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 236,
+          "end": 312,
+          "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_958746732c67933515ca",
+        "kind": "prop",
+        "name": "canvas; its bow curves into",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 236,
+          "end": 312,
+          "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_612c422b458fdf5dce07",
+        "kind": "prop",
+        "name": "polished timber",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 236,
+          "end": 312,
+          "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_c0bcf3bcad710398cfb3",
+        "kind": "prop",
+        "name": "tiny vessel grows into",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 313,
+          "end": 375,
+          "quote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_3b0e51b6a921c5584793",
+        "kind": "prop",
+        "name": "full-size mahogany sailing yacht",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 313,
+          "end": 375,
+          "quote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+        },
+        "origin": "script_grounded_model_breakdown"
+      },
+      {
+        "entityId": "prop_09b636b0735d894df767",
+        "kind": "prop",
+        "name": "sea opens around it",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 376,
+          "end": 400,
+          "quote": "The sea opens around it."
+        },
+        "origin": "script_grounded_model_breakdown"
+      }
+    ],
+    "continuity": [
+      {
+        "entityName": "WORKSHOP",
+        "key": "appearance",
+        "value": "Dark, empty, lit only by ambient light filtering through a window or skylight",
+        "intentionalChange": false,
+        "sourceQuote": "INT. WORKSHOP - NIGHT",
+        "entityId": "location_e7fec7a8facf5315f7bc",
+        "sceneId": "scene_001_3ffc412e",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 18,
+          "end": 39,
+          "quote": "INT. WORKSHOP - NIGHT"
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "paper boat",
+        "key": "prop_state",
+        "value": "Still, undisturbed, slightly crumpled at the bow",
+        "intentionalChange": false,
+        "sourceQuote": "A paper boat rests on a dark timber desk.",
+        "entityId": "prop_cd3c864b728e179a6032",
+        "sceneId": "scene_001_3ffc412e",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 41,
+          "end": 82,
+          "quote": "A paper boat rests on a dark timber desk."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "dark timber desk",
+        "key": "prop_material",
+        "value": "Polished dark wood, grain visible under dim lighting",
+        "intentionalChange": false,
+        "sourceQuote": "A paper boat rests on a dark timber desk.",
+        "entityId": "prop_ace87f2d4928564c0bc4",
+        "sceneId": "scene_001_3ffc412e",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 41,
+          "end": 82,
+          "quote": "A paper boat rests on a dark timber desk."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "One crease",
+        "key": "prop_state",
+        "value": "Faint, curved, catching a thin line of light",
+        "intentionalChange": false,
+        "sourceQuote": "One crease catches a thin line of light.",
+        "entityId": "prop_8d360cfc3d3c095cc46d",
+        "sceneId": "scene_001_3ffc412e",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 83,
+          "end": 123,
+          "quote": "One crease catches a thin line of light."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "thin line of light",
+        "key": "appearance",
+        "value": "Vertical beam, casting a soft glow on the crease, source off-screen",
+        "intentionalChange": false,
+        "sourceQuote": "One crease catches a thin line of light.",
+        "entityId": "prop_b275101dabaa2a5a5d0f",
+        "sceneId": "scene_001_3ffc412e",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 83,
+          "end": 123,
+          "quote": "One crease catches a thin line of light."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "bead of water",
+        "key": "prop_state",
+        "value": "Suspended above the folded bow, about to fall or already beginning to slide",
+        "intentionalChange": false,
+        "sourceQuote": "A bead of water touches the folded bow.",
+        "entityId": "prop_07cc45c54e6080804255",
+        "sceneId": "scene_001_3ffc412e",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 124,
+          "end": 163,
+          "quote": "A bead of water touches the folded bow."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "folded bow",
+        "key": "prop_state",
+        "value": "Tightly folded, slightly damp, reflecting the light",
+        "intentionalChange": false,
+        "sourceQuote": "A bead of water touches the folded bow.",
+        "entityId": "prop_4c5c82943ec8a3d52f5e",
+        "sceneId": "scene_001_3ffc412e",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 124,
+          "end": 163,
+          "quote": "A bead of water touches the folded bow."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "OCEAN",
+        "key": "appearance",
+        "value": "Blue water, calm and expansive, lit by the first rays of dawn",
+        "intentionalChange": false,
+        "sourceQuote": "EXT. OCEAN - DAWN",
+        "entityId": "location_d8d28567e28a71a911f0",
+        "sceneId": "scene_002_ddaf2281",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 165,
+          "end": 182,
+          "quote": "EXT. OCEAN - DAWN"
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "same paper boat floats alone",
+        "key": "prop_state",
+        "value": "Now a full-size mahogany sailing yacht, moving gracefully through the water",
+        "intentionalChange": true,
+        "sourceQuote": "The same paper boat floats alone in the blue water. Its folded paper stretches into canvas; its bow curves into polished timber. The tiny vessel grows into a full-size mahogany sailing yacht. The sea opens around it.",
+        "entityId": "prop_217b5d57473be5d0b20d",
+        "sceneId": "scene_002_ddaf2281",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 184,
+          "end": 400,
+          "quote": "The same paper boat floats alone in the blue water. Its folded paper stretches into canvas; its bow curves into polished timber. The tiny vessel grows into a full-size mahogany sailing yacht. The sea opens around it."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "blue water",
+        "key": "appearance",
+        "value": "Reflecting the dawn, shimmering with gentle ripples around the yacht",
+        "intentionalChange": false,
+        "sourceQuote": "The same paper boat floats alone in the blue water.",
+        "entityId": "prop_79c5b53398916ebaf8c7",
+        "sceneId": "scene_002_ddaf2281",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 184,
+          "end": 235,
+          "quote": "The same paper boat floats alone in the blue water."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "Its folded paper stretches into",
+        "key": "prop_material",
+        "value": "Canvas, taut and weathered, catching the morning light",
+        "intentionalChange": true,
+        "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber.",
+        "entityId": "prop_c89613406348b8f8839d",
+        "sceneId": "scene_002_ddaf2281",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 236,
+          "end": 312,
+          "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "canvas; its bow curves into",
+        "key": "prop_material",
+        "value": "Polished timber, smooth and gleaming, shaped like a classic yacht bow",
+        "intentionalChange": true,
+        "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber.",
+        "entityId": "prop_958746732c67933515ca",
+        "sceneId": "scene_002_ddaf2281",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 236,
+          "end": 312,
+          "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "polished timber",
+        "key": "appearance",
+        "value": "Reflective, warm-toned wood, catching the golden dawn light",
+        "intentionalChange": false,
+        "sourceQuote": "Its folded paper stretches into canvas; its bow curves into polished timber.",
+        "entityId": "prop_612c422b458fdf5dce07",
+        "sceneId": "scene_002_ddaf2281",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 236,
+          "end": 312,
+          "quote": "Its folded paper stretches into canvas; its bow curves into polished timber."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "tiny vessel grows into",
+        "key": "prop_state",
+        "value": "Now a full-size mahogany sailing yacht, sails unfurled, gliding through the water",
+        "intentionalChange": true,
+        "sourceQuote": "The tiny vessel grows into a full-size mahogany sailing yacht.",
+        "entityId": "prop_c0bcf3bcad710398cfb3",
+        "sceneId": "scene_002_ddaf2281",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 313,
+          "end": 375,
+          "quote": "The tiny vessel grows into a full-size mahogany sailing yacht."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "full-size mahogany sailing yacht",
+        "key": "prop_state",
+        "value": "Sailing alone, surrounded by the open sea, no other vessels in sight",
+        "intentionalChange": false,
+        "sourceQuote": "The sea opens around it.",
+        "entityId": "prop_3b0e51b6a921c5584793",
+        "sceneId": "scene_002_ddaf2281",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 376,
+          "end": 400,
+          "quote": "The sea opens around it."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      },
+      {
+        "entityName": "sea opens around it",
+        "key": "appearance",
+        "value": "The ocean parts gently around the yacht, creating a natural corridor of water",
+        "intentionalChange": false,
+        "sourceQuote": "The sea opens around it.",
+        "entityId": "prop_09b636b0735d894df767",
+        "sceneId": "scene_002_ddaf2281",
+        "sourceRef": {
+          "sourceSha256": "5cc68853f6d926958a628dcb8773a573f5d01cafe90f25befea7aa1ffb28e08b",
+          "start": 376,
+          "end": 400,
+          "quote": "The sea opens around it."
+        },
+        "origin": "planned_requirement",
+        "previousValue": null,
+        "status": "requires_visual_verification"
+      }
+    ],
+    "warnings": [
+      "Text before the first scene heading is retained in the source; verify title-page or unassigned action."
+    ],
+    "goal": "Generate and automatically assemble scenes from the screenplay. Recorded or multicamera footage is not required."
+  },
+  "sceneJobs": [],
+  "assets": [],
+  "outputs": [],
+  "events": [
+    {
+      "stage": "scene_plan",
+      "sceneId": "scene_001_3ffc412e",
+      "planHash": "4120e0ee51efa23cc8ad4393241f84b542d5a22bfe89f092b15f77fb13886b0f",
+      "at": "2026-10-07T13:39:40.069Z"
+    },
+    {
+      "stage": "scene_plan",
+      "sceneId": "scene_002_ddaf2281",
+      "planHash": "56b57329ddd5c78d55e1acc575efa5013dfdbb0b29594f99ac9abcb1765e3184",
+      "at": "2026-10-07T13:41:42.799Z"
+    },
+    {
+      "stage": "scene_plan_review",
+      "sceneId": "scene_001_3ffc412e",
+      "accepted": false,
+      "reason": "The written plan invents lost-dreams/memory backstory absent from the screenplay, registers lighting and object parts as independent props, and chooses stillness without a concrete dramatic purpose. Its source quotes pass the contract, but that does not make this strong storytelling.",
+      "reviewer": "Codex written-plan creative inspection",
+      "planHash": "4120e0ee51efa23cc8ad4393241f84b542d5a22bfe89f092b15f77fb13886b0f",
+      "at": "2026-10-07T13:46:10.368Z",
+      "scope": "Creative inspection of a written scene plan; not generated-pixel or human listening evidence."
+    },
+    {
+      "stage": "scene_plan_review",
+      "sceneId": "scene_002_ddaf2281",
+      "accepted": false,
+      "reason": "The written plan reveals the finished yacht in its hook and divides the transformation into four separate shots. It creates new prop identities from action fragments instead of resolving the same transforming vessel. This hides the requested continuous creative event and invents renewal-from-memory symbolism.",
+      "reviewer": "Codex written-plan creative inspection",
+      "planHash": "56b57329ddd5c78d55e1acc575efa5013dfdbb0b29594f99ac9abcb1765e3184",
+      "at": "2026-10-07T13:46:10.386Z",
+      "scope": "Creative inspection of a written scene plan; not generated-pixel or human listening evidence."
+    }
+  ],
+  "lease": null,
+  "failure": null,
+  "createdAt": "2026-10-07T12:44:02.258Z",
+  "updatedAt": "2026-10-07T13:46:10.387Z"
+}

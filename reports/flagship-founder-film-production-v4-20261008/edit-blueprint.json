@@ -1,0 +1,63 @@
+{
+  "status": "PENDING_REVIEWED_ASSETS_NOT_COMPILED",
+  "editor": "Existing Content Factory Studio adapter, Director command kernel and shared renderer only",
+  "fps": 24,
+  "sourceBrief": "../flagship-founder-film-production-v3-20261008/source-brief.txt",
+  "sourceVoiceAndScore": "../flagship-founder-film-production-v3-20261008/assets",
+  "assets": {
+    "yacht-continuation": "Retained generated/real-voyage-v6.mp4; private photographic moving source, 5.0625 seconds",
+    "origin": "Retained v3 moving conversation, 5.25-second reviewed trim",
+    "cascade": "Pending v4 NVIDIA story-relief take and visual approval",
+    "failure": "Retained v3 failure take, pending whole-film re-review",
+    "capacity-turn": "Pending v4 NVIDIA story-relief take and visual/factual approval",
+    "director": "Pending actual AutoPromote source-decision capture after the v4 source exists",
+    "vace-transform": "Pending v4 NVIDIA VACE inference and frame-by-frame approval",
+    "created-by": "Pending actual-project/final-film evidence shot and attribution review",
+    "ident": "Pending v5 NVIDIA ident preview, then full take and visual approval"
+  },
+  "hero": {
+    "targetSeconds": 51,
+    "sequence": [
+      {"assetId":"yacht-continuation","trimStart":0,"duration":3,"reason":"Open inside the earned payoff before revealing its source."},
+      {"assetId":"origin","trimStart":0,"duration":5.25,"reason":"One human conversation gives the problem scale."},
+      {"assetId":"cascade","trimStart":0,"duration":5.5,"reason":"Escalate sync to sound to failed render without repeating the picture."},
+      {"assetId":"failure","trimStart":0,"duration":4.5,"reason":"Hold on a documented consequence."},
+      {"assetId":"capacity-turn","trimStart":0,"duration":9,"reason":"The historical zero becomes 3000 milliGPU in one causal event."},
+      {"assetId":"director","trimStart":0,"duration":6.75,"reason":"Show actual creative source decisions, not a feature montage."},
+      {"assetId":"vace-transform","trimStart":0,"duration":5.0625,"reason":"Show the connected paper, wood, sail and world transformation."},
+      {"assetId":"yacht-continuation","trimStart":0,"duration":1.9375,"reason":"Let the full vessel keep moving; accept only after seam review."},
+      {"assetId":"created-by","trimStart":0,"duration":5,"reason":"Close the self-referential production loop."},
+      {"assetId":"ident","trimStart":0,"duration":5,"reason":"Give the brand a physical reveal and readable hold."}
+    ],
+    "voiceStarts": {"cold-open":0.35,"origin":3.35,"cascade":8.6,"failure":14.25,"quota":18.55,"breakthrough":23.4,"director":27.55,"magic":34.3,"reveal":41.55},
+    "scoreAssetId":"score",
+    "cueAssetId":"cues"
+  },
+  "cutdown": {
+    "targetSeconds": 26.5,
+    "sequence": [
+      {"assetId":"origin","trimStart":0,"duration":3,"reason":"Start with a real creator problem."},
+      {"assetId":"capacity-turn","trimStart":1,"duration":7,"reason":"Keep the obstacle and documented turn together."},
+      {"assetId":"vace-transform","trimStart":0,"duration":5.0625,"reason":"The paper-to-yacht visual event."},
+      {"assetId":"yacht-continuation","trimStart":0,"duration":1.9375,"reason":"Complete the transformed world."},
+      {"assetId":"created-by","trimStart":0,"duration":4.5,"reason":"Name who made the film."},
+      {"assetId":"ident","trimStart":0,"duration":5,"reason":"Resolve the brand with a clean hold."}
+    ],
+    "voiceStarts":{"cold-open":0.15,"quota":3.1,"breakthrough":6.65,"magic":10.3,"reveal":17.35},
+    "scoreAssetId":"score-cutdown",
+    "cueAssetId":"cues-cutdown"
+  },
+  "teaser": {
+    "targetSeconds": 11,
+    "sequence": [
+      {"assetId":"vace-transform","trimStart":0.5625,"duration":4.5,"reason":"Begin with paper still readable and stay for the vessel change."},
+      {"assetId":"created-by","trimStart":0,"duration":3.5,"reason":"Allow the complete existing 3.4-second reveal narration."},
+      {"assetId":"ident","trimStart":2,"duration":3,"reason":"Show the impact and final readable identity."}
+    ],
+    "voiceStarts":{"reveal":4.6},
+    "scoreAssetId":"score-teaser",
+    "cueAssetId":"cues-teaser",
+    "scoreNeeds11SecondExtension":true
+  },
+  "compilationGate":"Each media item needs accepted visual review, exact SHA-256, source provenance and reusable artifact receipt. No substitute footage or public claim if a dependency fails."
+}

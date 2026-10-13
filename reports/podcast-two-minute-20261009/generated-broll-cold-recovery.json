@@ -1,0 +1,134 @@
+{
+  "at": "2026-10-09T08:32:19.002Z",
+  "passed": true,
+  "realNormalEntry": true,
+  "nativeDurationChangeUndoRedo": true,
+  "state": {
+    "projectId": "viral-project-41785a68-22cc-4c47-931a-b8f3aebf40d4",
+    "captionStyle": "minimal",
+    "captionCount": 51,
+    "watermark": false,
+    "mainFrame": {
+      "insetPercent": 2.5,
+      "radiusPercent": 6,
+      "background": "studio_black",
+      "enabled": false
+    },
+    "job": "eadbcbcc5c2975a49b1480e91584e11e5f5b9c26",
+    "overlays": [
+      {
+        "id": "overlay-ef750422-46aa-4086-aa55-3af7d89d2cdc",
+        "startTime": 96.4,
+        "duration": 3,
+        "sourceStoragePath": "studio/sources/bf04dPKELvVMivWoUyLsAVyw2sg2/generated_eadbcbcc5c2975a49b1480e91584e11e5f5b9c26_shot-1_ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6.mp4",
+        "contentHash": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6",
+        "generationRef": {
+          "jobId": "eadbcbcc5c2975a49b1480e91584e11e5f5b9c26",
+          "shotId": "shot-1",
+          "contentHash": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6"
+        },
+        "bRollApprovalStatus": "generated_reviewed",
+        "generationProvenance": {
+          "provider": "wan",
+          "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "modelRevision": "b8fff7315c768468a5333511427288870b2e9635",
+          "settings": {
+            "steps": 50,
+            "width": 1280,
+            "height": 704,
+            "fps": 24,
+            "negativePrompt": "static image, frozen action, motionless camera, text, words, captions, letters, watermarks, logos, screen interface, distorted geometry, warped straight lines, blurry, low quality, artifacts, cartoon, incoherent temporal changes, strobing, shaky camera"
+          },
+          "seed": 1718008347,
+          "prompt": "Two lit candles with dancing flames in foreground, lateral camera glide rightward, soft church window glow behind, natural daylight, no people or text",
+          "jobId": "eadbcbcc5c2975a49b1480e91584e11e5f5b9c26",
+          "attemptId": "br-eadbcbcc5c2975a49b14-shot-1",
+          "contentHash": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6",
+          "origin": "generated_illustration",
+          "evidenceQuote": "I was a church-going child.",
+          "captionId": "transcript-caption-35-timeline-1",
+          "review": {
+            "accepted": true,
+            "reason": "Shot meets all criteria: depicts church setting as nonidentifying illustration, no visible defects, stable framing with believable restrained movement suitable for podcast cutaway",
+            "revisionInstructions": "",
+            "criteria": [
+              {
+                "criterion": "The moving shot depicts the concrete subject in the quoted transcript as a nonidentifying illustration",
+                "passed": true,
+                "observation": "Candles in church setting visually represent 'church' without identifying specific location or people"
+              },
+              {
+                "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+                "passed": true,
+                "observation": "All frames show clean candle flames and background elements with no visible artifacts or distortions"
+              },
+              {
+                "criterion": "The shot has stable framing and believable restrained physical movement suitable for a short podcast cutaway",
+                "passed": true,
+                "observation": "Camera remains steady with subtle natural flame flicker and slight depth-of-field shifts consistent with ambient lighting"
+              }
+            ],
+            "reviewer": "Qwen/Qwen3-VL-8B-Instruct",
+            "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+            "evidenceSha256": "f3315f547ff85a429bdd8dcb24a97ab44358c8e3854927e90cdd9538a7f701c2",
+            "artifactSha256": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6"
+          },
+          "systemReviewHistory": [
+            {
+              "accepted": false,
+              "reason": "Shot does not depict two candles as required; shows multiple candles (at least seven).",
+              "revisionInstructions": "Generate a shot with exactly two lit candles, maintaining the lateral glide and church background context, ensuring no other candles or objects appear in frame during the sequence. Avoid any visual clutter or additional elements beyond the specified subject and environment. Ensure the movement remains restrained and stable for podcast use. Confirm all frames show only the intended two candles without distortion or artifacts. No text, logos, or distracting elements should be present. Frame count:",
+              "criteria": [
+                {
+                  "criterion": "The moving shot depicts the concrete subject in the quoted transcript as an illustration",
+                  "passed": false,
+                  "observation": "Sampled frames show multiple candles (at least seven), not the required two candles"
+                },
+                {
+                  "criterion": "No visible distorted anatomy, broken objects, text, logos or distracting generation defects in sampled frames",
+                  "passed": true,
+                  "observation": "No visible distortions, text, logos, or distracting defects observed in sampled frames"
+                },
+                {
+                  "criterion": "The shot has stable framing and believable restrained movement suitable for a short podcast cutaway",
+                  "passed": true,
+                  "observation": "Framing is stable and movement is lateral glide, consistent with restrained motion for podcast use"
+                }
+              ],
+              "reviewer": "Qwen/Qwen3-VL-8B-Instruct",
+              "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+              "evidenceSha256": "f3315f547ff85a429bdd8dcb24a97ab44358c8e3854927e90cdd9538a7f701c2",
+              "artifactSha256": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6"
+            }
+          ],
+          "technical": {
+            "independentFullDecode": true,
+            "duration": 5.041667,
+            "width": 1280,
+            "height": 704
+          },
+          "reviewHistory": [
+            {
+              "decision": "accept",
+              "ownerUid": "bf04dPKELvVMivWoUyLsAVyw2sg2",
+              "contentHash": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6",
+              "at": "2026-10-09T08:26:34.227Z"
+            }
+          ]
+        }
+      }
+    ],
+    "assets": [
+      {
+        "id": "generated-eadbcbcc5c2975a49b1480e91584e11e5f5b9c26-shot-1",
+        "storagePath": "studio/sources/bf04dPKELvVMivWoUyLsAVyw2sg2/generated_eadbcbcc5c2975a49b1480e91584e11e5f5b9c26_shot-1_ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6.mp4",
+        "contentHash": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6",
+        "generationRef": {
+          "jobId": "eadbcbcc5c2975a49b1480e91584e11e5f5b9c26",
+          "shotId": "shot-1",
+          "contentHash": "ffebda68521ae52f42a675f13eae4b3bc284c1db7c9ff7216838277fe85435e6"
+        }
+      }
+    ]
+  }
+}

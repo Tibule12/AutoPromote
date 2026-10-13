@@ -1,0 +1,26 @@
+{
+  "scope": "First three seconds audio continuity only; no fresh full-mix listening approval",
+  "preview": "gpu/subject/preview.mp4",
+  "final": "vfx/download.mp4",
+  "sampleRate": 44100,
+  "samples": 132300,
+  "rmsPreview": [
+    0.12908457219600677,
+    0.07255466282367706
+  ],
+  "rmsFinal": [
+    0.17437653243541718,
+    0.09459856897592545
+  ],
+  "peakFinal": [
+    0.9287979602813721,
+    0.671626627445221
+  ],
+  "samePcm": false,
+  "zeroLagCorrelation": -0.013303232039593538,
+  "freshListeningAcceptance": false,
+  "maximumCorrelationSearchWindowSeconds": 1,
+  "bestAlignmentOffsetSeconds": 0.025,
+  "alignedMonoCorrelation": 0.9495309062391771,
+  "interpretation": "Programme trim/speed/routing must be checked before continuity can be accepted; raw proxy and mixed final are not sample-identical"
+}

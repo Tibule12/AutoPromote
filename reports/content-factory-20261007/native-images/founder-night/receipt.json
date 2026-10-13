@@ -1,0 +1,31 @@
+{
+  "status": "GENERATED_PENDING_REVIEW",
+  "sourceBrief": "Create a memorable AutoPromote welcome film and social campaign from an idea alone, with no recorded footage. Show imagination becoming finished work, rather than a feature list.",
+  "prompt": "Empty founder workbench late at night, one ordinary blank sheet and a tiny ivory paper sailboat under a warm practical desk lamp. Behind the workbench, an immense imagined ocean appears as the dark room naturally opens toward the blue sea. The small beginning and enormous ambition are visible together. A realistic quiet human workspace without any person, no invented testimonials or identity, cinematic amber and blue lighting, tactile paper and wood, no readable screens or text.",
+  "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "modelRevision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "tool": "AutoPromote NVIDIA image adapter",
+  "seed": 2026100736,
+  "settings": {
+    "steps": 35,
+    "guidance": 7,
+    "width": 1344,
+    "height": 768,
+    "dtype": "float16"
+  },
+  "gpu": "NVIDIA L40S",
+  "origin": "native_generated_image",
+  "artifact": {
+    "path": "/work/native-images/founder-night/video.mp4",
+    "sha256": "b30d3d85ec7e0470c42ec1050e175bef1c5b4b55c8e6cb45fb86cc01042bec69",
+    "duration": 3.0
+  },
+  "reusableArtifacts": [
+    {
+      "role": "native_image",
+      "path": "/work/native-images/founder-night/image.png",
+      "sha256": "9812ce2482094e7119ea8ecb2944f684d4ff386a18c42ab89094ce8af0d4b027"
+    }
+  ],
+  "seconds": 5.294149651000225
+}

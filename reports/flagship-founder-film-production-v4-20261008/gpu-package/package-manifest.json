@@ -1,0 +1,25 @@
+{
+  "status": "PREPARED_CPU_ONLY",
+  "files": {
+    "assets/control.mp4": "d3a51fd4d1a0a78f93b9365c0a612ea98e48c87f65f0316b1c86574d14915b39",
+    "assets/firstImage.png": "b3eb1b794e787906cf7539ed5bd0df180c9c16c98e90364ae320cc455ecb0115",
+    "assets/lastImage.png": "ec65d8f80b03608a8a638482d849d4cdc16c02d81f5d6af03fc7ce05388ae462",
+    "generate-controlled-video.py": "cbe044a9c8b21f51e4e018c3b2dd29280816e1b259e89d7cc8dd1a11b75939e6",
+    "request-template.json": "46b7c2b76a719ded129b6260ddb34ae47f87085bd1160655497d276ab0d873fb",
+    "logo-geometry.json": "c88e7a6e9c145f6ac8a50bd873cb5cab49ee6b4ef387e787cdf842b3548b082c",
+    "cinematic-ident-v5.py": "64f7e48bb9775162a90373536ae43204f92b8bff3bb0ee8632e69afb7ee107e1",
+    "vector_geometry.py": "238e65386a1f7ffbc09ca1ea545fbaf58c7d13755041f67e525d1c7e679d1ea0",
+    "ident-preview-request-template.json": "65d5a86ac473a1c7a0a6fd1a16216618f85b4f2867110edb1b2c718b6513ba20",
+    "story-relief-v4.py": "dfa66f35c091e6db7b53c4aef686599eb6de4b1cb3b0ba060f1ae48e8fa42266",
+    "font.ttf": "28c4c189a44803b1986fd16074187034dc6d94ad35f5e87de13dd0e786b70b73",
+    "cascade-evidence.json": "86e41a1d1f345f2ce15b85c1eaf0f24fef53fde6de2e8bd9feb724dfc14ed0ec",
+    "capacity-evidence.json": "2a564ea53205c33b0ef66a5daa66e61375d35c1c3dccd960ccd19f6fbd68c5fa",
+    "cascade-preview-request-template.json": "f1b16d046e90862219a72b864420fa75f1dc4934287f3e7d4c6d80f9414882f8",
+    "capacity-turn-preview-request-template.json": "f4c8e754e237327bf9931b6a2bf7575dc3cda4df1e1198add09eb0be3808878d",
+    "verify-v4-package.py": "4a610d29e4e0af802997e20c94b78a289147515b20de5588b7483da2f4fa5c47",
+    "font-license.txt": "bca346a561b9668925ff55af1fcf0e10e65e07b1b40dd057bb4f3ded848ef8cf",
+    "run-v4-vace-on-l40s.sh": "603f9cd13995e1f43765a27e4ab04ab446de93769db0bce36a9570dea4b01177",
+    "run-v4-ident-preview-on-l40s.sh": "ff76cb35c2a4ba72c70376edfc7ea9301724eda5e2079a36ae435a68b4b33bdb",
+    "run-v4-story-preview-on-l40s.sh": "9f10c6622713c95fdbca95e9d28531c5cc22c10f169219f6cb53d767c0455ca9"
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "sourceBriefSha256": "b880815288204a91cc71d2c125e5eccc6444fe68c07085c21e76e4fc7e797c7c",
+  "assets": [
+    {
+      "assetId": "cold-open",
+      "type": "video",
+      "duration": 4,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Show a finished world immediately; ask how an editing problem became this.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "origin",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Make sync understandable to a stranger through one human conversation, not interface instructions.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "cascade",
+      "type": "video",
+      "duration": 7,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Each fix causes a consequence, building frustration.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "problems",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "The original problem grows larger than the founder expected.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "failure",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Let a setback hurt; hold briefly rather than racing through a decorative code montage.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "quota",
+      "type": "video",
+      "duration": 7,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "External constraint becomes the lowest point; persistence is the emotional turn.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "breakthrough",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "A genuine quota grant and bounded execution earn the release of tension. 3000 milliGPU is capacity, not 3000 physical GPUs.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "director",
+      "type": "video",
+      "duration": 7,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Move from repairs to creative decisions, with real sources and editorial data.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "magic",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Reinterpret the hook as a constructed film instead of an unrelated spectacle.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "reveal",
+      "type": "video",
+      "duration": 6,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "Land the promised self-referential payoff. Production receipts disclose assistant-directed story and source generation versus actual AutoPromote editing/rendering.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "ident",
+      "type": "video",
+      "duration": 5,
+      "generation": "editable Blender/Cycles scene with real source textures",
+      "purpose": "A dedicated editable brand sequence, not a flat logo fade.",
+      "status": "planned",
+      "reuse": "hero, cutdown, teaser",
+      "nativeRequired": true
+    },
+    {
+      "assetId": "narration",
+      "type": "audio",
+      "generation": "Kokoro-82M standard af_heart on CPU",
+      "status": "planned"
+    },
+    {
+      "assetId": "score-and-cues",
+      "type": "audio",
+      "generation": "original editable synthesis with narrative timing; no generic loop",
+      "status": "planned"
+    }
+  ],
+  "retainedSources": [
+    "real-voyage-v6.mp4",
+    "podcast-host.webp",
+    "podcast-guest.webp",
+    "RTX quota before/after and gpu-receipt.json",
+    "archived L4 quota denial",
+    "original-v1 logo-geometry.json"
+  ],
+  "acceptance": [
+    "coherent visual continuity",
+    "readable facts",
+    "no malformed original logo",
+    "source evidence hashes",
+    "no narration overlaps",
+    "sound not silent or clipped",
+    "no private tokens or personal data in textures"
+  ]
+}

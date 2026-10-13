@@ -1,0 +1,7 @@
+Creating Cloud Run job [viral-studio-rtx-qualification] in project [autopromote-cc6d3] region [us-central1]
+Creating job...
+Done.
+Job [viral-studio-rtx-qualification] has successfully been created.
+
+To execute this job, use:
+gcloud run jobs execute viral-studio-rtx-qualification

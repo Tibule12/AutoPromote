@@ -1,0 +1,247 @@
+{
+  "startedAt": "2026-10-09T09:33:47.338Z",
+  "finishedAt": "2026-10-09T09:38:35.080Z",
+  "projectName": "A\nAutoPromote\nVIRAL CLIP STUDIO\nPodcast \u2014 finished two-minute edit 20261009",
+  "realApi": true,
+  "noMocks": true,
+  "submittedJobId": "viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+  "events": [
+    {
+      "path": "/api/media/preview-silence",
+      "status": 200,
+      "at": "2026-10-09T09:34:04.803Z"
+    },
+    {
+      "path": "/api/media/process",
+      "status": 200,
+      "at": "2026-10-09T09:34:13.822Z"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:34:22.784Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:34:28.882Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:34:35.103Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:34:40.833Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:34:47.203Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:34:53.262Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:34:58.884Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:05.981Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:10.731Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:16.889Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:23.437Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:29.109Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:35.147Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:40.610Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:46.903Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:52.436Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:35:58.423Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:04.377Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:10.656Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:17.034Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:22.436Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:28.451Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:34.460Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:40.466Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:48.205Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:54.026Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:36:59.177Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:37:06.343Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:37:11.608Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:37:17.269Z",
+      "jobStatus": "processing"
+    },
+    {
+      "path": "/api/media/status/viral_aae9d4641c9e4095d055a46173b2aff812e0c1630a114cbc484c8b191bb5d90c",
+      "status": 200,
+      "at": "2026-10-09T09:37:24.098Z",
+      "jobStatus": "completed"
+    }
+  ],
+  "errors": [],
+  "download": {
+    "suggestedName": "viral_clip_rendered.mp4",
+    "bytes": 167074643,
+    "nativeCompleted": true
+  },
+  "output": "reports/podcast-two-minute-20261009/vfx/download.mp4",
+  "outputSha256": "5f2b71f5b19046f37fe3482ae4b86afd636edde5946daba4a9f15c4dfd80face",
+  "technical": {
+    "passed": true,
+    "sha256": "5f2b71f5b19046f37fe3482ae4b86afd636edde5946daba4a9f15c4dfd80face",
+    "bytes": 167074643,
+    "seconds": 120,
+    "video": {
+      "width": 1920,
+      "height": 1080,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "120.000000",
+      "frameCount": 2880,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 h264_nvenc"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "120.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 5760000,
+      "sampleRate": 48000,
+      "seconds": 120,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/podcast-two-minute-20261009/vfx/download.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "independentAudioPacketRetest": "final-audio-clock-retest.json"
+}

@@ -1,0 +1,330 @@
+{
+  "status": "RENDERED_PENDING_CREATIVE_REVIEW",
+  "pipeline": "AutoPromote RenderViralRequest/render_viral_clip_impl",
+  "rendererSourceSha256": "bca31d3ac52a7cbc2d7524384883d78aca971f951f30f93467ccab75450f0ed6",
+  "requestSha256": "adbcf483e6e9b479f1a8d0d72bebe1177bec3cbe4282d4936851489556421236",
+  "transportSourceSha256": "89463a996657c766174ea2338e109248bdad4706cb09ae7022df7a3b9d21d678",
+  "sha256": "d6ae987aed7bed591ba9dcf685e86aedc4c855a3c632a6a249f89718b937b07a",
+  "audioMeasurements": {
+    "sampleRate": 48000,
+    "channels": 1,
+    "peak": 0.5903173089027405,
+    "rms": 0.07075912033764181,
+    "clippedSamples": 0,
+    "duration": 53.845333333333336,
+    "limitation": "Actual encoded channel layout; objective decode only, no human listening or speech comprehension acceptance."
+  },
+  "duration": 53.833333,
+  "encoder": "libx264",
+  "encodersUsed": [
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264",
+    "libx264"
+  ],
+  "requestedEncoderPolicy": "cpu",
+  "probe": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+        "profile": "High",
+        "codec_type": "video",
+        "codec_tag_string": "avc1",
+        "codec_tag": "0x31637661",
+        "width": 1920,
+        "height": 1080,
+        "coded_width": 1920,
+        "coded_height": 1080,
+        "closed_captions": 0,
+        "film_grain": 0,
+        "has_b_frames": 2,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "16:9",
+        "pix_fmt": "yuv420p",
+        "level": 40,
+        "chroma_location": "left",
+        "field_order": "progressive",
+        "refs": 1,
+        "is_avc": "true",
+        "nal_length_size": "4",
+        "id": "0x1",
+        "r_frame_rate": "24/1",
+        "avg_frame_rate": "24/1",
+        "time_base": "1/12288",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 661504,
+        "duration": "53.833333",
+        "bit_rate": "3516918",
+        "bits_per_raw_sample": "8",
+        "nb_frames": "1292",
+        "extradata_size": 47,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "VideoHandler",
+          "vendor_id": "[0][0][0][0]",
+          "encoder": "Lavc60.31.102 libx264"
+        }
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_long_name": "AAC (Advanced Audio Coding)",
+        "profile": "LC",
+        "codec_type": "audio",
+        "codec_tag_string": "mp4a",
+        "codec_tag": "0x6134706d",
+        "sample_fmt": "fltp",
+        "sample_rate": "48000",
+        "channels": 1,
+        "channel_layout": "mono",
+        "bits_per_sample": 0,
+        "initial_padding": 0,
+        "id": "0x2",
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/48000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 2583984,
+        "duration": "53.833000",
+        "bit_rate": "160998",
+        "nb_frames": "2525",
+        "extradata_size": 5,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "SoundHandler",
+          "vendor_id": "[0][0][0][0]"
+        }
+      }
+    ],
+    "format": {
+      "filename": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/flagship-founder-film-20261008/outputs/final-v2/one-edit-hero/final.mp4",
+      "nb_streams": 2,
+      "nb_programs": 0,
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "format_long_name": "QuickTime / MOV",
+      "start_time": "0.000000",
+      "duration": "53.833333",
+      "size": "24787537",
+      "bit_rate": "3683596",
+      "probe_score": 100,
+      "tags": {
+        "major_brand": "isom",
+        "minor_version": "512",
+        "compatible_brands": "isomiso2avc1mp41",
+        "encoder": "Lavf60.16.100"
+      }
+    }
+  },
+  "renderSeconds": 71.74201707000066,
+  "cloudCredentialsSupplied": false,
+  "result": {
+    "status": "completed",
+    "progress": 100,
+    "detail": "Render complete",
+    "job_id": "e34f9a04-173a-4815-924a-2a51deff2b6a",
+    "output_path": "/tmp/tmp/e34f9a04-173a-4815-924a-2a51deff2b6a_viral.mp4",
+    "output_url": "file:///home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004/reports/flagship-founder-film-20261008/outputs/final-v2/one-edit-hero/final.mp4",
+    "thumbnail_url": null,
+    "cover_frame": null,
+    "thumbnail_frame": null,
+    "brand_watermark": false,
+    "caption_review_copy": false,
+    "brand_watermark_receipt": {
+      "enabled": false,
+      "status": "disabled_for_studio"
+    },
+    "caption_review_receipt": null,
+    "output_settings": {
+      "resolution": "1080p",
+      "width": 1920,
+      "height": 1080,
+      "fps": 24,
+      "codec": "h264",
+      "encoder": "libx264",
+      "quality": "high",
+      "crf": 19,
+      "preset": "veryfast"
+    },
+    "watermark_text": null,
+    "audio_proof": {
+      "expected": true,
+      "verified": true,
+      "codec": "aac",
+      "channels": 1,
+      "sample_rate": 48000,
+      "duration_seconds": 53.833
+    },
+    "media_validation": {
+      "duration": 53.833333,
+      "size": 24787537,
+      "video": {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "avg_frame_rate": "24/1"
+      },
+      "audio": {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0"
+      }
+    },
+    "final_quality_gate": {
+      "status": "passed",
+      "media": {
+        "duration": 53.833333,
+        "size": 24787537,
+        "video": {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "avg_frame_rate": "24/1"
+        },
+        "audio": {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0"
+        }
+      },
+      "duration": {
+        "expected": 53.833,
+        "actual": 53.833,
+        "delta": 0.0,
+        "tolerance": 1.884
+      },
+      "audio_expected": true,
+      "picture_timing": {
+        "duration": 53.833,
+        "container_duration": 53.833,
+        "delta": 0.0,
+        "tolerance": 0.1
+      },
+      "black_ranges": [
+        {
+          "start": 48.8333,
+          "end": 50.0417,
+          "duration": 1.20833
+        }
+      ],
+      "planned_black_ranges": [
+        {
+          "start": 48.75,
+          "end": 50.25,
+          "reason": "Intentional dark anticipation in the dedicated five-second AutoPromote ident."
+        }
+      ],
+      "browser_delivery": "h264_yuv420p_faststart"
+    },
+    "duration": 53.833333,
+    "speed_plan": [
+      {
+        "start_time": 0.0,
+        "end_time": 53.833333,
+        "rate": 1.0
+      }
+    ],
+    "creative_receipt": {
+      "status": "not_requested",
+      "fallback": "clean",
+      "effects": []
+    },
+    "professional_cleanup": {
+      "status": "disabled"
+    },
+    "audio_restoration": null,
+    "audio_automation": {},
+    "audio_track_states": {},
+    "audio_remix_receipt": {
+      "version": 1,
+      "enabled": false,
+      "status": "not_requested"
+    },
+    "studio_plan_validation": {
+      "valid": false,
+      "errors": [
+        "legacy_request_without_plan"
+      ]
+    }
+  },
+  "priorUpmixedAudioMeasurements": {
+    "sampleRate": 48000,
+    "channels": 2,
+    "peak": 0.41741737723350525,
+    "rms": 0.05003424361348152,
+    "clippedSamples": 0,
+    "duration": 53.845333333333336,
+    "limitation": "Objective decoded measurements; listening and speech comprehension require founder review."
+  },
+  "measurementCorrection": "Post-render independent audit: previous helper forced stereo decoding of a mono encoded output. Corrected measurements use the actual output channel layout; media and historical renderer/transport hashes are unchanged."
+}

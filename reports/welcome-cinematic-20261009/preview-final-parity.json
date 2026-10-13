@@ -1,0 +1,39 @@
+{
+  "scope": "Private film: source world/clock/edit/sound continuity, proxy-to-final composition review. No full Studio lifecycle promotion.",
+  "nativeSceneSame": true,
+  "nativeSceneSha256": "a48c7c7dee9390ec1e0af711566dc0e2d1b5d9e1ea507955b58f4beea7cac73a",
+  "timelineBoundaries": [
+    0,
+    8,
+    15,
+    25,
+    32,
+    38
+  ],
+  "editorialPayloadSame": true,
+  "titles": 7,
+  "sources": 5,
+  "audioStemsSame": true,
+  "proxy": {
+    "resolution": [
+      640,
+      360
+    ],
+    "nativeCadence": 12,
+    "deliveryFps": 24
+  },
+  "final": {
+    "resolution": [
+      1920,
+      1080
+    ],
+    "nativeCadence": 24,
+    "deliveryFps": 24
+  },
+  "evidence": [
+    "proxy-review-sheet.jpg",
+    "final-review-sheet.jpg",
+    "final-validation.json",
+    "final-creative-review.json"
+  ]
+}
