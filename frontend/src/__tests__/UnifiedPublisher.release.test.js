@@ -150,3 +150,16 @@ test("only explicit destination handoff preselects providers", () => {
   expect(screen.getByRole("tab", { name: "YouTube" })).toHaveAttribute("aria-selected", "true");
   expect(screen.getByRole("tab", { name: "Reddit" })).toBeInTheDocument();
 });
+
+test("a large asset source can be searched without an endless first-step grid", async () => {
+  const many = Array.from({ length: 15 }, (_, index) => ({ ...asset, id: `studio-${index}`, title: `Studio render ${index}`, url: `https://example.test/studio-${index}.mp4` }));
+  const originalFetch = global.fetch;
+  global.fetch = jest.fn((url, options) => String(url).startsWith(API_ENDPOINTS.MY_CONTENT)
+    ? Promise.resolve(response({ content: many })) : originalFetch(url, options));
+  render(<UnifiedPublisher contentList={many} onUpload={onUpload} />);
+  await screen.findByRole("button", { name: "Show all 15 assets" });
+  expect(within(screen.getByRole("region", { name: "Choose release content" })).getAllByRole("button", { name: /Studio render/ })).toHaveLength(12);
+  fireEvent.change(screen.getByPlaceholderText("Search by name or template"), { target: { value: "Studio render 14" } });
+  expect(screen.getByRole("button", { name: /Studio render 14/ })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Studio render 13/ })).not.toBeInTheDocument();
+});

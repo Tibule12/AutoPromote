@@ -35,6 +35,10 @@ export default function PublisherReleaseWorkspace({
   customSchedule, setCustomSchedule, customFields, setCustomFields,
   reviewOptions, getData, nextReason, submit, submitting, feedback, advanced, bestTime, onNavigate,
 }) {
+  const [assetQuery, setAssetQuery] = useState("");
+  const [showAllAssets, setShowAllAssets] = useState(false);
+  const matchingAssets = assets.filter(asset => `${asset.name} ${asset.templateName || ""}`.toLowerCase().includes(assetQuery.trim().toLowerCase()));
+  const displayedAssets = showAllAssets ? matchingAssets : matchingAssets.slice(0, 12);
   const complete = selected.filter(platform => !issues[platform]?.length).length;
   const needsAttention = selected.length - complete;
   const source = sourceLabels(sourceAsset || file);
@@ -86,14 +90,16 @@ export default function PublisherReleaseWorkspace({
           {step === 0 && <section className="release-card release-content-chooser" aria-label="Choose release content">
             <h3>Choose your content</h3><p>Use media AutoPromote already owns, or upload a video or image.</p>
             <div className="release-source-tabs" role="tablist" aria-label="Content sources">
-              {[ ["studio", "Studio"], ["generated", "Generated"], ["assets", "Project assets"], ["upload", "Upload"] ].map(([id, name]) => <button key={id} type="button" role="tab" aria-selected={assetTab === id} onClick={() => onAssetTab(id)}>{name}</button>)}
+              {[ ["studio", "Studio"], ["generated", "Generated"], ["assets", "Project assets"], ["upload", "Upload"] ].map(([id, name]) => <button key={id} type="button" role="tab" aria-selected={assetTab === id} onClick={() => { setAssetQuery(""); setShowAllAssets(false); onAssetTab(id); }}>{name}</button>)}
             </div>
+            {assetTab !== "upload" && !assetsLoading && assets.length > 12 && <label className="release-asset-search">Find an asset<input type="search" value={assetQuery} onChange={event => { setAssetQuery(event.target.value); setShowAllAssets(false); }} placeholder="Search by name or template" /></label>}
             {assetTab === "upload" ? <label className="release-upload"><strong>Choose a video or image</strong><span>Upload from your device</span><input aria-label="Upload release media" type="file" accept="video/*,image/*" onChange={onUploadFile} /></label> : <div className="release-asset-grid" aria-busy={assetsLoading}>
-              {!assetsLoading && assets.map(asset => <button key={asset.sourceContentId} type="button" onClick={() => onSelectAsset(asset)}>
+              {!assetsLoading && displayedAssets.map(asset => <button key={asset.sourceContentId} type="button" onClick={() => onSelectAsset(asset)}>
                 {asset.thumbnailUrl ? <img src={sanitizeUrl(asset.thumbnailUrl)} alt="" /> : <span aria-hidden="true">▷</span>}
                 <strong>{asset.name}</strong>{sourceLabels(asset).template && <small>{sourceLabels(asset).template}</small>}
               </button>)}
-              {assetsLoading ? <p role="status">Loading {assetTab === "assets" ? "project" : assetTab} assets…</p> : !assets.length && <p>No available {assetTab === "assets" ? "project" : assetTab} assets in this workspace. Use another source or upload media.</p>}
+              {assetsLoading ? <p role="status">Loading {assetTab === "assets" ? "project" : assetTab} assets…</p> : !matchingAssets.length && <p>{assetQuery ? "No assets match that search." : `No available ${assetTab === "assets" ? "project" : assetTab} assets in this workspace. Use another source or upload media.`}</p>}
+              {!assetsLoading && !showAllAssets && matchingAssets.length > displayedAssets.length && <button type="button" className="release-show-assets" onClick={() => setShowAllAssets(true)}>Show all {matchingAssets.length} assets</button>}
             </div>}
             {file && advanced}
           </section>}

@@ -9,6 +9,7 @@ import {
 } from "../UserDashboardTabs/scheduleReleaseModel";
 
 const platforms = ["facebook", "instagram", "linkedin", "reddit", "tiktok", "youtube"];
+const beforeFirstRelease = new Date("2026-10-13T06:00:00Z").getTime();
 const pieces = [
   ["Coffee", "timeline", "2026-10-13T09:00:00.000Z"],
   ["Coffee", "final edit", "2026-10-14T09:00:00.000Z"],
@@ -76,6 +77,7 @@ test("calendar selects the release detail, expands Reddit, and viewing makes no 
       schedulesList={schedules}
       contentList={[]}
       defaultTimezone="Africa/Johannesburg"
+      currentTime={beforeFirstRelease}
       {...actions}
     />
   );
@@ -118,7 +120,7 @@ test("upcoming view hides old history while keeping the six destinations togethe
     <SchedulesPanel
       schedulesList={[old, ...schedules]}
       contentList={[]}
-      currentTime={new Date("2026-10-13T06:00:00Z").getTime()}
+      currentTime={beforeFirstRelease}
     />
   );
   expect(screen.getAllByText("6", { selector: ".schedule-kpis strong" })).toHaveLength(2);
@@ -167,7 +169,7 @@ test("post copy editor targets one destination and does not write until saved", 
 test("reschedule dialog submits an instant and its selected timezone", async () => {
   const actions = callbacks();
   actions.onRescheduleMany.mockResolvedValue(true);
-  render(<SchedulesPanel schedulesList={schedules} contentList={[]} defaultTimezone="UTC" {...actions} />);
+  render(<SchedulesPanel schedulesList={schedules} contentList={[]} defaultTimezone="UTC" currentTime={beforeFirstRelease} {...actions} />);
   fireEvent.click(screen.getByRole("button", { name: "Reschedule release" }));
   const dialog = screen.getByRole("dialog", { name: "Reschedule" });
   expect(actions.onRescheduleMany).not.toHaveBeenCalled();
