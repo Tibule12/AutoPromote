@@ -21,7 +21,7 @@ from viral_motion_graphics import (
     prepare_voiceover_samples,
 )
 from studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
-from studio_composition import validate_layer_order
+from studio_composition import validate_layer_order, validate_graphic_groups
 
 
 class MotionContractTests(unittest.TestCase):
@@ -102,6 +102,7 @@ return {{effect,pcm:Array.from(synthesizeEffect(effect,48000))}};}})));'''
             validate_design=validate_design,
             validate_resolved_overlays=lambda _overlays: [],
             validate_layer_order=validate_layer_order,
+            validate_graphic_groups=validate_graphic_groups,
             normalize_audio_remix=lambda _remix: None,
             validate_resolved_subject_vfx=validate_resolved_subject_vfx,
             match_subject_vfx=match_subject_vfx,

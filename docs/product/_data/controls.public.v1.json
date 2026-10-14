@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.10",
+  "knowledge_version": "1.0.11",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -3666,7 +3666,7 @@
       ],
       "label": "Layer order",
       "status": "PARTIAL",
-      "meaning": "Moves an ordinary graphic, motion scene or 3D scene backward or forward in the shared flat stack. The top row appears in front.",
+      "meaning": "Moves an ordinary graphic, motion scene, owned3D scene or group backward/forward among its siblings. The top row appears in front.",
       "constraints": {
         "type": "array",
         "minimum": 0,
@@ -3689,9 +3689,195 @@
         "studio.compositing"
       ],
       "limitations": [
-        "Static flat order only; source footage/source VFX and generated captions keep their separate stages.",
+        "Static graphic/group sibling order only; source footage/source VFX and generated captions keep their separate stages.",
         "3D still requires an existing current owned export asset. No generation is triggered by reordering.",
-        "Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and nesting remain unqualified."
+        "Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and broader nesting remain unqualified.",
+        "Groups preserve contiguous canonical leaf order. Reorder grouped timeline layers in Composite; master timing/animation/masks/blends remain open."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_x",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Group X position",
+      "status": "PARTIAL",
+      "meaning": "Translates the composed group horizontally relative to the programme canvas.",
+      "constraints": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 100,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "percent of stage",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
+        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
+        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_y",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Group Y position",
+      "status": "PARTIAL",
+      "meaning": "Translates the composed group vertically relative to the programme canvas.",
+      "constraints": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 100,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "percent of stage",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
+        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
+        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_scale",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Group scale",
+      "status": "PARTIAL",
+      "meaning": "Scales the composed group uniformly about the canvas centre, preserving child-local edits.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 2,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "multiplier",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
+        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
+        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_rotation",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Group rotation",
+      "status": "PARTIAL",
+      "meaning": "Rotates the composed group about the canvas centre, before the parent translation.",
+      "constraints": {
+        "type": "number",
+        "minimum": -180,
+        "maximum": 180,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "degrees",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
+        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
+        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_opacity",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Group opacity",
+      "status": "PARTIAL",
+      "meaning": "Fades the composed group once after its children overlap, before parent composition.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "fraction",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
+        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
+        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
       ],
       "updated_at": "2026-10-14",
       "product_version": "1.2.0"

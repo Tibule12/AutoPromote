@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-14T03:41:06.206696Z",
+  "updatedAt": "2026-10-14T04:41:56.753840Z",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -3797,7 +3797,7 @@
       "capability": "Compositing",
       "readiness": "PARTIAL",
       "complete": false,
-      "assessmentReason": "Canonical cross-family flat order now has scoped native image/title/two-motion lifecycle and occlusion evidence. Actual owned3D/video/large stacks, nested composites and complete picture/sound remain unqualified.",
+      "assessmentReason": "Canonical flat order and static nested group transforms have scoped native image/title/two-motion lifecycle and visible-image geometry evidence. Master animation/masks/blends/clip ownership, actual owned3D/video/large/deeper stacks and complete picture/sound remain unqualified.",
       "verifiedScope": "Oct 8: normal signed-in Studio → real L40S SAM2 preview → native playback/review/save → 12s final export/download. 72-frame preview byte-identical to previously accepted audio; preview and final pixels inspected and fully decoded.",
       "strongestVerifiedSlice": {
         "readiness": "FUNCTIONAL",
@@ -3817,7 +3817,8 @@
           "motionScenes",
           "threeDScenes",
           "subjectVfxScenes",
-          "compositionPlan"
+          "compositionPlan",
+          "editGraph.settings.compoundClips (graphic_group hierarchy)"
         ],
         "sourceRefs": [
           "graph",
@@ -3831,7 +3832,8 @@
           "transform/opacity",
           "mask/subject source",
           "B-roll layout/timing",
-          "Shared flat-stack order across ordinary layers, motion and3D scenes"
+          "Shared flat-stack order across ordinary layers, motion and3D scenes",
+          "Static nested group X/Y, uniform scale, rotation and whole-group opacity; root/child sibling order, reset and remove transform"
         ],
         "auditCoverage": "Targeted source/family inspection and retained real settings; exhaustive visible-control runtime inventory pending S04.",
         "confirmedUnwired": [],
@@ -3839,7 +3841,8 @@
         "missingOrUnqualifiedProfessionalControls": [
           "Broad native cross-family ordering including owned3D/video and large stacks",
           "Nested blends/masks",
-          "Multiple effects same occurrence"
+          "Multiple effects same occurrence",
+          "Group master keys, editable anchor, group blend/mask and clip ownership"
         ]
       },
       "preview": {
@@ -3993,7 +3996,8 @@
         "Only first 3s of a 12s podcast, four subject effects. Hair edges, complex cuts/occlusion, all Creator FX and full depth-map workflows remain unqualified.",
         "Unified global layer order across stages",
         "Nested blends/masks",
-        "Multiple effects same occurrence"
+        "Multiple effects same occurrence",
+        "Static Normal-child group lifecycle/geometry is bounded; master animation/anchor/masks/blends, deeper/video/owned3D groups and full raster/audio remain unqualified."
       ],
       "evidence": [
         {
@@ -4016,6 +4020,9 @@
         {
           "path": "reports/studio-canonical-visual-20261008/README.md",
           "kind": "canonical_visual_foundation_native_state_and_explicit_export_blockers"
+        },
+        {
+          "path": "reports/studio-professional-nested-groups-20261014/checkpoint.json"
         }
       ],
       "testExecution": {
@@ -7919,25 +7926,25 @@
   },
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "CANONICAL_CROSS_FAMILY_FLAT_LAYER_ORDER",
-    "lastSessionRealCapabilityRuns": 2,
+    "lastSessionKind": "CANONICAL_STATIC_NESTED_GROUP_TRANSFORMS",
+    "lastSessionRealCapabilityRuns": 1,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-layer-order-20261014/README.md",
+    "exactBlockersSource": "reports/studio-professional-nested-groups-20261014/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-layer-order-20261014/README.md",
+    "lastSessionEvidence": "reports/studio-professional-nested-groups-20261014/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendCasesPassed": 24,
-      "compositorCasesPassed": 42,
+      "frontendCasesPassed": 40,
+      "compositorCasesPassed": 59,
       "legacyAudioMotionCasesPassed": 21,
       "strictLocalAppBuild": "PASS",
       "fullStudioSuite": false
     },
-    "nextSlice": "S03 nested composition and group transforms on the existing canonical graph; keep S02 raster/moving/cold/broad picture and sound open",
+    "nextSlice": "S03 shared group transform keyframes and group property rows on the canonical graph, then group masks/blends and clip ownership; keep S02 raster/moving/cold/broad picture and sound open",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -11677,5 +11684,40 @@
       "S04"
     ],
     "nextImplementationSlice": "S03 nested composition and group transforms on the existing canonical graph; keep S02 raster/moving/cold/broad picture and sound open"
+  },
+  "professionalNestedGroups20261014": {
+    "evidence": "reports/studio-professional-nested-groups-20261014/README.md",
+    "checkpoint": "reports/studio-professional-nested-groups-20261014/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Static nested groups reuse the canonical compound settings and shared leaf compositor. One native image/two-motion edit passes history/save/cold reopen/CPU export/full timeline playback and four visible-image geometry pairs. Master animation/anchor/masks/blends, actual owned3D/video/deeper stacks and full raster/audio/readiness remain open.",
+    "nativeProjects": 1,
+    "nativeDiagnosticDuplicates": 1,
+    "nativeCpuExports": 1,
+    "nativeHistorySaveColdReopen": true,
+    "completeStudioRecordings": 1,
+    "geometryPairsPassed": 4,
+    "maxBoundaryP95Pixels": 2,
+    "minimumVisibleImageIou": 0.9804169994766849,
+    "frontendCasesPassed": 40,
+    "compositorCasesPassed": 59,
+    "legacyAudioMotionCasesPassed": 21,
+    "legacyAudioMotionSubtestsPassed": 255,
+    "strictAppBuild": "PASS",
+    "gpuJobs": 0,
+    "paidGpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "actualOwned3DNativeQualified": false,
+    "wholePreviewFinalParityQualified": false,
+    "fullStudioSuiteQualified": false,
+    "readinessPromoted": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ],
+    "nextImplementationSlice": "S03 shared group transform keyframes and group property rows on the canonical graph, then group masks/blends and clip ownership; keep S02 raster/moving/cold/broad picture and sound open",
+    "ownedLocalQaStopped": true,
+    "finalNativePreviewAfterFinalBuild": true,
+    "completedOutputRecoveryAfterDuplicateQualified": false
   }
 }

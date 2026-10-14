@@ -5,6 +5,7 @@ import ProductHelpButton from "./ProductHelpButton";
 import { STUDIO_EXPORT_BLEND_MODES } from "./studioBlendModes";
 import StudioMaskPathEditor from "./StudioMaskPathEditor";
 import StudioLayerStack from "./StudioLayerStack";
+import StudioGroupInspector from "./StudioGroupInspector";
 
 const Range = ({ label, valueLabel, ...props }) => (
   <label className="inspector-range">
@@ -425,6 +426,10 @@ export function MotionInspector({
 
 export function CompositeInspector({
   layerEntries = [],
+  groupTree,
+  groupEntries,
+  onTransformGroup,
+  onRemoveGroup,
   onMoveLayer,
   activeOverlay,
   overlays,
@@ -448,12 +453,11 @@ export function CompositeInspector({
       </div>
 
       <StudioLayerStack entries={layerEntries} onMove={onMoveLayer} />
+      {groupTree && <StudioGroupInspector tree={groupTree} entries={groupEntries} onCreate={onCreateCompound}
+        onTransform={onTransformGroup} onRemove={onRemoveGroup} onMove={onMoveLayer} />}
       <div className="composite-quick-actions">
         <button type="button" onClick={onAddAdjustmentLayer}>
           ＋ Adjustment layer
-        </button>
-        <button type="button" onClick={onCreateCompound}>
-          ▣ Compound selection
         </button>
       </div>
       {adjustmentLayers.length ? (

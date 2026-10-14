@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.10 • 2026-10-14T03:37:38.361841Z
+Development documentation • product 1.2.0 • knowledge 1.0.11 • 2026-10-14T04:31:18.521294Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -116,6 +116,11 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.geometric_mask.path | Mask polygon path | string | source-dependent … source-dependent | percent | "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.geometric_mask.radius | Mask corner radius | number | 0 … 50 | percent | 6 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.layer_order | Layer order | array | 0 … 2000 | none | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_x | Group X position | number | -100 … 100 | percent of stage | 0 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_y | Group Y position | number | -100 … 100 | percent of stage | 0 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_scale | Group scale | number | 0.1 … 2 | multiplier | 1 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_rotation | Group rotation | number | -180 … 180 | degrees | 0 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_opacity | Group opacity | number | 0 … 1 | fraction | 1 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -1420,10 +1425,81 @@ Applies to: image overlays, ordinary title layers. Requires: studio.compositing.
 
 ID: `studio.composite.layer_order` • **PARTIAL**
 
-Moves an ordinary graphic, motion scene or 3D scene backward or forward in the shared flat stack. The top row appears in front.
+Moves an ordinary graphic, motion scene, owned3D scene or group backward/forward among its siblings. The top row appears in front.
 
 Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
 
-- Static flat order only; source footage/source VFX and generated captions keep their separate stages.
+- Static graphic/group sibling order only; source footage/source VFX and generated captions keep their separate stages.
 - 3D still requires an existing current owned export asset. No generation is triggered by reordering.
-- Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and nesting remain unqualified.
+- Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and broader nesting remain unqualified.
+- Groups preserve contiguous canonical leaf order. Reorder grouped timeline layers in Composite; master timing/animation/masks/blends remain open.
+
+<a id="studio-composite-group_x"></a>
+
+## Group X position
+
+ID: `studio.composite.group_x` • **PARTIAL**
+
+Translates the composed group horizontally relative to the programme canvas.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Static transforms only; master keys, editable anchor and group masks/blends are unsupported.
+- At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.
+- Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified.
+
+<a id="studio-composite-group_y"></a>
+
+## Group Y position
+
+ID: `studio.composite.group_y` • **PARTIAL**
+
+Translates the composed group vertically relative to the programme canvas.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Static transforms only; master keys, editable anchor and group masks/blends are unsupported.
+- At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.
+- Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified.
+
+<a id="studio-composite-group_scale"></a>
+
+## Group scale
+
+ID: `studio.composite.group_scale` • **PARTIAL**
+
+Scales the composed group uniformly about the canvas centre, preserving child-local edits.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Static transforms only; master keys, editable anchor and group masks/blends are unsupported.
+- At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.
+- Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified.
+
+<a id="studio-composite-group_rotation"></a>
+
+## Group rotation
+
+ID: `studio.composite.group_rotation` • **PARTIAL**
+
+Rotates the composed group about the canvas centre, before the parent translation.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Static transforms only; master keys, editable anchor and group masks/blends are unsupported.
+- At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.
+- Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified.
+
+<a id="studio-composite-group_opacity"></a>
+
+## Group opacity
+
+ID: `studio.composite.group_opacity` • **PARTIAL**
+
+Fades the composed group once after its children overlap, before parent composition.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Static transforms only; master keys, editable anchor and group masks/blends are unsupported.
+- At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.
+- Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified.

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review canonical cross-family layer order, native controls/history/cold reopen, two owned CPU movies and eight visible-image occlusion pairs. Existing owned3D and full raster/audio/nesting remain unqualified; readiness unchanged.",
-  "reviewed_at": "2026-10-14T03:45:04.629Z",
-  "catalog_sha256": "38294f47cc7c743dc28d975de4eee67f18e547db9efa73c0121bd54c38c48b3d",
+  "reason": "Review static nested graphic-group transforms and five static controls; exact native image/two-motion movie/timeline, diagnostic history, four repeated final-build geometry pairs,120 focused cases and255 subtests. Legacy caption passthrough and null transform rejection repaired. Master animation/anchor/masks/blends, broad stacks/live raster/audio and later completed-output cold adoption remain unqualified; readiness unchanged.",
+  "reviewed_at": "2026-10-14T04:41:57.769Z",
+  "catalog_sha256": "74dbac96b60a322a92af3b08ef0e7e2f7915a622570e644fb40ac757f37597ef",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "4b497e9fc4397ca31067132c6f2e943c86a17d1b2c74ef0ad5b40fff43d8196e"
+      "sha256": "0c50be83f56ddfb5e482bc603df01ef2f3840d5fb92ed17cf7f00e28504510ec"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -71,7 +71,7 @@
     },
     {
       "path": "frontend/src/components/StudioAdvancedInspectors.js",
-      "sha256": "c5662034ed0ac652c24bed7d48f137f57cbeb6a0f7e01905d3aed31009603951"
+      "sha256": "3c0e0b5004dec93ac78449c0036f70c16ece74f3f2bde7428b0f1dad090edeb2"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -86,8 +86,16 @@
       "sha256": "3a0714845f710972eeca2c1f3705035ef93d0281cb9c474d137c05747e561022"
     },
     {
+      "path": "frontend/src/components/StudioGroupInspector.js",
+      "sha256": "fe22b55681ccbdc4654a022ef43bc8890bb0bab5f27d602018082f5dc78c93ce"
+    },
+    {
+      "path": "frontend/src/components/StudioGroupPreview.js",
+      "sha256": "b3bdf2bacfcddba7149534e300af1ec9b19da1974b7022c61b8424a51de55605"
+    },
+    {
       "path": "frontend/src/components/StudioLayerStack.js",
-      "sha256": "202979a5c9e2b58f56ae08527831a330f6d06255477dddf635b143773bc58fd9"
+      "sha256": "f748481d18ed70c90a1ce251884ce19dfdee0e18d6cf54986c9ae2a70722cc36"
     },
     {
       "path": "frontend/src/components/StudioMaskPathEditor.js",
@@ -107,7 +115,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "e4e6311cf54215e363f5e85ec37f79e7fdca5ac7a0e95ea6baa3ea27d9827743"
+      "sha256": "0e918957c589f3f396f7866fcec2c00e105643ad2745d2c527b1221db8ba1c62"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -146,6 +154,10 @@
       "sha256": "21e0a9eb112ff847ad2295de122d68c1c41313b98b6f531648a1aa312df20efe"
     },
     {
+      "path": "frontend/src/components/studioGroups.js",
+      "sha256": "938426347c10b36cd109f677cd0c008d29077adce4d100b03f4b16820cfc1538"
+    },
+    {
       "path": "frontend/src/components/studioLayerOrder.js",
       "sha256": "583dc05accb65c478d0bfb8b5d3f8deb9c8d827624860e98d84b0aa171acdf8a"
     },
@@ -163,7 +175,7 @@
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
-      "sha256": "7640469d20870e50877fbfc8176a7f7e5384b9aa4e0e17659abf5aae30327553"
+      "sha256": "cf9a33c03170a8e860ebad507367bdf083cb1e4f9799a08b7b4a256d04d60183"
     },
     {
       "path": "frontend/src/components/studioSourcePreview.js",
@@ -199,7 +211,7 @@
     },
     {
       "path": "python_media_worker/studio_composition.py",
-      "sha256": "330f9c95e8ed8a5d15b9b6f6fa444a89e22346a7182e49c45ef1c6a49c1c7619"
+      "sha256": "34d3768613f1ab3583e5ff0eae2c09b3a7b00cc6bcc0bd6c64fc0a4679a3cf6b"
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
@@ -323,11 +335,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "fc07e22a07276f022326d29bcf585b3f68e466fe6ffcac920737668b05ce0965"
+      "sha256": "a78c8a8e1f9ef02c8eb72e99f5cf10270e6aefe83c846587ba3d94e4f4cb52b0"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "e7e9bc2001252ebf66ac490c6ad6dc1f530138694bd2dc989f1d0bb0bdc39432"
+      "sha256": "d2aab3e0499bcf4a78142d92df5f838bc4d793315b76f3056e7216014ed85dc2"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

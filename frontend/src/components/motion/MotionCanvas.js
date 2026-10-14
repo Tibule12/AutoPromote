@@ -61,7 +61,8 @@ export default function MotionCanvas({ scenes, getTime, time = 0, zIndex }) {
         setFrame(tick);
         previous = tick;
       }
-      const r = root.current?.getBoundingClientRect();
+      // Ancestor group rotation/scale must not change local canvas geometry.
+      const r = root.current && { width: root.current.clientWidth, height: root.current.clientHeight };
       if (r?.width && r?.height)
         setSize(old =>
           old.w === r.width && old.h === r.height ? old : { w: r.width, h: r.height }

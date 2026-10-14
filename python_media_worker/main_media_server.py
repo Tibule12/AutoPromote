@@ -31613,7 +31613,7 @@ async def render_viral_clip(request: RenderViralRequest):
         from .studio_3d_overlay import validate_resolved_overlays
         from .studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
         from .viral_audio_remix import normalize_audio_remix
-        from .studio_composition import validate_layer_order
+        from .studio_composition import validate_layer_order, validate_graphic_groups
     except ImportError:
         # The production container starts this file as a top-level uvicorn
         # module, while the immutable-image test imports it as a package.
@@ -31621,7 +31621,7 @@ async def render_viral_clip(request: RenderViralRequest):
         from studio_3d_overlay import validate_resolved_overlays
         from studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
         from viral_audio_remix import normalize_audio_remix
-        from studio_composition import validate_layer_order
+        from studio_composition import validate_layer_order, validate_graphic_groups
     try:
         validate_design(request.motionGraphics, [effect.model_dump() for effect in request.sound_effects or []])
         resolved_three_d = validate_resolved_overlays(getattr(request, "threeDGraphics", None))
@@ -31629,6 +31629,7 @@ async def render_viral_clip(request: RenderViralRequest):
             [str(overlay.id) for overlay in request.overlays],
             [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
             [graphic["id"] for graphic in resolved_three_d])
+        validate_graphic_groups(request.composition_plan, explicit_layer_order)
         subject_items = validate_resolved_subject_vfx(getattr(request, "subjectVfx", None))
         if subject_items and not request.timeline_segments:
             raise ValueError("Subject renders require an explicit source timeline")
@@ -31650,13 +31651,14 @@ async def render_viral_clip(request: RenderViralRequest):
 
 async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: str = None):
     try:
-        from .studio_composition import validate_layer_order
+        from .studio_composition import validate_layer_order, validate_graphic_groups
     except ImportError:
-        from studio_composition import validate_layer_order
+        from studio_composition import validate_layer_order, validate_graphic_groups
     explicit_layer_order = validate_layer_order(request.composition_plan,
         [str(overlay.id) for overlay in request.overlays],
         [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
         [graphic["id"] for graphic in request.threeDGraphics or []])
+    validate_graphic_groups(request.composition_plan, explicit_layer_order)
     logger.info(f"Rendering viral clip for {request.video_url} with {len(request.overlays)} overlays (SmartCrop={request.smart_crop}, AutoCaptions={request.auto_captions})")
 
     unresolved_story_visuals = [
@@ -33655,11 +33657,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         if explicit_layer_order is not None:
             try:
-                from .studio_composition import connect_layer_blocks
+                from .studio_composition import connect_grouped_layer_blocks
             except ImportError:
-                from studio_composition import connect_layer_blocks
-            ordered_filters, current_v_label = connect_layer_blocks(
-                overlay_filter_blocks, overlay_base_label, explicit_layer_order)
+                from studio_composition import connect_grouped_layer_blocks
+            ordered_filters, current_v_label = connect_grouped_layer_blocks(
+                overlay_filter_blocks, overlay_base_label, explicit_layer_order,
+                request.composition_plan, base_width, base_height, rendered_timeline_duration)
             filter_chain = filter_chain[:overlay_chain_start] + ordered_filters
 
         # Full-screen B-roll previously covered already-burned words, while

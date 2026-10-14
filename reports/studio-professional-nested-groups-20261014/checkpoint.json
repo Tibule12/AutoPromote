@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-14T04:41:56.753840Z",
+  "clientDate": "2026-10-14",
+  "branch": "agent/studio-professional-continuation-v2",
+  "capabilityImproved": "Static nested graphic-group position, scale, rotation and whole-group opacity on the existing canonical compound settings and explicit leaf order",
+  "changedImplementationFiles": [
+    "frontend/src/components/ViralClipStudio.js",
+    "frontend/src/components/StudioAdvancedInspectors.js",
+    "frontend/src/components/StudioLayerStack.js",
+    "frontend/src/components/StudioLayerStack.css",
+    "frontend/src/components/StudioGroupInspector.js",
+    "frontend/src/components/StudioGroupPreview.js",
+    "frontend/src/components/studioGroups.js",
+    "frontend/src/components/studioRenderCompiler.js",
+    "frontend/src/components/motion/MotionCanvas.js",
+    "frontend/src/components/threeD/Studio3DCanvas.js",
+    "python_media_worker/main_media_server.py",
+    "python_media_worker/studio_composition.py"
+  ],
+  "implementationSha256": {
+    "frontend/src/components/ViralClipStudio.js": "0e918957c589f3f396f7866fcec2c00e105643ad2745d2c527b1221db8ba1c62",
+    "frontend/src/components/StudioAdvancedInspectors.js": "3c0e0b5004dec93ac78449c0036f70c16ece74f3f2bde7428b0f1dad090edeb2",
+    "frontend/src/components/StudioLayerStack.js": "f748481d18ed70c90a1ce251884ce19dfdee0e18d6cf54986c9ae2a70722cc36",
+    "frontend/src/components/StudioLayerStack.css": "4c2bede02d08616c4f32c68ccb5ccb8f6eaf73ee5710c7d04c0cf72a754f15a0",
+    "frontend/src/components/StudioGroupInspector.js": "fe22b55681ccbdc4654a022ef43bc8890bb0bab5f27d602018082f5dc78c93ce",
+    "frontend/src/components/StudioGroupPreview.js": "b3bdf2bacfcddba7149534e300af1ec9b19da1974b7022c61b8424a51de55605",
+    "frontend/src/components/studioGroups.js": "938426347c10b36cd109f677cd0c008d29077adce4d100b03f4b16820cfc1538",
+    "frontend/src/components/studioRenderCompiler.js": "cf9a33c03170a8e860ebad507367bdf083cb1e4f9799a08b7b4a256d04d60183",
+    "frontend/src/components/motion/MotionCanvas.js": "8bac5d7dda1b68276d060f90006c6188a99831ca22bf3f93eb7aa1f8b482b9a3",
+    "frontend/src/components/threeD/Studio3DCanvas.js": "d5cf42be96f7bb2542e66a92f378b5132444e6a44888c9a7614339ff49481eda",
+    "python_media_worker/main_media_server.py": "c262d5b16320563fc0995d1129e5a1e8e82eac331eff1f9e1379e19acb428304",
+    "python_media_worker/studio_composition.py": "34d3768613f1ab3583e5ff0eae2c09b3a7b00cc6bcc0bd6c64fc0a4679a3cf6b"
+  },
+  "nativeCases": [
+    {
+      "variant": "nested",
+      "projectId": "viral-project-1d38ef3b-46db-4f37-b392-d2852357a608",
+      "canonicalHash": "457632bee8cd38088fed671cbc40c3a7da275204de4c86971c3bfd1548f98d24",
+      "outputSha256": "4a8107e12fcaa00ecee97b27e49f0fca9ea7c86183a93520a84d4e0aa60ff111",
+      "studioRecordingSha256": "59d76fcd5c191b91581360ecb5880e5a14e83cd4b1dd5c50de2d45fc808fcec4",
+      "movie": "reports/studio-professional-nested-groups-20261014/proof/nested/final.mp4",
+      "studioRecording": "reports/studio-professional-nested-groups-20261014/proof/nested/edited-in-studio.mp4",
+      "order": [
+        "motion-12aaa46c-a688-4ddb-8732-0aecf836ccfb",
+        "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+        "motion-f4872948-174a-4517-97b9-2f3059478e6f",
+        "title-ea0da8e1-7c17-4428-9840-6e1df42224d5"
+      ],
+      "groups": [
+        {
+          "id": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "name": "Group 1",
+          "kind": "graphic_group",
+          "layerIds": [
+            "motion-12aaa46c-a688-4ddb-8732-0aecf836ccfb",
+            "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5"
+          ],
+          "transform": {
+            "x": -8,
+            "y": 5,
+            "scale": 0.85,
+            "rotation": -12,
+            "opacity": 0.8
+          }
+        },
+        {
+          "id": "group-dd5ad063-d781-4a0b-8c2e-74c04e012a8e",
+          "name": "Group 2",
+          "kind": "graphic_group",
+          "layerIds": [
+            "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+            "motion-f4872948-174a-4517-97b9-2f3059478e6f"
+          ],
+          "transform": {
+            "x": 12,
+            "y": -4,
+            "scale": 1.1,
+            "rotation": 18,
+            "opacity": 0.9
+          }
+        }
+      ],
+      "childKeysPreserved": true,
+      "undo": true,
+      "redo": true,
+      "saveColdReopen": true,
+      "nativeFinishedOutput": true,
+      "timelineVisible": true
+    }
+  ],
+  "finalBuildDiagnosticDuplicate": {
+    "projectId": "viral-project-1deb2495-0cf0-4017-99b8-64ea67d94d2e",
+    "canonicalDecisionsHash": "40bbf0a2d91f4f343fba0f487ca893f76163e9e5ba24e0c5b68560c443c2b409",
+    "canonicalHash": "c8d981d5b8c411c65a7dfecf68c018a29cc68e74caa20ae78f83fede441bffab",
+    "checks": [
+      "bring-group-2-forward",
+      "bring-group-1-forward-in-group-2"
+    ],
+    "uniqueNamesAfterRemoval": true,
+    "exactDecisionsRestored": true,
+    "gpuJobs": 0
+  },
+  "pairQualification": {
+    "comparisons": [
+      {
+        "variant": "nested",
+        "time": 0.5,
+        "nativePixels": 36309,
+        "finalPixels": 36165,
+        "visibleImageIou": 0.9824930929780891,
+        "boundaryP95Pixels": 2.0,
+        "passed": true
+      },
+      {
+        "variant": "nested",
+        "time": 1,
+        "nativePixels": 36124,
+        "finalPixels": 35956,
+        "visibleImageIou": 0.981471809110152,
+        "boundaryP95Pixels": 2.0,
+        "passed": true
+      },
+      {
+        "variant": "nested",
+        "time": 1.5,
+        "nativePixels": 36043,
+        "finalPixels": 35860,
+        "visibleImageIou": 0.9804169994766849,
+        "boundaryP95Pixels": 2.0,
+        "passed": true
+      },
+      {
+        "variant": "nested",
+        "time": 2.5,
+        "nativePixels": 36041,
+        "finalPixels": 35889,
+        "visibleImageIou": 0.980506071202401,
+        "boundaryP95Pixels": 2.0,
+        "passed": true
+      }
+    ],
+    "boundaryP95TolerancePixels": 2,
+    "visibleImageIouMinimum": 0.95,
+    "passed": true,
+    "gpuJobs": 0,
+    "scope": "Four declared exact paused samples of one native nested image/two-motion stack; group opacity0.8×0.9. Visible magenta footprint classifier R>140,G<90,B>140 declared before measurement. Original artwork geometry/occlusion only, no fitted spatial/time alignment. Full glyph/color/live sound/owned3D, larger stacks and moving parity remain unqualified."
+  },
+  "focusedFrontendCasesPassed": 40,
+  "compositorCasesPassed": 59,
+  "legacyAudioMotionWorkerCasesPassed": 21,
+  "legacyAudioMotionWorkerSubtestsPassed": 255,
+  "focusedDistinctCasesPassed": 120,
+  "strictAppBuild": "PASS",
+  "nativeCpuExports": 1,
+  "gpuJobs": 0,
+  "paidGpuRuntimeSeconds": 0,
+  "paidGpuCost": 0,
+  "actualOwned3DNativeRunQualified": false,
+  "wholePreviewFinalParityQualified": false,
+  "fullStudioSuiteQualified": false,
+  "readinessPromoted": false,
+  "retainedFailures": [
+    "First strict App build failed ESLint no-loop-func; the deletion loop was repaired and final strict build passes",
+    "First native edit reused the bring-* intermediate receipt filename for two successful arrow checks; final-build diagnostic duplicate now retains both distinct checks",
+    "Follow-up live capture waited for a completed-output card that was not visible after a diagnostic duplicate; corrected the live-only capture prerequisite without resubmission. Existing completed-output cold adoption after duplicating remains unqualified."
+  ],
+  "remainingBlockers": [
+    "Group master keyframes, editable anchor, masks/blends and clip ownership are not implemented by this static transform slice",
+    "Grouped non-Normal child blend explicitly fails export; whole group blend is not exposed",
+    "Grouped timeline drag reorder directs the user to Composite; native grouped drag/deletion beyond the recorded cases, larger/deeper/video/owned3D stacks and full glyph/effect raster remain unqualified",
+    "Continuous/cold/broad picture, live audio and human listening remain unqualified",
+    "Earlier S02 ellipse1.5s RGB RMSE4.26944 exceeds unchanged4.0 bound",
+    "Completed-output cold adoption after creating a diagnostic duplicate was not visible in the follow-up guard; earlier exact movie playback remains retained, later automatic completed-output recovery is unqualified."
+  ],
+  "nextImplementationSlice": "S03 shared group transform keyframes and group property rows on the canonical graph, then group masks/blends and clip ownership; keep S02 raster/moving/cold/broad picture and sound open",
+  "ownedLocalQaStopped": true,
+  "finalNativePreviewAfterFinalBuild": {
+    "canonicalHash": "457632bee8cd38088fed671cbc40c3a7da275204de4c86971c3bfd1548f98d24",
+    "samplesPassed": 4,
+    "legacyCaptionPassthroughRegressionGuard": true,
+    "nullTransformValuesRejected": true
+  }
+}

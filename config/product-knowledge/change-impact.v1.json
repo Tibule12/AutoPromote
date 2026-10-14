@@ -327,7 +327,10 @@
     {
       "feature_id": "studio.compositing",
       "documentation_impact": [
-        "FEATURE"
+        "FEATURE",
+        "CONTROLS",
+        "DEPENDENCIES",
+        "READINESS"
       ],
       "status_before": "PARTIAL",
       "status_after": "PARTIAL",
@@ -335,9 +338,15 @@
         "frontend/src/components/studioRenderCompiler.js",
         "python_media_worker/studio_layer_motion.py",
         "python_media_worker/studio_text.py",
-        "python_media_worker/main_media_server.py"
+        "python_media_worker/main_media_server.py",
+        "frontend/src/components/studioGroups.js",
+        "frontend/src/components/StudioGroupInspector.js",
+        "frontend/src/components/StudioGroupPreview.js",
+        "python_media_worker/studio_composition.py",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/studio-professional-nested-groups-20261014/README.md"
       ],
-      "reason": "Review actual native geometric-mask/crop/title-layout and delivery-resolution repairs with owned CPU exports. Keep PARTIAL: feather/inversion, arbitrary nesting, full raster/audio and creative/public qualification are open."
+      "reason": "Review static nested graphic-group transforms, canonical membership/order, native image/two-motion history/cold/CPU export/timeline, four bounded image geometry pairs and five static controls. Keep PARTIAL: master keys/anchor/masks/blends, deeper/video/owned3D groups and full raster/live sound remain open."
     },
     {
       "feature_id": "publishing.connections",

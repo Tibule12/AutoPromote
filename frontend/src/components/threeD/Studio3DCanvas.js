@@ -265,7 +265,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
     const draw = () => {
       raf = requestAnimationFrame(draw);
       if (document.hidden) return;
-      const rect = host.getBoundingClientRect();
+      const rect = { width: host.clientWidth, height: host.clientHeight };
       if (!rect.width || !rect.height) return;
       const resized = rect.width !== width || rect.height !== height;
       if (rect.width && rect.height && (rect.width !== width || rect.height !== height)) {

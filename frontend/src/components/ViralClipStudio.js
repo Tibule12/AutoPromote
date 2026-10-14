@@ -12,6 +12,8 @@ import ProductHelpButton from "./ProductHelpButton";
 import StudioLayerMask from "./StudioLayerMask";
 import { studioMediaEffectFilter } from "./studioMediaEffects";
 import { studioLayerEntries, moveStudioLayer, orderStudioCollection } from "./studioLayerOrder";
+import { studioGroupTree, createStudioGroup, moveStudioGroupNode, removeStudioGroup, removeStudioGroupMembers, studioGroupLocalPoint } from "./studioGroups";
+import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity } from "./studioMusicBufferClock";
@@ -3602,7 +3604,8 @@ const ViralClipStudio = ({
     speedKeyframes,
     voiceovers,
     adjustmentLayers,
-    compoundClips,
+    compoundClips: removeStudioGroupMembers(compoundClips, (compositionOrder || []).filter(id =>
+      !studioLayerEntries({ overlays, motionScenes, threeDScenes }).some(entry => entry.id === id))),
     audioAutomationSource,
     audioRestoration,
     proxySettings,
@@ -5676,6 +5679,15 @@ const ViralClipStudio = ({
   };
 
   const compositionEntries = studioLayerEntries({ overlays, motionScenes, threeDScenes, compositionOrder });
+  const compositionIds = compositionEntries.map(entry => entry.id);
+  // Deletions reconcile membership with the previous owned order. Unknown IDs
+  // in imported group records still fail validation rather than disappearing.
+  const effectiveCompoundClips = removeStudioGroupMembers(compoundClips,
+    (compositionOrder || []).filter(id => !compositionIds.includes(id)));
+  const compositionGroups = studioGroupTree(effectiveCompoundClips, compositionIds);
+  const compositionRoots = compositionGroups.roots.map(id => compositionGroups.byId.has(id)
+    ? { id, kind: "group", label: compositionGroups.byId.get(id).name }
+    : compositionEntries.find(entry => entry.id === id));
   const compositionRank = new Map(compositionEntries.map((entry, index) => [entry.id, 100 + index]));
   const applyCompositionOrder = ids => {
     setCompositionOrder(ids);
@@ -5683,7 +5695,11 @@ const ViralClipStudio = ({
     setMotionScenes(current => orderStudioCollection(current, ids));
     setThreeDScenes(current => orderStudioCollection(current, ids));
   };
-  const moveCompositionLayer = (id, direction) => applyCompositionOrder(moveStudioLayer(compositionEntries, id, direction));
+  const moveCompositionLayer = (id, direction) => {
+    if (!compositionGroups.groups.length) { applyCompositionOrder(moveStudioLayer(compositionEntries, id, direction)); return; }
+    const next = moveStudioGroupNode(effectiveCompoundClips, compositionIds, id, direction);
+    setCompoundClips(next.compounds); applyCompositionOrder(next.order);
+  };
   const moveOverlay = (id, direction) => {
     if (Array.isArray(compositionOrder)) { moveCompositionLayer(id, direction); return; }
     setOverlays(prev => {
@@ -5705,6 +5721,9 @@ const ViralClipStudio = ({
   };
 
   const moveOverlayToIndex = (id, nextIndex) => {
+    if (compositionGroups.groups.length) {
+      setStudioActionMessage("Reorder grouped layers in Composite."); return;
+    }
     if (Array.isArray(compositionOrder)) {
       const ordinary = compositionEntries.filter(entry => entry.kind === "overlay").map(entry => entry.id);
       const index = ordinary.indexOf(id);
@@ -10542,24 +10561,16 @@ const ViralClipStudio = ({
     setStudioActionMessage("Adjustment layer added above the video tracks at the playhead.");
   };
 
-  const createCompoundFromSelection = () => {
-    if (!activeOverlay) {
-      setStudioActionMessage("Select a layer to start a compound clip.");
-      return;
-    }
-    setCompoundClips(current => [
-      ...current,
-      {
-        id: createSecureId("compound"),
-        name: `Compound ${current.length + 1}`,
-        layerIds: [activeOverlay.id],
-        startTime: Number(activeOverlay.startTime || 0),
-        duration: Number(activeOverlay.duration || 0),
-      },
-    ]);
-    setStudioActionMessage(
-      "Compound clip created. Add more selected layers from the media bin or timeline."
-    );
+  const createCompoundFromSelection = selected => {
+    try {
+      const names = new Set(compositionGroups.groups.map(group => group.name));
+      let index = compositionGroups.groups.length + 1;
+      while (names.has(`Group ${index}`)) index += 1;
+      const next = createStudioGroup(effectiveCompoundClips, compositionIds, selected,
+        createSecureId("group"), `Group ${index}`);
+      setCompoundClips(next.compounds); applyCompositionOrder(next.order);
+      setStudioActionMessage("Group created. Its children keep their edits and keyframes.");
+    } catch (error) { setStudioActionMessage(error.message); }
   };
 
   const updateVoiceoverTake = (id, changes) => setVoiceovers(current => current.map(take => {
@@ -12637,7 +12648,7 @@ const ViralClipStudio = ({
           audio_keyframes: audioKeyframes,
           speed_keyframes: speedKeyframes,
           adjustment_layers: adjustmentLayers,
-          compound_clips: compoundClips,
+          compound_clips: effectiveCompoundClips,
           voiceovers,
         },
         compositionPlan: compileStudioCompositionForRender(exportEditState.studioDocument),
@@ -17459,6 +17470,11 @@ const ViralClipStudio = ({
 
     if (!dragItem.current) return;
 
+    const localPoint = studioGroupLocalPoint(compositionGroups, dragItem.current,
+      (relativeX / bounds.width) * 100, (relativeY / bounds.height) * 100, bounds.width, bounds.height);
+    percentX = Math.max(0, Math.min(100, localPoint.x));
+    percentY = Math.max(0, Math.min(100, localPoint.y));
+
     setOverlays(prev => {
       const currentOverlay = prev.find(o => o.id === dragItem.current);
       if (!currentOverlay) return prev;
@@ -19316,6 +19332,7 @@ const ViralClipStudio = ({
                           ) : null}
                         </div>
                       ) : null}
+                      <StudioGroupPreview compounds={effectiveCompoundClips} order={compositionIds}>
                       {!renderedOutputUrl && motionScenes.length > 0 ? (
                         (Array.isArray(compositionOrder) ? motionScenes.map(scene => [scene]) : [motionScenes]).map(scenes => <MotionCanvas
                           key={Array.isArray(compositionOrder) ? scenes[0].id : "motion-stage"}
@@ -19393,6 +19410,7 @@ const ViralClipStudio = ({
                           return (
                             <div
                               key={overlay.id}
+                              data-studio-layer-id={overlay.id}
                               className={`draggable-overlay ${
                                 activeOverlayId === overlay.id && comparisonMode !== "split"
                                   ? "active"
@@ -19448,6 +19466,7 @@ const ViralClipStudio = ({
                                 "--layer-opacity": overlay.type === "image"
                                   ? overlayMotion.opacity * titlePose.opacity : undefined,
                                 mixBlendMode: overlay.blendMode || "normal",
+                                pointerEvents: "auto",
                                 filter: isMediaOverlay ? studioMediaEffectFilter(overlay) : undefined,
                                 clipPath: getOverlayMaskClipPath({
                                   ...overlay,
@@ -19729,6 +19748,7 @@ const ViralClipStudio = ({
                             </div>
                           );
                         })}
+                      </StudioGroupPreview>
                     </div>
                   </div>
                     {(
@@ -24628,7 +24648,12 @@ const ViralClipStudio = ({
                   proposal={directorSubjectVfxProposal?.projectId === projectId && directorSubjectVfxProposal?.baseRevision === studioDocumentRef.current?.revision ? directorSubjectVfxProposal : null}
                 />
                 <CompositeInspector
-                  layerEntries={compositionEntries}
+                  layerEntries={compositionRoots}
+                  groupTree={compositionGroups}
+                  groupEntries={compositionEntries}
+                  onTransformGroup={(id, transform) => setCompoundClips(current => current.map(group =>
+                    group.id === id ? { ...group, transform } : group))}
+                  onRemoveGroup={id => setCompoundClips(current => removeStudioGroup(current, id))}
                   onMoveLayer={moveCompositionLayer}
                   activeOverlay={compositeInspectorTarget}
                   overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}

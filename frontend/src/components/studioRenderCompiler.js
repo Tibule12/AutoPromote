@@ -3,6 +3,7 @@ import { projectStudioLinkedTimingToSnapshot, projectStudioEditableStateToSnapsh
 import { buildAdvancedColorCube } from "./studioColorCube";
 import { assertStudioLayerBlendMode, assertStudioMainBlendMode } from "./studioBlendModes";
 import { parseStudioMaskPolygon } from "./studioMaskGeometry";
+import { studioGroupTree, removeStudioGroupMembers, GROUP_KIND } from "./studioGroups";
 
 export const compileStudioOverlaysForRender = (document, transportSnapshot = {}) =>
   projectStudioEditableStateToSnapshot(document, transportSnapshot).overlays
@@ -78,6 +79,19 @@ const compileBaseTransform = layer => ({
 
 export const compileStudioCompositionForRender = document => {
   const state = visualRenderState(document);
+  const compounds = document.editGraph?.settings?.compoundClips || [];
+  if (compounds.some(group => group.kind === GROUP_KIND) && !Array.isArray(state.compositionOrder))
+    fail("MISSING_GROUP_LAYER_ORDER", "Graphic groups need an explicit canonical layer order.");
+  const disabledIds = state.threeDScenes.filter(scene => scene.enabled === false).map(scene => scene.id);
+  const order = state.compositionOrder?.filter(id => !disabledIds.includes(id));
+  // Validate the saved hierarchy first. Disabled 3D retains its editable parent;
+  // only the render projection removes that leaf and any resulting empty group.
+  if (Array.isArray(state.compositionOrder)) {
+    const tree = studioGroupTree(compounds, state.compositionOrder);
+    if (state.overlays.some(layer => tree.parent.has(layer.id) && (layer.blendMode || 'normal') !== 'normal'))
+      fail("UNSUPPORTED_GROUP_CHILD_BLEND", "Grouped layers currently export with Normal blend. Set the child blend to Normal before export.");
+  }
+  const groups = studioGroupTree(removeStudioGroupMembers(compounds, disabledIds), order || []).groups;
   assertStudioMainBlendMode(state.mainTransform);
   state.overlays.filter(overlay => !overlay.isCaption).forEach(assertStudioLayerBlendMode);
   for (const layer of [state.mainTransform, ...state.overlays]) {
@@ -89,8 +103,8 @@ export const compileStudioCompositionForRender = document => {
     }
   }
   return { version: 1, coordinate_space: "canvas_percent", preview_timebase: "output_timeline_seconds",
-    ...(Array.isArray(state.compositionOrder) ? { order: state.compositionOrder.filter(id =>
-      !state.threeDScenes.some(scene => scene.id === id && scene.enabled === false)) } : {}),
+    ...(order ? { order } : {}),
+    ...(groups.length ? { groups: JSON.parse(JSON.stringify(groups)) } : {}),
     layers: [state.mainTransform || { id: "main-video", type: "video" },
       ...state.overlays.filter(overlay => !overlay.isCaption)].map(layer => ({
       id: layer.id, name: layer.name || layer.text || "Visual layer", type: layer.type || "visual",

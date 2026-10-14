@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-14T03:41:06.206696Z",
+  "updatedAt": "2026-10-14T04:41:56.753840Z",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -382,16 +382,25 @@
       ],
       "readiness": "PARTIAL",
       "assertion": "One explicit global stage/order/blend model including nested masks",
-      "gap": "Canonical compatibility explicitly says separate_worker_stages; 3D order only among 3D layers.",
+      "gap": "Explicit canonical graphic order and static nested Normal-child groups are implemented. Source/source-VFX/caption stages stay separate; group animation/anchor/masks/blends/clip ownership, actual owned3D/video/deeper stacks and whole raster/audio remain unqualified.",
       "sourceRefs": [
         "graph",
         "studio",
         "worker"
       ],
-      "automatedGuardFiles": [],
-      "automatedGuardResultThisSession": "NOT_RUN",
-      "realPairedRunThisSession": "NOT_RUN",
-      "measurement": null,
+      "automatedGuardFiles": [
+        "frontend/src/components/__tests__/studioGroups.test.js",
+        "python_media_worker/test_studio_composition.py"
+      ],
+      "automatedGuardResultThisSession": "40 frontend and59 actual compositor cases PASS; bounded checks only",
+      "realPairedRunThisSession": "One native nested image/two-motion edit;4/4 visible-image geometry pairs PASS; full raster/audio UNQUALIFIED",
+      "measurement": {
+        "evidence": "reports/studio-professional-nested-groups-20261014/proof/paired-nested-groups.json",
+        "scope": "Four paused visible-magenta footprint/occlusion pairs only",
+        "maxBoundaryP95Pixels": 2,
+        "minimumVisibleImageIou": 0.9804169994766849,
+        "wholePreviewFinalParityQualified": false
+      },
       "requiredEvidence": [
         "canonical input digest/settings",
         "pre-final preview capture at mapped times",
@@ -829,25 +838,25 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "CANONICAL_CROSS_FAMILY_FLAT_LAYER_ORDER",
-    "lastSessionRealCapabilityRuns": 2,
+    "lastSessionKind": "CANONICAL_STATIC_NESTED_GROUP_TRANSFORMS",
+    "lastSessionRealCapabilityRuns": 1,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-layer-order-20261014/README.md",
+    "exactBlockersSource": "reports/studio-professional-nested-groups-20261014/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-layer-order-20261014/README.md",
+    "lastSessionEvidence": "reports/studio-professional-nested-groups-20261014/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendCasesPassed": 24,
-      "compositorCasesPassed": 42,
+      "frontendCasesPassed": 40,
+      "compositorCasesPassed": 59,
       "legacyAudioMotionCasesPassed": 21,
       "strictLocalAppBuild": "PASS",
       "fullStudioSuite": false
     },
-    "nextSlice": "S03 nested composition and group transforms on the existing canonical graph; keep S02 raster/moving/cold/broad picture and sound open",
+    "nextSlice": "S03 shared group transform keyframes and group property rows on the canonical graph, then group masks/blends and clip ownership; keep S02 raster/moving/cold/broad picture and sound open",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -4558,5 +4567,40 @@
       "S04"
     ],
     "nextImplementationSlice": "S03 nested composition and group transforms on the existing canonical graph; keep S02 raster/moving/cold/broad picture and sound open"
+  },
+  "professionalNestedGroups20261014": {
+    "evidence": "reports/studio-professional-nested-groups-20261014/README.md",
+    "checkpoint": "reports/studio-professional-nested-groups-20261014/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Static nested groups reuse the canonical compound settings and shared leaf compositor. One native image/two-motion edit passes history/save/cold reopen/CPU export/full timeline playback and four visible-image geometry pairs. Master animation/anchor/masks/blends, actual owned3D/video/deeper stacks and full raster/audio/readiness remain open.",
+    "nativeProjects": 1,
+    "nativeDiagnosticDuplicates": 1,
+    "nativeCpuExports": 1,
+    "nativeHistorySaveColdReopen": true,
+    "completeStudioRecordings": 1,
+    "geometryPairsPassed": 4,
+    "maxBoundaryP95Pixels": 2,
+    "minimumVisibleImageIou": 0.9804169994766849,
+    "frontendCasesPassed": 40,
+    "compositorCasesPassed": 59,
+    "legacyAudioMotionCasesPassed": 21,
+    "legacyAudioMotionSubtestsPassed": 255,
+    "strictAppBuild": "PASS",
+    "gpuJobs": 0,
+    "paidGpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "actualOwned3DNativeQualified": false,
+    "wholePreviewFinalParityQualified": false,
+    "fullStudioSuiteQualified": false,
+    "readinessPromoted": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ],
+    "nextImplementationSlice": "S03 shared group transform keyframes and group property rows on the canonical graph, then group masks/blends and clip ownership; keep S02 raster/moving/cold/broad picture and sound open",
+    "ownedLocalQaStopped": true,
+    "finalNativePreviewAfterFinalBuild": true,
+    "completedOutputRecoveryAfterDuplicateQualified": false
   }
 }

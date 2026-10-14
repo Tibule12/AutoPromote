@@ -1,7 +1,9 @@
-"""Deterministic flat-layer RGB blending for the canonical Studio stack."""
+"""Deterministic RGB/alpha composition for the canonical Studio stack."""
 import math
 
 BLEND_MODES = {"normal", "multiply", "screen", "difference", "overlay", "hard-light", "soft-light", "color-dodge", "luminosity"}
+GROUP_TRANSFORM = {"x": 0, "y": 0, "scale": 1, "rotation": 0, "opacity": 1}
+GROUP_BOUNDS = {"x": (-100, 100), "y": (-100, 100), "scale": (.1, 2), "rotation": (-180, 180), "opacity": (0, 1)}
 
 
 def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids):
@@ -27,6 +29,114 @@ def connect_layer_blocks(blocks, base_label, order):
     for layer_id, block, previous_input, output in sorted(blocks, key=lambda item: rank[item[0]]):
         filters.extend(part.replace(f"[{previous_input}]", f"[{current}]") for part in block)
         current = output
+    return filters, current
+
+
+def validate_graphic_groups(plan, order):
+    """Reject unknown/static-only decisions before downloads or rendering."""
+    groups = (plan or {}).get("groups", [])
+    if not isinstance(groups, list) or len(groups) > 64:
+        raise ValueError("Composition supports at most 64 graphic groups")
+    if not groups:
+        return {}, [], {}
+    if order is None:
+        raise ValueError("Graphic groups need an explicit canonical layer order")
+    by_id, parent, rank = {}, {}, {identity: index for index, identity in enumerate(order)}
+    for group in groups:
+        if (not isinstance(group, dict) or set(group) - {"id", "name", "kind", "layerIds", "transform"}
+                or group.get("kind") != "graphic_group"):
+            raise ValueError("Graphic groups support membership and static transforms only")
+        identity, children = group.get("id"), group.get("layerIds")
+        if (not isinstance(identity, str) or not identity or identity in by_id or identity in rank
+                or not isinstance(children, list) or not children
+                or any(not isinstance(child, str) or not child for child in children)
+                or len(set(children)) != len(children)):
+            raise ValueError("Group membership needs unique IDs and at least one child")
+        raw = group.get("transform", {})
+        if not isinstance(raw, dict) or set(raw) - set(GROUP_TRANSFORM):
+            raise ValueError("Group transforms support static position, scale, rotation and opacity")
+        transform = {**GROUP_TRANSFORM, **raw}
+        for field, (low, high) in GROUP_BOUNDS.items():
+            value = transform[field]
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not low <= value <= high:
+                raise ValueError(f"Group {field} must be between {low} and {high}")
+        by_id[identity] = {**group, "transform": transform}
+    for identity, group in by_id.items():
+        for child in group["layerIds"]:
+            if (child not in rank and child not in by_id) or child in parent:
+                raise ValueError("Each group child needs one existing parent")
+            parent[child] = identity
+    for layer in (plan or {}).get("layers") or []:
+        if layer.get("id") in parent and layer.get("blend_mode", "normal") != "normal":
+            raise ValueError("Grouped layers currently export with Normal blend; set the child blend to Normal")
+
+    def leaves(identity, seen=()):
+        if identity not in by_id:
+            return [identity]
+        if identity in seen or len(seen) >= 8:
+            raise ValueError("Group nesting must be acyclic and at most 8 levels")
+        return [leaf for child in by_id[identity]["layerIds"] for leaf in leaves(child, (*seen, identity))]
+
+    for identity in by_id:
+        positions = [rank[leaf] for leaf in leaves(identity)]
+        if positions != list(range(positions[0], positions[0] + len(positions))):
+            raise ValueError("Group children must keep a contiguous layer order")
+    roots = [identity for identity in [*order, *by_id] if identity not in parent]
+    roots.sort(key=lambda identity: rank[leaves(identity)[0]])
+    return by_id, roots, parent
+
+
+def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height, duration):
+    """Reuse each prepared leaf; compose/clip groups before parent transforms."""
+    by_id, roots, _ = validate_graphic_groups(plan, order)
+    if not by_id:
+        return connect_layer_blocks(blocks, base_label, order)
+    if width <= 0 or height <= 0 or duration <= 0:
+        raise ValueError("Invalid group canvas geometry")
+    prepared = {item[0]: item for item in blocks}
+    if len(prepared) != len(blocks) or any(identity not in order for identity in prepared):
+        raise ValueError("Rendered group leaf is missing or duplicated in the composition order")
+    filters, counter = [], 0
+
+    def draw(identity, backdrop):
+        nonlocal counter
+        if identity not in by_id:
+            if identity not in prepared:  # Disabled/out-of-programme leaves.
+                return backdrop
+            _, block, previous, output = prepared[identity]
+            filters.extend(part.replace(f"[{previous}]", f"[{backdrop}]") for part in block)
+            return output
+        group, prefix = by_id[identity], f"studio_group_{counter}"
+        counter += 1
+        t = group["transform"]
+        scaled_w, scaled_h = max(1, round(width*t["scale"])), max(1, round(height*t["scale"]))
+        angle = math.radians(t["rotation"])
+        rotated_w = max(1, math.ceil(abs(math.cos(angle))*scaled_w + abs(math.sin(angle))*scaled_h - 1e-9))
+        rotated_h = max(1, math.ceil(abs(math.sin(angle))*scaled_w + abs(math.cos(angle))*scaled_h - 1e-9))
+        if rotated_w * rotated_h > 4096 * 2160:
+            raise ValueError("Group transform exceeds the 4K intermediate budget; reduce group scale or export resolution")
+        local = f"{prefix}_canvas"
+        filters.append(f"color=c=black:s={int(width)}x{int(height)}:r=30:d={float(duration):.6f},"
+                       f"format=rgba,colorchannelmixer=aa=0[{local}];")
+        for child in group["layerIds"]:
+            local = draw(child, local)
+        # Premultiplied interpolation avoids dark RGB fringes on transparency.
+        transform = "format=gbrap,premultiply=inplace=1"
+        if t["scale"] != 1:
+            transform += f",scale={scaled_w}:{scaled_h}:flags=lanczos"
+        if t["rotation"] != 0:
+            transform += f",rotate={angle:.12f}:ow={rotated_w}:oh={rotated_h}:c=black@0"
+        transform += f",unpremultiply=inplace=1,format=rgba,colorchannelmixer=aa={t['opacity']:.9f}"
+        filters.append(f"[{local}]{transform}[{prefix}_rgba];")
+        x, y = (width-rotated_w)/2 + width*t["x"]/100, (height-rotated_h)/2 + height*t["y"]/100
+        output = f"{prefix}_out"
+        filters.append(f"[{backdrop}][{prefix}_rgba]overlay=x={x:.9f}:y={y:.9f}:format=auto:"
+                       f"eof_action=pass:repeatlast=0[{output}];")
+        return output
+
+    current = base_label
+    for identity in roots:
+        current = draw(identity, current)
     return filters, current
 
 

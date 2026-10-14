@@ -9,7 +9,7 @@ export default function StudioLayerStack({ entries, onMove }) {
     <ol>
       {[...entries].reverse().map((entry, index) => <li key={entry.id}
         data-layer-id={entry.id} data-layer-kind={entry.kind}>
-        <span><strong>{entry.label}</strong><small>{entry.kind === 'three_d' ? '3D' : entry.kind === 'motion' ? 'Motion' : 'Visual'}</small></span>
+        <span><strong>{entry.label}</strong><small>{entry.kind === 'group' ? 'Group' : entry.kind === 'three_d' ? '3D' : entry.kind === 'motion' ? 'Motion' : 'Visual'}</small></span>
         <button type="button" aria-label={`Bring ${entry.label} forward`} disabled={index === 0}
           onClick={() => onMove(entry.id, 'forward')}>↑</button>
         <button type="button" aria-label={`Send ${entry.label} backward`} disabled={index === entries.length - 1}

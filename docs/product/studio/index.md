@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.10 • 2026-10-14T03:37:38.361841Z
+Development documentation • product 1.2.0 • knowledge 1.0.11 • 2026-10-14T04:31:18.521294Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -507,7 +507,7 @@ Applies the supported deterministic visual effects and source-bound subject scen
 
 ID: `studio.compositing` • **PARTIAL** • DETERMINISTIC
 
-Combines ordinary layers with supported blend modes and masks. Flat layer order now crosses ordinary layers, motion scenes and 3D on the canonical layer list; arbitrary nesting and whole preview/export agreement remain incomplete.
+Combines ordinary layers with supported blend modes and masks, shared graphic order and static nested Normal-child group transforms. Broad preview/export picture and sound agreement remains incomplete.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -524,25 +524,29 @@ Combines ordinary layers with supported blend modes and masks. Flat layer order 
 3. For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.
 4. For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.
 5. Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.
+6. To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.
+7. Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.
+8. Reset clears the master transform. Remove group transform promotes its children without baking the visual result. Review the exact final export.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Full-canvas nested wrappers apply static parent transforms and whole-group opacity while preserving child edits/keys. One native nested image/two-motion project has scoped geometry agreement; whole raster/picture/sound and broad combinations remain unqualified.
 
-**Final render:** The shared composition compiler carries geometric image masks and crop keyframes. Ordinary title masks use the title layout box rather than shadow padding. When delivery is larger than the source, graphics are composed at delivery resolution. Inspect the exact final movie; full preview/render raster agreement remains unqualified.
+**Final render:** The shared composition compiler carries geometric image masks and crop keyframes. Ordinary title masks use the title layout box rather than shadow padding. When delivery is larger than the source, graphics are composed at delivery resolution. Inspect the exact final movie; full preview/render raster agreement remains unqualified. Static nested Normal-child groups compose/clip their children before parent transforms and opacity through the same CPU leaf compositor; no model generation is introduced.
 
 **Limits**
 
 - Rectangle, ellipse and percentage-polygon image masks and crop animation have scoped native/export boundary evidence. This is deterministic geometry, not AI subject segmentation.
-- Feathered/inverted masks, animated video-layer masks, arbitrary nesting and full alpha/text/effect-order parity remain incomplete.
+- Feathered/inverted masks, animated video-layer masks, master group animation/masks/blends and broader nesting and full alpha/text/effect-order parity remain incomplete.
 - This dated development snapshot does not establish professional or production readiness.
 - Editable percentage-polygon paths and rectangle radius use the canonical mask object. This adds no animated path, neural segmentation, mask expansion or video-mask support.
 - The bounded inverted-polygon/shadow/glow/blur image stack passes four sampled colour pairs with transform/opacity keys. The ellipse stack retains a strict raster failure, and historical landscape edge failures remain open.
-- The layer stack has native image/title/two-motion history, cold reopen, exports and scoped visible-image occlusion evidence. Actual owned 3D cross-family export, whole motion/title raster, large stacks and nested compositions remain unqualified. Source footage/source VFX and generated captions retain their separate programme stages.
+- The layer stack has native image/title/two-motion history, cold reopen, exports and scoped visible-image occlusion evidence. Actual owned 3D cross-family export, whole motion/title raster, large/deeper stacks and full raster remain unqualified. Source footage/source VFX and generated captions retain their separate programme stages.
+- Static group position, uniform scale, rotation and whole-group opacity have one native image/two-motion history/cold/export/timeline and four scoped geometry pairs. Master keyframes/anchor/masks/blends and clip ownership are unsupported. Grouped non-Normal child blend fails export explicitly; grouped timeline drag order uses Composite. Actual owned3D/video/deeper groups and wider grouped drag/deletion remain unqualified.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order)
+**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity)
 
 **Guides:** No task guide in V1.
 
