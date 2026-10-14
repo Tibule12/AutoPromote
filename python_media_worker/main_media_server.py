@@ -33277,7 +33277,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 time_window = (first, max(first + .05, last))
             block = blend_layer_block(list(filter_chain[start:]), input_label, current_v_label,
                                       overlay.blendMode, base_width, base_height,
-                                      rendered_timeline_duration, f"studio_blend_{len(overlay_filter_blocks)}", time_window)
+                                      rendered_timeline_duration, f"studio_blend_{len(overlay_filter_blocks)}", time_window,
+                                      resolve_viral_export_profile(request.output_settings, base_width, base_height)["fps"] or 30)
             overlay_filter_blocks.append((str(overlay.id), block, input_label, current_v_label))
 
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
@@ -33657,13 +33658,24 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         if explicit_layer_order is not None:
             try:
-                from .studio_composition import connect_grouped_layer_blocks
+                from .studio_composition import connect_grouped_layer_blocks, graphic_group_mask
             except ImportError:
-                from studio_composition import connect_grouped_layer_blocks
+                from studio_composition import connect_grouped_layer_blocks, graphic_group_mask
+            group_mask_inputs = {}
+            group_fps = resolve_viral_export_profile(request.output_settings, base_width, base_height)["fps"] or 30
+            for index, group in enumerate(request.composition_plan.get("groups", [])):
+                if not group.get("mask", {}).get("enabled"):
+                    continue
+                matte_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_group_mask_{index}.png")
+                overlay_temp_paths.append(matte_path)
+                graphic_group_mask(group, base_width, base_height).save(matte_path)
+                inputs.extend(["-loop", "1", "-framerate", str(group_fps), "-i", matte_path])
+                group_mask_inputs[group["id"]] = f"{input_idx}:v"
+                input_idx += 1
             ordered_filters, current_v_label = connect_grouped_layer_blocks(
                 overlay_filter_blocks, overlay_base_label, explicit_layer_order,
                 request.composition_plan, base_width, base_height, rendered_timeline_duration, speed_plan,
-                resolve_viral_export_profile(request.output_settings, base_width, base_height)["fps"] or 30)
+                group_fps, group_mask_inputs)
             filter_chain = filter_chain[:overlay_chain_start] + ordered_filters
 
         # Full-screen B-roll previously covered already-burned words, while

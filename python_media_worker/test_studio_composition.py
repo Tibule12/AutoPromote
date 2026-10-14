@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from python_media_worker.studio_composition import (blend_layer_block, validate_layer_order, connect_layer_blocks,
-                                                   validate_graphic_groups, connect_grouped_layer_blocks, animated_group_filter)
+                                                   validate_graphic_groups, connect_grouped_layer_blocks, animated_group_filter, graphic_group_mask)
 from python_media_worker.studio_motion import easing_value
 
 BACKGROUND = np.array([40, 80, 120], dtype=float)
@@ -119,14 +119,13 @@ def test_invalid_group_hierarchy_and_unimplemented_fields_are_rejected(groups):
         validate_graphic_groups({'groups': groups}, ['image', 'motion', 'text'])
 
 
-def test_nested_groups_validate_and_require_explicit_order_and_normal_child_blending():
+def test_nested_groups_validate_and_require_explicit_order_with_child_blending():
     groups = [group('inner', ['image', 'motion']), group('outer', ['inner', 'text'])]
     nodes, roots, parents = validate_graphic_groups({'groups': groups}, ['image', 'motion', 'text', 'depth'])
     assert roots == ['outer', 'depth'] and parents['inner'] == 'outer' and nodes['inner']['transform']['opacity'] == 1
     with pytest.raises(ValueError, match='explicit'):
         validate_graphic_groups({'groups': groups}, None)
-    with pytest.raises(ValueError, match='Normal blend'):
-        validate_graphic_groups({'groups': groups, 'layers': [{'id': 'image', 'blend_mode': 'screen'}]}, ['image', 'motion', 'text'])
+    assert validate_graphic_groups({'groups': groups, 'layers': [{'id': 'image', 'blend_mode': 'screen'}]}, ['image', 'motion', 'text'])[0]
 
 
 def test_group_count_and_depth_limits_reject_oversized_hierarchies():
@@ -245,9 +244,9 @@ def blend(base, front, mode):
     return np.abs(base-front)
 
 
-def decode(filters, frames=30):
+def decode(filters, frames=30, inputs=()):
     result = subprocess.run(['ffmpeg','-v','error','-filter_complex_threads','1',
-                             '-filter_complex',filters,'-map','[out]','-frames:v',str(frames),
+                             *inputs,'-filter_complex',filters,'-map','[out]','-frames:v',str(frames),
                              '-pix_fmt','rgb24','-f','rawvideo','-'], check=True, capture_output=True)
     return np.frombuffer(result.stdout,np.uint8).reshape(-1,32,32,3)
 
@@ -305,3 +304,77 @@ def test_normal_path_keeps_the_existing_filter_graph():
 def test_unimplemented_modes_are_rejected_instead_of_rendering_as_normal(mode):
     with pytest.raises(ValueError,match='not implemented'):
         blend_layer_block(['[base][fg]overlay=0:0[out];'],'base','out',mode,32,32,1,'layer')
+
+
+@pytest.mark.parametrize('decision', [
+    {'blendMode':'unknown'}, {'blendMode':None}, {'mask':None}, {'mask':[]},
+    {'mask':{'enabled':'yes'}}, {'mask':{'inverted':1}}, {'mask':{'shape':'triangle'}},
+    {'mask':{'feather':float('nan')}}, {'mask':{'radius':51}}, {'mask':{'feather':101}},
+    {'mask':{'path':'polygon(0% 0%, 10% 20%)'}}, {'mask':{'points':[]}},
+])
+def test_group_composite_preflight_rejects_unsupported_and_malformed_decisions(decision):
+    with pytest.raises(ValueError):
+        validate_graphic_groups({'groups':[{**group('whole',['image']), **decision}]},['image'])
+
+
+@pytest.mark.parametrize('mode', ['multiply','screen','difference','overlay','soft-light','hard-light','color-dodge','luminosity'])
+@pytest.mark.parametrize('backdrop_alpha', [0,.5,1])
+def test_actual_child_blend_uses_the_isolated_backdrop_alpha(mode,backdrop_alpha):
+    source=(f'color=c=0x285078:s=32x32:r=30:d=1,format=rgba,colorchannelmixer=aa={backdrop_alpha}[local];'
+            'color=c=0x8040c0:s=8x8:r=30:d=1,format=rgba,colorchannelmixer=aa=.5[fg];')
+    block=['[local][fg]overlay=x=8:y=8:format=auto[child];']
+    filters=blend_layer_block(block,'local','child',mode,32,32,1,'nested')
+    frames=decode(background()+source+''.join(filters)+'[base][child]overlay=0:0:format=auto[out];')
+    ba=round(backdrop_alpha*255)/255;fa=127/255
+    effective=FOREGROUND*(1-ba)+blend(BACKGROUND,FOREGROUND,mode)*ba
+    # The lower child has the same RGB as the outer background. Porter-Duff
+    # source-over therefore reduces to this independently computed blend color.
+    np.testing.assert_allclose(frames[15,10,10],BACKGROUND*(1-fa)+effective*fa,atol=2)
+    np.testing.assert_allclose(frames[15,0,0],BACKGROUND,atol=1)
+
+
+@pytest.mark.parametrize('mode', ['multiply','screen','difference','overlay','soft-light','hard-light','color-dodge','luminosity'])
+def test_actual_group_blend_applies_after_child_overlap_and_whole_group_opacity(mode):
+    sources=('color=c=red:s=12x8:r=30:d=1,format=rgba[red];'
+             'color=c=0x8040c0:s=8x8:r=30:d=1,format=rgba[purple];')
+    blocks=[('lower',['[base][red]overlay=4:8:format=auto[first];'],'base','first'),
+            ('upper',['[first][purple]overlay=8:8:format=auto[second];'],'first','second')]
+    filters,out=connect_grouped_layer_blocks(blocks,'base',['lower','upper'],
+        {'groups':[{**group('whole',['lower','upper'],opacity=.5), 'blendMode':mode}]},32,32,1)
+    frames=decode(background()+sources+''.join(filters)+f'[{out}]null[out];')
+    a=127/255
+    np.testing.assert_allclose(frames[15,10,10],BACKGROUND*(1-a)+blend(BACKGROUND,FOREGROUND,mode)*a,atol=2)
+    np.testing.assert_allclose(frames[15,0,0],BACKGROUND,atol=1)
+
+
+@pytest.mark.parametrize('mask', [
+    {'enabled':True,'shape':'polygon','path':'polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)'},
+    {'enabled':True,'shape':'ellipse'},
+    {'enabled':True,'shape':'ellipse','inverted':True},
+    {'enabled':True,'shape':'rectangle','radius':0,'feather':20},
+])
+def test_actual_group_mask_clips_assembled_children_before_transform_opacity_and_blend(tmp_path,mask):
+    node={**group('whole',['lower','upper'],x=12.5,opacity=.5),'mask':mask,'blendMode':'screen'}
+    matte=graphic_group_mask(node,32,32);path=tmp_path/'mask.png';matte.save(path)
+    sources=('color=c=red:s=32x32:r=30:d=1,format=rgba[red];'
+             'color=c=0x8040c0:s=32x32:r=30:d=1,format=rgba[purple];')
+    blocks=[('lower',['[base][red]overlay=0:0:format=auto[first];'],'base','first'),
+            ('upper',['[first][purple]overlay=0:0:format=auto[second];'],'first','second')]
+    filters,out=connect_grouped_layer_blocks(blocks,'base',['lower','upper'],{'groups':[node]},32,32,1,
+        mask_inputs={'whole':'0:v'})
+    frames=decode(background()+sources+''.join(filters)+f'[{out}]null[out];',
+        inputs=['-loop','1','-framerate','30','-i',str(path)])
+    for x,y in [(8,8),(28,8),(8,24),(28,24),(20,16)]:
+        alpha=int(matte.getpixel((x-4,y)))*127//255/255
+        expected=BACKGROUND*(1-alpha)+blend(BACKGROUND,FOREGROUND,'screen')*alpha
+        np.testing.assert_allclose(frames[15,y,x],expected,atol=2)
+    np.testing.assert_allclose(frames[15,10,0],BACKGROUND,atol=1)
+    if mask['shape']=='polygon':
+        np.testing.assert_allclose(frames[15,8,8],BACKGROUND*(1-127/255)+blend(BACKGROUND,FOREGROUND,'screen')*127/255,atol=2)
+        np.testing.assert_allclose(frames[15,8,28],BACKGROUND,atol=1)
+
+
+def test_enabled_group_mask_rejects_a_missing_prepared_matte():
+    with pytest.raises(ValueError,match='prepared local matte'):
+        connect_grouped_layer_blocks([], 'base', ['image'],
+            {'groups':[{**group('whole',['image']), 'mask':{'enabled':True}}]},32,32,1)

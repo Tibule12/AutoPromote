@@ -348,9 +348,11 @@
         "frontend/src/components/studioMotionProperties.js",
         "frontend/src/components/StudioKeyframeCurveEditor.js",
         "python_media_worker/studio_motion.py",
-        "reports/studio-professional-group-keyframes-20261014/README.md"
+        "frontend/src/components/studioMaskGeometry.js",
+        "frontend/src/components/StudioMaskPathEditor.js",
+        "reports/studio-professional-group-composite-20261014/README.md"
       ],
-      "reason": "Review shared canonical animated group transforms/property rows, 16-key native nested edit, curve/nudge/lock/history/reset/removal/cold/export/full timeline playback, four bounded geometry pairs and unchanged decoded source-tone audio. 180 cases plus 261 subtests and strict App builds pass. Keep PARTIAL: group anchor/masks/blends/clip ownership, broader curves/native retiming/deeper/video/owned 3D, full raster and continuous picture/sound remain open."
+      "reason": "Review shared static group geometric masks and alpha-aware group/child blending. One native nested Multiply/Screen edit preserves all 16 group keys through validation/history/reset/lock/cold/export/full timeline playback; four bounded geometry/interior-color pairs and unchanged decoded audio pass. 243 cases plus 261 subtests and strict build pass. Keep PARTIAL: group anchor/clip ownership, mask/blend animation, wider modes/media/retiming/full picture/live sound remain open."
     },
     {
       "feature_id": "publishing.connections",

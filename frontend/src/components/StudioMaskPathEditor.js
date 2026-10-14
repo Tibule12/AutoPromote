@@ -3,7 +3,7 @@ import { DEFAULT_STUDIO_MASK_POLYGON, parseStudioMaskPolygon } from './studioMas
 
 // Keep incomplete typing out of the canonical graph and live render consumer.
 // Enter/blur commits one valid path through the ordinary layer history command.
-export default function StudioMaskPathEditor({ mask, onChange }) {
+export default function StudioMaskPathEditor({ mask, onChange, label = 'Mask polygon path', disabled = false }) {
   const saved = mask.path || DEFAULT_STUDIO_MASK_POLYGON;
   const [draft, setDraft] = useState(saved);
   const [error, setError] = useState('');
@@ -19,7 +19,7 @@ export default function StudioMaskPathEditor({ mask, onChange }) {
   };
   return <label className="inspector-select-field">
     <span>Polygon path</span>
-    <input type="text" aria-label="Mask polygon path" maxLength={2057}
+    <input type="text" aria-label={label} disabled={disabled} maxLength={2057}
       value={draft} aria-invalid={!!error}
       onChange={event => { setDraft(event.target.value); setError(''); }}
       onBlur={commit}

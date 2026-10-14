@@ -42,7 +42,7 @@ test.each([
   [() => [group('a', ['image'], { scale: NaN })], /scale/],
   [() => [group('a', ['image'], { opacity: null })], /opacity/],
   [() => [group('a', ['image'], { anchorX: 20 })], /static/],
-  [() => [{ ...group('a', ['image']), keyframes: [] }], /static/],
+  [() => [{ ...group('a', ['image']), keyframes: [] }], /membership/],
 ])('invalid or unsupported hierarchy decisions fail explicitly', (fixture, message) => {
   expect(() => studioGroupTree(fixture(), order)).toThrow(message);
 });
@@ -78,7 +78,7 @@ test('cold canonical projection and compiler own nesting and child keys independ
   const plan = compileStudioCompositionForRender(document);
   expect(plan.groups).toEqual(nested()); expect(plan.order).toEqual(order.slice(0, 3));
   state.overlays[0].blendMode = 'multiply';
-  expect(() => compileStudioCompositionForRender(adaptStudioSnapshotToDocument({ projectId: 'nested', snapshot: state }))).toThrow(/Normal blend/);
+  expect(compileStudioCompositionForRender(adaptStudioSnapshotToDocument({ projectId: 'nested', snapshot: state })).layers[1].blend_mode).toBe('multiply');
 });
 
 test('preview opacity belongs to each full-canvas wrapper and children keep their own transforms', () => {
@@ -195,4 +195,47 @@ test('group inspector displays evaluated values, supports property keys and resp
   rerender(<StudioGroupInspector {...props} locked/>);
   expect(screen.getByLabelText('inner x')).toBeDisabled();expect(screen.getByRole('button',{name:'Add inner x keyframe at playhead'})).toBeDisabled();
   fireEvent.click(screen.getByRole('button',{name:'Next inner x keyframe'}));expect(seek).toHaveBeenCalledWith(2);
+});
+
+
+test.each([
+  {blendMode:'unknown'}, {blendMode:null}, {mask:null}, {mask:[]},
+  {mask:{enabled:'yes'}}, {mask:{inverted:1}}, {mask:{shape:'triangle'}},
+  {mask:{radius:51}}, {mask:{feather:NaN}}, {mask:{feather:101}},
+  {mask:{path:'polygon(0% 0%, 10% 20%)'}}, {mask:{points:[]}},
+])('unsupported group masks and blending fail before preview/compilation', decision => {
+  expect(()=>studioGroupTree([{...group('whole',['image']),...decision}],order)).toThrow();
+});
+
+test('canonical group masks and blending roundtrip with keys and child effects, independent of transport', () => {
+  const groups=nested();groups[0].mask={enabled:true,shape:'polygon',path:'polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)',inverted:true,feather:4};
+  groups[0].blendMode='screen';groups[1].blendMode='multiply';
+  const state={orderedClips:[{id:'source',start:0,end:3}],selectedClipId:'source',
+    timeline:[{id:'main',sourceClipId:'source',startRequest:0,endRequest:3}],
+    overlays:[{id:'image',type:'image',blendMode:'overlay',mask:{enabled:true,shape:'ellipse'}},{id:'text',type:'text'}],
+    motionScenes:[{id:'motion',startTime:0,duration:3}],threeDScenes:[{id:'depth',enabled:false}],
+    compositionOrder:order,compoundClips:groups,motionKeyframes:[key('owned','inner','opacity',1,.5),key('child','image','x',1,60)]};
+  const document=adaptStudioSnapshotToDocument({projectId:'masked',snapshot:state});
+  const plan=compileStudioCompositionForRender(JSON.parse(JSON.stringify(document)));
+  expect(plan.groups[0].mask).toEqual(groups[0].mask);expect(plan.groups[0].blendMode).toBe('screen');
+  expect(plan.groups[0].motion_keyframes[0].value).toBe(.5);expect(plan.layers[1].blend_mode).toBe('overlay');
+  const reopened=projectStudioEditableStateToSnapshot(document,{...state,compoundClips:[]});
+  expect(reopened.compoundClips).toEqual(groups);expect(reopened.motionKeyframes).toEqual(state.motionKeyframes);
+});
+
+test('group mask drafts and locks preserve keys/poses and commit only the valid shared fields', () => {
+  const groups=nested();groups[0].mask={enabled:true,shape:'polygon'};
+  const composite=jest.fn();const props={tree:studioGroupTree(groups,order),entries:order.map(id=>({id,label:id})),
+    onComposite:composite,onCreate:jest.fn(),onRemove:jest.fn(),onMove:jest.fn(),onTransform:jest.fn()};
+  const {rerender}=render(<StudioGroupInspector {...props}/>);
+  fireEvent.change(screen.getByLabelText('inner blend mode'),{target:{value:'screen'}});
+  expect(composite).toHaveBeenCalledWith('inner',{blendMode:'screen'});
+  const path=screen.getByLabelText('inner mask polygon path');fireEvent.change(path,{target:{value:'polygon(0% 0%)'}});fireEvent.blur(path);
+  expect(path).toHaveAttribute('aria-invalid','true');expect(composite).toHaveBeenCalledTimes(1);
+  fireEvent.keyDown(path,{key:'Escape'});expect(path).toHaveAttribute('aria-invalid','false');
+  fireEvent.change(path,{target:{value:'polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)'}});fireEvent.keyDown(path,{key:'Enter'});
+  expect(composite).toHaveBeenLastCalledWith('inner',{mask:expect.objectContaining({path:'polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%)'})});
+  rerender(<StudioGroupInspector {...props} locked/>);
+  for(const label of ['inner blend mode','inner enable mask','inner mask shape','inner mask polygon path','inner mask feather','inner invert mask'])
+    expect(screen.getByLabelText(label)).toBeDisabled();
 });

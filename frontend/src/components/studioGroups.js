@@ -1,8 +1,29 @@
 import { interpolateAutomationValue, STUDIO_EASINGS } from './studioAutomation';
+import { STUDIO_EXPORT_BLEND_MODES } from './studioBlendModes';
+import { parseStudioMaskPolygon } from './studioMaskGeometry';
 
 export const GROUP_KIND = 'graphic_group';
 export const GROUP_TRANSFORM = { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1 };
 export const GROUP_BOUNDS = { x: [-100, 100], y: [-100, 100], scale: [.1, 2], rotation: [-180, 180], opacity: [0, 1] };
+
+// Masks clip the assembled local programme canvas before the group transform.
+// Reuse ordinary geometric-mask fields; no second effect or animation store.
+export function validateStudioGroupComposite(group) {
+  if (group.blendMode !== undefined && !STUDIO_EXPORT_BLEND_MODES.includes(group.blendMode)) throw Error('Unsupported group blend mode.');
+  const mask = group.mask;
+  if (mask === undefined) return;
+  if (!mask || typeof mask !== 'object' || Array.isArray(mask) ||
+      Object.keys(mask).some(field => !['enabled', 'shape', 'path', 'radius', 'feather', 'inverted'].includes(field)))
+    throw Error('Group masks support enabled, shape, path, radius, feather and inversion.');
+  for (const field of ['enabled', 'inverted']) if (mask[field] !== undefined && typeof mask[field] !== 'boolean')
+    throw Error(`Group mask ${field} needs a boolean.`);
+  if (mask.shape !== undefined && !['rectangle', 'ellipse', 'polygon'].includes(mask.shape)) throw Error('Unsupported group mask shape.');
+  for (const [field, high] of [['radius', 50], ['feather', 100]]) if (mask[field] !== undefined &&
+      (typeof mask[field] !== 'number' || !Number.isFinite(mask[field]) || mask[field] < 0 || mask[field] > high))
+    throw Error(`Group mask ${field} must be between 0 and ${high}.`);
+  if (mask.path !== undefined && typeof mask.path !== 'string') throw Error('Group mask path needs a percentage polygon.');
+  if (mask.path !== undefined || mask.shape === 'polygon') parseStudioMaskPolygon(mask.path || undefined);
+}
 
 // Group keys use the existing canonical motionKeyframes collection. Membership
 // stays in compoundClips; there is no second animation store or evaluator.
@@ -45,8 +66,9 @@ export function studioGroupTree(compounds, order) {
   if (groups.length > 64) throw Error('A project supports at most 64 graphic groups.');
   const byId = new Map(), parent = new Map(), known = new Set(order);
   for (const g of groups) {
-    if (Object.keys(g).some(key => !['id', 'name', 'kind', 'layerIds', 'transform'].includes(key)))
-      throw Error('Graphic groups support membership and static transforms only.');
+    if (Object.keys(g).some(key => !['id', 'name', 'kind', 'layerIds', 'transform', 'mask', 'blendMode'].includes(key)))
+      throw Error('Graphic groups support membership, transforms, masks and blending only.');
+    validateStudioGroupComposite(g);
     if (typeof g.id !== 'string' || !g.id || byId.has(g.id) || known.has(g.id) || !Array.isArray(g.layerIds) || !g.layerIds.length ||
         g.layerIds.some(id => typeof id !== 'string' || !id) ||
         new Set(g.layerIds).size !== g.layerIds.length) throw Error('Group membership needs unique IDs and at least one child.');

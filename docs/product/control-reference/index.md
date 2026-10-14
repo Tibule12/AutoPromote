@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.12 • 2026-10-14T14:56:21.456054Z
+Development documentation • product 1.2.0 • knowledge 1.0.13 • 2026-10-14T16:13:51.506436Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -121,6 +121,10 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.composite.group_scale | Group scale | number | 0.1 … 2 | multiplier | 1 | SUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.composite.group_rotation | Group rotation | number | -180 … 180 | degrees | 0 | SUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.composite.group_opacity | Group opacity | number | 0 … 1 | fraction | 1 | SUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_mask_enabled | Enable group mask | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_mask_shape | Group mask shape | enum | rectangle, ellipse, polygon | none | "rectangle" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_mask_feather | Group mask feather | number | 0 … 100 | pixels at 720px programme height | 0 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_mask_inverted | Invert group mask | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -323,11 +327,12 @@ Applies to: ordinary layers. Requires: studio.easing.
 
 ID: `studio.composite.blend` • **PARTIAL**
 
-Chooses how an ordinary overlay blends with the underlying image.
+Blends an ordinary layer or assembled group with its sibling backdrop while preserving source-over alpha. Children blend inside their isolated parent.
 
-Applies to: ordinary layers. Requires: studio.compositing.
+Applies to: ordinary layers, graphic groups. Requires: studio.compositing.
 
 - Main programme video currently supports normal only; unsupported main-video modes are rejected at export.
+- Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified.
 
 <a id="studio-effect-blur"></a>
 
@@ -1402,10 +1407,11 @@ ID: `studio.geometric_mask.path` • **PARTIAL**
 
 Authors the local polygon of an ordinary geometric layer mask. Incomplete or invalid text stays outside the saved graph until a valid Enter/blur commit.
 
-Applies to: image overlays, ordinary title layers. Requires: studio.compositing.
+Applies to: image overlays, ordinary title layers, graphic groups. Requires: studio.compositing.
 
 - Percentage polygon with3–64 points and at most2048 characters inside its parentheses. Each point contains finite X/Y percentages.
 - Path animation, arbitrary SVG paths and neural subject masks are unsupported.
+- Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified.
 
 <a id="studio-geometric_mask-radius"></a>
 
@@ -1415,10 +1421,11 @@ ID: `studio.geometric_mask.radius` • **PARTIAL**
 
 Sets the local rectangle mask corner radius, independently of the artwork frame. An explicit zero preserves square mask corners.
 
-Applies to: image overlays, ordinary title layers. Requires: studio.compositing.
+Applies to: image overlays, ordinary title layers, graphic groups. Requires: studio.compositing.
 
 - Rectangle masks only; artwork frame rounding and feathering are separate.
 - Radius animation is unsupported.
+- Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified.
 
 <a id="studio-composite-layer_order"></a>
 
@@ -1433,7 +1440,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 - Static graphic/group sibling order only; source footage/source VFX and generated captions keep their separate stages.
 - 3D still requires an existing current owned export asset. No generation is triggered by reordering.
 - Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and broader nesting remain unqualified.
-- Groups preserve contiguous canonical leaf order. Reorder grouped timeline layers in Composite; group clip ownership, masks/blends and broader animated combinations remain open.
+- Groups preserve contiguous canonical leaf order and isolate masks/blends among siblings. Reorder grouped timeline layers in Composite; group clip/occurrence ownership and broader animated combinations remain open.
 
 <a id="studio-composite-group_x"></a>
 
@@ -1447,7 +1454,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
 
 <a id="studio-composite-group_y"></a>
@@ -1462,7 +1469,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
 
 <a id="studio-composite-group_scale"></a>
@@ -1477,7 +1484,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
 
 <a id="studio-composite-group_rotation"></a>
@@ -1492,7 +1499,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
 
 <a id="studio-composite-group_opacity"></a>
@@ -1507,5 +1514,57 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
+
+<a id="studio-composite-group_mask_enabled"></a>
+
+## Enable group mask
+
+ID: `studio.composite.group_mask_enabled` • **PARTIAL**
+
+Clips assembled children with the authored local-canvas mask.
+
+Applies to: graphic groups. Requires: studio.compositing.
+
+- Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.
+- Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified.
+
+<a id="studio-composite-group_mask_shape"></a>
+
+## Group mask shape
+
+ID: `studio.composite.group_mask_shape` • **PARTIAL**
+
+Chooses rectangle, ellipse or percentage polygon in the group’s local programme canvas.
+
+Applies to: graphic groups. Requires: studio.compositing.
+
+- Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.
+- Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified.
+
+<a id="studio-composite-group_mask_feather"></a>
+
+## Group mask feather
+
+ID: `studio.composite.group_mask_feather` • **PARTIAL**
+
+Softens the group matte with Gaussian sigma in 720px programme units before the group transform.
+
+Applies to: graphic groups. Requires: studio.compositing.
+
+- Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.
+- Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified.
+
+<a id="studio-composite-group_mask_inverted"></a>
+
+## Invert group mask
+
+ID: `studio.composite.group_mask_inverted` • **PARTIAL**
+
+Inverts the authored matte after feathering within the local programme canvas.
+
+Applies to: graphic groups. Requires: studio.compositing.
+
+- Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.
+- Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified.

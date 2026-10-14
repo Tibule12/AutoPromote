@@ -1,5 +1,30 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { studioGroupTree, evaluateStudioGroupTransform } from './studioGroups';
+import { studioLayerMaskSvg } from './studioMaskGeometry';
+
+function GroupCanvas({ group, pose: t, rank, children }) {
+  const node = useRef(null), [size, setSize] = useState(null);
+  useLayoutEffect(() => {
+    const update = () => {
+      const width = node.current?.clientWidth, height = node.current?.clientHeight;
+      if (width > 0 && height > 0) setSize(current => current?.width === width && current?.height === height ? current : { width, height });
+    };
+    update();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(update); observer.observe(node.current);
+    return () => observer.disconnect();
+  }, []);
+  const svg = size && studioLayerMaskSvg(group.mask, 0, 0, size.width, size.height, size.height / 720);
+  const maskImage = svg ? `url("data:image/svg+xml,${encodeURIComponent(svg)}")` : undefined;
+  return <div ref={node} data-studio-group-id={group.id} data-studio-group-pose={JSON.stringify(t)}
+    style={{ position: 'absolute', inset: 0, transformOrigin: '50% 50%',
+      transform: `translate(${t.x}%, ${t.y}%) rotate(${t.rotation}deg) scale(${t.scale})`,
+      opacity: t.opacity, overflow: 'hidden', isolation: 'isolate', pointerEvents: 'none', zIndex: rank,
+      mixBlendMode: group.blendMode || 'normal', maskImage, WebkitMaskImage: maskImage,
+      maskSize: '100% 100%', WebkitMaskSize: '100% 100%', maskRepeat: 'no-repeat', WebkitMaskRepeat: 'no-repeat' }}>
+    {children}
+  </div>;
+}
 
 // Keep child coordinates and keyframes local to a full programme canvas.
 // Composite a group's children before applying its opacity and parent transform.
@@ -35,11 +60,9 @@ export default function StudioGroupPreview({ compounds, order, keyframes = [], t
     const group = tree.byId.get(id);
     if (!group) return layers.has(id) ? <React.Suspense key={id} fallback={null}>{layers.get(id)}</React.Suspense> : null;
     const t = evaluateStudioGroupTransform(group, keyframes, frame);
-    return <div key={id} data-studio-group-id={id} data-studio-group-pose={JSON.stringify(t)} style={{ position: 'absolute', inset: 0,
-      transformOrigin: '50% 50%', transform: `translate(${t.x}%, ${t.y}%) rotate(${t.rotation}deg) scale(${t.scale})`,
-      opacity: t.opacity, overflow: 'hidden', isolation: 'isolate', pointerEvents: 'none', zIndex: rank.get(tree.leaves(id)[0]) }}>
+    return <GroupCanvas key={id} group={group} pose={t} rank={rank.get(tree.leaves(id)[0])}>
       {group.layerIds.map(render)}
-    </div>;
+    </GroupCanvas>;
   };
   return <>{tree.roots.map(render)}{React.Children.toArray(other)}</>;
 }

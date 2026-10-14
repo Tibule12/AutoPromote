@@ -88,9 +88,7 @@ export const compileStudioCompositionForRender = document => {
   // Validate the saved hierarchy first. Disabled 3D retains its editable parent;
   // only the render projection removes that leaf and any resulting empty group.
   if (Array.isArray(state.compositionOrder)) {
-    const tree = studioGroupTree(compounds, state.compositionOrder);
-    if (state.overlays.some(layer => tree.parent.has(layer.id) && (layer.blendMode || 'normal') !== 'normal'))
-      fail("UNSUPPORTED_GROUP_CHILD_BLEND", "Grouped layers currently export with Normal blend. Set the child blend to Normal before export.");
+    studioGroupTree(compounds, state.compositionOrder);
   }
   const groups = studioGroupTree(removeStudioGroupMembers(compounds, disabledIds), order || []).groups;
   assertStudioMainBlendMode(state.mainTransform);

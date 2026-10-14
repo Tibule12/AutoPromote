@@ -24663,6 +24663,12 @@ const ViralClipStudio = ({
                   layerEntries={compositionRoots}
                   groupTree={compositionGroups}
                   groupEntries={compositionEntries}
+                  onCompositeGroup={(id, changes) => {
+                    if (!allowTimelineTimingEdit("graphics")) return;
+                    const next = effectiveCompoundClips.map(group => group.id === id ? { ...group, ...changes } : group);
+                    try { studioGroupTree(next, compositionIds); setCompoundClips(next); }
+                    catch (error) { setStudioActionMessage(error.message); }
+                  }}
                   onTransformGroup={(id, transform) => setCompoundClips(current => current.map(group =>
                     group.id === id ? { ...group, transform } : group))}
                   onRemoveGroup={id => {

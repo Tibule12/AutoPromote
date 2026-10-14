@@ -1,6 +1,6 @@
 # Track text to a moving object
 
-Development documentation • product 1.2.0 • knowledge 1.0.12 • 2026-10-14T14:56:21.456054Z
+Development documentation • product 1.2.0 • knowledge 1.0.13 • 2026-10-14T16:13:51.506436Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.12",
+  "knowledge_version": "1.0.13",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1065,6 +1065,26 @@
     },
     {
       "id": "studio.composite.group_opacity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_mask_enabled",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_mask_shape",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_mask_feather",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_mask_inverted",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -2819,6 +2839,26 @@
       "from": "studio.keyframes",
       "type": "editable_with",
       "to": "studio.composite.group_opacity"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_mask_enabled"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_mask_shape"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_mask_feather"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_mask_inverted"
     }
   ]
 }

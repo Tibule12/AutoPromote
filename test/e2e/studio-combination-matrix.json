@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-14T14:50:52.956051Z",
+  "updatedAt": "2026-10-14T16:11:42.450086Z",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -987,7 +987,8 @@
         "reports/studio-canonical-visual-20261008/README.md",
         "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
         "reports/studio-professional-nested-groups-20261014/checkpoint.json",
-        "reports/studio-professional-group-keyframes-20261014/checkpoint.json"
+        "reports/studio-professional-group-keyframes-20261014/checkpoint.json",
+        "reports/studio-professional-group-composite-20261014/checkpoint.json"
       ],
       "remainingBlockers": [
         "S02",
@@ -1006,7 +1007,8 @@
       "latestNativeBlendEvidence": "reports/model-capability-runtime-v1-20261009/NATIVE-LAYER-BLENDS-20261011.md",
       "latestNativeBlendScope": "Normal/Multiply/Screen/Difference for ordinary flat overlays; one native Difference export/recovery. Five other modes/main-video blending unavailable. Whole stage order/nesting and pre-final paired parity remain unqualified.",
       "latestCompleteBlendCueClockEvidence": "reports/model-capability-runtime-v1-20261009/CUE-CLOCK-AND-COMPLETE-BLENDS-20261011.md",
-      "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified."
+      "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified.",
+      "latestGroupCompositeScope": "Canonical static group masks and alpha-aware group/child blending reuse the animated hierarchy. One native nested Multiply/Screen edit preserves all keys/poses through control/history/lock/cold/export/full timeline playback; four geometry and bounded interior-color pairs pass. Broader masks/modes/media/retiming/full raster/live sound remain unqualified."
     },
     {
       "id": "multiple_effects_one_clip",
@@ -1399,26 +1401,26 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "CANONICAL_ANIMATED_GROUP_KEYS_AND_PROPERTY_ROWS",
+    "lastSessionKind": "CANONICAL_GROUP_MASKS_AND_ALPHA_AWARE_BLENDING",
     "lastSessionRealCapabilityRuns": 1,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-group-keyframes-20261014/README.md",
+    "exactBlockersSource": "reports/studio-professional-group-composite-20261014/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-group-keyframes-20261014/README.md",
+    "lastSessionEvidence": "reports/studio-professional-group-composite-20261014/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendCasesPassed": 77,
-      "compositorAndMotionCasesPassed": 82,
+      "frontendCasesPassed": 91,
+      "compositorAndMotionCasesPassed": 131,
       "legacyAudioMotionCasesPassed": 21,
       "subtestsPassed": 261,
       "strictLocalAppBuild": "PASS",
       "fullStudioSuite": false
     },
-    "nextSlice": "S03 group masks and blend semantics on the shared canonical hierarchy/compositor, then clip ownership; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open",
+    "nextSlice": "S03 group clip/occurrence ownership and timing through the canonical hierarchy; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -5227,5 +5229,40 @@
       "S04"
     ],
     "nextImplementationSlice": "S03 group masks and blend semantics on the shared canonical hierarchy/compositor, then clip ownership; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open"
+  },
+  "professionalGroupComposite20261014": {
+    "evidence": "reports/studio-professional-group-composite-20261014/README.md",
+    "checkpoint": "reports/studio-professional-group-composite-20261014/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Canonical static group masks and alpha-aware group/child blending reuse the animated hierarchy. One native nested Multiply/Screen edit preserves all keys/poses through control/history/lock/cold/export/full timeline playback; four geometry and bounded interior-color pairs pass. Broader masks/modes/media/retiming/full raster/live sound remain unqualified.",
+    "nativeProjects": 1,
+    "nativeCpuExports": 1,
+    "nativeHistorySaveColdReopen": true,
+    "masterKeyCount": 16,
+    "animatedChannels": 8,
+    "completeStudioRecordings": 1,
+    "geometryAndInteriorColorPairsPassed": 4,
+    "maxBoundaryP95Pixels": 1.0,
+    "minimumVisibleImageIou": 0.9886338144021536,
+    "maxInteriorRgbRmse": 3.2268460992634505,
+    "decodedSourceToneUnchanged": true,
+    "frontendCasesPassed": 91,
+    "compositorAndMotionCasesPassed": 131,
+    "legacyAudioMotionCasesPassed": 21,
+    "subtestsPassed": 261,
+    "strictAppBuild": "PASS",
+    "gpuJobs": 0,
+    "paidGpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "ownedLocalQaStopped": true,
+    "wholePreviewFinalParityQualified": false,
+    "fullStudioSuiteQualified": false,
+    "readinessPromoted": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ],
+    "nextImplementationSlice": "S03 group clip/occurrence ownership and timing through the canonical hierarchy; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open"
   }
 }

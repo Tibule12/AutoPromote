@@ -6,10 +6,45 @@ try:
     from .studio_motion import automation_expression, _curve_bounds, output_to_programme_expression
 except ImportError:
     from studio_motion import automation_expression, _curve_bounds, output_to_programme_expression
+try:
+    from .studio_layer_motion import layer_clip_mask
+except ImportError:
+    from studio_layer_motion import layer_clip_mask
 
 BLEND_MODES = {"normal", "multiply", "screen", "difference", "overlay", "hard-light", "soft-light", "color-dodge", "luminosity"}
 GROUP_TRANSFORM = {"x": 0, "y": 0, "scale": 1, "rotation": 0, "opacity": 1}
 GROUP_BOUNDS = {"x": (-100, 100), "y": (-100, 100), "scale": (.1, 2), "rotation": (-180, 180), "opacity": (0, 1)}
+
+
+def validate_group_mask(mask):
+    if (not isinstance(mask, dict) or set(mask) - {"enabled", "shape", "path", "radius", "feather", "inverted"}):
+        raise ValueError("Group masks support enabled, shape, path, radius, feather and inversion")
+    for field in ("enabled", "inverted"):
+        if field in mask and not isinstance(mask[field], bool):
+            raise ValueError(f"Group mask {field} needs a boolean")
+    if mask.get("shape", "rectangle") not in {"rectangle", "ellipse", "polygon"}:
+        raise ValueError("Unsupported group mask shape")
+    for field, high in (("radius", 50), ("feather", 100)):
+        value = mask.get(field, 0)
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= high:
+            raise ValueError(f"Group mask {field} must be between 0 and {high}")
+    if "path" in mask or mask.get("shape") == "polygon":
+        path = mask.get("path", "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)")
+        match = re.fullmatch(r"polygon\((.{1,2048})\)", path.strip()) if isinstance(path, str) else None
+        points = match.group(1).split(',') if match else []
+        if not 3 <= len(points) <= 64:
+            raise ValueError("Group mask requires a percentage polygon with 3 to 64 points")
+        for point in points:
+            pair = re.fullmatch(r"\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*", point)
+            if not pair or not all(math.isfinite(float(v)) for v in pair.groups()):
+                raise ValueError("Group mask requires finite percentage points")
+
+
+def graphic_group_mask(group, width, height):
+    """Same authored matte rasterizer as ordinary layers, in group-local space."""
+    mask = group.get("mask", {})
+    validate_group_mask(mask)
+    return layer_clip_mask((width, height), mask, feather_scale=height / 720)
 
 
 def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids):
@@ -49,9 +84,13 @@ def validate_graphic_groups(plan, order):
         raise ValueError("Graphic groups need an explicit canonical layer order")
     by_id, parent, rank, key_ids = {}, {}, {identity: index for index, identity in enumerate(order)}, set()
     for group in groups:
-        if (not isinstance(group, dict) or set(group) - {"id", "name", "kind", "layerIds", "transform", "motion_keyframes"}
+        if (not isinstance(group, dict) or set(group) - {"id", "name", "kind", "layerIds", "transform", "motion_keyframes", "mask", "blendMode"}
                 or group.get("kind") != "graphic_group"):
-            raise ValueError("Graphic groups support membership, transforms and transform keys only")
+            raise ValueError("Graphic groups support membership, transforms, keys, masks and blending only")
+        if group.get("blendMode", "normal") not in BLEND_MODES:
+            raise ValueError("Unsupported group blend mode")
+        if "mask" in group:
+            validate_group_mask(group["mask"])
         identity, children = group.get("id"), group.get("layerIds")
         if (not isinstance(identity, str) or not identity or identity in by_id or identity in rank
                 or not isinstance(children, list) or not children
@@ -95,9 +134,6 @@ def validate_graphic_groups(plan, order):
             if (child not in rank and child not in by_id) or child in parent:
                 raise ValueError("Each group child needs one existing parent")
             parent[child] = identity
-    for layer in (plan or {}).get("layers") or []:
-        if layer.get("id") in parent and layer.get("blend_mode", "normal") != "normal":
-            raise ValueError("Grouped layers currently export with Normal blend; set the child blend to Normal")
 
     def leaves(identity, seen=()):
         if identity not in by_id:
@@ -170,7 +206,7 @@ def animated_group_filter(group, input_label, prefix, width, height, duration, s
     return filters, rgba, x, y
 
 
-def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height, duration, speed_plan=None, frame_rate=30):
+def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height, duration, speed_plan=None, frame_rate=30, mask_inputs=None):
     """Reuse each prepared leaf; compose/clip groups before parent transforms."""
     by_id, roots, _ = validate_graphic_groups(plan, order)
     if not by_id:
@@ -208,12 +244,27 @@ def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height,
                        f"format=rgba,colorchannelmixer=aa=0[{local}];")
         for child in group["layerIds"]:
             local = draw(child, local)
+        if group.get("mask", {}).get("enabled"):
+            matte = (mask_inputs or {}).get(identity)
+            if not matte or not re.fullmatch(r"[A-Za-z0-9_:]+", matte):
+                raise ValueError("Enabled group masks need a prepared local matte input")
+            filters.extend([
+                f"[{local}]format=rgba,split=2[{prefix}_color][{prefix}_alpha_in];",
+                f"[{prefix}_alpha_in]alphaextract[{prefix}_alpha];",
+                f"[{matte}]format=gray,setsar=1[{prefix}_mask];",
+                f"[{prefix}_alpha][{prefix}_mask]blend=all_mode=multiply[{prefix}_masked_alpha];",
+                f"[{prefix}_color][{prefix}_masked_alpha]alphamerge[{prefix}_masked];",
+            ])
+            local = f"{prefix}_masked"
+        def composite(block, output):
+            filters.extend(blend_layer_block(block, backdrop, output, group.get("blendMode", "normal"),
+                                            width, height, duration, f"{prefix}_blend", frame_rate=fps))
+            return output
         if group.get("motion_keyframes"):
             block, rgba, x, y = animated_group_filter(group, local, prefix, width, height, duration, speed_plan, fps)
             filters.extend(block)
             output = f"{prefix}_out"
-            filters.append(f"[{backdrop}][{rgba}]overlay=x='{x}':y='{y}':format=auto:eof_action=pass:repeatlast=0[{output}];")
-            return output
+            return composite([f"[{backdrop}][{rgba}]overlay=x='{x}':y='{y}':format=auto:eof_action=pass:repeatlast=0[{output}];"], output)
         # Premultiplied interpolation avoids dark RGB fringes on transparency.
         transform = "format=gbrap,premultiply=inplace=1"
         if t["scale"] != 1:
@@ -224,9 +275,8 @@ def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height,
         filters.append(f"[{local}]{transform}[{prefix}_rgba];")
         x, y = (width-rotated_w)/2 + width*t["x"]/100, (height-rotated_h)/2 + height*t["y"]/100
         output = f"{prefix}_out"
-        filters.append(f"[{backdrop}][{prefix}_rgba]overlay=x={x:.9f}:y={y:.9f}:format=auto:"
-                       f"eof_action=pass:repeatlast=0[{output}];")
-        return output
+        return composite([f"[{backdrop}][{prefix}_rgba]overlay=x={x:.9f}:y={y:.9f}:format=auto:"
+                          f"eof_action=pass:repeatlast=0[{output}];"], output)
 
     current = base_label
     for identity in roots:
@@ -267,7 +317,7 @@ def rgb_blend_filter(mode):
     return f"blend=all_mode={mode}"
 
 
-def blend_layer_block(block, input_label, output_label, mode, width, height, duration, prefix, time_window=None):
+def blend_layer_block(block, input_label, output_label, mode, width, height, duration, prefix, time_window=None, frame_rate=30):
     mode = str(mode or "normal")
     if mode not in BLEND_MODES:
         raise ValueError(f"Studio blend mode {mode!r} is not implemented for export")
@@ -282,22 +332,31 @@ def blend_layer_block(block, input_label, output_label, mode, width, height, dur
     if time_window and mode != 'luminosity':
         blend_filter += f":enable='between(t,{time_window[0]:.3f},{time_window[1]:.3f})'"
     names = {name: f"{prefix}_{name}" for name in
-             ["blank", "foreground", "color", "alpha_in", "alpha", "base", "base_rgb", "keep", "rgb", "blended", "rgba"]}
+             ["blank", "foreground", "color", "alpha_in", "alpha", "base", "base_color", "base_alpha_in", "base_alpha",
+              "base_rgb", "keep", "rgb", "front_rgb", "front_opaque", "blended", "weighted", "effective", "effective_rgb", "rgba"]}
     # Draw this same ordinary layer block on a transparent canvas. Keep its
     # own timing, geometry, motion, masks and opacity; do not blend in YUV or
     # let the mode modify the layer alpha.
     result = [f"[{input_label}]split=2[{names['keep']}][{names['base']}];",
-              f"color=c=black:s={int(width)}x{int(height)}:r=30:d={float(duration):.6f},"
+              f"color=c=black:s={int(width)}x{int(height)}:r={float(frame_rate):.9f}:d={float(duration):.6f},"
               f"format=rgba,colorchannelmixer=aa=0[{names['blank']}];"]
     result.extend(part.replace(f"[{input_label}]", f"[{names['blank']}]")
                   .replace(f"[{output_label}]", f"[{names['foreground']}]") for part in block)
     result.extend([
         f"[{names['foreground']}]format=rgba,split=2[{names['color']}][{names['alpha_in']}];",
         f"[{names['alpha_in']}]alphaextract[{names['alpha']}];",
-        f"[{names['base']}]format=gbrp[{names['base_rgb']}];",
-        f"[{names['color']}]format=gbrp[{names['rgb']}];",
+        f"[{names['base']}]format=rgba,split=2[{names['base_color']}][{names['base_alpha_in']}];",
+        f"[{names['base_alpha_in']}]alphaextract[{names['base_alpha']}];",
+        f"[{names['base_color']}]format=gbrp[{names['base_rgb']}];",
+        f"[{names['color']}]format=gbrp,split=2[{names['rgb']}][{names['front_rgb']}];",
         f"[{names['base_rgb']}][{names['rgb']}]{blend_filter}[{names['blended']}];",
-        f"[{names['blended']}][{names['alpha']}]alphamerge[{names['rgba']}];",
+        # CSS blend color is (1-backdropAlpha)*foreground + backdropAlpha*blend.
+        # A transparent isolated parent must not turn Multiply children black.
+        f"[{names['blended']}][{names['base_alpha']}]alphamerge[{names['weighted']}];",
+        f"[{names['front_rgb']}]format=rgba[{names['front_opaque']}];",
+        f"[{names['front_opaque']}][{names['weighted']}]overlay=0:0:format=auto:eof_action=pass:repeatlast=0[{names['effective']}];",
+        f"[{names['effective']}]format=gbrp[{names['effective_rgb']}];",
+        f"[{names['effective_rgb']}][{names['alpha']}]alphamerge[{names['rgba']}];",
         f"[{names['keep']}][{names['rgba']}]overlay=0:0:eof_action=pass:repeatlast=0:format=auto[{output_label}];",
     ])
     return result
