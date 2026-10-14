@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.9 • 2026-10-13T21:44:18.983227Z
+Development documentation • product 1.2.0 • knowledge 1.0.10 • 2026-10-14T03:37:38.361841Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -507,7 +507,7 @@ Applies the supported deterministic visual effects and source-bound subject scen
 
 ID: `studio.compositing` • **PARTIAL** • DETERMINISTIC
 
-Combines ordinary layers with supported blend modes and masks. Global stage order, arbitrary nesting and full preview/export agreement remain incomplete.
+Combines ordinary layers with supported blend modes and masks. Flat layer order now crosses ordinary layers, motion scenes and 3D on the canonical layer list; arbitrary nesting and whole preview/export agreement remain incomplete.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -536,12 +536,13 @@ Combines ordinary layers with supported blend modes and masks. Global stage orde
 - This dated development snapshot does not establish professional or production readiness.
 - Editable percentage-polygon paths and rectangle radius use the canonical mask object. This adds no animated path, neural segmentation, mask expansion or video-mask support.
 - The bounded inverted-polygon/shadow/glow/blur image stack passes four sampled colour pairs with transform/opacity keys. The ellipse stack retains a strict raster failure, and historical landscape edge failures remain open.
+- The layer stack has native image/title/two-motion history, cold reopen, exports and scoped visible-image occlusion evidence. Actual owned 3D cross-family export, whole motion/title raster, large stacks and nested compositions remain unqualified. Source footage/source VFX and generated captions retain their separate programme stages.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius)
+**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order)
 
 **Guides:** No task guide in V1.
 

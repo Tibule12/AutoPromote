@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.9",
+  "knowledge_version": "1.0.10",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -3657,6 +3657,43 @@
         "Radius animation is unsupported."
       ],
       "updated_at": "2026-10-13",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.layer_order",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Layer order",
+      "status": "PARTIAL",
+      "meaning": "Moves an ordinary graphic, motion scene or 3D scene backward or forward in the shared flat stack. The top row appears in front.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 2000,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static flat order only; source footage/source VFX and generated captions keep their separate stages.",
+        "3D still requires an existing current owned export asset. No generation is triggered by reordering.",
+        "Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and nesting remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
       "product_version": "1.2.0"
     }
   ]

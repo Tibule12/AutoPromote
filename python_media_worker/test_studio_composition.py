@@ -1,13 +1,46 @@
 """Actual FFmpeg RGB/alpha/timing/order checks; no browser output substitutes."""
 import subprocess
+import itertools
 
 import numpy as np
 import pytest
 
-from python_media_worker.studio_composition import blend_layer_block
+from python_media_worker.studio_composition import blend_layer_block, validate_layer_order, connect_layer_blocks
 
 BACKGROUND = np.array([40, 80, 120], dtype=float)
 FOREGROUND = np.array([128, 64, 192], dtype=float)
+
+
+def test_explicit_stack_rejects_missing_unknown_duplicate_and_colliding_family_ids():
+    known = (["image"], ["motion"], ["depth"])
+    assert validate_layer_order({}, *known) is None
+    assert validate_layer_order({"order": ["depth", "image", "motion"]}, *known) == ["depth", "image", "motion"]
+    for order in (["image", "motion"], ["image", "motion", "unknown"], ["image", "motion", "motion"], "image"):
+        with pytest.raises(ValueError, match="every graphic"):
+            validate_layer_order({"order": order}, *known)
+    with pytest.raises(ValueError, match="every graphic"):
+        validate_layer_order({"order": ["image", "motion"]}, ["image"], ["motion"], ["image"])
+
+
+@pytest.mark.parametrize("order", list(itertools.permutations(["image", "motion", "depth"])))
+def test_actual_ffmpeg_cross_family_alpha_stack_uses_the_requested_backdrop(order):
+    # These are independent prepared alpha streams, as used by images, motion
+    # scenes and resolved owned 3D. Compare all orderings with separate RGBA math.
+    colors = {"image": (240, 30, 60), "motion": (20, 220, 80), "depth": (70, 50, 230)}
+    sources, blocks, current = "", [], "base"
+    for index, (identity, color) in enumerate(colors.items()):
+        rgb = ''.join(f'{value:02x}' for value in color)
+        sources += f"color=c=0x{rgb}:s=8x8:r=30:d=1,format=rgba,colorchannelmixer=aa=0.5[fg{index}];"
+        output = f"layer{index}"
+        blocks.append((identity, [f"[{current}][fg{index}]overlay=x=8:y=8:format=auto[{output}];"], current, output))
+        current = output
+    filters, output = connect_layer_blocks(blocks, 'base', list(order))
+    frames = decode(background()+sources+''.join(filters)+f"[{output}]null[out];")
+    expected = BACKGROUND.copy()
+    for identity in order:
+        expected = expected * (1 - 127/255) + np.array(colors[identity]) * (127/255)
+    np.testing.assert_allclose(frames[15, 10, 10], expected, atol=2)
+    np.testing.assert_allclose(frames[15, 0, 0], BACKGROUND, atol=1)
 
 
 def blend(base, front, mode):

@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-14T03:41:06.206696Z",
+  "clientDate": "2026-10-14",
+  "branch": "agent/studio-professional-continuation-v2",
+  "capabilityImproved": "Canonical flat layer order across ordinary image/video/title layers, motion scenes and existing owned3D alpha scenes; native stack controls, history, save/projection and per-scene compositing",
+  "changedImplementationFiles": [
+    "frontend/src/components/ViralClipStudio.js",
+    "frontend/src/components/StudioAdvancedInspectors.js",
+    "frontend/src/components/StudioLayerStack.js",
+    "frontend/src/components/StudioLayerStack.css",
+    "frontend/src/components/studioLayerOrder.js",
+    "frontend/src/components/studioProjectDocument.js",
+    "frontend/src/components/studioRenderCompiler.js",
+    "frontend/src/components/motion/MotionCanvas.js",
+    "frontend/src/components/threeD/Studio3DCanvas.js",
+    "python_media_worker/main_media_server.py",
+    "python_media_worker/studio_composition.py"
+  ],
+  "implementationSha256": {
+    "frontend/src/components/ViralClipStudio.js": "e4e6311cf54215e363f5e85ec37f79e7fdca5ac7a0e95ea6baa3ea27d9827743",
+    "frontend/src/components/StudioAdvancedInspectors.js": "c5662034ed0ac652c24bed7d48f137f57cbeb6a0f7e01905d3aed31009603951",
+    "frontend/src/components/StudioLayerStack.js": "202979a5c9e2b58f56ae08527831a330f6d06255477dddf635b143773bc58fd9",
+    "frontend/src/components/StudioLayerStack.css": "119a2ebc51059fb4390fc8563e7ae6c5704952199b11a5a0ccf1cfb1f12dcc9b",
+    "frontend/src/components/studioLayerOrder.js": "583dc05accb65c478d0bfb8b5d3f8deb9c8d827624860e98d84b0aa171acdf8a",
+    "frontend/src/components/studioProjectDocument.js": "99d7aa0270b51ea1520aac7a21c67a07498d96f43ac5bba5a0ff6938190a1e6b",
+    "frontend/src/components/studioRenderCompiler.js": "7640469d20870e50877fbfc8176a7f7e5384b9aa4e0e17659abf5aae30327553",
+    "frontend/src/components/motion/MotionCanvas.js": "815d1f12c1014bc0e57bd835a59aee88497e4d94628aa095d94db0a76e17af64",
+    "frontend/src/components/threeD/Studio3DCanvas.js": "d43fa3fe97c8c353de51c5d229df476530f98541c6e56452093995b5517982c6",
+    "python_media_worker/main_media_server.py": "fa73513adb5027892fed40bc65bdf37059310e6b95676c4600596514a5b0ab58",
+    "python_media_worker/studio_composition.py": "330f9c95e8ed8a5d15b9b6f6fa444a89e22346a7182e49c45ef1c6a49c1c7619"
+  },
+  "nativeCases": [
+    {
+      "variant": "motion-front",
+      "projectId": "viral-project-d10b246d-2179-4a30-9baa-e3854bdfbdb8",
+      "canonicalHash": "77e8689ba58080904519a6eae14b8cd70b379e3fa85c5c2b3b1a9c8723edd86f",
+      "outputSha256": "b02dd2ca578afd6745948389e5b05c311a2f9ab0f9dcbc7cb5d33c9e259b16b4",
+      "studioRecordingSha256": "7e7aac64c833a04874e48a8fdf2de717547d2e54920ff74c4e7fd8e9c60ee26d",
+      "movie": "reports/studio-professional-layer-order-20261014/proof/motion-front/final.mp4",
+      "studioRecording": "reports/studio-professional-layer-order-20261014/proof/motion-front/edited-in-studio.mp4",
+      "order": [
+        "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+        "motion-12aaa46c-a688-4ddb-8732-0aecf836ccfb",
+        "motion-f4872948-174a-4517-97b9-2f3059478e6f",
+        "title-ea0da8e1-7c17-4428-9840-6e1df42224d5"
+      ],
+      "undo": true,
+      "redo": true,
+      "saveColdReopen": true,
+      "nativeFinishedOutput": true,
+      "timelineVisible": true
+    },
+    {
+      "variant": "between",
+      "projectId": "viral-project-0fe56c0d-cf43-478d-8321-514c348844f1",
+      "canonicalHash": "fd276fe3219c32cf48d349e9be1fc2b96934e4d0966b2e993d2891f999141772",
+      "outputSha256": "0c0520083709979217c41be6fd36a5ccc59077d89d45149fb3cfc271b8568a1a",
+      "studioRecordingSha256": "13b69c6a95ee68c88a9da36e806a4dd6a5eb3f366ce33b636d5a1cbda31d2ede",
+      "movie": "reports/studio-professional-layer-order-20261014/proof/between/final.mp4",
+      "studioRecording": "reports/studio-professional-layer-order-20261014/proof/between/edited-in-studio.mp4",
+      "order": [
+        "motion-12aaa46c-a688-4ddb-8732-0aecf836ccfb",
+        "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+        "motion-f4872948-174a-4517-97b9-2f3059478e6f",
+        "title-ea0da8e1-7c17-4428-9840-6e1df42224d5"
+      ],
+      "undo": true,
+      "redo": true,
+      "saveColdReopen": true,
+      "nativeFinishedOutput": true,
+      "timelineVisible": true
+    }
+  ],
+  "pairQualification": {
+    "comparisons": [
+      {
+        "variant": "motion-front",
+        "time": 0.5,
+        "nativePixels": 21934,
+        "finalPixels": 21656,
+        "visibleImageIou": 0.9870538359848657,
+        "boundaryP95Pixels": 1.0,
+        "passed": true
+      },
+      {
+        "variant": "motion-front",
+        "time": 1,
+        "nativePixels": 15096,
+        "finalPixels": 14891,
+        "visibleImageIou": 0.9864202437731849,
+        "boundaryP95Pixels": 1.0,
+        "passed": true
+      },
+      {
+        "variant": "motion-front",
+        "time": 1.5,
+        "nativePixels": 21934,
+        "finalPixels": 21650,
+        "visibleImageIou": 0.9870520652867694,
+        "boundaryP95Pixels": 1.0,
+        "passed": true
+      },
+      {
+        "variant": "motion-front",
+        "time": 2.5,
+        "nativePixels": 24256,
+        "finalPixels": 23989,
+        "visibleImageIou": 0.9889924142480211,
+        "boundaryP95Pixels": 1.0,
+        "passed": true
+      },
+      {
+        "variant": "between",
+        "time": 0.5,
+        "nativePixels": 41413,
+        "finalPixels": 41410,
+        "visibleImageIou": 0.9999275589790645,
+        "boundaryP95Pixels": 0.0,
+        "passed": true
+      },
+      {
+        "variant": "between",
+        "time": 1,
+        "nativePixels": 41412,
+        "finalPixels": 41409,
+        "visibleImageIou": 0.9999275572297884,
+        "boundaryP95Pixels": 0.0,
+        "passed": true
+      },
+      {
+        "variant": "between",
+        "time": 1.5,
+        "nativePixels": 41413,
+        "finalPixels": 41410,
+        "visibleImageIou": 0.9999275589790645,
+        "boundaryP95Pixels": 0.0,
+        "passed": true
+      },
+      {
+        "variant": "between",
+        "time": 2.5,
+        "nativePixels": 41413,
+        "finalPixels": 41408,
+        "visibleImageIou": 0.9998792649651076,
+        "boundaryP95Pixels": 0.0,
+        "passed": true
+      }
+    ],
+    "boundaryP95TolerancePixels": 2,
+    "visibleImageIouMinimum": 0.95,
+    "passed": true,
+    "gpuJobs": 0,
+    "scope": "Eight exact paused images of two native ordinary-image/title plus two-motion stacks. Original magenta artwork visible footprint and occlusion geometry only; no fitted spatial/time alignment. Full glyph/color/live audio/3D/nesting remain unqualified."
+  },
+  "focusedFrontendCasesPassed": 24,
+  "compositorCasesPassed": 42,
+  "legacyAudioMotionWorkerCasesPassed": 21,
+  "legacyAudioMotionWorkerSubtestsPassed": 255,
+  "focusedDistinctCasesPassed": 87,
+  "strictAppBuild": "PASS",
+  "nativeCpuExports": 2,
+  "gpuJobs": 0,
+  "paidGpuRuntimeSeconds": 0,
+  "paidGpuCost": 0,
+  "actualOwned3DNativeRunQualified": false,
+  "wholePreviewFinalParityQualified": false,
+  "fullStudioSuiteQualified": false,
+  "readinessPromoted": false,
+  "retainedFailures": [
+    "three native harness selector attempts in private logs; two screenshots were overwritten before the retention boundary",
+    "one strict-build ESLint failure, repaired",
+    "legacy test fixture lacked new validator injection and old source-materialization keyword; corrected without changing source materialization behavior"
+  ],
+  "remainingBlockers": [
+    "Actual owned3D/video/large-stack cross-family native qualification",
+    "Nested group transforms, masks/blends and clip ownership",
+    "Full motion/title/color/live picture and sound parity",
+    "Earlier S02 ellipse1.5s RGB RMSE4.26944 exceeds unchanged4.0 bound"
+  ],
+  "nextImplementationSlice": "S03 nested composition and group transforms on the existing canonical graph; keep S02 raster/moving/cold/broad picture and sound open"
+}

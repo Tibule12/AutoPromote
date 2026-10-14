@@ -89,6 +89,8 @@ export const compileStudioCompositionForRender = document => {
     }
   }
   return { version: 1, coordinate_space: "canvas_percent", preview_timebase: "output_timeline_seconds",
+    ...(Array.isArray(state.compositionOrder) ? { order: state.compositionOrder.filter(id =>
+      !state.threeDScenes.some(scene => scene.id === id && scene.enabled === false)) } : {}),
     layers: [state.mainTransform || { id: "main-video", type: "video" },
       ...state.overlays.filter(overlay => !overlay.isCaption)].map(layer => ({
       id: layer.id, name: layer.name || layer.text || "Visual layer", type: layer.type || "visual",

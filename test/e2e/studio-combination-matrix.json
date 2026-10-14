@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-13T21:44:18.983227Z",
+  "updatedAt": "2026-10-14T03:41:06.206696Z",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -1397,24 +1397,25 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "LEGACY_OWNED_SOURCE_GENERATION_SAMPLING_AND_BOUNDED_COMPOSITION_AUDIT",
+    "lastSessionKind": "CANONICAL_CROSS_FAMILY_FLAT_LAYER_ORDER",
     "lastSessionRealCapabilityRuns": 2,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-source-sampling-20261013/README.md",
+    "exactBlockersSource": "reports/studio-professional-layer-order-20261014/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-source-sampling-20261013/README.md",
+    "lastSessionEvidence": "reports/studio-professional-layer-order-20261014/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendCasesPassed": 31,
-      "serverCasesPassed": 24,
+      "frontendCasesPassed": 24,
+      "compositorCasesPassed": 42,
+      "legacyAudioMotionCasesPassed": 21,
       "strictLocalAppBuild": "PASS",
       "fullStudioSuite": false
     },
-    "nextSlice": "S03 global composition order across ordinary layers, motion scenes and 3D; keep S02 strict ellipse raster, moving/cold/broad picture and sound open",
+    "nextSlice": "S03 nested composition and group transforms on the existing canonical graph; keep S02 raster/moving/cold/broad picture and sound open",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -5123,5 +5124,36 @@
       "S04"
     ],
     "nextImplementationSlice": "S03 global composition order; S02 remaining raster/moving/cold/broad picture and sound remain open"
+  },
+  "professionalFlatLayerOrder20261014": {
+    "evidence": "reports/studio-professional-layer-order-20261014/README.md",
+    "checkpoint": "reports/studio-professional-layer-order-20261014/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Canonical flat cross-family order is wired through native stack controls, saved layer list, preview ranks and per-scene worker assembly. Two native image/title/two-motion edits pass history/save/cold reopen/owned CPU export/full timeline playback; eight mapped visible-image occlusion pairs pass. Actual owned3D/video/large stacks, full raster/audio/nesting/readiness remain unqualified.",
+    "nativeProjects": 2,
+    "nativeCpuExports": 2,
+    "nativeHistorySaveColdReopen": true,
+    "completeStudioRecordings": 2,
+    "occlusionPairsPassed": 8,
+    "maxBoundaryP95Pixels": 1.0,
+    "minimumVisibleImageIou": 0.9864202437731849,
+    "frontendCasesPassed": 24,
+    "compositorCasesPassed": 42,
+    "legacyAudioMotionCasesPassed": 21,
+    "legacyAudioMotionSubtestsPassed": 255,
+    "strictAppBuild": "PASS",
+    "gpuJobs": 0,
+    "paidGpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "actualOwned3DNativeQualified": false,
+    "wholePreviewFinalParityQualified": false,
+    "fullStudioSuiteQualified": false,
+    "readinessPromoted": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ],
+    "nextImplementationSlice": "S03 nested composition and group transforms on the existing canonical graph; keep S02 raster/moving/cold/broad picture and sound open"
   }
 }

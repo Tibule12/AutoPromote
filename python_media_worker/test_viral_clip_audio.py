@@ -186,6 +186,7 @@ class ViralClipAudioTests(unittest.TestCase):
                     request.video_url,
                     mock.ANY,
                     keep_audio=True,
+                    preserve_source_bytes=False,
                 )
             finally:
                 if result and result.get("output_path") and os.path.exists(result["output_path"]):

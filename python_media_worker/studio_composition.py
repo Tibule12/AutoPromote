@@ -4,6 +4,32 @@ import math
 BLEND_MODES = {"normal", "multiply", "screen", "difference", "overlay", "hard-light", "soft-light", "color-dodge", "luminosity"}
 
 
+def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids):
+    """An explicit canonical stack must name every graphic exactly once."""
+    if "order" not in (plan or {}):
+        return None
+    order = plan["order"]
+    known = list(overlay_ids) + list(motion_ids) + list(three_d_ids)
+    if (not isinstance(order, list) or len(order) > 2000
+            or any(not isinstance(item, str) or not item for item in order)
+            or len(set(order)) != len(order) or len(set(known)) != len(known)
+            or set(order) != set(known)):
+        raise ValueError("Composition order must name every graphic layer exactly once")
+    return order
+
+
+def connect_layer_blocks(blocks, base_label, order):
+    """Reconnect prepared ordinary/motion/owned-3D blocks on one backdrop."""
+    rank = {layer_id: index for index, layer_id in enumerate(order)}
+    if any(item[0] not in rank for item in blocks):
+        raise ValueError("Rendered layer is missing from the composition order")
+    filters, current = [], base_label
+    for layer_id, block, previous_input, output in sorted(blocks, key=lambda item: rank[item[0]]):
+        filters.extend(part.replace(f"[{previous_input}]", f"[{current}]") for part in block)
+        current = output
+    return filters, current
+
+
 def luminosity_filter(width, window=None):
     # Nonseparable CSS luminosity = SetLum(backdrop, Lum(foreground)), including
     # ClipColor for out-of-gamut values. Read both RGB pictures in one geq input.

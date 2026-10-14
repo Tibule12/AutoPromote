@@ -4,6 +4,7 @@ import StudioKeyframeCurveEditor from "./StudioKeyframeCurveEditor";
 import ProductHelpButton from "./ProductHelpButton";
 import { STUDIO_EXPORT_BLEND_MODES } from "./studioBlendModes";
 import StudioMaskPathEditor from "./StudioMaskPathEditor";
+import StudioLayerStack from "./StudioLayerStack";
 
 const Range = ({ label, valueLabel, ...props }) => (
   <label className="inspector-range">
@@ -423,6 +424,8 @@ export function MotionInspector({
 }
 
 export function CompositeInspector({
+  layerEntries = [],
+  onMoveLayer,
   activeOverlay,
   overlays,
   adjustmentLayers,
@@ -444,6 +447,7 @@ export function CompositeInspector({
         <span className="inspector-status-dot is-ready">Layer aware</span>
       </div>
 
+      <StudioLayerStack entries={layerEntries} onMove={onMoveLayer} />
       <div className="composite-quick-actions">
         <button type="button" onClick={onAddAdjustmentLayer}>
           ＋ Adjustment layer

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.9",
+  "knowledge_version": "1.0.10",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-13T21:44:18.983227Z",
+  "updated_at": "2026-10-14T03:37:38.361841Z",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -987,8 +987,8 @@
       "feature_id": "studio.compositing",
       "name": "Compositing",
       "area": "Studio",
-      "summary": "Combines ordinary layers with supported blend modes and masks. Global stage order, arbitrary nesting and full preview/export agreement remain incomplete.",
-      "purpose": "Combines ordinary layers with supported blend modes and masks. Global stage order, arbitrary nesting and full preview/export agreement remain incomplete.",
+      "summary": "Combines ordinary layers with supported blend modes and masks. Flat layer order now crosses ordinary layers, motion scenes and 3D on the canonical layer list; arbitrary nesting and whole preview/export agreement remain incomplete.",
+      "purpose": "Combines ordinary layers with supported blend modes and masks. Flat layer order now crosses ordinary layers, motion scenes and 3D on the canonical layer list; arbitrary nesting and whole preview/export agreement remain incomplete.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
@@ -1005,7 +1005,8 @@
       "controls": [
         "studio.composite.blend",
         "studio.geometric_mask.path",
-        "studio.geometric_mask.radius"
+        "studio.geometric_mask.radius",
+        "studio.composite.layer_order"
       ],
       "workflow": [
         "Select an owned image or ordinary title in Studio Composite.",
@@ -1021,7 +1022,8 @@
         "Feathered/inverted masks, animated video-layer masks, arbitrary nesting and full alpha/text/effect-order parity remain incomplete.",
         "This dated development snapshot does not establish professional or production readiness.",
         "Editable percentage-polygon paths and rectangle radius use the canonical mask object. This adds no animated path, neural segmentation, mask expansion or video-mask support.",
-        "The bounded inverted-polygon/shadow/glow/blur image stack passes four sampled colour pairs with transform/opacity keys. The ellipse stack retains a strict raster failure, and historical landscape edge failures remain open."
+        "The bounded inverted-polygon/shadow/glow/blur image stack passes four sampled colour pairs with transform/opacity keys. The ellipse stack retains a strict raster failure, and historical landscape edge failures remain open.",
+        "The layer stack has native image/title/two-motion history, cold reopen, exports and scoped visible-image occlusion evidence. Actual owned 3D cross-family export, whole motion/title raster, large stacks and nested compositions remain unqualified. Source footage/source VFX and generated captions retain their separate programme stages."
       ],
       "common_errors": [
         {
@@ -1039,7 +1041,7 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-10-13",
+      "updated_at": "2026-10-14",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -11048,6 +11050,67 @@
       "updated_at": "2026-10-13",
       "product_version": "1.2.0",
       "visibility": "PUBLIC"
+    },
+    {
+      "control_id": "studio.composite.layer_order",
+      "label": "Layer order",
+      "meaning": "Moves an ordinary graphic, motion scene or 3D scene backward or forward in the shared flat stack. The top row appears in front.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "layers (canonical back-to-front array); compositionOrder is its snapshot projection",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 2000,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static flat order only; source footage/source VFX and generated captions keep their separate stages.",
+        "3D still requires an existing current owned export asset. No generation is triggered by reordering.",
+        "Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and nesting remain unqualified."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioLayerStack.js",
+          "anchor": "export default function StudioLayerStack",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioLayerOrder.js",
+          "anchor": "export function studioLayerEntries",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioProjectDocument.js",
+          "anchor": "ordered_flat_layers",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_composition.py",
+          "anchor": "def connect_layer_blocks",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
     }
   ],
   "tasks": [
@@ -13929,6 +13992,11 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.geometric_mask.radius"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.layer_order"
     }
   ],
   "template_bindings": [

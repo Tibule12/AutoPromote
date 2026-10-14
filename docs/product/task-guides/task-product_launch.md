@@ -1,6 +1,6 @@
 # Create a product-launch promo
 
-Development documentation • product 1.2.0 • knowledge 1.0.9 • 2026-10-13T21:44:18.983227Z
+Development documentation • product 1.2.0 • knowledge 1.0.10 • 2026-10-14T03:37:38.361841Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 

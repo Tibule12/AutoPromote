@@ -31613,6 +31613,7 @@ async def render_viral_clip(request: RenderViralRequest):
         from .studio_3d_overlay import validate_resolved_overlays
         from .studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
         from .viral_audio_remix import normalize_audio_remix
+        from .studio_composition import validate_layer_order
     except ImportError:
         # The production container starts this file as a top-level uvicorn
         # module, while the immutable-image test imports it as a package.
@@ -31620,9 +31621,14 @@ async def render_viral_clip(request: RenderViralRequest):
         from studio_3d_overlay import validate_resolved_overlays
         from studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
         from viral_audio_remix import normalize_audio_remix
+        from studio_composition import validate_layer_order
     try:
         validate_design(request.motionGraphics, [effect.model_dump() for effect in request.sound_effects or []])
-        validate_resolved_overlays(getattr(request, "threeDGraphics", None))
+        resolved_three_d = validate_resolved_overlays(getattr(request, "threeDGraphics", None))
+        explicit_layer_order = validate_layer_order(request.composition_plan,
+            [str(overlay.id) for overlay in request.overlays],
+            [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
+            [graphic["id"] for graphic in resolved_three_d])
         subject_items = validate_resolved_subject_vfx(getattr(request, "subjectVfx", None))
         if subject_items and not request.timeline_segments:
             raise ValueError("Subject renders require an explicit source timeline")
@@ -31643,6 +31649,14 @@ async def render_viral_clip(request: RenderViralRequest):
     return await render_viral_clip_impl(request)
 
 async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: str = None):
+    try:
+        from .studio_composition import validate_layer_order
+    except ImportError:
+        from studio_composition import validate_layer_order
+    explicit_layer_order = validate_layer_order(request.composition_plan,
+        [str(overlay.id) for overlay in request.overlays],
+        [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
+        [graphic["id"] for graphic in request.threeDGraphics or []])
     logger.info(f"Rendering viral clip for {request.video_url} with {len(request.overlays)} overlays (SmartCrop={request.smart_crop}, AutoCaptions={request.auto_captions})")
 
     unresolved_story_visuals = [
@@ -33582,26 +33596,38 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         # Add Motion Graphics Overlay
         if request.motionGraphics and request.motionGraphics.get("scenes"):
             from viral_motion_graphics import generate_transparent_motion_overlay
-            motion_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_motion.mov")
-            creative_adjusted_paths.append(motion_path)
-            report_progress(65, "Drawing reviewed motion graphics")
-            await asyncio.to_thread(
-                generate_transparent_motion_overlay, request.motionGraphics,
-                rendered_timeline_duration, motion_path, 30,
-                base_width, base_height, speed_plan,
-            )
-            inputs.extend(["-i", motion_path])
-            motion_idx = input_idx
-            input_idx += 1
-            next_label = "v_motion"
-            filter_chain.append(
-                f"[{current_v_label}][{motion_idx}:v]overlay=0:0:eof_action=pass[{next_label}];"
-            )
-            current_v_label = next_label
+            motion_groups = ([{**request.motionGraphics, "scenes": [scene]}
+                              for scene in request.motionGraphics["scenes"]]
+                             if explicit_layer_order is not None else [request.motionGraphics])
+            for index, motion_data in enumerate(motion_groups):
+                block_start, block_input = len(filter_chain), current_v_label
+                motion_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_motion_{index}.mov")
+                creative_adjusted_paths.append(motion_path)
+                report_progress(65, "Drawing reviewed motion graphics")
+                rendered_motion_path = await asyncio.to_thread(
+                    generate_transparent_motion_overlay, motion_data,
+                    rendered_timeline_duration, motion_path, 30,
+                    base_width, base_height, speed_plan,
+                )
+                if not rendered_motion_path:
+                    continue
+                inputs.extend(["-i", motion_path])
+                motion_idx = input_idx
+                input_idx += 1
+                next_label = f"v_motion_{index}"
+                motion_format = ":format=auto" if explicit_layer_order is not None else ""
+                filter_chain.append(
+                    f"[{current_v_label}][{motion_idx}:v]overlay=0:0:eof_action=pass{motion_format}[{next_label}];"
+                )
+                current_v_label = next_label
+                if explicit_layer_order is not None:
+                    overlay_filter_blocks.append((str(motion_data["scenes"][0]["id"]),
+                        list(filter_chain[block_start:]), block_input, current_v_label))
 
         if request.threeDGraphics:
             from studio_3d_overlay import download_overlay, validate_overlay_media, validate_resolved_overlays
             for index, graphic in enumerate(validate_resolved_overlays(request.threeDGraphics)):
+                block_start, block_input = len(filter_chain), current_v_label
                 alpha_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_3d_{index}.mov")
                 creative_adjusted_paths.append(alpha_path)
                 report_progress(68, "Compositing reviewed 3D motion graphics")
@@ -33613,15 +33639,28 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 stretch = max(.01, (end - start) / graphic["duration"])
                 layer_label = f"v_3d_input_{index}"
                 next_label = f"v_3d_{index}"
+                graphic_format = ":format=auto" if explicit_layer_order is not None else ""
                 filter_chain.append(
                     f"[{input_idx}:v]format=rgba,scale={base_width}:{base_height}:flags=lanczos,"
                     f"setpts=(PTS-STARTPTS)*{stretch:.8f}+{start:.3f}/TB[{layer_label}];"
                 )
                 filter_chain.append(
-                    f"[{current_v_label}][{layer_label}]overlay=0:0:eof_action=pass:repeatlast=0[{next_label}];"
+                    f"[{current_v_label}][{layer_label}]overlay=0:0:eof_action=pass:repeatlast=0{graphic_format}[{next_label}];"
                 )
                 input_idx += 1
                 current_v_label = next_label
+                if explicit_layer_order is not None:
+                    overlay_filter_blocks.append((graphic["id"], list(filter_chain[block_start:]),
+                                                 block_input, current_v_label))
+
+        if explicit_layer_order is not None:
+            try:
+                from .studio_composition import connect_layer_blocks
+            except ImportError:
+                from studio_composition import connect_layer_blocks
+            ordered_filters, current_v_label = connect_layer_blocks(
+                overlay_filter_blocks, overlay_base_label, explicit_layer_order)
+            filter_chain = filter_chain[:overlay_chain_start] + ordered_filters
 
         # Full-screen B-roll previously covered already-burned words, while
         # browser preview kept captions above the cutaway. Compose first.

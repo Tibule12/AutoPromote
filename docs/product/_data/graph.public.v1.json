@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.9",
+  "knowledge_version": "1.0.10",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1035,6 +1035,11 @@
     },
     {
       "id": "studio.geometric_mask.radius",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.layer_order",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -2729,6 +2734,11 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.geometric_mask.radius"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.layer_order"
     }
   ]
 }

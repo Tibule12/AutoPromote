@@ -11,6 +11,7 @@ import StudioLaunchTemplatePanel from "./StudioLaunchTemplatePanel";
 import ProductHelpButton from "./ProductHelpButton";
 import StudioLayerMask from "./StudioLayerMask";
 import { studioMediaEffectFilter } from "./studioMediaEffects";
+import { studioLayerEntries, moveStudioLayer, orderStudioCollection } from "./studioLayerOrder";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity } from "./studioMusicBufferClock";
@@ -2772,6 +2773,7 @@ const ViralClipStudio = ({
   const [trackStates, setTrackStates] = useState(DEFAULT_TRACK_STATES);
   const [motionKeyframes, setMotionKeyframes] = useState([]);
   const [motionScenes, setMotionScenes] = useState([]);
+  const [compositionOrder, setCompositionOrder] = useState(null);
   const [selectedMotionId, setSelectedMotionId] = useState(null);
   const [threeDScenes, setThreeDScenes] = useState([]);
   const [subjectVfxScenes, setSubjectVfxScenes] = useState([]);
@@ -3590,6 +3592,7 @@ const ViralClipStudio = ({
     trackStates,
     motionKeyframes,
     motionScenes,
+    ...(Array.isArray(compositionOrder) ? { compositionOrder } : {}),
     threeDScenes,
     subjectVfxScenes,
     motionTargetId,
@@ -4261,6 +4264,7 @@ const ViralClipStudio = ({
     setTrackStates({ ...DEFAULT_TRACK_STATES, ...(snapshot.trackStates || {}) });
     setMotionKeyframes(Array.isArray(snapshot.motionKeyframes) ? snapshot.motionKeyframes : []);
     setMotionScenes(Array.isArray(snapshot.motionScenes) ? snapshot.motionScenes.map(normalizeMotion) : []);
+    setCompositionOrder(Array.isArray(snapshot.compositionOrder) ? snapshot.compositionOrder : null);
     setThreeDScenes(Array.isArray(snapshot.threeDScenes) ? snapshot.threeDScenes.map(normalizeStudio3DScene) : []);
     setSubjectVfxScenes(Array.isArray(snapshot.subjectVfxScenes) ? snapshot.subjectVfxScenes : []);
     setSelectedMotionId(null);
@@ -5671,7 +5675,17 @@ const ViralClipStudio = ({
     );
   };
 
+  const compositionEntries = studioLayerEntries({ overlays, motionScenes, threeDScenes, compositionOrder });
+  const compositionRank = new Map(compositionEntries.map((entry, index) => [entry.id, 100 + index]));
+  const applyCompositionOrder = ids => {
+    setCompositionOrder(ids);
+    setOverlays(current => orderStudioCollection(current, ids));
+    setMotionScenes(current => orderStudioCollection(current, ids));
+    setThreeDScenes(current => orderStudioCollection(current, ids));
+  };
+  const moveCompositionLayer = (id, direction) => applyCompositionOrder(moveStudioLayer(compositionEntries, id, direction));
   const moveOverlay = (id, direction) => {
+    if (Array.isArray(compositionOrder)) { moveCompositionLayer(id, direction); return; }
     setOverlays(prev => {
       const currentIndex = prev.findIndex(overlay => overlay.id === id);
       if (currentIndex === -1) return prev;
@@ -5691,6 +5705,15 @@ const ViralClipStudio = ({
   };
 
   const moveOverlayToIndex = (id, nextIndex) => {
+    if (Array.isArray(compositionOrder)) {
+      const ordinary = compositionEntries.filter(entry => entry.kind === "overlay").map(entry => entry.id);
+      const index = ordinary.indexOf(id);
+      if (index < 0) return;
+      ordinary.splice(index, 1); ordinary.splice(Math.max(0, Math.min(ordinary.length, nextIndex)), 0, id);
+      let cursor = 0;
+      applyCompositionOrder(compositionEntries.map(entry => entry.kind === "overlay" ? ordinary[cursor++] : entry.id));
+      return;
+    }
     setOverlays(prev => {
       const currentIndex = prev.findIndex(overlay => overlay.id === id);
       if (currentIndex === -1) return prev;
@@ -9184,6 +9207,7 @@ const ViralClipStudio = ({
     setVoiceovers(next.voiceovers);
     setAdjustmentLayers(next.adjustmentLayers);
     setMotionScenes(next.motionScenes);
+    setCompositionOrder(Array.isArray(next.compositionOrder) ? next.compositionOrder : null);
     setThreeDScenes(next.threeDScenes);
     setMotionKeyframes(next.motionKeyframes);
     setSpeedKeyframes(next.speedKeyframes);
@@ -13004,6 +13028,7 @@ const ViralClipStudio = ({
     motionScenes,
     threeDScenes,
     subjectVfxScenes,
+    compositionOrder,
   ]);
 
   useEffect(() => {
@@ -19236,6 +19261,7 @@ const ViralClipStudio = ({
                           data-testid="live-caption-preview"
                           data-caption-render-style={captionStyle}
                           style={{
+                            zIndex: Math.max(480, 100 + compositionEntries.length),
                             "--caption-preview-scale": 1,
                             "--caption-story-accent":
                               captionStoryPreviewTreatment?.accent || "#ffb33d",
@@ -19291,19 +19317,23 @@ const ViralClipStudio = ({
                         </div>
                       ) : null}
                       {!renderedOutputUrl && motionScenes.length > 0 ? (
-                        <MotionCanvas
-                          scenes={motionScenes}
+                        (Array.isArray(compositionOrder) ? motionScenes.map(scene => [scene]) : [motionScenes]).map(scenes => <MotionCanvas
+                          key={Array.isArray(compositionOrder) ? scenes[0].id : "motion-stage"}
+                          scenes={scenes}
+                          zIndex={Math.max(...scenes.map(scene => compositionRank.get(scene.id) ?? 100))}
                           time={previewTimelineTime}
                           getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}
-                        />
+                        />)
                       ) : null}
                       {!renderedOutputUrl && threeDScenes.length > 0 ? (
                         <React.Suspense fallback={null}>
-                          <Studio3DCanvas
-                            scenes={threeDScenes}
+                          {(Array.isArray(compositionOrder) ? threeDScenes.map(scene => [scene]) : [threeDScenes]).map(scenes => <Studio3DCanvas
+                            key={Array.isArray(compositionOrder) ? scenes[0].id : "3d-stage"}
+                            scenes={scenes}
+                            zIndex={Math.max(...scenes.map(scene => compositionRank.get(scene.id) ?? 100))}
                             time={previewTimelineTime}
                             getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}
-                          />
+                          />)}
                         </React.Suspense>
                       ) : null}
                       {silenceRemoval && !showHookPreview ? (
@@ -19413,7 +19443,7 @@ const ViralClipStudio = ({
                                       : "0 3px 10px rgba(0,0,0,.72)",
                                 // Canvas coverage changes geometry, not layer
                                 // priority. Export uses this same saved stack.
-                                zIndex: 100 + index,
+                                zIndex: compositionRank.get(overlay.id) ?? 100 + index,
                                 opacity: overlayMotion.opacity * titlePose.opacity,
                                 "--layer-opacity": overlay.type === "image"
                                   ? overlayMotion.opacity * titlePose.opacity : undefined,
@@ -24598,6 +24628,8 @@ const ViralClipStudio = ({
                   proposal={directorSubjectVfxProposal?.projectId === projectId && directorSubjectVfxProposal?.baseRevision === studioDocumentRef.current?.revision ? directorSubjectVfxProposal : null}
                 />
                 <CompositeInspector
+                  layerEntries={compositionEntries}
+                  onMoveLayer={moveCompositionLayer}
                   activeOverlay={compositeInspectorTarget}
                   overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}
                   adjustmentLayers={adjustmentLayers}

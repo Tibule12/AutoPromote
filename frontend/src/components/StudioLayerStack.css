@@ -1,0 +1,9 @@
+.studio-layer-stack { margin: 12px 0; }
+.studio-layer-stack p { color: #9faec8; font-size: 12px; }
+.studio-layer-stack ol { margin: 0; padding: 0; list-style: none; }
+.studio-layer-stack li { display: flex; align-items: center; gap: 6px; padding: 8px; border-bottom: 1px solid #33405b; }
+.studio-layer-stack li > span { flex: 1; min-width: 0; }
+.studio-layer-stack strong { display: block; overflow: hidden; text-overflow: ellipsis; }
+.studio-layer-stack small { color: #9faec8; }
+.studio-layer-stack button { border: 1px solid #4f6184; border-radius: 5px; background: #18243d; color: #e7edff; padding: 4px 9px; }
+.studio-layer-stack button:disabled { opacity: .35; }

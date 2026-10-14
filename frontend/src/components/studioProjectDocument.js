@@ -8,6 +8,7 @@ import {
 import { createSemanticAnalysisReference } from "./studioSemanticTimeline";
 import { createModelArtifactReference } from "./studioModelArtifactReference";
 import { buildSpeedSegmentsFromKeyframes } from "./studioCreatorRecipes";
+import { studioLayerEntries } from "./studioLayerOrder";
 
 import {
   STUDIO_EDIT_SETTING_FIELDS, STUDIO_SOURCE_DECISION_FIELDS,
@@ -217,7 +218,8 @@ const layerReference = (item, type, index) => ({
   parameters: cloneParameters(item, layerParameterFields(3)),
 });
 
-export const buildStudioLayersFromSnapshot = snapshot => [
+export const buildStudioLayersFromSnapshot = snapshot => {
+  const layers = [
   ...(snapshot.overlays || []).map((item, index) =>
     layerReference(item, item.type === "text" ? "title" : "b_roll", index)
   ),
@@ -234,7 +236,11 @@ export const buildStudioLayersFromSnapshot = snapshot => [
     },
   })),
   ...(snapshot.captionSegments || []).map(captionLayerReference),
-];
+  ];
+  if (!Array.isArray(snapshot.compositionOrder)) return layers;
+  const rank = new Map(studioLayerEntries(snapshot).map((entry, index) => [entry.id, index]));
+  return layers.sort((a, b) => (rank.get(a.layerId) ?? rank.size) - (rank.get(b.layerId) ?? rank.size));
+};
 
 const LINKED_CUE_COLLECTIONS = ["soundEffects", "voiceovers", "adjustmentLayers"];
 const LINKED_KEY_COLLECTIONS = [
@@ -315,6 +321,10 @@ export const projectStudioLinkedTimingToSnapshot = document => {
     motionScenes: [],
     threeDScenes: [],
     subjectVfxScenes: [],
+    ...(document.compatibility?.layerComposition === "ordered_flat_layers" ? {
+      compositionOrder: document.layers.filter(layer => ["motion", "three_d"].includes(layer.type) ||
+        (layer.legacyCollection === "overlays" && !layer.parameters.isCaption)).map(layer => layer.layerId),
+    } : {}),
     speedKeyframes: (document.programmeSpeedKeys || []).map(key => ({
       ...(key.id !== undefined ? { id: key.id } : {}),
       property: "speed",
@@ -387,6 +397,8 @@ export const projectStudioEditableStateToSnapshot = (document, transportSnapshot
   if (document.compatibility?.editableStateVersion !== 1) return { ...transportSnapshot };
   const projected = projectStudioLinkedTimingToSnapshot(document);
   const result = { ...transportSnapshot };
+  delete result.compositionOrder;
+  if (projected.compositionOrder) result.compositionOrder = projected.compositionOrder;
   result.analysisRefs = JSON.parse(JSON.stringify(document.analysisRefs));
   if (document.compatibility?.editStateVersion === 1) {
     for (const field of STUDIO_EDIT_SETTING_FIELDS) delete result[field];
@@ -728,6 +740,7 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       stableStringify(projectIntelligenceRefs) &&
     stableStringify(previousDocument.programmeSpeedKeys) === stableStringify(programmeSpeedKeys) &&
     previousDocument.fallbackSpeed === fallbackSpeed &&
+    previousDocument.compatibility?.layerComposition === (Array.isArray(snapshot.compositionOrder) ? "ordered_flat_layers" : "separate_worker_stages") &&
     stableStringify(previousDocument.styleRef) === stableStringify(styleRef);
   const document = {
     schemaVersion: STUDIO_DOCUMENT_VERSION,
@@ -791,7 +804,7 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       editableStateVersion: 1,
       visualStateVersion: 1,
       editStateVersion: 1,
-      layerComposition: "separate_worker_stages",
+      layerComposition: Array.isArray(snapshot.compositionOrder) ? "ordered_flat_layers" : "separate_worker_stages",
     },
   };
   validateStudioProjectDocument(document);
