@@ -1,4 +1,5 @@
 // Property metadata for the existing canonical transform/keyframe graph.
+import { GROUP_BOUNDS, GROUP_KIND } from './studioGroups';
 export const STUDIO_MOTION_PROPERTIES = [
   { id: "x", label: "X", min: 0, max: 100, step: 0.1 },
   { id: "y", label: "Y", min: 0, max: 100, step: 0.1 },
@@ -8,6 +9,11 @@ export const STUDIO_MOTION_PROPERTIES = [
   { id: "cropX", label: "Crop X", min: 0, max: 49, step: 0.1, mediaOnly: true },
   { id: "cropY", label: "Crop Y", min: 0, max: 49, step: 0.1, mediaOnly: true },
 ];
+
+export const studioMotionPropertiesForTarget = target => target?.kind === GROUP_KIND
+  ? STUDIO_MOTION_PROPERTIES.filter(property => Object.hasOwn(GROUP_BOUNDS, property.id))
+    .map(property => ({ ...property, min: GROUP_BOUNDS[property.id][0], max: GROUP_BOUNDS[property.id][1] }))
+  : STUDIO_MOTION_PROPERTIES.filter(property => !property.mediaOnly || target?.id === 'main-video' || ['image', 'video'].includes(target?.type));
 
 // Authoring time is the edit clock; one output frame spans playbackRate / fps.
 // Half a frame distinguishes adjacent keys, including 50/60fps delivery.

@@ -344,9 +344,13 @@
         "frontend/src/components/StudioGroupPreview.js",
         "python_media_worker/studio_composition.py",
         "test/e2e/studio-capability-matrix.json",
-        "reports/studio-professional-nested-groups-20261014/README.md"
+        "frontend/src/components/StudioProTimeline.js",
+        "frontend/src/components/studioMotionProperties.js",
+        "frontend/src/components/StudioKeyframeCurveEditor.js",
+        "python_media_worker/studio_motion.py",
+        "reports/studio-professional-group-keyframes-20261014/README.md"
       ],
-      "reason": "Review static nested graphic-group transforms, canonical membership/order, native image/two-motion history/cold/CPU export/timeline, four bounded image geometry pairs and five static controls. Keep PARTIAL: master keys/anchor/masks/blends, deeper/video/owned3D groups and full raster/live sound remain open."
+      "reason": "Review shared canonical animated group transforms/property rows, 16-key native nested edit, curve/nudge/lock/history/reset/removal/cold/export/full timeline playback, four bounded geometry pairs and unchanged decoded source-tone audio. 180 cases plus 261 subtests and strict App builds pass. Keep PARTIAL: group anchor/masks/blends/clip ownership, broader curves/native retiming/deeper/video/owned 3D, full raster and continuous picture/sound remain open."
     },
     {
       "feature_id": "publishing.connections",
@@ -427,9 +431,17 @@
       "source_paths": [
         "frontend/src/components/StudioProTimeline.js",
         "frontend/src/components/ViralClipStudio.js",
-        "frontend/src/components/studioMotionProperties.js"
+        "frontend/src/components/studioMotionProperties.js",
+        "frontend/src/components/studioGroups.js",
+        "frontend/src/components/StudioKeyframeCurveEditor.js",
+        "python_media_worker/studio_motion.py",
+        "reports/studio-professional-group-keyframes-20261014/README.md",
+        "frontend/src/components/StudioGroupInspector.js",
+        "frontend/src/components/StudioGroupPreview.js",
+        "frontend/src/components/studioRenderCompiler.js",
+        "python_media_worker/studio_composition.py"
       ],
-      "reason": "Consolidate isolated property controls and exact newly added draft template versions. Retain readiness and creative-review limits; no new qualification or public approval."
+      "reason": "Document five group properties using the existing canonical motion keys, shared timeline rows, group bounds/curve inspector and CPU compositor. One native 16-key/eight-channel nested edit and four geometry pairs are bounded evidence; 180 cases plus 261 subtests and strict builds pass. Retain FUNCTIONAL and all broader curve/retiming/raster/media/live sound readiness limits."
     },
     {
       "feature_id": "studio.templates",

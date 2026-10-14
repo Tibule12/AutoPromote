@@ -1,6 +1,6 @@
 # Animate a person from an image
 
-Development documentation • product 1.2.0 • knowledge 1.0.11 • 2026-10-14T04:31:18.521294Z
+Development documentation • product 1.2.0 • knowledge 1.0.12 • 2026-10-14T14:56:21.456054Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 

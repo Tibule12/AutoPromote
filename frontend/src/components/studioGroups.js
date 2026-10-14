@@ -1,6 +1,41 @@
+import { interpolateAutomationValue, STUDIO_EASINGS } from './studioAutomation';
+
 export const GROUP_KIND = 'graphic_group';
 export const GROUP_TRANSFORM = { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1 };
 export const GROUP_BOUNDS = { x: [-100, 100], y: [-100, 100], scale: [.1, 2], rotation: [-180, 180], opacity: [0, 1] };
+
+// Group keys use the existing canonical motionKeyframes collection. Membership
+// stays in compoundClips; there is no second animation store or evaluator.
+export function validateStudioGroupKeyframes(groups, keyframes) {
+  const ids = new Set(groups.filter(g => g.kind === GROUP_KIND).map(g => g.id)), counts = new Map(), times = new Set(), keyIds = new Set();
+  for (const key of keyframes || []) {
+    if (!ids.has(key.targetId)) continue;
+    const bounds = GROUP_BOUNDS[key.property], count = (counts.get(key.targetId) || 0) + 1;
+    if (!bounds || typeof key.time !== 'number' || !Number.isFinite(key.time) || key.time < 0 ||
+        typeof key.value !== 'number' || !Number.isFinite(key.value) || key.value < bounds[0] || key.value > bounds[1] ||
+        typeof key.id !== 'string' || !key.id || keyIds.has(key.id)) throw Error('Group keys need unique IDs, a supported property, finite time and an in-range value.');
+    const position = JSON.stringify([key.targetId, key.property, key.time]);
+    if (times.has(position)) throw Error('A group property needs one key at each time.');
+    if (count > 256) throw Error('A graphic group supports at most 256 transform keys.');
+    if (key.easing !== undefined && !STUDIO_EASINGS.some(item => item.id === key.easing)) throw Error('Unsupported group key easing.');
+    if (key.curve !== undefined && (!Array.isArray(key.curve) || key.curve.length !== 4 || key.curve.some((value, index) =>
+      typeof value !== 'number' || !Number.isFinite(value) || value < (index % 2 ? -2 : 0) || value > (index % 2 ? 2 : 1)))) throw Error('Group Bézier keys need four valid time/value handles.');
+    counts.set(key.targetId, count); times.add(position); keyIds.add(key.id);
+  }
+}
+
+export function evaluateStudioGroupTransform(group, keyframes, time) {
+  const keys = (keyframes || []).filter(key => key.targetId === group.id);
+  return Object.fromEntries(Object.entries(GROUP_BOUNDS).map(([property, [low, high]]) => [property,
+    Math.max(low, Math.min(high, interpolateAutomationValue({ keyframes: keys, property, time,
+      fallback: group.transform?.[property] ?? GROUP_TRANSFORM[property] }))) ]));
+}
+
+export function pruneRemovedStudioGroupKeys(keyframes, compounds, activeCompounds) {
+  const active = new Set(activeCompounds.filter(group => group.kind === GROUP_KIND).map(group => group.id));
+  const removed = new Set(compounds.filter(group => group.kind === GROUP_KIND && !active.has(group.id)).map(group => group.id));
+  return keyframes.filter(key => !removed.has(key.targetId));
+}
 
 // Groups extend the existing canonical compoundClips settings. The layer list
 // remains the authoritative back-to-front leaf order; each group is contiguous.
@@ -94,9 +129,9 @@ export function removeStudioGroupMembers(compounds, removedIds) {
   return result;
 }
 
-export function studioGroupLocalPoint(tree, id, x, y, width, height) {
+export function studioGroupLocalPoint(tree, id, x, y, width, height, keyframes = [], time = 0) {
   const chain = []; let owner = tree.parent.get(id);
-  while (owner) { chain.push(tree.byId.get(owner).transform); owner = tree.parent.get(owner); }
+  while (owner) { chain.push(evaluateStudioGroupTransform(tree.byId.get(owner), keyframes, time)); owner = tree.parent.get(owner); }
   let px = x * width / 100, py = y * height / 100;
   for (const t of chain.reverse()) {
     const angle = -t.rotation * Math.PI / 180, dx = px - width * (.5 + t.x / 100), dy = py - height * (.5 + t.y / 100);

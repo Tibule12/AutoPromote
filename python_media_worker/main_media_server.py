@@ -33662,7 +33662,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 from studio_composition import connect_grouped_layer_blocks
             ordered_filters, current_v_label = connect_grouped_layer_blocks(
                 overlay_filter_blocks, overlay_base_label, explicit_layer_order,
-                request.composition_plan, base_width, base_height, rendered_timeline_duration)
+                request.composition_plan, base_width, base_height, rendered_timeline_duration, speed_plan,
+                resolve_viral_export_profile(request.output_settings, base_width, base_height)["fps"] or 30)
             filter_chain = filter_chain[:overlay_chain_start] + ordered_filters
 
         # Full-screen B-roll previously covered already-burned words, while

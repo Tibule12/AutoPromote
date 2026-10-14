@@ -1,6 +1,6 @@
 # Motion / Transform Keyframes
 
-Development documentation • product 1.2.0 • knowledge 1.0.11 • 2026-10-14T04:31:18.521294Z
+Development documentation • product 1.2.0 • knowledge 1.0.12 • 2026-10-14T14:56:21.456054Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -48,13 +48,13 @@ Edits position, scale, rotation, anchor, crop and opacity of ordinary layers. Na
 
 ID: `studio.keyframes` • **FUNCTIONAL** • DETERMINISTIC
 
-Adds property keys to a selected ordinary layer, moves them in the timeline and interpolates poses. Retained evidence covers native controls, undo/redo, reopen and export; whole-stage agreement is still partial.
+Adds property keys to ordinary layers and nested graphic groups, moves them in the shared timeline and interpolates poses. Retained native controls/history/reopen/export evidence is bounded; whole-stage agreement is still partial.
 
 **Purpose:** Create deliberate editable movement and retain the same keys across manual editing, Director proposals, saving and final compilation.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
-**Media:** ordinary text layers, image overlays, video overlays
+**Media:** ordinary text layers, image overlays, video overlays, nested graphic groups
 
 **Requires:** studio.transforms (FUNCTIONAL), studio.timeline (PARTIAL)
 
@@ -62,27 +62,28 @@ Adds property keys to a selected ordinary layer, moves them in the timeline and 
 
 **Workflow**
 
-1. Show motion keyframes in the timeline and expand an ordinary visual layer, including a layer without animation keys.
+1. Show motion keyframes in the timeline and expand an ordinary visual layer or graphic group, including targets without animation keys.
 2. Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.
 3. Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.
-4. Owning-track locks prevent changes. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
+4. Owning-track locks prevent changes. Group values use their own five-property bounds; group key selection opens Composite with the shared curve editor. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
 
-**Preview:** Evaluates ordinary canonical property keys on the existing preview clock. Keyed image layers take precedence over legacy CSS entrance animations and transitions, so opacity, scale and rotation remain visible. Broad raster, media and continuous playback agreement remains unqualified.
+**Preview:** Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** Uses the existing shared compiler/compositor and interpolation expressions where supported. Group keys retain canonical target ownership and are projected into the group composition plan; output time maps back to the programme clock. Inspect the actual exported movie; the status does not certify every combination.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
 - Two bounded masked image-effect edits preserve eight position/scale/rotation/opacity keys through native save/reopen/export. Inverted-polygon sampled picture passes; one ellipse raster pair still exceeds the strict colour bound. This does not qualify every mask/easing/media or legacy entrance clock.
+- One native nested image/two-motion project preserves 16 group keys across eight channels, including one custom X Bézier curve. Midpoint, property rows, nudge/lock, reset/remove/undo, save/cold reopen, CPU export and full timeline playback pass; four image geometry pairs pass and decoded source-tone audio is unchanged. Native retiming, broader curves, video/owned 3D/deeper groups, full raster and live sound remain unqualified. Existing worker Bézier expressions approximate 32 samples; browser interpolation solves the curve.
 
 **Common errors**
 
-- No selected editable layer: Select an ordinary layer before adding transform keys.
+- No selected editable layer: Select an ordinary layer or a graphic group before adding its supported transform keys.
 - Keyframe edits are locked: Unlock the applicable property/layer in the normal controls before editing.
 - Motion differs after export: Check current keys/source binding and the documented preview/final limitations; inspect mapped frames in the actual movie.
 
-**Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing)
+**Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity)
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
 

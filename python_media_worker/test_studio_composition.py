@@ -6,7 +6,8 @@ import numpy as np
 import pytest
 
 from python_media_worker.studio_composition import (blend_layer_block, validate_layer_order, connect_layer_blocks,
-                                                   validate_graphic_groups, connect_grouped_layer_blocks)
+                                                   validate_graphic_groups, connect_grouped_layer_blocks, animated_group_filter)
+from python_media_worker.studio_motion import easing_value
 
 BACKGROUND = np.array([40, 80, 120], dtype=float)
 FOREGROUND = np.array([128, 64, 192], dtype=float)
@@ -14,6 +15,96 @@ FOREGROUND = np.array([128, 64, 192], dtype=float)
 
 def group(identity, children, **transform):
     return dict(id=identity, name=identity, kind='graphic_group', layerIds=children, transform=transform)
+
+
+def key(identity, property_name, time, value, easing='linear', **extra):
+    return dict(id=identity, property=property_name, time=time, value=value, easing=easing, **extra)
+
+
+@pytest.mark.parametrize('keys', [
+    [key('a','cropX',0,20)], [key('a','scale',0,3)], [key('a','x',-1,0)],
+    [key('a','x',0,None)], [key('a','x',0,True)], [key('a','x',0,10,'unknown')],
+    [key('a','x',0,10,'bezier',curve=[-1,0,1,1])], [key('a','x',0,10),key('b','x',0,12)],
+])
+def test_group_key_preflight_rejects_invalid_property_time_value_curve_and_duplicates(keys):
+    with pytest.raises(ValueError):
+        validate_graphic_groups({'groups':[{**group('whole',['image']), 'motion_keyframes':keys}]}, ['image'])
+
+
+def animated_picture(groups, duration=1, speed_plan=None):
+    source=f'color=c=0xff00ff:s=8x4:r=30:d={duration},format=rgba[fg];'
+    blocks=[('image',['[base][fg]overlay=4:8:format=auto[child];'],'base','child')]
+    filters,output=connect_grouped_layer_blocks(blocks,'base',['image'],{'groups':groups},32,32,duration,speed_plan)
+    return decode(background(duration)+source+''.join(filters)+f'[{output}]null[out];',frames=round(duration*30))
+
+
+def magenta_centroid(frame, red=150, blue=180, green=70):
+    ys,xs=np.nonzero((frame[:,:,0]>red)&(frame[:,:,2]>blue)&(frame[:,:,1]<green))
+    assert len(xs)>5
+    return np.array([xs.mean(),ys.mean()]), len(xs)
+
+
+def test_actual_group_translation_keys_move_every_child_in_the_saved_clock():
+    frames=animated_picture([{**group('whole',['image']), 'motion_keyframes':[key('a','x',0,0),key('b','x',1,25)]}])
+    for index in [0,15,27]:
+        centre,count=magenta_centroid(frames[index]);np.testing.assert_allclose(centre,[7.5+8*index/30,9.5],atol=1)
+        assert count==32
+
+
+def test_actual_group_scale_and_rotation_keys_keep_an_invariant_parent_canvas():
+    frames=animated_picture([{**group('whole',['image']), 'motion_keyframes':[
+        key('s0','scale',0,1),key('s1','scale',1,.5),key('r0','rotation',0,0),key('r1','rotation',1,90)]}])
+    for index in [0,15,27]:
+        time=index/30;angle=np.deg2rad(90*time);scale=1-.5*time
+        matrix=np.array([[np.cos(angle),-np.sin(angle)],[np.sin(angle),np.cos(angle)]])
+        expected=np.array([15.5,15.5])+matrix@((np.array([7.5,9.5])-15.5)*scale)
+        centre,_=magenta_centroid(frames[index]);np.testing.assert_allclose(centre,expected,atol=1)
+
+
+def test_actual_opacity_keys_fade_the_overlapping_composite_once_and_hold_at_exact_keys():
+    sources=('color=c=red:s=8x8:r=30:d=1,format=rgba[red];color=c=blue:s=8x8:r=30:d=1,format=rgba[blue];')
+    blocks=[('image',['[base][red]overlay=8:8:format=auto[first];'],'base','first'),
+            ('motion',['[first][blue]overlay=12:8:format=auto[second];'],'first','second')]
+    for easing in ['linear','hold','ease_in_out','bezier']:
+        keys=[key('a','opacity',0,0),key('b','opacity',.5,1,easing,**({'curve':[.2,0,.8,1]} if easing=='bezier' else {}))]
+        filters,out=connect_grouped_layer_blocks(blocks,'base',['image','motion'],
+            {'groups':[{**group('whole',['image','motion']), 'motion_keyframes':keys}]},32,32,1)
+        frames=decode(background()+sources+''.join(filters)+f'[{out}]null[out];')
+        for index,alpha in [(0,0),(15,1),(27,1)]:
+            np.testing.assert_allclose(frames[index,10,14],BACKGROUND*(1-alpha)+np.array([0,0,255])*alpha,atol=2)
+        alpha=easing_value(.4,easing,[.2,0,.8,1])
+        np.testing.assert_allclose(frames[6,10,14],BACKGROUND*(1-alpha)+np.array([0,0,255])*alpha,atol=2)
+
+
+def test_actual_nested_group_keys_preserve_parent_rotation_and_child_opacity():
+    groups=[{**group('inner',['image']), 'motion_keyframes':[key('x0','x',0,0),key('x1','x',1,25),key('a0','opacity',0,.5),key('a1','opacity',1,1)]},
+            {**group('outer',['inner'],rotation=90,opacity=.5), 'motion_keyframes':[key('y0','y',0,0),key('y1','y',1,25)]}]
+    frame=animated_picture(groups)[15]
+    centre,count=magenta_centroid(frame,red=110,blue=160,green=65)
+    np.testing.assert_allclose(centre,[21.5,15.5],atol=.1);assert count==32
+    alpha=(191/255)*(127/255)
+    np.testing.assert_allclose(frame[15,21],BACKGROUND*(1-alpha)+np.array([255,0,255])*alpha,atol=2)
+
+
+def test_actual_group_keys_follow_the_same_inverse_clock_after_two_x_speed():
+    groups=[{**group('whole',['image']), 'motion_keyframes':[key('x0','x',0,0),key('x1','x',2,25)]}]
+    frames=animated_picture(groups,speed_plan=[dict(start_time=0,end_time=2,rate=2)])
+    centre,_=magenta_centroid(frames[15]);np.testing.assert_allclose(centre,[11.5,9.5],atol=.1)
+
+
+def test_actual_constant_keys_preserve_the_existing_static_picture_and_group_alpha():
+    static=animated_picture([group('whole',['image'],opacity=.5)])
+    keyed=animated_picture([{**group('whole',['image'],opacity=1), 'motion_keyframes':[
+        key('a','opacity',0,.5),key('b','opacity',1,.5),key('r','rotation',0,0)]}])
+    np.testing.assert_array_equal(keyed,static)
+
+
+def test_constant_rotation_and_scale_keys_do_not_allocate_unused_large_base_or_diagonal_surfaces():
+    group_plan={**group('whole',['image'],rotation=0,scale=2), 'motion_keyframes':[
+        key('s','scale',0,1),key('r','rotation',0,0)]}
+    node=validate_graphic_groups({'groups':[group_plan]},['image'])[0]['whole']
+    filters,_,_,_=animated_group_filter(node,'base','group',3840,2160,1,None,30)
+    assert 'pad=3842:2162' in ''.join(filters)
 
 
 @pytest.mark.parametrize('groups', [
@@ -154,15 +245,15 @@ def blend(base, front, mode):
     return np.abs(base-front)
 
 
-def decode(filters):
+def decode(filters, frames=30):
     result = subprocess.run(['ffmpeg','-v','error','-filter_complex_threads','1',
-                             '-filter_complex',filters,'-map','[out]','-frames:v','30',
+                             '-filter_complex',filters,'-map','[out]','-frames:v',str(frames),
                              '-pix_fmt','rgb24','-f','rawvideo','-'], check=True, capture_output=True)
     return np.frombuffer(result.stdout,np.uint8).reshape(-1,32,32,3)
 
 
-def background():
-    return 'color=c=0x285078:s=32x32:r=30:d=1,format=rgba[base];'
+def background(duration=1):
+    return f'color=c=0x285078:s=32x32:r=30:d={duration},format=rgba[base];'
 
 
 @pytest.mark.parametrize('mode',['multiply','screen','difference','overlay','soft-light','hard-light','color-dodge','luminosity'])

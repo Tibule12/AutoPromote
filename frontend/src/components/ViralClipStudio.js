@@ -12,7 +12,7 @@ import ProductHelpButton from "./ProductHelpButton";
 import StudioLayerMask from "./StudioLayerMask";
 import { studioMediaEffectFilter } from "./studioMediaEffects";
 import { studioLayerEntries, moveStudioLayer, orderStudioCollection } from "./studioLayerOrder";
-import { studioGroupTree, createStudioGroup, moveStudioGroupNode, removeStudioGroup, removeStudioGroupMembers, studioGroupLocalPoint } from "./studioGroups";
+import { studioGroupTree, createStudioGroup, moveStudioGroupNode, removeStudioGroup, removeStudioGroupMembers, studioGroupLocalPoint, GROUP_TRANSFORM, evaluateStudioGroupTransform, validateStudioGroupKeyframes, pruneRemovedStudioGroupKeys } from "./studioGroups";
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
@@ -115,7 +115,7 @@ import StudioSubjectVfxPanel from "./StudioSubjectVfxPanel";
 import { findUncoveredCaptionSpeechRanges, mapCaptionSilencesToProgramme } from "./studioCaptionCoverage";
 import { historyMediaIdentity, historySubjectVfxIdentity } from "./studioHistoryMedia";
 import { titleAnimationPose } from "./studioTitleLayout";
-import { STUDIO_MOTION_PROPERTIES, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
+import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
 import { validateSubjectVfxExport, resolveSubjectVfxProgrammePreview, subjectVfxRevision } from "./studioSubjectVfxContract";
 import { cutStudio3DScenes, normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
 import { SOUND_EFFECT_PRESETS, synthesizeEffect } from "./motion/soundDesign";
@@ -3592,7 +3592,9 @@ const ViralClipStudio = ({
     linkedSelection,
     rippleMode,
     trackStates,
-    motionKeyframes,
+    motionKeyframes: pruneRemovedStudioGroupKeys(motionKeyframes, compoundClips,
+      removeStudioGroupMembers(compoundClips, (compositionOrder || []).filter(id =>
+        !studioLayerEntries({ overlays, motionScenes, threeDScenes }).some(entry => entry.id === id)))),
     motionScenes,
     ...(Array.isArray(compositionOrder) ? { compositionOrder } : {}),
     threeDScenes,
@@ -9963,9 +9965,10 @@ const ViralClipStudio = ({
   const updateMotionKeyframe = (keyframeId, changes) => {
     const key = motionKeyframes.find(item => item.id === keyframeId);
     if (!key || !allowTimelineTimingEdit(motionKeyframeTrack(key.targetId))) return;
-    setMotionKeyframes(current =>
-      current.map(keyframe => (keyframe.id === keyframeId ? { ...keyframe, ...changes } : keyframe))
-    );
+    const next = motionKeyframes.map(keyframe => keyframe.id === keyframeId ? { ...keyframe, ...changes } : keyframe);
+    try { validateStudioGroupKeyframes(compositionGroups.groups, next); }
+    catch (error) { setStudioActionMessage(error.message); return; }
+    setMotionKeyframes(next);
   };
 
   const motionKeyframeTrack = targetId => {
@@ -9980,8 +9983,9 @@ const ViralClipStudio = ({
   };
 
   const editMotionPropertyAtPlayhead = (targetId, property, requestedValue, toggle = false) => {
-    const descriptor = STUDIO_MOTION_PROPERTIES.find(item => item.id === property);
-    const target = targetId === "main-video" ? mainTransform : overlays.find(item => item.id === targetId);
+    const group = compositionGroups.byId.get(targetId);
+    const target = group ? { ...group, ...group.transform } : targetId === "main-video" ? mainTransform : overlays.find(item => item.id === targetId);
+    const descriptor = studioMotionPropertiesForTarget(target).find(item => item.id === property);
     if (!target || !descriptor || (descriptor.mediaOnly && !["image", "video"].includes(target.type)) ||
         !allowTimelineTimingEdit(motionKeyframeTrack(targetId))) return;
     if (!toggle && !Number.isFinite(Number(requestedValue))) return;
@@ -9991,16 +9995,21 @@ const ViralClipStudio = ({
     const tolerance = motionKeyframeTolerance(exportSettings.fps, previewSpeed);
     const keys = motionKeyframes.filter(key => key.targetId === targetId && key.property === property);
     const existing = motionKeyAtPlayhead(keys, targetId, property, time, tolerance);
-    const evaluated = buildMotionAutomationStyle(keys, time, target)[property];
+    const evaluated = group ? evaluateStudioGroupTransform(group, keys, time)[property] : buildMotionAutomationStyle(keys, time, target)[property];
     const value = toggle ? evaluated : Math.max(descriptor.min, Math.min(descriptor.max, Number(requestedValue)));
     if (toggle && existing) {
       removeMotionKeyframe(existing.id);
     } else if (toggle || keys.length) {
-      setMotionKeyframes(current => upsertAutomationKeyframe(current, {
+      const next = upsertAutomationKeyframe(motionKeyframes, {
         id: existing?.id || createSecureId("motion-key"), targetId, property,
         time: existing?.time ?? time, value, easing: existing?.easing || "ease_in_out",
         ...(existing?.curve ? { curve: existing.curve } : {}),
-      }, tolerance));
+      }, tolerance);
+      try { validateStudioGroupKeyframes(compositionGroups.groups, next); }
+      catch (error) { setStudioActionMessage(error.message); return; }
+      setMotionKeyframes(next);
+    } else if (group) {
+      setCompoundClips(current => current.map(item => item.id === targetId ? { ...item, transform: { ...item.transform, [property]: value } } : item));
     } else if (targetId === "main-video") {
       setMainTransform(current => ({ ...current, [property]: value }));
     } else {
@@ -17471,7 +17480,8 @@ const ViralClipStudio = ({
     if (!dragItem.current) return;
 
     const localPoint = studioGroupLocalPoint(compositionGroups, dragItem.current,
-      (relativeX / bounds.width) * 100, (relativeY / bounds.height) * 100, bounds.width, bounds.height);
+      (relativeX / bounds.width) * 100, (relativeY / bounds.height) * 100, bounds.width, bounds.height,
+      motionKeyframes, previewTimelineTime);
     percentX = Math.max(0, Math.min(100, localPoint.x));
     percentY = Math.max(0, Math.min(100, localPoint.y));
 
@@ -19332,7 +19342,9 @@ const ViralClipStudio = ({
                           ) : null}
                         </div>
                       ) : null}
-                      <StudioGroupPreview compounds={effectiveCompoundClips} order={compositionIds}>
+                      <StudioGroupPreview compounds={effectiveCompoundClips} order={compositionIds}
+                        keyframes={motionKeyframes} time={previewTimelineTime}
+                        getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}>
                       {!renderedOutputUrl && motionScenes.length > 0 ? (
                         (Array.isArray(compositionOrder) ? motionScenes.map(scene => [scene]) : [motionScenes]).map(scenes => <MotionCanvas
                           key={Array.isArray(compositionOrder) ? scenes[0].id : "motion-stage"}
@@ -24653,7 +24665,22 @@ const ViralClipStudio = ({
                   groupEntries={compositionEntries}
                   onTransformGroup={(id, transform) => setCompoundClips(current => current.map(group =>
                     group.id === id ? { ...group, transform } : group))}
-                  onRemoveGroup={id => setCompoundClips(current => removeStudioGroup(current, id))}
+                  onRemoveGroup={id => {
+                    if (!allowTimelineTimingEdit("graphics")) return;
+                    setCompoundClips(current => removeStudioGroup(current, id));
+                    setMotionKeyframes(current => current.filter(key => key.targetId !== id));
+                  }}
+                  groupAnimation={{ keyframes: motionKeyframes, playhead: previewTimelineTime,
+                    keyTolerance: motionKeyframeTolerance(exportSettings.fps, previewSpeed),
+                    locked: Boolean(trackStates.graphics?.locked), focusKeyId: focusedMotionKeyframeId,
+                    onProperty: editMotionPropertyAtPlayhead,
+                    onToggleKey: (id, property) => editMotionPropertyAtPlayhead(id, property, undefined, true),
+                    onSeek: jumpToOutputTimelineTime, onUpdateKey: updateMotionKeyframe,
+                    onReset: id => {
+                      if (!allowTimelineTimingEdit("graphics")) return;
+                      setCompoundClips(current => current.map(group => group.id === id ? { ...group, transform: { ...GROUP_TRANSFORM } } : group));
+                      setMotionKeyframes(current => current.filter(key => key.targetId !== id));
+                    } }}
                   onMoveLayer={moveCompositionLayer}
                   activeOverlay={compositeInspectorTarget}
                   overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}
@@ -29416,6 +29443,7 @@ const ViralClipStudio = ({
                   )]
               }
               motionKeyframes={motionKeyframes}
+              graphicGroups={compositionGroups.groups}
               mainTransform={mainTransform}
               onUpdateMotionProperty={(targetId, property, value) => editMotionPropertyAtPlayhead(targetId, property, value)}
               onToggleMotionPropertyKeyframe={(targetId, property) => editMotionPropertyAtPlayhead(targetId, property, undefined, true)}
@@ -29423,8 +29451,8 @@ const ViralClipStudio = ({
               onSelectMotionKeyframe={(keyId, targetId) => {
                 setFocusedMotionKeyframeId(keyId);
                 setMotionTargetId(targetId);
-                selectCreativeTool("motion");
-                setMotionWorkspace("transform");
+                selectCreativeTool(compositionGroups.byId.has(targetId) ? "composite" : "motion");
+                if (!compositionGroups.byId.has(targetId)) setMotionWorkspace("transform");
                 setComparisonMode("after");
               }}
               onUpdateMotionKeyframe={updateMotionKeyframe}

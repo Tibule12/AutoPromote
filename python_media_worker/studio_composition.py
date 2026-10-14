@@ -1,5 +1,11 @@
 """Deterministic RGB/alpha composition for the canonical Studio stack."""
 import math
+import re
+
+try:
+    from .studio_motion import automation_expression, _curve_bounds, output_to_programme_expression
+except ImportError:
+    from studio_motion import automation_expression, _curve_bounds, output_to_programme_expression
 
 BLEND_MODES = {"normal", "multiply", "screen", "difference", "overlay", "hard-light", "soft-light", "color-dodge", "luminosity"}
 GROUP_TRANSFORM = {"x": 0, "y": 0, "scale": 1, "rotation": 0, "opacity": 1}
@@ -33,7 +39,7 @@ def connect_layer_blocks(blocks, base_label, order):
 
 
 def validate_graphic_groups(plan, order):
-    """Reject unknown/static-only decisions before downloads or rendering."""
+    """Reject unsupported decisions before downloads or rendering."""
     groups = (plan or {}).get("groups", [])
     if not isinstance(groups, list) or len(groups) > 64:
         raise ValueError("Composition supports at most 64 graphic groups")
@@ -41,11 +47,11 @@ def validate_graphic_groups(plan, order):
         return {}, [], {}
     if order is None:
         raise ValueError("Graphic groups need an explicit canonical layer order")
-    by_id, parent, rank = {}, {}, {identity: index for index, identity in enumerate(order)}
+    by_id, parent, rank, key_ids = {}, {}, {identity: index for index, identity in enumerate(order)}, set()
     for group in groups:
-        if (not isinstance(group, dict) or set(group) - {"id", "name", "kind", "layerIds", "transform"}
+        if (not isinstance(group, dict) or set(group) - {"id", "name", "kind", "layerIds", "transform", "motion_keyframes"}
                 or group.get("kind") != "graphic_group"):
-            raise ValueError("Graphic groups support membership and static transforms only")
+            raise ValueError("Graphic groups support membership, transforms and transform keys only")
         identity, children = group.get("id"), group.get("layerIds")
         if (not isinstance(identity, str) or not identity or identity in by_id or identity in rank
                 or not isinstance(children, list) or not children
@@ -60,6 +66,29 @@ def validate_graphic_groups(plan, order):
             value = transform[field]
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not low <= value <= high:
                 raise ValueError(f"Group {field} must be between {low} and {high}")
+        keys, times = group.get("motion_keyframes", []), set()
+        if not isinstance(keys, list) or len(keys) > 256:
+            raise ValueError("A graphic group supports at most 256 transform keys")
+        for key in keys:
+            if not isinstance(key, dict) or set(key) - {"id", "property", "time", "value", "easing", "curve"}:
+                raise ValueError("Unsupported group transform key fields")
+            identity_key, property_name, time, value = key.get("id"), key.get("property"), key.get("time"), key.get("value")
+            if (not isinstance(identity_key, str) or not identity_key or identity_key in key_ids or property_name not in GROUP_BOUNDS
+                    or isinstance(time, bool) or not isinstance(time, (int, float)) or not math.isfinite(time) or time < 0
+                    or isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+                    or not GROUP_BOUNDS[property_name][0] <= value <= GROUP_BOUNDS[property_name][1]):
+                raise ValueError("Group keys need unique IDs, a supported property, finite time and an in-range value")
+            if (property_name, time) in times:
+                raise ValueError("A group property needs one key at each time")
+            if key.get("easing", "linear") not in {"linear", "hold", "ease_in", "ease_out", "ease_in_out", "bezier"}:
+                raise ValueError("Unsupported group key easing")
+            if "curve" in key:
+                curve = key["curve"]
+                if (not isinstance(curve, list) or len(curve) != 4 or any(isinstance(v, bool)
+                        or not isinstance(v, (int, float)) or not math.isfinite(v)
+                        or not (-2 if i % 2 else 0) <= v <= (2 if i % 2 else 1) for i, v in enumerate(curve))):
+                    raise ValueError("Group Bézier keys need four valid time/value handles")
+            times.add((property_name, time)); key_ids.add(identity_key)
         by_id[identity] = {**group, "transform": transform}
     for identity, group in by_id.items():
         for child in group["layerIds"]:
@@ -86,13 +115,72 @@ def validate_graphic_groups(plan, order):
     return by_id, roots, parent
 
 
-def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height, duration):
+def animated_group_filter(group, input_label, prefix, width, height, duration, speed_plan, fps):
+    """Animate the assembled canvas using the shared key and programme clocks."""
+    keys, base = group["motion_keyframes"], group["transform"]
+    clock = output_to_programme_expression(speed_plan)
+    property_keys = {field: [key for key in keys if key["property"] == field] for field in GROUP_BOUNDS}
+    expressions = {field: re.sub(r"\bt\b", f"({clock})", automation_expression(property_keys[field], base[field])) for field in GROUP_BOUNDS}
+    expressions = {field: f"max({low},min({high},{expressions[field]}))" for field, (low, high) in GROUP_BOUNDS.items()}
+    def bounds(field):
+        selected = property_keys[field]
+        fallback = min(selected, key=lambda key: key["time"])["value"] if selected else base[field]
+        low, high = _curve_bounds(selected, fallback)
+        minimum, maximum = GROUP_BOUNDS[field]
+        return max(minimum, min(maximum, low)), max(minimum, min(maximum, high))
+    scale = bounds("scale")[1]
+    # An invariant transparent surface preserves the full scaled children and
+    # avoids downstream filters retaining the initial scale dimensions.
+    low, high = map(math.radians, bounds("rotation"))
+    angles = [low, high]
+    # Bound both projected axes over the actual angle interval. Constant keys
+    # do not require a diagonal square or retain an unused pre-key base pose.
+    for optimum in (math.atan2(height, width), math.atan2(width, height)):
+        for turn in range(-2, 3):
+            for sign in (-1, 1):
+                angle = turn*math.pi + sign*optimum
+                if low <= angle <= high:
+                    angles.append(angle)
+    rotated_w = max(abs(math.cos(angle))*width + abs(math.sin(angle))*height for angle in angles)*scale
+    rotated_h = max(abs(math.sin(angle))*width + abs(math.cos(angle))*height for angle in angles)*scale
+    canvas_w = math.ceil((max(width*scale, rotated_w)+2)/2)*2
+    canvas_h = math.ceil((max(height*scale, rotated_h)+2)/2)*2
+    if canvas_w*canvas_h > 4096*2160:
+        raise ValueError("Group transform exceeds the 4K intermediate budget; reduce group scale or export resolution")
+    transform = (f"format=gbrap,premultiply=inplace=1,scale=w='max(1,round({width}*({expressions['scale']})))':"
+                 f"h='max(1,round({height}*({expressions['scale']})))':eval=frame:flags=lanczos,"
+                 f"pad={canvas_w}:{canvas_h}:x=(ow-iw)/2:y=(oh-ih)/2:eval=frame:color=black@0,"
+                 f"rotate=angle='PI/180*({expressions['rotation']})':ow={canvas_w}:oh={canvas_h}:c=black@0,"
+                 "unpremultiply=inplace=1,format=rgba,setsar=1")
+    rgba = f"{prefix}_rgba"
+    if property_keys["opacity"] and bounds("opacity")[0] != bounds("opacity")[1]:
+        opacity = re.sub(r"\bt\b", "T", expressions["opacity"])
+        # Evaluate the curve on four pixels, then multiply the existing alpha.
+        # All children overlap before this one group fade; RGB is retained.
+        filters = [f"[{input_label}]{transform},split=2[{prefix}_color][{prefix}_ain];",
+                   f"[{prefix}_ain]alphaextract[{prefix}_alpha];",
+                   f"color=c=white:s=2x2:r={fps:.9f}:d={duration:.9f},format=gray,"
+                   f"geq=lum='255*({opacity})',scale={canvas_w}:{canvas_h}:flags=neighbor[{prefix}_weight];",
+                   f"[{prefix}_alpha][{prefix}_weight]blend=all_mode=multiply[{prefix}_af];",
+                   f"[{prefix}_color][{prefix}_af]alphamerge[{rgba}];"]
+    else:
+        filters = [f"[{input_label}]{transform},colorchannelmixer=aa={bounds('opacity')[0]:.9f}[{rgba}];"]
+    x = f"{(width-canvas_w)/2:.9f}+{width}*({expressions['x']})/100"
+    y = f"{(height-canvas_h)/2:.9f}+{height}*({expressions['y']})/100"
+    return filters, rgba, x, y
+
+
+def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height, duration, speed_plan=None, frame_rate=30):
     """Reuse each prepared leaf; compose/clip groups before parent transforms."""
     by_id, roots, _ = validate_graphic_groups(plan, order)
     if not by_id:
         return connect_layer_blocks(blocks, base_label, order)
     if width <= 0 or height <= 0 or duration <= 0:
         raise ValueError("Invalid group canvas geometry")
+    animated = any(group.get("motion_keyframes") for group in by_id.values())
+    fps = float(frame_rate) if animated else 30.0
+    if not math.isfinite(fps) or not 1 <= fps <= 120:
+        raise ValueError("Invalid group animation frame rate")
     prepared = {item[0]: item for item in blocks}
     if len(prepared) != len(blocks) or any(identity not in order for identity in prepared):
         raise ValueError("Rendered group leaf is missing or duplicated in the composition order")
@@ -116,10 +204,16 @@ def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height,
         if rotated_w * rotated_h > 4096 * 2160:
             raise ValueError("Group transform exceeds the 4K intermediate budget; reduce group scale or export resolution")
         local = f"{prefix}_canvas"
-        filters.append(f"color=c=black:s={int(width)}x{int(height)}:r=30:d={float(duration):.6f},"
+        filters.append(f"color=c=black:s={int(width)}x{int(height)}:r={fps:.9f}:d={float(duration):.6f},"
                        f"format=rgba,colorchannelmixer=aa=0[{local}];")
         for child in group["layerIds"]:
             local = draw(child, local)
+        if group.get("motion_keyframes"):
+            block, rgba, x, y = animated_group_filter(group, local, prefix, width, height, duration, speed_plan, fps)
+            filters.extend(block)
+            output = f"{prefix}_out"
+            filters.append(f"[{backdrop}][{rgba}]overlay=x='{x}':y='{y}':format=auto:eof_action=pass:repeatlast=0[{output}];")
+            return output
         # Premultiplied interpolation avoids dark RGB fringes on transparency.
         transform = "format=gbrap,premultiply=inplace=1"
         if t["scale"] != 1:
@@ -137,6 +231,8 @@ def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height,
     current = base_label
     for identity in roots:
         current = draw(identity, current)
+    if len(''.join(filters)) > 96000:
+        raise ValueError("Group animation filter graph is too large; simplify transform keys or curves")
     return filters, current
 
 

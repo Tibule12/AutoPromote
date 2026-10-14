@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.11",
+  "knowledge_version": "1.0.12",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -474,7 +474,8 @@
       "render_support": "SUPPORTED",
       "director_edit": "UNVERIFIED",
       "applicable_media": [
-        "ordinary layers"
+        "ordinary layers",
+        "graphic groups"
       ],
       "dependencies": [
         "studio.keyframes"
@@ -482,7 +483,7 @@
       "limitations": [
         "The current programme/layer range supplies the upper bound; no universal fixed duration is claimed."
       ],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-14",
       "product_version": "1.2.0"
     },
     {
@@ -515,16 +516,18 @@
       "render_support": "SUPPORTED",
       "director_edit": "UNVERIFIED",
       "applicable_media": [
-        "ordinary layers"
+        "ordinary layers",
+        "graphic groups"
       ],
       "dependencies": [
         "studio.easing",
         "studio.keyframes"
       ],
       "limitations": [
-        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "Group evaluation clamps values to each group property’s bounds. Worker Bézier expressions use the existing 32-sample approximation; broad curve/raster equivalence is unqualified."
       ],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-14",
       "product_version": "1.2.0"
     },
     {
@@ -3692,7 +3695,7 @@
         "Static graphic/group sibling order only; source footage/source VFX and generated captions keep their separate stages.",
         "3D still requires an existing current owned export asset. No generation is triggered by reordering.",
         "Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and broader nesting remain unqualified.",
-        "Groups preserve contiguous canonical leaf order. Reorder grouped timeline layers in Composite; master timing/animation/masks/blends remain open."
+        "Groups preserve contiguous canonical leaf order. Reorder grouped timeline layers in Composite; group clip ownership, masks/blends and broader animated combinations remain open."
       ],
       "updated_at": "2026-10-14",
       "product_version": "1.2.0"
@@ -3700,7 +3703,8 @@
     {
       "control_id": "studio.composite.group_x",
       "feature_ids": [
-        "studio.compositing"
+        "studio.compositing",
+        "studio.keyframes"
       ],
       "label": "Group X position",
       "status": "PARTIAL",
@@ -3714,7 +3718,7 @@
         "default_known": true
       },
       "unit": "percent of stage",
-      "keyframeable": "UNSUPPORTED",
+      "keyframeable": "SUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "PARTIAL",
       "director_edit": "UNVERIFIED",
@@ -3727,9 +3731,10 @@
         "studio.compositing"
       ],
       "limitations": [
-        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
-        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
-        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "updated_at": "2026-10-14",
       "product_version": "1.2.0"
@@ -3737,7 +3742,8 @@
     {
       "control_id": "studio.composite.group_y",
       "feature_ids": [
-        "studio.compositing"
+        "studio.compositing",
+        "studio.keyframes"
       ],
       "label": "Group Y position",
       "status": "PARTIAL",
@@ -3751,7 +3757,7 @@
         "default_known": true
       },
       "unit": "percent of stage",
-      "keyframeable": "UNSUPPORTED",
+      "keyframeable": "SUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "PARTIAL",
       "director_edit": "UNVERIFIED",
@@ -3764,9 +3770,10 @@
         "studio.compositing"
       ],
       "limitations": [
-        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
-        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
-        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "updated_at": "2026-10-14",
       "product_version": "1.2.0"
@@ -3774,7 +3781,8 @@
     {
       "control_id": "studio.composite.group_scale",
       "feature_ids": [
-        "studio.compositing"
+        "studio.compositing",
+        "studio.keyframes"
       ],
       "label": "Group scale",
       "status": "PARTIAL",
@@ -3788,7 +3796,7 @@
         "default_known": true
       },
       "unit": "multiplier",
-      "keyframeable": "UNSUPPORTED",
+      "keyframeable": "SUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "PARTIAL",
       "director_edit": "UNVERIFIED",
@@ -3801,9 +3809,10 @@
         "studio.compositing"
       ],
       "limitations": [
-        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
-        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
-        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "updated_at": "2026-10-14",
       "product_version": "1.2.0"
@@ -3811,7 +3820,8 @@
     {
       "control_id": "studio.composite.group_rotation",
       "feature_ids": [
-        "studio.compositing"
+        "studio.compositing",
+        "studio.keyframes"
       ],
       "label": "Group rotation",
       "status": "PARTIAL",
@@ -3825,7 +3835,7 @@
         "default_known": true
       },
       "unit": "degrees",
-      "keyframeable": "UNSUPPORTED",
+      "keyframeable": "SUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "PARTIAL",
       "director_edit": "UNVERIFIED",
@@ -3838,9 +3848,10 @@
         "studio.compositing"
       ],
       "limitations": [
-        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
-        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
-        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "updated_at": "2026-10-14",
       "product_version": "1.2.0"
@@ -3848,7 +3859,8 @@
     {
       "control_id": "studio.composite.group_opacity",
       "feature_ids": [
-        "studio.compositing"
+        "studio.compositing",
+        "studio.keyframes"
       ],
       "label": "Group opacity",
       "status": "PARTIAL",
@@ -3862,7 +3874,7 @@
         "default_known": true
       },
       "unit": "fraction",
-      "keyframeable": "UNSUPPORTED",
+      "keyframeable": "SUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "PARTIAL",
       "director_edit": "UNVERIFIED",
@@ -3875,9 +3887,10 @@
         "studio.compositing"
       ],
       "limitations": [
-        "Static transforms only; master keys, editable anchor and group masks/blends are unsupported.",
-        "At most64 groups and8 nesting levels; children need one parent and a contiguous canonical leaf order. Each rotated intermediate must fit the4K pixel budget.",
-        "Normal-blend children only. Native image/two-motion lifecycle/geometry is bounded; larger/deeper/video/owned3D groups, wider grouped drag/deletion, full raster and live sound remain unqualified."
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor, group masks/blends and clip ownership are unsupported. Normal-blend children only. One native 16-key/eight-channel image/two-motion lifecycle/geometry case is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "updated_at": "2026-10-14",
       "product_version": "1.2.0"

@@ -74,6 +74,24 @@ def automation_expression(keys, default=1.0):
     return f"if(lt(t,{points[0]['time']:.8f}),{points[0]['value']:.8f},{expression})"
 
 
+def output_to_programme_expression(speed_plan):
+    """The same inverse piecewise clock used by edit_clock, for FFmpeg t."""
+    if not speed_plan:
+        return "t"
+    segments, cursor = [], 0.0
+    for segment in speed_plan:
+        start, end, rate = (float(segment[field]) for field in ("start_time", "end_time", "rate"))
+        if not all(math.isfinite(value) for value in (start, end, rate)) or start < 0 or end <= start or rate <= 0:
+            raise ValueError("Invalid group animation speed clock")
+        length = (end-start)/rate
+        segments.append((start, end, rate, cursor, cursor+length))
+        cursor += length
+    result = f"{segments[-1][1]:.8f}"
+    for start, end, rate, first, last in reversed(segments):
+        result = f"if(lt(t,{last:.8f}),{start:.8f}+max(0,min({last-first:.8f},t-{first:.8f}))*{rate:.8f},{result})"
+    return result
+
+
 def _property_keys(plan, property_name):
     return [
         key for key in (plan.get("keyframes") or [])

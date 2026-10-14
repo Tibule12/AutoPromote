@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-14T04:41:56.753840Z",
+  "updatedAt": "2026-10-14T14:50:52.956051Z",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -382,7 +382,7 @@
       ],
       "readiness": "PARTIAL",
       "assertion": "One explicit global stage/order/blend model including nested masks",
-      "gap": "Explicit canonical graphic order and static nested Normal-child groups are implemented. Source/source-VFX/caption stages stay separate; group animation/anchor/masks/blends/clip ownership, actual owned3D/video/deeper stacks and whole raster/audio remain unqualified.",
+      "gap": "Explicit graphic order and animated Normal-child nested groups share the canonical graph. Source/source-VFX/caption stages, group masks/blends/anchor/clip ownership and broad curves/retiming/moving/video/owned3D/full raster/audio remain unqualified.",
       "sourceRefs": [
         "graph",
         "studio",
@@ -392,13 +392,13 @@
         "frontend/src/components/__tests__/studioGroups.test.js",
         "python_media_worker/test_studio_composition.py"
       ],
-      "automatedGuardResultThisSession": "40 frontend and59 actual compositor cases PASS; bounded checks only",
-      "realPairedRunThisSession": "One native nested image/two-motion edit;4/4 visible-image geometry pairs PASS; full raster/audio UNQUALIFIED",
+      "automatedGuardResultThisSession": "77 frontend and82 actual compositor/motion cases PASS; bounded checks only",
+      "realPairedRunThisSession": "One native16-key nested edit;4/4 visible-image geometry pairs PASS; full raster/live sound UNQUALIFIED",
       "measurement": {
-        "evidence": "reports/studio-professional-nested-groups-20261014/proof/paired-nested-groups.json",
-        "scope": "Four paused visible-magenta footprint/occlusion pairs only",
-        "maxBoundaryP95Pixels": 2,
-        "minimumVisibleImageIou": 0.9804169994766849,
+        "evidence": "reports/studio-professional-group-keyframes-20261014/proof/paired-group-keyframes.json",
+        "scope": "Four declared paused visible-magenta footprint/occlusion pairs only",
+        "maxBoundaryP95Pixels": 1.0,
+        "minimumVisibleImageIou": 0.9906280038449214,
         "wholePreviewFinalParityQualified": false
       },
       "requiredEvidence": [
@@ -838,25 +838,26 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "CANONICAL_STATIC_NESTED_GROUP_TRANSFORMS",
+    "lastSessionKind": "CANONICAL_ANIMATED_GROUP_KEYS_AND_PROPERTY_ROWS",
     "lastSessionRealCapabilityRuns": 1,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-nested-groups-20261014/README.md",
+    "exactBlockersSource": "reports/studio-professional-group-keyframes-20261014/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-nested-groups-20261014/README.md",
+    "lastSessionEvidence": "reports/studio-professional-group-keyframes-20261014/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendCasesPassed": 40,
-      "compositorCasesPassed": 59,
+      "frontendCasesPassed": 77,
+      "compositorAndMotionCasesPassed": 82,
       "legacyAudioMotionCasesPassed": 21,
+      "subtestsPassed": 261,
       "strictLocalAppBuild": "PASS",
       "fullStudioSuite": false
     },
-    "nextSlice": "S03 shared group transform keyframes and group property rows on the canonical graph, then group masks/blends and clip ownership; keep S02 raster/moving/cold/broad picture and sound open",
+    "nextSlice": "S03 group masks and blend semantics on the shared canonical hierarchy/compositor, then clip ownership; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -4602,5 +4603,39 @@
     "ownedLocalQaStopped": true,
     "finalNativePreviewAfterFinalBuild": true,
     "completedOutputRecoveryAfterDuplicateQualified": false
+  },
+  "professionalGroupKeyframes20261014": {
+    "evidence": "reports/studio-professional-group-keyframes-20261014/README.md",
+    "checkpoint": "reports/studio-professional-group-keyframes-20261014/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Canonical group keys and shared property rows/curve editor animate nested Normal-child canvases. One native image/two-motion edit with 16 group keys/eight channels passes history/rows/nudge/lock/save/cold/CPU export/full timeline playback; four artwork geometry pairs and unchanged decoded tone pass. Broader curves/retiming/moving/video/owned3D/masks/blends/full raster/audio remain unqualified.",
+    "nativeProjects": 1,
+    "nativeCpuExports": 1,
+    "nativeHistorySaveColdReopen": true,
+    "masterKeyCount": 16,
+    "animatedChannels": 8,
+    "completeStudioRecordings": 1,
+    "geometryPairsPassed": 4,
+    "maxBoundaryP95Pixels": 1.0,
+    "minimumVisibleImageIou": 0.9906280038449214,
+    "decodedSourceToneUnchanged": true,
+    "frontendCasesPassed": 77,
+    "compositorAndMotionCasesPassed": 82,
+    "legacyAudioMotionCasesPassed": 21,
+    "subtestsPassed": 261,
+    "strictAppBuild": "PASS",
+    "gpuJobs": 0,
+    "paidGpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "ownedLocalQaStopped": true,
+    "wholePreviewFinalParityQualified": false,
+    "fullStudioSuiteQualified": false,
+    "readinessPromoted": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ],
+    "nextImplementationSlice": "S03 group masks and blend semantics on the shared canonical hierarchy/compositor, then clip ownership; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open"
   }
 }

@@ -3,7 +3,7 @@ import { projectStudioLinkedTimingToSnapshot, projectStudioEditableStateToSnapsh
 import { buildAdvancedColorCube } from "./studioColorCube";
 import { assertStudioLayerBlendMode, assertStudioMainBlendMode } from "./studioBlendModes";
 import { parseStudioMaskPolygon } from "./studioMaskGeometry";
-import { studioGroupTree, removeStudioGroupMembers, GROUP_KIND } from "./studioGroups";
+import { studioGroupTree, removeStudioGroupMembers, GROUP_KIND, validateStudioGroupKeyframes } from "./studioGroups";
 
 export const compileStudioOverlaysForRender = (document, transportSnapshot = {}) =>
   projectStudioEditableStateToSnapshot(document, transportSnapshot).overlays
@@ -80,6 +80,7 @@ const compileBaseTransform = layer => ({
 export const compileStudioCompositionForRender = document => {
   const state = visualRenderState(document);
   const compounds = document.editGraph?.settings?.compoundClips || [];
+  validateStudioGroupKeyframes(compounds, state.motionKeyframes);
   if (compounds.some(group => group.kind === GROUP_KIND) && !Array.isArray(state.compositionOrder))
     fail("MISSING_GROUP_LAYER_ORDER", "Graphic groups need an explicit canonical layer order.");
   const disabledIds = state.threeDScenes.filter(scene => scene.enabled === false).map(scene => scene.id);
@@ -104,7 +105,13 @@ export const compileStudioCompositionForRender = document => {
   }
   return { version: 1, coordinate_space: "canvas_percent", preview_timebase: "output_timeline_seconds",
     ...(order ? { order } : {}),
-    ...(groups.length ? { groups: JSON.parse(JSON.stringify(groups)) } : {}),
+    ...(groups.length ? { groups: groups.map(group => {
+      const keys = (state.motionKeyframes || []).filter(key => key.targetId === group.id);
+      return { ...JSON.parse(JSON.stringify(group)), ...(keys.length ? { motion_keyframes: keys.map(key => ({
+        id: key.id, property: key.property, time: key.time, value: key.value, easing: key.easing || 'linear',
+        ...(key.curve ? { curve: [...key.curve] } : {}),
+      })) } : {}) };
+    }) } : {}),
     layers: [state.mainTransform || { id: "main-video", type: "video" },
       ...state.overlays.filter(overlay => !overlay.isCaption)].map(layer => ({
       id: layer.id, name: layer.name || layer.text || "Visual layer", type: layer.type || "visual",

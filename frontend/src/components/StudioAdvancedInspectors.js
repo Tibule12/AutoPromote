@@ -430,6 +430,7 @@ export function CompositeInspector({
   groupEntries,
   onTransformGroup,
   onRemoveGroup,
+  groupAnimation,
   onMoveLayer,
   activeOverlay,
   overlays,
@@ -454,7 +455,7 @@ export function CompositeInspector({
 
       <StudioLayerStack entries={layerEntries} onMove={onMoveLayer} />
       {groupTree && <StudioGroupInspector tree={groupTree} entries={groupEntries} onCreate={onCreateCompound}
-        onTransform={onTransformGroup} onRemove={onRemoveGroup} onMove={onMoveLayer} />}
+        onTransform={onTransformGroup} onRemove={onRemoveGroup} onMove={onMoveLayer} {...groupAnimation} />}
       <div className="composite-quick-actions">
         <button type="button" onClick={onAddAdjustmentLayer}>
           ＋ Adjustment layer

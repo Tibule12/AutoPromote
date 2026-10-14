@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.11 • 2026-10-14T04:31:18.521294Z
+Development documentation • product 1.2.0 • knowledge 1.0.12 • 2026-10-14T14:56:21.456054Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -233,13 +233,13 @@ Edits position, scale, rotation, anchor, crop and opacity of ordinary layers. Na
 
 ID: `studio.keyframes` • **FUNCTIONAL** • DETERMINISTIC
 
-Adds property keys to a selected ordinary layer, moves them in the timeline and interpolates poses. Retained evidence covers native controls, undo/redo, reopen and export; whole-stage agreement is still partial.
+Adds property keys to ordinary layers and nested graphic groups, moves them in the shared timeline and interpolates poses. Retained native controls/history/reopen/export evidence is bounded; whole-stage agreement is still partial.
 
 **Purpose:** Create deliberate editable movement and retain the same keys across manual editing, Director proposals, saving and final compilation.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
-**Media:** ordinary text layers, image overlays, video overlays
+**Media:** ordinary text layers, image overlays, video overlays, nested graphic groups
 
 **Requires:** studio.transforms (FUNCTIONAL), studio.timeline (PARTIAL)
 
@@ -247,27 +247,28 @@ Adds property keys to a selected ordinary layer, moves them in the timeline and 
 
 **Workflow**
 
-1. Show motion keyframes in the timeline and expand an ordinary visual layer, including a layer without animation keys.
+1. Show motion keyframes in the timeline and expand an ordinary visual layer or graphic group, including targets without animation keys.
 2. Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.
 3. Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.
-4. Owning-track locks prevent changes. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
+4. Owning-track locks prevent changes. Group values use their own five-property bounds; group key selection opens Composite with the shared curve editor. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
 
-**Preview:** Evaluates ordinary canonical property keys on the existing preview clock. Keyed image layers take precedence over legacy CSS entrance animations and transitions, so opacity, scale and rotation remain visible. Broad raster, media and continuous playback agreement remains unqualified.
+**Preview:** Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** Uses the existing shared compiler/compositor and interpolation expressions where supported. Group keys retain canonical target ownership and are projected into the group composition plan; output time maps back to the programme clock. Inspect the actual exported movie; the status does not certify every combination.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
 - Two bounded masked image-effect edits preserve eight position/scale/rotation/opacity keys through native save/reopen/export. Inverted-polygon sampled picture passes; one ellipse raster pair still exceeds the strict colour bound. This does not qualify every mask/easing/media or legacy entrance clock.
+- One native nested image/two-motion project preserves 16 group keys across eight channels, including one custom X Bézier curve. Midpoint, property rows, nudge/lock, reset/remove/undo, save/cold reopen, CPU export and full timeline playback pass; four image geometry pairs pass and decoded source-tone audio is unchanged. Native retiming, broader curves, video/owned 3D/deeper groups, full raster and live sound remain unqualified. Existing worker Bézier expressions approximate 32 samples; browser interpolation solves the curve.
 
 **Common errors**
 
-- No selected editable layer: Select an ordinary layer before adding transform keys.
+- No selected editable layer: Select an ordinary layer or a graphic group before adding its supported transform keys.
 - Keyframe edits are locked: Unlock the applicable property/layer in the normal controls before editing.
 - Motion differs after export: Check current keys/source binding and the documented preview/final limitations; inspect mapped frames in the actual movie.
 
-**Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing)
+**Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity)
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
 
@@ -507,7 +508,9 @@ Applies the supported deterministic visual effects and source-bound subject scen
 
 ID: `studio.compositing` • **PARTIAL** • DETERMINISTIC
 
-Combines ordinary layers with supported blend modes and masks, shared graphic order and static nested Normal-child group transforms. Broad preview/export picture and sound agreement remains incomplete.
+Combines ordinary layers with supported blend modes and masks, shared graphic order and nested Normal-child group transforms with property animation. Broad preview/export picture and sound agreement remains incomplete.
+
+**Purpose:** Compose editable graphic hierarchies while preserving child-local edits, timing and property animation through the shared preview and render path.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -515,7 +518,7 @@ Combines ordinary layers with supported blend modes and masks, shared graphic or
 
 **Requires:** studio.layers (FUNCTIONAL)
 
-**Optional:** None recorded.
+**Optional:** studio.keyframes (FUNCTIONAL)
 
 **Workflow**
 
@@ -526,21 +529,22 @@ Combines ordinary layers with supported blend modes and masks, shared graphic or
 5. Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.
 6. To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.
 7. Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.
-8. Reset clears the master transform. Remove group transform promotes its children without baking the visual result. Review the exact final export.
+8. Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom Bézier curve in Composite.
+9. Reset removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Owning graphics locks, undo/redo and save/reopen apply; inspect the exact final export.
 
-**Preview:** Full-canvas nested wrappers apply static parent transforms and whole-group opacity while preserving child edits/keys. One native nested image/two-motion project has scoped geometry agreement; whole raster/picture/sound and broad combinations remain unqualified.
+**Preview:** Full-canvas nested wrappers evaluate the existing canonical motion keys on the shared preview clock and apply parent transforms and whole-group opacity while preserving child edits/keys. Animated ancestor poses also map child pointer coordinates locally. One native nested image/two-motion edit with 16 group keys has four scoped geometry pairs; whole raster/picture/sound and broad combinations remain unqualified.
 
-**Final render:** The shared composition compiler carries geometric image masks and crop keyframes. Ordinary title masks use the title layout box rather than shadow padding. When delivery is larger than the source, graphics are composed at delivery resolution. Inspect the exact final movie; full preview/render raster agreement remains unqualified. Static nested Normal-child groups compose/clip their children before parent transforms and opacity through the same CPU leaf compositor; no model generation is introduced.
+**Final render:** The shared composition compiler carries geometric image masks and crop keyframes. Ordinary title masks use the title layout box rather than shadow padding. When delivery is larger than the source, graphics are composed at delivery resolution. Nested Normal-child groups compose/clip children before parent transforms and opacity through the same CPU leaf compositor. Existing interpolation expressions use the inverse programme clock; one opacity field multiplies assembled alpha after child overlap. Static/constant keys preserve prior pixels. Inspect the exact final movie; full preview/render raster agreement remains unqualified.
 
 **Limits**
 
 - Rectangle, ellipse and percentage-polygon image masks and crop animation have scoped native/export boundary evidence. This is deterministic geometry, not AI subject segmentation.
-- Feathered/inverted masks, animated video-layer masks, master group animation/masks/blends and broader nesting and full alpha/text/effect-order parity remain incomplete.
+- Feathered/inverted masks, animated video-layer masks, master group masks/blends, broader nesting and full alpha/text/effect-order parity remain incomplete.
 - This dated development snapshot does not establish professional or production readiness.
 - Editable percentage-polygon paths and rectangle radius use the canonical mask object. This adds no animated path, neural segmentation, mask expansion or video-mask support.
 - The bounded inverted-polygon/shadow/glow/blur image stack passes four sampled colour pairs with transform/opacity keys. The ellipse stack retains a strict raster failure, and historical landscape edge failures remain open.
 - The layer stack has native image/title/two-motion history, cold reopen, exports and scoped visible-image occlusion evidence. Actual owned 3D cross-family export, whole motion/title raster, large/deeper stacks and full raster remain unqualified. Source footage/source VFX and generated captions retain their separate programme stages.
-- Static group position, uniform scale, rotation and whole-group opacity have one native image/two-motion history/cold/export/timeline and four scoped geometry pairs. Master keyframes/anchor/masks/blends and clip ownership are unsupported. Grouped non-Normal child blend fails export explicitly; grouped timeline drag order uses Composite. Actual owned3D/video/deeper groups and wider grouped drag/deletion remain unqualified.
+- Group position, uniform scale, rotation and whole-group opacity share canonical motion keys and property rows. One native 16-key/eight-channel image/two-motion edit passes controls/history/reset/removal/save/cold/export/full timeline playback and four scoped geometry pairs; decoded source-tone audio is unchanged. Editable group anchor, masks/blends and clip ownership remain unsupported. Grouped non-Normal child blend fails export explicitly; grouped timeline drag order uses Composite. Actual owned 3D/video/deeper groups, native retiming, broader curves/drag/deletion and continuous picture/sound remain unqualified. The worker’s existing Bézier expressions approximate 32 samples; the browser solves the curve.
 
 **Common errors**
 

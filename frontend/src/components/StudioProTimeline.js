@@ -3,7 +3,8 @@ import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioControlMenu from "./StudioControlMenu";
 import { STUDIO_AUDIO_TRACKS } from "./studioAudioTracks";
 import { buildMotionAutomationStyle } from "./studioAutomation";
-import { STUDIO_MOTION_PROPERTIES, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
+import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
+import { GROUP_KIND, evaluateStudioGroupTransform } from "./studioGroups";
 import "./StudioTimeline.css";
 
 const EDIT_TOOLS = [
@@ -847,6 +848,7 @@ export default function StudioProTimeline({
   adjustmentLayers,
   creativeEffects,
   motionKeyframes,
+  graphicGroups = [],
   mainTransform = {},
   onUpdateMotionProperty,
   onToggleMotionPropertyKeyframe,
@@ -937,7 +939,8 @@ export default function StudioProTimeline({
   // Authored edits retain their source coordinates. Only the displayed clock
   // changes with global playback speed, matching the programme and export.
   const displayRate = Number.isFinite(Number(playbackRate)) && Number(playbackRate) > 0 ? Number(playbackRate) : 1;
-  const motionTargets = [{ ...mainTransform, id: 'main-video' }, ...(overlays || []).filter(layer => !layer.isCaption)]
+  const motionTargets = [{ ...mainTransform, id: 'main-video' }, ...(overlays || []).filter(layer => !layer.isCaption),
+    ...graphicGroups.map(group => ({ ...group, ...group.transform }))]
     .map(layer => ({ id: layer.id, layer, keys: (motionKeyframes || []).filter(key => key.targetId === layer.id) }));
   const safeZoom = Math.max(1, Math.min(32, Number(zoom || 1)));
   const playheadRef = React.useRef(0);
@@ -1776,9 +1779,9 @@ export default function StudioProTimeline({
             const track = target.id === 'main-video' ? 'video' : isBRollLayer(target.layer || {}) ? 'broll' : 'graphics';
             const locked = !!trackStates?.[track]?.locked;
             const expanded = expandedMotionTargets.has(target.id);
-            const properties = STUDIO_MOTION_PROPERTIES.filter(property => !property.mediaOnly ||
-              target.id === 'main-video' || ['image', 'video'].includes(target.layer?.type));
-            const values = buildMotionAutomationStyle(target.keys, playhead, target.layer);
+            const properties = studioMotionPropertiesForTarget(target.layer);
+            const values = target.layer.kind === GROUP_KIND ? evaluateStudioGroupTransform(target.layer, target.keys, playhead)
+              : buildMotionAutomationStyle(target.keys, playhead, target.layer);
             const tolerance = motionKeyframeTolerance(frameRate, displayRate);
             return <React.Fragment key={target.id}>
               <div className="pro-track-row pro-motion-target">

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review static nested graphic-group transforms and five static controls; exact native image/two-motion movie/timeline, diagnostic history, four repeated final-build geometry pairs,120 focused cases and255 subtests. Legacy caption passthrough and null transform rejection repaired. Master animation/anchor/masks/blends, broad stacks/live raster/audio and later completed-output cold adoption remain unqualified; readiness unchanged.",
-  "reviewed_at": "2026-10-14T04:41:57.769Z",
-  "catalog_sha256": "74dbac96b60a322a92af3b08ef0e7e2f7915a622570e644fb40ac757f37597ef",
+  "reason": "Document shared canonical group animation and property rows: one native 16-key/eight-channel edit, four bounded geometry pairs, unchanged decoded source-tone audio, 180 cases plus 261 subtests and strict builds. Retain all readiness and broader curve, retiming, raster, media and live-sound limits.",
+  "reviewed_at": "2026-10-14T14:57:52.987Z",
+  "catalog_sha256": "45a692b79fd7bf0a6f36f54adfdd44303b1b38f5cb07286b7cc3750a276fb65a",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "0c50be83f56ddfb5e482bc603df01ef2f3840d5fb92ed17cf7f00e28504510ec"
+      "sha256": "efca5314d55f6d48c3eeb2c3ccbb5c579bbb48f3b4957dada08d9decb0ebb1cc"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -71,7 +71,7 @@
     },
     {
       "path": "frontend/src/components/StudioAdvancedInspectors.js",
-      "sha256": "3c0e0b5004dec93ac78449c0036f70c16ece74f3f2bde7428b0f1dad090edeb2"
+      "sha256": "1f86a1f6ca980bc5f329a7e95bd087253e52625a77b7f40ccf308843484c3251"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -87,11 +87,15 @@
     },
     {
       "path": "frontend/src/components/StudioGroupInspector.js",
-      "sha256": "fe22b55681ccbdc4654a022ef43bc8890bb0bab5f27d602018082f5dc78c93ce"
+      "sha256": "6d8b231c2306cd8b69997eb00929040dc0e0f837b3ce89b135c64fdbbd0e2299"
     },
     {
       "path": "frontend/src/components/StudioGroupPreview.js",
-      "sha256": "b3bdf2bacfcddba7149534e300af1ec9b19da1974b7022c61b8424a51de55605"
+      "sha256": "05ffea07cf18cf5f2865a008b3574e55f5bd13b1ab10e6b335729e06c7648a90"
+    },
+    {
+      "path": "frontend/src/components/StudioKeyframeCurveEditor.js",
+      "sha256": "2bacf74d8d7cab72d83b60d1ccc201734384abc34cd920f6c8cef60022cf3a97"
     },
     {
       "path": "frontend/src/components/StudioLayerStack.js",
@@ -103,7 +107,7 @@
     },
     {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "611dac847c2b8adc9d952f7f6d955ce39b5cc27b90b077b54475a6257d2a8f1e"
+      "sha256": "ef96f9022dc46955be18ea3290a3b7cb3f8b60ea33de33b04d60275fffc85dd1"
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
@@ -115,7 +119,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "0e918957c589f3f396f7866fcec2c00e105643ad2745d2c527b1221db8ba1c62"
+      "sha256": "b02900a1b2a6dbf90cbd97e859cde97f564d5ce7fc5a0f8780c68a4c09ea9a28"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -155,7 +159,7 @@
     },
     {
       "path": "frontend/src/components/studioGroups.js",
-      "sha256": "938426347c10b36cd109f677cd0c008d29077adce4d100b03f4b16820cfc1538"
+      "sha256": "39567db564ff75aac5b30c3a25e86ef359a26a230babc7b98488780faf88cd20"
     },
     {
       "path": "frontend/src/components/studioLayerOrder.js",
@@ -170,12 +174,16 @@
       "sha256": "d85f3cc0df0b794eca4a413c28ee4b7bf8de38d671a61ddbe2b76433ef286a1b"
     },
     {
+      "path": "frontend/src/components/studioMotionProperties.js",
+      "sha256": "451e2a51fdba2af6d9a7227a120ab6883eeff1ec03fd06cae48a160f84ee1d2b"
+    },
+    {
       "path": "frontend/src/components/studioProjectDocument.js",
       "sha256": "99d7aa0270b51ea1520aac7a21c67a07498d96f43ac5bba5a0ff6938190a1e6b"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
-      "sha256": "cf9a33c03170a8e860ebad507367bdf083cb1e4f9799a08b7b4a256d04d60183"
+      "sha256": "d65c81f4a08b9982355c5a4c876e1ef83da61f3cffa0b719e9c2fb885f93c833"
     },
     {
       "path": "frontend/src/components/studioSourcePreview.js",
@@ -211,19 +219,23 @@
     },
     {
       "path": "python_media_worker/studio_composition.py",
-      "sha256": "34d3768613f1ab3583e5ff0eae2c09b3a7b00cc6bcc0bd6c64fc0a4679a3cf6b"
+      "sha256": "c3db2ed05728df315bdc12967733fc438f66869831be207cf6a04d924f5c95ea"
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
       "sha256": "ca8b1992e515d64fa431e23695f31011cc53fdb1520fba2c16b7bcb3ad1e79f2"
     },
     {
-      "path": "python_media_worker/studio_text.py",
-      "sha256": "03d8f13b9cb191bdf0bd9ac3525282626bae9986da6ec71d177165e4d1fec530"
+      "path": "python_media_worker/studio_motion.py",
+      "sha256": "46c65ca65bcdd76f827fa6384c832a524cc8e6c81ac534160fb321015003235e"
     },
     {
       "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
       "sha256": "b3bece0fe3f653ef88368b3013fbe96ccfd13ed953efa3342fb89eb20186374b"
+    },
+    {
+      "path": "reports/studio-professional-group-keyframes-20261014/README.md",
+      "sha256": "22ba3b2940f6dbd2e171a4bab6a680370a7942acffff43e2844548beedc83f9c"
     },
     {
       "path": "src/contentRoutes.js",
@@ -335,11 +347,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "a78c8a8e1f9ef02c8eb72e99f5cf10270e6aefe83c846587ba3d94e4f4cb52b0"
+      "sha256": "21e5aa04b56f6a54147b01f909194d90f1b480bc04c3b0e43e8cda5f2e4f1cfb"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "d2aab3e0499bcf4a78142d92df5f838bc4d793315b76f3056e7216014ed85dc2"
+      "sha256": "bd0c7e43fff6ad2dfd6e5a500177b1315d1fc3cf053bc8f0179e3e326f2162b5"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

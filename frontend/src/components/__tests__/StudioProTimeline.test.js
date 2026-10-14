@@ -3,6 +3,20 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import StudioProTimeline, {buildTimelineCaptionRegions} from "../StudioProTimeline";
 import { motionKeyAtPlayhead, motionKeyframeTolerance } from "../studioMotionProperties";
 
+test('group property rows share key gestures and expose translation/scale bounds without media crop', () => {
+  const toggle=jest.fn(),update=jest.fn(),select=jest.fn();
+  render(<StudioProTimeline duration={3} playhead={1} trackStates={{}} onToggleMotionPropertyKeyframe={toggle}
+    onUpdateMotionProperty={update} onSelectMotionKeyframe={select}
+    graphicGroups={[{id:'group',name:'Master',kind:'graphic_group',transform:{x:-8,y:0,scale:.85,rotation:0,opacity:1}}]}
+    motionKeyframes={[{id:'ga',targetId:'group',property:'x',time:0,value:-8},{id:'gb',targetId:'group',property:'x',time:2,value:8,easing:'linear'}]} />);
+  fireEvent.click(screen.getByRole('button',{name:'Show motion keyframes'}));fireEvent.click(screen.getByRole('button',{name:'Expand Master keyframes'}));
+  const x=screen.getByLabelText('Master x value');expect(x).toHaveValue(0);expect(x).toHaveAttribute('min','-100');
+  expect(screen.getByLabelText('Master scale value')).toHaveAttribute('max','2');expect(screen.queryByLabelText('Master cropX value')).toBeNull();
+  fireEvent.focus(x);fireEvent.change(x,{target:{value:'-4'}});fireEvent.blur(x);expect(update).toHaveBeenCalledWith('group','x',-4);
+  fireEvent.click(screen.getByRole('button',{name:'Add Master x keyframe at playhead'}));expect(toggle).toHaveBeenCalledWith('group','x');
+  fireEvent.click(screen.getByTestId('motion-timeline-key-gb'));expect(select).toHaveBeenCalledWith('gb','group');
+});
+
 test('unanimated layers expose supported properties; value entry commits once and Escape cancels', () => {
   const update = jest.fn(), toggle = jest.fn();
   render(<StudioProTimeline duration={3} playhead={1} mainTransform={{ scale: 1.2 }} trackStates={{}}

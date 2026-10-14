@@ -1,10 +1,24 @@
-import React from 'react';
-import { studioGroupTree } from './studioGroups';
+import React, { useEffect, useRef, useState } from 'react';
+import { studioGroupTree, evaluateStudioGroupTransform } from './studioGroups';
 
 // Keep child coordinates and keyframes local to a full programme canvas.
 // Composite a group's children before applying its opacity and parent transform.
-export default function StudioGroupPreview({ compounds, order, children }) {
+export default function StudioGroupPreview({ compounds, order, keyframes = [], time = 0, getTime, children }) {
   const tree = studioGroupTree(compounds, order);
+  const [frame, setFrame] = useState(time), clock = useRef(getTime);
+  clock.current = getTime;
+  const animated = keyframes.some(key => tree.byId.has(key.targetId)), hasClock = typeof getTime === 'function';
+  useEffect(() => { setFrame(time); }, [time]);
+  useEffect(() => {
+    if (!animated || !hasClock) return undefined;
+    let raf, previous;
+    const update = () => {
+      const now = Math.round(Number(clock.current?.()) * 90000) / 90000;
+      if (Number.isFinite(now) && now !== previous) { previous = now; setFrame(now); }
+      raf = requestAnimationFrame(update);
+    };
+    update(); return () => cancelAnimationFrame(raf);
+  }, [animated, hasClock]);
   if (!tree.groups.length) return children;
   const layers = new Map(), other = [], known = new Set(order);
   const collect = elements => React.Children.forEach(elements, child => {
@@ -20,12 +34,12 @@ export default function StudioGroupPreview({ compounds, order, children }) {
   const render = id => {
     const group = tree.byId.get(id);
     if (!group) return layers.has(id) ? <React.Suspense key={id} fallback={null}>{layers.get(id)}</React.Suspense> : null;
-    const t = group.transform;
-    return <div key={id} data-studio-group-id={id} style={{ position: 'absolute', inset: 0,
+    const t = evaluateStudioGroupTransform(group, keyframes, frame);
+    return <div key={id} data-studio-group-id={id} data-studio-group-pose={JSON.stringify(t)} style={{ position: 'absolute', inset: 0,
       transformOrigin: '50% 50%', transform: `translate(${t.x}%, ${t.y}%) rotate(${t.rotation}deg) scale(${t.scale})`,
       opacity: t.opacity, overflow: 'hidden', isolation: 'isolate', pointerEvents: 'none', zIndex: rank.get(tree.leaves(id)[0]) }}>
       {group.layerIds.map(render)}
     </div>;
   };
-  return <>{tree.roots.map(render)}{other}</>;
+  return <>{tree.roots.map(render)}{React.Children.toArray(other)}</>;
 }
