@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.13 • 2026-10-14T16:13:51.506436Z
+Development documentation • product 1.2.0 • knowledge 1.0.14 • 2026-10-14T17:19:31.904956Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -125,6 +125,9 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.composite.group_mask_shape | Group mask shape | enum | rectangle, ellipse, polygon | none | "rectangle" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.composite.group_mask_feather | Group mask feather | number | 0 … 100 | pixels at 720px programme height | 0 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.composite.group_mask_inverted | Invert group mask | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.group_clip.move | Move group clip | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.group_clip.in | Group clip In | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.group_clip.out | Group clip Out | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -1440,7 +1443,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 - Static graphic/group sibling order only; source footage/source VFX and generated captions keep their separate stages.
 - 3D still requires an existing current owned export asset. No generation is triggered by reordering.
 - Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and broader nesting remain unqualified.
-- Groups preserve contiguous canonical leaf order and isolate masks/blends among siblings. Reorder grouped timeline layers in Composite; group clip/occurrence ownership and broader animated combinations remain open.
+- Groups preserve contiguous canonical leaf order and isolate masks/blends among siblings. Reorder grouped timeline layers in Composite; source-occurrence attachment/remapping and group split/duplicate and broader animated combinations remain open.
 
 <a id="studio-composite-group_x"></a>
 
@@ -1454,7 +1457,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
 
 <a id="studio-composite-group_y"></a>
@@ -1469,7 +1472,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
 
 <a id="studio-composite-group_scale"></a>
@@ -1484,7 +1487,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
 
 <a id="studio-composite-group_rotation"></a>
@@ -1499,7 +1502,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
 
 <a id="studio-composite-group_opacity"></a>
@@ -1514,7 +1517,7 @@ Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha sce
 
 - Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
 - At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
-- Editable group anchor and clip/occurrence ownership are unsupported. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
 - Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
 
 <a id="studio-composite-group_mask_enabled"></a>
@@ -1568,3 +1571,45 @@ Applies to: graphic groups. Requires: studio.compositing.
 
 - Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.
 - Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified.
+
+<a id="studio-group_clip-move"></a>
+
+## Move group clip
+
+ID: `studio.group_clip.move` • **PARTIAL**
+
+Moves the group clip and all descendant starts and keys together, preserving durations and source phase.
+
+Applies to: graphic groups. Requires: studio.timeline, studio.compositing.
+
+- Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.
+- Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.
+- Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified.
+
+<a id="studio-group_clip-in"></a>
+
+## Group clip In
+
+ID: `studio.group_clip.in` • **PARTIAL**
+
+Sets the start of the group’s half-open programme visibility range without changing child content phase.
+
+Applies to: graphic groups. Requires: studio.timeline, studio.compositing.
+
+- Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.
+- Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.
+- Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified.
+
+<a id="studio-group_clip-out"></a>
+
+## Group clip Out
+
+ID: `studio.group_clip.out` • **PARTIAL**
+
+Sets the end of the group’s half-open visibility range; child keys and source edits remain available.
+
+Applies to: graphic groups. Requires: studio.timeline, studio.compositing.
+
+- Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.
+- Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.
+- Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified.

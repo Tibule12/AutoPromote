@@ -1,6 +1,7 @@
 import React from "react";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioControlMenu from "./StudioControlMenu";
+import StudioGroupTimelineClip from "./StudioGroupTimelineClip";
 import { STUDIO_AUDIO_TRACKS } from "./studioAudioTracks";
 import { buildMotionAutomationStyle } from "./studioAutomation";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
@@ -849,6 +850,10 @@ export default function StudioProTimeline({
   creativeEffects,
   motionKeyframes,
   graphicGroups = [],
+  groupTimingRows = [],
+  selectedGroupId,
+  onSelectGroup,
+  onEditGroupTiming,
   mainTransform = {},
   onUpdateMotionProperty,
   onToggleMotionPropertyKeyframe,
@@ -869,6 +874,8 @@ export default function StudioProTimeline({
   splitLocked = trackStates?.video?.locked,
   onTrimStart,
   onTrimEnd,
+  trimLocked = trackStates?.video?.locked,
+  deleteLocked = trackStates?.video?.locked,
   onDelete,
   canDelete,
   onToggleCaptions,
@@ -924,6 +931,7 @@ export default function StudioProTimeline({
     moments: "video",
   }[activeTool];
   React.useEffect(() => {
+    if (selectedGroupId) return;
     if (showMotionKeys && selectedMotionKey) return;
     const scroll = scrollRef.current;
     const row = scroll?.querySelector(`[data-testid="pro-track-row-${focusedTrack}"]`);
@@ -934,13 +942,14 @@ export default function StudioProTimeline({
     const top =
       row.getBoundingClientRect().top - scroll.getBoundingClientRect().top + scroll.scrollTop;
     scroll.scrollTop = Math.max(0, top - 29);
-  }, [focusedTrack, showMotionKeys, selectedMotionKey]);
+  }, [focusedTrack, showMotionKeys, selectedMotionKey, selectedGroupId]);
   const safeDuration = Math.max(0.1, Number(duration || 0.1));
   // Authored edits retain their source coordinates. Only the displayed clock
   // changes with global playback speed, matching the programme and export.
   const displayRate = Number.isFinite(Number(playbackRate)) && Number(playbackRate) > 0 ? Number(playbackRate) : 1;
   const motionTargets = [{ ...mainTransform, id: 'main-video' }, ...(overlays || []).filter(layer => !layer.isCaption),
     ...graphicGroups.map(group => ({ ...group, ...group.transform }))]
+    .filter(layer => !selectedGroupId || layer.id === selectedGroupId)
     .map(layer => ({ id: layer.id, layer, keys: (motionKeyframes || []).filter(key => key.targetId === layer.id) }));
   const safeZoom = Math.max(1, Math.min(32, Number(zoom || 1)));
   const playheadRef = React.useRef(0);
@@ -1119,7 +1128,7 @@ export default function StudioProTimeline({
               type="button"
               className="pro-quick-btn"
               onClick={onTrimStart}
-              disabled={!!trackStates?.video?.locked}
+              disabled={!!trimLocked}
               title="Cut everything before playhead"
               data-testid="pro-quick-trim-start"
             >
@@ -1129,7 +1138,7 @@ export default function StudioProTimeline({
               type="button"
               className="pro-quick-btn"
               onClick={onTrimEnd}
-              disabled={!!trackStates?.video?.locked}
+              disabled={!!trimLocked}
               title="Cut everything after playhead"
               data-testid="pro-quick-trim-end"
             >
@@ -1140,7 +1149,7 @@ export default function StudioProTimeline({
                 type="button"
                 className="pro-quick-btn is-danger"
                 onClick={onDelete}
-                disabled={!!trackStates?.video?.locked}
+                disabled={!!deleteLocked}
                 title="Delete selected clip"
                 data-testid="pro-quick-delete"
               >
@@ -1774,6 +1783,17 @@ export default function StudioProTimeline({
               </div>
             );
           })}
+          {groupTimingRows.map(item => <div key={`group-clip-${item.id}`} className={`pro-track-row pro-group-row ${item.locked ? 'is-locked' : ''}`}>
+            <div className="pro-track-header"><button type="button" aria-label={`Select ${item.name} group`} aria-pressed={selectedGroupId === item.id}
+              onClick={() => onSelectGroup?.(item.id)}><strong>{item.parentId ? '↳ ' : ''}{item.name}</strong></button>
+              <small>{item.locked ? 'Track locked' : 'Move together · trim edges'}</small></div>
+            <div className="pro-track-lane" aria-label={`${item.name} group timing`}>
+              <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
+              <StudioGroupTimelineClip item={item} duration={safeDuration} frameStep={displayRate / Math.max(1, Number(frameRate) || 30)}
+                snapping={snapping} snapTargets={snapTargets} selected={selectedGroupId === item.id}
+                onSelect={onSelectGroup} onEdit={onEditGroupTiming} />
+            </div>
+          </div>)}
           {showMotionKeys && motionTargets.map(target => {
             const label = target.id === 'main-video' ? 'Source video' : target.layer?.name || target.layer?.text || 'Visual layer';
             const track = target.id === 'main-video' ? 'video' : isBRollLayer(target.layer || {}) ? 'broll' : 'graphics';

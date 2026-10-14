@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review static group masks and alpha-aware group/child blending: one native nested Multiply/Screen edit preserves 16 keys through history/reset/lock/cold/export/timeline playback; four bounded geometry/interior-color pairs and unchanged audio pass. 243 cases plus 261 subtests, 17 knowledge checks and strict build. Readiness and broader masks/modes/media/retiming/full picture/live sound remain open.",
-  "reviewed_at": "2026-10-14T16:16:26.573Z",
-  "catalog_sha256": "3169c05965a3f9e8157e74109d6351494f9560d911ca816766bc32ef6b205c69",
+  "reason": "Final group-footage report and continuity records now include completed Studio playback, retained whole-picture comparison failures, same-job recovery, stopped owned QA services and unchanged readiness.",
+  "reviewed_at": "2026-10-14T18:15:56.154Z",
+  "catalog_sha256": "e42e773d520e864886cd9cce92829fc500a5ada9ea66237c0dd428acf10d3a84",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "3eeee36df6f8f69357fc3dc4c972c4e3d9cb052e206f506fd47b0db1ebd879a4"
+      "sha256": "9bfcdd2d09795c04eaa328a59cfaa696f35264bd7d744b38479980847556276a"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -87,11 +87,19 @@
     },
     {
       "path": "frontend/src/components/StudioGroupInspector.js",
-      "sha256": "5c4e7379d7681d894b0a6cce597512b746854c1062773e9a2f1cd09200a9757d"
+      "sha256": "5fd1eb4cde2f0c164f72855cc0dcb7a3c2cecf84e24ec01b2516525bcc8652c2"
     },
     {
       "path": "frontend/src/components/StudioGroupPreview.js",
-      "sha256": "f9a622a939818962653216ff2ac6f3d036d661683808c8e2a7473a419684e7dc"
+      "sha256": "ce933429e1b5888ff69d02756c17ff1852b11cfab60a24ac4c23f03b17c2c247"
+    },
+    {
+      "path": "frontend/src/components/StudioGroupTimelineClip.js",
+      "sha256": "6cf4801e6d7377e55b43e6ca7adce4ba3663671eb9a60648a1e6dce44c8f0e5c"
+    },
+    {
+      "path": "frontend/src/components/StudioGroupTimingInspector.js",
+      "sha256": "a35263f30eac29cb84c35e4d0dd629fc98b960ad29b17dc5ad93cfc412bd3e94"
     },
     {
       "path": "frontend/src/components/StudioKeyframeCurveEditor.js",
@@ -107,7 +115,7 @@
     },
     {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "ef96f9022dc46955be18ea3290a3b7cb3f8b60ea33de33b04d60275fffc85dd1"
+      "sha256": "2ff666e40062400b4ed535993b40941442e95a05ef2172d6ed37d515c6e15395"
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
@@ -119,7 +127,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "b2eb5c17d454b3bfb00adfe08c9a29afc60fb79e31293b397f118a97f8361e82"
+      "sha256": "0afbdaf8d95f13cd14afbc7a63a95758a7f432cfde089f799760d4a37881094f"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -158,8 +166,12 @@
       "sha256": "21e0a9eb112ff847ad2295de122d68c1c41313b98b6f531648a1aa312df20efe"
     },
     {
+      "path": "frontend/src/components/studioGroupTiming.js",
+      "sha256": "90dc50c41af72cdb1882b3f4f602a5ff1265be5263fd9a857f1f89ca57c9148f"
+    },
+    {
       "path": "frontend/src/components/studioGroups.js",
-      "sha256": "1856c1e2979206e62291b34812e01d743e6ec0a0945167f6918f67c190ab6667"
+      "sha256": "f4654b6e8d5bbcd7b494663222e3830b77d71b5b72d31d5847e695f684247ca0"
     },
     {
       "path": "frontend/src/components/studioLayerOrder.js",
@@ -219,7 +231,7 @@
     },
     {
       "path": "python_media_worker/studio_composition.py",
-      "sha256": "69404974424d5d32cd4029c6906f6068988b89ffa078bdb10ee6064cafd98d26"
+      "sha256": "1e99003d24034a900eaaeb28bd1d1ec55db85a04e85ae6dd2ce74fb5f7036af1"
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
@@ -234,12 +246,12 @@
       "sha256": "b3bece0fe3f653ef88368b3013fbe96ccfd13ed953efa3342fb89eb20186374b"
     },
     {
-      "path": "reports/studio-professional-group-composite-20261014/README.md",
-      "sha256": "5e6648feea6b619d2c33d3491dbe04e323dc40ec50de29a3fcf8dab234227f05"
-    },
-    {
       "path": "reports/studio-professional-group-keyframes-20261014/README.md",
       "sha256": "22ba3b2940f6dbd2e171a4bab6a680370a7942acffff43e2844548beedc83f9c"
+    },
+    {
+      "path": "reports/studio-professional-group-workflow-20261014/README.md",
+      "sha256": "aeff96b2daa31071a68a663aee2e7ba8020487096ebcbaeb66646a7f19690080"
     },
     {
       "path": "src/contentRoutes.js",
@@ -351,11 +363,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "795f9e71259ef58f829556f77afb66a697d20211c8a580422bc4bfd15a9c75b9"
+      "sha256": "a42d65047d88e58d3557c7bd7f80d4330bff67cf216adb0dd2227048242f5bd3"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "d5088cf14a2b93bdf1a230ced0f1352cee4741917dac3b941bb775a102d87b8a"
+      "sha256": "348fdd96d622e5d57cf05393b353a004479e4076056e324297f827f4f6b5926c"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

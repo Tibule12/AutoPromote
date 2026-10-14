@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { studioGroupTree, evaluateStudioGroupTransform } from './studioGroups';
 import { studioLayerMaskSvg } from './studioMaskGeometry';
 
-function GroupCanvas({ group, pose: t, rank, children }) {
+function GroupCanvas({ group, pose: t, rank, visible, children }) {
   const node = useRef(null), [size, setSize] = useState(null);
   useLayoutEffect(() => {
     const update = () => {
@@ -20,6 +20,7 @@ function GroupCanvas({ group, pose: t, rank, children }) {
     style={{ position: 'absolute', inset: 0, transformOrigin: '50% 50%',
       transform: `translate(${t.x}%, ${t.y}%) rotate(${t.rotation}deg) scale(${t.scale})`,
       opacity: t.opacity, overflow: 'hidden', isolation: 'isolate', pointerEvents: 'none', zIndex: rank,
+      display: visible ? undefined : 'none',
       mixBlendMode: group.blendMode || 'normal', maskImage, WebkitMaskImage: maskImage,
       maskSize: '100% 100%', WebkitMaskSize: '100% 100%', maskRepeat: 'no-repeat', WebkitMaskRepeat: 'no-repeat' }}>
     {children}
@@ -32,7 +33,7 @@ export default function StudioGroupPreview({ compounds, order, keyframes = [], t
   const tree = studioGroupTree(compounds, order);
   const [frame, setFrame] = useState(time), clock = useRef(getTime);
   clock.current = getTime;
-  const animated = keyframes.some(key => tree.byId.has(key.targetId)), hasClock = typeof getTime === 'function';
+  const animated = keyframes.some(key => tree.byId.has(key.targetId)) || tree.groups.some(group => group.timing), hasClock = typeof getTime === 'function';
   useEffect(() => { setFrame(time); }, [time]);
   useEffect(() => {
     if (!animated || !hasClock) return undefined;
@@ -60,7 +61,8 @@ export default function StudioGroupPreview({ compounds, order, keyframes = [], t
     const group = tree.byId.get(id);
     if (!group) return layers.has(id) ? <React.Suspense key={id} fallback={null}>{layers.get(id)}</React.Suspense> : null;
     const t = evaluateStudioGroupTransform(group, keyframes, frame);
-    return <GroupCanvas key={id} group={group} pose={t} rank={rank.get(tree.leaves(id)[0])}>
+    const visible = !group.timing || (frame >= group.timing.startTime && frame < group.timing.startTime + group.timing.duration);
+    return <GroupCanvas key={id} group={group} pose={t} visible={visible} rank={rank.get(tree.leaves(id)[0])}>
       {group.layerIds.map(render)}
     </GroupCanvas>;
   };

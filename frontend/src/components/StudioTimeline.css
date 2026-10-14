@@ -262,3 +262,17 @@
 .studio-keyframe-curve .curve-handle:focus { outline: none; stroke: #fff; stroke-width: 3; }
 .studio-keyframe-curve .curve-handle[aria-disabled="true"] { opacity: .45; cursor: default; }
 .studio-keyframe-curve svg text { fill: #b9b3c5; font-size: 10px; }
+.viral-studio-overlay .pro-group-row .pro-track-header { display: flex; flex-direction: column; align-items: stretch; gap: 3px; }
+.pro-group-row .pro-track-header > button { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+.pro-group-row .pro-track-header > button strong { display: inline; white-space: nowrap; }
+.pro-group-row .pro-track-header > small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pro-group-row .pro-track-header small { font-size: 9px; color: #9da6c6; }
+.pro-group-clip { position: absolute; top: 6px; bottom: 6px; display: flex; border: 1px solid #a78bfa; border-radius: 5px;
+  background: #362361; overflow: hidden; min-width: 8px; }
+.pro-group-clip.is-selected { box-shadow: 0 0 0 2px #c4b5fd; background: #4e327f; }
+.pro-group-body, .pro-group-trim { background: transparent; border: 0; color: #eee9ff; padding: 3px; }
+.pro-group-body { flex: 1; text-align: left; cursor: grab; overflow: hidden; white-space: nowrap; font-size: 11px; }
+.pro-group-body small { margin-left: 8px; color: #c4b5fd; }
+.pro-group-trim { cursor: ew-resize; flex: 0 0 10px; }
+.pro-group-clip.is-locked { opacity: .65; }
+.pro-group-clip button:focus-visible { outline: 2px solid #e9d5ff; outline-offset: -2px; }

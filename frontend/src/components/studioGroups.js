@@ -10,6 +10,10 @@ export const GROUP_BOUNDS = { x: [-100, 100], y: [-100, 100], scale: [.1, 2], ro
 // Reuse ordinary geometric-mask fields; no second effect or animation store.
 export function validateStudioGroupComposite(group) {
   if (group.blendMode !== undefined && !STUDIO_EXPORT_BLEND_MODES.includes(group.blendMode)) throw Error('Unsupported group blend mode.');
+  if (group.timing !== undefined && (!group.timing || typeof group.timing !== 'object' || Array.isArray(group.timing) ||
+      Object.keys(group.timing).some(field => !['startTime', 'duration'].includes(field)) ||
+      ['startTime', 'duration'].some(field => typeof group.timing[field] !== 'number' || !Number.isFinite(group.timing[field]) || group.timing[field] < 0)))
+    throw Error('Group timing needs a finite non-negative programme start and duration.');
   const mask = group.mask;
   if (mask === undefined) return;
   if (!mask || typeof mask !== 'object' || Array.isArray(mask) ||
@@ -66,8 +70,8 @@ export function studioGroupTree(compounds, order) {
   if (groups.length > 64) throw Error('A project supports at most 64 graphic groups.');
   const byId = new Map(), parent = new Map(), known = new Set(order);
   for (const g of groups) {
-    if (Object.keys(g).some(key => !['id', 'name', 'kind', 'layerIds', 'transform', 'mask', 'blendMode'].includes(key)))
-      throw Error('Graphic groups support membership, transforms, masks and blending only.');
+    if (Object.keys(g).some(key => !['id', 'name', 'kind', 'layerIds', 'transform', 'mask', 'blendMode', 'timing'].includes(key)))
+      throw Error('Graphic groups support membership, transforms, masks, blending and programme timing only.');
     validateStudioGroupComposite(g);
     if (typeof g.id !== 'string' || !g.id || byId.has(g.id) || known.has(g.id) || !Array.isArray(g.layerIds) || !g.layerIds.length ||
         g.layerIds.some(id => typeof id !== 'string' || !id) ||

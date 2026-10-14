@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.13 • 2026-10-14T16:13:51.506436Z
+Development documentation • product 1.2.0 • knowledge 1.0.14 • 2026-10-14T17:19:31.904956Z
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -8,7 +8,9 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 
 ID: `studio.timeline` • **PARTIAL** • DETERMINISTIC
 
-Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.
+Displays source occurrences, ordinary layers, audio cues, graphic-group clip bars and property keys on the shared programme clock.
+
+**Purpose:** Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -20,22 +22,25 @@ Displays clip occurrences, layers, audio cues and property keys on the shared pr
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Select a source, layer or group on its timeline row. Group bars remain available when property rows are collapsed.
+2. Move a group with a pointer gesture or frame nudge; its descendant starts and keys move in one history transaction. Drag or nudge its In/Out edges to limit visibility while keeping child source edits and hidden keys.
+3. Selecting a group focuses its property rows; select an ordinary child clip to edit that child’s keys. Graphics and child-track locks block group timing changes.
+4. Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Group In/Out uses a half-open programme-time visibility range around assembled child graphics. Group move shifts canonical child timing and keys, retaining source phase. The same derived group range clips linked motion cues for preview and export. Property focus and clip selection do not change the edit.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The shared composition plan carries group timing into the CPU compositor. The existing inverse programme clock gates the group’s assembled output at the same In/Out range. Source clips, child animation and audio use their existing compilation paths.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- One real 20-second footage/title/music/SFX project exercises group pointer move, trim, opacity keys, locks, group deletion/undo, source split/history and exact cold reopen. Broader source-occurrence attachment/reordering, group split/duplicate, nested audio/video/owned 3D timing and continuous/full picture/sound remain unqualified. Group trim preserves hidden keys and source phase; it does not retime/stretch child content.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** No source-qualified editable control is recorded.
+**Controls:** [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out)
 
 **Guides:** No task guide in V1.
 
@@ -508,7 +513,7 @@ Applies the supported deterministic visual effects and source-bound subject scen
 
 ID: `studio.compositing` • **PARTIAL** • DETERMINISTIC
 
-Combines ordinary layers and animated nested graphic groups with shared order, authored geometric masks and alpha-aware blend modes. Broad preview/export picture and sound agreement remains incomplete.
+Combines ordinary layers and animated graphic groups with shared order, static masks, alpha-aware blending and editable group clip timing. Broad preview/export picture and sound agreement remains incomplete.
 
 **Purpose:** Compose editable graphic hierarchies while preserving child-local edits, timing and property animation through the shared preview and render path.
 
@@ -533,6 +538,7 @@ Combines ordinary layers and animated nested graphic groups with shared order, a
 9. Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.
 10. Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.
 11. Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.
+12. Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.
 
 **Preview:** Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.
 
@@ -546,13 +552,13 @@ Combines ordinary layers and animated nested graphic groups with shared order, a
 - Editable percentage-polygon paths and rectangle radius use the canonical mask object. This adds no animated path, neural segmentation, mask expansion or video-mask support.
 - The bounded inverted-polygon/shadow/glow/blur image stack passes four sampled colour pairs with transform/opacity keys. The ellipse stack retains a strict raster failure, and historical landscape edge failures remain open.
 - The layer stack has native image/title/two-motion history, cold reopen, exports and scoped visible-image occlusion evidence. Actual owned 3D cross-family export, whole motion/title raster, large/deeper stacks and full raster remain unqualified. Source footage/source VFX and generated captions retain their separate programme stages.
-- One native nested image/two-motion edit uses a feathered inner polygon/Multiply and outer rounded-rectangle/Screen while preserving all 16 group keys and child poses/keys. Controls/history/reset/lock/cold/export/full timeline playback and four geometry/image-interior RGB pairs pass; decoded source-tone audio is unchanged. All eight non-Normal modes pass actual FFmpeg transparent/partial/opaque-backdrop fixtures, not every native mode/media/stack. Group anchor and clip/occurrence ownership remain unsupported. Grouped timeline drag order uses Composite. Actual owned 3D/video/deeper groups, native retiming, broader curves/grouped drag/deletion and continuous/full picture/sound remain unqualified. Worker Bézier expressions approximate 32 samples; the browser solves the curve.
+- One native nested image/two-motion edit uses a feathered inner polygon/Multiply and outer rounded-rectangle/Screen while preserving all 16 group keys and child poses/keys. Controls/history/reset/lock/cold/export/full timeline playback and four geometry/image-interior RGB pairs pass; decoded source-tone audio is unchanged. All eight non-Normal modes pass actual FFmpeg transparent/partial/opaque-backdrop fixtures, not every native mode/media/stack. Graphic-group clip bars own descendant starts/keys and visibility; source-occurrence attachment/remapping, group split/duplicate and editable group anchor remain unsupported. Grouped timeline drag order uses Composite. Actual owned 3D/video/deeper groups, native retiming, broader curves/grouped drag/deletion and continuous/full picture/sound remain unqualified. Worker Bézier expressions approximate 32 samples; the browser solves the curve.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Enable group mask](../control-reference/index.md#studio-composite-group_mask_enabled), [Group mask shape](../control-reference/index.md#studio-composite-group_mask_shape), [Group mask feather](../control-reference/index.md#studio-composite-group_mask_feather), [Invert group mask](../control-reference/index.md#studio-composite-group_mask_inverted)
+**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Enable group mask](../control-reference/index.md#studio-composite-group_mask_enabled), [Group mask shape](../control-reference/index.md#studio-composite-group_mask_shape), [Group mask feather](../control-reference/index.md#studio-composite-group_mask_feather), [Invert group mask](../control-reference/index.md#studio-composite-group_mask_inverted), [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out)
 
 **Guides:** No task guide in V1.
 

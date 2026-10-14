@@ -84,13 +84,19 @@ def validate_graphic_groups(plan, order):
         raise ValueError("Graphic groups need an explicit canonical layer order")
     by_id, parent, rank, key_ids = {}, {}, {identity: index for index, identity in enumerate(order)}, set()
     for group in groups:
-        if (not isinstance(group, dict) or set(group) - {"id", "name", "kind", "layerIds", "transform", "motion_keyframes", "mask", "blendMode"}
+        if (not isinstance(group, dict) or set(group) - {"id", "name", "kind", "layerIds", "transform", "motion_keyframes", "mask", "blendMode", "timing"}
                 or group.get("kind") != "graphic_group"):
             raise ValueError("Graphic groups support membership, transforms, keys, masks and blending only")
         if group.get("blendMode", "normal") not in BLEND_MODES:
             raise ValueError("Unsupported group blend mode")
         if "mask" in group:
             validate_group_mask(group["mask"])
+        if "timing" in group:
+            timing = group["timing"]
+            if (not isinstance(timing, dict) or set(timing) != {"startTime", "duration"}
+                    or any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+                           or value < 0 for value in timing.values())):
+                raise ValueError("Group timing needs a finite non-negative programme start and duration")
         identity, children = group.get("id"), group.get("layerIds")
         if (not isinstance(identity, str) or not identity or identity in by_id or identity in rank
                 or not isinstance(children, list) or not children
@@ -213,7 +219,7 @@ def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height,
         return connect_layer_blocks(blocks, base_label, order)
     if width <= 0 or height <= 0 or duration <= 0:
         raise ValueError("Invalid group canvas geometry")
-    animated = any(group.get("motion_keyframes") for group in by_id.values())
+    animated = any(group.get("motion_keyframes") or group.get("timing") for group in by_id.values())
     fps = float(frame_rate) if animated else 30.0
     if not math.isfinite(fps) or not 1 <= fps <= 120:
         raise ValueError("Invalid group animation frame rate")
@@ -260,11 +266,16 @@ def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height,
             filters.extend(blend_layer_block(block, backdrop, output, group.get("blendMode", "normal"),
                                             width, height, duration, f"{prefix}_blend", frame_rate=fps))
             return output
+        timing = group.get("timing")
+        gate = ""
+        if timing is not None:
+            clock = output_to_programme_expression(speed_plan)
+            gate = f":enable='gte(({clock}),{timing['startTime']:.9f})*lt(({clock}),{timing['startTime'] + timing['duration']:.9f})'"
         if group.get("motion_keyframes"):
             block, rgba, x, y = animated_group_filter(group, local, prefix, width, height, duration, speed_plan, fps)
             filters.extend(block)
             output = f"{prefix}_out"
-            return composite([f"[{backdrop}][{rgba}]overlay=x='{x}':y='{y}':format=auto:eof_action=pass:repeatlast=0[{output}];"], output)
+            return composite([f"[{backdrop}][{rgba}]overlay=x='{x}':y='{y}':format=auto:eof_action=pass:repeatlast=0{gate}[{output}];"], output)
         # Premultiplied interpolation avoids dark RGB fringes on transparency.
         transform = "format=gbrap,premultiply=inplace=1"
         if t["scale"] != 1:
@@ -276,7 +287,7 @@ def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height,
         x, y = (width-rotated_w)/2 + width*t["x"]/100, (height-rotated_h)/2 + height*t["y"]/100
         output = f"{prefix}_out"
         return composite([f"[{backdrop}][{prefix}_rgba]overlay=x={x:.9f}:y={y:.9f}:format=auto:"
-                          f"eof_action=pass:repeatlast=0[{output}];"], output)
+                          f"eof_action=pass:repeatlast=0{gate}[{output}];"], output)
 
     current = base_label
     for identity in roots:

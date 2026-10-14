@@ -378,3 +378,31 @@ def test_enabled_group_mask_rejects_a_missing_prepared_matte():
     with pytest.raises(ValueError,match='prepared local matte'):
         connect_grouped_layer_blocks([], 'base', ['image'],
             {'groups':[{**group('whole',['image']), 'mask':{'enabled':True}}]},32,32,1)
+
+@pytest.mark.parametrize('timing',[None,{'startTime':-1,'duration':2},{'startTime':0,'duration':float('nan')},
+                                  {'startTime':True,'duration':1},{'startTime':0,'duration':1,'sourceOffset':2}])
+def test_group_timing_rejects_malformed_or_unsupported_clock_decisions(timing):
+    with pytest.raises(ValueError,match='timing'):
+        validate_graphic_groups({'groups':[{**group('whole',['image']),'timing':timing}]},['image'])
+
+@pytest.mark.parametrize('mode',['normal','screen'])
+def test_group_in_out_limits_use_half_open_frame_times_without_changing_child_animation(mode):
+    groups=[{**group('whole',['image']),'blendMode':mode,'timing':{'startTime':.25,'duration':.25}}]
+    frames=animated_picture(groups)
+    for index in [0,7,15,27]:
+        np.testing.assert_allclose(frames[index,9,7],BACKGROUND,atol=1)
+    rgb=np.array([255,0,255]);expected=rgb if mode=='normal' else blend(BACKGROUND,rgb,mode)
+    np.testing.assert_allclose(frames[8,9,7],expected,atol=2)
+
+
+def test_nested_group_timing_intersects_parent_and_child_windows_after_two_x_retime():
+    groups=[{**group('inner',['image']),'timing':{'startTime':.2,'duration':1}},
+            {**group('outer',['inner']),'timing':{'startTime':.5,'duration':.5}}]
+    frames=animated_picture(groups,speed_plan=[dict(start_time=0,end_time=2,rate=2)])
+    for index in [0,7,15,27]:np.testing.assert_allclose(frames[index,9,7],BACKGROUND,atol=1)
+    np.testing.assert_allclose(frames[8,9,7],[255,0,255],atol=2)
+
+
+def test_a_fully_ripple_deleted_group_window_renders_no_descendant_pixels():
+    frames=animated_picture([{**group('whole',['image']),'timing':{'startTime':.3,'duration':0}}])
+    for index in [0,9,15,27]:np.testing.assert_allclose(frames[index,9,7],BACKGROUND,atol=1)

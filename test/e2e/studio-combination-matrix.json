@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-14T16:11:42.450086Z",
+  "updatedAt": "2026-10-14T18:13:49.482236Z",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -1396,31 +1396,33 @@
       "latestCompleteBlendCueClockEvidence": "reports/model-capability-runtime-v1-20261009/CUE-CLOCK-AND-COMPLETE-BLENDS-20261011.md",
       "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified.",
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
-      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+      "latestProfessionalGroupWorkflowEvidence": "reports/studio-professional-group-workflow-20261014/README.md",
+      "latestProfessionalGroupWorkflowScope": "Real 20-second footage edit: group clip pointer/numeric move, trim, opacity keys, locks, group delete/undo, source split/history, exact save/cold reopen, one owned CPU export/download/full decode and full editable Studio playback pass. Nine native visibility gates pass; nine declared whole-footage source comparisons fail. Full picture/live sound and export speed remain unqualified."
     }
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "CANONICAL_GROUP_MASKS_AND_ALPHA_AWARE_BLENDING",
+    "lastSessionKind": "SHARED_GROUP_CLIPS_ON_REAL_FOOTAGE_TIMELINE",
     "lastSessionRealCapabilityRuns": 1,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-group-composite-20261014/README.md",
+    "exactBlockersSource": "reports/studio-professional-group-workflow-20261014/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-group-composite-20261014/README.md",
+    "lastSessionEvidence": "reports/studio-professional-group-workflow-20261014/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendCasesPassed": 91,
-      "compositorAndMotionCasesPassed": 131,
+      "frontendCasesPassed": 111,
+      "compositorAndMotionCasesPassed": 140,
       "legacyAudioMotionCasesPassed": 21,
       "subtestsPassed": 261,
-      "strictLocalAppBuild": "PASS",
-      "fullStudioSuite": false
+      "strictAppBuild": "PASS",
+      "fullStudioSuiteQualified": false
     },
-    "nextSlice": "S03 group clip/occurrence ownership and timing through the canonical hierarchy; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open",
+    "nextSlice": "Repair the real-footage pre-final picture and CPU export performance, then shared group split/duplicate/source-occurrence ownership and remaining main-timeline mechanics.",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -2079,7 +2081,7 @@
         "readinessPromotion": false
       }
     ],
-    "lastSessionRealCapabilityScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified.",
+    "lastSessionRealCapabilityScope": "Real 20-second footage edit: group clip pointer/numeric move, trim, opacity keys, locks, group delete/undo, source split/history, exact save/cold reopen, one owned CPU export/download/full decode and full editable Studio playback pass. Nine native visibility gates pass; nine declared whole-footage source comparisons fail. Full picture/live sound and export speed remain unqualified.",
     "history": [
       {
         "at": "2026-10-12T23:29:14.460Z",
@@ -5264,5 +5266,57 @@
       "S04"
     ],
     "nextImplementationSlice": "S03 group clip/occurrence ownership and timing through the canonical hierarchy; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open"
+  },
+  "professionalGroupWorkflow20261014": {
+    "scope": "Real 20-second footage edit: group clip pointer/numeric move, trim, opacity keys, locks, group delete/undo, source split/history, exact save/cold reopen, one owned CPU export/download/full decode and full editable Studio playback pass. Nine native visibility gates pass; nine declared whole-footage source comparisons fail. Full picture/live sound and export speed remain unqualified.",
+    "projectId": "viral-project-358d4e56-32ef-492a-82e3-4be2ec1fe380",
+    "canonicalHash": "e4217013e5887d711f34ace4e9affb5d961cbec8176a2c2a7b2fc6b6e5afb11e",
+    "editableSourceShots": 11,
+    "editableGraphics": 14,
+    "propertyKeys": 164,
+    "groupOpacityKeys": 2,
+    "nativeHistorySaveColdReopen": true,
+    "nativeBackupRestoreAndOwnedExportReceiptRecovery": true,
+    "nativeCpuExports": 1,
+    "resubmittedExports": 0,
+    "nativeHalfOpenGroupGateSamplesPassed": 9,
+    "declaredFullFootageSourceComparisons": {
+      "passed": 0,
+      "total": 9,
+      "evidence": "reports/studio-professional-group-workflow-20261014/proof/paired-workflow.json",
+      "thresholdsChanged": false,
+      "fittedAlignmentUsedForAcceptance": false
+    },
+    "wholePreviewFinalParityQualified": false,
+    "readinessPromoted": false,
+    "nextTaskIds": [
+      "S02",
+      "S03",
+      "S04"
+    ],
+    "nextImplementationSlice": "Repair the real-footage pre-final picture and CPU export performance, then shared group split/duplicate/source-occurrence ownership and remaining main-timeline mechanics.",
+    "evidence": "reports/studio-professional-group-workflow-20261014/README.md",
+    "checkpoint": "reports/studio-professional-group-workflow-20261014/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "nativeProjects": 1,
+    "completeStudioRecordings": 1,
+    "nativeEditingRecordings": 1,
+    "frontendCasesPassed": 111,
+    "compositorAndMotionCasesPassed": 140,
+    "legacyAudioMotionCasesPassed": 21,
+    "subtestsPassed": 261,
+    "strictAppBuild": "PASS",
+    "gpuJobs": 0,
+    "paidGpuRuntimeSeconds": 0,
+    "paidGpuCost": 0,
+    "ownedLocalQaStopped": true,
+    "fullStudioSuiteQualified": false,
+    "remainingBlockers": [
+      "Whole pre-final picture remains unqualified: all nine declared source-feature p95 comparisons fail the unchanged 2px/eight-match bound. False descriptor matches may contribute; diagnostic majority affine fits near identity do not replace or pass acceptance. Dim ending background also differs visibly. No cause established within the bounded investigation.",
+      "The 20-second full-footage CPU job outlasted the 12-minute QA watcher and first 15-minute recovery observer. Completion and owned recovery/download pass; export performance remains a major open gap. startedAt is absent from the recovered receipt, so no exact worker wall runtime is claimed.",
+      "Live whole soundtrack and human listening are unqualified. Canonical audio decisions are unchanged by the group edit; a retained earlier film with a different canonical hash has non-identical PCM (correlation 0.9988210131214916, relative RMS error 0.04855700134475107). This is not a same-graph audio regression proof.",
+      "Group split/duplicate, source-occurrence attachment/remapping, group anchor, mask/blend animation, actual video/owned3D group qualification and broader S04 mechanics remain open.",
+      "Screen capture averages 19.473762455350567 fps for the 24fps movie. Full ended playback passes; smooth playback is not qualified. Prior S02 ellipse raster failure stays open."
+    ]
   }
 }

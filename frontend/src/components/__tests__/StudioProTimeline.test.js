@@ -494,3 +494,24 @@ test("motion clip supports dragging to move and trimming edges", () => {
   clip.dispatchEvent(new MouseEvent("pointerup", { bubbles: true }));
   expect(onMotionTrim).toHaveBeenCalledWith("motion-1", "end", 8);
 });
+
+test('group clip bars remain visible without opening property rows and preserve selection/lock actions',()=>{
+ const select=jest.fn(),edit=jest.fn();
+ const props={duration:8,trackStates:{},groupTimingRows:[{id:'g',name:'Opening',startTime:.5,duration:2,childCount:3}],onSelectGroup:select,onEditGroupTiming:edit};
+ const {rerender}=render(<StudioProTimeline {...props}/>);
+ const clip=screen.getByTestId('group-timeline-clip-g');expect(clip).toHaveAttribute('data-start','0.5');
+ fireEvent.click(screen.getByRole('button',{name:'Select Opening group clip'}));expect(select).toHaveBeenCalledWith('g');
+ fireEvent.keyDown(screen.getByRole('button',{name:'Trim Opening out'}),{key:'ArrowLeft'});expect(edit.mock.lastCall[1]).toBe('trim-end');
+ rerender(<StudioProTimeline {...props} groupTimingRows={[{...props.groupTimingRows[0],locked:true}]} selectedGroupId="g"/>);
+ expect(screen.getByRole('button',{name:'Trim Opening out'})).toBeDisabled();expect(screen.getByRole('button',{name:'Select Opening group clip'})).toHaveAttribute('aria-pressed','true');
+});
+
+test('selecting a group focuses its property rows while leaving ordinary clips accessible',()=>{
+ const props={duration:8,trackStates:{},overlays:[{id:'title',type:'text',name:'Child title'}],
+ graphicGroups:[{id:'g',name:'Opening',kind:'graphic_group',transform:{x:0,y:0,scale:1,rotation:0,opacity:1}}]};
+ const {rerender}=render(<StudioProTimeline {...props} selectedGroupId="g"/>);
+ fireEvent.click(screen.getByRole('button',{name:'Show motion keyframes'}));
+ expect(screen.getByRole('button',{name:'Expand Opening keyframes'})).toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:'Expand Child title keyframes'})).toBeNull();expect(screen.getByTestId('pro-graphics-clip-1')).toBeInTheDocument();
+ rerender(<StudioProTimeline {...props}/>);expect(screen.getByRole('button',{name:'Expand Child title keyframes'})).toBeInTheDocument();
+});

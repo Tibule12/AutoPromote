@@ -135,6 +135,7 @@ import {
   findCreatorBeat,
 } from "./studioCreatorRecipes";
 import { rippleTimedItems, rippleTimelineKeys, applyStudioClipMetadata } from "./studioTimelineEdits";
+import { studioGroupTimingRows, editStudioGroupTiming, rippleStudioGroupTiming, clipStudioGroupMotionCues } from "./studioGroupTiming";
 import {
   reconcileStudioDocument,
   buildStudioOutputTimeMap,
@@ -2814,6 +2815,7 @@ const ViralClipStudio = ({
   const [voiceovers, setVoiceovers] = useState([]);
   const [adjustmentLayers, setAdjustmentLayers] = useState([]);
   const [compoundClips, setCompoundClips] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [audioAutomationSource, setAudioAutomationSource] = useState("originalAudio");
   const [audioRestoration, setAudioRestoration] = useState({
     enabled: true,
@@ -2959,7 +2961,7 @@ const ViralClipStudio = ({
   });
   const exactAudioRemixPreviewRef = useRef(null);
 
-  const linkedMotionCues = React.useMemo(() => motionCues(motionScenes), [motionScenes]);
+  const linkedMotionCues = React.useMemo(() => clipStudioGroupMotionCues(motionCues(motionScenes), compoundClips), [motionScenes, compoundClips]);
   const allSoundEffects = React.useMemo(
     () => [...soundEffects, ...linkedMotionCues],
     [soundEffects, linkedMotionCues]
@@ -5687,6 +5689,36 @@ const ViralClipStudio = ({
   const effectiveCompoundClips = removeStudioGroupMembers(compoundClips,
     (compositionOrder || []).filter(id => !compositionIds.includes(id)));
   const compositionGroups = studioGroupTree(effectiveCompoundClips, compositionIds);
+  const editGroupClipTiming = (id, action, requested) => {
+    const frame = (Number(previewSpeed) || 1) / (Number(exportSettings.fps) || 30);
+    try {
+      const next = editStudioGroupTiming({ compounds: effectiveCompoundClips, order: compositionIds,
+        overlays, motionScenes, threeDScenes, motionKeyframes, trackStates, frameStep: frame },
+        id, action, Math.round(requested / frame) * frame, liveTimelineDuration);
+      setCompoundClips(next.compounds); setOverlays(next.overlays); setMotionScenes(next.motionScenes);
+      setThreeDScenes(next.threeDScenes); setMotionKeyframes(next.motionKeyframes);
+      setStudioActionMessage(action === 'move' ? 'Group moved with its child clips and keys.' : 'Group visibility trimmed; child edits and keys are preserved.');
+    } catch (error) { setStudioActionMessage(error.message); }
+  };
+  const fitGroupClipTiming = id => {
+    if (groupClipRows.find(group => group.id === id)?.locked) { setStudioActionMessage('Unlock the group and its child tracks first.'); return; }
+    setCompoundClips(current => current.map(group => {
+      if (group.id !== id) return group;
+      const { timing, ...rest } = group; return rest;
+    }));
+  };
+  const deleteGroupClip = id => {
+    if (groupClipRows.find(group => group.id === id)?.locked) { setStudioActionMessage('Unlock the group and its child tracks first.'); return; }
+    const leaves = new Set(compositionGroups.leaves(id));
+    const next = removeStudioGroupMembers(effectiveCompoundClips, [...leaves]);
+    const removed = new Set([...leaves, ...effectiveCompoundClips.filter(group => !next.some(item => item.id === group.id)).map(group => group.id)]);
+    setCompoundClips(next); setOverlays(current => current.filter(item => !leaves.has(item.id)));
+    setMotionScenes(current => current.filter(item => !leaves.has(item.id)));
+    setThreeDScenes(current => current.filter(item => !leaves.has(item.id)));
+    setMotionKeyframes(current => current.filter(key => !removed.has(key.targetId)));
+    setCompositionOrder(compositionIds.filter(identity => !leaves.has(identity)));
+    setSelectedGroupId(null); setStudioActionMessage('Group and its child layers deleted. Undo restores the complete group.');
+  };
   const compositionRoots = compositionGroups.roots.map(id => compositionGroups.byId.has(id)
     ? { id, kind: "group", label: compositionGroups.byId.get(id).name }
     : compositionEntries.find(entry => entry.id === id));
@@ -7652,6 +7684,9 @@ const ViralClipStudio = ({
       }) }
   );
   const liveTimelineDuration = outputTimelineDuration;
+  const groupClipRows = studioGroupTimingRows({ compounds: effectiveCompoundClips, order: compositionIds,
+    overlays, motionScenes, threeDScenes, duration: liveTimelineDuration, trackStates });
+  const selectedGroupClip = groupClipRows.find(group => group.id === selectedGroupId);
   const liveTimelineCutMarkers = timeline.slice(0, -1).flatMap((clip, index) => {
     const nextClip = timeline[index + 1];
     const currentWindow = getTimelineClipWindow(clip);
@@ -8919,6 +8954,7 @@ const ViralClipStudio = ({
     setVoiceovers(retime);
     setAdjustmentLayers(retime);
     setMotionScenes(current => cutMotion(current, from, to));
+    setCompoundClips(current => rippleStudioGroupTiming(current, from, to));
     setThreeDScenes(current => cutStudio3DScenes(current, from, to));
     setMotionKeyframes(current => rippleTimelineKeys(current, from, to));
     setSpeedKeyframes(current => rippleTimelineKeys(current, from, to));
@@ -12439,7 +12475,7 @@ const ViralClipStudio = ({
 
       const uploadedSoundMedia = new Map();
       const exportedSoundEffects = await Promise.all(
-        [...exportEditState.soundEffects, ...motionCues(exportEditState.motionScenes)]
+        [...exportEditState.soundEffects, ...clipStudioGroupMotionCues(motionCues(exportEditState.motionScenes), exportEditState.compoundClips)]
           .filter(effect => effect.enabled !== false && isStudioAudioTrackAudible(trackStates, "sfx"))
           .map(async effect => {
             let effectUrl = effect.url || null;
@@ -24677,6 +24713,7 @@ const ViralClipStudio = ({
                     setMotionKeyframes(current => current.filter(key => key.targetId !== id));
                   }}
                   groupAnimation={{ keyframes: motionKeyframes, playhead: previewTimelineTime,
+                    timingRows: groupClipRows, onEditTiming: editGroupClipTiming, onFitTiming: fitGroupClipTiming, onDeleteGroup: deleteGroupClip,
                     keyTolerance: motionKeyframeTolerance(exportSettings.fps, previewSpeed),
                     locked: Boolean(trackStates.graphics?.locked), focusKeyId: focusedMotionKeyframeId,
                     onProperty: editMotionPropertyAtPlayhead,
@@ -24694,6 +24731,7 @@ const ViralClipStudio = ({
                   onUpdateAdjustmentLayer={updateAdjustmentLayer}
                   onDeleteAdjustmentLayer={id => setAdjustmentLayers(current => current.filter(layer => layer.id !== id))}
                   onSelectOverlay={targetId => {
+                    setSelectedGroupId(null);
                     setCompositeTargetId(targetId);
                     if (targetId !== "main-video") setActiveOverlayId(targetId);
                   }}
@@ -29407,6 +29445,7 @@ const ViralClipStudio = ({
               soundEffects={[...soundEffects, ...linkedMotionCues]}
               motionScenes={[...motionScenes, ...threeDScenes.map(scene => ({ ...scene, is3D: true, color: scene.primaryColor, name: `3D · ${scene.text}` }))]}
               onSelectMotion={id => {
+                setSelectedGroupId(null);
                 if (threeDScenes.some(scene => scene.id === id)) {
                   setSelectedThreeDId(id);
                   setMotionWorkspace("3d");
@@ -29450,11 +29489,19 @@ const ViralClipStudio = ({
               }
               motionKeyframes={motionKeyframes}
               graphicGroups={compositionGroups.groups}
+              groupTimingRows={groupClipRows}
+              selectedGroupId={selectedGroupId}
+              onSelectGroup={id => {
+                setSelectedGroupId(id); setActiveOverlayId(null); setMotionTargetId(id);
+                selectCreativeTool('composite'); setComparisonMode('after');
+              }}
+              onEditGroupTiming={editGroupClipTiming}
               mainTransform={mainTransform}
               onUpdateMotionProperty={(targetId, property, value) => editMotionPropertyAtPlayhead(targetId, property, value)}
               onToggleMotionPropertyKeyframe={(targetId, property) => editMotionPropertyAtPlayhead(targetId, property, undefined, true)}
               frameRate={Number(exportSettings.fps) || 30}
               onSelectMotionKeyframe={(keyId, targetId) => {
+                setSelectedGroupId(compositionGroups.byId.has(targetId) ? targetId : null);
                 setFocusedMotionKeyframeId(keyId);
                 setMotionTargetId(targetId);
                 selectCreativeTool(compositionGroups.byId.has(targetId) ? "composite" : "motion");
@@ -29484,17 +29531,19 @@ const ViralClipStudio = ({
               onOverlaySlip={handleOverlayTimelineSlip}
               onAdjustmentMove={handleAdjustmentTimelineMove}
               onAdjustmentTrim={handleAdjustmentTimelineTrim}
-              onSelectOverlay={setActiveOverlayId}
+              onSelectOverlay={id => { setSelectedGroupId(null); setActiveOverlayId(id); }}
               onMotionMove={handleMotionTimelineMove}
               onMotionTrim={handleMotionTimelineTrim}
               onAutoGenerateMotionBeats={handleAutoGenerateMotionBeats}
               onSelectTool={toolId => toolId && selectCreativeTool(toolId)}
               onSplit={splitCurrentClipAtPlayhead}
-              splitLocked={Boolean(trackStates[activeOverlay ? (activeOverlay.bRollMode ? "broll" : "graphics") : "video"]?.locked)}
-              onTrimStart={trimClipStartToPlayhead}
-              onTrimEnd={trimClipEndToPlayhead}
-              onDelete={deleteActiveTimelineClip}
-              canDelete={timeline.length > 1}
+              splitLocked={Boolean(selectedGroupClip || trackStates[activeOverlay ? (activeOverlay.bRollMode ? "broll" : "graphics") : "video"]?.locked)}
+              onTrimStart={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-start', previewTimelineTime) : trimClipStartToPlayhead}
+              onTrimEnd={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-end', previewTimelineTime) : trimClipEndToPlayhead}
+              trimLocked={selectedGroupClip ? selectedGroupClip.locked : Boolean(trackStates.video?.locked)}
+              deleteLocked={selectedGroupClip ? selectedGroupClip.locked : Boolean(trackStates.video?.locked)}
+              onDelete={selectedGroupClip ? () => deleteGroupClip(selectedGroupId) : deleteActiveTimelineClip}
+              canDelete={selectedGroupClip ? !selectedGroupClip.locked : timeline.length > 1}
               onToggleCaptions={() => {
                 const next = !autoCaptions;
                 setAutoCaptions(next);

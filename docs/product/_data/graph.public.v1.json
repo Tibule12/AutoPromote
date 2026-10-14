@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.13",
+  "knowledge_version": "1.0.14",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1085,6 +1085,21 @@
     },
     {
       "id": "studio.composite.group_mask_inverted",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.group_clip.move",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.group_clip.in",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.group_clip.out",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -2859,6 +2874,36 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.group_mask_inverted"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.group_clip.move"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.group_clip.move"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.group_clip.in"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.group_clip.in"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.group_clip.out"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.group_clip.out"
     }
   ]
 }

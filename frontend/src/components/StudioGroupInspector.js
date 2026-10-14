@@ -3,6 +3,7 @@ import { GROUP_BOUNDS, GROUP_TRANSFORM, evaluateStudioGroupTransform } from './s
 import { motionKeyAtPlayhead } from './studioMotionProperties';
 import StudioKeyframeCurveEditor from './StudioKeyframeCurveEditor';
 import StudioMaskPathEditor from './StudioMaskPathEditor';
+import StudioGroupTimingInspector from './StudioGroupTimingInspector';
 import { STUDIO_EXPORT_BLEND_MODES } from './studioBlendModes';
 import './StudioLayerStack.css';
 
@@ -29,6 +30,7 @@ function GroupNumber({ group, field, onChange, onProperty, locked }) {
 
 export default function StudioGroupInspector({ tree, entries, onCreate, onTransform, onReset, onRemove, onMove,
   onComposite,
+  timingRows = [], onEditTiming, onFitTiming, onDeleteGroup,
   keyframes = [], playhead = 0, keyTolerance = .04, locked = false, onProperty, onToggleKey, onSeek, onUpdateKey, focusKeyId }) {
   const [selected, setSelected] = useState([]), byId = new Map(entries.map(entry => [entry.id, entry]));
   const label = id => tree.byId.get(id)?.name || byId.get(id)?.label || id;
@@ -47,6 +49,8 @@ export default function StudioGroupInspector({ tree, entries, onCreate, onTransf
       return <fieldset key={group.id} data-group-id={group.id}>
       <legend>{group.name}</legend>
       <small>{tree.parent.has(group.id) ? `Inside ${label(tree.parent.get(group.id))}` : 'Root group'}</small>
+      <StudioGroupTimingInspector row={timingRows.find(row => row.id === group.id)} onEdit={onEditTiming}
+        onFit={onFitTiming} onDelete={onDeleteGroup} />
       {onComposite && <div>
         <label>Blend mode <select aria-label={`${group.name} blend mode`} value={group.blendMode || 'normal'} disabled={locked}
           onChange={event => onComposite(group.id, { blendMode: event.target.value })}>

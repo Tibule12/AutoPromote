@@ -350,9 +350,12 @@
         "python_media_worker/studio_motion.py",
         "frontend/src/components/studioMaskGeometry.js",
         "frontend/src/components/StudioMaskPathEditor.js",
-        "reports/studio-professional-group-composite-20261014/README.md"
+        "frontend/src/components/studioGroupTiming.js",
+        "frontend/src/components/StudioGroupTimelineClip.js",
+        "frontend/src/components/StudioGroupTimingInspector.js",
+        "reports/studio-professional-group-workflow-20261014/README.md"
       ],
-      "reason": "Review shared static group geometric masks and alpha-aware group/child blending. One native nested Multiply/Screen edit preserves all 16 group keys through validation/history/reset/lock/cold/export/full timeline playback; four bounded geometry/interior-color pairs and unchanged decoded audio pass. 243 cases plus 261 subtests and strict build pass. Keep PARTIAL: group anchor/clip ownership, mask/blend animation, wider modes/media/retiming/full picture/live sound remain open."
+      "reason": "Add canonical group clip timing and reversible descendant ownership transactions to the normal timeline. Real-footage group move/trim/key/lock/delete/source-split history and exact cold reopen are exercised; unchanged readiness and broader source-occurrence/group/media/parity limits remain explicit."
     },
     {
       "feature_id": "publishing.connections",
@@ -462,6 +465,27 @@
         "frontend/src/components/StudioLaunchTemplatePanel.js"
       ],
       "reason": "Consolidate isolated property controls and exact newly added draft template versions. Retain readiness and creative-review limits; no new qualification or public approval."
+    },
+    {
+      "feature_id": "studio.timeline",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/studioGroupTiming.js",
+        "frontend/src/components/StudioGroupTimelineClip.js",
+        "frontend/src/components/StudioGroupTimingInspector.js",
+        "frontend/src/components/StudioProTimeline.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "python_media_worker/studio_composition.py",
+        "reports/studio-professional-group-workflow-20261014/README.md"
+      ],
+      "reason": "Document real editable group clip bars, delivery-frame move/trim, descendant starts/keys, locks, focused properties and reversible deletion. Restore/edit/history/cold reopen use a retained real 20-second footage/music/SFX project; group split/duplicate/source-occurrence remapping and broad conformance remain open."
     }
   ]
 }
