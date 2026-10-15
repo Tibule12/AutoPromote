@@ -3032,6 +3032,43 @@ describe("ViralClipStudio timeline sequencing", () => {
     })]);
   });
 
+  test("composition timeline moves keyed titles as one undo step and respects the actual owning track", async () => {
+    const source = { id: 'source', start: 0, end: 8, duration: 8 };
+    const snapshot = { orderedClips: [source], selectedClipId: 'source',
+      timeline: [{ ...source, id: 'main', sourceClipId: 'source', url: 'https://example.com/source.mp4', startRequest: 0, endRequest: 8 }],
+      reframeAspect: '16:9', smartCrop: false, autoCaptions: false, addHook: false,
+      trackStates: { broll: { locked: true }, graphics: { locked: false } },
+      overlays: [{ id: 'word', name: 'BREAK', type: 'text', text: 'BREAK', startTime: 1, duration: 3, x: 50, y: 50 }],
+      motionKeyframes: [{ id: 'word-x', targetId: 'word', property: 'x', time: 1.5, value: 50 }] };
+    const saveSpy = jest.spyOn(studioProjectStore, 'saveViralStudioProject').mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[source]}
+        initialSavedProject={{ id: 'keyed-timeline', name: 'Keyed timeline', snapshot }} onSave={jest.fn()} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Keyed timeline');
+      fireEvent.click(screen.getByTestId('studio-save-project')); await waitFor(() => expect(saveSpy).toHaveBeenCalled());
+      const before = saveSpy.mock.calls.at(-1)[0].snapshot;
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Select BREAK layer clip' }), { key: 'ArrowRight', shiftKey: true });
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays[0].startTime).toBeGreaterThan(1));
+      const moved = saveSpy.mock.calls.at(-1)[0].snapshot;
+      expect(moved.motionKeyframes[0].time - 1.5).toBeCloseTo(moved.overlays[0].startTime - 1, 5);
+      fireEvent.click(screen.getByTestId('studio-undo-button')); fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays).toEqual(before.overlays));
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.motionKeyframes).toEqual(before.motionKeyframes);
+      fireEvent.click(screen.getByRole('button', { name: 'Expand BREAK keyframes' }));
+      const x = screen.getByLabelText('BREAK x value'); fireEvent.focus(x); fireEvent.change(x, { target: { value: '70' } }); fireEvent.blur(x);
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.motionKeyframes.some(key => key.targetId === 'word' && key.property === 'x' && key.value === 70)).toBe(true));
+      fireEvent.click(screen.getByTestId('studio-undo-button'));
+      fireEvent.click(screen.getByRole('button', { name: 'Sequence tracks' }));
+      fireEvent.click(within(screen.getByTestId('pro-track-row-graphics')).getByRole('button', { name: 'Lock track', hidden: true }));
+      fireEvent.click(screen.getByRole('button', { name: 'Composition layers' }));
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Select BREAK layer clip' }), { key: 'ArrowRight' });
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays).toEqual(before.overlays);
+    } finally { saveSpy.mockRestore(); }
+  });
+
   test("imported choreography has atomic history and reaches the ordinary export graph", async () => {
     const snapshot = { orderedClips: [{ id: 'source', start: 0, end: 8, duration: 8 }], selectedClipId: 'source',
       timeline: [{ id: 'main', sourceClipId: 'source', url: 'https://example.com/source.mp4', startRequest: 0, endRequest: 8, duration: 8 }],

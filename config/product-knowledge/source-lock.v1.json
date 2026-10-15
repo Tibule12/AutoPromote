@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final reviewed graphics interchange and same-graph native motion delivery; public help states general capability limits, while individual creative rejections remain in internal evidence. Full Studio movie, editable backup, exact key/audio evidence and owned QA shutdown are retained.",
-  "reviewed_at": "2026-10-15T19:17:36.881Z",
-  "catalog_sha256": "37227ae7952bb4c417eaf987b7a76182bf459b24bac9c1cd4885a3b09091ef87",
+  "reason": "Final native timeline correspondence: preserve historical matrix formatting, verify normal controls/history/cold reopen and strict original project/export recovery with complete unchanged-movie playback. Current creative feedback and broad picture/sound limits remain open.",
+  "reviewed_at": "2026-10-15T19:55:25.213Z",
+  "catalog_sha256": "08ec37671722606287dc1cf59ae53531cfd5925028f3d3d5894cd248fbb5147f",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "9d27aba811e58447d193f316e8da5b0d07da426d4de1bf5807b58eb02823cdc9"
+      "sha256": "3b120877e05248c87fc9fff23ac37cac8df2cdec2458dab56791eb2e5ea42b1d"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -99,7 +99,7 @@
     },
     {
       "path": "frontend/src/components/StudioGroupTimelineClip.js",
-      "sha256": "6cf4801e6d7377e55b43e6ca7adce4ba3663671eb9a60648a1e6dce44c8f0e5c"
+      "sha256": "75fa2bc2ed6ce7f942283705ed2ac330c312ee5fa4f55d1865065963789b4862"
     },
     {
       "path": "frontend/src/components/StudioGroupTimingInspector.js",
@@ -135,7 +135,7 @@
     },
     {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "a8842730a0a06a7f5a85ff57b042eed930ad33bc027a18e66d23a5ba250a25b8"
+      "sha256": "a0fe4f8e6fc3d18e70577452c835aaaacfe32aaad19fc9af4ab604f726fa0329"
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
@@ -143,7 +143,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "e45d8c6b6b272a078f3de885acea5c1afb359dfb8e04f3df0432691f7c5a41b8"
+      "sha256": "40ad338e6883a1320bdc763bdc6d867f27ebae335c7c915534e1bc52c99d997a"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -236,6 +236,10 @@
     {
       "path": "frontend/src/components/studioSubjectVfxContract.js",
       "sha256": "b9a5740c3ce4b54c7f5509e218d8babd7e05bc5f8b12a159359e07a443bf7a30"
+    },
+    {
+      "path": "frontend/src/components/studioTimelineLayers.js",
+      "sha256": "7e54ffd8595722290792b69452c11a8b7f09ee6cebdf3a6a18525f7b735c1b61"
     },
     {
       "path": "frontend/src/components/studioVoiceover.js",
@@ -407,11 +411,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "1cf156ff76adaff5e843092d8fbd07d897bc921e94ba0857738ce2f316f9516e"
+      "sha256": "7c356de8eb495b3248576b2055ee08a9e896ce2a6c0fd808ea8dfdb1fb9635d2"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "41b9f5b1bab42bc2739bd01974c640c73887b88b713b9c97667e2220ffbdc32a"
+      "sha256": "bf6397404124a4f47788997c816788d6c8e4dc26d4cf52c81b839c30075a7c5c"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

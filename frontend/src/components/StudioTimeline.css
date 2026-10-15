@@ -314,3 +314,31 @@
 @media (max-width: 760px) {
   .pro-timeline-graph .studio-keyframe-curve { display: block; }
 }
+
+.viral-studio-overlay .pro-timeline-view { display: flex; gap: 3px; }
+.viral-studio-overlay .pro-timeline-view button {
+  border: 1px solid #454252; border-radius: 4px; background: #171b25; color: #a8aab5;
+  min-height: 32px; padding: 4px 9px;
+}
+.viral-studio-overlay .pro-timeline-view button[aria-pressed="true"] {
+  background: #343047; border-color: #665879; color: #f0e8ff;
+}
+.viral-studio-overlay .pro-layer-legend { padding: 4px 10px; font-size: 10px; color: #9297a5; }
+.viral-studio-overlay .studio-pro-timeline .pro-layer-row { min-height: 32px; height: 32px; }
+.viral-studio-overlay .studio-pro-timeline .pro-layer-row .pro-track-header {
+  grid-template-columns: 18px minmax(0, 1fr) 22px; gap: 4px; padding-top: 2px; padding-bottom: 2px;
+}
+.viral-studio-overlay .studio-pro-timeline .pro-layer-row .pro-layer-kind { grid-row: auto; height: 20px; font-size: 10px; }
+.viral-studio-overlay .pro-layer-row .pro-track-header button {
+  min-width: 0; height: 24px; border: 0; padding: 1px 3px; background: transparent; color: #d2d3db;
+}
+.viral-studio-overlay .pro-layer-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font-size: 11px; }
+.viral-studio-overlay .pro-layer-expand { font-size: 12px; }
+.viral-studio-overlay .studio-pro-timeline .pro-layer-row .pro-group-clip { top: 4px; bottom: 4px; min-width: 0; }
+.viral-studio-overlay .pro-layer-row .pro-group-body { font-size: 11px; }
+.viral-studio-overlay .pro-layer-row:not(.is-in-range) .pro-group-clip { opacity: .45; }
+.viral-studio-overlay .pro-layer-row.is-in-range .pro-group-clip { border-color: #ba9edf; }
+.viral-studio-overlay .pro-layer-row.is-group .pro-track-header { background: #292636; }
+
+.viral-studio-overlay .studio-pro-timeline.is-layer-view .pro-track-row { grid-template-columns: 260px minmax(700px, 1fr); }
+.viral-studio-overlay .studio-pro-timeline.is-layer-view .pro-time-ruler { margin-left: 260px; }

@@ -9,6 +9,8 @@ import { STUDIO_AUDIO_TRACKS } from "./studioAudioTracks";
 import { buildMotionAutomationStyle } from "./studioAutomation";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
 import { GROUP_KIND, evaluateStudioGroupTransform } from "./studioGroups";
+import { studioLayerEntries } from './studioLayerOrder';
+import { studioTimelineLayers } from './studioTimelineLayers';
 import "./StudioTimeline.css";
 
 const EDIT_TOOLS = [
@@ -812,7 +814,7 @@ function MotionPropertyValue({ label, property, value, locked, onCommit }) {
     min={property.min} max={property.max} step={property.step} disabled={locked || !onCommit}
     title="Unanimated: changes the layer value. Animated: writes a key at the playhead."
     value={draft ?? Number(Number(value).toFixed(3))}
-    onFocus={() => setDraft(String(value))} onChange={event => setDraft(event.target.value)}
+    onChange={event => setDraft(event.target.value)}
     onBlur={commit} onKeyDown={event => {
       if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); }
       if (event.key === "Escape") { event.preventDefault(); setDraft(null); }
@@ -857,6 +859,9 @@ export default function StudioProTimeline({
   motionKeyframes,
   graphicGroups = [],
   groupTimingRows = [],
+  compositionEntries,
+  selectedLayerId,
+  defaultView = 'tracks',
   selectedGroupId,
   onSelectGroup,
   onEditGroupTiming,
@@ -919,6 +924,10 @@ export default function StudioProTimeline({
   _onAlignBRollToBeat,
 }) {
   const scrollRef = React.useRef(null);
+  const [timelineView, setTimelineView] = React.useState(defaultView);
+  const [atPlayheadOnly, setAtPlayheadOnly] = React.useState(false);
+  const [collapsedGroups, setCollapsedGroups] = React.useState(new Set());
+  const layerView = timelineView === 'layers';
   const [showEmptyTracks, setShowEmptyTracks] = React.useState(false);
   const [showMotionKeys, setShowMotionKeys] = React.useState(false);
   const [showGraph, setShowGraph] = React.useState(false);
@@ -945,7 +954,7 @@ export default function StudioProTimeline({
     moments: "video",
   }[activeTool];
   React.useEffect(() => {
-    if (selectedGroupId) return;
+    if (layerView || selectedGroupId) return;
     if (showMotionKeys && selectedMotionKey) return;
     const scroll = scrollRef.current;
     const row = scroll?.querySelector(`[data-testid="pro-track-row-${focusedTrack}"]`);
@@ -956,7 +965,7 @@ export default function StudioProTimeline({
     const top =
       row.getBoundingClientRect().top - scroll.getBoundingClientRect().top + scroll.scrollTop;
     scroll.scrollTop = Math.max(0, top - 29);
-  }, [focusedTrack, showMotionKeys, selectedMotionKey, selectedGroupId]);
+  }, [focusedTrack, showMotionKeys, selectedMotionKey, selectedGroupId, layerView]);
   const safeDuration = Math.max(0.1, Number(duration || 0.1));
   // Authored edits retain their source coordinates. Only the displayed clock
   // changes with global playback speed, matching the programme and export.
@@ -1160,8 +1169,86 @@ export default function StudioProTimeline({
     return Array.from(new Set(points.filter(p => Number.isFinite(p))));
   }, [safeDuration, playhead, sourceSequence, broll, musicBeatMarkers, beatSnapping, snapping]);
 
+  const renderMotionTarget = (target, withHeader = true) => {
+            const label = target.id === 'main-video' ? 'Source video' : target.layer?.name || target.layer?.text || 'Visual layer';
+            const track = target.id === 'main-video' ? 'video' : isBRollLayer(target.layer || {}) ? 'broll' : 'graphics';
+            const locked = !!trackStates?.[track]?.locked;
+            const expanded = expandedMotionTargets.has(target.id);
+            const properties = studioMotionPropertiesForTarget(target.layer);
+            const values = target.layer.kind === GROUP_KIND ? evaluateStudioGroupTransform(target.layer, target.keys, playhead)
+              : buildMotionAutomationStyle(target.keys, playhead, target.layer);
+            const tolerance = motionKeyframeTolerance(frameRate, displayRate);
+            return <React.Fragment key={target.id}>
+              {withHeader && <div className="pro-track-row pro-motion-target">
+                <div className="pro-track-header"><button type="button" aria-expanded={expanded}
+                  aria-label={`${expanded ? 'Collapse' : 'Expand'} ${label} keyframes`}
+                  onClick={() => setExpandedMotionTargets(current => {
+                    const next = new Set(current); next.has(target.id) ? next.delete(target.id) : next.add(target.id); return next;
+                  })}>{expanded ? '▾' : '▸'} <strong>{label}</strong></button></div>
+                <div className="pro-track-lane"><small>{target.keys.length ? `${target.keys.length} keys` : 'No animation keys'} · expand to edit properties</small></div>
+              </div>}
+              {expanded && properties.map(descriptor => {
+                const property = descriptor.id;
+                const keys = target.keys.filter(key => key.property === property).sort((a, b) => a.time - b.time);
+                const atPlayhead = motionKeyAtPlayhead(keys, target.id, property, playhead, tolerance);
+                const previous = keys.filter(key => key.time < Number(playhead) - tolerance).at(-1);
+                const next = keys.find(key => key.time > Number(playhead) + tolerance);
+                return <div key={property} className={`pro-track-row pro-motion-property ${locked ? 'is-locked' : ''}`}>
+                <div className="pro-track-header">
+                  <strong title={locked ? 'Track locked' : descriptor.label}>{descriptor.label}</strong>
+                  <MotionPropertyValue label={label} property={descriptor} value={values[property]} locked={locked}
+                    onCommit={onUpdateMotionProperty ? value => onUpdateMotionProperty(target.id, property, value) : undefined} />
+                  <div className="pro-motion-property-actions">
+                    <button type="button" aria-label={`Previous ${label} ${property} keyframe`} disabled={!previous}
+                      onClick={event => onSeek?.(event, previous.time)}>‹</button>
+                    <button type="button" aria-label={`${atPlayhead ? 'Remove' : 'Add'} ${label} ${property} keyframe at playhead`}
+                      aria-pressed={!!atPlayhead} disabled={locked || !onToggleMotionPropertyKeyframe}
+                      onClick={() => onToggleMotionPropertyKeyframe?.(target.id, property)}>{atPlayhead ? '◆' : '◇'}</button>
+                    <button type="button" aria-label={`Next ${label} ${property} keyframe`} disabled={!next}
+                      onClick={event => onSeek?.(event, next.time)}>›</button>
+                  </div>
+                </div>
+                <div className="pro-track-lane" role="group" aria-label={`${label} ${property} keyframes`}>
+                  <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
+                  {keys.map(key => <MotionKeyframe key={key.id}
+                    item={key} duration={safeDuration} displayRate={displayRate} frameRate={Math.max(1, Number(frameRate) || 30)}
+                    snapping={snapping} snapTargets={snapTargets} locked={locked || (chosenLocked && selectedMotionKeys.has(key.id))} selected={selectedMotionKeys.has(key.id)}
+                    previewDelta={selectedMotionKeys.has(key.id) ? keyDragDelta : 0}
+                    onPreviewMove={selectedMotionKeys.has(key.id) ? setKeyDragDelta : undefined}
+                    onBoundTime={boundSelectedTime}
+                    onUpdate={(id, changes) => selectedMotionKeys.has(id) && chosenKeys.length > 1 && onEditMotionKeyframes
+                      ? actOnKeys('move', changes.time - key.time) : onUpdateMotionKeyframe?.(id, changes)}
+                    onRemove={id => selectedMotionKeys.has(id) && chosenKeys.length > 1 && onEditMotionKeyframes
+                      ? actOnKeys('delete') : onRemoveMotionKeyframe?.(id)} onSelect={(item, event) => {
+                      setSelectedMotionKey(item.id);
+                      const extend = event.shiftKey || event.ctrlKey || event.metaKey;
+                      setSelectedMotionKeys(current => {
+                        if (!extend) return current.has(item.id) ? current : new Set([item.id]);
+                        const next = new Set(current); next.has(item.id) ? next.delete(item.id) : next.add(item.id); return next;
+                      });
+                      if (!extend) onSelectMotionKeyframe?.(item.id, item.targetId);
+                      onSeek?.(event, Number(item.time));
+                    }} />)}
+                </div>
+              </div>; })}
+            </React.Fragment>;
+  };
+
+  const layerEntries = compositionEntries || studioLayerEntries({ overlays, motionScenes });
+  const layerRows = layerView ? studioTimelineLayers(layerEntries, graphicGroups, safeDuration, collapsedGroups)
+    .filter(row => !atPlayheadOnly || (Number(playhead || 0) >= row.effectiveStart && Number(playhead || 0) < row.effectiveEnd)) : [];
+  const toggleExpanded = id => {
+    setShowMotionKeys(true);
+    setExpandedMotionTargets(current => { const next = new Set(current); showMotionKeys && next.has(id) ? next.delete(id) : next.add(id); return next; });
+  };
+  const selectLayer = row => {
+    if (row.kind === 'group') onSelectGroup?.(row.id);
+    else if (row.kind === 'overlay') { onSelectOverlay?.(row.id); onSelectTool?.(isBRollLayer(row.layer) ? 'broll' : 'titles'); }
+    else onSelectMotion?.(row.id);
+  };
+
   return (
-    <section className="studio-pro-timeline" data-testid="studio-pro-timeline" onKeyDown={event => {
+    <section className={`studio-pro-timeline${layerView ? ' is-layer-view' : ''}`} data-testid="studio-pro-timeline" onKeyDown={event => {
       if (!showMotionKeys || !onEditMotionKeyframes || !(event.ctrlKey || event.metaKey) ||
           event.target.closest('input,select,textarea,[contenteditable="true"]')) return;
       if (event.key.toLowerCase() === 'c' && chosenKeys.length) {
@@ -1457,6 +1544,13 @@ export default function StudioProTimeline({
           ))}
         </div>
         <div className="pro-timeline-switches">
+          <div role="group" aria-label="Timeline view" className="pro-timeline-view">
+            <button type="button" aria-pressed={!layerView} onClick={() => setTimelineView('tracks')}>Sequence tracks</button>
+            <button type="button" aria-pressed={layerView} onClick={() => setTimelineView('layers')}>Composition layers</button>
+          </div>
+          {layerView && <button type="button" className={atPlayheadOnly ? 'is-on' : ''} aria-pressed={atPlayheadOnly}
+            title="Filter by layer timing and parent group gates. Opacity and occlusion still affect the picture."
+            onClick={() => setAtPlayheadOnly(value => !value)}>At playhead</button>}
           <button
             type="button"
             className={showEmptyTracks ? "is-on" : ""}
@@ -1535,7 +1629,9 @@ export default function StudioProTimeline({
           locked: !!trackStates?.[keyTrack({ targetId: target.id })]?.locked }))}
         onAction={actOnKeys} onCopy={copyKeys} onPaste={pasteKeys}
         error={motionKeyframeEditError}
-        onSelectAll={() => setSelectedMotionKeys(new Set(motionTargets.filter(target => expandedMotionTargets.has(target.id)).flatMap(target => target.keys.map(key => key.id))))}
+        onSelectAll={() => setSelectedMotionKeys(new Set((motionKeyframes || []).filter(key =>
+          expandedMotionTargets.has(key.targetId) && (layerView ? layerRows : motionTargets).some(target => target.id === key.targetId)
+        ).map(key => key.id)))}
         onClear={() => setSelectedMotionKeys(new Set())} />}
       {showMotionKeys && showGraph && graphTarget && <div className="pro-timeline-graph" aria-label="Timeline property graph">
         <strong>{graphTarget.name || graphTarget.text || 'Source video'} · {graphKey.property}</strong>
@@ -1565,9 +1661,49 @@ export default function StudioProTimeline({
             <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
           </div>
 
+          {layerView && <div className="pro-layer-legend">Front → back · one row per layer · bars show clip timing · groups clip their children{atPlayheadOnly ? ' · filtered at playhead' : ''}</div>}
+          {layerRows.map(row => {
+            const group = row.kind === 'group', track = group ? null : row.kind !== 'overlay' ? 'motion' : isBRollLayer(row.layer) ? 'broll' : 'graphics';
+            const groupItem = groupTimingRows.find(item => item.id === row.id);
+            const locked = group ? !!groupItem?.locked : !!trackStates?.[track]?.locked;
+            const selected = (group ? selectedGroupId : selectedLayerId) === row.id;
+            const expanded = showMotionKeys && expandedMotionTargets.has(row.id);
+            const target = allMotionTargets.find(item => item.id === row.id);
+            const inRange = Number(playhead || 0) >= row.effectiveStart && Number(playhead || 0) < row.effectiveEnd;
+            return <React.Fragment key={`layer-${row.id}`}>
+              <div className={`pro-track-row pro-layer-row ${group ? 'is-group' : ''} ${selected ? 'is-focused' : ''} ${inRange ? 'is-in-range' : ''} ${locked ? 'is-locked' : ''}`}
+                data-testid={`timeline-layer-${row.id}`} data-layer-id={row.id} data-layer-depth={row.depth}
+                data-effective-start={row.effectiveStart} data-effective-end={row.effectiveEnd}>
+                <div className="pro-track-header" style={{ paddingLeft: 6 + row.depth * 12 }}>
+                  {group ? <button type="button" className="pro-layer-expand" aria-label={`${collapsedGroups.has(row.id) ? 'Expand' : 'Collapse'} ${row.label} layers`}
+                    aria-expanded={!collapsedGroups.has(row.id)} onClick={() => setCollapsedGroups(current => {
+                      const next = new Set(current); next.has(row.id) ? next.delete(row.id) : next.add(row.id); return next;
+                    })}>{collapsedGroups.has(row.id) ? '▸' : '▾'}</button> : <span className="pro-layer-kind">{row.kind === 'overlay' ? row.layer.type === 'text' ? 'T' : '▧' : row.kind === 'three_d' ? '3D' : 'M'}</span>}
+                  <button type="button" className="pro-layer-name" aria-label={`Select ${row.label} layer`} aria-pressed={selected}
+                    title={row.label} onClick={() => selectLayer(row)}>{row.label}</button>
+                  {target && <button type="button" className="pro-layer-expand" aria-label={`${expanded ? 'Collapse' : 'Expand'} ${row.label} keyframes`}
+                    aria-expanded={expanded} onClick={() => toggleExpanded(row.id)}>◆</button>}
+                </div>
+                <div className="pro-track-lane" onClick={onSeek} role="presentation">
+                  <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
+                  <StudioGroupTimelineClip kind={group ? 'group' : 'layer'} item={{ ...row.layer, ...(groupItem || {}),
+                    id: row.id, name: row.label, startTime: row.start, duration: row.end - row.start, locked }}
+                    duration={safeDuration} displayRate={displayRate} frameStep={displayRate / Math.max(1, Number(frameRate) || 30)}
+                    snapping={snapping} snapTargets={snapTargets} selected={selected} onSelect={() => selectLayer(row)}
+                    onEdit={group ? onEditGroupTiming : (id, action, value) => {
+                      if (row.kind === 'overlay') {
+                        if (action === 'move') onOverlayMove?.(id, value); else onOverlayTrim?.(id, action === 'trim-start' ? 'start' : 'end', value);
+                      } else if (action === 'move') onMotionMove?.(id, value); else onMotionTrim?.(id, action === 'trim-start' ? 'start' : 'end', value);
+                    }} />
+                </div>
+              </div>
+              {target && showMotionKeys && renderMotionTarget({ id: row.id, layer: target, keys: (motionKeyframes || []).filter(key => key.targetId === row.id) }, false)}
+            </React.Fragment>;
+          })}
           {TRACK_DEFINITIONS.map(([trackId, code, label, type]) => {
+            if (layerView && ['graphics', 'broll'].includes(trackId)) return null;
             const state = trackStates[trackId] || {};
-            const items = clipsForTrack(trackId);
+            const items = clipsForTrack(trackId).filter(item => !layerView || trackId !== 'motion' || item.isPunch);
             if (!showEmptyTracks && !items.length && trackId !== focusedTrack) return null;
             const automation =
               trackId === "graphics" || trackId === "broll"
@@ -1590,7 +1726,7 @@ export default function StudioProTimeline({
               >
                 <div className="pro-track-header">
                   <span>{code}</span>
-                  <strong>{label}</strong>
+                  <strong>{layerView && trackId === 'video' ? 'Source video · base' : label}</strong>
                   <TrackControls trackId={trackId} state={state} onChange={onTrackStateChange} />
                 </div>
                 <div className="pro-track-lane" onClick={onSeek} role="presentation">
@@ -1866,7 +2002,7 @@ export default function StudioProTimeline({
               </div>
             );
           })}
-          {groupTimingRows.map(item => <div key={`group-clip-${item.id}`} className={`pro-track-row pro-group-row ${item.locked ? 'is-locked' : ''}`}>
+          {!layerView && groupTimingRows.map(item => <div key={`group-clip-${item.id}`} className={`pro-track-row pro-group-row ${item.locked ? 'is-locked' : ''}`}>
             <div className="pro-track-header"><button type="button" aria-label={`Select ${item.name} group`} aria-pressed={selectedGroupId === item.id}
               onClick={() => onSelectGroup?.(item.id)}><strong>{item.parentId ? '↳ ' : ''}{item.name}</strong></button>
               <small>{item.locked ? 'Track locked' : 'Move together · trim edges'}</small></div>
@@ -1877,70 +2013,7 @@ export default function StudioProTimeline({
                 onSelect={onSelectGroup} onEdit={onEditGroupTiming} />
             </div>
           </div>)}
-          {showMotionKeys && motionTargets.map(target => {
-            const label = target.id === 'main-video' ? 'Source video' : target.layer?.name || target.layer?.text || 'Visual layer';
-            const track = target.id === 'main-video' ? 'video' : isBRollLayer(target.layer || {}) ? 'broll' : 'graphics';
-            const locked = !!trackStates?.[track]?.locked;
-            const expanded = expandedMotionTargets.has(target.id);
-            const properties = studioMotionPropertiesForTarget(target.layer);
-            const values = target.layer.kind === GROUP_KIND ? evaluateStudioGroupTransform(target.layer, target.keys, playhead)
-              : buildMotionAutomationStyle(target.keys, playhead, target.layer);
-            const tolerance = motionKeyframeTolerance(frameRate, displayRate);
-            return <React.Fragment key={target.id}>
-              <div className="pro-track-row pro-motion-target">
-                <div className="pro-track-header"><button type="button" aria-expanded={expanded}
-                  aria-label={`${expanded ? 'Collapse' : 'Expand'} ${label} keyframes`}
-                  onClick={() => setExpandedMotionTargets(current => {
-                    const next = new Set(current); next.has(target.id) ? next.delete(target.id) : next.add(target.id); return next;
-                  })}>{expanded ? '▾' : '▸'} <strong>{label}</strong></button></div>
-                <div className="pro-track-lane"><small>{target.keys.length ? `${target.keys.length} keys` : 'No animation keys'} · expand to edit properties</small></div>
-              </div>
-              {expanded && properties.map(descriptor => {
-                const property = descriptor.id;
-                const keys = target.keys.filter(key => key.property === property).sort((a, b) => a.time - b.time);
-                const atPlayhead = motionKeyAtPlayhead(keys, target.id, property, playhead, tolerance);
-                const previous = keys.filter(key => key.time < Number(playhead) - tolerance).at(-1);
-                const next = keys.find(key => key.time > Number(playhead) + tolerance);
-                return <div key={property} className={`pro-track-row pro-motion-property ${locked ? 'is-locked' : ''}`}>
-                <div className="pro-track-header">
-                  <strong title={locked ? 'Track locked' : descriptor.label}>{descriptor.label}</strong>
-                  <MotionPropertyValue label={label} property={descriptor} value={values[property]} locked={locked}
-                    onCommit={onUpdateMotionProperty ? value => onUpdateMotionProperty(target.id, property, value) : undefined} />
-                  <div className="pro-motion-property-actions">
-                    <button type="button" aria-label={`Previous ${label} ${property} keyframe`} disabled={!previous}
-                      onClick={event => onSeek?.(event, previous.time)}>‹</button>
-                    <button type="button" aria-label={`${atPlayhead ? 'Remove' : 'Add'} ${label} ${property} keyframe at playhead`}
-                      aria-pressed={!!atPlayhead} disabled={locked || !onToggleMotionPropertyKeyframe}
-                      onClick={() => onToggleMotionPropertyKeyframe?.(target.id, property)}>{atPlayhead ? '◆' : '◇'}</button>
-                    <button type="button" aria-label={`Next ${label} ${property} keyframe`} disabled={!next}
-                      onClick={event => onSeek?.(event, next.time)}>›</button>
-                  </div>
-                </div>
-                <div className="pro-track-lane" role="group" aria-label={`${label} ${property} keyframes`}>
-                  <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
-                  {keys.map(key => <MotionKeyframe key={key.id}
-                    item={key} duration={safeDuration} displayRate={displayRate} frameRate={Math.max(1, Number(frameRate) || 30)}
-                    snapping={snapping} snapTargets={snapTargets} locked={locked || (chosenLocked && selectedMotionKeys.has(key.id))} selected={selectedMotionKeys.has(key.id)}
-                    previewDelta={selectedMotionKeys.has(key.id) ? keyDragDelta : 0}
-                    onPreviewMove={selectedMotionKeys.has(key.id) ? setKeyDragDelta : undefined}
-                    onBoundTime={boundSelectedTime}
-                    onUpdate={(id, changes) => selectedMotionKeys.has(id) && chosenKeys.length > 1 && onEditMotionKeyframes
-                      ? actOnKeys('move', changes.time - key.time) : onUpdateMotionKeyframe?.(id, changes)}
-                    onRemove={id => selectedMotionKeys.has(id) && chosenKeys.length > 1 && onEditMotionKeyframes
-                      ? actOnKeys('delete') : onRemoveMotionKeyframe?.(id)} onSelect={(item, event) => {
-                      setSelectedMotionKey(item.id);
-                      const extend = event.shiftKey || event.ctrlKey || event.metaKey;
-                      setSelectedMotionKeys(current => {
-                        if (!extend) return current.has(item.id) ? current : new Set([item.id]);
-                        const next = new Set(current); next.has(item.id) ? next.delete(item.id) : next.add(item.id); return next;
-                      });
-                      if (!extend) onSelectMotionKeyframe?.(item.id, item.targetId);
-                      onSeek?.(event, Number(item.time));
-                    }} />)}
-                </div>
-              </div>; })}
-            </React.Fragment>;
-          })}
+          {!layerView && showMotionKeys && motionTargets.map(target => renderMotionTarget(target))}
         </div>
       </div>
       <footer>

@@ -33,7 +33,15 @@ async function timeline(page, name) {
   const baseline = hash(saved.snapshot.studioDocument);
   const separator = page.getByRole('separator', { name: 'Resize timeline' });
   await separator.focus();
-  for (let i = 0; i < (process.env.STUDIO_QA_ALL_SOUND_LANES === '1' ? 26 : 12); i++) await separator.press('ArrowUp');
+  if (process.env.STUDIO_QA_TIMELINE_HEIGHT) {
+    const target = Number(process.env.STUDIO_QA_TIMELINE_HEIGHT);
+    assert(Number.isFinite(target) && target >= 148 && target <= 800);
+    for (let i = 0; i < 40; i++) {
+      const current = Number(await separator.getAttribute('aria-valuenow'));
+      if (Math.abs(current - target) < 24) break;
+      await separator.press(current < target ? 'ArrowUp' : 'ArrowDown');
+    }
+  } else for (let i = 0; i < (process.env.STUDIO_QA_ALL_SOUND_LANES === '1' ? 26 : 12); i++) await separator.press('ArrowUp');
   const view = page.getByTestId('studio-pro-timeline');
   await view.getByRole('button', { name: 'Fit entire timeline', exact: true }).click();
   // Keyboard navigation/layout changes must not alter graphics or the edit.

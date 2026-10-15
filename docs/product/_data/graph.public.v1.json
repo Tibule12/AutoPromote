@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.19",
+  "knowledge_version": "1.0.20",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1175,6 +1175,16 @@
     },
     {
       "id": "studio.graphics.import",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.timeline.view",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.timeline.at_playhead",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -3074,6 +3084,16 @@
       "from": "studio.titles",
       "type": "editable_with",
       "to": "studio.graphics.import"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.timeline.view"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.timeline.at_playhead"
     }
   ]
 }

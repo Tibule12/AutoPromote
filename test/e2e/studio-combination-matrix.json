@@ -5552,7 +5552,7 @@
     "readinessPromoted": false,
     "earlierBothMotionSamplesRejected": true,
     "remainingBlockers": [
-      "Creative approval of this moving sequence and soundtrack remains the user's review; both earlier samples were rejected as generic.",
+      "The user reports improvement but insufficient motion-design quality; creative approval remains false. The prior timeline view was also rejected; see professionalTimelineCorrespondence20261015.",
       "Static SVG artwork becomes raster image layers; vector paths are not editable shape geometry. Dedicated spatial tangents and text range selectors remain open.",
       "The CPU export outlasted its twelve-minute observer. The same completed job was recovered with zero resubmissions; a normal Retry status check was needed after a transient recovery deadline. Broad export/recovery latency remains open.",
       "Screen capture does not qualify smooth live playback. Whole continuous preview/final raster, live sound/human listening, S02 colour/ellipse/source features and broad parent/media combinations remain unqualified.",
@@ -5563,6 +5563,55 @@
       "S03",
       "S02"
     ],
-    "nextImplementationSlice": "Continue user motion-design feedback on the same editable graph, then shared S04 spatial tangent/path timing and S03 occurrence ownership; retain S02 picture/sound and export-latency limits."
+    "nextImplementationSlice": "Continue user motion-design feedback on the same editable graph, then shared S04 spatial tangent/path timing and S03 occurrence ownership; retain S02 picture/sound and export-latency limits.",
+    "userFeedback": "Better but still not there / not impressive yet; timeline correspondence rejected and corrected in the later timeline entry."
+  },
+  "professionalTimelineCorrespondence20261015": {
+    "evidence": "reports/studio-timeline-correspondence-20261015/README.md",
+    "checkpoint": "reports/studio-timeline-correspondence-20261015/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Actual composition layer rows, inline property editing, owning-track locks and layer/key timing history; original movie retained.",
+    "projectId": "viral-project-9e760ade-7bf6-40c5-970c-3074853e84ef",
+    "canonicalHash": "74342256ad1eb1f82baa68482772cb7b1ee8ff72efc163cfddca52b42d867817",
+    "outputSha256": "8fd2c9fc3e97d377f19e8dd0228a3ce51e2e5cd75a374731daf4f8c876d00e7a",
+    "distinctLayerAndGroupRows": 60,
+    "nativeLayerMoveWithKeysUndoRedo": true,
+    "nativeInlinePropertyEditUndo": true,
+    "nativeTimingFilterSamples": 6,
+    "exactColdReopen": true,
+    "nativeAllEditsUseStudioControls": true,
+    "nativeOriginalProjectBackupRestore": true,
+    "nativeOriginalExportReceiptRestore": true,
+    "nativeFullMoviePlayback": true,
+    "newRenderSubmissions": 0,
+    "gpuJobs": 0,
+    "paidGpuCost": 0,
+    "frontendCasesPassed": 95,
+    "strictNormalAppBuild": "PASS",
+    "recordingCapture": {
+      "captureSeconds": 20.128999948501587,
+      "screenFramesPerSecond": 21.31253420922856,
+      "movieFps": 24,
+      "encodedScreenRecordingFps": 24,
+      "sparseCapture": true,
+      "smoothPlaybackEvidence": false,
+      "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+    },
+    "wholePreviewFinalParityQualified": false,
+    "liveAudioQualified": false,
+    "humanListeningReview": false,
+    "creativeApproval": false,
+    "readinessPromoted": false,
+    "userFeedback": "Better but still not impressive; prior timeline did not correspond to the video. Every edit must use Studio controls.",
+    "remainingBlockers": [
+      "Whole preview/final raster, live audio/listening and smoothness remain unqualified.",
+      "S04 spatial tangent/path timing, text range selectors and true vector editing; S03 source occurrence/group ownership; S02 picture/sound and CPU export latency remain open."
+    ],
+    "nextTaskIds": [
+      "S04",
+      "S03",
+      "S02"
+    ],
+    "nextImplementationSlice": "Continue the user\u2019s motion-design refinement through native Studio controls on the same graph; then shared S04 spatial/path timing and S03 occurrence ownership. Retain S02 picture/sound and export latency limits."
   }
 }

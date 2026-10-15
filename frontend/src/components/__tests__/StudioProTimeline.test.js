@@ -56,6 +56,19 @@ test('property values evaluate the playhead; locks block edits but permit neighb
   expect(seek.mock.lastCall[1]).toBe(2);
 });
 
+test('focusing an interpolated property preserves its displayed number and replacement entry', () => {
+  const update=jest.fn();
+  render(<StudioProTimeline duration={3} playhead={1} trackStates={{}} defaultView="layers" onUpdateMotionProperty={update}
+    overlays={[{id:'word',type:'text',name:'Word',startTime:0,duration:3}]}
+    motionKeyframes={[{id:'a',targetId:'word',property:'x',time:0,value:0},
+      {id:'b',targetId:'word',property:'x',time:3,value:100,easing:'linear'}]} />);
+  fireEvent.click(screen.getByRole('button',{name:'Expand Word keyframes'}));
+  const field=screen.getByLabelText('Word x value');expect(field).toHaveValue(33.333);
+  fireEvent.focus(field);expect(field).toHaveValue(33.333);fireEvent.blur(field);expect(update).not.toHaveBeenCalled();
+  fireEvent.focus(field);fireEvent.change(field,{target:{value:'70'}});fireEvent.blur(field);
+  expect(update).toHaveBeenCalledWith('word','x',70);
+});
+
 test('adjacent delivery frames at 60fps or double speed remain distinct property keys', () => {
   for (const rate of [1, 2]) {
     const time = rate / 60, tolerance = motionKeyframeTolerance(60, rate);
@@ -613,4 +626,64 @@ test('the timeline graph edits only the selected owner and returns to property r
   const influence=screen.getByLabelText('Start influence (%)');fireEvent.focus(influence);fireEvent.change(influence,{target:{value:'50'}});fireEvent.blur(influence);
   expect(update).toHaveBeenCalledWith('b',{easing:'bezier',curve:[.5,0,.8,1]});
   fireEvent.click(screen.getByRole('button',{name:'Timeline graph editor'}));expect(screen.getByTestId('motion-timeline-key-b')).toBeVisible();
+});
+
+test('composition layers retain real front-to-back order, separate overlapping bars, and inline native property edits', () => {
+  const select = jest.fn(), move = jest.fn(), trim = jest.fn(), update = jest.fn();
+  const entries = [
+    {id:'back',kind:'overlay',label:'Ink stage',layer:{id:'back',type:'image',name:'Ink stage',startTime:0,duration:10}},
+    {id:'a',kind:'overlay',label:'BREAK',layer:{id:'a',type:'text',text:'BREAK',startTime:2,duration:4}},
+    {id:'b',kind:'overlay',label:'THE LOOP',layer:{id:'b',type:'text',text:'THE LOOP',startTime:3,duration:3}},
+  ];
+  const props = {duration:10,playhead:4,frameRate:20,playbackRate:2,trackStates:{},defaultView:'layers',compositionEntries:entries,
+    overlays:entries.map(entry=>entry.layer),onSelectOverlay:select,onOverlayMove:move,onOverlayTrim:trim,onUpdateMotionProperty:update,
+    motionKeyframes:[{id:'x-a',targetId:'a',property:'x',time:3,value:40}]};
+  const {rerender}=render(<StudioProTimeline {...props} />);
+  expect(screen.getAllByTestId(/^timeline-layer-/).map(row=>row.dataset.layerId)).toEqual(['b','a','back']);
+  const bar=screen.getByTestId('layer-timeline-clip-a');
+  expect(bar).toHaveStyle({left:'20%',width:'40%'});
+  expect(bar).toHaveAttribute('title','BREAK · 1.000s–3.000s');
+  fireEvent.click(screen.getByRole('button',{name:'Select BREAK layer clip'}));expect(select).toHaveBeenCalledWith('a');
+  fireEvent.keyDown(screen.getByRole('button',{name:'Select BREAK layer clip'}),{key:'ArrowRight'});expect(move).toHaveBeenCalledWith('a',2.1);
+  fireEvent.keyDown(screen.getByRole('button',{name:'Trim BREAK out'}),{key:'ArrowLeft'});expect(trim).toHaveBeenCalledWith('a','end',5.9);
+  fireEvent.click(screen.getByRole('button',{name:'Expand BREAK keyframes'}));
+  expect(screen.getByTestId('motion-timeline-key-x-a').closest('.pro-motion-property').previousElementSibling).toBeTruthy();
+  const value=screen.getByLabelText('BREAK x value');fireEvent.focus(value);fireEvent.change(value,{target:{value:'55'}});fireEvent.blur(value);
+  expect(update).toHaveBeenCalledWith('a','x',55);
+  rerender(<StudioProTimeline {...props} trackStates={{graphics:{locked:true}}} />);
+  move.mockClear();trim.mockClear();fireEvent.keyDown(screen.getByRole('button',{name:'Select BREAK layer clip'}),{key:'ArrowRight'});
+  expect(move).not.toHaveBeenCalled();expect(screen.getByRole('button',{name:'Trim BREAK out'})).toBeDisabled();
+  expect(screen.getByLabelText('BREAK x value')).toBeDisabled();
+});
+
+test('layer timing filter respects nested parent gates and group collapse without changing the edit', () => {
+  const entries=[{id:'child',kind:'overlay',label:'Child',layer:{id:'child',type:'text',startTime:0,duration:10}}];
+  const groups=[{id:'parent',kind:'graphic_group',name:'Parent',layerIds:['inner'],timing:{startTime:4,duration:2}},
+    {id:'inner',kind:'graphic_group',name:'Inner',layerIds:['child'],timing:{startTime:2,duration:6}}];
+  const props={duration:10,playhead:3,trackStates:{},defaultView:'layers',compositionEntries:entries,overlays:entries.map(e=>e.layer),graphicGroups:groups};
+  const original=JSON.stringify(props);const {rerender}=render(<StudioProTimeline {...props} />);
+  expect(screen.getAllByTestId(/^timeline-layer-/).map(row=>row.dataset.layerId)).toEqual(['parent','inner','child']);
+  expect(screen.getByTestId('timeline-layer-child')).toHaveAttribute('data-effective-start','4');
+  expect(screen.getByTestId('timeline-layer-child')).toHaveAttribute('data-effective-end','6');
+  fireEvent.click(screen.getByRole('button',{name:'At playhead'}));expect(screen.queryByTestId('timeline-layer-child')).toBeNull();
+  rerender(<StudioProTimeline {...props} playhead={5} />);expect(screen.getByTestId('timeline-layer-child')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button',{name:'Collapse Parent layers'}));expect(screen.queryByTestId('timeline-layer-child')).toBeNull();
+  fireEvent.click(screen.getByRole('button',{name:'Expand Parent layers'}));expect(screen.getByTestId('timeline-layer-child')).toBeInTheDocument();
+  expect(JSON.stringify(props)).toBe(original);
+  fireEvent.click(screen.getByRole('button',{name:'Sequence tracks'}));expect(screen.getByTestId('pro-track-row-graphics')).toBeInTheDocument();
+});
+
+test('Select visible keys follows displayed layer rows when timing filters or collapsed groups hide owners', () => {
+  const entries=[{id:'a',kind:'overlay',label:'First',layer:{id:'a',name:'First',type:'text',startTime:0,duration:2}},
+    {id:'b',kind:'overlay',label:'Later',layer:{id:'b',name:'Later',type:'text',startTime:4,duration:2}}];
+  render(<StudioProTimeline duration={8} playhead={1} trackStates={{}} defaultView="layers" compositionEntries={entries}
+    overlays={entries.map(entry=>entry.layer)} onEditMotionKeyframes={jest.fn()}
+    motionKeyframes={[{id:'a-x',targetId:'a',property:'x',time:1,value:50},{id:'b-x',targetId:'b',property:'x',time:4,value:50}]} />);
+  fireEvent.click(screen.getByRole('button',{name:'Expand First keyframes'}));
+  fireEvent.click(screen.getByRole('button',{name:'Expand Later keyframes'}));
+  fireEvent.click(screen.getByRole('button',{name:'At playhead'}));
+  fireEvent.click(screen.getByRole('button',{name:'Select visible keys'}));
+  expect(screen.getByTestId('motion-timeline-key-a-x')).toHaveAttribute('aria-pressed','true');
+  expect(screen.queryByTestId('motion-timeline-key-b-x')).toBeNull();
+  expect(screen.getByText('1 keys selected')).toBeInTheDocument();
 });

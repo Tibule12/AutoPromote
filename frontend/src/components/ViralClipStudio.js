@@ -5224,18 +5224,29 @@ const ViralClipStudio = ({
   };
 
   const handleOverlayTimelineMove = (id, newStartTime) => {
-    if (!allowTimelineTimingEdit("broll")) return;
+    const layer = overlays.find(item => item.id === id);
+    if (!layer || !allowTimelineTimingEdit(layer.bRollMode || ['image', 'video'].includes(layer.type) ? 'broll' : 'graphics')) return;
+    const ownedKeys = motionKeyframes.filter(key => key.targetId === id);
+    const start = Number(layer.startTime || 0);
+    const earliest = Math.min(start, ...ownedKeys.map(key => key.time));
+    const latest = Math.max(start + Number(layer.duration || 0), ...ownedKeys.map(key => key.time));
+    const delta = Math.max(-earliest, Math.min(newStartTime - start, Math.max(0, liveTimelineDuration - latest)));
+    setPreviewFinishedFile(false);
     setOverlays(prev =>
       prev.map(overlay =>
         overlay.id === id
-          ? { ...overlay, startTime: Math.max(0, newStartTime) }
+          ? { ...overlay, startTime: Math.round((start + delta) * 90000) / 90000 }
           : overlay
       )
     );
+    setMotionKeyframes(current => current.map(key => key.targetId === id
+      ? { ...key, time: Math.round((key.time + delta) * 90000) / 90000 } : key));
   };
 
   const handleOverlayTimelineTrim = (id, edge, value) => {
-    if (!allowTimelineTimingEdit("broll")) return;
+    const layer = overlays.find(item => item.id === id);
+    if (!layer || !allowTimelineTimingEdit(layer.bRollMode || ['image', 'video'].includes(layer.type) ? 'broll' : 'graphics')) return;
+    setPreviewFinishedFile(false);
     setOverlays(prev =>
       prev.map(overlay => {
         if (overlay.id !== id) return overlay;
@@ -5305,6 +5316,7 @@ const ViralClipStudio = ({
 
   const handleMotionTimelineMove = (id, newStart) => {
     if (!allowTimelineTimingEdit("motion")) return;
+    setPreviewFinishedFile(false);
     if (threeDScenes.some(scene => scene.id === id)) {
       setThreeDScenes(prev => prev.map(scene => {
         if (scene.id !== id) return scene;
@@ -5326,6 +5338,7 @@ const ViralClipStudio = ({
 
   const handleMotionTimelineTrim = (id, edge, value) => {
     if (!allowTimelineTimingEdit("motion")) return;
+    setPreviewFinishedFile(false);
     if (threeDScenes.some(scene => scene.id === id)) {
       setThreeDScenes(prev => prev.map(scene => {
         if (scene.id !== id) return scene;
@@ -5707,6 +5720,7 @@ const ViralClipStudio = ({
       const next = editStudioGroupTiming({ compounds: effectiveCompoundClips, order: compositionIds,
         overlays, motionScenes, threeDScenes, motionKeyframes, trackStates, frameStep: frame },
         id, action, Math.round(requested / frame) * frame, liveTimelineDuration);
+      setPreviewFinishedFile(false);
       setCompoundClips(next.compounds); setOverlays(next.overlays); setMotionScenes(next.motionScenes);
       setThreeDScenes(next.threeDScenes); setMotionKeyframes(next.motionKeyframes);
       setStudioActionMessage(action === 'move' ? 'Group moved with its child clips and keys.' : 'Group visibility trimmed; child edits and keys are preserved.');
@@ -29560,6 +29574,9 @@ const ViralClipStudio = ({
               motionKeyframes={motionKeyframes}
               graphicGroups={compositionGroups.groups}
               groupTimingRows={groupClipRows}
+              compositionEntries={compositionEntries}
+              defaultView="layers"
+              selectedLayerId={activeOverlayId || motionTargetId}
               selectedGroupId={selectedGroupId}
               onSelectGroup={id => {
                 setSelectedGroupId(id); setActiveOverlayId(null); setMotionTargetId(id);

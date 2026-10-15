@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.19 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.20 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -8,7 +8,7 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 
 ID: `studio.timeline` • **PARTIAL** • DETERMINISTIC
 
-Displays source occurrences, ordinary layers, audio cues, graphic-group clip bars and property keys on one programme clock. Expanded rows support box selection and copying animation onto compatible layers, alongside batch movement, timing and interpolation. The timeline also opens the selected owner’s value/velocity graph with bounded controls and a programme playhead.
+Shows the real composition as separate front-to-back layer and group rows, with exact clip timing and expandable transform properties. Sequence tracks remain available for source editing and sound. Both views use the same project and programme clock.
 
 **Purpose:** Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.
 
@@ -22,10 +22,13 @@ Displays source occurrences, ordinary layers, audio cues, graphic-group clip bar
 
 **Workflow**
 
-1. Select a source, layer or group on its timeline row. Group bars remain available when property rows are collapsed.
-2. Move a group with a pointer gesture or frame nudge; its descendant starts and keys move in one history transaction. Drag or nudge its In/Out edges to limit visibility while keeping child source edits and hidden keys.
-3. Selecting a group focuses its property rows; select an ordinary child clip to edit that child’s keys. Graphics and child-track locks block group timing changes.
-4. Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported.
+1. Use Composition layers to inspect each title, artwork or scene on its own row. Expand a layer’s keyframes to edit its existing transform properties. Bars show clip timing; opacity, occlusion and parent group gates determine the picture.
+2. Use At playhead to filter by current clip timing and all parent group gates. This display filter changes no project decisions. Use Sequence tracks for source footage and track mix controls.
+3. Move an ordinary animated layer using its bar or arrow keys. Its canonical transform keys move by the same bounded delta. Undo restores layer timing and keys together.
+4. Select a source, layer or group on its timeline row. Group bars remain available when property rows are collapsed.
+5. Move a group with a pointer gesture or frame nudge; its descendant starts and keys move in one history transaction. Drag or nudge its In/Out edges to limit visibility while keeping child source edits and hidden keys.
+6. Selecting a group focuses its property rows; select an ordinary child clip to edit that child’s keys. Graphics and child-track locks block group timing changes.
+7. Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported.
 
 **Preview:** Group In/Out uses a half-open programme-time visibility range around assembled child graphics. Group move shifts canonical child timing and keys, retaining source phase. The same derived group range clips linked motion cues for preview and export. Property focus and clip selection do not change the edit.
 
@@ -40,7 +43,7 @@ Displays source occurrences, ordinary layers, audio cues, graphic-group clip bar
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out)
+**Controls:** [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Composition layers / Sequence tracks](../control-reference/index.md#studio-timeline-view), [At playhead](../control-reference/index.md#studio-timeline-at_playhead)
 
 **Guides:** No task guide in V1.
 

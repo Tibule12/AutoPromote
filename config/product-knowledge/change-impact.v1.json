@@ -691,6 +691,23 @@
         "reports/studio-break-the-loop-20261015/README.md"
       ],
       "reason": "Native graphics interchange imports authored choreography as ordinary editable titles, artwork, groups and property keys with atomic history and no separate animation evaluator. Preserve user rejection of both previous samples and separate creative approval from native delivery evidence."
+    },
+    {
+      "feature_id": "studio.timeline",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/StudioProTimeline.js",
+        "frontend/src/components/studioTimelineLayers.js",
+        "frontend/src/components/ViralClipStudio.js"
+      ],
+      "reason": "Replace unreadable overlapping motion-design rows with a view of the real composition stack and parent timing gates. Ordinary layer moves retain their transform keys and owning-track locks. UI/native qualification does not establish whole picture/sound or creative approval."
     }
   ]
 }

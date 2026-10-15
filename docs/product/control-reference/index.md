@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.19 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.20 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -143,6 +143,8 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.title.kinetic_tilt | Kinetic rotation | number | 0 … 90 | degrees | 12 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.title.kinetic_exit | Kinetic exit | number | 0.1 … 3 | seconds | 0.25 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.graphics.import | Import animated graphics | string | source-dependent … source-dependent | JSON file | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.timeline.view | Composition layers / Sequence tracks | string | layers, tracks | display choice | "layers" | UNSUPPORTED | PARTIAL | UNSUPPORTED | UNSUPPORTED |
+| studio.timeline.at_playhead | At playhead | boolean | source-dependent … source-dependent | display choice | false | UNSUPPORTED | PARTIAL | UNSUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -1838,3 +1840,27 @@ Applies to: ordinary text layer, static SVG artwork. Requires: studio.titles, st
 - Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.
 - Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.
 - Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate.
+
+<a id="studio-timeline-view"></a>
+
+## Composition layers / Sequence tracks
+
+ID: `studio.timeline.view` • **PARTIAL**
+
+Switches between the actual composition stack and source/audio sequence tracks. Layer rows expose native selection, move/trim and inline transform keys.
+
+Applies to: ordinary text/image/video layers, graphic groups, motion scenes. Requires: studio.timeline.
+
+- Display choices do not mutate the canonical project. Source footage remains a base stage; clip timing alone does not certify visible pixels. Whole preview/final picture and sound remain unqualified.
+
+<a id="studio-timeline-at_playhead"></a>
+
+## At playhead
+
+ID: `studio.timeline.at_playhead` • **PARTIAL**
+
+Filters layer rows by their real half-open timing range intersected with every parent group gate. It does not test opacity or occlusion.
+
+Applies to: ordinary text/image/video layers, graphic groups, motion scenes. Requires: studio.timeline.
+
+- Display choices do not mutate the canonical project. Source footage remains a base stage; clip timing alone does not certify visible pixels. Whole preview/final picture and sound remain unqualified.
