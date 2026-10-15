@@ -1,0 +1,38 @@
+{
+  "idea": "A repeating circular system breaks on an impact, becomes an individual rhythm, and resolves as punctuation.",
+  "beats": [
+    {
+      "time": 0,
+      "action": "Repetition / accelerating circular typography"
+    },
+    {
+      "time": 3.92,
+      "action": "Impact / circular fragments and interlocking letters"
+    },
+    {
+      "time": 6,
+      "action": "BREAK THE LOOP resolves"
+    },
+    {
+      "time": 8.1,
+      "action": "Connected slash into changing modular layout"
+    },
+    {
+      "time": 11.4,
+      "action": "Word enlarges into a travelling typographic wave and equalizer"
+    },
+    {
+      "time": 14.8,
+      "action": "Circle carries movement into final punctuation"
+    },
+    {
+      "time": 17.55,
+      "action": "Quiet final lockup / readable landing"
+    }
+  ],
+  "layers": 58,
+  "groups": 2,
+  "keys": 897,
+  "noExternalRenderer": true,
+  "nativeImportRequired": true
+}

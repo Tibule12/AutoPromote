@@ -3032,6 +3032,35 @@ describe("ViralClipStudio timeline sequencing", () => {
     })]);
   });
 
+  test("imported choreography has atomic history and reaches the ordinary export graph", async () => {
+    const snapshot = { orderedClips: [{ id: 'source', start: 0, end: 8, duration: 8 }], selectedClipId: 'source',
+      timeline: [{ id: 'main', sourceClipId: 'source', url: 'https://example.com/source.mp4', startRequest: 0, endRequest: 8, duration: 8 }],
+      reframeAspect: '16:9', smartCrop: false, autoCaptions: false, motionScenes: [], threeDScenes: [], overlays: [] };
+    const input = { format: 'autopromote-graphics', version: 1, name: 'Choreography', width: 1280, height: 720, duration: 8,
+      layers: [{ id: 'word', name: 'BREAK', type: 'text', text: 'BREAK', startTime: 0, duration: 8, x: 50, y: 50, scale: 3,
+        rotation: 0, opacity: 1, width: 90, fontWeight: 900, textAlign: 'center', color: '#ff5436',
+        keys: [{ property: 'x', time: 0, value: 10, easing: 'linear' }, { property: 'x', time: 1, value: 50, easing: 'ease_out' }] }], groups: [] };
+    const file = new File([JSON.stringify(input)], 'motion.json', { type: 'application/json' });
+    Object.defineProperty(file, 'text', { value: async () => JSON.stringify(input) });
+    const onSave = jest.fn(async () => ({}));
+    const saveSpy = jest.spyOn(studioProjectStore, 'saveViralStudioProject').mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={snapshot.orderedClips}
+        initialSavedProject={{ id: 'graphics-import', name: 'Graphics import', snapshot }} onSave={onSave} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Graphics import');
+      fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' })).getByRole('button', { name: 'Graphics', exact: true }));
+      fireEvent.change(screen.getByLabelText('Graphics composition file'), { target: { files: [file] } });
+      await waitFor(() => expect(within(screen.getByTestId('studio-graphics-import')).getByRole('status', { hidden: true })).toHaveTextContent('Choreography imported.'), { timeout: 3000 });
+      fireEvent.click(screen.getByTestId('studio-save-project')); await waitFor(() => expect(saveSpy).toHaveBeenCalled());
+      const saved = saveSpy.mock.calls.at(-1)[0].snapshot; expect(saved.overlays[0].text).toBe('BREAK'); expect(saved.motionKeyframes).toHaveLength(2);
+      fireEvent.click(screen.getByTestId('studio-undo-button')); fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays).toHaveLength(0));
+      fireEvent.click(screen.getByTestId('studio-redo-button')); await clickRenderFinalClip(); await waitFor(() => expect(onSave).toHaveBeenCalled());
+      const layer = onSave.mock.calls[0][2].compositionPlan.layers.find(layer => layer.id === saved.overlays[0].id);
+      expect(layer.motion_keyframes.map(key => key.value)).toEqual([10, 50]);
+    } finally { saveSpy.mockRestore(); }
+  });
+
   test("kinetic typography builds ordinary title layers with atomic history and the same export graph", async () => {
     const snapshot = {
       orderedClips: [{ id: 'source', start: 0, end: 8, duration: 8 }], selectedClipId: 'source',
@@ -3053,8 +3082,9 @@ describe("ViralClipStudio timeline sequencing", () => {
       fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' })).getByRole('button', { name: 'Graphics', exact: true }));
       fireEvent.change(screen.getByLabelText('Title text', { exact: true }), { target: { value: 'MAKE EVERY\nWORD MOVE' } });
       expect(screen.getByLabelText('Title text', { exact: true })).toHaveValue('MAKE EVERY\nWORD MOVE');
-      fireEvent.click(screen.getByRole('button', { name: 'Build editable text motion', exact: true }));
-      await waitFor(() => expect(screen.getByText(/4 editable words created/)).toBeInTheDocument());
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Build editable text motion', exact: true })); });
+      await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+      await screen.findByText(/4 editable words created/, {}, { timeout: 3000 });
       fireEvent.click(screen.getByTestId('studio-save-project'));
       await waitFor(() => expect(saveSpy).toHaveBeenCalled());
       const saved = saveSpy.mock.calls.at(-1)[0].snapshot;

@@ -1,5 +1,7 @@
 # Full-frame kinetic composition — 15 October 2026
 
+Subsequent user review rejected this composition as generic. It has no creative approval. [The next continuation](../studio-break-the-loop-20261015/README.md) preserves this result and rejection.
+
 The user's feedback rejected the basic text-over-footage treatment. This continuation makes typography the full-frame composition: large ink/acid/paper treatments, four animated type groups, staggered word/letter entries, expanding/rotating stage panels and a geometric orbit interlude. Original projects and the earlier movie remain preserved. Creative acceptance is the user's review of the actual moving work and soundtrack.
 
 All 33 text layers remain ordinary editable text. Four procedural SVG artworks in `assets/` are imported through Studio's existing sanitizer/rasterizer and ordinary owned-media path. The shared group/property graph contains 595 keys: 528 text keys, 35 image keys, eight group scale keys and the original 24 source keys. All 571 layer/group key identities, values, times, easing and curves match the actual native composition request. The original source clips remain underneath the opaque artwork; they are not the visible treatment. Existing music and sound cues stay in the same audio graph.

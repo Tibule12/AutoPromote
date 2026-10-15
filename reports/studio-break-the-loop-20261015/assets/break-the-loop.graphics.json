@@ -1,0 +1,7339 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "BREAK THE LOOP — authored motion",
+  "width": 1280,
+  "height": 720,
+  "duration": 20,
+  "layers": [
+    {
+      "id": "Ink / programme",
+      "name": "Ink / programme",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><rect width=\"1280\" height=\"720\" rx=\"0\" fill=\"#121215\"/></svg>",
+      "startTime": 0,
+      "duration": 20,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    },
+    {
+      "id": "Frame / registration",
+      "name": "Frame / registration",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><path d=\"M72 80h28M72 80v28M1208 80h-28M1208 80v28M72 640h28M72 640v-28M1208 640h-28M1208 640v-28\" fill=\"none\" stroke=\"#777477\" stroke-width=\"1.5\" opacity=\".55\"/></svg>",
+      "startTime": 0,
+      "duration": 20,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    },
+    {
+      "id": "Loop / dial",
+      "name": "Loop / dial",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"720\" height=\"720\" viewBox=\"0 0 720 720\"><g fill=\"none\" stroke=\"#ff5436\" stroke-width=\"2\"><circle cx=\"360\" cy=\"360\" r=\"290\"/><circle cx=\"360\" cy=\"360\" r=\"300\" opacity=\".25\"/><path d=\"M679 360L702 360\"/><path d=\"M690.7366397664596 388.9357065922225L700.698586747377 389.8072640196991\"/><path d=\"M686.9561740000531 417.6511949854209L696.8042515301752 419.38767676209017\"/><path d=\"M680.6873743279707 445.9279229740369L690.3466325908614 448.5161134250621\"/><path d=\"M671.9779501009216 473.550687584122L681.3748763087807 476.9708890173787\"/><path d=\"M660.8941852961677 500.3092628979122L669.9572631665343 504.5354455153192\"/><path d=\"M636.2621038072359 519.5L656.180688094278 531\"/><path d=\"M631.9584787039453 550.4273768685473L640.1499991468352 556.1631412320578\"/><path d=\"M614.3267551155006 573.405486415931L621.9871995466905 579.8333625127964\"/><path d=\"M594.7594513539339 594.7594513539337L601.8305191657993 601.8305191657993\"/><path d=\"M573.4054864159311 614.3267551155006L579.8333625127965 621.9871995466905\"/><path d=\"M550.4273768685473 631.9584787039453L556.1631412320578 640.1499991468352\"/><path d=\"M519.5 636.2621038072359L531 656.180688094278\"/><path d=\"M500.3092628979122 660.8941852961677L504.5354455153192 669.9572631665343\"/><path d=\"M473.55068758412204 671.9779501009216L476.97088901737874 681.3748763087806\"/><path d=\"M445.92792297403696 680.6873743279707L448.51611342506214 690.3466325908613\"/><path d=\"M417.6511949854209 686.9561740000531L419.3876767620902 696.8042515301752\"/><path d=\"M388.9357065922225 690.7366397664596L389.80726401969906 700.698586747377\"/><path d=\"M360 679L360 702\"/><path d=\"M331.06429340777754 690.7366397664596L330.19273598030094 700.698586747377\"/><path d=\"M302.34880501457917 686.9561740000531L300.61232323790983 696.8042515301752\"/><path d=\"M274.0720770259631 680.6873743279707L271.48388657493786 690.3466325908614\"/><path d=\"M246.44931241587807 671.9779501009216L243.02911098262138 681.3748763087807\"/><path d=\"M219.6907371020878 660.8941852961677L215.46455448468083 669.9572631665343\"/><path d=\"M200.50000000000006 636.2621038072359L189.00000000000009 656.180688094278\"/><path d=\"M169.57262313145267 631.9584787039453L163.8368587679422 640.1499991468352\"/><path d=\"M146.59451358406892 614.3267551155006L140.16663748720353 621.9871995466905\"/><path d=\"M125.24054864606623 594.7594513539339L118.16948083420075 601.8305191657993\"/><path d=\"M105.67324488449933 573.4054864159311L98.01280045330958 579.8333625127965\"/><path d=\"M88.04152129605467 550.4273768685473L79.85000085316477 556.1631412320577\"/><path d=\"M83.73789619276414 519.5000000000001L63.81931190572203 531.0000000000001\"/><path d=\"M59.10581470383221 500.3092628979122L50.04273683346571 504.5354455153192\"/><path d=\"M48.02204989907841 473.5506875841221L38.62512369121936 476.97088901737874\"/><path d=\"M39.3126256720293 445.92792297403685L29.65336740913864 448.51611342506203\"/><path d=\"M33.04382599994693 417.65119498542083L23.195748469824878 419.38767676209017\"/><path d=\"M29.26336023354048 388.9357065922225L19.301413252623036 389.8072640196991\"/><path d=\"M41 360.00000000000006L18 360.00000000000006\"/><path d=\"M29.26336023354048 331.06429340777754L19.301413252623036 330.192735980301\"/><path d=\"M33.043825999946876 302.3488050145792L23.19574846982482 300.61232323790995\"/><path d=\"M39.3126256720293 274.07207702596327L29.653367409138582 271.483886574938\"/><path d=\"M48.02204989907841 246.449312415878L38.6251236912193 243.02911098262132\"/><path d=\"M59.105814703832095 219.69073710208798L50.0427368334656 215.46455448468097\"/><path d=\"M83.73789619276408 200.49999999999997L63.819311905721975 188.99999999999997\"/><path d=\"M88.04152129605467 169.5726231314528L79.85000085316472 163.83685876794232\"/><path d=\"M105.67324488449918 146.5945135840691L98.01280045330941 140.1666374872037\"/><path d=\"M125.24054864606617 125.24054864606623L118.1694808342007 118.16948083420075\"/><path d=\"M146.5945135840689 105.67324488449933L140.1666374872035 98.01280045330958\"/><path d=\"M169.57262313145287 88.04152129605461L163.8368587679424 79.85000085316472\"/><path d=\"M200.49999999999986 83.73789619276414L188.99999999999986 63.81931190572203\"/><path d=\"M219.6907371020876 59.10581470383232L215.46455448468063 50.042736833465824\"/><path d=\"M246.44931241587804 48.02204989907841L243.02911098262138 38.6251236912193\"/><path d=\"M274.07207702596315 39.3126256720293L271.48388657493797 29.65336740913864\"/><path d=\"M302.3488050145791 33.04382599994693L300.61232323790983 23.195748469824878\"/><path d=\"M331.0642934077775 29.26336023354048L330.1927359803009 19.301413252623036\"/><path d=\"M359.99999999999994 41L359.99999999999994 18\"/><path d=\"M388.9357065922224 29.26336023354048L389.807264019699 19.301413252623036\"/><path d=\"M417.6511949854208 33.043825999946876L419.38767676209005 23.19574846982482\"/><path d=\"M445.92792297403673 39.3126256720293L448.5161134250619 29.653367409138582\"/><path d=\"M473.5506875841221 48.02204989907841L476.9708890173788 38.62512369121936\"/><path d=\"M500.30926289791205 59.105814703832095L504.535445515319 50.0427368334656\"/><path d=\"M519.4999999999998 83.73789619276397L530.9999999999998 63.81931190572186\"/><path d=\"M550.4273768685473 88.04152129605473L556.1631412320578 79.85000085316483\"/><path d=\"M573.405486415931 105.67324488449927L579.8333625127964 98.01280045330947\"/><path d=\"M594.7594513539337 125.24054864606617L601.8305191657992 118.1694808342007\"/><path d=\"M614.3267551155006 146.59451358406886L621.9871995466904 140.16663748720347\"/><path d=\"M631.9584787039453 169.57262313145256L640.1499991468352 163.8368587679421\"/><path d=\"M636.2621038072359 200.5000000000001L656.1806880942781 189.0000000000001\"/><path d=\"M660.8941852961677 219.6907371020876L669.9572631665342 215.4645544846806\"/><path d=\"M671.9779501009216 246.449312415878L681.3748763087807 243.02911098262132\"/><path d=\"M680.6873743279707 274.07207702596315L690.3466325908614 271.4838865749379\"/><path d=\"M686.9561740000531 302.3488050145791L696.8042515301752 300.6123232379098\"/><path d=\"M690.7366397664596 331.0642934077774L700.698586747377 330.1927359803009\"/></g></svg>",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 50,
+      "y": 50,
+      "width": 36.5,
+      "height": 64.9,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    },
+    {
+      "id": "loop-0",
+      "name": "Loop / 1",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 50,
+      "y": 9.11,
+      "scale": 0.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": []
+    },
+    {
+      "id": "loop-1",
+      "name": "Loop / 2",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 61.5,
+      "y": 14.588221239254302,
+      "scale": 0.8,
+      "rotation": 30,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": []
+    },
+    {
+      "id": "loop-2",
+      "name": "Loop / 3",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 69.91858428704208,
+      "y": 29.555,
+      "scale": 0.8,
+      "rotation": 60,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": []
+    },
+    {
+      "id": "loop-3",
+      "name": "Loop / 4",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 73,
+      "y": 50,
+      "scale": 0.8,
+      "rotation": 90,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": []
+    },
+    {
+      "id": "loop-4",
+      "name": "Loop / 5",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 69.9185842870421,
+      "y": 70.445,
+      "scale": 0.8,
+      "rotation": 120,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": []
+    },
+    {
+      "id": "loop-5",
+      "name": "Loop / 6",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 61.5,
+      "y": 85.4117787607457,
+      "scale": 0.8,
+      "rotation": 150,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": []
+    },
+    {
+      "id": "loop-6",
+      "name": "Loop / 7",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 50,
+      "y": 90.89,
+      "scale": 0.8,
+      "rotation": 180,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": []
+    },
+    {
+      "id": "loop-7",
+      "name": "Loop / 8",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 38.50000000000001,
+      "y": 85.4117787607457,
+      "scale": 0.8,
+      "rotation": -150,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": []
+    },
+    {
+      "id": "loop-8",
+      "name": "Loop / 9",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 30.081415712957916,
+      "y": 70.44500000000002,
+      "scale": 0.8,
+      "rotation": -120,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": []
+    },
+    {
+      "id": "loop-9",
+      "name": "Loop / 10",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 27,
+      "y": 50.00000000000001,
+      "scale": 0.8,
+      "rotation": -90,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": []
+    },
+    {
+      "id": "loop-10",
+      "name": "Loop / 11",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 30.081415712957913,
+      "y": 29.554999999999996,
+      "scale": 0.8,
+      "rotation": -60,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": []
+    },
+    {
+      "id": "loop-11",
+      "name": "Loop / 12",
+      "type": "text",
+      "text": "LOOP",
+      "startTime": 0,
+      "duration": 4.55,
+      "x": 38.499999999999986,
+      "y": 14.58822123925431,
+      "scale": 0.8,
+      "rotation": -30,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": []
+    },
+    {
+      "id": "on",
+      "name": "ON",
+      "type": "text",
+      "text": "ON",
+      "startTime": 0.35,
+      "duration": 3.57,
+      "x": 50,
+      "y": 43,
+      "scale": 1.1,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 0.35,
+          "value": 55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.85,
+          "value": 43,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3.4,
+          "value": 43,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.92,
+          "value": 34,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 0.35,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.65,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.92,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "repeat",
+      "name": "REPEAT",
+      "type": "text",
+      "text": "REPEAT",
+      "startTime": 0.55,
+      "duration": 3.37,
+      "x": 50,
+      "y": 54,
+      "scale": 3.25,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0.55,
+          "value": 2.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.1,
+          "value": 3.25,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 2.35,
+          "value": 3.3,
+          "easing": "linear"
+        },
+        {
+          "property": "scale",
+          "time": 3.3,
+          "value": 3.5,
+          "easing": "ease_in"
+        },
+        {
+          "property": "scale",
+          "time": 3.92,
+          "value": 0.4,
+          "easing": "ease_in"
+        },
+        {
+          "property": "rotation",
+          "time": 0.55,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 1.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.3,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 3.92,
+          "value": 18,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 0.55,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.72,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.92,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "count-0",
+      "name": "01",
+      "type": "text",
+      "text": "01",
+      "startTime": 1.05,
+      "duration": 0.7,
+      "x": 50,
+      "y": 66,
+      "scale": 0.45,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": [
+        {
+          "property": "y",
+          "time": 1.05,
+          "value": 69,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 1.23,
+          "value": 66,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 1.55,
+          "value": 66,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 1.74,
+          "value": 63,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 1.05,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 1.15,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 1.6,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 1.74,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "count-1",
+      "name": "02",
+      "type": "text",
+      "text": "02",
+      "startTime": 1.87,
+      "duration": 0.7,
+      "x": 50,
+      "y": 66,
+      "scale": 0.45,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": [
+        {
+          "property": "y",
+          "time": 1.87,
+          "value": 69,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.05,
+          "value": 66,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.37,
+          "value": 66,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 2.56,
+          "value": 63,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 1.87,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 1.97,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 2.42,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 2.56,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "count-2",
+      "name": "03",
+      "type": "text",
+      "text": "03",
+      "startTime": 2.69,
+      "duration": 0.7,
+      "x": 50,
+      "y": 66,
+      "scale": 0.45,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": [
+        {
+          "property": "y",
+          "time": 2.69,
+          "value": 69,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.87,
+          "value": 66,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3.19,
+          "value": 66,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.38,
+          "value": 63,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 2.69,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 2.79,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.24,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.38,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Break / arc 1",
+      "name": "Break / arc 1",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"720\" height=\"720\" viewBox=\"0 0 720 720\"><path d=\"M650 360 A290 290 0 0 1 517.3709245293206 603.5865187418772\" fill=\"none\" stroke=\"#ff5436\" stroke-width=\"5\"/></svg>",
+      "startTime": 3.92,
+      "duration": 1.73,
+      "x": 50,
+      "y": 50,
+      "width": 36.5,
+      "height": 64.9,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 80.71538966616305,
+          "easing": "ease_out"
+        },
+        {
+          "property": "y",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.65,
+          "value": 71.57414923718913,
+          "easing": "ease_out"
+        },
+        {
+          "property": "rotation",
+          "time": 3.92,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.65,
+          "value": 65,
+          "easing": "ease_out"
+        },
+        {
+          "property": "scale",
+          "time": 3.92,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.65,
+          "value": 1.6,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 3.92,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.55,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 5.65,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Break / arc 2",
+      "name": "Break / arc 2",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"720\" height=\"720\" viewBox=\"0 0 720 720\"><path d=\"M505 611.1473670974872 A290 290 0 0 1 227.7333490147804 618.0804778303739\" fill=\"none\" stroke=\"#ff5436\" stroke-width=\"5\"/></svg>",
+      "startTime": 3.92,
+      "duration": 1.73,
+      "x": 50,
+      "y": 50,
+      "width": 36.5,
+      "height": 64.9,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 50.825880485181834,
+          "easing": "ease_out"
+        },
+        {
+          "property": "y",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.65,
+          "value": 94.98747028178272,
+          "easing": "ease_out"
+        },
+        {
+          "property": "rotation",
+          "time": 3.92,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.65,
+          "value": -65,
+          "easing": "ease_out"
+        },
+        {
+          "property": "scale",
+          "time": 3.92,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.65,
+          "value": 1.6,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 3.92,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.55,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 5.65,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Break / arc 3",
+      "name": "Break / arc 3",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"720\" height=\"720\" viewBox=\"0 0 720 720\"><path d=\"M215.00000000000006 611.1473670974872 A290 290 0 0 1 70.36242448545977 374.4939590884967\" fill=\"none\" stroke=\"#ff5436\" stroke-width=\"5\"/></svg>",
+      "startTime": 3.92,
+      "duration": 1.73,
+      "x": 50,
+      "y": 50,
+      "width": 36.5,
+      "height": 64.9,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 20.110490819018793,
+          "easing": "ease_out"
+        },
+        {
+          "property": "y",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.65,
+          "value": 73.41332104459359,
+          "easing": "ease_out"
+        },
+        {
+          "property": "rotation",
+          "time": 3.92,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.65,
+          "value": 65,
+          "easing": "ease_out"
+        },
+        {
+          "property": "scale",
+          "time": 3.92,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.65,
+          "value": 1.6,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 3.92,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.55,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 5.65,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Break / arc 4",
+      "name": "Break / arc 4",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"720\" height=\"720\" viewBox=\"0 0 720 720\"><path d=\"M70 360.00000000000006 A290 290 0 0 1 202.6290754706793 116.41348125812289\" fill=\"none\" stroke=\"#ff5436\" stroke-width=\"5\"/></svg>",
+      "startTime": 3.92,
+      "duration": 1.73,
+      "x": 50,
+      "y": 50,
+      "width": 36.5,
+      "height": 64.9,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 19.28461033383695,
+          "easing": "ease_out"
+        },
+        {
+          "property": "y",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.65,
+          "value": 28.42585076281087,
+          "easing": "ease_out"
+        },
+        {
+          "property": "rotation",
+          "time": 3.92,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.65,
+          "value": -65,
+          "easing": "ease_out"
+        },
+        {
+          "property": "scale",
+          "time": 3.92,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.65,
+          "value": 1.6,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 3.92,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.55,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 5.65,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Break / arc 5",
+      "name": "Break / arc 5",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"720\" height=\"720\" viewBox=\"0 0 720 720\"><path d=\"M214.99999999999986 108.85263290251285 A290 290 0 0 1 492.2666509852194 101.91952216962602\" fill=\"none\" stroke=\"#ff5436\" stroke-width=\"5\"/></svg>",
+      "startTime": 3.92,
+      "duration": 1.73,
+      "x": 50,
+      "y": 50,
+      "width": 36.5,
+      "height": 64.9,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 49.17411951481815,
+          "easing": "ease_out"
+        },
+        {
+          "property": "y",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.65,
+          "value": 5.012529718217287,
+          "easing": "ease_out"
+        },
+        {
+          "property": "rotation",
+          "time": 3.92,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.65,
+          "value": 65,
+          "easing": "ease_out"
+        },
+        {
+          "property": "scale",
+          "time": 3.92,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.65,
+          "value": 1.6,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 3.92,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.55,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 5.65,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Break / arc 6",
+      "name": "Break / arc 6",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"720\" height=\"720\" viewBox=\"0 0 720 720\"><path d=\"M505 108.8526329025128 A290 290 0 0 1 649.6375755145402 345.50604091150325\" fill=\"none\" stroke=\"#ff5436\" stroke-width=\"5\"/></svg>",
+      "startTime": 3.92,
+      "duration": 1.73,
+      "x": 50,
+      "y": 50,
+      "width": 36.5,
+      "height": 64.9,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.65,
+          "value": 79.88950918098121,
+          "easing": "ease_out"
+        },
+        {
+          "property": "y",
+          "time": 3.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.65,
+          "value": 26.586678955406423,
+          "easing": "ease_out"
+        },
+        {
+          "property": "rotation",
+          "time": 3.92,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 5.65,
+          "value": -65,
+          "easing": "ease_out"
+        },
+        {
+          "property": "scale",
+          "time": 3.92,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.65,
+          "value": 1.6,
+          "easing": "ease_out"
+        },
+        {
+          "property": "opacity",
+          "time": 3.92,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.55,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 5.65,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Impact / flash",
+      "name": "Impact / flash",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><rect width=\"1280\" height=\"720\" rx=\"0\" fill=\"#ff5436\"/></svg>",
+      "startTime": 3.91667,
+      "duration": 0.08333333333333333,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    },
+    {
+      "id": "break-0",
+      "name": "BREAK / B",
+      "type": "text",
+      "text": "B",
+      "startTime": 3.52,
+      "duration": 5.03,
+      "x": 28,
+      "y": 48,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3.52,
+          "value": 87,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 4.1,
+          "value": 48,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.7,
+          "value": 48,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.35,
+          "value": 34,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.52,
+          "value": -30,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 4.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.52,
+          "value": 0.3,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 4.1,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.7,
+          "value": 4.8,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.35,
+          "value": 3.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.52,
+          "value": 28,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.7,
+          "value": 28,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 6.35,
+          "value": 34,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "break-1",
+      "name": "BREAK / R",
+      "type": "text",
+      "text": "R",
+      "startTime": 3.605,
+      "duration": 4.945,
+      "x": 39,
+      "y": 48,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3.605,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 4.185,
+          "value": 48,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.7,
+          "value": 48,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.35,
+          "value": 34,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.605,
+          "value": 30,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 4.185,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.605,
+          "value": 0.3,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 4.185,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.7,
+          "value": 4.8,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.35,
+          "value": 3.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.605,
+          "value": 39,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.7,
+          "value": 39,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 6.35,
+          "value": 42,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "break-2",
+      "name": "BREAK / E",
+      "type": "text",
+      "text": "E",
+      "startTime": 3.69,
+      "duration": 4.86,
+      "x": 50,
+      "y": 48,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3.69,
+          "value": 87,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 4.27,
+          "value": 48,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.7,
+          "value": 48,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.35,
+          "value": 34,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.69,
+          "value": -30,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 4.27,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.69,
+          "value": 0.3,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 4.27,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.7,
+          "value": 4.8,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.35,
+          "value": 3.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.69,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.7,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 6.35,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "break-3",
+      "name": "BREAK / A",
+      "type": "text",
+      "text": "A",
+      "startTime": 3.775,
+      "duration": 4.775,
+      "x": 61,
+      "y": 48,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3.775,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 4.355,
+          "value": 48,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.7,
+          "value": 48,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.35,
+          "value": 34,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.775,
+          "value": 30,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 4.355,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.775,
+          "value": 0.3,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 4.355,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.7,
+          "value": 4.8,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.35,
+          "value": 3.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.775,
+          "value": 61,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.7,
+          "value": 61,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 6.35,
+          "value": 58,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "break-4",
+      "name": "BREAK / K",
+      "type": "text",
+      "text": "K",
+      "startTime": 3.86,
+      "duration": 4.69,
+      "x": 72,
+      "y": 48,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 3.86,
+          "value": 87,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 4.44,
+          "value": 48,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.7,
+          "value": 48,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.35,
+          "value": 34,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.86,
+          "value": -30,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 4.44,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.86,
+          "value": 0.3,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 4.44,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.7,
+          "value": 4.8,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.35,
+          "value": 3.4,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.86,
+          "value": 72,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 5.7,
+          "value": 72,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 6.35,
+          "value": 66,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "the-loop",
+      "name": "THE LOOP.",
+      "type": "text",
+      "text": "THE LOOP.",
+      "startTime": 6,
+      "duration": 2.55,
+      "x": 50,
+      "y": 61,
+      "scale": 3.15,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": [
+        {
+          "property": "y",
+          "time": 6,
+          "value": 78,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 6.6,
+          "value": 61,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 6.25,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Transition / slash",
+      "name": "Transition / slash",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"900\" height=\"48\" viewBox=\"0 0 900 48\"><rect width=\"900\" height=\"48\" rx=\"0\" fill=\"#ff5436\"/></svg>",
+      "startTime": 7.8,
+      "duration": 1,
+      "x": 50,
+      "y": 50,
+      "width": 75,
+      "height": 6.7,
+      "scale": 1,
+      "rotation": -12,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "x",
+          "time": 7.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.25,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.8,
+          "value": 100,
+          "easing": "ease_in"
+        },
+        {
+          "property": "scale",
+          "time": 7.8,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.15,
+          "value": 1.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.8,
+          "value": 0.1,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 7.8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 7.95,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 8.55,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 8.8,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "make",
+      "name": "MAKE",
+      "type": "text",
+      "text": "MAKE",
+      "startTime": 8.1,
+      "duration": 3,
+      "x": 29,
+      "y": 37,
+      "scale": 3.6,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "x",
+          "time": 8.1,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.7,
+          "value": 29,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 10.55,
+          "value": 29,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 11.1,
+          "value": 5,
+          "easing": "ease_in"
+        },
+        {
+          "property": "rotation",
+          "time": 8.1,
+          "value": 14,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 8.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 10.55,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 11.1,
+          "value": -22,
+          "easing": "ease_in"
+        }
+      ]
+    },
+    {
+      "id": "your",
+      "name": "YOUR",
+      "type": "text",
+      "text": "YOUR",
+      "startTime": 8.48,
+      "duration": 2.72,
+      "x": 69,
+      "y": 37,
+      "scale": 3.6,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 8.48,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9.15,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 10.65,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 11.2,
+          "value": 40,
+          "easing": "ease_in"
+        },
+        {
+          "property": "scale",
+          "time": 8.48,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.15,
+          "value": 3.6,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 10.65,
+          "value": 3.6,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 11.2,
+          "value": 0.1,
+          "easing": "ease_in"
+        }
+      ]
+    },
+    {
+      "id": "own",
+      "name": "OWN",
+      "type": "text",
+      "text": "OWN",
+      "startTime": 9,
+      "duration": 2.3,
+      "x": 29,
+      "y": 64,
+      "scale": 4.1,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": [
+        {
+          "property": "y",
+          "time": 9,
+          "value": 91,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 9.5,
+          "value": 64,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 10.7,
+          "value": 64,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 11.3,
+          "value": 88,
+          "easing": "ease_in"
+        }
+      ]
+    },
+    {
+      "id": "rhythm-small",
+      "name": "RHYTHM",
+      "type": "text",
+      "text": "RHYTHM",
+      "startTime": 9.4,
+      "duration": 2.05,
+      "x": 70,
+      "y": 64,
+      "scale": 2.65,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "x",
+          "time": 9.4,
+          "value": 95,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9.95,
+          "value": 70,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 10.85,
+          "value": 70,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 11.45,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 9.4,
+          "value": 64,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 10.85,
+          "value": 64,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 11.45,
+          "value": 49,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.4,
+          "value": 0.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.95,
+          "value": 2.65,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 10.85,
+          "value": 2.65,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 11.45,
+          "value": 4.6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 9.65,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.35,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.45,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "wave-letter-0",
+      "name": "Rhythm / 1",
+      "type": "text",
+      "text": "R",
+      "startTime": 11.4,
+      "duration": 3.85,
+      "x": 25,
+      "y": 49,
+      "scale": 4.6,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 11.4,
+          "value": 49,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.4,
+          "value": 3.5,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.507144444444444,
+          "value": 49.74818776223048,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.507144444444444,
+          "value": 2.7364101886381045,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.61428888888889,
+          "value": 51.33982698923638,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.61428888888889,
+          "value": 0.7788232688471006,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.721433333333334,
+          "value": 52.24348792444871,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.721433333333334,
+          "value": -1.5185930869114532,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.828566666666667,
+          "value": 50.56198146082321,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.828566666666667,
+          "value": -3.1533910376584666,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.935711111111111,
+          "value": 48.198924637757266,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.935711111111111,
+          "value": -3.4122476926363827,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.042855555555555,
+          "value": 46.185406663115096,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.042855555555555,
+          "value": -2.182214306505568,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.15,
+          "value": 45.4,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.15,
+          "value": -6.429395695523604e-16,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.257144444444444,
+          "value": 46.18540666311509,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.257144444444444,
+          "value": 2.182214306505567,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.36428888888889,
+          "value": 48.198924637757266,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.36428888888889,
+          "value": 3.4122476926363823,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.471433333333334,
+          "value": 50.56198146082321,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.471433333333334,
+          "value": 3.1533910376584675,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.578566666666667,
+          "value": 52.24348792444871,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.578566666666667,
+          "value": 1.5185930869114543,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.685711111111111,
+          "value": 52.509740483854564,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.685711111111111,
+          "value": -0.7788232688470993,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.792855555555555,
+          "value": 51.244563286691445,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.792855555555555,
+          "value": -2.7364101886381036,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.9,
+          "value": 49,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.9,
+          "value": -3.5,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.007144444444444,
+          "value": 46.75543671330856,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.007144444444444,
+          "value": -2.736410188638105,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.11428888888889,
+          "value": 45.490259516145436,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.11428888888889,
+          "value": -0.7788232688471018,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.221433333333334,
+          "value": 45.756512075551285,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.221433333333334,
+          "value": 1.5185930869114463,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.328566666666667,
+          "value": 47.43801853917679,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.328566666666667,
+          "value": 3.153391037658466,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.435711111111111,
+          "value": 49.80107536224273,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.435711111111111,
+          "value": 3.412247692636383,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.542855555555555,
+          "value": 51.814593336884904,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.542855555555555,
+          "value": 2.1822143065055686,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.65,
+          "value": 52.6,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.65,
+          "value": 1.9288187086570813e-15,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.757144444444444,
+          "value": 51.81459333688491,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.757144444444444,
+          "value": -2.1822143065055655,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.86428888888889,
+          "value": 49.801075362242734,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.86428888888889,
+          "value": -3.4122476926363823,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.971433333333334,
+          "value": 47.438018539176795,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.971433333333334,
+          "value": -3.153391037658468,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.078566666666667,
+          "value": 45.75651207555129,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.078566666666667,
+          "value": -1.51859308691145,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.185711111111111,
+          "value": 45.490259516145436,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.185711111111111,
+          "value": 0.7788232688470981,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.292855555555555,
+          "value": 46.755436713308555,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.292855555555555,
+          "value": 2.7364101886380987,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.4,
+          "value": 49,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.4,
+          "value": 3.5,
+          "easing": "linear"
+        },
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 4.6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 4.6,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 15.2,
+          "value": 0.15,
+          "easing": "ease_in"
+        },
+        {
+          "property": "x",
+          "time": 11.4,
+          "value": 25,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 14.4,
+          "value": 25,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 15.2,
+          "value": 45,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.85,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.25,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "wave-letter-1",
+      "name": "Rhythm / 2",
+      "type": "text",
+      "text": "H",
+      "startTime": 11.4,
+      "duration": 3.85,
+      "x": 35,
+      "y": 49,
+      "scale": 4.6,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": [
+        {
+          "property": "y",
+          "time": 11.4,
+          "value": 49,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.4,
+          "value": 2.67694765549571,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.507144444444444,
+          "value": 48.967841961229645,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.507144444444444,
+          "value": 3.4987430075795456,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.61428888888889,
+          "value": 50.44555378087009,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.61428888888889,
+          "value": 2.79390720928543,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.721433333333334,
+          "value": 52.487012482765856,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.721433333333334,
+          "value": 0.8699862230479412,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.828566666666667,
+          "value": 52.28418160626557,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.828566666666667,
+          "value": -1.4335419723007619,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.935711111111111,
+          "value": 50.648340665075835,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.935711111111111,
+          "value": -3.1115627138160367,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.042855555555555,
+          "value": 48.293267645311595,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.042855555555555,
+          "value": -3.4318934063693147,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.15,
+          "value": 46.246568125775845,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.15,
+          "value": -2.25476190533192,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.257144444444444,
+          "value": 45.40129290648961,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.257144444444444,
+          "value": -0.09379427974687365,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.36428888888889,
+          "value": 46.12626687044927,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.36428888888889,
+          "value": 2.108099263768881,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.471433333333334,
+          "value": 48.105157027722115,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.471433333333334,
+          "value": 3.3901510249112468,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.578566666666667,
+          "value": 50.474500314366495,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.578566666666667,
+          "value": 3.1929543394248605,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.685711111111111,
+          "value": 52.20046450563935,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.685711111111111,
+          "value": 1.602553424379288,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.792855555555555,
+          "value": 52.52994750369415,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.792855555555555,
+          "value": -0.6871009003915101,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.9,
+          "value": 51.31918367405569,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.9,
+          "value": -2.6769476554957103,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.007144444444444,
+          "value": 49.096474116311065,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.007144444444444,
+          "value": -3.498743007579546,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.11428888888889,
+          "value": 46.831669328694865,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.11428888888889,
+          "value": -2.793907209285429,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.221433333333334,
+          "value": 45.512987517234144,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.221433333333334,
+          "value": -0.8699862230479462,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.328566666666667,
+          "value": 45.71581839373443,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.328566666666667,
+          "value": 1.4335419723007627,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.435711111111111,
+          "value": 47.351659334924165,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.435711111111111,
+          "value": 3.1115627138160376,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.542855555555555,
+          "value": 49.70673235468841,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.542855555555555,
+          "value": 3.4318934063693147,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.65,
+          "value": 51.75343187422416,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.65,
+          "value": 2.254761905331918,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.757144444444444,
+          "value": 52.59870709351039,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.757144444444444,
+          "value": 0.09379427974687182,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.86428888888889,
+          "value": 51.87373312955073,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.86428888888889,
+          "value": -2.1080992637688825,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.971433333333334,
+          "value": 49.894842972277885,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.971433333333334,
+          "value": -3.390151024911247,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.078566666666667,
+          "value": 47.5254996856335,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.078566666666667,
+          "value": -3.192954339424857,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.185711111111111,
+          "value": 45.79953549436065,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.185711111111111,
+          "value": -1.6025534243792867,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.292855555555555,
+          "value": 45.47005249630585,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.292855555555555,
+          "value": 0.6871009003915027,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.4,
+          "value": 46.68081632594431,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.4,
+          "value": 2.6769476554957095,
+          "easing": "linear"
+        },
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 4.6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 4.6,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 15.2,
+          "value": 0.15,
+          "easing": "ease_in"
+        },
+        {
+          "property": "x",
+          "time": 11.4,
+          "value": 35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 14.4,
+          "value": 35,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 15.2,
+          "value": 47,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.85,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.25,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "wave-letter-2",
+      "name": "Rhythm / 3",
+      "type": "text",
+      "text": "Y",
+      "startTime": 11.4,
+      "duration": 3.85,
+      "x": 45,
+      "y": 49,
+      "scale": 4.6,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 11.4,
+          "value": 49,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.4,
+          "value": 0.5948850001508437,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.507144444444444,
+          "value": 48.202620588345724,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.507144444444444,
+          "value": 2.6155623206887944,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.61428888888889,
+          "value": 48.87141404195971,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.61428888888889,
+          "value": 3.4949729331924373,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.721433333333334,
+          "value": 51.09054058436519,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.721433333333334,
+          "value": 2.849397418398169,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.828566666666667,
+          "value": 52.461779825528076,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.828566666666667,
+          "value": 0.9605242823411984,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.935711111111111,
+          "value": 52.322516321575876,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.935711111111111,
+          "value": -1.3474611711794502,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.042855555555555,
+          "value": 50.733515896915705,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.042855555555555,
+          "value": -3.0674994124038735,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.15,
+          "value": 48.38811828555913,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.15,
+          "value": -3.4490740549596106,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.257144444444444,
+          "value": 46.30970732729153,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.257144444444444,
+          "value": -2.3256899506583095,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.36428888888889,
+          "value": 45.40517069728778,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.36428888888889,
+          "value": -0.18752118880876162,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.471433333333334,
+          "value": 46.06919122679045,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.471433333333334,
+          "value": 2.032470012577268,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.578566666666667,
+          "value": 48.01203216673476,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.578566666666667,
+          "value": 3.365619274818963,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.685711111111111,
+          "value": 50.38596006178457,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.685711111111111,
+          "value": 3.2302242015321028,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.792855555555555,
+          "value": 52.15514225275827,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.792855555555555,
+          "value": 1.6853626775569404,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.9,
+          "value": 52.547619027958454,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.9,
+          "value": -0.5948850001508408,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.007144444444444,
+          "value": 51.392138234962836,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.007144444444444,
+          "value": -2.6155623206887926,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.11428888888889,
+          "value": 49.19287893706044,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.11428888888889,
+          "value": -3.494972933192437,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.221433333333334,
+          "value": 46.909459415634814,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.221433333333334,
+          "value": -2.849397418398175,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.328566666666667,
+          "value": 45.538220174471924,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.328566666666667,
+          "value": -0.960524282341201,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.435711111111111,
+          "value": 45.677483678424124,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.435711111111111,
+          "value": 1.3474611711794477,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.542855555555555,
+          "value": 47.26648410308429,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.542855555555555,
+          "value": 3.0674994124038717,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.65,
+          "value": 49.61188171444086,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.65,
+          "value": 3.4490740549596115,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.757144444444444,
+          "value": 51.69029267270847,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.757144444444444,
+          "value": 2.3256899506583117,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.86428888888889,
+          "value": 52.59482930271222,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.86428888888889,
+          "value": 0.18752118880876292,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.971433333333334,
+          "value": 51.93080877320955,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.971433333333334,
+          "value": -2.032470012577267,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.078566666666667,
+          "value": 49.98796783326523,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.078566666666667,
+          "value": -3.3656192748189646,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.185711111111111,
+          "value": 47.61403993821542,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.185711111111111,
+          "value": -3.2302242015321005,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.292855555555555,
+          "value": 45.84485774724173,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.292855555555555,
+          "value": -1.6853626775569417,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.4,
+          "value": 45.452380972041546,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.4,
+          "value": 0.5948850001508457,
+          "easing": "linear"
+        },
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 4.6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 4.6,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 15.2,
+          "value": 0.15,
+          "easing": "ease_in"
+        },
+        {
+          "property": "x",
+          "time": 11.4,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 14.4,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 15.2,
+          "value": 49,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.85,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.25,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "wave-letter-3",
+      "name": "Rhythm / 4",
+      "type": "text",
+      "text": "T",
+      "startTime": 11.4,
+      "duration": 3.85,
+      "x": 55,
+      "y": 49,
+      "scale": 4.6,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 11.4,
+          "value": 49,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.4,
+          "value": -1.7669613660994998,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.507144444444444,
+          "value": 47.8124192121598,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.507144444444444,
+          "value": 0.5022418050894751,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.61428888888889,
+          "value": 47.35775028832669,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.61428888888889,
+          "value": 2.5522982761605473,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.721433333333334,
+          "value": 48.71085478353988,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.721433333333334,
+          "value": 3.4886924848129204,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.828566666666667,
+          "value": 51.01124890104285,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.828566666666667,
+          "value": 2.902840958392173,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.935711111111111,
+          "value": 52.434060636289175,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.935711111111111,
+          "value": 1.0503724149244176,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.042855555555555,
+          "value": 52.358464535267295,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.042855555555555,
+          "value": -1.2604125137844089,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.15,
+          "value": 50.81744597655948,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.15,
+          "value": -3.021232783271058,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.257144444444444,
+          "value": 48.483408429050826,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.257144444444444,
+          "value": -3.463777297867238,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.36428888888889,
+          "value": 46.37477891594915,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.36428888888889,
+          "value": -2.39494749619024,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.471433333333334,
+          "value": 45.411630587049565,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.471433333333334,
+          "value": -0.28111340489178527,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.578566666666667,
+          "value": 46.01422072851091,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.578566666666667,
+          "value": 1.9553808760138802,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.685711111111111,
+          "value": 47.91961694464917,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.685711111111111,
+          "value": 3.338670063058919,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.792855555555555,
+          "value": 50.296424299892536,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.792855555555555,
+          "value": 3.2651738537320902,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.9,
+          "value": 52.10755371993594,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.9,
+          "value": 1.7669613660995012,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.007144444444444,
+          "value": 52.56274236352059,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.007144444444444,
+          "value": -0.5022418050894739,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.11428888888889,
+          "value": 51.46337456750996,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.11428888888889,
+          "value": -2.5522982761605464,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.221433333333334,
+          "value": 49.28914521646013,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.221433333333334,
+          "value": -3.4886924848129195,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.328566666666667,
+          "value": 46.98875109895715,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.328566666666667,
+          "value": -2.902840958392173,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.435711111111111,
+          "value": 45.565939363710825,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.435711111111111,
+          "value": -1.050372414924419,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.542855555555555,
+          "value": 45.641535464732705,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.542855555555555,
+          "value": 1.2604125137844076,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.65,
+          "value": 47.18255402344051,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.65,
+          "value": 3.021232783271058,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.757144444444444,
+          "value": 49.516591570949174,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.757144444444444,
+          "value": 3.4637772978672383,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.86428888888889,
+          "value": 51.62522108405085,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.86428888888889,
+          "value": 2.394947496190241,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.971433333333334,
+          "value": 52.588369412950435,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.971433333333334,
+          "value": 0.2811134048917866,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.078566666666667,
+          "value": 51.98577927148909,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.078566666666667,
+          "value": -1.9553808760138844,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.185711111111111,
+          "value": 50.08038305535083,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.185711111111111,
+          "value": -3.3386700630589186,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.292855555555555,
+          "value": 47.70357570010748,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.292855555555555,
+          "value": -3.265173853732095,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.4,
+          "value": 45.89244628006406,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.4,
+          "value": -1.7669613660995078,
+          "easing": "linear"
+        },
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 4.6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 4.6,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 15.2,
+          "value": 0.15,
+          "easing": "ease_in"
+        },
+        {
+          "property": "x",
+          "time": 11.4,
+          "value": 55,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 14.4,
+          "value": 55,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 15.2,
+          "value": 51,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.85,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.25,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "wave-letter-4",
+      "name": "Rhythm / 5",
+      "type": "text",
+      "text": "H",
+      "startTime": 11.4,
+      "duration": 3.85,
+      "x": 65,
+      "y": 49,
+      "scale": 4.6,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#ff5436",
+      "keys": [
+        {
+          "property": "y",
+          "time": 11.4,
+          "value": 49,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.4,
+          "value": -3.2977781923403033,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.507144444444444,
+          "value": 47.980755636956815,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.507144444444444,
+          "value": -1.8472908791881077,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.61428888888889,
+          "value": 46.616462234953225,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.61428888888889,
+          "value": 0.4092378590896865,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.721433333333334,
+          "value": 46.46715849603439,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.721433333333334,
+          "value": 2.487200963296372,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.828566666666667,
+          "value": 48.614796191766196,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.828566666666667,
+          "value": 3.479906173570143,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.935711111111111,
+          "value": 50.93051257507807,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.935711111111111,
+          "value": 2.9541994417676154,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.042855555555555,
+          "value": 52.40387482522673,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.042855555555555,
+          "value": 1.1394660845566589,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.15,
+          "value": 52.39200042640717,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.15,
+          "value": -1.1724585255456672,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.257144444444444,
+          "value": 50.90007061859348,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.257144444444444,
+          "value": -2.9727960588759577,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.36428888888889,
+          "value": 48.57906963065061,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.36428888888889,
+          "value": -3.4759925740265456,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.471433333333334,
+          "value": 46.44173615203802,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.471433333333334,
+          "value": -2.4624847955221165,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.578566666666667,
+          "value": 45.42066793575643,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.578566666666667,
+          "value": -0.3745037024495337,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.685711111111111,
+          "value": 45.96139485989617,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.685711111111111,
+          "value": 1.8768872257703466,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.792855555555555,
+          "value": 47.827977741598865,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.792855555555555,
+          "value": 3.30932274674821,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.9,
+          "value": 50.205957340561255,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.9,
+          "value": 3.297778192340304,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.007144444444444,
+          "value": 52.057733089129556,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.007144444444444,
+          "value": 1.8472908791881089,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.11428888888889,
+          "value": 52.57530664757016,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.11428888888889,
+          "value": -0.40923785908968524,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.221433333333334,
+          "value": 51.532841503965614,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.221433333333334,
+          "value": -2.4872009632963645,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.328566666666667,
+          "value": 49.38520380823381,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.328566666666667,
+          "value": -3.4799061735701424,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.435711111111111,
+          "value": 47.069487424921924,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.435711111111111,
+          "value": -2.954199441767614,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.542855555555555,
+          "value": 45.59612517477327,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.542855555555555,
+          "value": -1.1394660845566629,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.65,
+          "value": 45.607999573592835,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.65,
+          "value": 1.1724585255456688,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.757144444444444,
+          "value": 47.09992938140651,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.757144444444444,
+          "value": 2.9727960588759554,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.86428888888889,
+          "value": 49.42093036934939,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.86428888888889,
+          "value": 3.4759925740265456,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.971433333333334,
+          "value": 51.55826384796198,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.971433333333334,
+          "value": 2.4624847955221196,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.078566666666667,
+          "value": 52.57933206424357,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.078566666666667,
+          "value": 0.3745037024495319,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.185711111111111,
+          "value": 52.03860514010383,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.185711111111111,
+          "value": -1.8768872257703433,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.292855555555555,
+          "value": 50.17202225840114,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.292855555555555,
+          "value": -3.3093227467482063,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.4,
+          "value": 47.794042659438745,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.4,
+          "value": -3.297778192340305,
+          "easing": "linear"
+        },
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 4.6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 4.6,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 15.2,
+          "value": 0.15,
+          "easing": "ease_in"
+        },
+        {
+          "property": "x",
+          "time": 11.4,
+          "value": 65,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 14.4,
+          "value": 65,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 15.2,
+          "value": 53,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.85,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.25,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "wave-letter-5",
+      "name": "Rhythm / 6",
+      "type": "text",
+      "text": "M",
+      "startTime": 11.4,
+      "duration": 3.85,
+      "x": 75,
+      "y": 49,
+      "scale": 4.6,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 11.4,
+          "value": 49,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.4,
+          "value": -3.277598405517787,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.507144444444444,
+          "value": 48.62845861182553,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.507144444444444,
+          "value": -3.328013798267311,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.61428888888889,
+          "value": 46.9961892362862,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.61428888888889,
+          "value": -1.9262935176289933,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.721433333333334,
+          "value": 45.414697144584146,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.721433333333334,
+          "value": 0.3159399651544471,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.828566666666667,
+          "value": 46.399510852477434,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.828566666666667,
+          "value": 2.4203171402841916,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 11.935711111111111,
+          "value": 48.51901428471667,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 11.935711111111111,
+          "value": 3.4686203105078968,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.042855555555555,
+          "value": 50.84838959787074,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.042855555555555,
+          "value": 3.003435978682022,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.15,
+          "value": 52.37124407424687,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.15,
+          "value": 1.22774129691367,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.257144444444444,
+          "value": 52.42309990678923,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.257144444444444,
+          "value": -1.0836623821755496,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.36428888888889,
+          "value": 50.981330475275534,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.36428888888889,
+          "value": -2.9222240304159635,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.471433333333334,
+          "value": 48.675033178698285,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.471433333333334,
+          "value": -3.485711109432078,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.578566666666667,
+          "value": 46.510530941421976,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.578566666666667,
+          "value": -2.5282533378691614,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.685711111111111,
+          "value": 45.43227625204902,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.685711111111111,
+          "value": -0.4676250009699044,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.792855555555555,
+          "value": 45.910751564784206,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.792855555555555,
+          "value": 1.797045442374333,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 12.9,
+          "value": 47.73718038031737,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 12.9,
+          "value": 3.2775984055177867,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.007144444444444,
+          "value": 50.11462416452342,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.007144444444444,
+          "value": 3.3280137982673113,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.11428888888889,
+          "value": 52.0057161455707,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.11428888888889,
+          "value": 1.9262935176289944,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.221433333333334,
+          "value": 52.585302855415854,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.221433333333334,
+          "value": -0.31593996515443973,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.328566666666667,
+          "value": 51.600489147522566,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.328566666666667,
+          "value": -2.4203171402841903,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.435711111111111,
+          "value": 49.48098571528333,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.435711111111111,
+          "value": -3.4686203105078963,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.542855555555555,
+          "value": 47.15161040212926,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.542855555555555,
+          "value": -3.0034359786820226,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.65,
+          "value": 45.62875592575313,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.65,
+          "value": -1.2277412969136714,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.757144444444444,
+          "value": 45.57690009321077,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.757144444444444,
+          "value": 1.0836623821755484,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.86428888888889,
+          "value": 47.018669524724466,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.86428888888889,
+          "value": 2.9222240304159626,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 13.971433333333334,
+          "value": 49.324966821301715,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 13.971433333333334,
+          "value": 3.4857111094320783,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.078566666666667,
+          "value": 51.48946905857803,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.078566666666667,
+          "value": 2.528253337869158,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.185711111111111,
+          "value": 52.56772374795098,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.185711111111111,
+          "value": 0.46762500096990567,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.292855555555555,
+          "value": 52.0892484352158,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.292855555555555,
+          "value": -1.7970454423743265,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.4,
+          "value": 50.26281961968263,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 14.4,
+          "value": -3.2775984055177863,
+          "easing": "linear"
+        },
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 4.6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 4.6,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 15.2,
+          "value": 0.15,
+          "easing": "ease_in"
+        },
+        {
+          "property": "x",
+          "time": 11.4,
+          "value": 75,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 14.4,
+          "value": 75,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 15.2,
+          "value": 55,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.85,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.25,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Rhythm / bar 1",
+      "name": "Rhythm / bar 1",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"140\" viewBox=\"0 0 30 140\"><rect width=\"30\" height=\"140\" rx=\"15\" fill=\"#ff5436\"/></svg>",
+      "startTime": 11.4,
+      "duration": 4,
+      "x": 26,
+      "y": 71,
+      "width": 2.35,
+      "height": 19.45,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 0.25,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.5875,
+          "value": 0.9184055200460766,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.775,
+          "value": 0.8563723028646926,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.9625,
+          "value": 0.36830927060743646,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.15,
+          "value": 0.9637015554171371,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.3375,
+          "value": 0.7791552441777939,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.525,
+          "value": 0.48365602263503404,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.7125,
+          "value": 0.9911261754077504,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.9,
+          "value": 0.6886878946688213,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.0875,
+          "value": 0.593151920331491,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.275,
+          "value": 0.9999926549130276,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.4625,
+          "value": 0.5872355984009499,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 0.6940551360304184,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.8375,
+          "value": 0.9900789732059601,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.025,
+          "value": 0.47733876755927546,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.2125,
+          "value": 0.7838390067768423,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 0.961633373438593,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Rhythm / bar 2",
+      "name": "Rhythm / bar 2",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"140\" viewBox=\"0 0 30 140\"><rect width=\"30\" height=\"140\" rx=\"15\" fill=\"#f4efe6\"/></svg>",
+      "startTime": 11.4,
+      "duration": 4,
+      "x": 32,
+      "y": 71,
+      "width": 2.35,
+      "height": 19.45,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 0.6095691539531523,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.5875,
+          "value": 0.6734818550462767,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.775,
+          "value": 0.9937486078393514,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.9625,
+          "value": 0.5012411126169285,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.15,
+          "value": 0.7658246193879805,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.3375,
+          "value": 0.9691932059973538,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.525,
+          "value": 0.38662187820407123,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.7125,
+          "value": 0.8452508978868652,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.9,
+          "value": 0.92662887531722,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.0875,
+          "value": 0.26858156909001835,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.275,
+          "value": 0.9097718199787526,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.4625,
+          "value": 0.8671214462265309,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 0.34992403106495795,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.8375,
+          "value": 0.9577717520830786,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.025,
+          "value": 0.792161012133981,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.2125,
+          "value": 0.465927487498799,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 0.9880487538112326,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Rhythm / bar 3",
+      "name": "Rhythm / bar 3",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"140\" viewBox=\"0 0 30 140\"><rect width=\"30\" height=\"140\" rx=\"15\" fill=\"#ff5436\"/></svg>",
+      "startTime": 11.4,
+      "duration": 4,
+      "x": 38,
+      "y": 71,
+      "width": 2.35,
+      "height": 19.45,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 0.8811032386059223,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.5875,
+          "value": 0.3248750624851212,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.775,
+          "value": 0.9490293144754198,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.9625,
+          "value": 0.8092789091325401,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.15,
+          "value": 0.44165582652012375,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.3375,
+          "value": 0.9831475882488228,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.525,
+          "value": 0.7234499784042406,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.7125,
+          "value": 0.5536374404624493,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.9,
+          "value": 0.9989075090309537,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.0875,
+          "value": 0.6257656423434135,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.275,
+          "value": 0.6580158331670274,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.4625,
+          "value": 0.9959144411529918,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 0.5186719616776203,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.8375,
+          "value": 0.7521773216474518,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.025,
+          "value": 0.9742433324119577,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.2125,
+          "value": 0.40485061145334744,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 0.8337640589007238,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Rhythm / bar 4",
+      "name": "Rhythm / bar 4",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"140\" viewBox=\"0 0 30 140\"><rect width=\"30\" height=\"140\" rx=\"15\" fill=\"#f4efe6\"/></svg>",
+      "startTime": 11.4,
+      "duration": 4,
+      "x": 44,
+      "y": 71,
+      "width": 2.35,
+      "height": 19.45,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 0.9981212399530408,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.5875,
+          "value": 0.5420637567314879,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.775,
+          "value": 0.7331632654282685,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.9625,
+          "value": 0.9803857231586464,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.15,
+          "value": 0.4294369969104865,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.3375,
+          "value": 0.8176018714809461,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.525,
+          "value": 0.9443610117457991,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.7125,
+          "value": 0.31231705211312166,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.9,
+          "value": 0.8878274654714237,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.0875,
+          "value": 0.8909491810662105,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.275,
+          "value": 0.306363340346357,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.4625,
+          "value": 0.9420815662096055,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 0.8214876879392741,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.8375,
+          "value": 0.4236323688261542,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.025,
+          "value": 0.9790056260462323,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.2125,
+          "value": 0.7377158801178376,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 0.5365535628880068,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Rhythm / bar 5",
+      "name": "Rhythm / bar 5",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"140\" viewBox=\"0 0 30 140\"><rect width=\"30\" height=\"140\" rx=\"15\" fill=\"#ff5436\"/></svg>",
+      "startTime": 11.4,
+      "duration": 4,
+      "x": 50,
+      "y": 71,
+      "width": 2.35,
+      "height": 19.45,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 0.9319730701192612,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.5875,
+          "value": 0.8374951822206125,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.775,
+          "value": 0.39900199809629605,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.9625,
+          "value": 0.9726686390628948,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.15,
+          "value": 0.756597385413363,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.3375,
+          "value": 0.5130874207672149,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.525,
+          "value": 0.9952682527250984,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.7125,
+          "value": 0.6630141569482277,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.9,
+          "value": 0.6205850133539568,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.0875,
+          "value": 0.999206006379829,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.275,
+          "value": 0.5590888639313174,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.4625,
+          "value": 0.7188029866696626,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 0.9843832968634877,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.8375,
+          "value": 0.4474238435243507,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.025,
+          "value": 0.8052819174643373,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.2125,
+          "value": 0.9511712916435122,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 0.3308152392245817,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Rhythm / bar 6",
+      "name": "Rhythm / bar 6",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"140\" viewBox=\"0 0 30 140\"><rect width=\"30\" height=\"140\" rx=\"15\" fill=\"#f4efe6\"/></svg>",
+      "startTime": 11.4,
+      "duration": 4,
+      "x": 56,
+      "y": 71,
+      "width": 2.35,
+      "height": 19.45,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 0.6988541080779673,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.5875,
+          "value": 0.9890872974913452,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.775,
+          "value": 0.47164015499600453,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.9625,
+          "value": 0.7880170681746422,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.15,
+          "value": 0.9597250657655607,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.3375,
+          "value": 0.3558400060449004,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.525,
+          "value": 0.8637078332983081,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.7125,
+          "value": 0.9125909917901146,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.9,
+          "value": 0.26261042536326296,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.0875,
+          "value": 0.9240310718587201,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.275,
+          "value": 0.8488653344676177,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.4625,
+          "value": 0.38074508591723605,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 0.9674762622026414,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.8375,
+          "value": 0.7701438135828418,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.025,
+          "value": 0.4956058293532711,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.2125,
+          "value": 0.9929555167711528,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 0.6783976522449904,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Rhythm / bar 7",
+      "name": "Rhythm / bar 7",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"140\" viewBox=\"0 0 30 140\"><rect width=\"30\" height=\"140\" rx=\"15\" fill=\"#ff5436\"/></svg>",
+      "startTime": 11.4,
+      "duration": 4,
+      "x": 62,
+      "y": 71,
+      "width": 2.35,
+      "height": 19.45,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 0.3558400060449004,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.5875,
+          "value": 0.9597250657655608,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.775,
+          "value": 0.788017068174642,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.9625,
+          "value": 0.47164015499600487,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.15,
+          "value": 0.9890872974913452,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.3375,
+          "value": 0.6988541080779673,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.525,
+          "value": 0.5818903324711396,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.7125,
+          "value": 0.9999424431730757,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.9,
+          "value": 0.5984516345603175,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.0875,
+          "value": 0.6838298232911502,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.275,
+          "value": 0.9920186849675363,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.4625,
+          "value": 0.4893237717620128,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 0.7749060156951577,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.8375,
+          "value": 0.9655144374265667,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.025,
+          "value": 0.37420313158623075,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.2125,
+          "value": 0.8528383199137157,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 0.9210933791053776,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Rhythm / bar 8",
+      "name": "Rhythm / bar 8",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"140\" viewBox=\"0 0 30 140\"><rect width=\"30\" height=\"140\" rx=\"15\" fill=\"#f4efe6\"/></svg>",
+      "startTime": 11.4,
+      "duration": 4,
+      "x": 68,
+      "y": 71,
+      "width": 2.35,
+      "height": 19.45,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 0.5130874207672149,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.5875,
+          "value": 0.7565973854133632,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.775,
+          "value": 0.9726686390628947,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.9625,
+          "value": 0.3990019980962957,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.15,
+          "value": 0.8374951822206127,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.3375,
+          "value": 0.9319730701192612,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.525,
+          "value": 0.2811854968249675,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.7125,
+          "value": 0.9036818293101915,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.9,
+          "value": 0.8742005816679256,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.0875,
+          "value": 0.3374119036378702,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.275,
+          "value": 0.9534999825810542,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.4625,
+          "value": 0.8007978234055841,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 0.4538204698082081,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.8375,
+          "value": 0.9857021725498687,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.025,
+          "value": 0.7136028341777739,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.2125,
+          "value": 0.5651252776199807,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 0.9994820415609383,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Rhythm / bar 9",
+      "name": "Rhythm / bar 9",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"140\" viewBox=\"0 0 30 140\"><rect width=\"30\" height=\"140\" rx=\"15\" fill=\"#ff5436\"/></svg>",
+      "startTime": 11.4,
+      "duration": 4,
+      "x": 74,
+      "y": 71,
+      "width": 2.35,
+      "height": 19.45,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 11.4,
+          "value": 0.8176018714809461,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.5875,
+          "value": 0.4294369969104868,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.775,
+          "value": 0.9803857231586465,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 11.9625,
+          "value": 0.7331632654282682,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.15,
+          "value": 0.5420637567314881,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.3375,
+          "value": 0.9981212399530408,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.525,
+          "value": 0.6366260288660979,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.7125,
+          "value": 0.6473771056813705,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 12.9,
+          "value": 0.9971234566268804,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.0875,
+          "value": 0.530407498622677,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.275,
+          "value": 0.7427399490390918,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.4625,
+          "value": 0.9774173581338144,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.65,
+          "value": 0.41716743557518443,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 13.8375,
+          "value": 0.8257643573226868,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.025,
+          "value": 0.9394963942485063,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.2125,
+          "value": 0.2997414230134005,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "scale",
+          "time": 14.4,
+          "value": 0.8943713611423726,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 11.7,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.4,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Final / travelling dot",
+      "name": "Final / travelling dot",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"720\" height=\"720\" viewBox=\"0 0 720 720\"><circle cx=\"360\" cy=\"360\" r=\"320\" fill=\"#ff5436\"/></svg>",
+      "startTime": 14.8,
+      "duration": 5.2,
+      "x": 18,
+      "y": 72,
+      "width": 3.6,
+      "height": 6.4,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "x",
+          "time": 14.8,
+          "value": 18,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.8,
+          "value": 72,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 14.903122222222223,
+          "value": 21.625,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 14.903122222222223,
+          "value": 64.47674840741938,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.006255555555555,
+          "value": 25.25,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.006255555555555,
+          "value": 57.22339643485677,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.109377777777778,
+          "value": 28.875,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.109377777777778,
+          "value": 50.499471611294325,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.2125,
+          "value": 32.5,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.2125,
+          "value": 44.54415587728429,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.315622222222222,
+          "value": 36.125,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.315622222222222,
+          "value": 39.56709395710837,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.418755555555556,
+          "value": 39.75,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.418755555555556,
+          "value": 35.74033682959368,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.521877777777778,
+          "value": 43.375,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.521877777777778,
+          "value": 33.191729905483704,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.625,
+          "value": 47,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.625,
+          "value": 32,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.728122222222222,
+          "value": 50.625,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.728122222222222,
+          "value": 32.191729905483704,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.831255555555556,
+          "value": 54.25,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.831255555555556,
+          "value": 33.74033682959368,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 15.934377777777778,
+          "value": 57.875,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 15.934377777777778,
+          "value": 36.56709395710837,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 16.0375,
+          "value": 61.5,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 16.0375,
+          "value": 40.54415587728428,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 16.140622222222223,
+          "value": 65.125,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 16.140622222222223,
+          "value": 45.499471611294325,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 16.243755555555556,
+          "value": 68.75,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 16.243755555555556,
+          "value": 51.22339643485677,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 16.346877777777777,
+          "value": 72.375,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 16.346877777777777,
+          "value": 57.47674840741937,
+          "easing": "linear"
+        },
+        {
+          "property": "x",
+          "time": 16.45,
+          "value": 76,
+          "easing": "linear"
+        },
+        {
+          "property": "y",
+          "time": 16.45,
+          "value": 63.99999999999999,
+          "easing": "linear"
+        },
+        {
+          "property": "scale",
+          "time": 14.8,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 15.1,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 16.45,
+          "value": 1,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 16.62,
+          "value": 1.3,
+          "easing": "ease_out"
+        },
+        {
+          "property": "scale",
+          "time": 16.9,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 20,
+          "value": 1,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "move-final",
+      "name": "MOVE",
+      "type": "text",
+      "text": "MOVE",
+      "startTime": 15,
+      "duration": 5,
+      "x": 48,
+      "y": 38,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "x",
+          "time": 15,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 16.1,
+          "value": 48,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 15,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 16.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 15,
+          "value": 2,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 16.1,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 15,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.25,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "different-final",
+      "name": "DIFFERENT",
+      "type": "text",
+      "text": "DIFFERENT",
+      "startTime": 15.5,
+      "duration": 4.5,
+      "x": 48,
+      "y": 60,
+      "scale": 3.35,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#f4efe6",
+      "keys": [
+        {
+          "property": "y",
+          "time": 15.5,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 16.45,
+          "value": 60,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 15.5,
+          "value": 8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 16.45,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 15.5,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 15.8,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "Final / underline",
+      "name": "Final / underline",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1000\" height=\"8\" viewBox=\"0 0 1000 8\"><rect width=\"1000\" height=\"8\" rx=\"4\" fill=\"#ff5436\"/></svg>",
+      "startTime": 16.4,
+      "duration": 3.6,
+      "x": 50,
+      "y": 76,
+      "width": 76,
+      "height": 1.12,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 16.4,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 17.15,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.12,
+            1.25,
+            0.25,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 16.4,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 16.55,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "final-signature",
+      "name": "BREAK THE LOOP.",
+      "type": "text",
+      "text": "BREAK THE LOOP.",
+      "startTime": 17,
+      "duration": 3,
+      "x": 50,
+      "y": 84,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#777477",
+      "keys": [
+        {
+          "property": "y",
+          "time": 17,
+          "value": 88,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 17.55,
+          "value": 84,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 17,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 17.55,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": "01 / repeating orbit",
+      "name": "01 / repeating orbit",
+      "layerIds": [
+        "Loop / dial",
+        "loop-0",
+        "loop-1",
+        "loop-2",
+        "loop-3",
+        "loop-4",
+        "loop-5",
+        "loop-6",
+        "loop-7",
+        "loop-8",
+        "loop-9",
+        "loop-10",
+        "loop-11"
+      ],
+      "startTime": 0,
+      "duration": 4.55,
+      "keys": [
+        {
+          "property": "rotation",
+          "time": 0,
+          "value": -160,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 1.6,
+          "value": -105,
+          "easing": "linear"
+        },
+        {
+          "property": "rotation",
+          "time": 3.35,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.7,
+            0,
+            1,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 4.55,
+          "value": 130,
+          "easing": "ease_in"
+        },
+        {
+          "property": "scale",
+          "time": 0,
+          "value": 1.7,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 0.65,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.15,
+          "value": 0.92,
+          "easing": "linear"
+        },
+        {
+          "property": "scale",
+          "time": 3.65,
+          "value": 1.02,
+          "easing": "ease_in"
+        },
+        {
+          "property": "scale",
+          "time": 4.55,
+          "value": 1.85,
+          "easing": "ease_in"
+        },
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 0.3,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 3.9,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 4.55,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "02 / break the loop",
+      "name": "02 / break the loop",
+      "layerIds": [
+        "break-0",
+        "break-1",
+        "break-2",
+        "break-3",
+        "break-4",
+        "the-loop"
+      ],
+      "startTime": 3.52,
+      "duration": 5.03,
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.52,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 7.65,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "x",
+          "time": 8.55,
+          "value": -100,
+          "easing": "ease_in"
+        },
+        {
+          "property": "rotation",
+          "time": 3.52,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.65,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 8.55,
+          "value": -12,
+          "easing": "ease_in"
+        }
+      ]
+    }
+  ]
+}

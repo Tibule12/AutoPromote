@@ -16,6 +16,8 @@ import { studioGroupTree, createStudioGroup, moveStudioGroupNode, removeStudioGr
 import StudioMotionPathEditor from './StudioMotionPathEditor';
 import StudioKineticTypePanel from './StudioKineticTypePanel';
 import { buildStudioKineticType } from './studioKineticType';
+import StudioGraphicsImport from './StudioGraphicsImport';
+import { buildStudioGraphicsPackage } from './studioGraphicsPackage';
 import { editStudioPositionPose } from './studioMotionEditing';
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
@@ -10661,6 +10663,29 @@ const ViralClipStudio = ({
       setCompoundClips(next.compounds); applyCompositionOrder(next.order);
       setStudioActionMessage("Group created. Its children keep their edits and keyframes.");
     } catch (error) { setStudioActionMessage(error.message); }
+  };
+
+  const importGraphicsComposition = async input => {
+    if (trackStates.graphics?.locked) throw Error('Unlock the Graphics track before importing.');
+    const projectId = activeProjectIdRef.current, signature = lastSnapshotSignatureRef.current;
+    const stage = phoneFrameRef.current;
+    const result = await buildStudioGraphicsPackage({ input, overlays, keyframes: motionKeyframes,
+      compounds: effectiveCompoundClips, order: compositionIds, duration: liveTimelineDuration,
+      aspect: (stage?.clientWidth || 1280) / (stage?.clientHeight || 720), createId: createSecureId });
+    if (activeProjectIdRef.current !== projectId || lastSnapshotSignatureRef.current !== signature) {
+      result.urls.forEach(url => URL.revokeObjectURL(url));
+      throw Error('The edit changed during import. Import the composition again.');
+    }
+    result.urls.forEach(url => projectMediaObjectUrlsRef.current.add(url));
+    flushSync(() => {
+      setOverlays(result.overlays); setMotionKeyframes(result.keyframes);
+      setCompoundClips(result.compounds); setCompositionOrder(result.order);
+      setActiveOverlayId(result.layers.find(layer => layer.type === 'text')?.id || result.layers[0].id);
+      setMotionTargetId(result.layers[0].id); setSelectedGroupId(null); setPreviewFinishedFile(false);
+    });
+    setComparisonMode('after'); setTimelineDockExpanded(true);
+    setStudioActionMessage(`${result.name}: ${result.layers.length} editable graphic layers imported.`);
+    return result.name;
   };
 
   const createKineticTitle = async options => {
@@ -23933,6 +23958,8 @@ const ViralClipStudio = ({
                       layers
                     </span>
                   </div>
+
+                  <StudioGraphicsImport onImport={importGraphicsComposition} locked={!!trackStates.graphics?.locked} />
 
                   <div className="title-preset-grid" aria-label="Add title layer">
                     <button type="button" onClick={() => addTextOverlay("headline")}>

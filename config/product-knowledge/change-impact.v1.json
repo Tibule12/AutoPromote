@@ -673,6 +673,24 @@
         "reports/studio-kinetic-composition-20261015/README.md"
       ],
       "reason": "Kinetic word/grapheme authoring emits existing ordinary grouped titles and motion keys; document real constraints without promoting readiness. Native full-frame typography continuation uses ordinary artwork/group keys; a 100% image preview now honors its saved width instead of the legacy 90% CSS cap."
+    },
+    {
+      "feature_id": "studio.titles",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioGraphicsImport.js",
+        "frontend/src/components/studioGraphicsPackage.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "reports/studio-break-the-loop-20261015/README.md"
+      ],
+      "reason": "Native graphics interchange imports authored choreography as ordinary editable titles, artwork, groups and property keys with atomic history and no separate animation evaluator. Preserve user rejection of both previous samples and separate creative approval from native delivery evidence."
     }
   ]
 }

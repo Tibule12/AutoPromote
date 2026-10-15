@@ -1,0 +1,190 @@
+{
+  "evidence": "reports/studio-break-the-loop-20261015/README.md",
+  "checkpoint": "reports/studio-break-the-loop-20261015/checkpoint.json",
+  "branch": "agent/studio-professional-continuation-v2",
+  "scope": "Native graphics interchange produces ordinary editable titles, raster artwork, groups and transform keys; BREAK THE LOOP uses connected orbit/breakup/layout/wave/punctuation choreography and an original timed score.",
+  "projectId": "viral-project-9e760ade-7bf6-40c5-970c-3074853e84ef",
+  "canonicalHash": "74342256ad1eb1f82baa68482772cb7b1ee8ff72efc163cfddca52b42d867817",
+  "outputSha256": "8fd2c9fc3e97d377f19e8dd0228a3ce51e2e5cd75a374731daf4f8c876d00e7a",
+  "textLayers": 36,
+  "artworkLayers": 22,
+  "graphicGroups": 2,
+  "propertyKeys": 921,
+  "exactCompiledAuthoredKeyTuples": 897,
+  "nativeImportUndoRedo": true,
+  "nativeIndividualTextEditUndo": true,
+  "nativeIndividualPropertyKeyEditUndo": true,
+  "nativeDotPathKeysEdited": 34,
+  "exactColdReopen": true,
+  "acceptedCpuJobs": 1,
+  "renderObserverExceededTwelveMinutes": true,
+  "recoveredSameOwnedJob": true,
+  "duplicateRenderSubmissions": 0,
+  "nativeRequestRecordedAt": "2026-10-15T18:49:56.743060+00:00",
+  "verifiedDownloadAt": "2026-10-15T19:05:59.710Z",
+  "verifiedDownloadAfterRecordedRequestSeconds": 962.96694,
+  "normalRetryStatusCheckUsed": true,
+  "nativeFullMoviePlayback": true,
+  "nativeProjectBackupDownload": true,
+  "backupSha256": "b8f6c64aff2380a2d4ff927b8b351dadeca8cb793b3dd5389325c6775505530f",
+  "backupBytes": 12497090,
+  "frontendCasesPassed": 6,
+  "knowledgeCasesPassed": 17,
+  "strictNormalAppBuild": "PASS",
+  "workerCodeChanged": false,
+  "gpuJobs": 0,
+  "paidGpuCost": 0,
+  "recordingCapture": {
+    "captureSeconds": 20.17300009727478,
+    "screenFramesPerSecond": 19.481485059482615,
+    "movieFps": 24,
+    "encodedScreenRecordingFps": 24,
+    "sparseCapture": true,
+    "smoothPlaybackEvidence": false,
+    "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+  },
+  "wholePreviewFinalParityQualified": false,
+  "liveAudioQualified": false,
+  "humanListeningReview": false,
+  "creativeApproval": false,
+  "readinessPromoted": false,
+  "earlierBothMotionSamplesRejected": true,
+  "remainingBlockers": [
+    "Creative approval of this moving sequence and soundtrack remains the user's review; both earlier samples were rejected as generic.",
+    "Static SVG artwork becomes raster image layers; vector paths are not editable shape geometry. Dedicated spatial tangents and text range selectors remain open.",
+    "The CPU export outlasted its twelve-minute observer. The same completed job was recovered with zero resubmissions; a normal Retry status check was needed after a transient recovery deadline. Broad export/recovery latency remains open.",
+    "Screen capture does not qualify smooth live playback. Whole continuous preview/final raster, live sound/human listening, S02 colour/ellipse/source features and broad parent/media combinations remain unqualified.",
+    "S03 source-occurrence/group ownership and dedicated S04 spatial path timing remain open; no creative/public/pro/production promotion."
+  ],
+  "nextTaskIds": [
+    "S04",
+    "S03",
+    "S02"
+  ],
+  "nextImplementationSlice": "Continue user motion-design feedback on the same editable graph, then shared S04 spatial tangent/path timing and S03 occurrence ownership; retain S02 picture/sound and export-latency limits.",
+  "recordedAt": "2026-10-15T19:15:16.755567+00:00",
+  "nativeDesign": {
+    "projectId": "viral-project-9e760ade-7bf6-40c5-970c-3074853e84ef",
+    "canonicalHashBeforeMediaUpload": "dac171368aac50f4817dd33e907e19bdfbeb390b78659e786548ca3333ba1ae5",
+    "layers": 58,
+    "groups": 2,
+    "keys": 921,
+    "nativeImportUndoRedo": true,
+    "nativeIndividualTextEditUndo": true,
+    "nativeIndividualPropertyKeyEditUndo": true,
+    "exactColdReopen": true,
+    "sharedCanonicalGraph": true,
+    "noGraphInjection": true,
+    "gpuJobs": 0,
+    "paidCost": 0
+  },
+  "nativePolish": {
+    "projectId": "viral-project-9e760ade-7bf6-40c5-970c-3074853e84ef",
+    "canonicalHash": "f2fa33de46e4abf4aea2855eb502acae9e76b72564d50c07b245acbda4c68b3f",
+    "dotPathAdjustedThroughNativeKeys": 34,
+    "exactColdReopen": true,
+    "noGraphInjection": true
+  },
+  "soundtrackAgreement": {
+    "independentDecode": true,
+    "sourceStereo48000": true,
+    "authoredSoundtrackWindowAgreement": [
+      {
+        "start": 0.5,
+        "end": 3.3,
+        "correlation": 0.999466330187933,
+        "fittedGain": 0.5985505212331086
+      },
+      {
+        "start": 4.2,
+        "end": 7.2,
+        "correlation": 0.9987658191441244,
+        "fittedGain": 0.5981797222332651
+      },
+      {
+        "start": 8.3,
+        "end": 10.4,
+        "correlation": 0.9971051907161647,
+        "fittedGain": 0.5962252389822443
+      },
+      {
+        "start": 11.5,
+        "end": 14.3,
+        "correlation": 0.9990958223600493,
+        "fittedGain": 0.598560506465175
+      },
+      {
+        "start": 16.5,
+        "end": 19.5,
+        "correlation": 0.999920920801065,
+        "fittedGain": 0.59935491697985
+      }
+    ],
+    "nativeGain": 0.6,
+    "outputMeasuredIntegratedLufs": -24.5,
+    "outputMeasuredTruePeakDbfs": -4.9,
+    "humanListeningReview": false,
+    "livePreviewMixQualified": false
+  },
+  "technical": {
+    "passed": true,
+    "sha256": "8fd2c9fc3e97d377f19e8dd0228a3ce51e2e5cd75a374731daf4f8c876d00e7a",
+    "bytes": 1839759,
+    "seconds": 20,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "20.000000",
+      "frameCount": 480,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "20.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 960512,
+      "sampleRate": 48000,
+      "seconds": 20.010666666666665,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-break-the-loop-20261015/proof/break-the-loop/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "e45d8c6b6b272a078f3de885acea5c1afb359dfb8e04f3df0432691f7c5a41b8",
+    "frontend/src/components/StudioGraphicsImport.js": "34b581b59a6c4c17af293655be82dceec58cf943cecd8cd5b481155e3c34ff31",
+    "frontend/src/components/studioGraphicsPackage.js": "6bbd9df234caf2fb793d8f8777eae8936e368d61d7d5de5c45c4478a304561fb",
+    "frontend/src/components/__tests__/studioGraphicsPackage.test.js": "dc0c16dee18f79c87024a1d9b5d4ae45534ed4a6b9639114df79596636af4b4c",
+    "frontend/src/components/__tests__/ViralClipStudio.test.js": "40f909f96aa4b80bb20b42b159aff015b9377ea2aa9fb7b61cda91b80d5476cf",
+    "scripts/studio-professional/author-break-loop.js": "637afa7832901bd762e90f0c5f98a3641df5b4cf5b3cb59ff92c158d927be932",
+    "scripts/studio-professional/break-loop-proof.js": "7cda453c9d17901f5f10fed86ad955808ce99a49416324d6e0c458fe2979413a",
+    "scripts/studio-professional/score-break-loop.py": "0b8110ac6c2835b12a4fc53ea722af43485e1aa851cd06d813ca219d72767f51",
+    "reports/studio-break-the-loop-20261015/assets/break-the-loop.graphics.json": "7d0c6ff34d92a509bcc423f773d4e83c2402f8107cd21bb5f79b317dbee24d53",
+    "reports/studio-break-the-loop-20261015/assets/break-the-loop-original-score.wav": "30b1097d5ba7a8e5308ef5a98236ba111e2d80f78dff4b6a88f01444908e497f"
+  },
+  "artifactHashes": {
+    "reports/studio-break-the-loop-20261015/proof/break-the-loop/final.mp4": "8fd2c9fc3e97d377f19e8dd0228a3ce51e2e5cd75a374731daf4f8c876d00e7a",
+    "reports/studio-break-the-loop-20261015/proof/break-the-loop/edited-in-studio.mp4": "bf2c4a2114c97141e532c3c8b15b6135b5261f62fc4f34adb8438c8b7ab6f057",
+    "reports/studio-break-the-loop-20261015/proof/editing-in-studio.mp4": "cae440c693528627535f6e396f282f749a6660ae1279a15e8b352df89cb952fd",
+    "reports/studio-break-the-loop-20261015/proof/BREAK-THE-LOOP.autopromote.json": "b8f6c64aff2380a2d4ff927b8b351dadeca8cb793b3dd5389325c6775505530f"
+  },
+  "retainedFailedObservations": [
+    "First import rejects a 330-degree source rotation before mutation; source authoring normalized and native import/history/cold reopen pass.",
+    "A dense 0.103s key row initially intercepted clicks; ordinary 8x timeline zoom enabled the 34-key dot-path adjustment.",
+    "One recording preflight stopped at 4.99GiB. Only regenerable owned caches/superseded builds were removed; historical private saved-project receipts were losslessly gzipped with raw SHA-256 and exact decompression checks. Sources/auth/IndexedDB/movies preserved.",
+    "The twelve-minute render observer expired; the same real owned completed job was recovered and its download hash matched, with zero resubmissions.",
+    "One cold finished-movie observation hit a transient request deadline; normal Retry status check recovered the same job.",
+    "A capture observed the movie ending but its old helper tried scrolling to an empty SFX lane; that failed trace/raw capture is retained. Corrected music/source timeline recording completes separately.",
+    "A font-loaded legacy kinetic component check initially raced under load; async act/settled assertions preserve its atomic-history/export checks. All six final scoped frontend cases pass."
+  ],
+  "ownedLocalQaStopped": true,
+  "qaShutdownEvidence": "reports/studio-break-the-loop-20261015/proof/qa-shutdown.json"
+}

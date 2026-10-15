@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.18",
+  "knowledge_version": "1.0.19",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -4670,6 +4670,44 @@
       "limitations": [
         "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
         "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.graphics.import",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Import animated graphics",
+      "status": "PARTIAL",
+      "meaning": "Imports an authored graphics JSON file as ordinary editable titles, image artwork, groups and transform keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "JSON file",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer",
+        "static SVG artwork"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "AutoPromote graphics v1 JSON; matching programme aspect; timing inside the current programme; at most 128 total graphic layers and 32 new groups; 256 keys per item, 8192 imported keys and 4MiB file size.",
+        "Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.",
+        "Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.",
+        "Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate."
       ],
       "updated_at": "2026-10-15",
       "product_version": "1.2.0"

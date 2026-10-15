@@ -36,7 +36,7 @@
   "readinessPromoted": false,
   "creativeApproval": false,
   "remainingBlockers": [
-    "The first text-over-footage sample was challenged by the user. Creative approval of the replacement remains the user's actual moving/sound review.",
+    "The user rejected both earlier motion-design samples. Their technical checks do not qualify creative approval.",
     "Screen capture cadence does not qualify smooth playback; QA is headless/muted and the recording soundtrack comes from the exact verified export at its observed start offset.",
     "Whole continuous preview/final raster, live mix and human listening remain unqualified. Existing S02 colour/ellipse/source-feature/audio limits remain open.",
     "Complex script shaping/RTL, arbitrary masks/tracking/retiming/3D and broad parent/media combinations remain unqualified.",
@@ -162,5 +162,6 @@
     "scope": "Technical only. Pixel and listening review are separate required evidence."
   },
   "failedAttemptsPreserved": true,
-  "mainMergeOrProductionDeployment": false
+  "mainMergeOrProductionDeployment": false,
+  "userRejectedBothEarlierMotionSamples": true
 }

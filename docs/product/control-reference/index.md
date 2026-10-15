@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.18 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.19 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -142,6 +142,7 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.title.kinetic_travel | Kinetic travel | number | 0 … 30 | percent | 8 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.title.kinetic_tilt | Kinetic rotation | number | 0 … 90 | degrees | 12 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.title.kinetic_exit | Kinetic exit | number | 0.1 … 3 | seconds | 0.25 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.graphics.import | Import animated graphics | string | source-dependent … source-dependent | JSON file | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -1822,3 +1823,18 @@ Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
 
 - Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
 - The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-graphics-import"></a>
+
+## Import animated graphics
+
+ID: `studio.graphics.import` • **PARTIAL**
+
+Imports an authored graphics JSON file as ordinary editable titles, image artwork, groups and transform keys.
+
+Applies to: ordinary text layer, static SVG artwork. Requires: studio.titles, studio.keyframes.
+
+- AutoPromote graphics v1 JSON; matching programme aspect; timing inside the current programme; at most 128 total graphic layers and 32 new groups; 256 keys per item, 8192 imported keys and 4MiB file size.
+- Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.
+- Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.
+- Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate.

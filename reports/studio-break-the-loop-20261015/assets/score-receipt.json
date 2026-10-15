@@ -1,0 +1,117 @@
+{
+  "originalProceduralAudio": true,
+  "seconds": 20,
+  "sampleRate": 48000,
+  "channels": 2,
+  "peak": 0.8382174670399534,
+  "events": [
+    {
+      "time": 0.15,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 0.75,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 1.35,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 1.9,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 2.4,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 2.8,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 3.12,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 3.38,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 3.58,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 3.74,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 3.91667,
+      "event": "ring-break impact"
+    },
+    {
+      "time": 4.1,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 4.185,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 4.27,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 4.3549999999999995,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 4.4399999999999995,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 4.475,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 5.225,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 5.975,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 6.725,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 7.475,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 8.225,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 8.975,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 9.725,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 10.475,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 17.15,
+      "event": "mechanical tick"
+    },
+    {
+      "time": 17.55,
+      "event": "mechanical tick"
+    }
+  ]
+}

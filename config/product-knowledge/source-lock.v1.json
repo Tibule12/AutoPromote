@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed kinetic word/grapheme authoring, full-frame width repair, both native saved projects and CPU exports, replacement full Studio playback, exact key preservation and retained creative/picture/sound limits.",
-  "reviewed_at": "2026-10-15T18:14:06.556Z",
-  "catalog_sha256": "c766f829ec17403d7d04c96c7aad8bf23ae04c918cba79fcb5b616514b6244f8",
+  "reason": "Final reviewed graphics interchange and same-graph native motion delivery; public help states general capability limits, while individual creative rejections remain in internal evidence. Full Studio movie, editable backup, exact key/audio evidence and owned QA shutdown are retained.",
+  "reviewed_at": "2026-10-15T19:17:36.881Z",
+  "catalog_sha256": "37227ae7952bb4c417eaf987b7a76182bf459b24bac9c1cd4885a3b09091ef87",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "bde98058a0afd1b9f8bcf8849f466f83d68b8aaf6f2fb606ed6525188c637a62"
+      "sha256": "9d27aba811e58447d193f316e8da5b0d07da426d4de1bf5807b58eb02823cdc9"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -86,6 +86,10 @@
       "sha256": "3a0714845f710972eeca2c1f3705035ef93d0281cb9c474d137c05747e561022"
     },
     {
+      "path": "frontend/src/components/StudioGraphicsImport.js",
+      "sha256": "34b581b59a6c4c17af293655be82dceec58cf943cecd8cd5b481155e3c34ff31"
+    },
+    {
       "path": "frontend/src/components/StudioGroupInspector.js",
       "sha256": "5fd1eb4cde2f0c164f72855cc0dcb7a3c2cecf84e24ec01b2516525bcc8652c2"
     },
@@ -139,7 +143,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "b31e72154c54612ae76ef9176085c4a72141d86d8baa597a4985598b64012e45"
+      "sha256": "e45d8c6b6b272a078f3de885acea5c1afb359dfb8e04f3df0432691f7c5a41b8"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -176,6 +180,10 @@
     {
       "path": "frontend/src/components/studioDirectorProposals.js",
       "sha256": "21e0a9eb112ff847ad2295de122d68c1c41313b98b6f531648a1aa312df20efe"
+    },
+    {
+      "path": "frontend/src/components/studioGraphicsPackage.js",
+      "sha256": "6bbd9df234caf2fb793d8f8777eae8936e368d61d7d5de5c45c4478a304561fb"
     },
     {
       "path": "frontend/src/components/studioGroupTiming.js",
@@ -399,11 +407,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "905ad0f710dadd3c416cbc482b71f196860f3ee766121e0b2070f54964c5bd79"
+      "sha256": "1cf156ff76adaff5e843092d8fbd07d897bc921e94ba0857738ce2f316f9516e"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "1cdff04b589eef4ec66149c347f83bd22ce21f08975b606ae94eb37a7d7de338"
+      "sha256": "41b9f5b1bab42bc2739bd01974c640c73887b88b713b9c97667e2220ffbdc32a"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.18",
+  "knowledge_version": "1.0.19",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1170,6 +1170,11 @@
     },
     {
       "id": "studio.title.kinetic_exit",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.graphics.import",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -3064,6 +3069,11 @@
       "from": "studio.titles",
       "type": "editable_with",
       "to": "studio.title.kinetic_exit"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.graphics.import"
     }
   ]
 }

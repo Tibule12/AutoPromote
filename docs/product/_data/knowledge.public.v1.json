@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.18",
+  "knowledge_version": "1.0.19",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-15",
@@ -589,7 +589,7 @@
       "name": "Titles",
       "area": "Studio",
       "status": "FUNCTIONAL",
-      "summary": "Places editable titles and separates ordinary title copy into grouped word or letter layers with staggered canonical position, scale, rotation and opacity keys.",
+      "summary": "Places editable titles, separates copy into word/letter layers, and imports authored graphics compositions as ordinary layers, groups and motion keys.",
       "purpose": "Author kinetic typography using the same editable layers, group timing and property graph used by preview and export.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -611,7 +611,8 @@
         "studio.title.kinetic_entry",
         "studio.title.kinetic_travel",
         "studio.title.kinetic_tilt",
-        "studio.title.kinetic_exit"
+        "studio.title.kinetic_exit",
+        "studio.graphics.import"
       ],
       "workflow": [
         "Add or select an ordinary transparent Inter title in Graphics and set its copy, position, size and duration.",
@@ -619,6 +620,7 @@
         "Build editable text motion. Each word or grapheme becomes an ordinary title in one Type group with editable property keys.",
         "Select individual text layers to change their copy, style or keyframes. Move the Type group to keep child timing together. Undo restores the original title.",
         "Combine the generated type with ordinary imported artwork and group scale keys to author a full-frame composition; all text stays independently editable.",
+        "In Graphics, open Import animated graphics and choose an AutoPromote graphics v1 JSON file matching the programme aspect and duration. It adds ordinary editable layers above the current composition; Undo removes the complete import.",
         "Save, reopen and inspect the actual finished movie with its editable timeline."
       ],
       "preview_behavior": "Generated ordinary layers use existing title layout and canonical motion interpolation on the programme clock; building text motion returns the monitor to Live Edit.",
@@ -628,7 +630,8 @@
         "At most 48 units and 128 graphic layers; entrances, stagger, hold and exit must fit the title duration. Position must stay inside the programme.",
         "Word/letter controls are authoring inputs. After separation edit the resulting layers and keys; Undo restores the source title.",
         "Broad text shaping, continuous picture/sound agreement and professional or production readiness remain unqualified.",
-        "The first text-over-footage sample was challenged by the user. Native technical delivery is separate from approval of the moving design and soundtrack."
+        "Successful authoring and export do not establish creative quality or professional readiness.",
+        "Graphics import supports text and static SVG artwork rasterized to ordinary image assets. Artwork geometry is not converted to editable vector paths. Use the generated layers and property keys after import."
       ],
       "common_errors": [
         {
@@ -9298,6 +9301,44 @@
       ],
       "updated_at": "2026-10-15",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.graphics.import",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Import animated graphics",
+      "status": "PARTIAL",
+      "meaning": "Imports an authored graphics JSON file as ordinary editable titles, image artwork, groups and transform keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "JSON file",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer",
+        "static SVG artwork"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "AutoPromote graphics v1 JSON; matching programme aspect; timing inside the current programme; at most 128 total graphic layers and 32 new groups; 256 keys per item, 8192 imported keys and 4MiB file size.",
+        "Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.",
+        "Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.",
+        "Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
     }
   ],
   "tasks": [
@@ -12025,6 +12066,11 @@
       "from": "studio.titles",
       "type": "editable_with",
       "to": "studio.title.kinetic_exit"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.graphics.import"
     }
   ]
 }
