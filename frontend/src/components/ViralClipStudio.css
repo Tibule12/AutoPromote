@@ -5565,6 +5565,9 @@ body.dashboard-mode.viral-studio-open {
   font-size: 0.58rem;
   line-height: 1.45;
 }
+.motion-workspace-toolbar { display: flex; flex-wrap: wrap; }
+.motion-workspace-toolbar button { flex: 0 0 auto; }
+.motion-workspace-toolbar > span { flex-basis: 100%; }
 
 .motion-pose-list article {
   min-height: 50px;
@@ -5606,7 +5609,10 @@ body.dashboard-mode.viral-studio-open {
   stroke-width: 1.5px;
   cursor: pointer;
   pointer-events: auto;
+  touch-action: none;
 }
+.studio-motion-path-key[aria-disabled="true"] { cursor: default; opacity: .55; }
+.studio-motion-path-coordinate { font-size: 2px; fill: #fff; stroke: #091323; stroke-width: .12px; paint-order: stroke; }
 
 .studio-motion-path-key:hover,
 .studio-motion-path-key:focus {

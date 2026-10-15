@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.16 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.17 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -130,6 +130,10 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.group_clip.out | Group clip Out | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.keyframe.selection_scale | Selected keyframe time scale | number | 0 … 100 | multiplier | 2 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.keyframe.paste_target | Keyframe paste destination | string | source-dependent … source-dependent | layer ID; empty means original layers | "" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.start_velocity | Start velocity | number | source-dependent … source-dependent | property units per programme second | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.end_velocity | End velocity | number | source-dependent … source-dependent | property units per programme second | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.start_influence | Start influence | number | 1 … 99 | percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.end_influence | End influence | number | 1 … 99 | percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -142,6 +146,7 @@ Adjusts position x on the selected ordinary layer. Anchor/crop affect the transf
 Applies to: ordinary layers. Requires: studio.transforms, studio.keyframes.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- The on-picture motion-path editor writes an X/Y pair in one history edit. An in-progress pointer drag is preview-only; release commits ordinary canonical keys and Escape discards it.
 
 <a id="studio-transform-y"></a>
 
@@ -154,6 +159,7 @@ Adjusts position y on the selected ordinary layer. Anchor/crop affect the transf
 Applies to: ordinary layers. Requires: studio.transforms, studio.keyframes.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- The on-picture motion-path editor writes an X/Y pair in one history edit. An in-progress pointer drag is preview-only; release commits ordinary canonical keys and Escape discards it.
 
 <a id="studio-transform-scale"></a>
 
@@ -327,6 +333,7 @@ Sets the bounded cubic interpolation curve; X handles stay 0–1 and Y handles m
 Applies to: ordinary layers. Requires: studio.easing.
 
 - Array contains exactly four handles. Shared contract permits Y overshoot; some inspector widgets show narrower Y bounds.
+- The same four values can be edited through signed velocity and influence. Value and velocity graphs are inspection views, not separate animation engines. The sampled path uses the same X/Y evaluator.
 
 <a id="studio-composite-blend"></a>
 
@@ -1645,3 +1652,59 @@ Applies to: ordinary layers, graphic groups. Requires: studio.keyframes.
 - Only one copied source owner may be remapped to a destination. Property identities are retained; unsupported properties and destination value ranges reject the whole paste.
 - Destination locks, half-frame collisions and programme overflow reject atomically. Original-layers mode checks original owner locks.
 - Clipboard is timeline-local; cross-project/system clipboard interchange is not qualified. Whole picture/sound agreement remains partial.
+
+<a id="studio-keyframe-start_velocity"></a>
+
+## Start velocity
+
+ID: `studio.keyframe.start_velocity` • **PARTIAL**
+
+Sets signed endpoint change per programme second for the selected incoming key interval.
+
+Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
+
+- Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
+- Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified.
+
+<a id="studio-keyframe-end_velocity"></a>
+
+## End velocity
+
+ID: `studio.keyframe.end_velocity` • **PARTIAL**
+
+Sets signed endpoint change per programme second for the selected incoming key interval.
+
+Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
+
+- Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
+- Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified.
+
+<a id="studio-keyframe-start_influence"></a>
+
+## Start influence
+
+ID: `studio.keyframe.start_influence` • **PARTIAL**
+
+Controls the endpoint time influence while preserving its signed velocity.
+
+Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
+
+- Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
+- Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified.
+
+<a id="studio-keyframe-end_influence"></a>
+
+## End influence
+
+ID: `studio.keyframe.end_influence` • **PARTIAL**
+
+Controls the endpoint time influence while preserving its signed velocity.
+
+Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
+
+- Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
+- Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified.

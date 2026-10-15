@@ -166,3 +166,15 @@ export function studioGroupLocalPoint(tree, id, x, y, width, height, keyframes =
   }
   return { x: px / width * 100, y: py / height * 100 };
 }
+
+export function studioGroupProgrammePoint(tree, id, x, y, width, height, keyframes = [], time = 0) {
+  let px = x * width / 100, py = y * height / 100, owner = tree.parent.get(id);
+  while (owner) {
+    const t = evaluateStudioGroupTransform(tree.byId.get(owner), keyframes, time);
+    const angle = t.rotation * Math.PI / 180, dx = (px - width / 2) * t.scale, dy = (py - height / 2) * t.scale;
+    px = dx * Math.cos(angle) - dy * Math.sin(angle) + width * (.5 + t.x / 100);
+    py = dx * Math.sin(angle) + dy * Math.cos(angle) + height * (.5 + t.y / 100);
+    owner = tree.parent.get(owner);
+  }
+  return { x: px / width * 100, y: py / height * 100 };
+}

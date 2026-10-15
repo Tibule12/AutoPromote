@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final review of native property marquee, cross-layer clipboard, graph/export binding, complete Studio playback and exact limits.",
-  "reviewed_at": "2026-10-15T16:14:51.368Z",
-  "catalog_sha256": "37de9d5870cd1060f68fd27c7dc72ce031bbf17f5d19f1e878830e41fbc4cf25",
+  "reason": "Reviewed direct path editing, timeline value/velocity and influence controls, animated inspector/live-preview fixes, exact native ONDA lifecycle/export/playback, and retained limits.",
+  "reviewed_at": "2026-10-15T17:10:39.243Z",
+  "catalog_sha256": "0ee3fe978e36baa6993d9f9116603885af4808627d1311b533ae8b2c7c5b411b",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "001429b018c91da892eb0380be6cc7b5c11cf3939adc031688820b0d3ef43142"
+      "sha256": "3f5ed43cfd295dab11cfc972f6febb8a20f7ce935be4cd5662c8ecccfcd90c50"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -71,7 +71,7 @@
     },
     {
       "path": "frontend/src/components/StudioAdvancedInspectors.js",
-      "sha256": "fd022a275c0fcd112bca122f10acc8fffd6e7153a15314fd779480b1d2d3df3f"
+      "sha256": "23d40d398abc319c2e5cab9e1b764bac412effb4c290596d9c4901d08475cbb5"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -107,7 +107,11 @@
     },
     {
       "path": "frontend/src/components/StudioKeyframeCurveEditor.js",
-      "sha256": "2bacf74d8d7cab72d83b60d1ccc201734384abc34cd920f6c8cef60022cf3a97"
+      "sha256": "2c7793fc1ee366342e77aa7b64ed75262bb7bf399752466d684144e712fee2d8"
+    },
+    {
+      "path": "frontend/src/components/StudioKeyframeVelocityControls.js",
+      "sha256": "72af2ecc790997f34eac8620e07eeb0906f93709496b7c756d9e9e4afba4801c"
     },
     {
       "path": "frontend/src/components/StudioLayerStack.js",
@@ -118,8 +122,12 @@
       "sha256": "9121c1894e7e9da67bb499e9d6e4e77aa59924cfd0f9e5900397757f77d8f5a7"
     },
     {
+      "path": "frontend/src/components/StudioMotionPathEditor.js",
+      "sha256": "3de2484c04ada522c3047e15b70048701ecdc599239e0def62c123a6790526fb"
+    },
+    {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "dc9cc9cade20bb49365a8a416b3669eb22750572c9bb79412997d6b376f95aa4"
+      "sha256": "a8842730a0a06a7f5a85ff57b042eed930ad33bc027a18e66d23a5ba250a25b8"
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
@@ -127,7 +135,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "c38bee5d097c0c458fda482dd537716ec5b8c3bab017d503238eab5883f65431"
+      "sha256": "8ac6ebc8a519a5681c62b94d51767e3847987165fc47422a1354e187e402ae61"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -171,7 +179,7 @@
     },
     {
       "path": "frontend/src/components/studioGroups.js",
-      "sha256": "f4654b6e8d5bbcd7b494663222e3830b77d71b5b72d31d5847e695f684247ca0"
+      "sha256": "7508d75f8410bc11cd17b799116c6f20e65e74dbb4eb28407a480a06eae6dcae"
     },
     {
       "path": "frontend/src/components/studioKeyframeSelection.js",
@@ -188,6 +196,10 @@
     {
       "path": "frontend/src/components/studioMediaEffects.js",
       "sha256": "d85f3cc0df0b794eca4a413c28ee4b7bf8de38d671a61ddbe2b76433ef286a1b"
+    },
+    {
+      "path": "frontend/src/components/studioMotionEditing.js",
+      "sha256": "085fdfe496f5ecdf30ced145dcd26538f3596ed9e66e9a7b5b13a66a57759a94"
     },
     {
       "path": "frontend/src/components/studioMotionProperties.js",
@@ -258,8 +270,8 @@
       "sha256": "b3bece0fe3f653ef88368b3013fbe96ccfd13ed953efa3342fb89eb20186374b"
     },
     {
-      "path": "reports/studio-keyframe-marquee-20261015/README.md",
-      "sha256": "a888cec602780aa4cf5bd9fd0fb2fa4be1f4e28c3867f933d54772a581535e4e"
+      "path": "reports/studio-motion-workspace-20261015/README.md",
+      "sha256": "bcd840ed466a62c47427cf116d58ce4d1a9a03c6843ecf61d6410c511e7d4216"
     },
     {
       "path": "reports/studio-professional-group-workflow-20261014/README.md",
@@ -379,11 +391,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "9ff34401183e34b15310ee421da0efc9696dd345718c6beee785d49513a48611"
+      "sha256": "eff81d13df482c65e97005bcb0f255ca82bad0fc7729a79703972d791cc14779"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "44c003a9282773b6c2a955164ac007e2c9dbe6ea4961303e1b03c714210c17d6"
+      "sha256": "dbd578423f5fa93fa61ddff7deb3e614c1bc8320e954adb707c987bb05ad219d"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

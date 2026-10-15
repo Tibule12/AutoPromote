@@ -4,6 +4,7 @@ import StudioControlMenu from "./StudioControlMenu";
 import StudioGroupTimelineClip from "./StudioGroupTimelineClip";
 import StudioKeyframeActions from "./StudioKeyframeActions";
 import useStudioKeyframeMarquee from "./useStudioKeyframeMarquee";
+import StudioKeyframeCurveEditor from './StudioKeyframeCurveEditor';
 import { STUDIO_AUDIO_TRACKS } from "./studioAudioTracks";
 import { buildMotionAutomationStyle } from "./studioAutomation";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
@@ -920,6 +921,7 @@ export default function StudioProTimeline({
   const scrollRef = React.useRef(null);
   const [showEmptyTracks, setShowEmptyTracks] = React.useState(false);
   const [showMotionKeys, setShowMotionKeys] = React.useState(false);
+  const [showGraph, setShowGraph] = React.useState(false);
   const [expandedMotionTargets, setExpandedMotionTargets] = React.useState(new Set());
   const [selectedMotionKey, setSelectedMotionKey] = React.useState(null);
   const [selectedMotionKeys, setSelectedMotionKeys] = React.useState(new Set());
@@ -964,6 +966,8 @@ export default function StudioProTimeline({
   const motionTargets = allMotionTargets.filter(layer => !selectedGroupId || layer.id === selectedGroupId)
     .map(layer => ({ id: layer.id, layer, keys: (motionKeyframes || []).filter(key => key.targetId === layer.id) }));
   const chosenKeys = (motionKeyframes || []).filter(key => selectedMotionKeys.has(key.id));
+  const graphKey = (motionKeyframes || []).find(key => key.id === selectedMotionKey) || chosenKeys.at(-1);
+  const graphTarget = allMotionTargets.find(target => target.id === graphKey?.targetId);
   const keyTrack = key => {
     if (key.targetId === 'main-video') return 'video';
     const layer = (overlays || []).find(item => item.id === key.targetId);
@@ -1518,7 +1522,9 @@ export default function StudioProTimeline({
             <output aria-label="Timeline zoom level">{safeZoom}×</output>
           </div>
           <button type="button" aria-label={showMotionKeys ? 'Hide motion keyframes' : 'Show motion keyframes'}
-            aria-pressed={showMotionKeys} onClick={() => setShowMotionKeys(current => !current)}>◆ Keyframes</button>
+            aria-pressed={showMotionKeys} onClick={() => { setShowMotionKeys(current => !current); setShowGraph(false); }}>◆ Keyframes</button>
+          {showMotionKeys && <button type="button" aria-label="Timeline graph editor" disabled={!graphTarget}
+            aria-pressed={showGraph} onClick={() => setShowGraph(current => !current)}>Graph editor</button>}
         </div>
       </div>
 
@@ -1531,7 +1537,18 @@ export default function StudioProTimeline({
         error={motionKeyframeEditError}
         onSelectAll={() => setSelectedMotionKeys(new Set(motionTargets.filter(target => expandedMotionTargets.has(target.id)).flatMap(target => target.keys.map(key => key.id))))}
         onClear={() => setSelectedMotionKeys(new Set())} />}
-      <div className="pro-timeline-scroll" ref={scrollRef} onScroll={marquee.handlers.onScroll}>
+      {showMotionKeys && showGraph && graphTarget && <div className="pro-timeline-graph" aria-label="Timeline property graph">
+        <strong>{graphTarget.name || graphTarget.text || 'Source video'} · {graphKey.property}</strong>
+        <StudioKeyframeCurveEditor key={graphTarget.id} keyframes={(motionKeyframes || []).filter(key => key.targetId === graphTarget.id)}
+          focusId={graphKey.id} locked={!!trackStates?.[keyTrack(graphKey)]?.locked}
+          playhead={playhead}
+          valueBounds={Object.fromEntries(studioMotionPropertiesForTarget(graphTarget).map(property => [property.id, [property.min, property.max]]))}
+          clampEvaluation={graphTarget.kind === GROUP_KIND}
+          onUpdate={onUpdateMotionKeyframe} onSelect={id => {
+            setSelectedMotionKey(id); setSelectedMotionKeys(new Set([id])); onSelectMotionKeyframe?.(id, graphTarget.id);
+          }} />
+      </div>}
+      <div className="pro-timeline-scroll" style={showGraph ? { display: 'none' } : undefined} ref={scrollRef} onScroll={marquee.handlers.onScroll}>
         <div className="pro-timeline-content" tabIndex={-1} style={{ width: visibleWidth, position: 'relative' }}
           {...marquee.handlers}>
           {marquee.box && <div className="pro-keyframe-marquee" data-testid="keyframe-marquee" style={marquee.box} />}

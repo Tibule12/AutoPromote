@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-15T16:14:15.791Z",
+  "updatedAt": "2026-10-15T17:10:38.362Z",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -7966,24 +7966,24 @@
   },
   "continuity": {
     "nextHighestPriorityTaskId": "S04",
-    "lastSessionKind": "PROPERTY_MARQUEE_AND_CROSS_LAYER_PASTE",
+    "lastSessionKind": "DIRECT_MOTION_PATH_AND_TIMELINE_VELOCITY_WORKSPACE",
     "lastSessionRealCapabilityRuns": 1,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-keyframe-marquee-20261015/README.md",
+    "exactBlockersSource": "reports/studio-motion-workspace-20261015/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-keyframe-marquee-20261015/README.md",
+    "lastSessionEvidence": "reports/studio-motion-workspace-20261015/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendCasesPassed": 35,
+      "frontendCasesPassed": 46,
       "strictAppBuild": "PASS",
       "workerCodeChanged": false,
       "fullStudioSuiteQualified": false
     },
-    "nextSlice": "S04 temporal velocity/influence and spatial path editing on the existing canonical key/curve graph. Retain S02 whole colour/raster/sound and S03 occurrence/group ownership limits.",
+    "nextSlice": "Continue S04 coordinated spatial tangents and path timing on the canonical graph, then shared S03 occurrence/group ownership. Retain S02 whole picture/sound limits and the evaluated-field focus/seek follow-up.",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -11963,5 +11963,50 @@
       "S03"
     ],
     "nextImplementationSlice": "S04 temporal velocity/influence and spatial path editing on the existing canonical key/curve graph. Retain S02 whole colour/raster/sound and S03 occurrence/group ownership limits."
+  },
+  "professionalMotionWorkspace20261015": {
+    "evidence": "reports/studio-motion-workspace-20261015/README.md",
+    "checkpoint": "reports/studio-motion-workspace-20261015/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Direct on-picture paired position editing and a timeline value/velocity graph with signed endpoint velocity/influence on the existing canonical animation data; Motion inspector and completed-movie preview freshness repairs.",
+    "projectId": "viral-project-d146ee45-1e3a-4ae8-969d-6e608b6772f0",
+    "canonicalHash": "181624b7e884292581ee1146b9d9e2754a7d9409b622bb20d0e93859a821bed9",
+    "sourceShots": 10,
+    "graphicLayers": 14,
+    "propertyKeyCount": 175,
+    "editedImageKeyCount": 21,
+    "nativePairedPositionDragUndoRedo": true,
+    "nativePointerCancelAndTrackLock": true,
+    "nativeVelocityInfluenceUndoRedo": true,
+    "nativeExactColdReopen": true,
+    "nativeCpuExports": 2,
+    "renderSeconds": [
+      253.938,
+      226.154
+    ],
+    "nativeEditingRecordings": 2,
+    "completeStudioRecordings": 1,
+    "frontendCasesPassed": 46,
+    "strictAppBuild": "PASS",
+    "workerCodeChanged": false,
+    "gpuJobs": 0,
+    "paidGpuCost": 0,
+    "ownedLocalQaStopped": true,
+    "wholePreviewFinalParityQualified": false,
+    "fullStudioSuiteQualified": false,
+    "readinessPromoted": false,
+    "remainingBlockers": [
+      "Dedicated spatial tangent/spline and vector speed/arc-length controls are not qualified. Path editing currently authors paired X/Y property keys and samples their existing interpolation.",
+      "Native image workflow is scoped to this real footage composition. Nested animated parent mapping and group clamping have helper/component coverage; broad masks/3D/retiming remain unqualified.",
+      "Whole continuous picture/raster/live sound and human listening remain unqualified. Existing S02 colour/ellipse/source-feature/audio and S03 group/source-occurrence ownership limits remain open.",
+      "Intermediate evaluated-field hold entry did not set the desired key value; the explicit selected-key inspector correction, cold reopen and corrected export are verified. Wider focus/seek/value-commit behavior requires scoped follow-up.",
+      "Screen capture cadence is separate from movie decode and does not qualify smooth playback. No readiness/creative/public promotion."
+    ],
+    "nextTaskIds": [
+      "S04",
+      "S03",
+      "S02"
+    ],
+    "nextImplementationSlice": "Continue S04 coordinated spatial tangents and path timing on the canonical graph, then shared S03 occurrence/group ownership. Retain S02 whole picture/sound limits and the evaluated-field focus/seek follow-up."
   }
 }

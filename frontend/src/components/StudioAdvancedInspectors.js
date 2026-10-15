@@ -25,6 +25,7 @@ export function MotionInspector({
   onSelectOverlay,
   onUpdateOverlay,
   onAddKeyframe,
+  onAddPositionKeyframe,
   onUpdateKeyframe,
   onRemoveKeyframe,
   onSeek,
@@ -295,7 +296,8 @@ export function MotionInspector({
             <button type="button" onClick={onResetMotion}>
               Reset transform
             </button>
-            <span>Set the transform, then save a pose at the current playhead.</span>
+            <button type="button" disabled={keyframesLocked} onClick={onAddPositionKeyframe}>Add position key</button>
+            <span>Drag path points over the picture. Arrow keys nudge; Escape cancels.</span>
           </div>
 
           {activeOverlay.type !== "text" ? (
@@ -410,6 +412,7 @@ export function MotionInspector({
             })}
           </div>
           <StudioKeyframeCurveEditor key={activeOverlay.id} keyframes={targetKeyframes}
+            playhead={playhead}
             focusId={focusKeyframeId} onUpdate={onUpdateKeyframe} locked={keyframesLocked}
             onSelect={id => onSeek(Number(targetKeyframes.find(key => key.id === id)?.time || 0))} />
         </>

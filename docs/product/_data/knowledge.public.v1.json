@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.16",
+  "knowledge_version": "1.0.17",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-15",
@@ -10,7 +10,7 @@
       "name": "Timeline",
       "area": "Studio",
       "status": "PARTIAL",
-      "summary": "Displays source occurrences, ordinary layers, audio cues, graphic-group clip bars and property keys on one programme clock. Expanded rows support box selection and copying animation onto compatible layers, alongside batch movement, timing and interpolation.",
+      "summary": "Displays source occurrences, ordinary layers, audio cues, graphic-group clip bars and property keys on one programme clock. Expanded rows support box selection and copying animation onto compatible layers, alongside batch movement, timing and interpolation. The timeline also opens the selected owner’s value/velocity graph with bounded controls and a programme playhead.",
       "purpose": "Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -333,7 +333,7 @@
       "name": "Motion / Transform Keyframes",
       "area": "Studio",
       "status": "FUNCTIONAL",
-      "summary": "Box-select ordinary layer and group property keys in the shared timeline, then move, scale, ease, copy or paste animation onto a compatible layer in one undoable edit.",
+      "summary": "Edit property keys and sampled motion paths directly over the picture, or shape value/velocity curves in the timeline. Manual edits, Director/template keys, saving and export use the same canonical animation data.",
       "purpose": "Create deliberate editable movement and retain the same keys across manual editing, Director proposals, saving and final compilation.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -368,7 +368,11 @@
         "studio.composite.group_rotation",
         "studio.composite.group_opacity",
         "studio.keyframe.selection_scale",
-        "studio.keyframe.paste_target"
+        "studio.keyframe.paste_target",
+        "studio.keyframe.start_velocity",
+        "studio.keyframe.end_velocity",
+        "studio.keyframe.start_influence",
+        "studio.keyframe.end_influence"
       ],
       "workflow": [
         "Show motion keyframes in the timeline and expand an ordinary visual layer or graphic group, including targets without animation keys.",
@@ -376,7 +380,11 @@
         "Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.",
         "Drag empty property-lane space to box-select across expanded rows. Shift/Ctrl/Command adds; Alt subtracts; Escape or pointer cancellation restores the prior selection. Shift/Ctrl/Command-click also selects individual keys. Drag, frame-nudge, scale spacing, apply interpolation or delete with the batch toolbar.",
         "Copy with the toolbar or Ctrl/Command+C. Choose Original layers or an existing visual layer in Paste to, then paste at the playhead with the toolbar or Ctrl/Command+V. A single-source-layer clipboard can target another layer; supported property values, spacing, easing and curves are retained with fresh key identities.",
-        "Owning-track locks prevent changes. Group values use their own five-property bounds; group key selection opens Composite with the shared curve editor. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property."
+        "Owning-track locks prevent changes. Group values use their own five-property bounds; group key selection opens Composite with the shared curve editor. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.",
+        "In Motion, Add position key writes an X/Y pair at the playhead. Drag a path point over the picture or nudge with Arrow keys (Shift increases the step). The picture follows the temporary drag; release commits the pair once, while Escape/cancellation restores the prior edit. Paths sample actual X/Y interpolation and map animated parent coordinates.",
+        "Select a timeline key, open Graph editor and choose Value graph or Velocity graph. Edit the interval arriving at that key. Signed velocity uses property units per programme second; endpoint influence preserves endpoint velocity. Numeric edits commit on Enter/blur and write the existing four cubic handles.",
+        "Once a transform is animated, Motion inspector value edits write a key at the playhead. The static fallback is retained for the base transform; it no longer overrides visible key-driven values.",
+        "Editing motion keys while viewing a completed movie switches After to Live Edit. The prior download remains available through Export; it is not presented as an updated movie."
       ],
       "preview_behavior": "Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.",
       "render_behavior": "Uses the existing shared compiler/compositor and interpolation expressions where supported. Group keys retain canonical target ownership and are projected into the group composition plan; output time maps back to the programme clock. Inspect the actual exported movie; the status does not certify every combination.",
@@ -384,7 +392,9 @@
         "This dated development snapshot does not establish professional or production readiness.",
         "Two bounded masked image-effect edits preserve eight position/scale/rotation/opacity keys through native save/reopen/export. Inverted-polygon sampled picture passes; one ellipse raster pair still exceeds the strict colour bound. This does not qualify every mask/easing/media or legacy entrance clock.",
         "One native nested image/two-motion project preserves 16 group keys across eight channels, including one custom X Bézier curve. Midpoint, property rows, nudge/lock, reset/remove/undo, save/cold reopen, CPU export and full timeline playback pass; four image geometry pairs pass and decoded source-tone audio is unchanged. Native retiming, broader curves, broader mask/blend combinations, video/owned 3D/deeper groups, full raster and live sound remain unqualified. Existing worker Bézier expressions approximate 32 samples; browser interpolation solves the curve.",
-        "Cross-layer paste requires a single source layer and a current-project destination supporting every copied property and value range. Missing targets, unsupported crop/group bounds, destination locks, half-frame timing collisions and programme overflow reject the whole paste. Original-layers mode supports mixed owners. Clipboard is local to this timeline component; it is not an OS/project interchange format. Freehand lasso, spatial interpolation and velocity handles are not implemented. Broad media/retiming/full picture and sound qualification remains open."
+        "Cross-layer paste requires a single source layer and a current-project destination supporting every copied property and value range. Missing targets, unsupported crop/group bounds, destination locks, half-frame timing collisions and programme overflow reject the whole paste. Original-layers mode supports mixed owners. Clipboard is local to this timeline component; it is not an OS/project interchange format. Freehand lasso, dedicated spatial tangent handles and cross-project interchange are not qualified. Broad media/retiming/full picture and sound qualification remains open.",
+        "Direct path editing changes paired X/Y keys; it does not add a separate spatial-spline representation. Independent X/Y timing curves may create a curved trajectory. Native evidence is an ordinary image over real footage; nested animated-parent coordinate conversion has helper coverage. Broader masks/3D/retiming/full picture and sound remain unqualified.",
+        "Velocity/influence edits write a custom cubic curve, including when converting an easing preset. Flat intervals cannot acquire movement through velocity alone. Influence is1–99%; speeds that exceed the supported handle range reject. Hold has a discontinuous step and no finite editable endpoint velocity. Worker custom curves retain the existing32-sample approximation."
       ],
       "common_errors": [
         {
@@ -457,19 +467,25 @@
       "optional_capabilities": [],
       "controls": [
         "studio.keyframe.easing",
-        "studio.keyframe.curve"
+        "studio.keyframe.curve",
+        "studio.keyframe.start_velocity",
+        "studio.keyframe.end_velocity",
+        "studio.keyframe.start_influence",
+        "studio.keyframe.end_influence"
       ],
       "workflow": [
         "Select an existing key or pose group for the intended ordinary layer.",
         "Choose linear, ease-in, ease-out, ease-in-out, hold or custom curve; inspect the transition into that key.",
-        "For a custom curve, use bounded handles and play the movement; save/reopen and inspect final output."
+        "For a custom curve, use bounded handles and play the movement; save/reopen and inspect final output.",
+        "Select an arriving key in the timeline Graph editor. Switch between Value and Velocity views; set start/end velocity and influence, or drag the existing value-curve handles. Numeric edits commit once on Enter or blur."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
         "The shared curve contract allows Y overshoot -2–2, while some numeric inspector widgets restrict Y to 0–1.",
         "The right-hand key supplies easing for the interval between keys.",
-        "This is native 2D property interpolation, distinct from legacy scene-level 3D easing."
+        "This is native 2D property interpolation, distinct from legacy scene-level 3D easing.",
+        "Velocity is signed change in the property per programme second, not screen-path speed. Influence preserves endpoint velocity. Editing a preset converts it to a custom cubic; hold and constant-value intervals have no editable finite motion velocity. Dedicated spatial tangent controls remain unqualified."
       ],
       "common_errors": [
         {
@@ -4624,7 +4640,8 @@
         "studio.keyframes"
       ],
       "limitations": [
-        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "The on-picture motion-path editor writes an X/Y pair in one history edit. An in-progress pointer drag is preview-only; release commits ordinary canonical keys and Escape discards it."
       ],
       "updated_at": "2026-10-12",
       "product_version": "1.2.0"
@@ -4659,7 +4676,8 @@
         "studio.keyframes"
       ],
       "limitations": [
-        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "The on-picture motion-path editor writes an X/Y pair in one history edit. An in-progress pointer drag is preview-only; release commits ordinary canonical keys and Escape discards it."
       ],
       "updated_at": "2026-10-12",
       "product_version": "1.2.0"
@@ -5158,7 +5176,8 @@
         "studio.easing"
       ],
       "limitations": [
-        "Array contains exactly four handles. Shared contract permits Y overshoot; some inspector widgets show narrower Y bounds."
+        "Array contains exactly four handles. Shared contract permits Y overshoot; some inspector widgets show narrower Y bounds.",
+        "The same four values can be edited through signed velocity and influence. Value and velocity graphs are inspection views, not separate animation engines. The sampled path uses the same X/Y evaluator."
       ],
       "updated_at": "2026-10-12",
       "product_version": "1.2.0"
@@ -8818,6 +8837,158 @@
       ],
       "updated_at": "2026-10-15",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.start_velocity",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "Start velocity",
+      "status": "PARTIAL",
+      "meaning": "Sets signed endpoint change per programme second for the selected incoming key interval.",
+      "constraints": {
+        "type": "number",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "property units per programme second",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layer properties",
+        "graphic-group properties"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.end_velocity",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "End velocity",
+      "status": "PARTIAL",
+      "meaning": "Sets signed endpoint change per programme second for the selected incoming key interval.",
+      "constraints": {
+        "type": "number",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "property units per programme second",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layer properties",
+        "graphic-group properties"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.start_influence",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "Start influence",
+      "status": "PARTIAL",
+      "meaning": "Controls the endpoint time influence while preserving its signed velocity.",
+      "constraints": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 99,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layer properties",
+        "graphic-group properties"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.end_influence",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "End influence",
+      "status": "PARTIAL",
+      "meaning": "Controls the endpoint time influence while preserving its signed velocity.",
+      "constraints": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 99,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layer properties",
+        "graphic-group properties"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
     }
   ],
   "tasks": [
@@ -11465,6 +11636,46 @@
       "from": "studio.keyframes",
       "type": "editable_with",
       "to": "studio.keyframe.paste_target"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_velocity"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_velocity"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_velocity"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_velocity"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_influence"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_influence"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_influence"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_influence"
     }
   ]
 }

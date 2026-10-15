@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.16",
+  "knowledge_version": "1.0.17",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1110,6 +1110,26 @@
     },
     {
       "id": "studio.keyframe.paste_target",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.start_velocity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.end_velocity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.start_influence",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.end_influence",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -2924,6 +2944,46 @@
       "from": "studio.keyframes",
       "type": "editable_with",
       "to": "studio.keyframe.paste_target"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_velocity"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_velocity"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_velocity"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_velocity"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_influence"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_influence"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_influence"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_influence"
     }
   ]
 }

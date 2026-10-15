@@ -594,6 +594,66 @@
         "reports/studio-keyframe-marquee-20261015/README.md"
       ],
       "reason": "Box-select across property rows, add/subtract/cancel, and paste onto a compatible layer using the existing canonical keys/history/compiler. Keep readiness and wider picture/sound limits unchanged."
+    },
+    {
+      "feature_id": "studio.keyframes",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioMotionPathEditor.js",
+        "frontend/src/components/studioMotionEditing.js",
+        "frontend/src/components/StudioKeyframeVelocityControls.js",
+        "frontend/src/components/StudioKeyframeCurveEditor.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "reports/studio-motion-workspace-20261015/README.md"
+      ],
+      "reason": "Direct on-picture paired position editing, timeline value/velocity graph and numeric influence on the existing canonical cubic graph; repair animated Motion inspector writes. Retain exact scope and wider picture/sound limits."
+    },
+    {
+      "feature_id": "studio.easing",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioMotionPathEditor.js",
+        "frontend/src/components/studioMotionEditing.js",
+        "frontend/src/components/StudioKeyframeVelocityControls.js",
+        "frontend/src/components/StudioKeyframeCurveEditor.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "reports/studio-motion-workspace-20261015/README.md"
+      ],
+      "reason": "Direct on-picture paired position editing, timeline value/velocity graph and numeric influence on the existing canonical cubic graph; repair animated Motion inspector writes. Retain exact scope and wider picture/sound limits."
+    },
+    {
+      "feature_id": "studio.timeline",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/StudioMotionPathEditor.js",
+        "frontend/src/components/studioMotionEditing.js",
+        "frontend/src/components/StudioKeyframeVelocityControls.js",
+        "frontend/src/components/StudioKeyframeCurveEditor.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "reports/studio-motion-workspace-20261015/README.md"
+      ],
+      "reason": "Direct on-picture paired position editing, timeline value/velocity graph and numeric influence on the existing canonical cubic graph; repair animated Motion inspector writes. Retain exact scope and wider picture/sound limits."
     }
   ]
 }

@@ -1917,6 +1917,12 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId('studio-after-video').src).toContain('source.mp4');
     fireEvent.click(screen.getByRole('button',{name:'Show Finished Video',exact:true}));
     expect(screen.getByTestId('studio-after-video').src).toContain('rendered.mp4?access=renewed');
+    fireEvent.click(within(screen.getByRole('navigation',{name:'Creative tools'})).getByRole('button',{name:'Motion',exact:true}));
+    fireEvent.click(screen.getByRole('button',{name:'Transform keyframes',exact:true}));
+    fireEvent.change(within(screen.getByTestId('clip-studio-inspector')).getByLabelText('X'),{target:{value:'37'}});
+    expect(screen.getByTestId('studio-after-video').src).toContain('source.mp4');
+    fireEvent.click(within(screen.getByRole('navigation',{name:'Creative tools'})).getByRole('button',{name:'Export',exact:true}));
+    expect(screen.getByRole('button',{name:'Download Rendered Clip'})).toBeEnabled();
   });
 
   test("removes a marked middle range and exports retained segments with a join style", async () => {
@@ -5418,13 +5424,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.change(within(inspector).getByLabelText("Y"), { target: { value: "42" } });
     fireEvent.click(within(inspector).getByRole("button", { name: /Add transform keyframe/i }));
 
-    const afterVideo = screen.getByTestId("studio-after-video");
-    Object.defineProperty(afterVideo, "currentTime", {
-      configurable: true,
-      writable: true,
-      value: 4,
-    });
-    fireEvent.timeUpdate(afterVideo);
+    fireEvent.change(screen.getByLabelText("Edited output position"), { target: { value: "4" } });
     fireEvent.change(within(inspector).getByLabelText("X"), { target: { value: "72" } });
     fireEvent.change(within(inspector).getByLabelText("Y"), { target: { value: "61" } });
     fireEvent.click(within(inspector).getByRole("button", { name: /Add transform keyframe/i }));
@@ -5441,7 +5441,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         layers: expect.arrayContaining([
           expect.objectContaining({
             id: "main-video",
-            base_transform: expect.objectContaining({ x: 72, y: 61 }),
+            base_transform: expect.objectContaining({ x: 35, y: 42 }),
             motion_keyframes: expect.arrayContaining([
               expect.objectContaining({ property: "x", time: 0, value: 35 }),
               expect.objectContaining({ property: "x", time: 4, value: 72 }),

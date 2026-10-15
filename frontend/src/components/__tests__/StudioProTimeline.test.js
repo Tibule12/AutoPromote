@@ -601,3 +601,16 @@ test('marquee spans property rows, adds/subtracts and restores selection on Esca
   start(); pointer(content, 'pointercancel'); expect(screen.getByText('2 keys selected')).toBeInTheDocument();
   expect(batch).not.toHaveBeenCalled();
 });
+
+test('the timeline graph edits only the selected owner and returns to property rows without changing keys',()=>{
+  const update=jest.fn();render(<StudioProTimeline duration={3} trackStates={{}} onUpdateMotionKeyframe={update}
+    motionKeyframes={[{id:'a',targetId:'main-video',property:'x',time:0,value:10},
+      {id:'b',targetId:'main-video',property:'x',time:2,value:90,easing:'bezier',curve:[.2,0,.8,1]},
+      {id:'foreign',targetId:'other',property:'x',time:2,value:5}]} overlays={[{id:'other',name:'Other',type:'text'}]}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Show motion keyframes'}));fireEvent.click(screen.getByRole('button',{name:'Expand Source video keyframes'}));
+  fireEvent.click(screen.getByTestId('motion-timeline-key-b'));fireEvent.click(screen.getByRole('button',{name:'Timeline graph editor'}));
+  expect(screen.getByRole('img',{name:'x value curve'})).toBeVisible();expect(screen.getByLabelText('Curve keyframe').querySelectorAll('option')).toHaveLength(2);
+  const influence=screen.getByLabelText('Start influence (%)');fireEvent.focus(influence);fireEvent.change(influence,{target:{value:'50'}});fireEvent.blur(influence);
+  expect(update).toHaveBeenCalledWith('b',{easing:'bezier',curve:[.5,0,.8,1]});
+  fireEvent.click(screen.getByRole('button',{name:'Timeline graph editor'}));expect(screen.getByTestId('motion-timeline-key-b')).toBeVisible();
+});

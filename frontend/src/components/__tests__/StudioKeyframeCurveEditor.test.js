@@ -70,3 +70,13 @@ test("pointer handle movement previews locally and commits once; cancel leaves t
   fireEvent(graph, new MouseEvent('pointercancel', {bubbles:true}));
   expect(update).not.toHaveBeenCalled();
 });
+
+test('velocity display and numeric influence use the saved cubic, with one commit and a range error for impossible speeds', () => {
+  const update=jest.fn();render(<StudioKeyframeCurveEditor keyframes={keys} focusId="b" onUpdate={update}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Velocity graph'}));expect(screen.getByTestId('motion-velocity-curve')).toBeInTheDocument();
+  const influence=screen.getByLabelText('Start influence (%)');fireEvent.focus(influence);fireEvent.change(influence,{target:{value:'40'}});
+  expect(update).not.toHaveBeenCalled();fireEvent.blur(influence);expect(update).toHaveBeenCalledTimes(1);
+  expect(update.mock.lastCall).toEqual(['b',{easing:'bezier',curve:[.4,.2,.8,.9]}]);
+  const speed=screen.getByLabelText('End velocity (opacity/s)');fireEvent.focus(speed);fireEvent.change(speed,{target:{value:'900'}});fireEvent.blur(speed);
+  expect(screen.getByRole('alert')).toHaveTextContent('exceeds');expect(update).toHaveBeenCalledTimes(1);
+});

@@ -295,3 +295,22 @@
   border: 1px solid #c4b5fd; background: rgba(139, 92, 246, .18); box-sizing: border-box; }
 .pro-motion-property .pro-track-lane { touch-action: none; }
 .pro-keyframe-error { flex-basis: 100%; color: #fda4af; }
+.studio-graph-modes { display: flex; gap: 6px; margin: 6px 0; }
+.studio-keyframe-curve .curve-playhead { stroke: #fca5a5; stroke-width: 1; fill: none; }
+.studio-graph-modes button { background: #252b3b; color: #cbd5e1; border: 1px solid #48516a; border-radius: 4px; padding: 5px 8px; }
+.studio-graph-modes button[aria-pressed="true"] { border-color: #c4b5fd; color: #fff; background: #44305c; }
+.studio-velocity-controls small { display: block; color: #a8acb6; margin-top: 6px; }
+.pro-timeline-graph { overflow: auto; max-height: 430px; padding: 8px 14px; color: #eee9ff; }
+.pro-timeline-graph .studio-keyframe-curve { display: grid; grid-template-columns: minmax(280px, 360px) minmax(220px, 1fr); gap: 6px 20px; }
+.pro-timeline-graph .studio-keyframe-curve > label { grid-column: 1 / -1; }
+.pro-timeline-graph .studio-keyframe-curve > svg { grid-column: 1; grid-row: 3 / span 3; max-height: none; aspect-ratio: 5 / 3; height: auto; align-self: start; }
+.pro-timeline-graph .studio-keyframe-curve > .studio-graph-modes { grid-column: 1; grid-row: 2; }
+.pro-timeline-graph .studio-keyframe-curve > .studio-graph-key-values { grid-column: 2; grid-row: 2; }
+.pro-timeline-graph .studio-keyframe-curve > .studio-graph-interval { grid-column: 2; grid-row: 3; }
+.pro-timeline-graph .studio-keyframe-curve > .studio-velocity-controls { grid-column: 2; grid-row: 4; }
+.pro-timeline-graph .studio-keyframe-curve > .studio-bezier-coordinates { grid-column: 2; grid-row: 5; }
+.pro-timeline-graph label span { font-size: 11px; }
+.pro-timeline-graph input, .pro-timeline-graph select { font-size: 12px; }
+@media (max-width: 760px) {
+  .pro-timeline-graph .studio-keyframe-curve { display: block; }
+}

@@ -1,6 +1,6 @@
 # Create a product-launch promo
 
-Development documentation • product 1.2.0 • knowledge 1.0.16 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.17 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -32,7 +32,7 @@ Apply the shared launch draft to owned footage and branding; distinguish your ti
 - studio.export — **PARTIAL**: Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
 - studio.media_ingest — **FUNCTIONAL**: Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.
 - studio.templates — **PARTIAL**: Instantiates a pinned draft template into ordinary editable clips, layers, keyframes and audio. Retained signed-in local lifecycle evidence exists; public qualification and the showroom handoff remain incomplete.
-- studio.keyframes — **FUNCTIONAL**: Box-select ordinary layer and group property keys in the shared timeline, then move, scale, ease, copy or paste animation onto a compatible layer in one undoable edit.
+- studio.keyframes — **FUNCTIONAL**: Edit property keys and sampled motion paths directly over the picture, or shape value/velocity curves in the timeline. Manual edits, Director/template keys, saving and export use the same canonical animation data.
 - studio.audio — **FUNCTIONAL**: Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX buses. Cues and gain keys remain editable in the project.
 
 ## Result and limitations
