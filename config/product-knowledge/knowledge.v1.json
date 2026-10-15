@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.17",
+  "knowledge_version": "1.0.18",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-15",
@@ -919,8 +919,8 @@
       "feature_id": "studio.titles",
       "name": "Titles",
       "area": "Studio",
-      "summary": "Places editable title text in ordinary layers with deterministic style, layout and timing. It is distinct from automatic speech transcription.",
-      "purpose": "Places editable title text in ordinary layers with deterministic style, layout and timing. It is distinct from automatic speech transcription.",
+      "summary": "Places editable titles and separates ordinary title copy into grouped word or letter layers with staggered canonical position, scale, rotation and opacity keys.",
+      "purpose": "Author kinetic typography using the same editable layers, group timing and property graph used by preview and export.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
@@ -933,16 +933,32 @@
       "controls": [
         "studio.title.text",
         "studio.title.scale",
-        "studio.title.color"
+        "studio.title.color",
+        "studio.title.kinetic_unit",
+        "studio.title.kinetic_style",
+        "studio.title.kinetic_direction",
+        "studio.title.kinetic_stagger",
+        "studio.title.kinetic_entry",
+        "studio.title.kinetic_travel",
+        "studio.title.kinetic_tilt",
+        "studio.title.kinetic_exit"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Add or select an ordinary transparent Inter title in Graphics and set its copy, position, size and duration.",
+        "Open Kinetic typography, choose words or letters, movement and order, then set stagger, entrance, travel, rotation and exit.",
+        "Build editable text motion. Each word or grapheme becomes an ordinary title in one Type group with editable property keys.",
+        "Select individual text layers to change their copy, style or keyframes. Move the Type group to keep child timing together. Undo restores the original title.",
+        "Combine the generated type with ordinary imported artwork and group scale keys to author a full-frame composition; all text stays independently editable.",
+        "Save, reopen and inspect the actual finished movie with its editable timeline."
       ],
-      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "preview_behavior": "Generated ordinary layers use existing title layout and canonical motion interpolation on the programme clock; building text motion returns the monitor to Live Edit.",
+      "render_behavior": "The existing composition compiler and title compositor consume generated ordinary layers and property keys. There is no separate text-animation engine.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "Separating supports transparent ordinary Inter titles with no existing motion keys, active mask, tracking, rainbow text or non-normal blend effect.",
+        "At most 48 units and 128 graphic layers; entrances, stagger, hold and exit must fit the title duration. Position must stay inside the programme.",
+        "Word/letter controls are authoring inputs. After separation edit the resulting layers and keys; Undo restores the source title.",
+        "Broad text shaping, continuous picture/sound agreement and professional or production readiness remain unqualified.",
+        "The first text-over-footage sample was challenged by the user. Native technical delivery is separate from approval of the moving design and soundtrack."
       ],
       "common_errors": [
         {
@@ -960,7 +976,7 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "FUNCTIONAL",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-15",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -973,6 +989,16 @@
           "path": "test/e2e/studio-capability-matrix.json",
           "anchor": "\"id\": \"overlays\"",
           "kind": "READINESS"
+        },
+        {
+          "path": "frontend/src/components/studioKineticType.js",
+          "anchor": "export function buildStudioKineticType",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioKineticTypePanel.js",
+          "anchor": "export default function StudioKineticTypePanel",
+          "kind": "IMPLEMENTATION"
         }
       ]
     },
@@ -12662,6 +12688,411 @@
           "kind": "IMPLEMENTATION"
         }
       ]
+    },
+    {
+      "control_id": "studio.title.kinetic_unit",
+      "label": "Kinetic unit",
+      "meaning": "Sets unit when creating ordinary editable text units and motion keys.",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "field": "authoring.kinetic.unit",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "word",
+        "default_known": true,
+        "values": [
+          "word",
+          "letter"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioKineticTypePanel.js",
+          "anchor": "export default function StudioKineticTypePanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioKineticType.js",
+          "anchor": "export function buildStudioKineticType",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.title.kinetic_style",
+      "label": "Kinetic movement",
+      "meaning": "Sets movement when creating ordinary editable text units and motion keys.",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "field": "authoring.kinetic.style",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "rise",
+        "default_known": true,
+        "values": [
+          "rise",
+          "pop",
+          "spin"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioKineticTypePanel.js",
+          "anchor": "export default function StudioKineticTypePanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioKineticType.js",
+          "anchor": "export function buildStudioKineticType",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.title.kinetic_direction",
+      "label": "Kinetic order",
+      "meaning": "Sets order when creating ordinary editable text units and motion keys.",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "field": "authoring.kinetic.direction",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "forward",
+        "default_known": true,
+        "values": [
+          "forward",
+          "reverse",
+          "center"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioKineticTypePanel.js",
+          "anchor": "export default function StudioKineticTypePanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioKineticType.js",
+          "anchor": "export function buildStudioKineticType",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.title.kinetic_stagger",
+      "label": "Kinetic stagger",
+      "meaning": "Sets stagger when creating ordinary editable text units and motion keys.",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "field": "authoring.kinetic.stagger",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "default": 0.12,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioKineticTypePanel.js",
+          "anchor": "export default function StudioKineticTypePanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioKineticType.js",
+          "anchor": "export function buildStudioKineticType",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.title.kinetic_entry",
+      "label": "Kinetic entrance",
+      "meaning": "Sets entrance when creating ordinary editable text units and motion keys.",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "field": "authoring.kinetic.entry",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 3,
+        "default": 0.5,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioKineticTypePanel.js",
+          "anchor": "export default function StudioKineticTypePanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioKineticType.js",
+          "anchor": "export function buildStudioKineticType",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.title.kinetic_travel",
+      "label": "Kinetic travel",
+      "meaning": "Sets travel when creating ordinary editable text units and motion keys.",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "field": "authoring.kinetic.travel",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 30,
+        "default": 8,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation.",
+        "Available for Rise and Spin. Pop changes scale without translation; its travel input is disabled."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioKineticTypePanel.js",
+          "anchor": "export default function StudioKineticTypePanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioKineticType.js",
+          "anchor": "export function buildStudioKineticType",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.title.kinetic_tilt",
+      "label": "Kinetic rotation",
+      "meaning": "Sets rotation when creating ordinary editable text units and motion keys.",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "field": "authoring.kinetic.tilt",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 90,
+        "default": 12,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "degrees",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation.",
+        "Available for Spin. Rise and Pop do not author rotation travel; the rotation input is disabled for those movements."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioKineticTypePanel.js",
+          "anchor": "export default function StudioKineticTypePanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioKineticType.js",
+          "anchor": "export function buildStudioKineticType",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.title.kinetic_exit",
+      "label": "Kinetic exit",
+      "meaning": "Sets exit when creating ordinary editable text units and motion keys.",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "field": "authoring.kinetic.exit",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 3,
+        "default": 0.25,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioKineticTypePanel.js",
+          "anchor": "export default function StudioKineticTypePanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioKineticType.js",
+          "anchor": "export function buildStudioKineticType",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
     }
   ],
   "tasks": [
@@ -15703,6 +16134,46 @@
       "type": "editable_with",
       "from": "studio.easing",
       "to": "studio.keyframe.end_influence"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_unit"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_style"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_direction"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_stagger"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_entry"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_travel"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_tilt"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_exit"
     }
   ],
   "template_bindings": [

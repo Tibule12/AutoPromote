@@ -3032,6 +3032,52 @@ describe("ViralClipStudio timeline sequencing", () => {
     })]);
   });
 
+  test("kinetic typography builds ordinary title layers with atomic history and the same export graph", async () => {
+    const snapshot = {
+      orderedClips: [{ id: 'source', start: 0, end: 8, duration: 8 }], selectedClipId: 'source',
+      timeline: [{ id: 'main', sourceClipId: 'source', url: 'https://example.com/source.mp4', startRequest: 0, endRequest: 8, duration: 8 }],
+      reframeAspect: '16:9', smartCrop: false, autoCaptions: false, motionScenes: [], threeDScenes: [], activeOverlayId: 'type-source',
+      overlays: [{ id: 'type-source', type: 'text', text: 'MAKE EVERY WORD MOVE', x: 50, y: 50,
+        width: 90, scale: 1, startTime: 0, duration: 4, bg: 'transparent', fontFamily: 'Inter', opacity: 1 }],
+    };
+    const originalFonts = Object.getOwnPropertyDescriptor(document, 'fonts');
+    Object.defineProperty(document, 'fonts', { configurable: true, value: { load: jest.fn(async () => []) } });
+    const originalCanvas = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = () => ({ clearRect() {}, drawImage() {}, measureText: text => ({ width: text.length * 18 }) });
+    const saveSpy = jest.spyOn(studioProjectStore, 'saveViralStudioProject').mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    const onSave = jest.fn(async () => ({}));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={snapshot.orderedClips}
+        initialSavedProject={{ id: 'kinetic-editor', name: 'Kinetic editor', snapshot }} onSave={onSave} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Kinetic editor');
+      fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' })).getByRole('button', { name: 'Graphics', exact: true }));
+      fireEvent.change(screen.getByLabelText('Title text', { exact: true }), { target: { value: 'MAKE EVERY\nWORD MOVE' } });
+      expect(screen.getByLabelText('Title text', { exact: true })).toHaveValue('MAKE EVERY\nWORD MOVE');
+      fireEvent.click(screen.getByRole('button', { name: 'Build editable text motion', exact: true }));
+      await waitFor(() => expect(screen.getByText(/4 editable words created/)).toBeInTheDocument());
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy).toHaveBeenCalled());
+      const saved = saveSpy.mock.calls.at(-1)[0].snapshot;
+      expect(saved.overlays.map(layer => layer.text)).toEqual(['MAKE', 'EVERY', 'WORD', 'MOVE']);
+      expect(saved.overlays[0].y).toBeLessThan(saved.overlays[2].y);
+      expect(saved.motionKeyframes).toHaveLength(64); expect(saved.compoundClips).toHaveLength(1);
+      fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes', exact: true }));
+      expect(screen.getByRole('button', { name: 'Expand MAKE · 1 keyframes', exact: true })).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('studio-undo-button'));
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays).toHaveLength(1));
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays[0].id).toBe('type-source');
+      fireEvent.click(screen.getByTestId('studio-redo-button'));
+      await clickRenderFinalClip(); await waitFor(() => expect(onSave).toHaveBeenCalled());
+      const plan = onSave.mock.calls[0][2].compositionPlan;
+      expect(plan.layers.filter(layer => saved.overlays.some(word => word.id === layer.id))).toHaveLength(4);
+      expect(plan.groups[0].layerIds).toEqual(saved.compoundClips[0].layerIds);
+    } finally {
+      saveSpy.mockRestore(); HTMLCanvasElement.prototype.getContext = originalCanvas;
+      if (originalFonts) Object.defineProperty(document, 'fonts', originalFonts); else delete document.fonts;
+    }
+  });
+
   test("fullscreen inserts respect the saved title stack and native layer reordering reaches export", async () => {
     const projectId = "saved-layer-stack";
     const snapshot = {

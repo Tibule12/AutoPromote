@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed direct path editing, timeline value/velocity and influence controls, animated inspector/live-preview fixes, exact native ONDA lifecycle/export/playback, and retained limits.",
-  "reviewed_at": "2026-10-15T17:10:39.243Z",
-  "catalog_sha256": "0ee3fe978e36baa6993d9f9116603885af4808627d1311b533ae8b2c7c5b411b",
+  "reason": "Reviewed kinetic word/grapheme authoring, full-frame width repair, both native saved projects and CPU exports, replacement full Studio playback, exact key preservation and retained creative/picture/sound limits.",
+  "reviewed_at": "2026-10-15T18:14:06.556Z",
+  "catalog_sha256": "c766f829ec17403d7d04c96c7aad8bf23ae04c918cba79fcb5b616514b6244f8",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "3f5ed43cfd295dab11cfc972f6febb8a20f7ce935be4cd5662c8ecccfcd90c50"
+      "sha256": "bde98058a0afd1b9f8bcf8849f466f83d68b8aaf6f2fb606ed6525188c637a62"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -114,6 +114,10 @@
       "sha256": "72af2ecc790997f34eac8620e07eeb0906f93709496b7c756d9e9e4afba4801c"
     },
     {
+      "path": "frontend/src/components/StudioKineticTypePanel.js",
+      "sha256": "bf8f7db8f3078511a0596e013402e394b30e7db9616765ffb404b681bf96f1b2"
+    },
+    {
       "path": "frontend/src/components/StudioLayerStack.js",
       "sha256": "f748481d18ed70c90a1ce251884ce19dfdee0e18d6cf54986c9ae2a70722cc36"
     },
@@ -135,7 +139,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "8ac6ebc8a519a5681c62b94d51767e3847987165fc47422a1354e187e402ae61"
+      "sha256": "b31e72154c54612ae76ef9176085c4a72141d86d8baa597a4985598b64012e45"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -184,6 +188,10 @@
     {
       "path": "frontend/src/components/studioKeyframeSelection.js",
       "sha256": "c4333bf5a7565f9ba0297de734fd9a528847818d7b8a5026c30452fe2b88211d"
+    },
+    {
+      "path": "frontend/src/components/studioKineticType.js",
+      "sha256": "13a027cb7ba9a6722345a40ee1d5a98827670d3b0bf9862d63c965b237ce741b"
     },
     {
       "path": "frontend/src/components/studioLayerOrder.js",
@@ -391,11 +399,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "eff81d13df482c65e97005bcb0f255ca82bad0fc7729a79703972d791cc14779"
+      "sha256": "905ad0f710dadd3c416cbc482b71f196860f3ee766121e0b2070f54964c5bd79"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "dbd578423f5fa93fa61ddff7deb3e614c1bc8320e954adb707c987bb05ad219d"
+      "sha256": "1cdff04b589eef4ec66149c347f83bd22ce21f08975b606ae94eb37a7d7de338"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

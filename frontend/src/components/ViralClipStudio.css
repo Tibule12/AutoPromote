@@ -10682,6 +10682,16 @@ body.dashboard-mode.viral-studio-open {
   gap: 6px;
 }
 
+.kinetic-type-panel .title-typography-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kinetic-type-panel .title-typography-row label,
+.kinetic-type-panel .title-typography-row select { min-width: 0; width: 100%; }
+.kinetic-type-panel .motion-position-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.kinetic-type-panel > button {
+  width: 100%; min-height: 36px; margin-top: 10px; border: 1px solid #8b5cf6;
+  border-radius: 7px; background: #3b2571; color: #fff; font: inherit; cursor: pointer;
+}
+.kinetic-type-panel > button:disabled { opacity: .5; cursor: default; }
+
 .title-color-row label {
   display: grid;
   gap: 5px;

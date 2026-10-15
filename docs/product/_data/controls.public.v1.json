@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.17",
+  "knowledge_version": "1.0.18",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -4377,6 +4377,299 @@
         "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
         "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
         "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_unit",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic unit",
+      "status": "PARTIAL",
+      "meaning": "Sets unit when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "word",
+        "default_known": true,
+        "values": [
+          "word",
+          "letter"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_style",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic movement",
+      "status": "PARTIAL",
+      "meaning": "Sets movement when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "rise",
+        "default_known": true,
+        "values": [
+          "rise",
+          "pop",
+          "spin"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_direction",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic order",
+      "status": "PARTIAL",
+      "meaning": "Sets order when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "forward",
+        "default_known": true,
+        "values": [
+          "forward",
+          "reverse",
+          "center"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_stagger",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic stagger",
+      "status": "PARTIAL",
+      "meaning": "Sets stagger when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "default": 0.12,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_entry",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic entrance",
+      "status": "PARTIAL",
+      "meaning": "Sets entrance when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 3,
+        "default": 0.5,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_travel",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic travel",
+      "status": "PARTIAL",
+      "meaning": "Sets travel when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 30,
+        "default": 8,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation.",
+        "Available for Rise and Spin. Pop changes scale without translation; its travel input is disabled."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_tilt",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic rotation",
+      "status": "PARTIAL",
+      "meaning": "Sets rotation when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 90,
+        "default": 12,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "degrees",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation.",
+        "Available for Spin. Rise and Pop do not author rotation travel; the rotation input is disabled for those movements."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_exit",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic exit",
+      "status": "PARTIAL",
+      "meaning": "Sets exit when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 3,
+        "default": 0.25,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
       ],
       "updated_at": "2026-10-15",
       "product_version": "1.2.0"

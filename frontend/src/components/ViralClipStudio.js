@@ -14,6 +14,8 @@ import { studioMediaEffectFilter } from "./studioMediaEffects";
 import { studioLayerEntries, moveStudioLayer, orderStudioCollection } from "./studioLayerOrder";
 import { studioGroupTree, createStudioGroup, moveStudioGroupNode, removeStudioGroup, removeStudioGroupMembers, studioGroupLocalPoint, studioGroupProgrammePoint, GROUP_TRANSFORM, evaluateStudioGroupTransform, validateStudioGroupKeyframes, pruneRemovedStudioGroupKeys } from "./studioGroups";
 import StudioMotionPathEditor from './StudioMotionPathEditor';
+import StudioKineticTypePanel from './StudioKineticTypePanel';
+import { buildStudioKineticType } from './studioKineticType';
 import { editStudioPositionPose } from './studioMotionEditing';
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
@@ -116,7 +118,7 @@ import Studio3DPanel from "./threeD/Studio3DPanel";
 import StudioSubjectVfxPanel from "./StudioSubjectVfxPanel";
 import { findUncoveredCaptionSpeechRanges, mapCaptionSilencesToProgramme } from "./studioCaptionCoverage";
 import { historyMediaIdentity, historySubjectVfxIdentity } from "./studioHistoryMedia";
-import { titleAnimationPose } from "./studioTitleLayout";
+import { titleAnimationPose, normalizeStudioTitleText } from "./studioTitleLayout";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
 import { validateSubjectVfxExport, resolveSubjectVfxProgrammePreview, subjectVfxRevision } from "./studioSubjectVfxContract";
 import { cutStudio3DScenes, normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
@@ -10661,6 +10663,33 @@ const ViralClipStudio = ({
     } catch (error) { setStudioActionMessage(error.message); }
   };
 
+  const createKineticTitle = async options => {
+    if (trackStates.graphics?.locked) throw Error('Unlock the Graphics track to edit text motion.');
+    const source = overlays.find(layer => layer.id === activeOverlayId), projectId = activeProjectIdRef.current;
+    const editSignature = lastSnapshotSignatureRef.current;
+    if (!source) throw Error('Select a title first.');
+    await document.fonts.load(`${Number(source.fontWeight || 900)} 36px "Studio Inter"`);
+    if (activeProjectIdRef.current !== projectId) throw Error('The project changed. Select the title again.');
+    if (lastSnapshotSignatureRef.current !== editSignature || latestEditorSnapshotRef.current?.().activeOverlayId !== source.id)
+      throw Error('The edit changed while the font loaded. Select the title and build its motion again.');
+    const canvas = document.createElement('canvas'), context = canvas.getContext('2d');
+    context.font = `${Number(source.fontWeight || 900)} 36px "Studio Inter"`;
+    const stage = phoneFrameRef.current;
+    const result = buildStudioKineticType({ source, overlays, keyframes: motionKeyframes,
+      compounds: effectiveCompoundClips, order: compositionIds,
+      width: stage?.clientWidth || 1280, height: stage?.clientHeight || 720,
+      measure: value => context.measureText(value).width, createId: createSecureId,
+      fps: Number(exportSettings.fps) || 30, playbackRate: Number(previewSpeed) || 1, ...options });
+    flushSync(() => {
+      setOverlays(result.overlays); setMotionKeyframes(result.keyframes);
+      setCompoundClips(result.compounds); setCompositionOrder(result.order);
+      setActiveOverlayId(result.layers[0].id); setMotionTargetId(result.layers[0].id);
+      setSelectedGroupId(null); setPreviewFinishedFile(false);
+    });
+    setComparisonMode('after'); setTimelineDockExpanded(true);
+    setStudioActionMessage(`${result.layers.length} editable ${options.unit === 'letter' ? 'letters' : 'words'} created with staggered motion keys. Select each word in the timeline or move the complete Type group.`);
+  };
+
   const updateVoiceoverTake = (id, changes) => setVoiceovers(current => current.map(take => {
     if (take.id !== id) return take;
     const next = { ...take, ...changes };
@@ -16755,7 +16784,7 @@ const ViralClipStudio = ({
   };
 
   const updateOverlayText = (id, newText) => {
-    const safeText = normalizePlainText(newText);
+    const safeText = normalizeStudioTitleText(newText);
     setOverlays(overlays.map(o => (o.id === id ? { ...o, text: safeText } : o)));
   };
 
@@ -19433,7 +19462,8 @@ const ViralClipStudio = ({
                           return true;
                         })
                         .map((overlay, index) => {
-                          const safeOverlayText = normalizePlainText(overlay.text);
+                          const safeOverlayText = overlay.type === 'text' && !overlay.isCaption && !overlay.bRollMode
+                            ? normalizeStudioTitleText(overlay.text) : normalizePlainText(overlay.text);
                           const safeOverlaySrc = getSafeMediaSource(overlay.src);
                           const isFullscreen = overlay.bRollMode === "fullscreen";
                           const isMediaOverlay = ["video", "image"].includes(overlay.type);
@@ -19483,7 +19513,7 @@ const ViralClipStudio = ({
                                     ? `${overlay.width || 35}%`
                                     : isStyledTitle ? "max-content" : "auto",
                                 maxWidth: isStyledTitle
-                                  ? `calc(var(--title-layout-width, 576px) * ${Math.max(15, Math.min(90, Number(overlay.width || 90))) / 100})` : undefined,
+                                  ? `calc(var(--title-layout-width, 576px) * ${Math.max(15, Math.min(90, Number(overlay.width || 90))) / 100})` : isMediaOverlay ? "none" : undefined,
                                 height: isFullscreen
                                   ? "100%"
                                   : overlay.type === "video" || overlay.type === "image"
@@ -23932,6 +23962,7 @@ const ViralClipStudio = ({
                             type="button"
                             className={activeOverlayId === overlay.id ? "is-active" : ""}
                             onClick={() => {
+                              setSelectedGroupId(null);
                               setActiveOverlayId(overlay.id);
                               jumpToOutputTimelineTime(Number(overlay.startTime || 0));
                             }}
@@ -24250,6 +24281,8 @@ const ViralClipStudio = ({
                           ))}
                         </div>
                       </div>
+
+                      <StudioKineticTypePanel onBuild={createKineticTitle} locked={!!trackStates.graphics?.locked} />
 
                       <div className="inspector-inline-actions">
                         <button type="button" onClick={() => duplicateOverlay(activeOverlay.id)}>
@@ -24668,7 +24701,7 @@ const ViralClipStudio = ({
                     keyframes={motionKeyframes}
                     focusKeyframeId={focusedMotionKeyframeId}
                     keyframesLocked={Boolean(trackStates[motionKeyframeTrack(motionTargetId)]?.locked)}
-                    onSelectOverlay={setMotionTargetId}
+                    onSelectOverlay={id => { setSelectedGroupId(null); setMotionTargetId(id); }}
                     onUpdateOverlay={(field, value) => {
                       if (!motionInspectorTarget) return;
                       if (studioMotionPropertiesForTarget(motionInspectorTarget).some(property => property.id === field)) {

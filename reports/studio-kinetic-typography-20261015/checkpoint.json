@@ -1,0 +1,19 @@
+{
+  "scope": "Initial native word/grapheme authoring evidence; user challenged this basic text-over-footage creative treatment.",
+  "projectId": "viral-project-aebc2ae6-2d4f-4098-a2ea-b52534a44635",
+  "canonicalHash": "d3b2d841dd815fb60f1bf80351e2b10aa7e4269916d1081b71b5f1f9371941fe",
+  "outputSha256": "94ad80f95b65b42780adcf250ff06c26b1480f531120e585c0fa3b13bc080a49",
+  "textLayers": 33,
+  "groups": 4,
+  "propertyKeys": 552,
+  "exactCompiledTextKeys": 528,
+  "normalNativeCpuExport": true,
+  "fullDecode": true,
+  "completeNativePlayback": true,
+  "smoothPlaybackEvidence": false,
+  "creativeApproved": false,
+  "replacementEvidence": "reports/studio-kinetic-composition-20261015/README.md",
+  "replacementCheckpoint": "reports/studio-kinetic-composition-20261015/checkpoint.json",
+  "gpuJobs": 0,
+  "readinessPromoted": false
+}

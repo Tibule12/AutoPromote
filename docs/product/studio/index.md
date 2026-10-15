@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.17 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.18 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -412,7 +412,9 @@ Caption controls and reviewed phrase rendering exist, but the retained automatic
 
 ID: `studio.titles` • **FUNCTIONAL** • DETERMINISTIC
 
-Places editable title text in ordinary layers with deterministic style, layout and timing. It is distinct from automatic speech transcription.
+Places editable titles and separates ordinary title copy into grouped word or letter layers with staggered canonical position, scale, rotation and opacity keys.
+
+**Purpose:** Author kinetic typography using the same editable layers, group timing and property graph used by preview and export.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -424,22 +426,30 @@ Places editable title text in ordinary layers with deterministic style, layout a
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Add or select an ordinary transparent Inter title in Graphics and set its copy, position, size and duration.
+2. Open Kinetic typography, choose words or letters, movement and order, then set stagger, entrance, travel, rotation and exit.
+3. Build editable text motion. Each word or grapheme becomes an ordinary title in one Type group with editable property keys.
+4. Select individual text layers to change their copy, style or keyframes. Move the Type group to keep child timing together. Undo restores the original title.
+5. Combine the generated type with ordinary imported artwork and group scale keys to author a full-frame composition; all text stays independently editable.
+6. Save, reopen and inspect the actual finished movie with its editable timeline.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Generated ordinary layers use existing title layout and canonical motion interpolation on the programme clock; building text motion returns the monitor to Live Edit.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The existing composition compiler and title compositor consume generated ordinary layers and property keys. There is no separate text-animation engine.
 
 **Limits**
 
-- This dated development snapshot does not establish professional or production readiness.
+- Separating supports transparent ordinary Inter titles with no existing motion keys, active mask, tracking, rainbow text or non-normal blend effect.
+- At most 48 units and 128 graphic layers; entrances, stagger, hold and exit must fit the title duration. Position must stay inside the programme.
+- Word/letter controls are authoring inputs. After separation edit the resulting layers and keys; Undo restores the source title.
+- Broad text shaping, continuous picture/sound agreement and professional or production readiness remain unqualified.
+- The first text-over-footage sample was challenged by the user. Native technical delivery is separate from approval of the moving design and soundtrack.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Title text](../control-reference/index.md#studio-title-text), [Title size](../control-reference/index.md#studio-title-scale), [Title text color](../control-reference/index.md#studio-title-color)
+**Controls:** [Title text](../control-reference/index.md#studio-title-text), [Title size](../control-reference/index.md#studio-title-scale), [Title text color](../control-reference/index.md#studio-title-color), [Kinetic unit](../control-reference/index.md#studio-title-kinetic_unit), [Kinetic movement](../control-reference/index.md#studio-title-kinetic_style), [Kinetic order](../control-reference/index.md#studio-title-kinetic_direction), [Kinetic stagger](../control-reference/index.md#studio-title-kinetic_stagger), [Kinetic entrance](../control-reference/index.md#studio-title-kinetic_entry), [Kinetic travel](../control-reference/index.md#studio-title-kinetic_travel), [Kinetic rotation](../control-reference/index.md#studio-title-kinetic_tilt), [Kinetic exit](../control-reference/index.md#studio-title-kinetic_exit)
 
 **Guides:** No task guide in V1.
 

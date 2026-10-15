@@ -1,3 +1,10 @@
+// Preserve authored line breaks and a trailing newline while the user types.
+// Text remains plain React/Pillow text; controls and angle brackets are removed.
+export const normalizeStudioTitleText = value => String(value ?? '').replace(/\r\n?/g, '\n')
+  // Intentionally remove control characters while retaining LF for typography.
+  // eslint-disable-next-line no-control-regex
+  .replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, ' ').replace(/[<>]/g, '');
+
 // Title animation follows the edit clock, including paused scrubbing and exit.
 export function titleAnimationPose(overlay, time) {
   const start = Number(overlay.startTime ?? overlay.start_time ?? 0);

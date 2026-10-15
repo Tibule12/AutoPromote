@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.17 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.18 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -134,6 +134,14 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.keyframe.end_velocity | End velocity | number | source-dependent … source-dependent | property units per programme second | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.keyframe.start_influence | Start influence | number | 1 … 99 | percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.keyframe.end_influence | End influence | number | 1 … 99 | percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.title.kinetic_unit | Kinetic unit | string | word, letter | none | "word" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_style | Kinetic movement | string | rise, pop, spin | none | "rise" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_direction | Kinetic order | string | forward, reverse, center | none | "forward" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_stagger | Kinetic stagger | number | 0 … 1 | seconds | 0.12 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_entry | Kinetic entrance | number | 0.1 … 3 | seconds | 0.5 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_travel | Kinetic travel | number | 0 … 30 | percent | 8 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_tilt | Kinetic rotation | number | 0 … 90 | degrees | 12 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_exit | Kinetic exit | number | 0.1 … 3 | seconds | 0.25 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -1708,3 +1716,109 @@ Applies to: ordinary layer properties, graphic-group properties. Requires: studi
 - Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
 - Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
 - Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified.
+
+<a id="studio-title-kinetic_unit"></a>
+
+## Kinetic unit
+
+ID: `studio.title.kinetic_unit` • **PARTIAL**
+
+Sets unit when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_style"></a>
+
+## Kinetic movement
+
+ID: `studio.title.kinetic_style` • **PARTIAL**
+
+Sets movement when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_direction"></a>
+
+## Kinetic order
+
+ID: `studio.title.kinetic_direction` • **PARTIAL**
+
+Sets order when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_stagger"></a>
+
+## Kinetic stagger
+
+ID: `studio.title.kinetic_stagger` • **PARTIAL**
+
+Sets stagger when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_entry"></a>
+
+## Kinetic entrance
+
+ID: `studio.title.kinetic_entry` • **PARTIAL**
+
+Sets entrance when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_travel"></a>
+
+## Kinetic travel
+
+ID: `studio.title.kinetic_travel` • **PARTIAL**
+
+Sets travel when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+- Available for Rise and Spin. Pop changes scale without translation; its travel input is disabled.
+
+<a id="studio-title-kinetic_tilt"></a>
+
+## Kinetic rotation
+
+ID: `studio.title.kinetic_tilt` • **PARTIAL**
+
+Sets rotation when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+- Available for Spin. Rise and Pop do not author rotation travel; the rotation input is disabled for those movements.
+
+<a id="studio-title-kinetic_exit"></a>
+
+## Kinetic exit
+
+ID: `studio.title.kinetic_exit` • **PARTIAL**
+
+Sets exit when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.

@@ -654,6 +654,25 @@
         "reports/studio-motion-workspace-20261015/README.md"
       ],
       "reason": "Direct on-picture paired position editing, timeline value/velocity graph and numeric influence on the existing canonical cubic graph; repair animated Motion inspector writes. Retain exact scope and wider picture/sound limits."
+    },
+    {
+      "feature_id": "studio.titles",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioKineticTypePanel.js",
+        "frontend/src/components/studioKineticType.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "reports/studio-kinetic-typography-20261015/README.md",
+        "reports/studio-kinetic-composition-20261015/README.md"
+      ],
+      "reason": "Kinetic word/grapheme authoring emits existing ordinary grouped titles and motion keys; document real constraints without promoting readiness. Native full-frame typography continuation uses ordinary artwork/group keys; a 100% image preview now honors its saved width instead of the legacy 90% CSS cap."
     }
   ]
 }

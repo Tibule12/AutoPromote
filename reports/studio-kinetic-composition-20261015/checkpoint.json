@@ -1,0 +1,166 @@
+{
+  "evidence": "reports/studio-kinetic-composition-20261015/README.md",
+  "checkpoint": "reports/studio-kinetic-composition-20261015/checkpoint.json",
+  "branch": "agent/studio-professional-continuation-v2",
+  "scope": "Editable kinetic word/grapheme authoring on the existing graph and a native full-frame ink/acid/paper typography composition with independent artwork, group zooms and orbital motion.",
+  "projectId": "viral-project-0decbce8-cb8e-4475-8b27-dca3266ef0f4",
+  "canonicalHash": "bda073117f9e56d6a3fd3490cc92867155ddacc37361fde9bdc685e64efbe812",
+  "outputSha256": "cd85d5e1b77a14ae5c629cecc0ceda6695ceebaf4d0926ed942f02ba8877e1fb",
+  "sourceShots": 10,
+  "textLayers": 33,
+  "imageLayers": 4,
+  "graphicGroups": 4,
+  "propertyKeyCount": 595,
+  "exactCompiledLayerAndGroupKeys": 571,
+  "nativeTypeConversionUndoRedo": true,
+  "nativeIndividualWordKeyEditUndo": true,
+  "nativeOwnedSvgImportAndLayerOrder": true,
+  "nativeGroupScaleAnimation": true,
+  "nativeFullFramePreviewWidth": true,
+  "nativeExactColdReopen": true,
+  "nativeCpuExportsThisSession": 2,
+  "replacementCpuExports": 1,
+  "replacementJobSeconds": 463.331,
+  "replacementVerifiedDownloadSeconds": 467.109,
+  "nativeCompletePlayback": true,
+  "screenCaptureFps": 19.966226457911745,
+  "smoothPlaybackEvidence": false,
+  "frontendCasesPassed": 9,
+  "knowledgeCasesPassed": 17,
+  "strictAppBuild": "PASS",
+  "workerCodeChanged": false,
+  "gpuJobs": 0,
+  "paidGpuCost": 0,
+  "wholePreviewFinalParityQualified": false,
+  "fullStudioSuiteQualified": false,
+  "readinessPromoted": false,
+  "creativeApproval": false,
+  "remainingBlockers": [
+    "The first text-over-footage sample was challenged by the user. Creative approval of the replacement remains the user's actual moving/sound review.",
+    "Screen capture cadence does not qualify smooth playback; QA is headless/muted and the recording soundtrack comes from the exact verified export at its observed start offset.",
+    "Whole continuous preview/final raster, live mix and human listening remain unqualified. Existing S02 colour/ellipse/source-feature/audio limits remain open.",
+    "Complex script shaping/RTL, arbitrary masks/tracking/retiming/3D and broad parent/media combinations remain unqualified.",
+    "S03 group/source-occurrence ownership and dedicated S04 spatial tangent/path timing remain open. No readiness or creative/public/production promotion."
+  ],
+  "nextTaskIds": [
+    "S04",
+    "S03",
+    "S02"
+  ],
+  "nextImplementationSlice": "Continue the user's motion-design feedback with editable typography/shape choreography on this shared graph, then S04 spatial tangent/path timing and S03 occurrence ownership; retain S02 picture/sound limits.",
+  "recordedAt": "2026-10-15T18:13:56.680989Z",
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "b31e72154c54612ae76ef9176085c4a72141d86d8baa597a4985598b64012e45",
+    "frontend/src/components/ViralClipStudio.css": "a53368684aaf56703cb9206e47eb656052e555e3ddab1d9007809eeb87ff8dda",
+    "frontend/src/components/studioTitleLayout.js": "b0c89ea6e42a3df7f20c1bfbd7c720c612677550860a60ae2803b22c47fcda59",
+    "frontend/src/components/studioKineticType.js": "13a027cb7ba9a6722345a40ee1d5a98827670d3b0bf9862d63c965b237ce741b",
+    "frontend/src/components/StudioKineticTypePanel.js": "bf8f7db8f3078511a0596e013402e394b30e7db9616765ffb404b681bf96f1b2",
+    "frontend/src/components/__tests__/ViralClipStudio.test.js": "804d5a4862ef9b7ce89155acf58aae9951890d27d85e04058d4753a7ece72856",
+    "frontend/src/components/__tests__/studioKineticType.test.js": "6351caa82c11bb425b381a8ab5fd1732f301cfb1a640752be7286078ca321a18",
+    "scripts/studio-professional/kinetic-type-proof.js": "b1c1a89742da357ffe9e99a9e55de5b532b60d44a5ce59e15d89554ac606bda3",
+    "scripts/studio-professional/kinetic-composition-proof.js": "bca902e67712f48cf61ae873584b26b5981da4367875b080b7e40cc9da117f09",
+    "reports/studio-kinetic-composition-20261015/assets/acid-stage.svg": "4c566bc06dce96cd702a85ada93f88819b9d8e58f1ab665f30fa6447e142ef4d",
+    "reports/studio-kinetic-composition-20261015/assets/ink-stage.svg": "c2555c83ee3ac247d9f7ad3079424d1667e0d7d989a174ea055649d6de4ac5ee",
+    "reports/studio-kinetic-composition-20261015/assets/orbit.svg": "d80da5c740c80c75f1e5fc7bc7c00ac5219307daa0584cac04cb7b7b6ccad806",
+    "reports/studio-kinetic-composition-20261015/assets/paper-stage.svg": "1ceb7c6c9a3d5adf8ba22be75a8f0cd6f68aa0dd59615a756e8bf06482d6176c"
+  },
+  "artifactHashes": {
+    "reports/studio-kinetic-composition-20261015/proof/composition/final.mp4": "cd85d5e1b77a14ae5c629cecc0ceda6695ceebaf4d0926ed942f02ba8877e1fb",
+    "reports/studio-kinetic-composition-20261015/proof/composition/edited-in-studio.mp4": "bd9e6c48e0037cac1ea4aa52f9fa0d3fe81c5430718bc9968e0f8045491a79ac",
+    "reports/studio-kinetic-composition-20261015/proof/editing-in-studio.mp4": "704456445dbcef827b56ea2987fdd543673001c7b2891124970141faf74f61db"
+  },
+  "editingRecording": {
+    "seconds": 9.342999935150146,
+    "frames": 98,
+    "rawBytes": 14750546,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture"
+  },
+  "playback": {
+    "createdAt": "2026-10-15T18:13:28.761Z",
+    "playback": {
+      "duration": 20,
+      "time": 20,
+      "ended": true,
+      "width": 1280,
+      "height": 720,
+      "playbackRate": 1,
+      "decodedFrames": 485
+    },
+    "canonicalHash": "bda073117f9e56d6a3fd3490cc92867155ddacc37361fde9bdc685e64efbe812",
+    "nativeFinishedOutput": true,
+    "timelineVisible": true,
+    "audioTrackReveal": {
+      "nativeSoundInspector": true,
+      "sfxLaneVisible": true,
+      "atOutputSeconds": 7.794263
+    },
+    "recording": "/home/tibule12/Projects/AutoPromte/AutoPromote-main-integration-20261013/reports/studio-kinetic-composition-20261015/proof/composition/edited-in-studio.mp4",
+    "screencastFrames": 403,
+    "recordingScratch": {
+      "releasedBytes": 58802176,
+      "retainedSamples": [
+        "000000.jpg",
+        "000201.jpg",
+        "000402.jpg"
+      ]
+    },
+    "recordingCapture": {
+      "captureSeconds": 20.133999824523926,
+      "screenFramesPerSecond": 19.966226457911745,
+      "movieFps": 24,
+      "encodedScreenRecordingFps": 24,
+      "sparseCapture": true,
+      "smoothPlaybackEvidence": false,
+      "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+    },
+    "recordingAudio": "Soundtrack muxed from the exact hash-verified export at the observed native playback-start offset; QA browser muted",
+    "audioOffset": 0.07399988174438477,
+    "decodedFramesThisPlayback": 476,
+    "projectId": "viral-project-0decbce8-cb8e-4475-8b27-dca3266ef0f4",
+    "outputSha256": "cd85d5e1b77a14ae5c629cecc0ceda6695ceebaf4d0926ed942f02ba8877e1fb",
+    "submittedJobId": "viral_dce70e33c643d9fda36abac3e8f050d694ae3035737d2cb0a6a1b70262f8165d",
+    "templateRef": {
+      "templateId": "product_launch_cinematic_v1",
+      "version": "1.1.2",
+      "definitionHash": "6432bd27c16769283529278b62a4c228b5a06476b113b5ab74d852e12c0dea2d"
+    },
+    "listeningReview": "pending founder review",
+    "noMocks": true
+  },
+  "finalTechnical": {
+    "passed": true,
+    "sha256": "cd85d5e1b77a14ae5c629cecc0ceda6695ceebaf4d0926ed942f02ba8877e1fb",
+    "bytes": 1459788,
+    "seconds": 20,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "20.000000",
+      "frameCount": 480,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "20.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 960512,
+      "sampleRate": 48000,
+      "seconds": 20.010666666666665,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-kinetic-composition-20261015/proof/composition/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "failedAttemptsPreserved": true,
+  "mainMergeOrProductionDeployment": false
+}

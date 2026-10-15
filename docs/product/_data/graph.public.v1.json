@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.17",
+  "knowledge_version": "1.0.18",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1130,6 +1130,46 @@
     },
     {
       "id": "studio.keyframe.end_influence",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_unit",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_style",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_direction",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_stagger",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_entry",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_travel",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_tilt",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_exit",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -2984,6 +3024,46 @@
       "from": "studio.easing",
       "type": "editable_with",
       "to": "studio.keyframe.end_influence"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_unit"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_style"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_direction"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_stagger"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_entry"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_travel"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_tilt"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_exit"
     }
   ]
 }
