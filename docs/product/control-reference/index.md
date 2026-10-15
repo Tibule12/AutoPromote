@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.14 • 2026-10-14T17:19:31.904956Z
+Development documentation • product 1.2.0 • knowledge 1.0.15 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -128,6 +128,7 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.group_clip.move | Move group clip | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.group_clip.in | Group clip In | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.group_clip.out | Group clip Out | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.keyframe.selection_scale | Selected keyframe time scale | number | 0 … 100 | multiplier | 2 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -298,6 +299,7 @@ Places a property key on the programme clock; timeline nudges use the output fra
 Applies to: ordinary layers, graphic groups. Requires: studio.keyframes.
 
 - The current programme/layer range supplies the upper bound; no universal fixed duration is claimed.
+- The property timeline also applies this operation to selected ordinary keys in one history edit. Copy/paste retains original ownership and creates new identities; collisions and mixed locked selections reject the entire change.
 
 <a id="studio-keyframe-easing"></a>
 
@@ -311,6 +313,7 @@ Applies to: ordinary layers, graphic groups. Requires: studio.easing, studio.key
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
 - Group evaluation clamps values to each group property’s bounds. Worker Bézier expressions use the existing 32-sample approximation; broad curve/raster equivalence is unqualified.
+- The property timeline also applies this operation to selected ordinary keys in one history edit. Copy/paste retains original ownership and creates new identities; collisions and mixed locked selections reject the entire change.
 
 <a id="studio-keyframe-curve"></a>
 
@@ -1613,3 +1616,17 @@ Applies to: graphic groups. Requires: studio.timeline, studio.compositing.
 - Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.
 - Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.
 - Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified.
+
+<a id="studio-keyframe-selection_scale"></a>
+
+## Selected keyframe time scale
+
+ID: `studio.keyframe.selection_scale` • **PARTIAL**
+
+Scales selected key spacing from the first selected key, retaining property values, curves and ownership.
+
+Applies to: ordinary layers, graphic groups. Requires: studio.keyframes.
+
+- A finite factor greater than zero and at most100 is accepted. Scaling is not animated.
+- The first selected key stays fixed. Programme-range overflow or collisions reject the operation. Every selected track must be unlocked.
+- One native group-opacity workflow passes history/cold/export; broad property/media/retiming/full picture and sound qualification remain open.

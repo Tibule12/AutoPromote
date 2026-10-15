@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.14 • 2026-10-14T17:19:31.904956Z
+Development documentation • product 1.2.0 • knowledge 1.0.15 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -8,7 +8,7 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 
 ID: `studio.timeline` • **PARTIAL** • DETERMINISTIC
 
-Displays source occurrences, ordinary layers, audio cues, graphic-group clip bars and property keys on the shared programme clock.
+Displays source occurrences, ordinary layers, audio cues, graphic-group clip bars and property keys on the shared programme clock. Expanded property rows also support multi-key selection, batch movement, copy/paste, time scaling and interpolation.
 
 **Purpose:** Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.
 
@@ -238,7 +238,7 @@ Edits position, scale, rotation, anchor, crop and opacity of ordinary layers. Na
 
 ID: `studio.keyframes` • **FUNCTIONAL** • DETERMINISTIC
 
-Adds property keys to ordinary layers and nested graphic groups, moves them in the shared timeline and interpolates poses. Retained native controls/history/reopen/export evidence is bounded; whole-stage agreement is still partial.
+Edit ordinary layer and group property keys directly in the shared timeline: select multiple keys, move/nudge, copy/paste at the playhead, scale timing, apply interpolation and delete in one undoable edit. Whole-stage picture/sound agreement remains partial.
 
 **Purpose:** Create deliberate editable movement and retain the same keys across manual editing, Director proposals, saving and final compilation.
 
@@ -255,7 +255,8 @@ Adds property keys to ordinary layers and nested graphic groups, moves them in t
 1. Show motion keyframes in the timeline and expand an ordinary visual layer or graphic group, including targets without animation keys.
 2. Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.
 3. Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.
-4. Owning-track locks prevent changes. Group values use their own five-property bounds; group key selection opens Composite with the shared curve editor. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
+4. Shift/Ctrl/Command-click keys to select together. Drag or frame-nudge the selection, copy with Ctrl/Command+C and paste with Ctrl/Command+V at the playhead on the original layers. The batch toolbar scales spacing from the first selected key and applies interpolation or deletion in one history step.
+5. Owning-track locks prevent changes. Group values use their own five-property bounds; group key selection opens Composite with the shared curve editor. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
 
 **Preview:** Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.
 
@@ -266,6 +267,7 @@ Adds property keys to ordinary layers and nested graphic groups, moves them in t
 - This dated development snapshot does not establish professional or production readiness.
 - Two bounded masked image-effect edits preserve eight position/scale/rotation/opacity keys through native save/reopen/export. Inverted-polygon sampled picture passes; one ellipse raster pair still exceeds the strict colour bound. This does not qualify every mask/easing/media or legacy entrance clock.
 - One native nested image/two-motion project preserves 16 group keys across eight channels, including one custom X Bézier curve. Midpoint, property rows, nudge/lock, reset/remove/undo, save/cold reopen, CPU export and full timeline playback pass; four image geometry pairs pass and decoded source-tone audio is unchanged. Native retiming, broader curves, broader mask/blend combinations, video/owned 3D/deeper groups, full raster and live sound remain unqualified. Existing worker Bézier expressions approximate 32 samples; browser interpolation solves the curve.
+- Batch clipboard retains original layer/property ownership. Cross-layer/project paste, marquee selection, spatial interpolation and velocity handles are not implemented. Collisions, out-of-programme scaling and locked selections reject the whole edit. Native batch proof covers group opacity; multi-property/mixed-lock behavior has component coverage, not whole-media qualification.
 
 **Common errors**
 
@@ -273,7 +275,7 @@ Adds property keys to ordinary layers and nested graphic groups, moves them in t
 - Keyframe edits are locked: Unlock the applicable property/layer in the normal controls before editing.
 - Motion differs after export: Check current keys/source binding and the documented preview/final limitations; inspect mapped frames in the actual movie.
 
-**Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity)
+**Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Selected keyframe time scale](../control-reference/index.md#studio-keyframe-selection_scale)
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
 
@@ -1341,6 +1343,7 @@ Shows the existing project programme with mapped source frames and sound. Retain
 
 - This dated development snapshot does not establish professional or production readiness.
 - Accurate paused source pictures remain bounded to qualified clip clocks,90-second windows and128MiB sources. Strict ellipse mask/effect raster agreement and broad continuous picture/sound remain open.
+- The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.
 
 **Common errors**
 
@@ -1378,6 +1381,7 @@ Compiles the canonical project into the existing deterministic final path. Outpu
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.
 
 **Common errors**
 

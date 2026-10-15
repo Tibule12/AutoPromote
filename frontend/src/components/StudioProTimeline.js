@@ -2,6 +2,7 @@ import React from "react";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioControlMenu from "./StudioControlMenu";
 import StudioGroupTimelineClip from "./StudioGroupTimelineClip";
+import StudioKeyframeActions from "./StudioKeyframeActions";
 import { STUDIO_AUDIO_TRACKS } from "./studioAudioTracks";
 import { buildMotionAutomationStyle } from "./studioAutomation";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
@@ -135,7 +136,7 @@ const AutomationDots = ({ items, duration, type }) =>
   ));
 
 const MotionKeyframe = ({ item, duration, frameRate, displayRate, snapping, snapTargets,
-  locked, selected, onSelect, onUpdate, onRemove }) => {
+  locked, selected, onSelect, onUpdate, onRemove, onBoundTime, onPreviewMove, previewDelta = 0 }) => {
   const drag = React.useRef(null);
   const [pendingTime, setPendingTime] = React.useState(null);
   const frame = displayRate / frameRate;
@@ -146,31 +147,34 @@ const MotionKeyframe = ({ item, duration, frameRate, displayRate, snapping, snap
         Math.abs(point-next) < Math.abs(best-next) ? point : best, Infinity);
       if (Math.abs(nearest-next) <= Math.max(frame, .08 * displayRate)) next = nearest;
     }
-    return Math.max(0, Math.min(duration, Math.round(next / frame) * frame));
+    next = Math.max(0, Math.min(duration, Math.round(next / frame) * frame));
+    return onBoundTime ? onBoundTime(next, item) : next;
   };
   const label = `${item.property}: ${Number(item.value).toFixed(2)} at ${(item.time/displayRate).toFixed(3)}s`;
   return <button type="button" className={`pro-motion-keyframe ${selected ? 'is-selected' : ''}`}
-    data-testid={`motion-timeline-key-${item.id}`} data-time={pendingTime ?? item.time}
-    style={{ left: percentAt(pendingTime ?? item.time, duration) }}
+    data-testid={`motion-timeline-key-${item.id}`} data-time={pendingTime ?? (item.time + previewDelta)}
+    style={{ left: percentAt(pendingTime ?? (item.time + previewDelta), duration) }}
     aria-label={label} aria-pressed={selected} title={`${label} · ${item.easing || 'ease_in_out'}${locked ? ' · Track locked' : ''}`}
     onClick={event => { event.stopPropagation(); onSelect?.(item, event); }}
     onPointerDown={event => {
       event.stopPropagation(); if (locked || event.button !== 0) return;
+      if (!selected && (event.shiftKey || event.ctrlKey || event.metaKey)) return;
+      if (!selected) onSelect?.(item, event);
       drag.current = { x: event.clientX, time: Number(item.time), width: event.currentTarget.parentElement.getBoundingClientRect().width };
       event.currentTarget.setPointerCapture?.(event.pointerId);
     }}
     onPointerMove={event => {
       if (!drag.current || locked) return;
       const next = boundedTime(drag.current.time + (event.clientX-drag.current.x) / Math.max(1, drag.current.width) * duration);
-      drag.current.next = next; setPendingTime(next);
+      drag.current.next = next; setPendingTime(next); onPreviewMove?.(next - Number(item.time));
     }}
     onPointerUp={event => {
       event.stopPropagation();
-      const next = drag.current?.next; drag.current = null; setPendingTime(null);
+      const next = drag.current?.next; drag.current = null; setPendingTime(null); onPreviewMove?.(0);
       if (!locked && next !== undefined && Math.abs(next-Number(item.time)) > .000001) onUpdate?.(item.id, { time: next });
       if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     }}
-    onPointerCancel={() => { drag.current = null; setPendingTime(null); }}
+    onPointerCancel={() => { drag.current = null; setPendingTime(null); onPreviewMove?.(0); }}
     onKeyDown={event => {
       if (!['ArrowLeft', 'ArrowRight', 'Delete', 'Backspace'].includes(event.key)) return;
       event.preventDefault(); event.stopPropagation(); if (locked) return;
@@ -860,6 +864,7 @@ export default function StudioProTimeline({
   onSelectMotionKeyframe,
   onUpdateMotionKeyframe,
   onRemoveMotionKeyframe,
+  onEditMotionKeyframes,
   frameRate = 30,
   motionScenes = [],
   onSelectMotion,
@@ -915,6 +920,9 @@ export default function StudioProTimeline({
   const [showMotionKeys, setShowMotionKeys] = React.useState(false);
   const [expandedMotionTargets, setExpandedMotionTargets] = React.useState(new Set());
   const [selectedMotionKey, setSelectedMotionKey] = React.useState(null);
+  const [selectedMotionKeys, setSelectedMotionKeys] = React.useState(new Set());
+  const [copiedMotionKeys, setCopiedMotionKeys] = React.useState([]);
+  const [keyDragDelta, setKeyDragDelta] = React.useState(0);
   const focusedTrack = {
     reframe: "framing",
     captions: "captions",
@@ -951,6 +959,26 @@ export default function StudioProTimeline({
     ...graphicGroups.map(group => ({ ...group, ...group.transform }))]
     .filter(layer => !selectedGroupId || layer.id === selectedGroupId)
     .map(layer => ({ id: layer.id, layer, keys: (motionKeyframes || []).filter(key => key.targetId === layer.id) }));
+  const chosenKeys = (motionKeyframes || []).filter(key => selectedMotionKeys.has(key.id));
+  const keyTrack = key => {
+    if (key.targetId === 'main-video') return 'video';
+    const layer = (overlays || []).find(item => item.id === key.targetId);
+    return layer?.bRollMode || ['image', 'video'].includes(layer?.type) ? 'broll' : 'graphics';
+  };
+  const chosenLocked = chosenKeys.some(key => trackStates?.[keyTrack(key)]?.locked);
+  const pasteLocked = copiedMotionKeys.some(key => trackStates?.[keyTrack(key)]?.locked);
+  const actOnKeys = (action, value, clipboard) => {
+    const result = onEditMotionKeyframes?.(chosenKeys.map(key => key.id), action, { value, clipboard });
+    if (Array.isArray(result)) setSelectedMotionKeys(new Set(result));
+  };
+  const copyKeys = () => setCopiedMotionKeys(JSON.parse(JSON.stringify(chosenKeys)));
+  const pasteKeys = () => actOnKeys('paste', Number(playhead || 0), copiedMotionKeys);
+  const boundSelectedTime = (time, key) => {
+    if (!selectedMotionKeys.has(key.id) || chosenKeys.length < 2) return time;
+    const delta = Math.max(-Math.min(...chosenKeys.map(item => item.time)),
+      Math.min(time-key.time, safeDuration-Math.max(...chosenKeys.map(item => item.time))));
+    return key.time + delta;
+  };
   const safeZoom = Math.max(1, Math.min(32, Number(zoom || 1)));
   const playheadRef = React.useRef(0);
   playheadRef.current = Number(playhead || 0);
@@ -1110,7 +1138,15 @@ export default function StudioProTimeline({
   }, [safeDuration, playhead, sourceSequence, broll, musicBeatMarkers, beatSnapping, snapping]);
 
   return (
-    <section className="studio-pro-timeline" data-testid="studio-pro-timeline">
+    <section className="studio-pro-timeline" data-testid="studio-pro-timeline" onKeyDown={event => {
+      if (!showMotionKeys || !onEditMotionKeyframes || !(event.ctrlKey || event.metaKey) ||
+          event.target.closest('input,select,textarea,[contenteditable="true"]')) return;
+      if (event.key.toLowerCase() === 'c' && chosenKeys.length) {
+        event.preventDefault(); event.stopPropagation(); copyKeys();
+      } else if (event.key.toLowerCase() === 'v' && copiedMotionKeys.length && !pasteLocked) {
+        event.preventDefault(); event.stopPropagation(); pasteKeys();
+      }
+    }}>
       <div className="pro-timeline-toolbar">
         {onSplit && (
           <div className="pro-quick-actions" role="toolbar" aria-label="Quick editing actions">
@@ -1467,6 +1503,11 @@ export default function StudioProTimeline({
         </div>
       </div>
 
+      {showMotionKeys && onEditMotionKeyframes && <StudioKeyframeActions count={chosenKeys.length} copied={copiedMotionKeys.length}
+        locked={chosenLocked} pasteLocked={pasteLocked} frameStep={displayRate / Math.max(1, Number(frameRate) || 30)}
+        onAction={actOnKeys} onCopy={copyKeys} onPaste={pasteKeys}
+        onSelectAll={() => setSelectedMotionKeys(new Set(motionTargets.filter(target => expandedMotionTargets.has(target.id)).flatMap(target => target.keys.map(key => key.id))))}
+        onClear={() => setSelectedMotionKeys(new Set())} />}
       <div className="pro-timeline-scroll" ref={scrollRef}>
         <div className="pro-timeline-content" style={{ width: visibleWidth }}>
           <div className="pro-time-ruler" onClick={onSeek} role="presentation" data-testid="pro-time-ruler" data-output-duration={safeDuration / displayRate}>
@@ -1837,9 +1878,21 @@ export default function StudioProTimeline({
                   <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
                   {keys.map(key => <MotionKeyframe key={key.id}
                     item={key} duration={safeDuration} displayRate={displayRate} frameRate={Math.max(1, Number(frameRate) || 30)}
-                    snapping={snapping} snapTargets={snapTargets} locked={locked} selected={selectedMotionKey === key.id}
-                    onUpdate={onUpdateMotionKeyframe} onRemove={onRemoveMotionKeyframe} onSelect={(item, event) => {
-                      setSelectedMotionKey(item.id); onSelectMotionKeyframe?.(item.id, item.targetId);
+                    snapping={snapping} snapTargets={snapTargets} locked={locked || (chosenLocked && selectedMotionKeys.has(key.id))} selected={selectedMotionKeys.has(key.id)}
+                    previewDelta={selectedMotionKeys.has(key.id) ? keyDragDelta : 0}
+                    onPreviewMove={selectedMotionKeys.has(key.id) ? setKeyDragDelta : undefined}
+                    onBoundTime={boundSelectedTime}
+                    onUpdate={(id, changes) => selectedMotionKeys.has(id) && chosenKeys.length > 1 && onEditMotionKeyframes
+                      ? actOnKeys('move', changes.time - key.time) : onUpdateMotionKeyframe?.(id, changes)}
+                    onRemove={id => selectedMotionKeys.has(id) && chosenKeys.length > 1 && onEditMotionKeyframes
+                      ? actOnKeys('delete') : onRemoveMotionKeyframe?.(id)} onSelect={(item, event) => {
+                      setSelectedMotionKey(item.id);
+                      const extend = event.shiftKey || event.ctrlKey || event.metaKey;
+                      setSelectedMotionKeys(current => {
+                        if (!extend) return current.has(item.id) ? current : new Set([item.id]);
+                        const next = new Set(current); next.has(item.id) ? next.delete(item.id) : next.add(item.id); return next;
+                      });
+                      if (!extend) onSelectMotionKeyframe?.(item.id, item.targetId);
                       onSeek?.(event, Number(item.time));
                     }} />)}
                 </div>

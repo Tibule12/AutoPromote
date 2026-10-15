@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-14T18:13:49.482236Z",
+  "updatedAt": "2026-10-15T03:37:14.489745Z",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -682,6 +682,10 @@
         {
           "path": "reports/studio-canonical-visual-20261008/README.md",
           "kind": "canonical_visual_foundation_native_state_and_explicit_export_blockers"
+        },
+        {
+          "path": "reports/studio-keyframe-selection-20261015/checkpoint.json",
+          "kind": "bounded_native_property_timeline_and_shared_engine_repair"
         }
       ],
       "testExecution": {
@@ -734,7 +738,9 @@
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
       "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
       "latestProfessionalMaskedEffectsEvidence": "reports/studio-professional-masked-effects-20261013/README.md",
-      "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified."
+      "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified.",
+      "latestPropertyTimelineEvidence": "reports/studio-keyframe-selection-20261015/README.md",
+      "latestPropertyTimelineScope": "Native property timeline multi-key selection, atomic drag/nudge/time scale/interpolation/copy/paste/delete/history, exact cold reopen and one20s CPU export/full editable Studio playback pass. One group opacity channel has complete native evidence; multi-property/mixed-lock guards have component evidence. Supporting stale Finish clock and byte-preserving source-motion performance repairs pass; full picture/sound stays unqualified."
     },
     {
       "id": "final_render",
@@ -942,6 +948,10 @@
         {
           "path": "reports/studio-canonical-visual-20261008/README.md",
           "kind": "canonical_visual_foundation_native_state_and_explicit_export_blockers"
+        },
+        {
+          "path": "reports/studio-keyframe-selection-20261015/checkpoint.json",
+          "kind": "bounded_native_property_timeline_and_shared_engine_repair"
         }
       ],
       "testExecution": {
@@ -983,7 +993,9 @@
       "latestNativeKeyframeSoundEvidence": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
       "latestNativeKeyframeSoundScope": "Native editable keyframes/export/full finished-file playback, retimed bus audio correction and bounded composition repairs. Whole product/creative parity remains unqualified.",
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
-      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+      "latestPropertyTimelineEvidence": "reports/studio-keyframe-selection-20261015/README.md",
+      "latestPropertyTimelineScope": "Native property timeline multi-key selection, atomic drag/nudge/time scale/interpolation/copy/paste/delete/history, exact cold reopen and one20s CPU export/full editable Studio playback pass. One group opacity channel has complete native evidence; multi-property/mixed-lock guards have component evidence. Supporting stale Finish clock and byte-preserving source-motion performance repairs pass; full picture/sound stays unqualified."
     },
     {
       "id": "captions",
@@ -1941,6 +1953,10 @@
         {
           "path": "python_media_worker/main_media_server.py",
           "kind": "source_inspection"
+        },
+        {
+          "path": "reports/studio-keyframe-selection-20261015/checkpoint.json",
+          "kind": "bounded_native_property_timeline_and_shared_engine_repair"
         }
       ],
       "testExecution": {
@@ -1969,7 +1985,9 @@
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
       "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
       "latestProfessionalMaskedEffectsEvidence": "reports/studio-professional-masked-effects-20261013/README.md",
-      "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified."
+      "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified.",
+      "latestPropertyTimelineEvidence": "reports/studio-keyframe-selection-20261015/README.md",
+      "latestPropertyTimelineScope": "Native property timeline multi-key selection, atomic drag/nudge/time scale/interpolation/copy/paste/delete/history, exact cold reopen and one20s CPU export/full editable Studio playback pass. One group opacity channel has complete native evidence; multi-property/mixed-lock guards have component evidence. Supporting stale Finish clock and byte-preserving source-motion performance repairs pass; full picture/sound stays unqualified."
     },
     {
       "id": "masking",
@@ -7947,27 +7965,26 @@
     }
   },
   "continuity": {
-    "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "SHARED_GROUP_CLIPS_ON_REAL_FOOTAGE_TIMELINE",
-    "lastSessionRealCapabilityRuns": 1,
+    "nextHighestPriorityTaskId": "S04",
+    "lastSessionKind": "PROPERTY_TIMELINE_MULTI_KEY_EDITING",
+    "lastSessionRealCapabilityRuns": 2,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-professional-group-workflow-20261014/README.md",
+    "exactBlockersSource": "reports/studio-keyframe-selection-20261015/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-professional-group-workflow-20261014/README.md",
+    "lastSessionEvidence": "reports/studio-keyframe-selection-20261015/README.md",
     "lastSessionAutomatedChecks": {
-      "frontendCasesPassed": 111,
-      "compositorAndMotionCasesPassed": 140,
-      "legacyAudioMotionCasesPassed": 21,
-      "subtestsPassed": 261,
+      "frontendCasesPassed": 35,
+      "workerCasesPassed": 146,
+      "workerSubtestsPassed": 8,
       "strictAppBuild": "PASS",
       "fullStudioSuiteQualified": false
     },
-    "nextSlice": "Repair the real-footage pre-final picture and CPU export performance, then shared group split/duplicate/source-occurrence ownership and remaining main-timeline mechanics.",
+    "nextSlice": "Continue visible S04 property editing with cross-layer clipboard and marquee selection; retain S02 colour/raster/whole sound and S03 source-occurrence/group ownership blockers.",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -8626,7 +8643,7 @@
         "readinessPromotion": false
       }
     ],
-    "lastSessionRealCapabilityScope": "Real 20-second footage edit: group clip pointer/numeric move, trim, opacity keys, locks, group delete/undo, source split/history, exact save/cold reopen, one owned CPU export/download/full decode and full editable Studio playback pass. Nine native visibility gates pass; nine declared whole-footage source comparisons fail. Full picture/live sound and export speed remain unqualified.",
+    "lastSessionRealCapabilityScope": "Native property timeline multi-key selection, atomic drag/nudge/time scale/interpolation/copy/paste/delete/history, exact cold reopen and one20s CPU export/full editable Studio playback pass. One group opacity channel has complete native evidence; multi-property/mixed-lock guards have component evidence. Supporting stale Finish clock and byte-preserving source-motion performance repairs pass; full picture/sound stays unqualified.",
     "history": [
       {
         "at": "2026-10-12T23:29:14.460Z",
@@ -11863,5 +11880,48 @@
       "Group split/duplicate, source-occurrence attachment/remapping, group anchor, mask/blend animation, actual video/owned3D group qualification and broader S04 mechanics remain open.",
       "Screen capture averages 19.473762455350567 fps for the 24fps movie. Full ended playback passes; smooth playback is not qualified. Prior S02 ellipse raster failure stays open."
     ]
+  },
+  "professionalKeyframeSelection20261015": {
+    "evidence": "reports/studio-keyframe-selection-20261015/README.md",
+    "checkpoint": "reports/studio-keyframe-selection-20261015/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Native property timeline multi-key selection, atomic drag/nudge/time scale/interpolation/copy/paste/delete/history, exact cold reopen and one20s CPU export/full editable Studio playback pass. One group opacity channel has complete native evidence; multi-property/mixed-lock guards have component evidence. Supporting stale Finish clock and byte-preserving source-motion performance repairs pass; full picture/sound stays unqualified.",
+    "projectId": "viral-project-f1982ab1-ca3d-432c-a049-c2549c7f790e",
+    "canonicalHash": "2ad4e14c5b4ee2e53d1a2fae63349e018b4c7ce31eef33ceed4b9a01d08cf929",
+    "nativeHistorySaveColdReopen": true,
+    "nativeCpuExports": 2,
+    "propertyKeyCount": 166,
+    "selectedGroupOpacityKeyCount": 4,
+    "nativeEditingRecordings": 1,
+    "completeStudioRecordings": 2,
+    "nativeRenderSeconds": [
+      244.079,
+      233.54
+    ],
+    "all480RepairPictureFramesIdentical": true,
+    "repairSoundtrackIdentical": false,
+    "frontendCasesPassed": 35,
+    "workerCasesPassed": 146,
+    "workerSubtestsPassed": 8,
+    "strictAppBuild": "PASS",
+    "gpuJobs": 0,
+    "paidGpuCost": 0,
+    "ownedLocalQaStopped": true,
+    "wholePreviewFinalParityQualified": false,
+    "fullStudioSuiteQualified": false,
+    "readinessPromoted": false,
+    "remainingBlockers": [
+      "Native batch lifecycle covers one group opacity channel; multi-property/mixed-lock behavior has component coverage. Broad media, all curves, retiming, masks/owned3D and full raster/live sound remain unqualified.",
+      "Clipboard paste retains original layer/property ownership. Cross-layer/project paste, marquee/lasso selection, spatial interpolation and velocity handles remain open.",
+      "The stale black Finish cover is repaired, but legacy CSS/FFmpeg grade and old strict source-feature comparison remain unqualified. No acceptance tolerance changed; prior S02 ellipse raster failure remains open.",
+      "All480 repair-export decoded picture frames are byte-identical; decoded soundtrack differs from the retained earlier export. Whole audio parity/listening remains unqualified.",
+      "Screen recordings have sparse capture relative to24fps and do not establish playback smoothness. No full Studio suite or readiness/creative/public promotion."
+    ],
+    "nextTaskIds": [
+      "S04",
+      "S02",
+      "S03"
+    ],
+    "nextImplementationSlice": "Continue visible S04 property editing with cross-layer clipboard and marquee selection; retain S02 colour/raster/whole sound and S03 source-occurrence/group ownership blockers."
   }
 }

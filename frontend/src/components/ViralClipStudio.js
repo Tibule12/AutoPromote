@@ -136,6 +136,7 @@ import {
 } from "./studioCreatorRecipes";
 import { rippleTimedItems, rippleTimelineKeys, applyStudioClipMetadata } from "./studioTimelineEdits";
 import { studioGroupTimingRows, editStudioGroupTiming, rippleStudioGroupTiming, clipStudioGroupMotionCues } from "./studioGroupTiming";
+import { editStudioKeyframeSelection } from "./studioKeyframeSelection";
 import {
   reconcileStudioDocument,
   buildStudioOutputTimeMap,
@@ -2880,6 +2881,7 @@ const ViralClipStudio = ({
   const [showCompositionGrid, setShowCompositionGrid] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [commandSearch, setCommandSearch] = useState("");
+  const finishProgrammeClockRef = useRef(null);
   const {
     fx: finishFx,
     applyPreset: applyFinishPreset,
@@ -2895,7 +2897,7 @@ const ViralClipStudio = ({
     fadeStyle: finishFadeStyle,
     hasEffects: hasFinishEffects,
     attachVideo: attachFinishVideo,
-  } = useCinematicEffects();
+  } = useCinematicEffects({ clockRef: finishProgrammeClockRef });
   const [podcastVisualizer, setPodcastVisualizer] = useState({
     enabled: false,
     mode: "wave",
@@ -7684,6 +7686,10 @@ const ViralClipStudio = ({
       }) }
   );
   const liveTimelineDuration = outputTimelineDuration;
+  finishProgrammeClockRef.current = {
+    currentTime: previewTimelineTime,
+    duration: liveTimelineDuration,
+  };
   const groupClipRows = studioGroupTimingRows({ compounds: effectiveCompoundClips, order: compositionIds,
     overlays, motionScenes, threeDScenes, duration: liveTimelineDuration, trackStates });
   const selectedGroupClip = groupClipRows.find(group => group.id === selectedGroupId);
@@ -10016,6 +10022,22 @@ const ViralClipStudio = ({
     const key = motionKeyframes.find(item => item.id === id);
     if (!key || !allowTimelineTimingEdit(motionKeyframeTrack(key.targetId))) return;
     setMotionKeyframes(current => current.filter(item => item.id !== id));
+  };
+
+  const editMotionKeyframeSelection = (ids, action, options) => {
+    try {
+      const touched = action === 'paste' ? options.clipboard : motionKeyframes.filter(key => ids.includes(key.id));
+      const known = new Set(['main-video', ...compositionIds, ...compositionGroups.byId.keys()]);
+      if (touched.some(key => !known.has(key.targetId))) throw Error('The copied layers must exist in this project.');
+      if (touched.some(key => trackStates[motionKeyframeTrack(key.targetId)]?.locked)) throw Error('Unlock every selected track before editing keys.');
+      const result = editStudioKeyframeSelection(motionKeyframes, ids, action, {
+        ...options, duration: liveTimelineDuration, createId: () => createSecureId('motion-key'),
+      });
+      validateStudioGroupKeyframes(compositionGroups.groups, result.keys);
+      setMotionKeyframes(result.keys);
+      setStudioActionMessage(`${action === 'paste' ? 'Pasted' : action === 'delete' ? 'Deleted' : 'Updated'} ${touched.length} keyframes in one edit.`);
+      return result.selectedIds;
+    } catch (error) { setStudioActionMessage(error.message); return null; }
   };
 
   const editMotionPropertyAtPlayhead = (targetId, property, requestedValue, toggle = false) => {
@@ -29510,6 +29532,7 @@ const ViralClipStudio = ({
               }}
               onUpdateMotionKeyframe={updateMotionKeyframe}
               onRemoveMotionKeyframe={removeMotionKeyframe}
+              onEditMotionKeyframes={editMotionKeyframeSelection}
               audioKeyframes={audioKeyframes}
               speedKeyframes={speedKeyframes}
               onSeek={(event, exactTime = null) => {

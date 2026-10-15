@@ -276,3 +276,17 @@
 .pro-group-trim { cursor: ew-resize; flex: 0 0 10px; }
 .pro-group-clip.is-locked { opacity: .65; }
 .pro-group-clip button:focus-visible { outline: 2px solid #e9d5ff; outline-offset: -2px; }
+
+.pro-keyframe-actions {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  padding: 7px 10px; background: #171b25; border-bottom: 1px solid #343844;
+  font-size: 11px; color: #cbd5e1;
+}
+.pro-keyframe-actions button, .pro-keyframe-actions select, .pro-keyframe-actions input {
+  border: 1px solid #48516a; border-radius: 4px; background: #242b3b; color: #eef2ff;
+  padding: 4px 6px; font: inherit;
+}
+.pro-keyframe-actions button:disabled { opacity: .45; }
+.pro-keyframe-actions label { display: flex; align-items: center; gap: 4px; }
+.pro-keyframe-actions input { width: 48px; }
+.pro-keyframe-actions small { color: #94a3b8; }

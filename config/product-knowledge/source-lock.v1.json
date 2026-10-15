@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final group-footage report and continuity records now include completed Studio playback, retained whole-picture comparison failures, same-job recovery, stopped owned QA services and unchanged readiness.",
-  "reviewed_at": "2026-10-14T18:15:56.154Z",
-  "catalog_sha256": "e42e773d520e864886cd9cce92829fc500a5ada9ea66237c0dd428acf10d3a84",
+  "reason": "Property-timeline multi-key selection, atomic drag/nudge, original-owner clipboard paste, time scaling and batch interpolation/deletion now pass native history/cold/export/full Studio playback. Supporting Finish clock and source-motion performance fixes pass bounded native checks. Full colour/raster/live sound and cross-layer/marquee/spatial/velocity controls remain unqualified. No readiness or creative promotion.",
+  "reviewed_at": "2026-10-15T03:37:36.137Z",
+  "catalog_sha256": "e4a6022b973353ffd1fb65a1d6dd4263ffcb0c842bb8d3efd75db6628c6e7ede",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "9bfcdd2d09795c04eaa328a59cfaa696f35264bd7d744b38479980847556276a"
+      "sha256": "21851acaa9f2e19cff9872008892c058def91f26c02266368b2b66b14a1440c4"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -102,6 +102,10 @@
       "sha256": "a35263f30eac29cb84c35e4d0dd629fc98b960ad29b17dc5ad93cfc412bd3e94"
     },
     {
+      "path": "frontend/src/components/StudioKeyframeActions.js",
+      "sha256": "2f2cfa38207df88ee222f7e4d5665c04f3e3ebcbc40927fb026e5cc0d04ccb1e"
+    },
+    {
       "path": "frontend/src/components/StudioKeyframeCurveEditor.js",
       "sha256": "2bacf74d8d7cab72d83b60d1ccc201734384abc34cd920f6c8cef60022cf3a97"
     },
@@ -115,19 +119,15 @@
     },
     {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "2ff666e40062400b4ed535993b40941442e95a05ef2172d6ed37d515c6e15395"
+      "sha256": "504196572a90e2d41b10c6d96c0a386a343ec02a6d7b31acf2728d729787c712"
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
       "sha256": "fab0fbc632dda0daddfa79cef9bee38248d932780185b65a74c8650fbed8cfe9"
     },
     {
-      "path": "frontend/src/components/ViralClipStudio.css",
-      "sha256": "cfb9b6960cf578ef1e58ac1148052491141c49a1327740f9618f4bd011e8d9dd"
-    },
-    {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "0afbdaf8d95f13cd14afbc7a63a95758a7f432cfde089f799760d4a37881094f"
+      "sha256": "70c4604d515d811a41dbb28d511d0373198bcbf78cab7e1bce53029d0b01575b"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -172,6 +172,10 @@
     {
       "path": "frontend/src/components/studioGroups.js",
       "sha256": "f4654b6e8d5bbcd7b494663222e3830b77d71b5b72d31d5847e695f684247ca0"
+    },
+    {
+      "path": "frontend/src/components/studioKeyframeSelection.js",
+      "sha256": "7abf0315b3df81ed2ab31b64085c8ac799ddb3e58ddf408a4b231a9d21e005d7"
     },
     {
       "path": "frontend/src/components/studioLayerOrder.js",
@@ -226,6 +230,10 @@
       "sha256": "1d019cc4dc1ac58470384a207b45fb0c04ed20e6dc18d63df4fbe46c2e174c1b"
     },
     {
+      "path": "frontend/src/hooks/useCinematicEffects.js",
+      "sha256": "2a9dd4b7c60b3a8add3259855fed5d0bdc8fe31c934b3967aa1e25a326505740"
+    },
+    {
       "path": "package.json",
       "sha256": "0e080bca545444fe048521b1442a3309ffee28694dfa9613eacdd48159a119e3"
     },
@@ -239,11 +247,15 @@
     },
     {
       "path": "python_media_worker/studio_motion.py",
-      "sha256": "46c65ca65bcdd76f827fa6384c832a524cc8e6c81ac534160fb321015003235e"
+      "sha256": "284fde9d3cb325afcc481afc8be70fb8d994c857d1771063e0c64e08181e0f52"
     },
     {
       "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
       "sha256": "b3bece0fe3f653ef88368b3013fbe96ccfd13ed953efa3342fb89eb20186374b"
+    },
+    {
+      "path": "reports/studio-keyframe-selection-20261015/README.md",
+      "sha256": "544932bdc35e1dea2f9b84b1a2bb0a3d57f91221aba0d813964914d7a3dc6c43"
     },
     {
       "path": "reports/studio-professional-group-keyframes-20261014/README.md",
@@ -252,6 +264,10 @@
     {
       "path": "reports/studio-professional-group-workflow-20261014/README.md",
       "sha256": "aeff96b2daa31071a68a663aee2e7ba8020487096ebcbaeb66646a7f19690080"
+    },
+    {
+      "path": "reports/studio-source-parity-repair-20261015/README.md",
+      "sha256": "6816cdc2fe12d443d74968f9dd6a14aa8f67f206db1f4065d6df2d9e14a597f4"
     },
     {
       "path": "src/contentRoutes.js",
@@ -363,11 +379,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "a42d65047d88e58d3557c7bd7f80d4330bff67cf216adb0dd2227048242f5bd3"
+      "sha256": "86f945607283f251f06a87611477084c21d4c21754b65f27777d2e1d0a513bff"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "348fdd96d622e5d57cf05393b353a004479e4076056e324297f827f4f6b5926c"
+      "sha256": "0a341d56c3054ce9df965f86d5a22ab73411262b36d98fd9efcc7036ed8cc1a2"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

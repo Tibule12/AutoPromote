@@ -1,0 +1,126 @@
+{
+  "createdAt": "2026-10-15T03:37:14.489745Z",
+  "branch": "agent/studio-professional-continuation-v2",
+  "scope": "AE-style multi-key editing directly in the ordinary property timeline, using existing canonical motion keys and shared preview/compiler/renderer.",
+  "sourceSha256": {
+    "frontend/src/components/studioKeyframeSelection.js": "7abf0315b3df81ed2ab31b64085c8ac799ddb3e58ddf408a4b231a9d21e005d7",
+    "frontend/src/components/StudioKeyframeActions.js": "2f2cfa38207df88ee222f7e4d5665c04f3e3ebcbc40927fb026e5cc0d04ccb1e",
+    "frontend/src/components/StudioProTimeline.js": "504196572a90e2d41b10c6d96c0a386a343ec02a6d7b31acf2728d729787c712",
+    "frontend/src/components/StudioTimeline.css": "08f74551454c02f19488cb1acb04755a120c1efb09a1310d22e4027f4198caed",
+    "frontend/src/components/ViralClipStudio.js": "70c4604d515d811a41dbb28d511d0373198bcbf78cab7e1bce53029d0b01575b",
+    "frontend/src/hooks/useCinematicEffects.js": "2a9dd4b7c60b3a8add3259855fed5d0bdc8fe31c934b3967aa1e25a326505740",
+    "frontend/src/hooks/__tests__/useCinematicEffects.test.js": "515e35de25c31ac9e9457dece2e682d4454fbef62ee36fea867876b19291bc29",
+    "frontend/src/components/__tests__/studioKeyframeSelection.test.js": "de5f18bd2220b66c84e65d253725e276cabd41ccfc5dcf5a0e50f06495a371ed",
+    "frontend/src/components/__tests__/StudioProTimeline.test.js": "c29697d1eaee59f76b7a994cfcad3d722fcc00242e499079aa9efd6510a31cf6",
+    "python_media_worker/studio_motion.py": "284fde9d3cb325afcc481afc8be70fb8d994c857d1771063e0c64e08181e0f52",
+    "python_media_worker/test_studio_motion.py": "33252b04aec28d1307b49effb9f8bbb96223aaf930ef1cf91d72f79bb47c488c",
+    "scripts/studio-professional/source-parity-proof.js": "162be5cf81a915beeb1d73ab0837718d9826322d96dede3286dd30837a875659",
+    "scripts/studio-professional/keyframe-batch-proof.js": "2435a72ae78ad7cfe5cb1f30558af9cbbf6308cf94f39bdb61b235b917daf349"
+  },
+  "projectId": "viral-project-f1982ab1-ca3d-432c-a049-c2549c7f790e",
+  "canonicalHash": "2ad4e14c5b4ee2e53d1a2fae63349e018b4c7ce31eef33ceed4b9a01d08cf929",
+  "nativeWorkflowReceipt": "reports/studio-keyframe-selection-20261015/proof/native-batch-edit.json",
+  "nativeSelectedTrackLockEvidence": "reports/studio-source-parity-repair-20261015/proof/native-selected-key-lock.json",
+  "editableSourceShots": 11,
+  "editableGraphicLayers": 14,
+  "totalPropertyKeys": 166,
+  "editedGroupKeys": [
+    {
+      "easing": "ease_out",
+      "id": "motion-key-6f0d5b4b-ff16-4166-b97f-08f94534a70b",
+      "targetId": "group-aada8fc0-4555-46c3-89d1-b91a2f98bd95",
+      "property": "opacity",
+      "value": 0,
+      "time": 0.7916666666666666
+    },
+    {
+      "easing": "ease_out",
+      "id": "motion-key-7e22d7be-d7fb-4a67-b524-072deb526142",
+      "targetId": "group-aada8fc0-4555-46c3-89d1-b91a2f98bd95",
+      "property": "opacity",
+      "value": 1,
+      "time": 1.2916666666666667
+    },
+    {
+      "easing": "ease_out",
+      "id": "motion-key-eb6e55de-6693-46f8-ba93-d0780396a4d4",
+      "targetId": "group-aada8fc0-4555-46c3-89d1-b91a2f98bd95",
+      "property": "opacity",
+      "value": 0,
+      "time": 1.375
+    },
+    {
+      "easing": "ease_out",
+      "id": "motion-key-1ba94c6c-f386-4c76-b794-cfdbcacd0c1b",
+      "targetId": "group-aada8fc0-4555-46c3-89d1-b91a2f98bd95",
+      "property": "opacity",
+      "value": 1,
+      "time": 1.875
+    }
+  ],
+  "nativeShiftSelection": true,
+  "nativeAtomicDragUndoRedo": true,
+  "nativeTimeScaling": true,
+  "nativeFrameNudge": true,
+  "nativeBatchInterpolation": true,
+  "nativeClipboardPasteUndoRedo": true,
+  "nativeDeleteUndo": true,
+  "nativeExactColdReopen": true,
+  "copiedKeysReachedRenderPlan": true,
+  "nativeCpuExports": 1,
+  "nativeRenderSeconds": 233.54,
+  "editingRecording": {
+    "path": "reports/studio-keyframe-selection-20261015/proof/editing-in-studio.mp4",
+    "sha256": "d22662547e32da9602d139361400dbf7e605ffae5a737558b2f2618896c6c659",
+    "seconds": 38.32,
+    "nativeEditingRecording": true,
+    "muted": true,
+    "sourceWebmPreserved": true
+  },
+  "studioRecording": {
+    "path": "reports/studio-keyframe-selection-20261015/proof/keyframes/edited-in-studio.mp4",
+    "sha256": "315c377816799a75da202cf6f8222ee69d943ee1c318bfc1692346f35d242c12",
+    "nativeEnded": true,
+    "timelineVisible": true,
+    "captureFps": 19.326065347366004,
+    "smoothPlaybackQualified": false,
+    "soundtrack": "Soundtrack muxed from the exact hash-verified export at the observed native playback-start offset; QA browser muted"
+  },
+  "finalMovie": {
+    "path": "reports/studio-keyframe-selection-20261015/proof/keyframes/final.mp4",
+    "sha256": "bdace79115b63a6924275a81874432861c1555acdd1d87ef83144c2af4b4d0b0",
+    "seconds": 20,
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "fullIndependentDecode": true
+  },
+  "tests": {
+    "frontendCasesPassed": 35,
+    "workerCasesPassed": 146,
+    "workerSubtestsPassed": 8,
+    "strictAppBuild": "PASS",
+    "fullStudioSuiteQualified": false
+  },
+  "paidGpuJobs": 0,
+  "paidGpuRuntimeSeconds": 0,
+  "paidGpuCost": 0,
+  "ownedLocalQaStopped": true,
+  "wholePreviewFinalParityQualified": false,
+  "readinessPromoted": false,
+  "creativeApproved": false,
+  "publicPromoted": false,
+  "remainingBlockers": [
+    "Native batch lifecycle covers one group opacity channel; multi-property/mixed-lock behavior has component coverage. Broad media, all curves, retiming, masks/owned3D and full raster/live sound remain unqualified.",
+    "Clipboard paste retains original layer/property ownership. Cross-layer/project paste, marquee/lasso selection, spatial interpolation and velocity handles remain open.",
+    "The stale black Finish cover is repaired, but legacy CSS/FFmpeg grade and old strict source-feature comparison remain unqualified. No acceptance tolerance changed; prior S02 ellipse raster failure remains open.",
+    "All480 repair-export decoded picture frames are byte-identical; decoded soundtrack differs from the retained earlier export. Whole audio parity/listening remains unqualified.",
+    "Screen recordings have sparse capture relative to24fps and do not establish playback smoothness. No full Studio suite or readiness/creative/public promotion."
+  ],
+  "nextTaskIds": [
+    "S04",
+    "S02",
+    "S03"
+  ],
+  "nextImplementationSlice": "Continue visible S04 property editing with cross-layer clipboard and marquee selection; retain S02 colour/raster/whole sound and S03 source-occurrence/group ownership blockers."
+}

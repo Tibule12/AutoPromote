@@ -515,3 +515,40 @@ test('selecting a group focuses its property rows while leaving ordinary clips a
  expect(screen.queryByRole('button',{name:'Expand Child title keyframes'})).toBeNull();expect(screen.getByTestId('pro-graphics-clip-1')).toBeInTheDocument();
  rerender(<StudioProTimeline {...props}/>);expect(screen.getByRole('button',{name:'Expand Child title keyframes'})).toBeInTheDocument();
 });
+
+test('Shift selection applies a single batch edit and copies complete keys for paste at the playhead', () => {
+  const batch=jest.fn(),keys=[{id:'ka',targetId:'main-video',property:'x',time:1,value:20,easing:'linear'},
+    {id:'kb',targetId:'main-video',property:'opacity',time:2,value:.5,easing:'bezier',curve:[.1,0,.8,1]}];
+  const props={duration:6,playhead:4,frameRate:24,motionKeyframes:keys,onEditMotionKeyframes:batch,trackStates:{}};
+  render(<StudioProTimeline {...props}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Show motion keyframes'}));
+  fireEvent.click(screen.getByRole('button',{name:'Expand Source video keyframes'}));
+  fireEvent.click(screen.getByTestId('motion-timeline-key-ka'));
+  fireEvent.click(screen.getByTestId('motion-timeline-key-kb'),{shiftKey:true});
+  expect(screen.getByText('2 keys selected')).toBeInTheDocument();
+  fireEvent.keyDown(screen.getByTestId('motion-timeline-key-ka'),{key:'ArrowRight'});
+  expect(batch).toHaveBeenCalledTimes(1);expect(batch.mock.lastCall.slice(0,2)).toEqual([['ka','kb'],'move']);
+  expect(batch.mock.lastCall[2].value).toBeCloseTo(1/24,10);
+  fireEvent.change(screen.getByLabelText('Selected keyframe interpolation'),{target:{value:'hold'}});
+  fireEvent.click(screen.getByRole('button',{name:'Apply interpolation'}));
+  expect(batch.mock.lastCall[1]).toBe('easing');expect(batch.mock.lastCall[2].value).toBe('hold');
+  fireEvent.keyDown(screen.getByTestId('motion-timeline-key-ka'),{key:'c',ctrlKey:true});
+  fireEvent.keyDown(screen.getByTestId('motion-timeline-key-ka'),{key:'v',ctrlKey:true});
+  expect(batch.mock.lastCall).toEqual([['ka','kb'],'paste',{value:4,clipboard:keys}]);
+});
+
+test('a mixed locked selection permits copying and prevents every batch mutation', () => {
+  const batch=jest.fn();render(<StudioProTimeline duration={5} onEditMotionKeyframes={batch}
+    trackStates={{video:{locked:true}}} motionKeyframes={[{id:'la',targetId:'main-video',property:'x',time:1,value:20},
+      {id:'lb',targetId:'title',property:'x',time:2,value:40}]} overlays={[{id:'title',name:'Title',type:'text'}]}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Show motion keyframes'}));
+  fireEvent.click(screen.getByRole('button',{name:'Expand Source video keyframes'}));
+  fireEvent.click(screen.getByRole('button',{name:'Expand Title keyframes'}));
+  fireEvent.click(screen.getByTestId('motion-timeline-key-la'));fireEvent.click(screen.getByTestId('motion-timeline-key-lb'),{shiftKey:true});
+  expect(screen.getByRole('button',{name:'Apply interpolation'})).toBeDisabled();
+  expect(screen.getByRole('button',{name:'Move selected keys one frame later'})).toBeDisabled();
+  expect(screen.getByRole('button',{name:'Copy keys'})).toBeEnabled();
+  fireEvent.click(screen.getByRole('button',{name:'Copy keys'}));
+  expect(screen.getByRole('button',{name:'Paste at playhead'})).toBeDisabled();
+  fireEvent.keyDown(screen.getByTestId('motion-timeline-key-lb'),{key:'Delete'});expect(batch).not.toHaveBeenCalled();
+});

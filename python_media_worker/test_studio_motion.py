@@ -6,11 +6,40 @@ import numpy as np
 from python_media_worker.studio_motion import (
     build_studio_motion_filter,
     build_studio_zoom_filter,
+    automation_expression,
     easing_value,
 )
 
 
 class StudioMotionTests(unittest.TestCase):
+    def test_row_cached_curves_preserve_legacy_rgb_bytes_with_threaded_slices(self):
+        import re
+        motion = {"keyframes": [
+            {"property": field, "time": time, "value": value, "easing": "linear"}
+            for field, values in [("opacity", [1, .17, .65]), ("cropX", [0, 12, 3]), ("cropY", [8, 0, 6])]
+            for time, value in zip([0, .5, 1], values)
+        ]}
+        current = build_studio_motion_filter(motion, 160, 90)
+        expressions = {field: re.sub(r"\bt\b", "T", automation_expression(
+            [key for key in motion["keyframes"] if key["property"] == field], fallback))
+            for field, fallback in [("opacity", 1), ("cropX", 0), ("cropY", 0)]}
+        mask = (f"({expressions['opacity']})*gte(X,W*({expressions['cropX']})/100)"
+                f"*lte(X,W*(1-({expressions['cropX']})/100))"
+                f"*gte(Y,H*({expressions['cropY']})/100)*lte(Y,H*(1-({expressions['cropY']})/100))")
+        legacy = current.split(",format=gbrp,geq=")[0] + ",format=gbrp,geq=" + ":".join(
+            f"{channel}='{channel}(X,Y)*({mask})'" for channel in ("r", "g", "b")) + ",format=yuv420p,setsar=1"
+        for threads in [1, 4]:
+            with self.subTest(threads=threads):
+                results = []
+                for graph in [legacy, current]:
+                    result = subprocess.run(['ffmpeg', '-v', 'error', '-filter_threads', str(threads),
+                        '-f', 'lavfi', '-i', 'testsrc2=s=160x90:r=12:d=1.25', '-vf', graph,
+                        '-pix_fmt', 'rgb24', '-f', 'rawvideo', '-'], capture_output=True, timeout=30)
+                    self.assertEqual(result.returncode, 0, result.stderr.decode())
+                    self.assertEqual(len(result.stdout), 15 * 160 * 90 * 3)
+                    results.append(result.stdout)
+                self.assertEqual(results[0], results[1])
+
     def test_translation_recovers_top_source_pixels_after_zoom(self):
         graph = build_studio_motion_filter({"base_transform": {
             "scale": 1.1, "x": 50, "y": 55, "rotation": 0,

@@ -486,6 +486,74 @@
         "reports/studio-professional-group-workflow-20261014/README.md"
       ],
       "reason": "Document real editable group clip bars, delivery-frame move/trim, descendant starts/keys, locks, focused properties and reversible deletion. Restore/edit/history/cold reopen use a retained real 20-second footage/music/SFX project; group split/duplicate/source-occurrence remapping and broad conformance remain open."
+    },
+    {
+      "feature_id": "studio.keyframes",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/studioKeyframeSelection.js",
+        "frontend/src/components/StudioKeyframeActions.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "reports/studio-keyframe-selection-20261015/README.md"
+      ],
+      "reason": "Add ordinary timeline multi-selection, atomic drag/nudge, clipboard, time scaling, interpolation and deletion on the existing canonical keys. Native history/cold/export and explicit cross-layer/media/parity limits; no readiness promotion."
+    },
+    {
+      "feature_id": "studio.timeline",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/studioKeyframeSelection.js",
+        "frontend/src/components/StudioKeyframeActions.js",
+        "frontend/src/components/ViralClipStudio.js"
+      ],
+      "reason": "Expose keyframe batch actions directly in expanded property rows; keep one shared graph and existing readiness."
+    },
+    {
+      "feature_id": "studio.preview",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/hooks/useCinematicEffects.js",
+        "frontend/src/components/ViralClipStudio.js",
+        "reports/studio-source-parity-repair-20261015/README.md"
+      ],
+      "reason": "Use mapped programme time instead of a stale inactive decoder for Finish timing. Native black-cover repair; full colour/raster/sound remains unqualified."
+    },
+    {
+      "feature_id": "studio.render",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "python_media_worker/studio_motion.py",
+        "reports/studio-source-parity-repair-20261015/README.md"
+      ],
+      "reason": "Cache time-only opacity/crop expressions per row without changing8-bit RGB. Actual20s native export completes within the existing12-minute budget with all decoded pictures unchanged; sound and full parity remain unqualified."
     }
   ]
 }

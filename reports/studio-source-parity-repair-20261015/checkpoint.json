@@ -1,0 +1,68 @@
+{
+  "createdAt": "2026-10-15T03:37:14.489745Z",
+  "branch": "agent/studio-professional-continuation-v2",
+  "canonicalHash": "e4217013e5887d711f34ace4e9affb5d961cbec8176a2c2a7b2fc6b6e5afb11e",
+  "finalMovie": "reports/studio-source-parity-repair-20261015/proof/workflow/final.mp4",
+  "movieSha256": "a063eb1d43af750638aae8a26f4f8eaaa5726e713ae84dd68d62f02a213652ff",
+  "nativeRenderSeconds": 244.079,
+  "nativeCpuExports": 1,
+  "nativeEnded": true,
+  "all480DecodedPictureFramesIdentical": true,
+  "decodedAudioIdentical": false,
+  "nativeNinePausedSourceCaptures": "reports/studio-source-parity-repair-20261015/proof/after-native.json",
+  "motionBenchmark": {
+    "cases": [
+      {
+        "programmeStart": 0,
+        "frames": 12,
+        "width": 1920,
+        "height": 1080,
+        "byteIdentical": true,
+        "runs": [
+          {
+            "version": "before",
+            "seconds": 10.37799718597671
+          },
+          {
+            "version": "after",
+            "seconds": 3.162654542014934
+          }
+        ],
+        "speedup": 3.2814197845854087
+      },
+      {
+        "programmeStart": 16,
+        "frames": 12,
+        "width": 1920,
+        "height": 1080,
+        "byteIdentical": true,
+        "runs": [
+          {
+            "version": "before",
+            "seconds": 11.615208281960804
+          },
+          {
+            "version": "after",
+            "seconds": 3.4493600729620084
+          }
+        ],
+        "speedup": 3.367351635164803
+      }
+    ],
+    "scope": "Actual saved source-motion plan at 1080p/24fps; first and fading half-second windows, two FFmpeg filter threads, same synthetic source and byte-identical decoded RGB. Not the complete native export."
+  },
+  "nativeSelectedTrackLock": "reports/studio-source-parity-repair-20261015/proof/native-selected-key-lock.json",
+  "sourceSha256": {
+    "frontend/src/hooks/useCinematicEffects.js": "2a9dd4b7c60b3a8add3259855fed5d0bdc8fe31c934b3967aa1e25a326505740",
+    "python_media_worker/studio_motion.py": "284fde9d3cb325afcc481afc8be70fb8d994c857d1771063e0c64e08181e0f52"
+  },
+  "ownedLocalQaStopped": true,
+  "paidGpuJobs": 0,
+  "wholePreviewFinalParityQualified": false,
+  "readinessPromoted": false,
+  "remainingBlockers": [
+    "The stale black Finish cover is repaired, but legacy CSS/FFmpeg grade and old strict source-feature comparison remain unqualified. No acceptance tolerance changed; prior S02 ellipse raster failure remains open.",
+    "All480 repair-export decoded picture frames are byte-identical; decoded soundtrack differs from the retained earlier export. Whole audio parity/listening remains unqualified.",
+    "Screen recordings have sparse capture relative to24fps and do not establish playback smoothness. No full Studio suite or readiness/creative/public promotion."
+  ]
+}

@@ -213,13 +213,25 @@ def build_studio_motion_filter(motion, width, height):
         and _identity_curve(crop_x_keys, base_crop_x, 0)
         and _identity_curve(crop_y_keys, base_crop_y, 0)
     ):
-        mask = (
-            f"({opacity})*gte(X,W*({crop_x})/100)*lte(X,W*(1-({crop_x})/100))"
-            f"*gte(Y,H*({crop_y})/100)*lte(Y,H*(1-({crop_y})/100))"
-        )
+        # Curves depend on frame time, not pixel position. geq evaluates each
+        # colour expression in row order, with independent state per thread.
+        # Cache at X=0 on every row so threaded slices also initialize their
+        # own registers; retain the original 8-bit RGB multiplication exactly.
+        curves, factors = [], []
+        if not _identity_curve(opacity_keys, base_opacity, 1):
+            curves.append(f"st(0,{opacity})")
+            factors.append("ld(0)")
+        if not _identity_curve(crop_x_keys, base_crop_x, 0):
+            curves.append(f"st(1,{crop_x})")
+            factors.extend(("gte(X,W*ld(1)/100)", "lte(X,W*(1-ld(1)/100))"))
+        if not _identity_curve(crop_y_keys, base_crop_y, 0):
+            curves.append(f"st(2,{crop_y})")
+            factors.extend(("gte(Y,H*ld(2)/100)", "lte(Y,H*(1-ld(2)/100))"))
+        cache = f"if(eq(X,0),{'+'.join(curves)},0)"
+        mask = "*".join(factors)
         filters.append("format=gbrp")
         filters.append(
-            f"geq=r='r(X,Y)*({mask})':g='g(X,Y)*({mask})':b='b(X,Y)*({mask})'"
+            "geq=" + ":".join(f"{channel}='{cache};{channel}(X,Y)*({mask})'" for channel in ("r", "g", "b"))
         )
         filters.append("format=yuv420p")
 
