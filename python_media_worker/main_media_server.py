@@ -30901,6 +30901,7 @@ class ViralOverlay(BaseModel):
     fontWeight: int = 900
     textAlign: Literal["left", "center", "right"] = "center"
     strokeWidth: float = 0
+    strokeColor: Optional[str] = None
     shadow: Literal["none", "soft", "strong"] = "soft"
     animation: Optional[Dict[str, Any]] = None
     start_time: Optional[float] = None

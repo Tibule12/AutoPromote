@@ -10521,7 +10521,7 @@ body.dashboard-mode.viral-studio-open {
   border-radius: 10px;
   animation: none;
   transition: none;
-  -webkit-text-stroke: var(--title-stroke, 0) rgba(0, 0, 0, 0.92);
+  -webkit-text-stroke: var(--title-stroke, 0) var(--title-stroke-color, rgba(0, 0, 0, 0.92));
   transform: translate(var(--layer-translate-x, -50%), var(--layer-translate-y, -50%)) rotate(var(--title-rotation, 0deg)) scale(calc(var(--title-preview-scale, 0.444444) * var(--title-scale, 1)));
   transform-origin: var(--layer-anchor-x, 50%) var(--layer-anchor-y, 50%);
 }

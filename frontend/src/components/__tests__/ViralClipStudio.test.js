@@ -1020,6 +1020,41 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(media).toHaveAttribute("aria-controls", screen.getByRole("tabpanel", { name: "Media" }).id);
   });
 
+  test("replacing the entire sequence removes unrelated footage while preserving timed graphics and sound atomically", async () => {
+    global.fetch.mockResolvedValue({ok:true,json:async()=>({url:'https://example.com/owned.mp4',generation:'1'})});
+    const first={id:'people',name:'Headphones people',start:0,end:4,duration:4,url:'https://example.com/people.mp4',storagePath:'studio/sources/test-user/people.mp4'};
+    const canvas={id:'canvas',name:'Ink canvas',url:'https://example.com/ink.mp4',storagePath:'studio/sources/test-user/ink.mp4',duration:30,status:'ready',mediaType:'video'};
+    const snapshot={orderedClips:[first],selectedClipId:first.id,timeline:[{...first,sourceClipId:first.id,startRequest:0,endRequest:4},{...first,id:'people2',sourceClipId:first.id,startRequest:4,endRequest:8}],
+      projectMedia:[{...first,status:'ready'},canvas],reframeAspect:'16:9',previewSpeed:1,addHook:false,silenceRemoval:false,
+      overlays:[{id:'word',name:'LOOP',type:'text',text:'LOOP',clipId:'people',startTime:2,duration:4,strokeWidth:3,strokeColor:'#ff5436'}],
+      motionKeyframes:[{id:'source-key',targetId:'main-video',property:'scale',time:1,value:1.1},{id:'title-key',targetId:'word',property:'x',time:2,value:50}],
+      addMusic:true,musicTrack:{id:'music',name:'Score',url:'https://example.com/score.wav',sourceStoragePath:'uploads/audios/test-user/score.wav',volume:.8},
+      captionSegments:[{id:'old-caption',start:0,end:1,text:'Old footage words'}]};
+    const saveSpy=jest.spyOn(studioProjectStore,'saveViralStudioProject').mockImplementation(async project=>({...project,updatedAt:Date.now()}));
+    try {
+      render(<ViralClipStudio videoUrl={first.url} clips={[first]} initialSavedProject={{id:'replace-sequence',name:'Motion only',snapshot}} onSave={jest.fn()} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Motion only');
+      fireEvent.click(screen.getByTestId('studio-save-project'));await waitFor(()=>expect(saveSpy).toHaveBeenCalled());
+      const before=saveSpy.mock.calls.at(-1)[0].snapshot;
+      fireEvent.click(screen.getByRole('button',{name:'Preview Ink canvas',hidden:true}));
+      expect(screen.getByRole('button',{name:'Replace entire sequence',hidden:true})).not.toBeDisabled();
+      fireEvent.click(screen.getByRole('button',{name:'Replace entire sequence',hidden:true}));
+      expect(screen.getByText(/Sequence replaced by/)).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(()=>expect(saveSpy.mock.calls.at(-1)[0].snapshot.timeline).toHaveLength(1));
+      const after=saveSpy.mock.calls.at(-1)[0].snapshot;
+      expect(after.timeline[0]).toMatchObject({name:'Ink canvas',startRequest:0,endRequest:8,duration:8});
+      expect(after.orderedClips).toHaveLength(1);expect(after.projectMedia.map(item=>item.name)).toEqual(['Ink canvas']);
+      expect(after.motionKeyframes).toEqual([snapshot.motionKeyframes[1]]);expect(after.musicTrack).toEqual(before.musicTrack);
+      expect(after.overlays[0]).toMatchObject({text:'LOOP',startTime:2,duration:4,clipId:after.timeline[0].id,strokeWidth:3,strokeColor:'#ff5436'});
+      expect(after.captionSegments).toEqual([]);
+      fireEvent.click(screen.getByTestId('studio-undo-button'));fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(()=>expect(saveSpy.mock.calls.at(-1)[0].snapshot.timeline).toEqual(before.timeline));
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.motionKeyframes).toEqual(before.motionKeyframes);
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.projectMedia).toEqual(before.projectMedia);
+    }finally{saveSpy.mockRestore();}
+  });
+
   test("batch media stays ordered in the library until explicitly placed, with isolated failures", async () => {
     const previousCreateUrl = URL.createObjectURL;
     const previousRevokeUrl = URL.revokeObjectURL;

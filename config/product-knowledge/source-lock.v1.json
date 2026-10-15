@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final native timeline correspondence: preserve historical matrix formatting, verify normal controls/history/cold reopen and strict original project/export recovery with complete unchanged-movie playback. Current creative feedback and broad picture/sound limits remain open.",
-  "reviewed_at": "2026-10-15T19:55:25.213Z",
-  "catalog_sha256": "08ec37671722606287dc1cf59ae53531cfd5925028f3d3d5894cd248fbb5147f",
+  "reason": "Reviewed native sequence replacement, unused media/key cleanup, title outline browser/CPU consumption, corrected same-graph motion delivery, exact backup/full Studio playback and unchanged readiness classifications.",
+  "reviewed_at": "2026-10-15T22:21:38.638Z",
+  "catalog_sha256": "4e2bb1bba15f8f997a24e32ca00c8661560e399be52ecee2eb08a694922926d5",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "3b120877e05248c87fc9fff23ac37cac8df2cdec2458dab56791eb2e5ea42b1d"
+      "sha256": "9406922e13808b776b04fa8e5cee56d3f82e3040b40bfbb8c8fb3a870f104d66"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -143,7 +143,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "40ad338e6883a1320bdc763bdc6d867f27ebae335c7c915534e1bc52c99d997a"
+      "sha256": "9d0d1df82a16aee5fc8124f082a9b5f7696ea61328e84c3af194eea6f115c62b"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -183,7 +183,7 @@
     },
     {
       "path": "frontend/src/components/studioGraphicsPackage.js",
-      "sha256": "6bbd9df234caf2fb793d8f8777eae8936e368d61d7d5de5c45c4478a304561fb"
+      "sha256": "83ce505c821c095ced712b08045defd7f8699220b380b1ee9c915631a33949dd"
     },
     {
       "path": "frontend/src/components/studioGroupTiming.js",
@@ -284,6 +284,10 @@
     {
       "path": "python_media_worker/studio_motion.py",
       "sha256": "284fde9d3cb325afcc481afc8be70fb8d994c857d1771063e0c64e08181e0f52"
+    },
+    {
+      "path": "python_media_worker/studio_text.py",
+      "sha256": "dd2a85c506c58246b8f933f4d77774c5e99e4845276ff4eb496c80030d32127c"
     },
     {
       "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
@@ -411,11 +415,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "7c356de8eb495b3248576b2055ee08a9e896ce2a6c0fd808ea8dfdb1fb9635d2"
+      "sha256": "1485d52c9dbf1e6d91bf74e33da895bb88898bf53e4c23703eea6077d11106c1"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "bf6397404124a4f47788997c816788d6c8e4dc26d4cf52c81b839c30075a7c5c"
+      "sha256": "9b22d83a2cbfdc1e7e3e7fd8f1bf3f7d62271743d96edc222515b9af806a79a0"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.20",
+  "knowledge_version": "1.0.21",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-15",
@@ -594,7 +594,7 @@
       "name": "Titles",
       "area": "Studio",
       "status": "FUNCTIONAL",
-      "summary": "Places editable titles, separates copy into word/letter layers, and imports authored graphics compositions as ordinary layers, groups and motion keys.",
+      "summary": "Places editable titles, separates word/letter motion and imports authored graphics. Outline width and color share the saved title state, live preview and CPU title rasterizer.",
       "purpose": "Author kinetic typography using the same editable layers, group timing and property graph used by preview and export.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -617,7 +617,8 @@
         "studio.title.kinetic_travel",
         "studio.title.kinetic_tilt",
         "studio.title.kinetic_exit",
-        "studio.graphics.import"
+        "studio.graphics.import",
+        "studio.title.outline_color"
       ],
       "workflow": [
         "Add or select an ordinary transparent Inter title in Graphics and set its copy, position, size and duration.",
@@ -2148,7 +2149,7 @@
       "name": "Media import",
       "area": "Studio",
       "status": "FUNCTIONAL",
-      "summary": "Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.",
+      "summary": "Imports owned media into the ordinary project. A ready video can replace the entire source sequence at the same programme length while retaining timed graphics and soundtrack. Unused project media can be removed with Undo; source files remain stored.",
       "purpose": "Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -2161,15 +2162,21 @@
         "system.account"
       ],
       "optional_capabilities": [],
-      "controls": [],
+      "controls": [
+        "studio.media.replace_sequence",
+        "studio.media.remove_unused"
+      ],
       "workflow": [
         "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Review the result and its limitations before saving or exporting.",
+        "Select a saved video at least as long as the current programme and choose Replace entire sequence. Graphics and sound keep their programme timing; source captions, cameras and old template bindings are removed. Undo restores the prior sequence.",
+        "Remove unused media clears unreferenced library entries and transform keys with no remaining target. Active sources, layer/camera/music/sound references and pending uploads are retained. Stored files are not deleted."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Sequence replacement requires source speed 1 with no speed keys, opening hook or silence removal. A source clip still provides the programme clock; a plain background video may be used."
       ],
       "common_errors": [
         {
@@ -9340,7 +9347,8 @@
         "AutoPromote graphics v1 JSON; matching programme aspect; timing inside the current programme; at most 128 total graphic layers and 32 new groups; 256 keys per item, 8192 imported keys and 4MiB file size.",
         "Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.",
         "Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.",
-        "Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate."
+        "Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate.",
+        "Optional title strokeWidth 0–8 and strokeColor hex fields use the ordinary title controls and CPU rasterizer."
       ],
       "updated_at": "2026-10-15",
       "product_version": "1.2.0"
@@ -9414,6 +9422,106 @@
       ],
       "limitations": [
         "Display choices do not mutate the canonical project. Source footage remains a base stage; clip timing alone does not certify visible pixels. Whole preview/final picture and sound remain unqualified."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.media.replace_sequence",
+      "feature_ids": [
+        "studio.media_ingest"
+      ],
+      "label": "Replace entire sequence",
+      "status": "PARTIAL",
+      "meaning": "Replaces source clips at the same programme length while preserving graphics and soundtrack timing. Removes source captions/camera/template bindings. Undo restores the original source state.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "action",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned project media"
+      ],
+      "dependencies": [
+        "studio.media_ingest"
+      ],
+      "limitations": [
+        "Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate.",
+        "Ready video at least as long as the programme; unlocked Video track; source speed 1, no speed keys, opening hook or silence removal. Graphic/sound timing remains intact; source-specific decisions are reset."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.media.remove_unused",
+      "feature_ids": [
+        "studio.media_ingest"
+      ],
+      "label": "Remove unused media",
+      "status": "PARTIAL",
+      "meaning": "Removes unreferenced project-library assets and animation keys with no remaining layer. Retains active sources, camera/audio references and pending uploads. Undo restores entries; stored files remain available.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "action",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned project media"
+      ],
+      "dependencies": [
+        "studio.media_ingest"
+      ],
+      "limitations": [
+        "Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.outline_color",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Outline color",
+      "status": "PARTIAL",
+      "meaning": "Sets the ordinary title outline color in saved state, native preview and CPU output. Outline width remains the existing title property.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "#000000",
+        "default_known": true,
+        "values": []
+      },
+      "unit": "hex color",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles"
+      ],
+      "limitations": [
+        "Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate."
       ],
       "updated_at": "2026-10-15",
       "product_version": "1.2.0"
@@ -12159,6 +12267,21 @@
       "from": "studio.timeline",
       "type": "editable_with",
       "to": "studio.timeline.at_playhead"
+    },
+    {
+      "from": "studio.media_ingest",
+      "type": "editable_with",
+      "to": "studio.media.replace_sequence"
+    },
+    {
+      "from": "studio.media_ingest",
+      "type": "editable_with",
+      "to": "studio.media.remove_unused"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.outline_color"
     }
   ]
 }

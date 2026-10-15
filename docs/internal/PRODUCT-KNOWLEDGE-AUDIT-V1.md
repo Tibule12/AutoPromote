@@ -1,5 +1,7 @@
 # Product documentation audit V1 — 12 October 2026
 
+16 October knowledge 1.0.21 documents 140 controls, including normal whole-sequence replacement, unused-reference cleanup and editable title outline color. [One-source motion project, native history/cold reopen, corrected final movie and full Studio playback](../../reports/studio-break-loop-depth-20261015/README.md). All 729 native keys reach the export request; the exact editable backup matches the selected movie. The initial transition collision and both twelve-minute observer deadlines remain recorded. Feature/readiness counts stay unchanged; creative review and full picture/audio qualification remain separate.
+
 15 October knowledge1.0.20 documents137 controls, including the actual composition-layer view and parent-gated timing filter. [Native layer/key/history/cold-reopen checks and complete unchanged-movie playback](../../reports/studio-timeline-correspondence-20261015/README.md) pass; whole picture/sound and creative approval remain separate. Feature/readiness counts stay unchanged.
 
 13 October knowledge1.0.8 records canonical image-key precedence over legacy CSS entrance fill/transitions. [Two actual masked-effects films/timelines,7 of8 current raster pairs and exact failures](../../reports/studio-professional-masked-effects-20261013/README.md). Feature counts/readiness remain unchanged; whole picture/sound and failed ellipse/landscape pairs remain open.

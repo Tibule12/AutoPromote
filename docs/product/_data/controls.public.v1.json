@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.20",
+  "knowledge_version": "1.0.21",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -4707,7 +4707,8 @@
         "AutoPromote graphics v1 JSON; matching programme aspect; timing inside the current programme; at most 128 total graphic layers and 32 new groups; 256 keys per item, 8192 imported keys and 4MiB file size.",
         "Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.",
         "Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.",
-        "Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate."
+        "Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate.",
+        "Optional title strokeWidth 0–8 and strokeColor hex fields use the ordinary title controls and CPU rasterizer."
       ],
       "updated_at": "2026-10-15",
       "product_version": "1.2.0"
@@ -4781,6 +4782,106 @@
       ],
       "limitations": [
         "Display choices do not mutate the canonical project. Source footage remains a base stage; clip timing alone does not certify visible pixels. Whole preview/final picture and sound remain unqualified."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.media.replace_sequence",
+      "feature_ids": [
+        "studio.media_ingest"
+      ],
+      "label": "Replace entire sequence",
+      "status": "PARTIAL",
+      "meaning": "Replaces source clips at the same programme length while preserving graphics and soundtrack timing. Removes source captions/camera/template bindings. Undo restores the original source state.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "action",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned project media"
+      ],
+      "dependencies": [
+        "studio.media_ingest"
+      ],
+      "limitations": [
+        "Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate.",
+        "Ready video at least as long as the programme; unlocked Video track; source speed 1, no speed keys, opening hook or silence removal. Graphic/sound timing remains intact; source-specific decisions are reset."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.media.remove_unused",
+      "feature_ids": [
+        "studio.media_ingest"
+      ],
+      "label": "Remove unused media",
+      "status": "PARTIAL",
+      "meaning": "Removes unreferenced project-library assets and animation keys with no remaining layer. Retains active sources, camera/audio references and pending uploads. Undo restores entries; stored files remain available.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "action",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned project media"
+      ],
+      "dependencies": [
+        "studio.media_ingest"
+      ],
+      "limitations": [
+        "Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.outline_color",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Outline color",
+      "status": "PARTIAL",
+      "meaning": "Sets the ordinary title outline color in saved state, native preview and CPU output. Outline width remains the existing title property.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "#000000",
+        "default_known": true,
+        "values": []
+      },
+      "unit": "hex color",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles"
+      ],
+      "limitations": [
+        "Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate."
       ],
       "updated_at": "2026-10-15",
       "product_version": "1.2.0"

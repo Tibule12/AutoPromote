@@ -1,6 +1,6 @@
 # Animate a person from an image
 
-Development documentation • product 1.2.0 • knowledge 1.0.20 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.21 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -25,7 +25,7 @@ No additional requirement recorded.
 
 ## Feature readiness
 
-- studio.media_ingest — **FUNCTIONAL**: Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.
+- studio.media_ingest — **FUNCTIONAL**: Imports owned media into the ordinary project. A ready video can replace the entire source sequence at the same programme length while retaining timed graphics and soundtrack. Unused project media can be removed with Undo; source files remain stored.
 - generation.human_animation — **PARTIAL**: Image-conditioned moving footage can contain a person; consistent identity, exact actions and public qualification are not guaranteed. A moving person does not demonstrate speaking.
 - generation.scene_workflow — **PARTIAL**: Plans a bounded shot, requests it, reviews the returned video and imports only an accepted owned asset into the same canonical project.
 

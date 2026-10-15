@@ -57,6 +57,18 @@ class StudioTextTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             check_wrapped_weighted_title_preserves_outline_background_and_alignment(Path(temp))
 
+    def test_outline_uses_canonical_color_and_preserves_legacy_black(self):
+        with tempfile.TemporaryDirectory() as temp:
+            target = Path(temp)/"outline.png"
+            spec = {"text": "LOOP", "fontWeight": 900, "color": "#121215", "shadow": "none", "strokeWidth": 8}
+            render_title_asset({**spec, "strokeColor": "#ff5436"}, target, 1280, 720)
+            pixels = np.asarray(Image.open(target))
+            red = (pixels[..., 0] > 180) & (pixels[..., 1] < 140) & (pixels[..., 2] < 120) & (pixels[..., 3] > 180)
+            assert red.sum() > 100
+            render_title_asset(spec, target, 1280, 720)
+            legacy = np.asarray(Image.open(target))
+            assert not ((legacy[..., 0] > 180) & (legacy[..., 1] < 140)).any()
+
     def test_real_timed_composition(self):
         with tempfile.TemporaryDirectory() as temp:
             check_real_title_compositor_renders_timed_fades_and_keyframe_position(Path(temp))

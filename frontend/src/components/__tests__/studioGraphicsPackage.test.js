@@ -58,3 +58,14 @@ test('a failed artwork decode releases every created URL and preserves all exist
     createId: () => `id-${++id}`, createUrl: () => 'blob:one', revokeUrl, rasterize })).rejects.toThrow('Decode failed');
   expect(revokeUrl).toHaveBeenCalledWith('blob:one'); expect(overlays).toEqual([{ id: 'existing' }]); expect(keyframes).toEqual([{ id: 'existing-key' }]);
 });
+
+test('editable outline color and width survive import and canonical compilation',async()=>{
+  const input=spec();Object.assign(input.layers[0],{strokeWidth:3,strokeColor:'#f4efe6'});
+  const result=await build(input);expect(result.layers[0]).toMatchObject({strokeWidth:3,strokeColor:'#f4efe6'});
+  const document=adaptStudioSnapshotToDocument({projectId:'outline',snapshot:{timeline:[{id:'shot',sourceClipId:'source',startRequest:0,endRequest:4,duration:4}],overlays:result.overlays,motionKeyframes:result.keyframes}});
+  expect(document.layers.find(layer=>layer.layerId===result.layers[0].id).parameters).toMatchObject({strokeWidth:3,strokeColor:'#f4efe6'});
+  for(const invalid of [{strokeWidth:9},{strokeColor:'url(https://example.com)'}]) {
+    Object.assign(input.layers[0],invalid);expect(()=>validateStudioGraphicsPackage(input,{duration:4,aspect:16/9})).toThrow();
+    Object.assign(input.layers[0],{strokeWidth:3,strokeColor:'#f4efe6'});
+  }
+});

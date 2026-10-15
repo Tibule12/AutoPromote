@@ -88,7 +88,8 @@ def render_title_asset(overlay, output_path, width, height):
         x = margin+padding_x if align == "left" else margin+box_width-padding_x-length if align == "right" else margin+(box_width-length)/2
         baseline = margin+padding_y+index*line_height+(line_height-ascent-descent)/2+ascent
         text_draw.text((x, baseline), line, font=font, anchor="ls", fill=color(overlay.get("color"), "white"),
-                       stroke_width=max(0, round(float(overlay.get("strokeWidth") or 0)*unit/2)), stroke_fill=(0, 0, 0, 235))
+                       stroke_width=max(0, round(float(overlay.get("strokeWidth") or 0)*unit/2)),
+                       stroke_fill=color(overlay.get("strokeColor"), "rgba(0,0,0,0.92)"))
     shadow = overlay.get("shadow") or "soft"
     if shadow != "none":
         for y, blur, opacity in ([(4, 7, .95), (1, 1, 1)] if shadow == "strong" else [(3, 5, .72)]):

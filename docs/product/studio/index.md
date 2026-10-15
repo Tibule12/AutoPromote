@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.20 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.21 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -415,7 +415,7 @@ Caption controls and reviewed phrase rendering exist, but the retained automatic
 
 ID: `studio.titles` • **FUNCTIONAL** • DETERMINISTIC
 
-Places editable titles, separates copy into word/letter layers, and imports authored graphics compositions as ordinary layers, groups and motion keys.
+Places editable titles, separates word/letter motion and imports authored graphics. Outline width and color share the saved title state, live preview and CPU title rasterizer.
 
 **Purpose:** Author kinetic typography using the same editable layers, group timing and property graph used by preview and export.
 
@@ -454,7 +454,7 @@ Places editable titles, separates copy into word/letter layers, and imports auth
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Title text](../control-reference/index.md#studio-title-text), [Title size](../control-reference/index.md#studio-title-scale), [Title text color](../control-reference/index.md#studio-title-color), [Kinetic unit](../control-reference/index.md#studio-title-kinetic_unit), [Kinetic movement](../control-reference/index.md#studio-title-kinetic_style), [Kinetic order](../control-reference/index.md#studio-title-kinetic_direction), [Kinetic stagger](../control-reference/index.md#studio-title-kinetic_stagger), [Kinetic entrance](../control-reference/index.md#studio-title-kinetic_entry), [Kinetic travel](../control-reference/index.md#studio-title-kinetic_travel), [Kinetic rotation](../control-reference/index.md#studio-title-kinetic_tilt), [Kinetic exit](../control-reference/index.md#studio-title-kinetic_exit), [Import animated graphics](../control-reference/index.md#studio-graphics-import)
+**Controls:** [Title text](../control-reference/index.md#studio-title-text), [Title size](../control-reference/index.md#studio-title-scale), [Title text color](../control-reference/index.md#studio-title-color), [Kinetic unit](../control-reference/index.md#studio-title-kinetic_unit), [Kinetic movement](../control-reference/index.md#studio-title-kinetic_style), [Kinetic order](../control-reference/index.md#studio-title-kinetic_direction), [Kinetic stagger](../control-reference/index.md#studio-title-kinetic_stagger), [Kinetic entrance](../control-reference/index.md#studio-title-kinetic_entry), [Kinetic travel](../control-reference/index.md#studio-title-kinetic_travel), [Kinetic rotation](../control-reference/index.md#studio-title-kinetic_tilt), [Kinetic exit](../control-reference/index.md#studio-title-kinetic_exit), [Import animated graphics](../control-reference/index.md#studio-graphics-import), [Outline color](../control-reference/index.md#studio-title-outline_color)
 
 **Guides:** No task guide in V1.
 
@@ -1608,7 +1608,9 @@ Places owned B-roll as ordinary editable video occurrences or layers and mixes i
 
 ID: `studio.media_ingest` • **FUNCTIONAL** • DETERMINISTIC
 
-Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.
+Imports owned media into the ordinary project. A ready video can replace the entire source sequence at the same programme length while retaining timed graphics and soundtrack. Unused project media can be removed with Undo; source files remain stored.
+
+**Purpose:** Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -1622,6 +1624,8 @@ Imports supported owned video, image and audio into canonical assets. Decoding, 
 
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
+3. Select a saved video at least as long as the current programme and choose Replace entire sequence. Graphics and sound keep their programme timing; source captions, cameras and old template bindings are removed. Undo restores the prior sequence.
+4. Remove unused media clears unreferenced library entries and transform keys with no remaining target. Active sources, layer/camera/music/sound references and pending uploads are retained. Stored files are not deleted.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -1630,12 +1634,13 @@ Imports supported owned video, image and audio into canonical assets. Decoding, 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Sequence replacement requires source speed 1 with no speed keys, opening hook or silence removal. A source clip still provides the programme clock; a plain background video may be used.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** No source-qualified editable control is recorded.
+**Controls:** [Replace entire sequence](../control-reference/index.md#studio-media-replace_sequence), [Remove unused media](../control-reference/index.md#studio-media-remove_unused)
 
 **Guides:** [Turn an image into a cinematic scene](../task-guides/task-image_cinematic.md), [Create a product-launch promo](../task-guides/task-product_launch.md), [Animate a person from an image](../task-guides/task-animate_person.md)
 

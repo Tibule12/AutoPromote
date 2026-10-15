@@ -16344,6 +16344,64 @@ const ViralClipStudio = ({
     setStudioActionMessage(`Selected clip now uses “${asset.name}”. Its timeline duration and effects are preserved.`);
   };
 
+  const replaceSequenceSource = asset => {
+    if (!allowTimelineTimingEdit('video')) return;
+    if (!asset?.storagePath || !asset.url || asset.status !== 'ready' ||
+        !['', 'video'].includes(asset.mediaType || asset.type || '') ||
+        !Number.isFinite(Number(asset.duration)) || Number(asset.duration) < liveTimelineDuration) {
+      setMediaImportMessage('Choose a saved video at least as long as the programme.'); return;
+    }
+    if (speedKeyframes.length || Number(previewSpeed) !== 1 || addHook || silenceRemoval) {
+      setMediaImportMessage('Turn off source speed changes, the opening hook and silence removal before replacing the sequence.'); return;
+    }
+    const baseline = cloneSnapshot(getEditorSnapshot());
+    const source = { id: createSecureId('source'), name: asset.name, url: asset.url,
+      storagePath: asset.storagePath, sourceStoragePath: asset.storagePath, contentHash: asset.contentHash || null,
+      sourceMediaId: asset.id, duration: liveTimelineDuration, sourceDuration: Number(asset.duration),
+      start: 0, end: liveTimelineDuration, startRequest: 0, endRequest: liveTimelineDuration, isLocal: false };
+    const occurrence = { ...source, id: createSecureId('scene'), sourceClipId: source.id };
+    const removedPaths = new Set(timeline.flatMap(clip => [clip.storagePath, clip.sourceStoragePath]).filter(Boolean));
+    const retainedPaths = new Set([asset.storagePath, ...overlays.flatMap(layer => [layer.storagePath, layer.sourceStoragePath])].filter(Boolean));
+    pauseSynchronizedPreview();
+    pendingHistoryBaselineRef.current = baseline;
+    flushSync(() => {
+      setTimeline([occurrence]); setOrderedClips([source]); setSelectedClip(source); setActiveTimelineIndex(0);
+      setOverlays(current => current.map(layer => ({ ...layer, clipId: occurrence.id })));
+      setMotionKeyframes(current => current.filter(key => key.targetId !== 'main-video'));
+      setReframeKeyframes([]); setReframeModeCuts([]); setSpeakerFocusCuts([]); setSpeakerStackSources([]);
+      setSubjectVfxScenes([]); setSmartCrop(false); setAutoCaptions(false); setCaptionSegments([]); setCaptionTextOverride('');
+      setCreativeTemplateInstance(null); setAngleGroups([]); setActiveAngleGroupId(null);
+      setProjectMedia(current => current.filter(item => item.id === asset.id ||
+        !removedPaths.has(item.storagePath || item.sourceStoragePath) || retainedPaths.has(item.storagePath || item.sourceStoragePath)));
+      setPreviewFinishedFile(false); setComparisonMode('after'); setVideoTime(0); setProjectSaveState('unsaved');
+    });
+    setStudioActionMessage(`Sequence replaced by “${asset.name}”. Graphic layers and soundtrack timing are preserved. Undo restores the previous sources.`);
+  };
+
+  const removeUnusedProjectMedia = () => {
+    const ids = new Set(), paths = new Set();
+    const visit = value => {
+      if (!value || typeof value !== 'object') return;
+      if (Array.isArray(value)) { value.forEach(visit); return; }
+      for (const [field, item] of Object.entries(value)) {
+        if (['id', 'sourceMediaId', 'sourceClipId', 'assetId'].includes(field) && typeof item === 'string') ids.add(item);
+        else if (['storagePath', 'sourceStoragePath', 'assetStoragePath'].includes(field) && typeof item === 'string') paths.add(item);
+        else if (item && typeof item === 'object' && !(item instanceof Blob)) visit(item);
+      }
+    };
+    visit([timeline, orderedClips, overlays, speakerStackSources, angleGroups, soundEffects, voiceovers, musicTrack,
+      extractedAudio, mainFrame, subjectVfxScenes, creativeTemplateInstance]);
+    const retained = projectMedia.filter(item => ids.has(item.id) || paths.has(item.storagePath || item.sourceStoragePath) ||
+      ['queued', 'uploading', 'failed', 'needs_upload'].includes(item.status));
+    const targets = new Set(['main-video', ...overlays.map(layer => layer.id), ...motionScenes.map(layer => layer.id),
+      ...threeDScenes.map(layer => layer.id), ...compositionGroups.groups.map(group => group.id)]);
+    const retainedKeys = motionKeyframes.filter(key => targets.has(key.targetId));
+    if (retained.length === projectMedia.length && retainedKeys.length === motionKeyframes.length) { setMediaImportMessage('Every saved asset and animation key is used by this edit.'); return; }
+    pendingHistoryBaselineRef.current = cloneSnapshot(getEditorSnapshot());
+    setProjectMedia(retained); setMotionKeyframes(retainedKeys); setSelectedProjectMediaId(null);
+    setMediaImportMessage(`Removed ${projectMedia.length - retained.length} unused assets and ${motionKeyframes.length - retainedKeys.length} orphaned keys. Undo restores them; saved source files are retained.`);
+  };
+
   const addProjectMediaAsBRoll = asset => {
     if (!asset?.storagePath || !asset.url || !(Number(asset.duration) > 0)) {
       setMediaImportMessage("This video needs a readable duration before it can be placed. Use Retry duration on its card.");
@@ -16828,6 +16886,8 @@ const ViralClipStudio = ({
   };
 
   const deleteOverlay = id => {
+    const nextCompounds = removeStudioGroupMembers(compoundClips, [id]);
+    setCompoundClips(nextCompounds);
     setOverlays(current => {
       const nextOverlays = current.filter(overlay => overlay.id !== id);
       setActiveOverlayId(currentId => {
@@ -16840,7 +16900,8 @@ const ViralClipStudio = ({
       });
       return nextOverlays;
     });
-    setMotionKeyframes(current => current.filter(keyframe => String(keyframe.targetId) !== String(id)));
+    setMotionKeyframes(current => pruneRemovedStudioGroupKeys(current, compoundClips, nextCompounds)
+      .filter(keyframe => String(keyframe.targetId) !== String(id)));
   };
 
   // ── B-roll / cutaway overlay helpers ──
@@ -18180,6 +18241,7 @@ const ViralClipStudio = ({
               >
                 ＋ Import scenes
               </button>
+              <button type="button" className="studio-media-bin__import" onClick={removeUnusedProjectMedia}>Remove unused media</button>
               {pendingProjectMediaCount > 0 ? (
                 <small className="studio-media-bin__pending" role="status">
                   Saving {pendingProjectMediaCount} {pendingProjectMediaCount === 1 ? "video" : "videos"}… You can keep editing.
@@ -18275,6 +18337,9 @@ const ViralClipStudio = ({
                           onClick={() => replaceActiveTimelineSource(item)}>
                           Replace selected clip
                         </button>
+                        <button type="button" disabled={!ready || !Number.isFinite(Number(item.duration)) || Number(item.duration) < liveTimelineDuration || !!trackStates.video?.locked}
+                          title="Replace all source clips; keep programme length, graphics and soundtrack. Source captions and camera treatments are removed."
+                          onClick={() => replaceSequenceSource(item)}>Replace entire sequence</button>
                         <button
                           type="button"
                           disabled={!ready}
@@ -19572,6 +19637,7 @@ const ViralClipStudio = ({
                                 "--layer-anchor-x": `${Number(overlay.anchorX ?? 50)}%`,
                                 "--layer-anchor-y": `${Number(overlay.anchorY ?? 50)}%`,
                                 "--title-stroke": `${Number(overlay.strokeWidth || 0)}px`,
+                                "--title-stroke-color": overlay.strokeColor || 'rgba(0,0,0,0.92)',
                                 textAlign: overlay.textAlign || "center",
                                 fontWeight: Number(overlay.fontWeight || 900),
                                 fontFamily: (overlay.fontFamily || "Inter") === "Inter"
@@ -24187,6 +24253,12 @@ const ViralClipStudio = ({
                             )
                           }
                         />
+                      </label>
+
+                      <label className="inspector-range">
+                        <span><b>Outline color</b></span>
+                        <input type="color" aria-label="Title outline color" value={activeOverlay.strokeColor || '#000000'}
+                          onChange={event => setOverlayStyleOption(activeOverlay.id, 'strokeColor', event.target.value)} />
                       </label>
 
                       <label className="inspector-range">

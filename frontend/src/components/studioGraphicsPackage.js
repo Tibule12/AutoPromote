@@ -61,12 +61,14 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
   };
   const cleanLayers = input.layers.map(layer => {
     only(layer, ['id', 'name', 'type', 'text', 'svg', 'startTime', 'duration', 'x', 'y', 'scale', 'rotation', 'opacity',
-      'width', 'height', 'fontWeight', 'color', 'textAlign', 'keys'], 'layer');
+      'width', 'height', 'fontWeight', 'color', 'textAlign', 'strokeWidth', 'strokeColor', 'keys'], 'layer');
     identity(layer);
     for (const [property, limits] of Object.entries(bounds)) number(layer[property], ...limits, property);
     number(layer.width, 1, 100, 'Layer width');
     if (layer.type === 'text') {
       text(layer.text, 500, 'title text'); color(layer.color);
+      if (layer.strokeColor !== undefined) color(layer.strokeColor);
+      if (layer.strokeWidth !== undefined) number(layer.strokeWidth, 0, 8, 'Outline width');
       if (![400, 600, 700, 800, 900].includes(layer.fontWeight) || !['left', 'center', 'right'].includes(layer.textAlign))
         throw Error('Choose a supported Inter weight and title alignment.');
       if (layer.svg !== undefined || layer.height !== undefined) throw Error('Text layers use copy and title sizing; artwork uses SVG and height.');
@@ -74,7 +76,7 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
     }
     if (layer.type !== 'artwork' || typeof layer.svg !== 'string' || layer.svg.length > 200000)
       throw Error('Artwork must contain a bounded inline SVG.');
-    if (['text', 'color', 'fontWeight', 'textAlign'].some(field => layer[field] !== undefined))
+    if (['text', 'color', 'fontWeight', 'textAlign', 'strokeWidth', 'strokeColor'].some(field => layer[field] !== undefined))
       throw Error('Artwork styling belongs in its SVG, not in title fields.');
     number(layer.height, 1, 100, 'Artwork height');
     artworkBytes += layer.svg.length;
@@ -121,7 +123,7 @@ export async function buildStudioGraphicsPackage({ input, overlays, keyframes, c
     for (const layer of spec.layers) {
       const { keys: _keys, svg: _svg, ...base } = layer;
       const ordinary = { ...base, id: ids.get(layer.id), type: 'text', anchorX: 50, anchorY: 50,
-        bg: 'transparent', shadow: 'none', strokeWidth: 0, fontFamily: 'Inter', motionDesign: true,
+        bg: 'transparent', shadow: 'none', strokeWidth: layer.strokeWidth || 0, fontFamily: 'Inter', motionDesign: true,
         animation: { enter: 'none', exit: 'none', enterDuration: 0, exitDuration: 0 } };
       if (layer.type === 'artwork') {
         const file = await rasterize(layer.svg, layer.name), src = createUrl(file); urls.push(src);

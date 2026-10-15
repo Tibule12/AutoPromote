@@ -120,6 +120,10 @@ async function view(page, name) {
   const renderReceipt = JSON.parse(fs.readFileSync(path.join(folder, name, 'render-receipt.json')));
   assert.equal(hash(before.snapshot.studioDocument), renderReceipt.projectHash,
     'The visible edit differs from the finished movie');
+  if (process.env.STUDIO_QA_HIDE_MEDIA === '1') {
+    const hideMedia = page.getByRole('button', { name: 'Hide media', exact: true });
+    if (await hideMedia.isVisible()) await hideMedia.click();
+  }
   const finalMovie = path.join(folder, name, 'final.mp4');
   assert.equal(hash(fs.readFileSync(finalMovie)), renderReceipt.outputSha256);
   const verifiedMovie = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0',

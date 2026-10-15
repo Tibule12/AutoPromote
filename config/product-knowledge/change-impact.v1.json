@@ -708,6 +708,42 @@
         "frontend/src/components/ViralClipStudio.js"
       ],
       "reason": "Replace unreadable overlapping motion-design rows with a view of the real composition stack and parent timing gates. Ordinary layer moves retain their transform keys and owning-track locks. UI/native qualification does not establish whole picture/sound or creative approval."
+    },
+    {
+      "feature_id": "studio.media_ingest",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/studioGraphicsPackage.js",
+        "python_media_worker/studio_text.py",
+        "reports/studio-break-loop-depth-20261015/README.md"
+      ],
+      "reason": "Remove inherited unrelated source material through native sequence replacement and unused-reference cleanup; depth choreography uses ordinary editable title outline color and motion keys. Preserve the user request for stronger creativity and separate native delivery from creative approval."
+    },
+    {
+      "feature_id": "studio.titles",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/studioGraphicsPackage.js",
+        "python_media_worker/studio_text.py",
+        "reports/studio-break-loop-depth-20261015/README.md"
+      ],
+      "reason": "Remove inherited unrelated source material through native sequence replacement and unused-reference cleanup; depth choreography uses ordinary editable title outline color and motion keys. Preserve the user request for stronger creativity and separate native delivery from creative approval."
     }
   ]
 }
