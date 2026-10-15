@@ -23,3 +23,28 @@ test('collisions and out-of-range scaling fail atomically; deleting a selection 
   expect(editStudioKeyframeSelection(keys,['a','b'],'delete',{duration:5}).keys).toEqual([keys[2]]);
   expect(keys[0].time).toBe(1);
 });
+
+test('cross-layer paste keeps spacing, values and Bezier data while assigning new owners and identities', () => {
+  let id = 0;
+  const result = editStudioKeyframeSelection(keys, [], 'paste', { value: 3, clipboard: keys.slice(0, 2),
+    pasteTarget: { id: 'destination', type: 'text' }, duration: 5, createId: () => `copy-${id++}` });
+  expect(result.keys.slice(-2)).toEqual(keys.slice(0, 2).map((key, index) => ({ ...key,
+    id: `copy-${index}`, targetId: 'destination', time: key.time + 2 })));
+  expect(result.keys.slice(0, 3)).toEqual(keys);
+  expect(result.keys.at(-2).curve).not.toBe(keys[0].curve);
+});
+
+test('incompatible properties, destination bounds, multiple owners and destination collisions reject the whole paste', () => {
+  const paste = (clipboard, pasteTarget) => editStudioKeyframeSelection(keys, [], 'paste', {
+    clipboard, pasteTarget, value: 1, duration: 5, createId: () => 'copy' });
+  expect(() => paste([{ ...keys[0], property: 'cropX' }], { id: 'text', type: 'text' })).toThrow('does not support');
+  expect(() => paste([{ ...keys[0], value: -8 }], { id: 'text', type: 'text' })).toThrow('between 0 and 100');
+  expect(() => paste(keys, { id: 'text', type: 'text' })).toThrow('one layer');
+  expect(() => paste([keys[0]], { id: 'g', kind: 'graphic_group' })).toThrow('already occupies');
+  expect(keys).toHaveLength(3);
+});
+
+test('paste rejects a collision within the editor half-frame tolerance after playhead snapping', () => {
+  expect(() => editStudioKeyframeSelection(keys, [], 'paste', { value: 1 + 1 / 60, clipboard: [keys[0]],
+    duration: 5, timeTolerance: 1 / 48, createId: () => 'copy' })).toThrow('already occupies');
+});

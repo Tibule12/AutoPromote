@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-15T03:37:14.489745Z",
+  "updatedAt": "2026-10-15T16:14:15.791Z",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -7966,25 +7966,24 @@
   },
   "continuity": {
     "nextHighestPriorityTaskId": "S04",
-    "lastSessionKind": "PROPERTY_TIMELINE_MULTI_KEY_EDITING",
-    "lastSessionRealCapabilityRuns": 2,
+    "lastSessionKind": "PROPERTY_MARQUEE_AND_CROSS_LAYER_PASTE",
+    "lastSessionRealCapabilityRuns": 1,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-keyframe-selection-20261015/README.md",
+    "exactBlockersSource": "reports/studio-keyframe-marquee-20261015/README.md",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-keyframe-selection-20261015/README.md",
+    "lastSessionEvidence": "reports/studio-keyframe-marquee-20261015/README.md",
     "lastSessionAutomatedChecks": {
       "frontendCasesPassed": 35,
-      "workerCasesPassed": 146,
-      "workerSubtestsPassed": 8,
       "strictAppBuild": "PASS",
+      "workerCodeChanged": false,
       "fullStudioSuiteQualified": false
     },
-    "nextSlice": "Continue visible S04 property editing with cross-layer clipboard and marquee selection; retain S02 colour/raster/whole sound and S03 source-occurrence/group ownership blockers.",
+    "nextSlice": "S04 temporal velocity/influence and spatial path editing on the existing canonical key/curve graph. Retain S02 whole colour/raster/sound and S03 occurrence/group ownership limits.",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -11704,7 +11703,7 @@
     "nativeHistorySaveColdReopen": true,
     "completeStudioRecordings": 2,
     "occlusionPairsPassed": 8,
-    "maxBoundaryP95Pixels": 1.0,
+    "maxBoundaryP95Pixels": 1,
     "minimumVisibleImageIou": 0.9864202437731849,
     "frontendCasesPassed": 24,
     "compositorCasesPassed": 42,
@@ -11772,7 +11771,7 @@
     "animatedChannels": 8,
     "completeStudioRecordings": 1,
     "geometryPairsPassed": 4,
-    "maxBoundaryP95Pixels": 1.0,
+    "maxBoundaryP95Pixels": 1,
     "minimumVisibleImageIou": 0.9906280038449214,
     "decodedSourceToneUnchanged": true,
     "frontendCasesPassed": 77,
@@ -11806,7 +11805,7 @@
     "animatedChannels": 8,
     "completeStudioRecordings": 1,
     "geometryAndInteriorColorPairsPassed": 4,
-    "maxBoundaryP95Pixels": 1.0,
+    "maxBoundaryP95Pixels": 1,
     "minimumVisibleImageIou": 0.9886338144021536,
     "maxInteriorRgbRmse": 3.2268460992634505,
     "decodedSourceToneUnchanged": true,
@@ -11923,5 +11922,46 @@
       "S03"
     ],
     "nextImplementationSlice": "Continue visible S04 property editing with cross-layer clipboard and marquee selection; retain S02 colour/raster/whole sound and S03 source-occurrence/group ownership blockers."
+  },
+  "professionalKeyframeMarquee20261015": {
+    "evidence": "reports/studio-keyframe-marquee-20261015/README.md",
+    "checkpoint": "reports/studio-keyframe-marquee-20261015/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "Native property-row marquee and compatible cross-layer animation paste on the existing canonical keys/history/preview/compiler/renderer.",
+    "projectId": "viral-project-e09695ba-cd91-40d2-a995-2d4d1a17b3f9",
+    "canonicalHash": "c90fa3d8204013fea0ec640c1ac3cd42fc7d5c058490943e3090dd806ad19587",
+    "nativeMultiPropertyMarquee": true,
+    "nativeAddSubtractCancel": true,
+    "nativeEdgeScrollPixels": 129,
+    "nativeCrossLayerPasteUndoRedo": true,
+    "nativeDestinationCollisionAndLocks": true,
+    "nativeExactColdReopen": true,
+    "nativeCpuExports": 1,
+    "renderSeconds": 239.067,
+    "completeStudioRecordings": 1,
+    "nativeEditingRecordings": 1,
+    "propertyKeyCount": 166,
+    "editedKeyTuplesInNativeCompositionPlan": 8,
+    "frontendCasesPassed": 35,
+    "strictAppBuild": "PASS",
+    "workerCodeChanged": false,
+    "gpuJobs": 0,
+    "paidGpuCost": 0,
+    "ownedLocalQaStopped": true,
+    "wholePreviewFinalParityQualified": false,
+    "fullStudioSuiteQualified": false,
+    "readinessPromoted": false,
+    "remainingBlockers": [
+      "Cross-project/OS clipboard interchange, freehand lasso, spatial interpolation and velocity handles are not qualified.",
+      "Native scope covers two ordinary text-property channels; compatibility/mixed locks have component coverage. Broad media, retiming, full raster/live soundtrack and human listening remain unqualified.",
+      "Existing S02 colour/ellipse/source-feature and audio differences, S03 source-occurrence/group ownership and broader model lifecycle remain open.",
+      "Screen capture averages19.30fps for a24fps movie; full ended playback does not establish smoothness."
+    ],
+    "nextTaskIds": [
+      "S04",
+      "S02",
+      "S03"
+    ],
+    "nextImplementationSlice": "S04 temporal velocity/influence and spatial path editing on the existing canonical key/curve graph. Retain S02 whole colour/raster/sound and S03 occurrence/group ownership limits."
   }
 }

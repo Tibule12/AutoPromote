@@ -1,7 +1,20 @@
 // Batch operations edit ordinary canonical motion keys in one transaction.
 import { STUDIO_EASINGS } from './studioAutomation';
+import { studioMotionPropertiesForTarget } from './studioMotionProperties';
 const tick = time => Math.round(time * 90000) / 90000;
-export function editStudioKeyframeSelection(keys, ids, action, { value, clipboard = [], duration, createId } = {}) {
+export function retargetStudioKeyframes(clipboard, target) {
+  if (!target?.id) throw Error('Choose an existing destination layer.');
+  if (new Set(clipboard.map(key => key.targetId)).size > 1) throw Error('Copy keys from one layer before pasting onto another layer.');
+  const properties = studioMotionPropertiesForTarget(target);
+  return clipboard.map(key => {
+    const descriptor = properties.find(property => property.id === key.property);
+    if (!descriptor) throw Error(`The destination does not support ${key.property} animation.`);
+    if (!Number.isFinite(key.value) || key.value < descriptor.min || key.value > descriptor.max)
+      throw Error(`${descriptor.label} values must be between ${descriptor.min} and ${descriptor.max} on the destination.`);
+    return { ...key, targetId: target.id };
+  });
+}
+export function editStudioKeyframeSelection(keys, ids, action, { value, clipboard = [], pasteTarget, duration, createId, timeTolerance = 0 } = {}) {
   const selected = new Set(ids), owned = keys.filter(key => selected.has(key.id));
   if (action !== 'paste' && (!owned.length || owned.length !== selected.size)) throw Error('Select existing keyframes first.');
   let next, selectedIds = owned.map(key => key.id);
@@ -21,8 +34,15 @@ export function editStudioKeyframeSelection(keys, ids, action, { value, clipboar
       ...(value === 'bezier' && !key.curve ? { curve: [.33, 0, .67, 1] } : {}) } : key);
   } else if (action === 'paste') {
     if (!clipboard.length || !Number.isFinite(value) || typeof createId !== 'function') throw Error('Copy keyframes before pasting at the playhead.');
-    const first = Math.min(...clipboard.map(key => key.time));
-    const pasted = clipboard.map(key => ({ ...key, ...(key.curve ? { curve: [...key.curve] } : {}), id: createId(), time: tick(value + key.time - first) }));
+    const source = pasteTarget ? retargetStudioKeyframes(clipboard, pasteTarget) : clipboard;
+    const first = Math.min(...source.map(key => key.time));
+    const pasted = source.map(key => ({ ...key, ...(key.curve ? { curve: [...key.curve] } : {}), id: createId(), time: tick(value + key.time - first) }));
+    for (let index = 0; index < pasted.length; index++) {
+      const key = pasted[index];
+      if ([...keys, ...pasted.slice(0, index)].some(other => other.targetId === key.targetId &&
+          other.property === key.property && Math.abs(other.time - key.time) <= timeTolerance))
+        throw Error('A keyframe already occupies that property and time. Move the playhead or selection.');
+    }
     next = [...keys, ...pasted]; selectedIds = pasted.map(key => key.id);
   } else throw Error('Unsupported keyframe operation.');
   const channels = new Set(), identities = new Set();

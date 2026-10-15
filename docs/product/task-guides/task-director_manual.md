@@ -1,6 +1,6 @@
 # Modify Director edits manually
 
-Development documentation • product 1.2.0 • knowledge 1.0.15 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.16 • 2026-10-15
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -28,7 +28,7 @@ Reviewed Director changes and manual controls share the same project graph.
 
 ## Feature readiness
 
-- studio.keyframes — **FUNCTIONAL**: Edit ordinary layer and group property keys directly in the shared timeline: select multiple keys, move/nudge, copy/paste at the playhead, scale timing, apply interpolation and delete in one undoable edit. Whole-stage picture/sound agreement remains partial.
+- studio.keyframes — **FUNCTIONAL**: Box-select ordinary layer and group property keys in the shared timeline, then move, scale, ease, copy or paste animation onto a compatible layer in one undoable edit.
 - studio.audio — **FUNCTIONAL**: Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX buses. Cues and gain keys remain editable in the project.
 - studio.undo_redo — **FUNCTIONAL**: Uses the shared command history to restore edits and redo them with revision-aware state. It is not permission to mutate a different revision silently.
 - director.evidence — **FUNCTIONAL**: Binds suggestions to owned source, analysis/artifact evidence and the current project revision. Unsupported visual claims are not acceptable evidence.

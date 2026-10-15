@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.15",
+  "knowledge_version": "1.0.16",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-15",
@@ -9,7 +9,7 @@
       "feature_id": "studio.timeline",
       "name": "Timeline",
       "area": "Studio",
-      "summary": "Displays source occurrences, ordinary layers, audio cues, graphic-group clip bars and property keys on the shared programme clock. Expanded property rows also support multi-key selection, batch movement, copy/paste, time scaling and interpolation.",
+      "summary": "Displays source occurrences, ordinary layers, audio cues, graphic-group clip bars and property keys on one programme clock. Expanded rows support box selection and copying animation onto compatible layers, alongside batch movement, timing and interpolation.",
       "purpose": "Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -112,6 +112,11 @@
         {
           "path": "frontend/src/components/ViralClipStudio.js",
           "anchor": "editMotionKeyframeSelection",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/useStudioKeyframeMarquee.js",
+          "anchor": "useStudioKeyframeMarquee",
           "kind": "IMPLEMENTATION"
         }
       ]
@@ -503,7 +508,7 @@
       "feature_id": "studio.keyframes",
       "name": "Motion / Transform Keyframes",
       "area": "Studio",
-      "summary": "Edit ordinary layer and group property keys directly in the shared timeline: select multiple keys, move/nudge, copy/paste at the playhead, scale timing, apply interpolation and delete in one undoable edit. Whole-stage picture/sound agreement remains partial.",
+      "summary": "Box-select ordinary layer and group property keys in the shared timeline, then move, scale, ease, copy or paste animation onto a compatible layer in one undoable edit.",
       "purpose": "Create deliberate editable movement and retain the same keys across manual editing, Director proposals, saving and final compilation.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -537,13 +542,15 @@
         "studio.composite.group_scale",
         "studio.composite.group_rotation",
         "studio.composite.group_opacity",
-        "studio.keyframe.selection_scale"
+        "studio.keyframe.selection_scale",
+        "studio.keyframe.paste_target"
       ],
       "workflow": [
         "Show motion keyframes in the timeline and expand an ordinary visual layer or graphic group, including targets without animation keys.",
         "Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.",
         "Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.",
-        "Shift/Ctrl/Command-click keys to select together. Drag or frame-nudge the selection, copy with Ctrl/Command+C and paste with Ctrl/Command+V at the playhead on the original layers. The batch toolbar scales spacing from the first selected key and applies interpolation or deletion in one history step.",
+        "Drag empty property-lane space to box-select across expanded rows. Shift/Ctrl/Command adds; Alt subtracts; Escape or pointer cancellation restores the prior selection. Shift/Ctrl/Command-click also selects individual keys. Drag, frame-nudge, scale spacing, apply interpolation or delete with the batch toolbar.",
+        "Copy with the toolbar or Ctrl/Command+C. Choose Original layers or an existing visual layer in Paste to, then paste at the playhead with the toolbar or Ctrl/Command+V. A single-source-layer clipboard can target another layer; supported property values, spacing, easing and curves are retained with fresh key identities.",
         "Owning-track locks prevent changes. Group values use their own five-property bounds; group key selection opens Composite with the shared curve editor. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property."
       ],
       "preview_behavior": "Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.",
@@ -552,7 +559,7 @@
         "This dated development snapshot does not establish professional or production readiness.",
         "Two bounded masked image-effect edits preserve eight position/scale/rotation/opacity keys through native save/reopen/export. Inverted-polygon sampled picture passes; one ellipse raster pair still exceeds the strict colour bound. This does not qualify every mask/easing/media or legacy entrance clock.",
         "One native nested image/two-motion project preserves 16 group keys across eight channels, including one custom X Bézier curve. Midpoint, property rows, nudge/lock, reset/remove/undo, save/cold reopen, CPU export and full timeline playback pass; four image geometry pairs pass and decoded source-tone audio is unchanged. Native retiming, broader curves, broader mask/blend combinations, video/owned 3D/deeper groups, full raster and live sound remain unqualified. Existing worker Bézier expressions approximate 32 samples; browser interpolation solves the curve.",
-        "Batch clipboard retains original layer/property ownership. Cross-layer/project paste, marquee selection, spatial interpolation and velocity handles are not implemented. Collisions, out-of-programme scaling and locked selections reject the whole edit. Native batch proof covers group opacity; multi-property/mixed-lock behavior has component coverage, not whole-media qualification."
+        "Cross-layer paste requires a single source layer and a current-project destination supporting every copied property and value range. Missing targets, unsupported crop/group bounds, destination locks, half-frame timing collisions and programme overflow reject the whole paste. Original-layers mode supports mixed owners. Clipboard is local to this timeline component; it is not an OS/project interchange format. Freehand lasso, spatial interpolation and velocity handles are not implemented. Broad media/retiming/full picture and sound qualification remains open."
       ],
       "common_errors": [
         {
@@ -654,11 +661,6 @@
           "kind": "IMPLEMENTATION"
         },
         {
-          "path": "reports/studio-professional-group-keyframes-20261014/README.md",
-          "anchor": "# Nested group keyframes and property rows",
-          "kind": "NATIVE_REPORT"
-        },
-        {
           "path": "frontend/src/components/studioKeyframeSelection.js",
           "anchor": "editStudioKeyframeSelection",
           "kind": "IMPLEMENTATION"
@@ -674,8 +676,13 @@
           "kind": "IMPLEMENTATION"
         },
         {
-          "path": "reports/studio-keyframe-selection-20261015/README.md",
-          "anchor": "# Property timeline keyframe selection",
+          "path": "frontend/src/components/useStudioKeyframeMarquee.js",
+          "anchor": "useStudioKeyframeMarquee",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "reports/studio-keyframe-marquee-20261015/README.md",
+          "anchor": "# Marquee selection and cross-layer animation",
           "kind": "NATIVE_REPORT"
         }
       ]
@@ -7189,7 +7196,7 @@
       ],
       "limitations": [
         "The current programme/layer range supplies the upper bound; no universal fixed duration is claimed.",
-        "The property timeline also applies this operation to selected ordinary keys in one history edit. Copy/paste retains original ownership and creates new identities; collisions and mixed locked selections reject the entire change."
+        "The property timeline also applies this operation to selected ordinary keys in one history edit. Paste can retain original ownership or target one compatible layer with new identities; timing collisions and destination locks reject the entire change."
       ],
       "status": "FUNCTIONAL",
       "updated_at": "2026-10-15",
@@ -7273,7 +7280,7 @@
       "limitations": [
         "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
         "Group evaluation clamps values to each group property’s bounds. Worker Bézier expressions use the existing 32-sample approximation; broad curve/raster equivalence is unqualified.",
-        "The property timeline also applies this operation to selected ordinary keys in one history edit. Copy/paste retains original ownership and creates new identities; collisions and mixed locked selections reject the entire change."
+        "The property timeline also applies this operation to selected ordinary keys in one history edit. Paste can retain original ownership or target one compatible layer with new identities; timing collisions and destination locks reject the entire change."
       ],
       "status": "FUNCTIONAL",
       "updated_at": "2026-10-15",
@@ -12320,7 +12327,7 @@
       "limitations": [
         "A finite factor greater than zero and at most100 is accepted. Scaling is not animated.",
         "The first selected key stays fixed. Programme-range overflow or collisions reject the operation. Every selected track must be unlocked.",
-        "One native group-opacity workflow passes history/cold/export; broad property/media/retiming/full picture and sound qualification remain open."
+        "Group opacity and ordinary multi-property time scaling use the existing canonical key graph and history. Broad media/retiming/full picture and sound qualification remains open."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-15",
@@ -12335,6 +12342,61 @@
         {
           "path": "frontend/src/components/StudioKeyframeActions.js",
           "anchor": "Selected keyframes",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "editMotionKeyframeSelection",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.keyframe.paste_target",
+      "label": "Keyframe paste destination",
+      "meaning": "Chooses original owners or a compatible current-project visual layer for copied property animation.",
+      "feature_ids": [
+        "studio.keyframes"
+      ],
+      "field": "motionKeyframes[].targetId",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": "",
+        "default_known": true
+      },
+      "unit": "layer ID; empty means original layers",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers",
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Only one copied source owner may be remapped to a destination. Property identities are retained; unsupported properties and destination value ranges reject the whole paste.",
+        "Destination locks, half-frame collisions and programme overflow reject atomically. Original-layers mode checks original owner locks.",
+        "Clipboard is timeline-local; cross-project/system clipboard interchange is not qualified. Whole picture/sound agreement remains partial."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioKeyframeSelection.js",
+          "anchor": "retargetStudioKeyframes",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioKeyframeActions.js",
+          "anchor": "Keyframe paste destination",
           "kind": "IMPLEMENTATION"
         },
         {
@@ -15339,6 +15401,11 @@
       "type": "editable_with",
       "to": "studio.keyframe.selection_scale",
       "from": "studio.keyframes"
+    },
+    {
+      "type": "editable_with",
+      "from": "studio.keyframes",
+      "to": "studio.keyframe.paste_target"
     }
   ],
   "template_bindings": [

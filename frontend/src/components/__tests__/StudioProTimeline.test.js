@@ -552,3 +552,52 @@ test('a mixed locked selection permits copying and prevents every batch mutation
   expect(screen.getByRole('button',{name:'Paste at playhead'})).toBeDisabled();
   fireEvent.keyDown(screen.getByTestId('motion-timeline-key-lb'),{key:'Delete'});expect(batch).not.toHaveBeenCalled();
 });
+
+test('paste destination uses destination locks and reveals the successfully pasted layer', () => {
+  const batch = jest.fn(() => ['fresh']), selectGroup = jest.fn();
+  render(<StudioProTimeline duration={5} playhead={3} onEditMotionKeyframes={batch} onSelectGroup={selectGroup}
+    trackStates={{ video: { locked: true } }} overlays={[{ id: 'title', type: 'text', name: 'Title' }]}
+    motionKeyframes={[{ id: 'source', targetId: 'main-video', property: 'opacity', time: 1, value: .5 }]} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Expand Source video keyframes' }));
+  fireEvent.click(screen.getByTestId('motion-timeline-key-source'));
+  fireEvent.click(screen.getByRole('button', { name: 'Copy keys' }));
+  expect(screen.getByRole('button', { name: 'Paste at playhead' })).toBeDisabled();
+  fireEvent.change(screen.getByLabelText('Keyframe paste destination'), { target: { value: 'title' } });
+  expect(screen.getByRole('button', { name: 'Paste at playhead' })).toBeEnabled();
+  fireEvent.keyDown(screen.getByTestId('motion-timeline-key-source'), { key: 'v', metaKey: true });
+  expect(batch.mock.lastCall[2]).toEqual({ value: 3, clipboard: [{ id: 'source', targetId: 'main-video', property: 'opacity', time: 1, value: .5 }], pasteTargetId: 'title' });
+  expect(screen.getByRole('button', { name: 'Collapse Title keyframes' })).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Keyframe paste destination'), { target: { value: 'main-video' } });
+  expect(screen.getByRole('button', { name: 'Paste at playhead' })).toBeDisabled();
+});
+
+test('marquee spans property rows, adds/subtracts and restores selection on Escape or pointer cancellation', () => {
+  const batch = jest.fn();
+  const { container } = render(<StudioProTimeline duration={5} onEditMotionKeyframes={batch} trackStates={{}}
+    motionKeyframes={[{ id: 'one', targetId: 'main-video', property: 'x', time: 1, value: 20 },
+      { id: 'two', targetId: 'main-video', property: 'opacity', time: 2, value: .5 }]} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Expand Source video keyframes' }));
+  const content = container.querySelector('.pro-timeline-content');
+  const lane = screen.getByRole('group', { name: 'Source video x keyframes' });
+  const one = screen.getByTestId('motion-timeline-key-one'), two = screen.getByTestId('motion-timeline-key-two');
+  content.getBoundingClientRect = () => ({ left: 0, top: 0 });
+  one.getBoundingClientRect = () => ({ left: 100, top: 100, width: 20, height: 20 });
+  two.getBoundingClientRect = () => ({ left: 200, top: 200, width: 20, height: 20 });
+  const pointer = (element, type, props) => fireEvent(element, new MouseEvent(type, { bubbles: true, button: 0, ...props }));
+  const start = props => pointer(lane, 'pointerdown', { clientX: 90, clientY: 90, ...props });
+  const move = (x, y) => pointer(content, 'pointermove', { clientX: x, clientY: y });
+  start(); move(220, 220);
+  expect(screen.getByText('2 keys selected')).toBeInTheDocument();
+  expect(screen.getByTestId('keyframe-marquee')).toHaveStyle({ width: '130px', height: '130px' });
+  pointer(content, 'pointerup');
+  start({ altKey: true }); move(130, 130); pointer(content, 'pointerup');
+  expect(one).toHaveAttribute('aria-pressed', 'false'); expect(two).toHaveAttribute('aria-pressed', 'true');
+  start({ shiftKey: true }); move(130, 130); pointer(content, 'pointerup');
+  expect(screen.getByText('2 keys selected')).toBeInTheDocument();
+  start(); move(130, 130); fireEvent.keyDown(content, { key: 'Escape' });
+  expect(screen.getByText('2 keys selected')).toBeInTheDocument(); expect(screen.queryByTestId('keyframe-marquee')).toBeNull();
+  start(); pointer(content, 'pointercancel'); expect(screen.getByText('2 keys selected')).toBeInTheDocument();
+  expect(batch).not.toHaveBeenCalled();
+});

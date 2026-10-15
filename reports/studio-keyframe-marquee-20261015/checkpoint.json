@@ -1,0 +1,105 @@
+{
+  "createdAt": "2026-10-15T16:14:15.735Z",
+  "branch": "agent/studio-professional-continuation-v2",
+  "scope": "Native property-row marquee and compatible cross-layer animation paste on the existing canonical keys/history/preview/compiler/renderer.",
+  "sourceSha256": {
+    "frontend/src/components/StudioKeyframeActions.js": "440e21f6a2a83900f1948444515043d989b6d72fd2e589fd5d6225581492f4a2",
+    "frontend/src/components/StudioProTimeline.js": "dc9cc9cade20bb49365a8a416b3669eb22750572c9bb79412997d6b376f95aa4",
+    "frontend/src/components/StudioTimeline.css": "6eb8b98a2ac8fd6963b468ce6b0c269ae42fcd15b886b1d71c95a3d728a295db",
+    "frontend/src/components/ViralClipStudio.js": "c38bee5d097c0c458fda482dd537716ec5b8c3bab017d503238eab5883f65431",
+    "frontend/src/components/studioKeyframeSelection.js": "c4333bf5a7565f9ba0297de734fd9a528847818d7b8a5026c30452fe2b88211d",
+    "frontend/src/components/useStudioKeyframeMarquee.js": "a8cbf568f7d26e2a479e1c517eb76cd26efa461a1a9cd79e1422dc540046648b",
+    "frontend/src/components/__tests__/StudioProTimeline.test.js": "10f0d95a6cc9cdd72ce030cff2376568a0dca27a2f17507d82842234dd400466",
+    "frontend/src/components/__tests__/studioKeyframeSelection.test.js": "49ff522dca85af49f033a11f5bfbbca23741dbbc2919c2d922b3cee31b66edc9",
+    "scripts/studio-professional/keyframe-marquee-proof.js": "467e5172d46c42e0facc3bbda42cf3455098b5eefb0527c1253b57dfc20b67a6"
+  },
+  "projectId": "viral-project-e09695ba-cd91-40d2-a995-2d4d1a17b3f9",
+  "canonicalHash": "c90fa3d8204013fea0ec640c1ac3cd42fc7d5c058490943e3090dd806ad19587",
+  "nativeReceipt": "reports/studio-keyframe-marquee-20261015/proof/native-marquee-edit.json",
+  "nativeRectangleAcrossProperties": true,
+  "nativeAddSubtractCancel": true,
+  "nativeEdgeScrollPixels": 129,
+  "nativeSelectionLeavesCanonicalHashUnchanged": true,
+  "nativeTwoPropertyTimeScaleAndInterpolation": true,
+  "nativeDestinationCollisionAtomicity": true,
+  "nativeCrossLayerPasteUndoRedo": true,
+  "nativeDestinationTrackLock": true,
+  "nativeExactColdReopen": true,
+  "editableSourceShots": 11,
+  "editableGraphicLayers": 14,
+  "propertyKeys": 166,
+  "editedKeyTuplesInNativeCompositionPlan": 8,
+  "previewFinalDecisionTransport": true,
+  "wholePreviewFinalPictureSoundQualified": false,
+  "nativeCpuExports": 1,
+  "renderSeconds": 239.067,
+  "resubmittedExports": 0,
+  "fullDecodePassed": true,
+  "movieProbe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "24/1",
+        "nb_read_frames": "480"
+      },
+      {
+        "codec_name": "aac",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0",
+        "nb_read_frames": "938"
+      }
+    ],
+    "format": {
+      "duration": "20.000000"
+    }
+  },
+  "completeStudioPlayback": {
+    "duration": 20,
+    "time": 20,
+    "ended": true,
+    "width": 1280,
+    "height": 720,
+    "playbackRate": 1,
+    "decodedFrames": 486
+  },
+  "screenCapture": {
+    "captureSeconds": 20.15499997138977,
+    "screenFramesPerSecond": 19.3004217589774,
+    "movieFps": 24,
+    "encodedScreenRecordingFps": 24,
+    "sparseCapture": true,
+    "smoothPlaybackEvidence": false,
+    "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+  },
+  "fullTimelineAndPropertiesRecorded": true,
+  "recordingAudio": "Soundtrack muxed from the exact hash-verified export at the observed native playback-start offset; QA browser muted",
+  "artifactSha256": {
+    "reports/studio-keyframe-marquee-20261015/proof/editing-in-studio.mp4": "334446a19bf893cce8facbb9930d7abfa9155ba36edac9064bc287d4e6a3febc",
+    "reports/studio-keyframe-marquee-20261015/proof/animation/edited-in-studio.mp4": "d5869a73a1c37a5dfc4e90a8a989ac3b06bcac14bd5b2f2a6c84b201e9c93fdc",
+    "reports/studio-keyframe-marquee-20261015/proof/animation/final.mp4": "f1fecb87d9d665250f0a228c6ea5215baba7bbfd050c54b757ba09d7cfcc1ba3"
+  },
+  "frontendCasesPassed": 35,
+  "strictAppBuild": "PASS",
+  "workerCodeChanged": false,
+  "workerTestsRerun": false,
+  "fullStudioSuiteQualified": false,
+  "gpuJobs": 0,
+  "paidGpuRuntimeSeconds": 0,
+  "paidGpuCost": 0,
+  "ownedLocalQaStopped": true,
+  "qaShutdownReceipt": "reports/studio-keyframe-marquee-20261015/proof/qa-shutdown.json",
+  "readinessPromoted": false,
+  "creativeApproved": false,
+  "publicPromoted": false,
+  "nextTaskId": "S04",
+  "remainingBlockers": [
+    "Cross-project/OS clipboard interchange, freehand lasso, spatial interpolation and velocity handles are not qualified.",
+    "Native scope covers two ordinary text-property channels; compatibility/mixed locks have component coverage. Broad media, retiming, full raster/live soundtrack and human listening remain unqualified.",
+    "Existing S02 colour/ellipse/source-feature and audio differences, S03 source-occurrence/group ownership and broader model lifecycle remain open.",
+    "Screen capture averages19.30fps for a24fps movie; full ended playback does not establish smoothness."
+  ]
+}

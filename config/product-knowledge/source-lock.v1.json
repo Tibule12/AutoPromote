@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Property-timeline multi-key selection, atomic drag/nudge, original-owner clipboard paste, time scaling and batch interpolation/deletion now pass native history/cold/export/full Studio playback. Supporting Finish clock and source-motion performance fixes pass bounded native checks. Full colour/raster/live sound and cross-layer/marquee/spatial/velocity controls remain unqualified. No readiness or creative promotion.",
-  "reviewed_at": "2026-10-15T03:37:36.137Z",
-  "catalog_sha256": "e4a6022b973353ffd1fb65a1d6dd4263ffcb0c842bb8d3efd75db6628c6e7ede",
+  "reason": "Final review of native property marquee, cross-layer clipboard, graph/export binding, complete Studio playback and exact limits.",
+  "reviewed_at": "2026-10-15T16:14:51.368Z",
+  "catalog_sha256": "37de9d5870cd1060f68fd27c7dc72ce031bbf17f5d19f1e878830e41fbc4cf25",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "21851acaa9f2e19cff9872008892c058def91f26c02266368b2b66b14a1440c4"
+      "sha256": "001429b018c91da892eb0380be6cc7b5c11cf3939adc031688820b0d3ef43142"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/StudioKeyframeActions.js",
-      "sha256": "2f2cfa38207df88ee222f7e4d5665c04f3e3ebcbc40927fb026e5cc0d04ccb1e"
+      "sha256": "440e21f6a2a83900f1948444515043d989b6d72fd2e589fd5d6225581492f4a2"
     },
     {
       "path": "frontend/src/components/StudioKeyframeCurveEditor.js",
@@ -119,7 +119,7 @@
     },
     {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "504196572a90e2d41b10c6d96c0a386a343ec02a6d7b31acf2728d729787c712"
+      "sha256": "dc9cc9cade20bb49365a8a416b3669eb22750572c9bb79412997d6b376f95aa4"
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
@@ -127,7 +127,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "70c4604d515d811a41dbb28d511d0373198bcbf78cab7e1bce53029d0b01575b"
+      "sha256": "c38bee5d097c0c458fda482dd537716ec5b8c3bab017d503238eab5883f65431"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -175,7 +175,7 @@
     },
     {
       "path": "frontend/src/components/studioKeyframeSelection.js",
-      "sha256": "7abf0315b3df81ed2ab31b64085c8ac799ddb3e58ddf408a4b231a9d21e005d7"
+      "sha256": "c4333bf5a7565f9ba0297de734fd9a528847818d7b8a5026c30452fe2b88211d"
     },
     {
       "path": "frontend/src/components/studioLayerOrder.js",
@@ -222,6 +222,10 @@
       "sha256": "f1941d64ec4befe17f602a7831d41b054195af1e5513690699cc3492c0021e49"
     },
     {
+      "path": "frontend/src/components/useStudioKeyframeMarquee.js",
+      "sha256": "a8cbf568f7d26e2a479e1c517eb76cd26efa461a1a9cd79e1422dc540046648b"
+    },
+    {
       "path": "frontend/src/features/publishing/UnifiedPublisher.js",
       "sha256": "98d49e63ee467e017f16ec646dc3acae6731b6858a53b10a6a800d1e6965601e"
     },
@@ -254,12 +258,8 @@
       "sha256": "b3bece0fe3f653ef88368b3013fbe96ccfd13ed953efa3342fb89eb20186374b"
     },
     {
-      "path": "reports/studio-keyframe-selection-20261015/README.md",
-      "sha256": "544932bdc35e1dea2f9b84b1a2bb0a3d57f91221aba0d813964914d7a3dc6c43"
-    },
-    {
-      "path": "reports/studio-professional-group-keyframes-20261014/README.md",
-      "sha256": "22ba3b2940f6dbd2e171a4bab6a680370a7942acffff43e2844548beedc83f9c"
+      "path": "reports/studio-keyframe-marquee-20261015/README.md",
+      "sha256": "a888cec602780aa4cf5bd9fd0fb2fa4be1f4e28c3867f933d54772a581535e4e"
     },
     {
       "path": "reports/studio-professional-group-workflow-20261014/README.md",
@@ -379,11 +379,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "86f945607283f251f06a87611477084c21d4c21754b65f27777d2e1d0a513bff"
+      "sha256": "9ff34401183e34b15310ee421da0efc9696dd345718c6beee785d49513a48611"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "0a341d56c3054ce9df965f86d5a22ab73411262b36d98fd9efcc7036ed8cc1a2"
+      "sha256": "44c003a9282773b6c2a955164ac007e2c9dbe6ea4961303e1b03c714210c17d6"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
