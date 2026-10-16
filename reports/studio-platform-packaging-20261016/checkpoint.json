@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-16",
+  "evidence": "reports/studio-platform-packaging-20261016/README.md",
+  "checkpoint": "reports/studio-platform-packaging-20261016/checkpoint.json",
+  "branch": "agent/studio-professional-continuation-v2",
+  "normalSignedInUserFlow": true,
+  "apiReplay": false,
+  "databaseMutationOutsideApp": false,
+  "authBypass": false,
+  "headlessMuted": true,
+  "verifiedDestinationSchedules": 24,
+  "sourceHashesVerified": 24,
+  "postsPerPlatform": 4,
+  "platforms": [
+    "youtube",
+    "tiktok",
+    "instagram",
+    "linkedin",
+    "facebook",
+    "reddit"
+  ],
+  "timezone": "Africa/Johannesburg",
+  "firstLocalTime": "2026-10-16T20:15",
+  "lastLocalTime": "2026-10-16T23:20",
+  "retainedRecordingSchedules": 12,
+  "newDestinationSchedules": 12,
+  "newContentRecords": 6,
+  "reusedOwnedContentSchedules": 6,
+  "coffeeMutations": 0,
+  "coffeeIsolationCheckedAgainstOriginalIds": true,
+  "nativeMutationLedgers": 24,
+  "providerPublicationVerified": false,
+  "uploadCapEncountered": {
+    "used": 20,
+    "limit": 20,
+    "fileBlockedBeforeUpload": true
+  },
+  "ownedMediaSchedulingRepair": {
+    "normalAssetPicker": true,
+    "contentOwnerValidated": true,
+    "exactPlatformCopyAndTimes": true,
+    "distributionEntitlementsRetained": true,
+    "quotaOverride": false
+  },
+  "automatedChecks": {
+    "publisherWorkflow": 9,
+    "serverScheduleGuards": 7,
+    "strictNormalAppBuild": true
+  },
+  "cpuExports": 2,
+  "gpuJobs": 0,
+  "newRenderSubmissions": 2,
+  "duplicateRenderSubmissions": 0,
+  "recurringRepostsCreated": 0,
+  "autonomousDailyProductionInstalled": false,
+  "futureDaysQueued": false,
+  "dailyTargetConditionalOnQualifiedNewOutput": true,
+  "detailedTutorial": "Separate later round",
+  "creativeApproval": false,
+  "readinessPromoted": false,
+  "productionDeployment": false,
+  "mainMerge": false,
+  "remainingBlockers": [
+    "Future days need four distinct reviewed edits and platform packages; no autonomous creative-production runner was installed.",
+    "Provider publication requires the operating scheduler/worker and successful provider results.",
+    "Shared S04 spatial/path timing, S03 occurrence/group ownership and S02 whole live picture/sound/export latency remain open."
+  ],
+  "ownedQaServicesStopped": {
+    "at": "2026-10-16T17:58:42.193Z",
+    "ownedServices": [
+      {
+        "pid": 60310,
+        "role": "cpu-launcher",
+        "stopped": true
+      },
+      {
+        "pid": 96315,
+        "role": "api",
+        "stopped": true
+      },
+      {
+        "pid": 53903,
+        "role": "app",
+        "stopped": true
+      },
+      {
+        "pid": 60317,
+        "role": "cpu-worker",
+        "stopped": true
+      }
+    ],
+    "earlierOwnedApisStopped": [
+      53845,
+      95763
+    ],
+    "otherSessionsPreserved": true,
+    "gpuJobs": 0
+  }
+}

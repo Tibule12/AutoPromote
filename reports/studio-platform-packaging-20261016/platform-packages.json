@@ -1,0 +1,1443 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-16T17:13:43.291Z",
+  "timezone": "Africa/Johannesburg",
+  "intent": {
+    "postsPerPlatformPerDay": 4,
+    "platforms": [
+      "youtube",
+      "tiktok",
+      "instagram",
+      "linkedin",
+      "facebook",
+      "reddit"
+    ],
+    "destinationPostsPerDay": 24,
+    "startDate": "2026-10-16",
+    "ongoingConditionalOnQualifiedDailyOutput": true,
+    "reuseRejectedWork": false,
+    "coffeeChangesAllowed": false,
+    "detailedTutorial": "Separate future round",
+    "submissionFlow": "Normal signed-in Publisher and Queue controls only"
+  },
+  "dailySlots": {
+    "youtube": [
+      "09:00",
+      "13:00",
+      "17:00",
+      "21:15"
+    ],
+    "tiktok": [
+      "08:30",
+      "12:45",
+      "18:30",
+      "21:00"
+    ],
+    "instagram": [
+      "08:45",
+      "12:15",
+      "17:45",
+      "20:30"
+    ],
+    "linkedin": [
+      "08:15",
+      "11:15",
+      "14:15",
+      "17:15"
+    ],
+    "facebook": [
+      "09:15",
+      "13:15",
+      "18:00",
+      "20:45"
+    ],
+    "reddit": [
+      "10:30",
+      "14:00",
+      "18:45",
+      "22:00"
+    ]
+  },
+  "timingRationale": "Initial editorial test windows in the recorded SAST timezone, not analytics-backed best-time claims. Today starts late and uses staggered future evening slots.",
+  "futureDayPolicy": "Requires four distinct completed worthwhile stories, each with platform-specific copy and a visually reviewed full result/matching timeline. Unqualified slots stay empty.",
+  "posts": [
+    {
+      "postId": "cycling.youtube",
+      "storyId": "cycling",
+      "platform": "youtube",
+      "platforms": [
+        "youtube"
+      ],
+      "title": "Cycling video editing: varied cuts matched to music",
+      "description": "A cycling promo feels more deliberate when the shot lengths vary with the action. Watch the finished result beside the real cuts, title keys and sound lanes. The useful detail is the change in shot length, not a constant rapid-cut rhythm.\n\nWhich cut would you hold longer?\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Which cut would you hold longer?",
+      "audience": "Editors searching for a specific editing technique",
+      "problem": "Cycling footage can feel monotonous when every shot has the same duration.",
+      "hook": "A moving cycling edit plays beside visibly varied shot lengths and timed graphics.",
+      "payoff": "Show how varied cuts, title cues and separate sound lanes build a short promo rhythm.",
+      "proof": "The real capture exposes short and long source occurrences plus independently timed graphics/music/SFX lanes.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T18:15:00.000Z",
+      "localTime": "2026-10-16T20:15",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "luc32JOZG41vhTtHNMj1",
+      "existingContentId": "Idv8NQa3wmo1jr3XiKUy",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:27:51.913Z",
+      "mediaSha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:29:30.971Z",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "verifiedAt": "2026-10-16T17:29:40.439Z",
+      "schedules": [
+        {
+          "id": "luc32JOZG41vhTtHNMj1",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "youtube",
+          "startTime": "2026-10-16T18:15:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "cycling.tiktok",
+      "storyId": "cycling",
+      "platform": "tiktok",
+      "platforms": [
+        "tiktok"
+      ],
+      "title": "Good cycling clips. Why does the edit still drag?",
+      "description": "The shots are fine. Keeping the same pace all the way through is the part to question. Here is the result beside the actual cut lengths and sound cues.\n\nWhere would you let the ride breathe?\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Where would you let the ride breathe?",
+      "audience": "Creators whose short edits feel flat despite good source material",
+      "problem": "Cycling footage can feel monotonous when every shot has the same duration.",
+      "hook": "A moving cycling edit plays beside visibly varied shot lengths and timed graphics.",
+      "payoff": "Show how varied cuts, title cues and separate sound lanes build a short promo rhythm.",
+      "proof": "The real capture exposes short and long source occurrences plus independently timed graphics/music/SFX lanes.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T18:22:00.000Z",
+      "localTime": "2026-10-16T20:22",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "tlUNbQzNXrKxaKBY7fay",
+      "existingContentId": "Idv8NQa3wmo1jr3XiKUy",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:27:58.463Z",
+      "mediaSha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:30:25.492Z",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "verifiedAt": "2026-10-16T17:30:34.297Z",
+      "schedules": [
+        {
+          "id": "tlUNbQzNXrKxaKBY7fay",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "tiktok",
+          "startTime": "2026-10-16T18:22:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "cycling.instagram",
+      "storyId": "cycling",
+      "platform": "instagram",
+      "platforms": [
+        "instagram"
+      ],
+      "title": "Cycling reel pacing: cuts, type hits and sound cues",
+      "description": "Ride footage needs contrast: short action beats, longer moments and type that lands on purpose. The complete result stays visible alongside the layers that time it.\n\n#CyclingReels #VideoEditing #EditBreakdown\n\nSave the pacing idea for your next ride edit.\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Save the pacing idea for your next ride edit.",
+      "audience": "Reel editors and motion designers studying rhythm and typography",
+      "problem": "Cycling footage can feel monotonous when every shot has the same duration.",
+      "hook": "A moving cycling edit plays beside visibly varied shot lengths and timed graphics.",
+      "payoff": "Show how varied cuts, title cues and separate sound lanes build a short promo rhythm.",
+      "proof": "The real capture exposes short and long source occurrences plus independently timed graphics/music/SFX lanes.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T18:29:00.000Z",
+      "localTime": "2026-10-16T20:29",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "UUmvi1fKahqItL1I5CaX",
+      "existingContentId": "Idv8NQa3wmo1jr3XiKUy",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:28:04.882Z",
+      "mediaSha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:30:47.027Z",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "verifiedAt": "2026-10-16T17:30:56.111Z",
+      "schedules": [
+        {
+          "id": "UUmvi1fKahqItL1I5CaX",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "instagram",
+          "startTime": "2026-10-16T18:29:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "cycling.linkedin",
+      "storyId": "cycling",
+      "platform": "linkedin",
+      "platforms": [
+        "linkedin"
+      ],
+      "title": "Make short promo revisions easier to trace",
+      "description": "A useful editing structure keeps source cuts, titles, music and sound cues visible as separate decisions. This cycling demo shows the finished video beside that structure. It gives a reviewer something specific to discuss when the pacing needs changing; no time-saving benchmark is claimed.\n\nWhich part of a short promo usually creates the most revision work?\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Which part of a short promo usually creates the most revision work?",
+      "audience": "Content teams revising short promotional videos",
+      "problem": "Cycling footage can feel monotonous when every shot has the same duration.",
+      "hook": "A moving cycling edit plays beside visibly varied shot lengths and timed graphics.",
+      "payoff": "Show how varied cuts, title cues and separate sound lanes build a short promo rhythm.",
+      "proof": "The real capture exposes short and long source occurrences plus independently timed graphics/music/SFX lanes.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T18:36:00.000Z",
+      "localTime": "2026-10-16T20:36",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "57y9reOkPpt58URHdPgc",
+      "existingContentId": "Idv8NQa3wmo1jr3XiKUy",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:28:11.094Z",
+      "mediaSha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:31:09.679Z",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "verifiedAt": "2026-10-16T17:31:18.170Z",
+      "schedules": [
+        {
+          "id": "57y9reOkPpt58URHdPgc",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "linkedin",
+          "startTime": "2026-10-16T18:36:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "cycling.facebook",
+      "storyId": "cycling",
+      "platform": "facebook",
+      "platforms": [
+        "facebook"
+      ],
+      "title": "Great ride footage, but the finished video still drags?",
+      "description": "A short cycling video does not need every shot to be the same length. This example keeps the finished edit on screen with its cuts, titles and sound lanes so you can see where the pace changes.\n\nWhich moment deserves a longer shot?\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Which moment deserves a longer shot?",
+      "audience": "Creators turning everyday footage into an engaging short video",
+      "problem": "Cycling footage can feel monotonous when every shot has the same duration.",
+      "hook": "A moving cycling edit plays beside visibly varied shot lengths and timed graphics.",
+      "payoff": "Show how varied cuts, title cues and separate sound lanes build a short promo rhythm.",
+      "proof": "The real capture exposes short and long source occurrences plus independently timed graphics/music/SFX lanes.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T18:43:00.000Z",
+      "localTime": "2026-10-16T20:43",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "CUw7ofJ8U1ZtWoZsUvjx",
+      "existingContentId": "Idv8NQa3wmo1jr3XiKUy",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:28:17.598Z",
+      "mediaSha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:31:34.634Z",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "verifiedAt": "2026-10-16T17:31:46.244Z",
+      "schedules": [
+        {
+          "id": "CUw7ofJ8U1ZtWoZsUvjx",
+          "contentId": "Idv8NQa3wmo1jr3XiKUy",
+          "platform": "facebook",
+          "startTime": "2026-10-16T18:43:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "cycling.reddit",
+      "storyId": "cycling",
+      "platform": "reddit",
+      "platforms": [
+        "reddit"
+      ],
+      "title": "Cycling edit feedback: do the shorter cuts help, or rush the ride?",
+      "description": "I am sharing my own editing-tool development demo. The full result and its actual editing tracks stay visible together. I varied the source-shot lengths and timed the titles and sound cues separately.\n\nI would like feedback on one choice: does the change between short action cuts and longer shots give the ride enough breathing room?\n\nWhich cut would you change, and why?\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Which cut would you change, and why?",
+      "audience": "Editors discussing specific timing and composition decisions",
+      "problem": "Cycling footage can feel monotonous when every shot has the same duration.",
+      "hook": "A moving cycling edit plays beside visibly varied shot lengths and timed graphics.",
+      "payoff": "Show how varied cuts, title cues and separate sound lanes build a short promo rhythm.",
+      "proof": "The real capture exposes short and long source occurrences plus independently timed graphics/music/SFX lanes.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T18:50:00.000Z",
+      "localTime": "2026-10-16T20:50",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "ufaY8tyeucXTbSIxmbVc",
+      "existingContentId": "BgGqkwe2wyMsAZehE4Re",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:28:24.257Z",
+      "mediaSha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:31:58.776Z",
+      "contentId": "BgGqkwe2wyMsAZehE4Re",
+      "verifiedAt": "2026-10-16T17:32:09.975Z",
+      "schedules": [
+        {
+          "id": "ufaY8tyeucXTbSIxmbVc",
+          "contentId": "BgGqkwe2wyMsAZehE4Re",
+          "platform": "reddit",
+          "startTime": "2026-10-16T18:50:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "headphones.youtube",
+      "storyId": "headphones",
+      "platform": "youtube",
+      "platforms": [
+        "youtube"
+      ],
+      "title": "Headphones promo editing: sync cuts, titles and sound",
+      "description": "A short music-led promo needs more than a backing track. This demo shows the finished headphones edit beside its real source cuts, title keys and sound cues, so the timing choices are visible.\n\nWhich title or cut should land differently?\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Which title or cut should land differently?",
+      "audience": "Editors searching for a specific editing technique",
+      "problem": "A music-led promo can feel disconnected when text, cuts and sound land independently.",
+      "hook": "The complete headphones promo plays with its actual graphic keys and audio lanes visible.",
+      "payoff": "Make the relationship between the cut, title and sound cue visible so revisions can target the right layer.",
+      "proof": "The real capture contains separate source cuts, graphic keys, music and sound-effect clips.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T19:05:00.000Z",
+      "localTime": "2026-10-16T21:05",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "ckaxIofCGmqcw4cQTLMg",
+      "existingContentId": "vG5AugeyquVTpZP45sdv",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:28:30.426Z",
+      "mediaSha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:32:24.689Z",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "verifiedAt": "2026-10-16T17:32:36.647Z",
+      "schedules": [
+        {
+          "id": "ckaxIofCGmqcw4cQTLMg",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "youtube",
+          "startTime": "2026-10-16T19:05:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "headphones.tiktok",
+      "storyId": "headphones",
+      "platform": "tiktok",
+      "platforms": [
+        "tiktok"
+      ],
+      "title": "The music hits. Why does the edit still feel off?",
+      "description": "A good track cannot fix a title or cut that lands at the wrong moment. Here is the complete headphones edit with the actual visual and audio layers beside it.\n\nWhich moment feels most connected to the sound?\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Which moment feels most connected to the sound?",
+      "audience": "Creators whose short edits feel flat despite good source material",
+      "problem": "A music-led promo can feel disconnected when text, cuts and sound land independently.",
+      "hook": "The complete headphones promo plays with its actual graphic keys and audio lanes visible.",
+      "payoff": "Make the relationship between the cut, title and sound cue visible so revisions can target the right layer.",
+      "proof": "The real capture contains separate source cuts, graphic keys, music and sound-effect clips.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T19:12:00.000Z",
+      "localTime": "2026-10-16T21:12",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "I9bTI5rBmJRCNWVvhtLy",
+      "existingContentId": "vG5AugeyquVTpZP45sdv",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:28:36.947Z",
+      "mediaSha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:32:50.532Z",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "verifiedAt": "2026-10-16T17:32:59.349Z",
+      "schedules": [
+        {
+          "id": "I9bTI5rBmJRCNWVvhtLy",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "tiktok",
+          "startTime": "2026-10-16T19:12:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "headphones.instagram",
+      "storyId": "headphones",
+      "platform": "instagram",
+      "platforms": [
+        "instagram"
+      ],
+      "title": "Music-led reel editing: type timing meets sound design",
+      "description": "Cuts, type hits and accents need their own timing. This headphones concept keeps the full result visible with the layers behind it.\n\n#SoundDesign #MotionTypography #ReelEditing\n\nSave this visual-and-audio timing reference.\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Save this visual-and-audio timing reference.",
+      "audience": "Reel editors and motion designers studying rhythm and typography",
+      "problem": "A music-led promo can feel disconnected when text, cuts and sound land independently.",
+      "hook": "The complete headphones promo plays with its actual graphic keys and audio lanes visible.",
+      "payoff": "Make the relationship between the cut, title and sound cue visible so revisions can target the right layer.",
+      "proof": "The real capture contains separate source cuts, graphic keys, music and sound-effect clips.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T19:19:00.000Z",
+      "localTime": "2026-10-16T21:19",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "FfCKfvRYwY4AtoCPtt38",
+      "existingContentId": "vG5AugeyquVTpZP45sdv",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:28:43.446Z",
+      "mediaSha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:33:13.207Z",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "verifiedAt": "2026-10-16T17:33:23.172Z",
+      "schedules": [
+        {
+          "id": "FfCKfvRYwY4AtoCPtt38",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "instagram",
+          "startTime": "2026-10-16T19:19:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "headphones.linkedin",
+      "storyId": "headphones",
+      "platform": "linkedin",
+      "platforms": [
+        "linkedin"
+      ],
+      "title": "Keep picture, title and audio revisions separate",
+      "description": "When a short promo feels wrong, the revision may belong to the shot, the title or the sound cue. This headphones demo keeps those decisions separate and visible beside the finished video. The outcome is a clearer revision target, without claiming measured productivity gains.\n\nWhich layer is hardest to communicate in a review?\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Which layer is hardest to communicate in a review?",
+      "audience": "Content teams revising short promotional videos",
+      "problem": "A music-led promo can feel disconnected when text, cuts and sound land independently.",
+      "hook": "The complete headphones promo plays with its actual graphic keys and audio lanes visible.",
+      "payoff": "Make the relationship between the cut, title and sound cue visible so revisions can target the right layer.",
+      "proof": "The real capture contains separate source cuts, graphic keys, music and sound-effect clips.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T19:26:00.000Z",
+      "localTime": "2026-10-16T21:26",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "clOTO8PZ1v7UV5Fqlgc8",
+      "existingContentId": "vG5AugeyquVTpZP45sdv",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:28:49.538Z",
+      "mediaSha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:33:36.459Z",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "verifiedAt": "2026-10-16T17:33:45.397Z",
+      "schedules": [
+        {
+          "id": "clOTO8PZ1v7UV5Fqlgc8",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "linkedin",
+          "startTime": "2026-10-16T19:26:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "headphones.facebook",
+      "storyId": "headphones",
+      "platform": "facebook",
+      "platforms": [
+        "facebook"
+      ],
+      "title": "Ever picked a great song and still ended up with a flat video?",
+      "description": "The song is only one part of the edit. This headphones example shows the finished video together with its shots, moving titles and sound cues, so you can see what is timed separately.\n\nWhat would you move to make the edit feel better?\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "What would you move to make the edit feel better?",
+      "audience": "Creators turning everyday footage into an engaging short video",
+      "problem": "A music-led promo can feel disconnected when text, cuts and sound land independently.",
+      "hook": "The complete headphones promo plays with its actual graphic keys and audio lanes visible.",
+      "payoff": "Make the relationship between the cut, title and sound cue visible so revisions can target the right layer.",
+      "proof": "The real capture contains separate source cuts, graphic keys, music and sound-effect clips.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T19:33:00.000Z",
+      "localTime": "2026-10-16T21:33",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "SKFOB9Y79m6d6WcxdbJI",
+      "existingContentId": "vG5AugeyquVTpZP45sdv",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:28:57.173Z",
+      "mediaSha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:34:00.344Z",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "verifiedAt": "2026-10-16T17:34:10.365Z",
+      "schedules": [
+        {
+          "id": "SKFOB9Y79m6d6WcxdbJI",
+          "contentId": "vG5AugeyquVTpZP45sdv",
+          "platform": "facebook",
+          "startTime": "2026-10-16T19:33:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "headphones.reddit",
+      "storyId": "headphones",
+      "platform": "reddit",
+      "platforms": [
+        "reddit"
+      ],
+      "title": "Headphones promo feedback: which cut or title feels off the beat?",
+      "description": "This is my own editing-tool development demo, using licensed stock material. The actual result and editing tracks are visible together. The cuts, typography and sound cues are separate editable decisions.\n\nI am interested in the timing rather than a general app review: where does the picture stop feeling connected to the music?\n\nPlease point to one moment you would retime.\n\nDevelopment demo built in AutoPromote. Licensed stock footage and audio; concept brand, not a customer endorsement. The footage is not AI-generated.",
+      "cta": "Please point to one moment you would retime.",
+      "audience": "Editors discussing specific timing and composition decisions",
+      "problem": "A music-led promo can feel disconnected when text, cuts and sound land independently.",
+      "hook": "The complete headphones promo plays with its actual graphic keys and audio lanes visible.",
+      "payoff": "Make the relationship between the cut, title and sound cue visible so revisions can target the right layer.",
+      "proof": "The real capture contains separate source cuts, graphic keys, music and sound-effect clips.",
+      "media": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T19:40:00.000Z",
+      "localTime": "2026-10-16T21:40",
+      "timezone": "Africa/Johannesburg",
+      "existingScheduleId": "1qP0LfC0aA86kG0ZTfzC",
+      "existingContentId": "ZGziuRwPgIcx35etQGf5",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "copyVerified": true,
+      "copyUpdatedAt": "2026-10-16T17:29:02.962Z",
+      "mediaSha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "visualReview": {
+        "source": "Actual retained recording inspected at0.5,1.5,7,12seconds; complete result and real timeline remain visible; existing native full-playback evidence retained.",
+        "mediaChanged": false,
+        "reviewer": "Codex",
+        "wholeSmoothnessQualified": false
+      },
+      "rescheduledAt": "2026-10-16T17:34:25.503Z",
+      "contentId": "ZGziuRwPgIcx35etQGf5",
+      "verifiedAt": "2026-10-16T17:34:34.861Z",
+      "schedules": [
+        {
+          "id": "1qP0LfC0aA86kG0ZTfzC",
+          "contentId": "ZGziuRwPgIcx35etQGf5",
+          "platform": "reddit",
+          "startTime": "2026-10-16T19:40:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "masked-type.youtube",
+      "storyId": "masked-type",
+      "platform": "youtube",
+      "platforms": [
+        "youtube"
+      ],
+      "title": "Split text animation with editable masks and moving bands",
+      "description": "The fractured word is built from three masked title layers, rather than a flattened text movie. The result and its actual layer rows stay visible together.\n\nWhich band movement would you adjust?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Which band movement would you adjust?",
+      "audience": "Editors searching for a specific editing technique",
+      "problem": "A sliced text effect becomes hard to revise when the lettering is flattened into one video.",
+      "hook": "Fractured NOISE lettering plays while the real three-band text layers remain visible.",
+      "payoff": "Demonstrate separately editable masked text bands and their existing motion keys.",
+      "proof": "Three native title masks and their keys survive normal save/reopen/export; the actual recording contains those layer rows.",
+      "media": "reports/studio-platform-packaging-20261016/proof/recording-excerpt/type-bands-excerpt/final.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T19:55:00.000Z",
+      "localTime": "2026-10-16T21:55",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "visualReview": {
+        "date": "2026-10-16T17:42:48.187Z",
+        "fullVideoAndMatchingTimelineVisible": true,
+        "firstFrameAndTwoSecondSamplesReviewed": true,
+        "sourceExcerptStartSeconds": 5.6,
+        "seconds": 8.875
+      },
+      "submittedAt": "2026-10-16T17:42:56.034Z",
+      "contentId": "oZJMMgLQWLAL7ml9izlA",
+      "uploadAcknowledgedAt": "2026-10-16T17:43:17.147Z",
+      "submittedCaption": "The fractured word is built from three masked title layers, rather than a flattened text movie. The result and its actual layer rows stay visible together.\n\nWhich band movement would you adjust?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:43:21.789Z",
+      "schedules": [
+        {
+          "id": "GxnHHtll1OoMRAmJhnGb",
+          "contentId": "oZJMMgLQWLAL7ml9izlA",
+          "platform": "youtube",
+          "startTime": "2026-10-16T19:55:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "masked-type.tiktok",
+      "storyId": "masked-type",
+      "platform": "tiktok",
+      "platforms": [
+        "tiktok"
+      ],
+      "title": "What if the broken text stayed editable?",
+      "description": "The word splits into moving bands. Those bands are still text layers with their own masks and keys, and you can see them beside the full result.\n\nWhich movement would you keep?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Which movement would you keep?",
+      "audience": "Creators whose short edits feel flat despite good source material",
+      "problem": "A sliced text effect becomes hard to revise when the lettering is flattened into one video.",
+      "hook": "Fractured NOISE lettering plays while the real three-band text layers remain visible.",
+      "payoff": "Demonstrate separately editable masked text bands and their existing motion keys.",
+      "proof": "Three native title masks and their keys survive normal save/reopen/export; the actual recording contains those layer rows.",
+      "media": "reports/studio-platform-packaging-20261016/proof/recording-excerpt/type-bands-excerpt/final.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T20:02:00.000Z",
+      "localTime": "2026-10-16T22:02",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "visualReview": {
+        "date": "2026-10-16T17:42:48.188Z",
+        "fullVideoAndMatchingTimelineVisible": true,
+        "firstFrameAndTwoSecondSamplesReviewed": true,
+        "sourceExcerptStartSeconds": 5.6,
+        "seconds": 8.875
+      },
+      "submittedAt": "2026-10-16T17:43:31.130Z",
+      "contentId": "08vvIG3THfEBdCUAI80h",
+      "uploadAcknowledgedAt": "2026-10-16T17:43:48.459Z",
+      "submittedCaption": "The word splits into moving bands. Those bands are still text layers with their own masks and keys, and you can see them beside the full result.\n\nWhich movement would you keep?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:43:52.743Z",
+      "schedules": [
+        {
+          "id": "xeHqiOHZg2ZU9TnLiKoZ",
+          "contentId": "08vvIG3THfEBdCUAI80h",
+          "platform": "tiktok",
+          "startTime": "2026-10-16T20:02:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "masked-type.instagram",
+      "storyId": "masked-type",
+      "platform": "instagram",
+      "platforms": [
+        "instagram"
+      ],
+      "title": "Sliced type animation with editable text bands",
+      "description": "Masked typography, offset bands and an echo-wall pullback. The full result stays beside the real layers.\n\n#KineticTypography #MotionDesign #TypeAnimation\n\nSave the layer-based type idea.\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Save the layer-based type idea.",
+      "audience": "Reel editors and motion designers studying rhythm and typography",
+      "problem": "A sliced text effect becomes hard to revise when the lettering is flattened into one video.",
+      "hook": "Fractured NOISE lettering plays while the real three-band text layers remain visible.",
+      "payoff": "Demonstrate separately editable masked text bands and their existing motion keys.",
+      "proof": "Three native title masks and their keys survive normal save/reopen/export; the actual recording contains those layer rows.",
+      "media": "reports/studio-platform-packaging-20261016/proof/recording-excerpt/type-bands-excerpt/final.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T20:09:00.000Z",
+      "localTime": "2026-10-16T22:09",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "visualReview": {
+        "date": "2026-10-16T17:42:48.188Z",
+        "fullVideoAndMatchingTimelineVisible": true,
+        "firstFrameAndTwoSecondSamplesReviewed": true,
+        "sourceExcerptStartSeconds": 5.6,
+        "seconds": 8.875
+      },
+      "submittedAt": "2026-10-16T17:44:00.453Z",
+      "contentId": "FkHdIAY4KiWuRtpKURTk",
+      "uploadAcknowledgedAt": "2026-10-16T17:44:18.332Z",
+      "submittedCaption": "Sliced type animation with editable text bands\n\nMasked typography, offset bands and an echo-wall pullback. The full result stays beside the real layers.\n\n#KineticTypography #MotionDesign #TypeAnimation\n\nSave the layer-based type idea.\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:44:22.880Z",
+      "schedules": [
+        {
+          "id": "Po1tifSu0a50XkYzAZzJ",
+          "contentId": "FkHdIAY4KiWuRtpKURTk",
+          "platform": "instagram",
+          "startTime": "2026-10-16T20:09:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "masked-type.linkedin",
+      "storyId": "masked-type",
+      "platform": "linkedin",
+      "platforms": [
+        "linkedin"
+      ],
+      "title": "Keep animated type revisions at the layer level",
+      "description": "This typography demo preserves three independently masked text bands. A wording or timing revision can target those editable layers. The finished result is visible with its actual editing structure; this is not a measured speed comparison.\n\nWhat text revision tends to break your motion workflow?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "What text revision tends to break your motion workflow?",
+      "audience": "Content teams revising short promotional videos",
+      "problem": "A sliced text effect becomes hard to revise when the lettering is flattened into one video.",
+      "hook": "Fractured NOISE lettering plays while the real three-band text layers remain visible.",
+      "payoff": "Demonstrate separately editable masked text bands and their existing motion keys.",
+      "proof": "Three native title masks and their keys survive normal save/reopen/export; the actual recording contains those layer rows.",
+      "media": "reports/studio-platform-packaging-20261016/proof/recording-excerpt/type-bands-excerpt/final.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T20:16:00.000Z",
+      "localTime": "2026-10-16T22:16",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "visualReview": {
+        "date": "2026-10-16T17:42:48.188Z",
+        "fullVideoAndMatchingTimelineVisible": true,
+        "firstFrameAndTwoSecondSamplesReviewed": true,
+        "sourceExcerptStartSeconds": 5.6,
+        "seconds": 8.875
+      },
+      "submittedAt": "2026-10-16T17:52:32.491Z",
+      "preflightBlocked": {
+        "at": "2026-10-16T17:44:30.186Z",
+        "code": "UPLOAD_CAP_EXCEEDED",
+        "used": 20,
+        "limit": 20,
+        "fileNotUploaded": true,
+        "existingContentMutation": false
+      },
+      "reuseContentId": "FkHdIAY4KiWuRtpKURTk",
+      "reuseAssetTitle": "Sliced type animation with editable text bands",
+      "contentId": "FkHdIAY4KiWuRtpKURTk",
+      "scheduleAcknowledgedAt": "2026-10-16T17:52:40.360Z",
+      "reusedOwnedMedia": true,
+      "submittedCaption": "This typography demo preserves three independently masked text bands. A wording or timing revision can target those editable layers. The finished result is visible with its actual editing structure; this is not a measured speed comparison.\n\nWhat text revision tends to break your motion workflow?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:52:44.662Z",
+      "schedules": [
+        {
+          "id": "1Ru4QJJiRTpf7cLnGWnE",
+          "contentId": "FkHdIAY4KiWuRtpKURTk",
+          "platform": "linkedin",
+          "startTime": "2026-10-16T20:16:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "masked-type.facebook",
+      "storyId": "masked-type",
+      "platform": "facebook",
+      "platforms": [
+        "facebook"
+      ],
+      "title": "Ever made a text effect you could not easily change later?",
+      "description": "This word animation keeps the split bands as separate text layers. The full result and the actual layers are shown together.\n\nWhich part of the effect would you change first?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Which part of the effect would you change first?",
+      "audience": "Creators turning everyday footage into an engaging short video",
+      "problem": "A sliced text effect becomes hard to revise when the lettering is flattened into one video.",
+      "hook": "Fractured NOISE lettering plays while the real three-band text layers remain visible.",
+      "payoff": "Demonstrate separately editable masked text bands and their existing motion keys.",
+      "proof": "Three native title masks and their keys survive normal save/reopen/export; the actual recording contains those layer rows.",
+      "media": "reports/studio-platform-packaging-20261016/proof/recording-excerpt/type-bands-excerpt/final.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T20:23:00.000Z",
+      "localTime": "2026-10-16T22:23",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "visualReview": {
+        "date": "2026-10-16T17:42:48.188Z",
+        "fullVideoAndMatchingTimelineVisible": true,
+        "firstFrameAndTwoSecondSamplesReviewed": true,
+        "sourceExcerptStartSeconds": 5.6,
+        "seconds": 8.875
+      },
+      "reuseContentId": "FkHdIAY4KiWuRtpKURTk",
+      "reuseAssetTitle": "Sliced type animation with editable text bands",
+      "facebookDestination": {
+        "id": "123974150805178",
+        "name": "Tibule (ID: 123974150805178)"
+      },
+      "submittedAt": "2026-10-16T17:55:16.369Z",
+      "contentId": "FkHdIAY4KiWuRtpKURTk",
+      "scheduleAcknowledgedAt": "2026-10-16T17:55:20.396Z",
+      "reusedOwnedMedia": true,
+      "submittedCaption": "This word animation keeps the split bands as separate text layers. The full result and the actual layers are shown together.\n\nWhich part of the effect would you change first?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:55:24.813Z",
+      "schedules": [
+        {
+          "id": "GuUABrxBywfryTW1mvjf",
+          "contentId": "FkHdIAY4KiWuRtpKURTk",
+          "platform": "facebook",
+          "startTime": "2026-10-16T20:23:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "masked-type.reddit",
+      "storyId": "masked-type",
+      "platform": "reddit",
+      "platforms": [
+        "reddit"
+      ],
+      "title": "Sliced typography feedback: do the displaced bands still read clearly?",
+      "description": "I am sharing my own motion-design development demo. The word uses three native masked text layers; the recording shows the actual layers beside the full result.\n\nDoes the displacement support the idea, or do the fractures stay open too long?\n\nWhich transition needs a different hold?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Which transition needs a different hold?",
+      "audience": "Editors discussing specific timing and composition decisions",
+      "problem": "A sliced text effect becomes hard to revise when the lettering is flattened into one video.",
+      "hook": "Fractured NOISE lettering plays while the real three-band text layers remain visible.",
+      "payoff": "Demonstrate separately editable masked text bands and their existing motion keys.",
+      "proof": "Three native title masks and their keys survive normal save/reopen/export; the actual recording contains those layer rows.",
+      "media": "reports/studio-platform-packaging-20261016/proof/recording-excerpt/type-bands-excerpt/final.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T20:30:00.000Z",
+      "localTime": "2026-10-16T22:30",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "visualReview": {
+        "date": "2026-10-16T17:42:48.188Z",
+        "fullVideoAndMatchingTimelineVisible": true,
+        "firstFrameAndTwoSecondSamplesReviewed": true,
+        "sourceExcerptStartSeconds": 5.6,
+        "seconds": 8.875
+      },
+      "reuseContentId": "FkHdIAY4KiWuRtpKURTk",
+      "reuseAssetTitle": "Sliced type animation with editable text bands",
+      "redditDestination": "u_Tibule12",
+      "submittedAt": "2026-10-16T17:55:45.487Z",
+      "contentId": "FkHdIAY4KiWuRtpKURTk",
+      "scheduleAcknowledgedAt": "2026-10-16T17:55:49.770Z",
+      "reusedOwnedMedia": true,
+      "submittedCaption": "I am sharing my own motion-design development demo. The word uses three native masked text layers; the recording shows the actual layers beside the full result.\n\nDoes the displacement support the idea, or do the fractures stay open too long?\n\nWhich transition needs a different hold?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:55:54.467Z",
+      "schedules": [
+        {
+          "id": "hTne9P2hP2mc9WsXLktw",
+          "contentId": "FkHdIAY4KiWuRtpKURTk",
+          "platform": "reddit",
+          "startTime": "2026-10-16T20:30:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "five-words.youtube",
+      "storyId": "five-words",
+      "platform": "youtube",
+      "platforms": [
+        "youtube"
+      ],
+      "title": "Kinetic typography: give five words five different motion roles",
+      "description": "MAKE EVERY FRAME FEEL ALIVE: constructed letters, elastic timing, a film-gate frame, a travelling wave and a final resolve. The full result stays visible beside the real editing tracks. This is a result breakdown, not the detailed tutorial.\n\nWhich word has the strongest motion idea?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Which word has the strongest motion idea?",
+      "audience": "Editors searching for a specific editing technique",
+      "problem": "A five-word message feels repetitive when every word receives the same entrance animation.",
+      "hook": "The complete five-word result opens on a bold moving poster while its actual editable rows remain visible.",
+      "payoff": "Give MAKE, EVERY, FRAME, FEEL and ALIVE different motion roles, ending in one readable message.",
+      "proof": "Requires the new real native design, matching export and complete same-hash Studio playback before scheduling.",
+      "media": "reports/studio-five-words-20261016/proof/five-words/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T20:45:00.000Z",
+      "localTime": "2026-10-16T22:45",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "visualReview": {
+        "reviewer": "Codex",
+        "fullNativePlayback": true,
+        "matchingCanonicalBackup": true,
+        "frameSamples": 32,
+        "fullResultAndTimeline": true,
+        "screenCaptureFps": 17.85,
+        "playbackSmoothnessQualified": false
+      },
+      "submittedAt": "2026-10-16T17:37:17.448Z",
+      "contentId": "xi386OnrFHXC51zkKtXi",
+      "uploadAcknowledgedAt": "2026-10-16T17:37:35.133Z",
+      "verifiedAt": "2026-10-16T17:37:39.358Z",
+      "schedules": [
+        {
+          "id": "P7Tmda1F4wRdCU2CtFGm",
+          "contentId": "xi386OnrFHXC51zkKtXi",
+          "platform": "youtube",
+          "startTime": "2026-10-16T20:45:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "five-words.tiktok",
+      "storyId": "five-words",
+      "platform": "tiktok",
+      "platforms": [
+        "tiktok"
+      ],
+      "title": "Why give every word the same animation?",
+      "description": "Five words. Different jobs: build, stretch, frame, ripple and resolve. Watch the full result beside the real layers.\n\nWhich word needs the most work?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Which word needs the most work?",
+      "audience": "Creators whose short edits feel flat despite good source material",
+      "problem": "A five-word message feels repetitive when every word receives the same entrance animation.",
+      "hook": "The complete five-word result opens on a bold moving poster while its actual editable rows remain visible.",
+      "payoff": "Give MAKE, EVERY, FRAME, FEEL and ALIVE different motion roles, ending in one readable message.",
+      "proof": "Requires the new real native design, matching export and complete same-hash Studio playback before scheduling.",
+      "media": "reports/studio-five-words-20261016/proof/five-words/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T20:52:00.000Z",
+      "localTime": "2026-10-16T22:52",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "visualReview": {
+        "reviewer": "Codex",
+        "fullNativePlayback": true,
+        "matchingCanonicalBackup": true,
+        "frameSamples": 32,
+        "fullResultAndTimeline": true,
+        "screenCaptureFps": 17.85,
+        "playbackSmoothnessQualified": false
+      },
+      "submittedAt": "2026-10-16T17:38:15.649Z",
+      "contentId": "h1BSMZQbwhubgeXYu4ED",
+      "uploadAcknowledgedAt": "2026-10-16T17:38:34.276Z",
+      "verifiedAt": "2026-10-16T17:38:38.189Z",
+      "schedules": [
+        {
+          "id": "iRaaYzEmscm13jIzpYq4",
+          "contentId": "h1BSMZQbwhubgeXYu4ED",
+          "platform": "tiktok",
+          "startTime": "2026-10-16T20:52:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "five-words.instagram",
+      "storyId": "five-words",
+      "platform": "instagram",
+      "platforms": [
+        "instagram"
+      ],
+      "title": "Five-word kinetic type: construction, rhythm and resolve",
+      "description": "MAKE EVERY FRAME FEEL ALIVE. One phrase, with a distinct motion role for each word and a readable final composition. The full result and matching layers stay visible.\n\n#KineticType #MotionDesign #TypographyAnimation\n\nSave the motion study and tell me which transition holds up.\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Save the motion study and tell me which transition holds up.",
+      "audience": "Reel editors and motion designers studying rhythm and typography",
+      "problem": "A five-word message feels repetitive when every word receives the same entrance animation.",
+      "hook": "The complete five-word result opens on a bold moving poster while its actual editable rows remain visible.",
+      "payoff": "Give MAKE, EVERY, FRAME, FEEL and ALIVE different motion roles, ending in one readable message.",
+      "proof": "Requires the new real native design, matching export and complete same-hash Studio playback before scheduling.",
+      "media": "reports/studio-five-words-20261016/proof/five-words/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T20:59:00.000Z",
+      "localTime": "2026-10-16T22:59",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "visualReview": {
+        "reviewer": "Codex",
+        "fullNativePlayback": true,
+        "matchingCanonicalBackup": true,
+        "frameSamples": 32,
+        "fullResultAndTimeline": true,
+        "screenCaptureFps": 17.85,
+        "playbackSmoothnessQualified": false
+      },
+      "submittedAt": "2026-10-16T17:38:46.080Z",
+      "contentId": "bY10FJsWRrmvUbHxN3Sp",
+      "uploadAcknowledgedAt": "2026-10-16T17:39:06.190Z",
+      "submittedCaption": "Five-word kinetic type: construction, rhythm and resolve\n\nMAKE EVERY FRAME FEEL ALIVE. One phrase, with a distinct motion role for each word and a readable final composition. The full result and matching layers stay visible.\n\n#KineticType #MotionDesign #TypographyAnimation\n\nSave the motion study and tell me which transition holds up.\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:42:33.542Z",
+      "schedules": [
+        {
+          "id": "yfukhdimEADR4ei0UARP",
+          "contentId": "bY10FJsWRrmvUbHxN3Sp",
+          "platform": "instagram",
+          "startTime": "2026-10-16T20:59:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "five-words.linkedin",
+      "storyId": "five-words",
+      "platform": "linkedin",
+      "platforms": [
+        "linkedin"
+      ],
+      "title": "Keep a five-word motion piece open to revision",
+      "description": "The creative decision here is to give each word a different role while preserving separate letters, artwork and motion keys. The result and its actual editing structure remain visible together, so feedback can name a word or layer.\n\nWhich part would you revise before using it in a campaign?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Which part would you revise before using it in a campaign?",
+      "audience": "Content teams revising short promotional videos",
+      "problem": "A five-word message feels repetitive when every word receives the same entrance animation.",
+      "hook": "The complete five-word result opens on a bold moving poster while its actual editable rows remain visible.",
+      "payoff": "Give MAKE, EVERY, FRAME, FEEL and ALIVE different motion roles, ending in one readable message.",
+      "proof": "Requires the new real native design, matching export and complete same-hash Studio playback before scheduling.",
+      "media": "reports/studio-five-words-20261016/proof/five-words/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T21:06:00.000Z",
+      "localTime": "2026-10-16T23:06",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "visualReview": {
+        "reviewer": "Codex",
+        "fullNativePlayback": true,
+        "matchingCanonicalBackup": true,
+        "frameSamples": 32,
+        "fullResultAndTimeline": true,
+        "screenCaptureFps": 17.85,
+        "playbackSmoothnessQualified": false
+      },
+      "reuseContentId": "bY10FJsWRrmvUbHxN3Sp",
+      "reuseAssetTitle": "Five-word kinetic type: construction, rhythm and resolve",
+      "submittedAt": "2026-10-16T17:56:12.190Z",
+      "contentId": "bY10FJsWRrmvUbHxN3Sp",
+      "scheduleAcknowledgedAt": "2026-10-16T17:56:16.489Z",
+      "reusedOwnedMedia": true,
+      "submittedCaption": "The creative decision here is to give each word a different role while preserving separate letters, artwork and motion keys. The result and its actual editing structure remain visible together, so feedback can name a word or layer.\n\nWhich part would you revise before using it in a campaign?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:56:21.451Z",
+      "schedules": [
+        {
+          "id": "bN7owcrwMLu7uGbXggBJ",
+          "contentId": "bY10FJsWRrmvUbHxN3Sp",
+          "platform": "linkedin",
+          "startTime": "2026-10-16T21:06:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "five-words.facebook",
+      "storyId": "five-words",
+      "platform": "facebook",
+      "platforms": [
+        "facebook"
+      ],
+      "title": "Why can animated words still feel lifeless?",
+      "description": "A phrase needs more than the same entrance five times. This example gives each word its own movement, with the full video and its matching editing tracks visible together.\n\nWhich word brings the message to life?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Which word brings the message to life?",
+      "audience": "Creators turning everyday footage into an engaging short video",
+      "problem": "A five-word message feels repetitive when every word receives the same entrance animation.",
+      "hook": "The complete five-word result opens on a bold moving poster while its actual editable rows remain visible.",
+      "payoff": "Give MAKE, EVERY, FRAME, FEEL and ALIVE different motion roles, ending in one readable message.",
+      "proof": "Requires the new real native design, matching export and complete same-hash Studio playback before scheduling.",
+      "media": "reports/studio-five-words-20261016/proof/five-words/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T21:13:00.000Z",
+      "localTime": "2026-10-16T23:13",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "visualReview": {
+        "reviewer": "Codex",
+        "fullNativePlayback": true,
+        "matchingCanonicalBackup": true,
+        "frameSamples": 32,
+        "fullResultAndTimeline": true,
+        "screenCaptureFps": 17.85,
+        "playbackSmoothnessQualified": false
+      },
+      "reuseContentId": "bY10FJsWRrmvUbHxN3Sp",
+      "reuseAssetTitle": "Five-word kinetic type: construction, rhythm and resolve",
+      "facebookDestination": {
+        "id": "123974150805178",
+        "name": "Tibule (ID: 123974150805178)"
+      },
+      "submittedAt": "2026-10-16T17:56:40.551Z",
+      "contentId": "bY10FJsWRrmvUbHxN3Sp",
+      "scheduleAcknowledgedAt": "2026-10-16T17:56:45.133Z",
+      "reusedOwnedMedia": true,
+      "submittedCaption": "A phrase needs more than the same entrance five times. This example gives each word its own movement, with the full video and its matching editing tracks visible together.\n\nWhich word brings the message to life?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:56:50.105Z",
+      "schedules": [
+        {
+          "id": "oJD9eb56OGFcOqGbGDRG",
+          "contentId": "bY10FJsWRrmvUbHxN3Sp",
+          "platform": "facebook",
+          "startTime": "2026-10-16T21:13:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    },
+    {
+      "postId": "five-words.reddit",
+      "storyId": "five-words",
+      "platform": "reddit",
+      "platforms": [
+        "reddit"
+      ],
+      "title": "Five-word motion study: do the changing treatments feel connected?",
+      "description": "This is my own development demo: MAKE EVERY FRAME FEEL ALIVE. Each word has a different motion role, and the real editing structure is visible beside the full result.\n\nI am looking for specific motion feedback: do the construction, frame and wave sections feel like one piece? A detailed start-to-finish walkthrough is for a separate round.\n\nWhich transition would you rebuild?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "cta": "Which transition would you rebuild?",
+      "audience": "Editors discussing specific timing and composition decisions",
+      "problem": "A five-word message feels repetitive when every word receives the same entrance animation.",
+      "hook": "The complete five-word result opens on a bold moving poster while its actual editable rows remain visible.",
+      "payoff": "Give MAKE, EVERY, FRAME, FEEL and ALIVE different motion roles, ending in one readable message.",
+      "proof": "Requires the new real native design, matching export and complete same-hash Studio playback before scheduling.",
+      "media": "reports/studio-five-words-20261016/proof/five-words/edited-in-studio.mp4",
+      "format": {
+        "preserveFullVideo": true,
+        "preserveMatchingTimeline": true,
+        "allowCropOfVideoOrTimeline": false,
+        "currentRecordingAspect": "16:10",
+        "verticalPreference": "Use9:16 only when the entire video and readable timeline remain visible; preserve the real recording otherwise."
+      },
+      "scheduledAt": "2026-10-16T21:20:00.000Z",
+      "localTime": "2026-10-16T23:20",
+      "timezone": "Africa/Johannesburg",
+      "status": "SCHEDULED_VERIFIED_IN_APP",
+      "visualReviewed": true,
+      "queueVerified": true,
+      "mediaSha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "visualReview": {
+        "reviewer": "Codex",
+        "fullNativePlayback": true,
+        "matchingCanonicalBackup": true,
+        "frameSamples": 32,
+        "fullResultAndTimeline": true,
+        "screenCaptureFps": 17.85,
+        "playbackSmoothnessQualified": false
+      },
+      "reuseContentId": "bY10FJsWRrmvUbHxN3Sp",
+      "reuseAssetTitle": "Five-word kinetic type: construction, rhythm and resolve",
+      "redditDestination": "u_Tibule12",
+      "submittedAt": "2026-10-16T17:57:08.138Z",
+      "contentId": "bY10FJsWRrmvUbHxN3Sp",
+      "scheduleAcknowledgedAt": "2026-10-16T17:57:12.338Z",
+      "reusedOwnedMedia": true,
+      "submittedCaption": "This is my own development demo: MAKE EVERY FRAME FEEL ALIVE. Each word has a different motion role, and the real editing structure is visible beside the full result.\n\nI am looking for specific motion feedback: do the construction, frame and wave sections feel like one piece? A detailed start-to-finish walkthrough is for a separate round.\n\nWhich transition would you rebuild?\n\nAuthored typography and original sound in a development build of AutoPromote. This shows the result and its editable layers; a detailed start-to-finish walkthrough is for a separate post.",
+      "verifiedAt": "2026-10-16T17:57:16.557Z",
+      "schedules": [
+        {
+          "id": "04ul7N7Upe58HSoRqMQx",
+          "contentId": "bY10FJsWRrmvUbHxN3Sp",
+          "platform": "reddit",
+          "startTime": "2026-10-16T21:20:00.000Z",
+          "status": "pending",
+          "isActive": true,
+          "frequency": "once"
+        }
+      ],
+      "nativeUserFlow": true
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.22",
+  "knowledge_version": "1.0.23",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-16",
@@ -4450,8 +4450,8 @@
       "name": "Scheduling",
       "area": "Publishing",
       "status": "PARTIAL",
-      "summary": "Schedules or reposts eligible content through the existing account-linked pipeline. External delivery depends on current connection and platform constraints.",
-      "purpose": "Schedules or reposts eligible content through the existing account-linked pipeline. External delivery depends on current connection and platform constraints.",
+      "summary": "Schedules owned completed media through the existing account-linked pipeline. Scheduling an unchanged Project asset reuses its content record without consuming another content upload; platform and distribution limits still apply.",
+      "purpose": "Schedules owned completed media through the existing account-linked pipeline. Scheduling an unchanged Project asset reuses its content record without consuming another content upload; platform and distribution limits still apply.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
@@ -4468,7 +4468,7 @@
         "publishing.queue.load_more"
       ],
       "workflow": [
-        "Select an owned completed movie in Publisher and set the title and description.",
+        "Select an owned completed movie from Publisher’s Studio, Generated or Project assets, or upload a new file; set the title and description.",
         "Choose connected destinations, review platform-specific options and set a future date and time.",
         "Review the exact destinations and timing, then choose Schedule posts.",
         "Open Schedule and verify each requested platform has the intended pending schedule.",
@@ -4479,7 +4479,8 @@
       "limitations": [
         "Provider permissions, destination access and account allowance apply.",
         "An upload acknowledgement does not prove every schedule was created.",
-        "A pending schedule needs an operating scheduler and posting worker. Only a successful provider result confirms publication."
+        "A pending schedule needs an operating scheduler and posting worker. Only a successful provider result confirms publication.",
+        "Fresh uploads and edited replacement files still require upload allowance. Reusing stored media for a schedule does not increase new-content upload capacity."
       ],
       "common_errors": [
         {
@@ -4490,7 +4491,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-13",
+      "updated_at": "2026-10-16",
       "product_version": "1.2.0"
     },
     {

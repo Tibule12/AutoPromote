@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review ordinary static mask import and canonical tick boundary validation, denser title rasters with unchanged layout, native pressure-cut history/cold reopen/403-key compilation, same-job movie recovery and complete timeline playback. Preserve creative rejection, measured audio/capture limits and unchanged readiness.",
-  "reviewed_at": "2026-10-16T16:39:52.027Z",
-  "catalog_sha256": "6319399d69e1803717440c4683d444026595396859d9fef8969d7203c0f48140",
+  "reason": "Reviewed native five-word Studio delivery and 24 platform packages; documented unchanged owned-media scheduling without another upload while preserving ownership, platform and distribution entitlements. No readiness promotion.",
+  "reviewed_at": "2026-10-16T17:59:29.514Z",
+  "catalog_sha256": "6521d035111c85ef35272043ef8d30a27d1bcf07641e4d93a2d279d70d65244d",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -52,6 +52,10 @@
     {
       "path": "frontend/src/UserDashboardTabs/SchedulesPanel.js",
       "sha256": "1b19109a2961340c849083ab1a5294e68fb8c29c580a689fb0c58959a58b8c7a"
+    },
+    {
+      "path": "frontend/src/__tests__/UnifiedPublisher.release.test.js",
+      "sha256": "14b340167436f5bfac411e8df4278fb2f3b16c1985f6fda79a568b1180ba69a9"
     },
     {
       "path": "frontend/src/components/MultiCamCombiner.js",
@@ -259,7 +263,7 @@
     },
     {
       "path": "frontend/src/features/publishing/UnifiedPublisher.js",
-      "sha256": "98d49e63ee467e017f16ec646dc3acae6731b6858a53b10a6a800d1e6965601e"
+      "sha256": "678011af43f715d12af03af13f3bc975555f162c22ecd7ab5baff62c7ca4cd81"
     },
     {
       "path": "frontend/src/features/publishing/utils/publishingUtils.js",
@@ -307,7 +311,7 @@
     },
     {
       "path": "src/contentRoutes.js",
-      "sha256": "33fbd1e5ab786af8da3aa0b6d8903805e8ffa511d3cb73f6da96144a8f5543b6"
+      "sha256": "8b11651b376a1fc08f66c5a5d83fdadbf68f6784a4bdae2415bd32b8caf66f9b"
     },
     {
       "path": "src/creativeTemplates/showcase.js",
@@ -414,12 +418,16 @@
       "sha256": "96b079ee8c986f17690a3928bdc40f46cdb7761998b24b44a94a80aa87f483b1"
     },
     {
+      "path": "test/content-existing-schedule.jest.test.js",
+      "sha256": "eb35e9b35ff30eaffd71f7d46dddc20376f7e064b8341e9f10499e6e5969d4b3"
+    },
+    {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "d0b594f69a1068fff6361dccd08ca1ea421c6e0b91c33e56f6a66817bad8c354"
+      "sha256": "5c0b1c74d24586444598d3e7a221b89cfe7a26f6ab3dbe4227cfe8517545884a"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "4b19e7872904d9204f81ac4cb0141549034b68c87725bf873ed498a1b23d3d2d"
+      "sha256": "2c256424b95fa49a2d242967185c02f329a232e93f555a8490f3f89eea2cd49b"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

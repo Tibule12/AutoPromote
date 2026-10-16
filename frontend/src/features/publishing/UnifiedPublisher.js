@@ -882,6 +882,14 @@ const UnifiedPublisher = ({
     }
 
     const platformScheduleTimesForPayload = platformScheduleTimes;
+    const reuseOwnedContent = !!scheduledTime && !!sourceAsset?.sourceContentId &&
+      !(fileToUpload instanceof Blob) && mediaUrl(fileToUpload) === sourceAsset.url &&
+      platforms.every(platform => {
+        const meta = getEffectiveMediaMetaForPlatform(platform);
+        return mediaUrl(getPlatformEffectiveData(platform).file) === sourceAsset.url &&
+          !meta.trimStart && !(meta.trimEnd && meta.trimEnd < (meta.duration || Infinity) - 0.001) &&
+          !meta.rotate && !meta.flipH && !meta.flipV && !meta.filter;
+      });
 
     if (scheduledTime) {
       const scheduledAtMs = Date.parse(scheduledTime);
@@ -922,7 +930,7 @@ const UnifiedPublisher = ({
       }
 
       setFeedbackMessage("Checking plan limits...");
-      await preflightUploadReadiness({
+      if (!reuseOwnedContent) await preflightUploadReadiness({
         token,
         platforms,
         scheduledTime: scheduledTime ? new Date(scheduledTime).toISOString() : null,
@@ -1118,7 +1126,18 @@ const UnifiedPublisher = ({
         },
       };
 
-      if (onUpload) {
+      if (reuseOwnedContent) {
+        const response = await fetch(`${API_ENDPOINTS.MY_CONTENT.replace(/\/my-content$/, "")}/${encodeURIComponent(sourceAsset.sourceContentId)}/promotion-schedules`, {
+          method: "POST",
+          headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}`, "Content-Type": "application/json" }),
+          body: JSON.stringify({ time: scheduledTime, frequency, timezone: deliveryTimezone,
+            platforms, platformTimes: platformScheduleTimesForPayload, platformOptions: platformOptionsMap }),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw Object.assign(new Error(result.error || "Scheduling failed."), { code: result.code, context: result.context });
+        setFeedbackMessage(`${label} scheduled from your existing media. Check Queue for delivery status.`);
+        toast.success("Existing media scheduled");
+      } else if (onUpload) {
         const result = await onUpload(uploadParams);
         if (result?.ok === false) throw new Error(result.error || "Submission failed.");
         setFeedbackMessage(`${label} submitted. Check Schedule for delivery status.`);

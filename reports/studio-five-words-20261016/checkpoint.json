@@ -1,0 +1,140 @@
+{
+  "projectId": "viral-project-6df914df-68ac-47dd-9cfd-18bbbec43df0",
+  "canonicalHash": "30204699ca875856dbdf9188ef7d0f345b7434d48a7e3de169666218c232591d",
+  "layers": 41,
+  "groups": 1,
+  "keys": 539,
+  "seconds": 16,
+  "nativeImportUndoRedo": true,
+  "nativeTitleColorEditUndo": true,
+  "exactColdReopen": true,
+  "nativeControlsOnly": true,
+  "graphInjection": false,
+  "unrelatedFootageReferences": false,
+  "gpuJobs": 0,
+  "date": "2026-10-16",
+  "evidence": "reports/studio-five-words-20261016/README.md",
+  "checkpoint": "reports/studio-five-words-20261016/checkpoint.json",
+  "branch": "agent/studio-professional-continuation-v2",
+  "scope": "Five-word authored motion graphics through normal Studio controls, canonical export and complete matching timeline playback.",
+  "canonicalHashBeforeAssetMaterialization": "d026c344a2bf38cbc6040e31506525f8fad6b1a1208cb5e6f3c942adcecdc1c2",
+  "outputSha256": "266a94d0b9835ed77b4a878931cccc066fded61719a7c5b91dd4b96af11977c0",
+  "submittedJobId": "viral_351ca808a8e264a795a1df4a91658e838270b26ff2d8acd0d44bde8bd9258c99",
+  "exactCompiledKeyTuples": 539,
+  "newRenderSubmissions": 1,
+  "duplicateRecoverySubmissions": 0,
+  "paidGpuCost": 0,
+  "nativeFullMoviePlayback": true,
+  "nativeEditableBackup": true,
+  "nativeRecordingCapture": {
+    "captureSeconds": 16.188000202178955,
+    "screenFramesPerSecond": 17.852730194622787,
+    "movieFps": 24,
+    "encodedScreenRecordingFps": 24,
+    "sparseCapture": true,
+    "smoothPlaybackEvidence": false,
+    "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+  },
+  "recordingAudio": "Soundtrack muxed from the exact hash-verified export at the observed native playback-start offset; QA browser muted",
+  "recordingIndependentFullDecode": true,
+  "recordingTechnical": {
+    "width": 1600,
+    "height": 1000,
+    "seconds": 16.333333,
+    "videoFrames": 392,
+    "fps": 24,
+    "audioChannels": 2,
+    "audioSampleRate": 48000
+  },
+  "movie": "reports/studio-five-words-20261016/proof/five-words/final.mp4",
+  "studioRecording": "reports/studio-five-words-20261016/proof/five-words/edited-in-studio.mp4",
+  "projectBackup": "reports/studio-five-words-20261016/proof/MAKE-EVERY-FRAME-FEEL-ALIVE.autopromote.json",
+  "technical": {
+    "passed": true,
+    "sha256": "266a94d0b9835ed77b4a878931cccc066fded61719a7c5b91dd4b96af11977c0",
+    "bytes": 1380654,
+    "seconds": 16,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "16.000000",
+      "frameCount": 384,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "16.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 768000,
+      "sampleRate": 48000,
+      "seconds": 16,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-five-words-20261016/proof/five-words/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "renderWallSeconds": 547.185,
+  "livePosesInspected": 14,
+  "sampledFinalFrames": 32,
+  "frameSampling": "Exact decoded frames 0,12,...372 at 24fps.",
+  "nativeMusicGain": 0.6,
+  "finalMeasuredLufs": -19.13,
+  "finalTruePeakDbtp": -5.37,
+  "noProductRuntimeChange": true,
+  "wholePreviewFinalParityQualified": false,
+  "humanListeningReview": false,
+  "liveAudioQualified": false,
+  "creativeApproval": false,
+  "readinessPromoted": false,
+  "productionDeployment": false,
+  "mainMerge": false,
+  "remainingBlockers": [
+    "Whole continuous live-preview/final picture, live sound/human listening and screen smoothness remain unqualified.",
+    "S04 spatial tangents, editable vector paths and range selectors; S03 occurrence/group ownership; S02 picture/sound/export latency remain open.",
+    "The clean ink source supplies the programme clock. Imported artwork rasterizes. Creative quality still requires user review."
+  ],
+  "nextTaskIds": [
+    "S04",
+    "S03",
+    "S02"
+  ],
+  "ownedQaServicesStopped": {
+    "at": "2026-10-16T17:58:42.193Z",
+    "ownedServices": [
+      {
+        "pid": 60310,
+        "role": "cpu-launcher",
+        "stopped": true
+      },
+      {
+        "pid": 96315,
+        "role": "api",
+        "stopped": true
+      },
+      {
+        "pid": 53903,
+        "role": "app",
+        "stopped": true
+      },
+      {
+        "pid": 60317,
+        "role": "cpu-worker",
+        "stopped": true
+      }
+    ],
+    "earlierOwnedApisStopped": [
+      53845,
+      95763
+    ],
+    "otherSessionsPreserved": true,
+    "gpuJobs": 0
+  }
+}

@@ -1,6 +1,6 @@
 # Publishing
 
-Development documentation • product 1.2.0 • knowledge 1.0.22 • 2026-10-16
+Development documentation • product 1.2.0 • knowledge 1.0.23 • 2026-10-16
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -48,7 +48,7 @@ Connects supported platform accounts through existing permissions. Displayed pla
 
 ID: `publishing.schedule` • **PARTIAL** • DETERMINISTIC
 
-Schedules or reposts eligible content through the existing account-linked pipeline. External delivery depends on current connection and platform constraints.
+Schedules owned completed media through the existing account-linked pipeline. Scheduling an unchanged Project asset reuses its content record without consuming another content upload; platform and distribution limits still apply.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -60,7 +60,7 @@ Schedules or reposts eligible content through the existing account-linked pipeli
 
 **Workflow**
 
-1. Select an owned completed movie in Publisher and set the title and description.
+1. Select an owned completed movie from Publisher’s Studio, Generated or Project assets, or upload a new file; set the title and description.
 2. Choose connected destinations, review platform-specific options and set a future date and time.
 3. Review the exact destinations and timing, then choose Schedule posts.
 4. Open Schedule and verify each requested platform has the intended pending schedule.
@@ -75,6 +75,7 @@ Schedules or reposts eligible content through the existing account-linked pipeli
 - Provider permissions, destination access and account allowance apply.
 - An upload acknowledgement does not prove every schedule was created.
 - A pending schedule needs an operating scheduler and posting worker. Only a successful provider result confirms publication.
+- Fresh uploads and edited replacement files still require upload allowance. Reusing stored media for a schedule does not increase new-content upload capacity.
 
 **Common errors**
 
