@@ -1,7 +1,7 @@
 // An interchange authoring operation, not a second animation runtime. Imported
 // graphics become ordinary layers, groups and property keys immediately.
 import { sanitizeLogoSvg } from './motion/sanitizeLogoSvg';
-import { GROUP_KIND, GROUP_TRANSFORM, GROUP_BOUNDS, studioGroupTree, validateStudioGroupKeyframes } from './studioGroups';
+import { GROUP_KIND, GROUP_TRANSFORM, GROUP_BOUNDS, studioGroupTree, validateStudioGroupKeyframes, validateStudioGroupComposite } from './studioGroups';
 
 const number = (value, low, high, label) => {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < low || value > high)
@@ -42,7 +42,11 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
     for (const key of rows) {
       only(key, ['property', 'time', 'value', 'easing', 'curve'], 'keyframe');
       if (!limits[key.property] || !easings.includes(key.easing)) throw Error('Unsupported property or interpolation.');
-      number(key.time, start, end, 'Key time'); number(key.value, ...limits[key.property], 'Key value');
+      // Compare on the document's timebase. Decimal start + duration can land
+      // just below its exact end key (for example 1.445 + 2.405 versus 3.85).
+      number(key.time, 0, Number.MAX_VALUE, 'Key time');
+      number(Math.round(key.time * 90000), Math.round(start * 90000), Math.round(end * 90000), 'Key time tick');
+      number(key.value, ...limits[key.property], 'Key value');
       const stamp = `${key.property}:${tick(key.time)}`;
       if (times.has(stamp)) throw Error('A property has two keys at the same time.'); times.add(stamp);
       if (key.easing === 'bezier') {
@@ -61,10 +65,11 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
   };
   const cleanLayers = input.layers.map(layer => {
     only(layer, ['id', 'name', 'type', 'text', 'svg', 'startTime', 'duration', 'x', 'y', 'scale', 'rotation', 'opacity',
-      'width', 'height', 'fontWeight', 'color', 'textAlign', 'strokeWidth', 'strokeColor', 'keys'], 'layer');
+      'width', 'height', 'fontWeight', 'color', 'textAlign', 'strokeWidth', 'strokeColor', 'mask', 'keys'], 'layer');
     identity(layer);
     for (const [property, limits] of Object.entries(bounds)) number(layer[property], ...limits, property);
     number(layer.width, 1, 100, 'Layer width');
+    if (layer.mask !== undefined) validateStudioGroupComposite({ mask: layer.mask });
     if (layer.type === 'text') {
       text(layer.text, 500, 'title text'); color(layer.color);
       if (layer.strokeColor !== undefined) color(layer.strokeColor);
@@ -83,7 +88,8 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
     return { ...layer, svg: sanitizeLogoSvg(layer.svg) };
   });
   const cleanGroups = input.groups.map(group => {
-    only(group, ['id', 'name', 'layerIds', 'startTime', 'duration', 'keys'], 'group'); identity(group, GROUP_BOUNDS);
+    only(group, ['id', 'name', 'layerIds', 'startTime', 'duration', 'mask', 'keys'], 'group'); identity(group, GROUP_BOUNDS);
+    if (group.mask !== undefined) validateStudioGroupComposite({ mask: group.mask });
     if (!Array.isArray(group.layerIds) || !group.layerIds.length) throw Error('Groups need ordinary layer members.');
     for (const id of group.layerIds) {
       if (!input.layers.some(layer => layer.id === id) || members.has(id)) throw Error('Each group member must be a unique ordinary layer.');
@@ -135,6 +141,7 @@ export async function buildStudioGraphicsPackage({ input, overlays, keyframes, c
     const groups = spec.groups.map(group => {
       addKeys(group);
       return { id: ids.get(group.id), name: group.name, kind: GROUP_KIND, transform: { ...GROUP_TRANSFORM },
+        ...(group.mask ? { mask: JSON.parse(JSON.stringify(group.mask)) } : {}),
         layerIds: group.layerIds.map(id => ids.get(id)), timing: { startTime: group.startTime, duration: group.duration } };
     });
     const next = { overlays: [...overlays, ...layers], keyframes: [...keyframes, ...keys],

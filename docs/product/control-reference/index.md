@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.21 • 2026-10-15
+Development documentation • product 1.2.0 • knowledge 1.0.22 • 2026-10-16
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -1835,7 +1835,7 @@ Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
 
 ID: `studio.graphics.import` • **PARTIAL**
 
-Imports an authored graphics JSON file as ordinary editable titles, image artwork, groups and transform keys.
+Imports authored graphics as ordinary editable titles, artwork, groups, static geometric masks and transform keys.
 
 Applies to: ordinary text layer, static SVG artwork. Requires: studio.titles, studio.keyframes.
 
@@ -1844,6 +1844,7 @@ Applies to: ordinary text layer, static SVG artwork. Requires: studio.titles, st
 - Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.
 - Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate.
 - Optional title strokeWidth 0–8 and strokeColor hex fields use the ordinary title controls and CPU rasterizer.
+- Optional layer/group masks use the existing enabled, shape, percentage-polygon path, radius, feather and inversion fields. Masks remain editable in Composite; imported masks are static.
 
 <a id="studio-timeline-view"></a>
 

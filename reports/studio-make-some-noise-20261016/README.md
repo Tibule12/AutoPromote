@@ -1,5 +1,7 @@
 # MAKE SOME NOISE — kinetic poster
 
+The user rejected this version’s creative level on16October. Its project, movie and technical receipts remain retained; it is not a creatively accepted example.
+
 The user requested another word animation. This is a separate 12-second edit with acid yellow, deep blue and ink, a new original 120 BPM score and four typographic stages. The previous BREAK THE LOOP project and movie remain saved.
 
 MAKE assembles from four directions. SOME enters with alternating quarter turns and moving outlined poster repeats. NOISE uses a travelling letter accent and three separate meter graphics. The ending resolves into MAKE / SOME / NOISE. with a short sound-burst graphic and “YOUR VOICE. YOUR RULES.”.

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.21",
+  "knowledge_version": "1.0.22",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-15",
+  "updated_at": "2026-10-16",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -648,7 +648,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-15",
+      "updated_at": "2026-10-16",
       "product_version": "1.2.0"
     },
     {
@@ -9321,7 +9321,7 @@
       ],
       "label": "Import animated graphics",
       "status": "PARTIAL",
-      "meaning": "Imports an authored graphics JSON file as ordinary editable titles, image artwork, groups and transform keys.",
+      "meaning": "Imports authored graphics as ordinary editable titles, artwork, groups, static geometric masks and transform keys.",
       "constraints": {
         "type": "string",
         "minimum": null,
@@ -9348,9 +9348,10 @@
         "Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.",
         "Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.",
         "Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate.",
-        "Optional title strokeWidth 0–8 and strokeColor hex fields use the ordinary title controls and CPU rasterizer."
+        "Optional title strokeWidth 0–8 and strokeColor hex fields use the ordinary title controls and CPU rasterizer.",
+        "Optional layer/group masks use the existing enabled, shape, percentage-polygon path, radius, feather and inversion fields. Masks remain editable in Composite; imported masks are static."
       ],
-      "updated_at": "2026-10-15",
+      "updated_at": "2026-10-16",
       "product_version": "1.2.0"
     },
     {

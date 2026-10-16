@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed separate user-requested MAKE SOME NOISE native film, unchanged Studio implementation, exact293-key compilation, export/full timeline playback/backup and retained live-picture limits without readiness promotion.",
-  "reviewed_at": "2026-10-16T03:16:06.608Z",
-  "catalog_sha256": "4e2bb1bba15f8f997a24e32ca00c8661560e399be52ecee2eb08a694922926d5",
+  "reason": "Review ordinary static mask import and canonical tick boundary validation, denser title rasters with unchanged layout, native pressure-cut history/cold reopen/403-key compilation, same-job movie recovery and complete timeline playback. Preserve creative rejection, measured audio/capture limits and unchanged readiness.",
+  "reviewed_at": "2026-10-16T16:39:52.027Z",
+  "catalog_sha256": "6319399d69e1803717440c4683d444026595396859d9fef8969d7203c0f48140",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "9406922e13808b776b04fa8e5cee56d3f82e3040b40bfbb8c8fb3a870f104d66"
+      "sha256": "73b23cb3ae2df134cc878480cbaa46eeb76d3b2f4c7fb1c1fd9e0cf030d5f22f"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -183,7 +183,7 @@
     },
     {
       "path": "frontend/src/components/studioGraphicsPackage.js",
-      "sha256": "83ce505c821c095ced712b08045defd7f8699220b380b1ee9c915631a33949dd"
+      "sha256": "b3c7a875e846adeacedea9e407503d84ae71a108ae4a721d2cd43dd7ab240528"
     },
     {
       "path": "frontend/src/components/studioGroupTiming.js",
@@ -287,7 +287,7 @@
     },
     {
       "path": "python_media_worker/studio_text.py",
-      "sha256": "dd2a85c506c58246b8f933f4d77774c5e99e4845276ff4eb496c80030d32127c"
+      "sha256": "f5ab063a0654b12464fdf9d493683cc363f8f244141548f96aba1fdadfad13e3"
     },
     {
       "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
@@ -415,11 +415,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "7b51333b572a2521a563f0b1a987815695f5f128d74456d3cc692f54e2cb0098"
+      "sha256": "d0b594f69a1068fff6361dccd08ca1ea421c6e0b91c33e56f6a66817bad8c354"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "a29f43affd7cba65331f3f136e0edfac8fbe88af0cf2dcad1ce924cd8a50cbdd"
+      "sha256": "4b19e7872904d9204f81ac4cb0141549034b68c87725bf873ed498a1b23d3d2d"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

@@ -1,0 +1,16 @@
+{
+  "name": "MAKE SOME NOISE \u2014 pressure cut",
+  "duration": 14,
+  "layers": 40,
+  "groups": 5,
+  "keys": 403,
+  "maskedTextBands": 3,
+  "maskedRevealGroups": 1,
+  "concept": "Silence becomes pressure. The word rises through a shutter, compresses into a core, fractures into three editable text bands, expands into an echo wall, then resolves and returns to the opening signal.",
+  "palette": [
+    "#111113",
+    "#f4efe7",
+    "#ff4b24"
+  ],
+  "nativeImportRequired": true
+}

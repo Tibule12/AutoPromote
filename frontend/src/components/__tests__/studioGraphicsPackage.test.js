@@ -44,6 +44,18 @@ test('unknown fields, duplicate keys, out-of-range timing and foreign groups fai
   }
 });
 
+test('exact end keys use canonical ticks while keys a tick outside remain invalid', async () => {
+  const input = spec();
+  Object.assign(input.layers[0], { startTime: 1.445, duration: 2.405,
+    keys: [{ property: 'x', time: 3.85, value: 50, easing: 'linear' }] });
+  const result = await build(input);
+  expect(result.keys[0].time).toBe(3.85);
+  for (const time of [1.445 - 1 / 90000, 3.85 + 1 / 90000, NaN, Infinity]) {
+    input.layers[0].keys[0].time = time;
+    expect(() => validateStudioGraphicsPackage(input, { duration: 4, aspect: 16 / 9 })).toThrow();
+  }
+});
+
 test('SVG artwork uses the existing safe static sanitizer before decoding', () => {
   const input = spec(); input.layers.push({ ...artwork('safe'), svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><script>alert(1)</script><image href="https://external.example/track"/><circle cx="50" cy="50" r="20"/></svg>' });
   const validated = validateStudioGraphicsPackage(input, { duration: 4, aspect: 16 / 9 });
@@ -67,5 +79,19 @@ test('editable outline color and width survive import and canonical compilation'
   for(const invalid of [{strokeWidth:9},{strokeColor:'url(https://example.com)'}]) {
     Object.assign(input.layers[0],invalid);expect(()=>validateStudioGraphicsPackage(input,{duration:4,aspect:16/9})).toThrow();
     Object.assign(input.layers[0],{strokeWidth:3,strokeColor:'#f4efe6'});
+  }
+});
+
+test('ordinary layer and group masks survive import into the existing render graph',async()=>{
+  const input=spec(),mask={enabled:true,shape:'polygon',path:'polygon(0% 0%, 100% 0%, 100% 40%, 0% 40%)',feather:0,inverted:false};
+  input.layers[0].mask=mask;input.groups[0].mask={enabled:true,shape:'rectangle',radius:0,feather:1};
+  const result=await build(input);
+  const document=adaptStudioSnapshotToDocument({projectId:'masks',snapshot:{timeline:[{id:'shot',sourceClipId:'source',startRequest:0,endRequest:4,duration:4}],
+    overlays:result.overlays,motionKeyframes:result.keyframes,compoundClips:result.compounds,compositionOrder:result.order}});
+  const plan=compileStudioCompositionForRender(document);
+  expect(plan.layers.find(layer=>layer.id===result.layers[0].id).effects.mask).toEqual(mask);
+  expect(plan.groups[0].mask).toEqual(input.groups[0].mask);
+  for(const invalid of [{shape:'custom'},{path:'url(https://example.com)'},{feather:-1},{enabled:'yes'},{script:'x'}]){
+    input.layers[0].mask={...mask,...invalid};expect(()=>validateStudioGraphicsPackage(input,{duration:4,aspect:16/9})).toThrow();
   }
 });

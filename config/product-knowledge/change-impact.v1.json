@@ -744,6 +744,23 @@
         "reports/studio-break-loop-depth-20261015/README.md"
       ],
       "reason": "Remove inherited unrelated source material through native sequence replacement and unused-reference cleanup; depth choreography uses ordinary editable title outline color and motion keys. Preserve the user request for stronger creativity and separate native delivery from creative approval."
+    },
+    {
+      "feature_id": "studio.titles",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "TASKS",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/studioGraphicsPackage.js",
+        "python_media_worker/studio_text.py",
+        "reports/studio-noise-pressure-20261016/README.md"
+      ],
+      "reason": "User rejected the prior creative level. Import ordinary static layer/group masks for editable sliced typography and reveal windows, and retain title layout while rendering denser glyph assets for enlarged text. Technical evidence does not establish creative approval or broad picture parity."
     }
   ]
 }

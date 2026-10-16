@@ -7,7 +7,7 @@ import unittest
 import tempfile
 
 from python_media_worker.studio_text import render_title_asset
-from python_media_worker.studio_layer_motion import render_image_layer_motion
+from python_media_worker.studio_layer_motion import render_image_layer_motion, _render_pose
 
 
 def check_wrapped_weighted_title_preserves_outline_background_and_alignment(tmp_path):
@@ -53,6 +53,25 @@ def check_real_title_compositor_renders_timed_fades_and_keyframe_position(tmp_pa
 
 
 class StudioTextTests(unittest.TestCase):
+    def test_large_titles_keep_geometry_with_sharper_glyph_edges(self):
+        with tempfile.TemporaryDirectory() as temp:
+            results, geometry = [], []
+            for density in [1, 4]:
+                path = Path(temp)/f"density-{density}.png"
+                spec = {"type": "text", "text": "I", "fontWeight": 900, "color": "white", "shadow": "none"}
+                box = render_title_asset(spec, path, 1280, 720, raster_scale=density)
+                geometry.append(box)
+                pose = {"x": 50, "y": 50, "scale": 5, "rotation": 0, "opacity": 1, "crop_x": 0, "crop_y": 0}
+                frame = _render_pose(Image.open(path).convert("RGBA"), {**spec, **box},
+                    {"anchor_x": box["anchorX"], "anchor_y": box["anchorY"]}, pose, (1280, 720))
+                alpha = np.asarray(frame)[..., 3]
+                y, x = np.where(alpha > 127)
+                row = alpha[(y.min()+y.max())//2]
+                results.append(((x.min(), y.min(), x.max(), y.max()), int(((row > 10) & (row < 245)).sum())))
+            assert geometry[0] == geometry[1]
+            assert max(abs(a-b) for a,b in zip(results[0][0], results[1][0])) <= 1
+            assert results[1][1] <= results[0][1]*.5, results
+
     def test_styled_asset(self):
         with tempfile.TemporaryDirectory() as temp:
             check_wrapped_weighted_title_preserves_outline_background_and_alignment(Path(temp))

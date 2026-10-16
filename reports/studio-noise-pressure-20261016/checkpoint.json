@@ -1,0 +1,150 @@
+{
+  "projectId": "viral-project-15a353fe-c3c6-4112-890d-ade65ec4efcd",
+  "canonicalHash": "36457f190c267c70f0aeb9db58af051a240d79d65031287cc08a4d7c7f8ae3b1",
+  "layers": 40,
+  "groups": 5,
+  "keys": 403,
+  "seconds": 14,
+  "nativeImportUndoRedo": true,
+  "nativeGroupMaskEditUndo": true,
+  "exactColdReopen": true,
+  "nativeControlsOnly": true,
+  "graphInjection": false,
+  "unrelatedFootageReferences": false,
+  "gpuJobs": 0,
+  "date": "2026-10-16",
+  "evidence": "reports/studio-noise-pressure-20261016/README.md",
+  "checkpoint": "reports/studio-noise-pressure-20261016/checkpoint.json",
+  "branch": "agent/studio-professional-continuation-v2",
+  "scope": "User-requested stronger motion design through native editable masked type, group choreography and original event-timed sound; shared glyph-density and canonical end-key repairs.",
+  "canonicalHashBeforeAssetMaterialization": "4521696942f72fcfb35cf6da585e0e6887260090c2e4088a025b316f3a2b5e76",
+  "exactCompiledKeyTuples": 403,
+  "newRenderSubmissions": 1,
+  "duplicateRecoverySubmissions": 0,
+  "paidGpuCost": 0,
+  "livePosesInspected": 14,
+  "nativeMusicGain": 0.6,
+  "sourceMeasuredLufs": -16.74,
+  "sourceTruePeakDbtp": -1.24,
+  "automatedChecks": {
+    "frontend": 56,
+    "actualCpuTitle": 4,
+    "strictNormalAppBuild": true
+  },
+  "glyphSharpnessComparison": {
+    "densityBefore": 1,
+    "densityAfter": 4,
+    "partialEdgePixelsBefore": 14,
+    "partialEdgePixelsAfter": 4,
+    "maxGeometryDifferencePixels": 1,
+    "wholeGlyphParity": false
+  },
+  "staticNativeMasks": {
+    "textBands": 3,
+    "groupReveal": 1
+  },
+  "nativeImportRejectedThenCorrected": "An exact decimal end key was rejected before mutation; canonical90kHz comparisons repair the shared validator. Keys a tick outside remain rejected.",
+  "renderObserverDeadlineExpired": true,
+  "wholePreviewFinalParityQualified": false,
+  "humanListeningReview": false,
+  "liveAudioQualified": false,
+  "creativeApproval": false,
+  "creativeReviewStatus": "Prior film rejected by user. Replacement requires user creative review.",
+  "readinessPromoted": false,
+  "productionDeployment": false,
+  "mainMerge": false,
+  "remainingBlockers": [
+    "Whole continuous preview/final raster, live sound/listening and screen smoothness remain unqualified.",
+    "CPU composition outlasted its12-minute observer. The SAME owned job completes and recovers through normal Studio with zero duplicate submissions; export latency remains open.",
+    "S04 dedicated spatial tangents, editable vector paths and range selectors; S03 occurrence/group ownership; S02 picture/sound/export latency remain open.",
+    "The clean ink source supplies the programme clock. Artwork rasterizes on import; masks are static. The replacement requires user creative review."
+  ],
+  "nextTaskIds": [
+    "S04",
+    "S03",
+    "S02"
+  ],
+  "nextImplementationSlice": "User motion feedback; shared spatial/path timing and occurrence ownership, retaining S02 picture/sound and CPU export latency.",
+  "outputSha256": "8eb6422025d8d5e456ed7973f333d086a58df4916ac824f52f62465939782a53",
+  "submittedJobId": "viral_5551be5ba232445c0731c5172c4a4e2bbe41185944177eed5e00a1ae4f7f4408",
+  "nativeFullMoviePlayback": true,
+  "nativeEditableBackup": true,
+  "nativeRecordingCapture": {
+    "captureSeconds": 14.282999992370605,
+    "screenFramesPerSecond": 13.792620605281057,
+    "movieFps": 24,
+    "encodedScreenRecordingFps": 24,
+    "sparseCapture": true,
+    "smoothPlaybackEvidence": false,
+    "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+  },
+  "recordingAudio": "Soundtrack muxed from the exact hash-verified export at the observed native playback-start offset; QA browser muted",
+  "recordingIndependentFullDecode": true,
+  "movie": "reports/studio-noise-pressure-20261016/proof/noise-pressure/final.mp4",
+  "studioRecording": "reports/studio-noise-pressure-20261016/proof/noise-pressure/edited-in-studio.mp4",
+  "projectBackup": "reports/studio-noise-pressure-20261016/proof/NOISE-PRESSURE.autopromote.json",
+  "technical": {
+    "passed": true,
+    "sha256": "8eb6422025d8d5e456ed7973f333d086a58df4916ac824f52f62465939782a53",
+    "bytes": 1637584,
+    "seconds": 14,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "14.000000",
+      "frameCount": 336,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "14.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 672768,
+      "sampleRate": 48000,
+      "seconds": 14.016,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-noise-pressure-20261016/proof/noise-pressure/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "sampledFinalFrames": 56,
+  "frameSampling": "Exact decoded frames0,6,...330 at24fps, plus final frame335.",
+  "finalMeasuredLufs": -21.34,
+  "finalTruePeakDbtp": -5.15,
+  "recoveredThroughNativeSavedEntry": true,
+  "ownedQaServicesStopped": {
+    "ownedServices": [
+      {
+        "pid": 10170,
+        "role": "cpu-worker",
+        "stopped": true
+      },
+      {
+        "pid": 10163,
+        "role": "cpu-launcher",
+        "stopped": true
+      },
+      {
+        "pid": 10177,
+        "role": "api",
+        "stopped": true
+      },
+      {
+        "pid": 10295,
+        "role": "app",
+        "stopped": true
+      }
+    ],
+    "otherSessionsPreserved": true,
+    "gpuJobs": 0
+  },
+  "closingIrisBoundary": "Last decoded frame retains small orange corners around the returning signal; seamless looping is not qualified."
+}
