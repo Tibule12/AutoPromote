@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed native sequence replacement, unused media/key cleanup, title outline browser/CPU consumption, corrected same-graph motion delivery, exact backup/full Studio playback and unchanged readiness classifications.",
-  "reviewed_at": "2026-10-15T22:21:38.638Z",
+  "reason": "Reviewed separate user-requested MAKE SOME NOISE native film, unchanged Studio implementation, exact293-key compilation, export/full timeline playback/backup and retained live-picture limits without readiness promotion.",
+  "reviewed_at": "2026-10-16T03:16:06.608Z",
   "catalog_sha256": "4e2bb1bba15f8f997a24e32ca00c8661560e399be52ecee2eb08a694922926d5",
   "sources": [
     {
@@ -415,11 +415,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "1485d52c9dbf1e6d91bf74e33da895bb88898bf53e4c23703eea6077d11106c1"
+      "sha256": "7b51333b572a2521a563f0b1a987815695f5f128d74456d3cc692f54e2cb0098"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "9b22d83a2cbfdc1e7e3e7fd8f1bf3f7d62271743d96edc222515b9af806a79a0"
+      "sha256": "a29f43affd7cba65331f3f136e0edfac8fbe88af0cf2dcad1ce924cd8a50cbdd"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

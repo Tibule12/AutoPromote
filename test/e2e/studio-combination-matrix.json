@@ -5778,5 +5778,131 @@
       "gpuJobs": 0,
       "productionDeployment": false
     }
+  },
+  "professionalMakeSomeNoise20261016": {
+    "projectId": "viral-project-a7342cec-c150-4077-8be1-036b5c3aa491",
+    "canonicalHash": "7843190ab2dd3930e5eb01ab0452bc42bedd44e478fff775b757b7b22c67be3d",
+    "layers": 28,
+    "groups": 4,
+    "keys": 293,
+    "seconds": 12,
+    "nativeImportUndoRedo": true,
+    "nativeTitleColorEditUndo": true,
+    "exactColdReopen": true,
+    "nativeControlsOnly": true,
+    "graphInjection": false,
+    "unrelatedFootageReferences": false,
+    "gpuJobs": 0,
+    "date": "2026-10-16",
+    "evidence": "reports/studio-make-some-noise-20261016/README.md",
+    "checkpoint": "reports/studio-make-some-noise-20261016/checkpoint.json",
+    "branch": "agent/studio-professional-continuation-v2",
+    "scope": "User-requested separate MAKE SOME NOISE kinetic typography film through normal Studio import/edit/history/save/render/playback.",
+    "canonicalHashBeforeAssetMaterialization": "846c83b4536a324ef47e4ef59753432a1ffc8bc975126b8dd5afc361aee2de52",
+    "outputSha256": "06c3ea6b41e24413b8d15d40839bccc26e376fd58d407a16cf7978215a0f0fde",
+    "submittedJobId": "viral_109d43a3a66fee4b701ea31d13e9c623a8b77aa98616ca2946b4adf2ca944319",
+    "exactCompiledKeyTuples": 293,
+    "newRenderSubmissions": 1,
+    "duplicateRecoverySubmissions": 0,
+    "paidGpuCost": 0,
+    "nativeFullMoviePlayback": true,
+    "nativeEditableBackup": true,
+    "nativeRecordingCapture": {
+      "captureSeconds": 12.146000146865845,
+      "screenFramesPerSecond": 20.994565858440257,
+      "movieFps": 24,
+      "encodedScreenRecordingFps": 24,
+      "sparseCapture": true,
+      "smoothPlaybackEvidence": false,
+      "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+    },
+    "recordingAudio": "Soundtrack muxed from the exact hash-verified export at the observed native playback-start offset; QA browser muted",
+    "movie": "reports/studio-make-some-noise-20261016/proof/make-some-noise/final.mp4",
+    "studioRecording": "reports/studio-make-some-noise-20261016/proof/make-some-noise/edited-in-studio.mp4",
+    "projectBackup": "reports/studio-make-some-noise-20261016/proof/MAKE-SOME-NOISE.autopromote.json",
+    "technical": {
+      "passed": true,
+      "sha256": "06c3ea6b41e24413b8d15d40839bccc26e376fd58d407a16cf7978215a0f0fde",
+      "bytes": 826235,
+      "seconds": 12,
+      "video": {
+        "width": 1280,
+        "height": 720,
+        "codec": "h264",
+        "fps": "24/1",
+        "duration": "12.000000",
+        "frameCount": 288,
+        "pixelFormat": "yuv420p",
+        "encoder": "Lavc60.31.102 libx264"
+      },
+      "audio": {
+        "codec": "aac",
+        "channels": 2,
+        "sampleRate": "48000",
+        "duration": "12.000000"
+      },
+      "independentFullDecode": true,
+      "decodedAudio": {
+        "samples": 576512,
+        "sampleRate": 48000,
+        "seconds": 12.010666666666667,
+        "toleranceSeconds": 0.04466666666666667,
+        "passed": true
+      },
+      "contactSheet": "reports/studio-make-some-noise-20261016/proof/make-some-noise/final.mp4.frames.jpg",
+      "scope": "Technical only. Pixel and listening review are separate required evidence."
+    },
+    "livePosesInspected": 14,
+    "sampledFinalFrames": 48,
+    "normalAppBuild": "Unchanged strict normal App build from ab3a9499; no frontend/worker code changed for this request.",
+    "nativeImportRejectedThenCorrected": "SOME group member ordering was corrected in source before successful import; failed attempt retained.",
+    "wholePreviewFinalParityQualified": false,
+    "humanListeningReview": false,
+    "liveAudioQualified": false,
+    "creativeApproval": false,
+    "readinessPromoted": false,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "ownedQaServicesStopped": {
+      "ownedServices": [
+        {
+          "pid": 1027371,
+          "role": "cpu-worker",
+          "stopped": true
+        },
+        {
+          "pid": 1027364,
+          "role": "cpu-launcher",
+          "stopped": true
+        },
+        {
+          "pid": 1027440,
+          "role": "api",
+          "stopped": true
+        },
+        {
+          "pid": 1027527,
+          "role": "app",
+          "stopped": true
+        }
+      ],
+      "otherSessionsPreserved": true,
+      "gpuJobs": 0
+    },
+    "remainingBlockers": [
+      "Live8.6s screenshot has partial S/footer pixels; decoded final8.6s is complete. Reproduction and whole live-picture qualification remain open.",
+      "Whole continuous preview/final raster, live sound/listening and playback smoothness remain unqualified.",
+      "S04 dedicated spatial tangents, editable vector paths and range selectors; S03 occurrence/group ownership; S02 picture/sound/export latency remain open.",
+      "The ink source supplies the existing programme clock. Artwork is rasterized on import. The new film requires user creative review."
+    ],
+    "nextTaskIds": [
+      "S04",
+      "S03",
+      "S02"
+    ],
+    "nextImplementationSlice": "User motion feedback, then shared spatial/path timing and occurrence ownership, retaining S02 picture/sound and export latency work.",
+    "finalMeasuredLufs": -28.53,
+    "finalTruePeakDbtp": -13.34,
+    "nativeMusicGain": 0.25
   }
 }
