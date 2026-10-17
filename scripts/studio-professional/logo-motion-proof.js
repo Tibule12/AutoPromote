@@ -40,6 +40,31 @@ async function main(){
    console.log('Normal project duplicate and native component cleanup complete.');return;
   }
   await page.getByRole('button',{name,exact:true}).click();await h.rail(page);await pause(page);await seek(page,0);
+  if(action==='diamond-clearance'){
+   assert.equal(config.pieceStyle,'diamond');const before=await save(page,'before-diamond-clearance');
+   await q.tool(page,'Motion');await page.getByRole('button',{name:'Transform keyframes',exact:true}).click();
+   const edits=[];for(const layer of before.snapshot.overlays){
+    const ys=before.snapshot.motionKeyframes.filter(k=>k.targetId===layer.id&&k.property==='y').sort((a,b)=>a.time-b.time);
+    if(layer.name==='Construction / symbol ribbon 2')edits.push({layer,key:ys[0],value:18},{layer,key:ys[1],value:layer.y+4});
+    if(layer.name.startsWith('Wordmark pieces /'))for(const key of ys.slice(0,2)){
+     const value=Math.max(10,Math.min(56-layer.height*.6,key.value));if(value!==key.value)edits.push({layer,key,value});
+    }
+   }
+   for(let i=0;i<edits.length;i++){
+    const edit=edits[i];await page.getByText('Target layer',{exact:true}).locator('..').locator('select').selectOption({label:edit.layer.name});
+    await page.getByLabel('Curve keyframe',{exact:true}).selectOption(edit.key.id);
+    await page.getByLabel('Selected motion key value',{exact:true}).fill(String(edit.value));await page.getByLabel('Selected motion key value',{exact:true}).blur();
+    if(i===0){const changed=await save(page,'diamond-key-edited');await page.getByTestId('studio-undo-button').click();
+     assert.equal(decisions((await save(page,'diamond-key-undone')).snapshot.studioDocument),decisions(before.snapshot.studioDocument));
+     await page.getByTestId('studio-redo-button').click();assert.equal(decisions((await save(page,'diamond-key-redone')).snapshot.studioDocument),decisions(changed.snapshot.studioDocument));}
+   }
+   const final=await save(page,'diamond-clearance');for(const edit of edits)assert(Math.abs(final.snapshot.motionKeyframes.find(k=>k.id===edit.key.id).value-edit.value)<.0001);
+   assert.equal(final.snapshot.motionKeyframes.length,901);for(const t of [4.4,4.9,5.5]){await seek(page,t);await page.getByTestId('hook-preview-frame').screenshot({path:path.join(folder,`clearance-${t}.png`)});}
+   await page.reload();await page.getByRole('button',{name:'Viral Clip Studio',exact:true}).click();await page.getByRole('button',{name,exact:true}).click();await h.rail(page);await pause(page);
+   const cold=await save(page,'diamond-clearance-cold');assert.equal(hash(cold.snapshot.studioDocument),hash(final.snapshot.studioDocument));
+   fs.writeFileSync(path.join(folder,'native-clearance.json'),JSON.stringify({projectId:cold.id,canonicalHash:hash(cold.snapshot.studioDocument),nativeCurveKeyEdits:edits.length,nativeCurveEditUndoRedo:true,exactColdReopen:true,rendersSubmitted:renders},null,2));
+   assert.equal(renders,0);console.log('Native curve edits keep logo pieces above the settled words; history and cold reopen passed.');return;
+  }
   if(action==='type-weight'){
    assert(config.pieceConstruction);await q.tool(page,'Graphics');const before=await save(page,'before-weight-repair');
    const titles=before.snapshot.overlays.filter(o=>o.type==='text');assert.equal(titles.length,20);
@@ -124,7 +149,14 @@ async function main(){
    }
    await require('../creative-templates/materials-editing-proof').view(page,config.output);
    const download=page.waitForEvent('download');await page.getByRole('button',{name:'Download project backup',exact:true}).click();
-   await(await download).saveAs(path.join(folder,config.backupName));assert.equal(renders,0);return;
+   await(await download).saveAs(path.join(folder,config.backupName));
+   if(config.compareProjectHash){
+    const preserved=await page.evaluate(title=>new Promise((resolve,reject)=>{const r=indexedDB.open('autopromote-viral-studio',1);r.onerror=()=>reject(r.error);
+     r.onsuccess=()=>{const db=r.result,q=db.transaction('projects','readonly').objectStore('projects').getAll();q.onerror=()=>{db.close();reject(q.error);};q.onsuccess=()=>{db.close();resolve(q.result.find(p=>p.name===title));};};}),config.baseProject);
+    assert.equal(hash(preserved.snapshot.studioDocument),config.compareProjectHash);
+    fs.writeFileSync(path.join(folder,'comparison-source-preserved.json'),JSON.stringify({projectId:preserved.id,canonicalHash:config.compareProjectHash,originalNativeProjectPreserved:true,readOnlyObservation:true},null,2));
+   }
+   assert.equal(renders,0);return;
   }
   assert.equal(action,'design');
   assert(!await page.evaluate(()=>!!window.__E2E_BYPASS));
@@ -136,6 +168,7 @@ async function main(){
   if(config.pieceConstruction){
    await panel.getByRole('checkbox',{name:'Construct words from pieces',exact:true}).check();
    await panel.getByLabel('Logo wordmark slices',{exact:true}).fill(String(config.pieceColumns||11));
+   if(config.pieceStyle)await panel.getByLabel('Logo piece choreography',{exact:true}).selectOption(config.pieceStyle);
   }
   const stop=await recording(page);
   try{
@@ -147,7 +180,7 @@ async function main(){
     assert(built.snapshot.overlays.some(o=>o.name==='Mark / gradient symbol'));
     if(config.pieceConstruction){
      assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Wordmark pieces /')).length,2*(config.pieceColumns||11));
-     assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Words /')&&o.mask?.enabled).length,15);
+     assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Words /')&&o.mask?.enabled).length,config.pieceStyle==='diamond'?20:15);
     }else assert(built.snapshot.overlays.some(o=>o.name==='Mark / original gradient wordmark'));
     assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Construction / symbol ribbon')).length,3);
    }else assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Mark / image band')).length,3);
@@ -178,7 +211,7 @@ async function main(){
    actualReusableLogoControl:true,nativeBuildUndoRedo:true,nativeIndependentTaglineEditUndo:true,exactColdReopen:true,
    nativeControlsOnly:true,graphInjection:false,sourceImageSha256:hash(fs.readFileSync(path.join(base,'assets/AutoPromote-Gradient-Tech-Logo.png'))),
    originalGradientAndLetteringRetained:true,separateSymbolAndWordmark:!!config.separateBitmap,
-   nativePieceConstructionControl:!!config.pieceConstruction,nativeMusicVolume:.6,rendersSubmitted:renders};
+   nativePieceConstructionControl:!!config.pieceConstruction,nativePieceChoreography:config.pieceStyle||'spring',nativeMusicVolume:.6,rendersSubmitted:renders};
   assert.equal(renders,0);fs.writeFileSync(path.join(folder,'native-design.json'),JSON.stringify(geometry,null,2));
   const designFile=path.join(base,'design.json');
   const design=JSON.parse(fs.readFileSync(designFile));Object.assign(design,{layers:geometry.layers,groups:geometry.groups,keys:geometry.keys});fs.writeFileSync(designFile,JSON.stringify(design,null,2));

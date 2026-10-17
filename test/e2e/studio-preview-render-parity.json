@@ -6610,5 +6610,155 @@
       "playback": "reports/studio-logo-word-pieces-20261017/proof/word-piece-construction/studio-playback.json",
       "audio": "reports/studio-logo-word-pieces-20261017/proof/audio-review.json"
     }
+  },
+  "logoDiamondComparison20261017": {
+    "updatedAt": "2026-10-17T12:50:38.594Z",
+    "status": "ALTERNATE_NATIVE_LOGO_READY_FOR_OWNER_COMPARISON",
+    "versionA": {
+      "projectId": "viral-project-37e2dce7-a082-4816-8dcd-8229bee816d6",
+      "canonicalHash": "762af0d2f5729674324ffda98091bcb7cb6c91d4a61a34eda3424efc3b06b7d4",
+      "preservedNativeProjectAndMedia": true,
+      "movie": "reports/studio-logo-word-pieces-20261017/proof/word-piece-construction/final.mp4"
+    },
+    "versionB": {
+      "projectId": "viral-project-2329935a-ba63-4200-97fc-311da3c70760",
+      "canonicalHash": "8250857cb420d2f93f878c5399475f658659bef8cb04f75261923d38b9ecabbb",
+      "movie": "reports/studio-logo-diamond-cascade-20261017/proof/diamond-cascade/final.mp4",
+      "movieSha256": "576d188a7219e2d42db1a5c4c698c8b6859fc59dc0c4e8a78a69ccc59323c3d5",
+      "submittedJobId": "viral_e034672a6789bc8dd9918dd2ee3e56c9b2ecd6c09d498a451a14673800c6e492",
+      "seconds": 10,
+      "frames": 240,
+      "resolution": [
+        1280,
+        720
+      ],
+      "fps": 24,
+      "layers": 59,
+      "groups": 6,
+      "keys": 901,
+      "nativeWordmarkPieces": 22,
+      "nativeTriangularTextPieces": 20,
+      "backup": "reports/studio-logo-diamond-cascade-20261017/proof/AUTOPROMOTE-DIAMOND-CASCADE.autopromote.json",
+      "backupSha256": "76333277fa5416b4094ee0fd5e36a9f1da5e895cc868059a7acc6a7efc0e2f14"
+    },
+    "actualNativeChoreographySelector": true,
+    "ordinaryNativeLayersAndKeys": true,
+    "nativeBuildUndoRedo": true,
+    "nativeIndependentTitleEditUndo": true,
+    "exactColdReopen": true,
+    "allCompiledKeysAndMasksExact": true,
+    "oneAcceptedCpuJob": true,
+    "fullNativeFinishedPlayback": true,
+    "completeMatchingStudioRecording": "reports/studio-logo-diamond-cascade-20261017/proof/diamond-cascade/edited-in-studio.mp4",
+    "screenCaptureFps": 18.03844261646683,
+    "exactFreshNativeBackupRestore": true,
+    "nativeClearance": {
+      "projectId": "viral-project-2329935a-ba63-4200-97fc-311da3c70760",
+      "canonicalHash": "96725691cdc4e123bbbcd06b9943ef402320efd9258c7f59f2ab497e437bcf30",
+      "nativeCurveKeyEdits": 19,
+      "nativeCurveEditUndoRedo": true,
+      "exactColdReopen": true,
+      "rendersSubmitted": 0
+    },
+    "audio": {
+      "movieSha256": "576d188a7219e2d42db1a5c4c698c8b6859fc59dc0c4e8a78a69ccc59323c3d5",
+      "sourceReference": "assets/identity-diamond.wav",
+      "workingSource": "assets/identity-diamond.m4a",
+      "sourceCorrelation": 0.9978621046268602,
+      "expectedNativeGain": 0.6,
+      "observedNativeGain": 0.5954818892787775,
+      "sampleRate": 48000,
+      "stereo": true,
+      "measuredIntegratedLufs": -24.17,
+      "measuredTruePeakDbtp": -6.32,
+      "measuredLoudnessRangeLu": 6.6,
+      "humanListening": false
+    },
+    "visual": {
+      "movieSha256": "576d188a7219e2d42db1a5c4c698c8b6859fc59dc0c4e8a78a69ccc59323c3d5",
+      "canonicalHash": "8250857cb420d2f93f878c5399475f658659bef8cb04f75261923d38b9ecabbb",
+      "actualMovieContactSheetViewed": true,
+      "actualLiveAssemblyPosesViewed": true,
+      "nativeRecordingMidpointViewed": true,
+      "allFiveWordGroupsVisible": true,
+      "allSixDiamondLayersVisible": true,
+      "musicAndSourceTracksVisible": true,
+      "fullUncroppedMovieFrameVisible": true,
+      "captureGeometry": {
+        "viewport": {
+          "width": 1920,
+          "height": 1400
+        },
+        "video": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "frame": {
+          "x": 475.109375,
+          "y": 152,
+          "width": 721.765625,
+          "height": 405.984375
+        },
+        "timeline": {
+          "x": 0,
+          "y": 617,
+          "width": 1920,
+          "height": 783
+        },
+        "source": {
+          "width": 1280,
+          "height": 720
+        },
+        "objectFit": "contain"
+      },
+      "screenCaptureFps": 18.03844261646683,
+      "screenCaptureSmoothnessQualified": false,
+      "originalGradientAndLetteringPreserved": true,
+      "continuousSettledLogoAndWords": true,
+      "humanListening": false,
+      "ownerCreativeSelection": null
+    },
+    "checks": {
+      "focusedFrontendCases": 37,
+      "knowledgeCases": 17,
+      "strictNormalAppBuild": "PASS",
+      "continuityContract": "PASS"
+    },
+    "ownerSelectedVersion": null,
+    "schedulingState": "Wait for owner A/B choice before scheduling",
+    "newSchedules": 0,
+    "newContentUploads": 0,
+    "paidJobs": 0,
+    "mainMerge": false,
+    "productionDeployment": false,
+    "founderCreativeAcceptance": false,
+    "showroomQualified": false,
+    "wholePredictiveParityQualified": false,
+    "smoothnessQualified": false,
+    "humanListening": false,
+    "formalCounts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "limitations": [
+      "Bitmap fragments are native raster crops/masks, not inferred editable vector contours or glyph outlines.",
+      "Four text pieces and a continuous title remain separate editable copies.",
+      "Screen recording cadence is separate from the 24 fps native movie; human listening, predictive parity and creative acceptance remain separate."
+    ],
+    "nextTask": "Obtain owner A/B selection, then use normal Publisher for the chosen film with destination-specific packaging. Retain shared S04 spatial/path timing, S03 occurrence/group ownership and S02 picture/sound/export latency work.",
+    "evidence": {
+      "native": "reports/studio-logo-diamond-cascade-20261017/proof/native-design.json",
+      "render": "reports/studio-logo-diamond-cascade-20261017/proof/diamond-cascade/render-receipt.json",
+      "playback": "reports/studio-logo-diamond-cascade-20261017/proof/diamond-cascade/studio-playback.json",
+      "restore": "reports/studio-logo-diamond-cascade-20261017/proof/fresh-restore/receipt.json",
+      "preservedA": "reports/studio-logo-diamond-cascade-20261017/proof/comparison-source-preserved.json",
+      "report": "reports/studio-logo-diamond-cascade-20261017/README.md"
+    }
   }
 }

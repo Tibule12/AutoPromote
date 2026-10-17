@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.29",
+  "knowledge_version": "1.0.30",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-17",
@@ -4674,7 +4674,8 @@
         "studio.logo_motion.separate_symbol",
         "studio.logo_motion.symbol_width",
         "studio.logo_motion.piece_construction",
-        "studio.logo_motion.piece_columns"
+        "studio.logo_motion.piece_columns",
+        "studio.logo_motion.piece_style"
       ],
       "workflow": [
         "Open Graphics → Logo motion in an owned programme at least eight seconds long.",
@@ -4682,10 +4683,11 @@
         "Choose the brand name, accent, background and an 8–14 second duration that fits the programme. Build editable logo motion at the programme start.",
         "For an image with a left-hand symbol and separate lettering, enable Separate left symbol from wordmark. Symbol width places the search boundary; the builder follows transparent space and rejects cuts through opaque artwork. Three separately masked fragments assemble the symbol, which accelerates along forward routes before joining the original wordmark.",
         "Enable Construct words from pieces to assemble the original bitmap wordmark from 2–16 interlocking slices. Five words each construct from three independently masked title pieces, with staggered rebounds before a continuous close.",
+        "Choose Piece choreography: Spring assembly keeps the symbol-first interlocking arrangement; Diamond cascade opens with four triangular pieces per word, moves each complete word into place, then assembles the original logo in centre-out diagonal slices.",
         "Edit the resulting ordinary layers, masks, groups and keys. Undo removes the authored composition. Add and time sound through the normal Sound controls.",
         "Review the actual preview, save/reopen and export through the existing Studio workflow."
       ],
-      "preview_behavior": "The builder writes ordinary graphics into the existing project. SVG shapes become raster artwork. Raster identities can use three reveal bands, or separate symbol and original wordmark along a transparent seam. Separated symbols assemble through three ordinary polygon-masked fragments, then use one continuous symbol during camera travel. With a background, a dark stage resolves to a light field. Both treatments finish on one continuous original lockup. Ordinary preview evaluates existing transforms, masks and opacity keys. Piece construction crops the original decoded RGBA into narrow image slices without redrawing the wordmark. Each slice has two complementary masks. Create., Schedule., Publish., Move and forward. each assemble from three zigzag-masked ordinary text layers; matching continuous titles replace the settled fragments.",
+      "preview_behavior": "The builder writes ordinary graphics into the existing project. SVG shapes become raster artwork. Raster identities can use three reveal bands, or separate symbol and original wordmark along a transparent seam. Separated symbols assemble through three ordinary polygon-masked fragments, then use one continuous symbol during camera travel. With a background, a dark stage resolves to a light field. Both treatments finish on one continuous original lockup. Ordinary preview evaluates existing transforms, masks and opacity keys. Piece construction crops the original decoded RGBA into narrow image slices without redrawing the wordmark. Each slice has two complementary masks. Create., Schedule., Publish., Move and forward. each assemble from three zigzag-masked ordinary text layers; matching continuous titles replace the settled fragments. Diamond cascade is a second authoring arrangement of the same native graph. It uses four triangular masks per word, large opening type, continuous word travel and a centre-out original-logo assembly; Spring assembly remains unchanged.",
       "render_behavior": "The standard graphics importer, canonical document and composition renderer compile the same authored layers, masks, groups and keys. No separate logo render engine or paid model is started.",
       "limitations": [
         "Development feature; no professional, production or showroom qualification.",
@@ -9871,6 +9873,42 @@
       ],
       "updated_at": "2026-10-17",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.piece_style",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Logo piece choreography",
+      "status": "PARTIAL",
+      "meaning": "Chooses a symbol-first spring assembly or a word-first triangular cascade, authoring ordinary editable layers and keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "spring",
+          "diamond"
+        ],
+        "default": "spring",
+        "default_known": true
+      },
+      "unit": "choreography",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
     }
   ],
   "tasks": [
@@ -12678,6 +12716,11 @@
       "from": "studio.logo_motion",
       "type": "editable_with",
       "to": "studio.logo_motion.piece_columns"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.piece_style"
     }
   ]
 }

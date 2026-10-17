@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.29",
+  "knowledge_version": "1.0.30",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1245,6 +1245,11 @@
     },
     {
       "id": "studio.logo_motion.piece_columns",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.piece_style",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -3219,6 +3224,11 @@
       "from": "studio.logo_motion",
       "type": "editable_with",
       "to": "studio.logo_motion.piece_columns"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.piece_style"
     }
   ]
 }

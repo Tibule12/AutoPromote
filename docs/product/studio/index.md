@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.29 • 2026-10-17
+Development documentation • product 1.2.0 • knowledge 1.0.30 • 2026-10-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -2086,10 +2086,11 @@ Builds a logo intro as ordinary editable artwork, masks, groups and motion keys.
 3. Choose the brand name, accent, background and an 8–14 second duration that fits the programme. Build editable logo motion at the programme start.
 4. For an image with a left-hand symbol and separate lettering, enable Separate left symbol from wordmark. Symbol width places the search boundary; the builder follows transparent space and rejects cuts through opaque artwork. Three separately masked fragments assemble the symbol, which accelerates along forward routes before joining the original wordmark.
 5. Enable Construct words from pieces to assemble the original bitmap wordmark from 2–16 interlocking slices. Five words each construct from three independently masked title pieces, with staggered rebounds before a continuous close.
-6. Edit the resulting ordinary layers, masks, groups and keys. Undo removes the authored composition. Add and time sound through the normal Sound controls.
-7. Review the actual preview, save/reopen and export through the existing Studio workflow.
+6. Choose Piece choreography: Spring assembly keeps the symbol-first interlocking arrangement; Diamond cascade opens with four triangular pieces per word, moves each complete word into place, then assembles the original logo in centre-out diagonal slices.
+7. Edit the resulting ordinary layers, masks, groups and keys. Undo removes the authored composition. Add and time sound through the normal Sound controls.
+8. Review the actual preview, save/reopen and export through the existing Studio workflow.
 
-**Preview:** The builder writes ordinary graphics into the existing project. SVG shapes become raster artwork. Raster identities can use three reveal bands, or separate symbol and original wordmark along a transparent seam. Separated symbols assemble through three ordinary polygon-masked fragments, then use one continuous symbol during camera travel. With a background, a dark stage resolves to a light field. Both treatments finish on one continuous original lockup. Ordinary preview evaluates existing transforms, masks and opacity keys. Piece construction crops the original decoded RGBA into narrow image slices without redrawing the wordmark. Each slice has two complementary masks. Create., Schedule., Publish., Move and forward. each assemble from three zigzag-masked ordinary text layers; matching continuous titles replace the settled fragments.
+**Preview:** The builder writes ordinary graphics into the existing project. SVG shapes become raster artwork. Raster identities can use three reveal bands, or separate symbol and original wordmark along a transparent seam. Separated symbols assemble through three ordinary polygon-masked fragments, then use one continuous symbol during camera travel. With a background, a dark stage resolves to a light field. Both treatments finish on one continuous original lockup. Ordinary preview evaluates existing transforms, masks and opacity keys. Piece construction crops the original decoded RGBA into narrow image slices without redrawing the wordmark. Each slice has two complementary masks. Create., Schedule., Publish., Move and forward. each assemble from three zigzag-masked ordinary text layers; matching continuous titles replace the settled fragments. Diamond cascade is a second authoring arrangement of the same native graph. It uses four triangular masks per word, large opening type, continuous word travel and a centre-out original-logo assembly; Spring assembly remains unchanged.
 
 **Final render:** The standard graphics importer, canonical document and composition renderer compile the same authored layers, masks, groups and keys. No separate logo render engine or paid model is started.
 
@@ -2110,7 +2111,7 @@ Builds a logo intro as ordinary editable artwork, masks, groups and motion keys.
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Logo motion brand name](../control-reference/index.md#studio-logo_motion-brand_name), [Logo motion duration](../control-reference/index.md#studio-logo_motion-duration), [Logo motion accent](../control-reference/index.md#studio-logo_motion-accent), [Add background](../control-reference/index.md#studio-logo_motion-background), [Separate left symbol from wordmark](../control-reference/index.md#studio-logo_motion-separate_symbol), [Logo symbol width](../control-reference/index.md#studio-logo_motion-symbol_width), [Construct words from pieces](../control-reference/index.md#studio-logo_motion-piece_construction), [Logo wordmark slices](../control-reference/index.md#studio-logo_motion-piece_columns)
+**Controls:** [Logo motion brand name](../control-reference/index.md#studio-logo_motion-brand_name), [Logo motion duration](../control-reference/index.md#studio-logo_motion-duration), [Logo motion accent](../control-reference/index.md#studio-logo_motion-accent), [Add background](../control-reference/index.md#studio-logo_motion-background), [Separate left symbol from wordmark](../control-reference/index.md#studio-logo_motion-separate_symbol), [Logo symbol width](../control-reference/index.md#studio-logo_motion-symbol_width), [Construct words from pieces](../control-reference/index.md#studio-logo_motion-piece_construction), [Logo wordmark slices](../control-reference/index.md#studio-logo_motion-piece_columns), [Logo piece choreography](../control-reference/index.md#studio-logo_motion-piece_style)
 
 **Guides:** No task guide in V1.
 

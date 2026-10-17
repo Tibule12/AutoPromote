@@ -34,7 +34,7 @@ function splitLogo(markup) {
 
 export function buildStudioLogoMotion({ svg = AUTOPROMOTE_LOGO_SVG, bitmap, brandName = 'AutoPromote',
   accent = '#a855f7', duration = 10, programmeDuration, width = 1280, height = 720,
-  includeBackground = true, separateBitmap = false, symbolWidth = 28, measure, pieceConstruction = false, pieceColumns = 11, encodeCrop }) {
+  includeBackground = true, separateBitmap = false, symbolWidth = 28, measure, pieceConstruction = false, pieceColumns = 11, pieceStyle = 'spring', encodeCrop }) {
   if (!Number.isFinite(programmeDuration) || !Number.isFinite(duration) || duration < 8 || duration > 14 || duration > programmeDuration)
     throw Error('Use an 8–14 second intro that fits this programme.');
   if (![width,height].every(v => Number.isFinite(v) && v >= 16 && v <= 4096)) throw Error('Invalid programme dimensions.');
@@ -56,7 +56,7 @@ export function buildStudioLogoMotion({ svg = AUTOPROMOTE_LOGO_SVG, bitmap, bran
   if (ratio < .5 || ratio > 2) throw Error('Use a portrait, square or landscape programme between 1:2 and 2:1.');
   if(pieceConstruction){
     if(!bitmap||!separateBitmap)throw Error('Choose a bitmap and separate its symbol before constructing words from pieces.');
-    return buildStudioLogoPieceMotion({bitmap,brandName,accent,duration,programmeDuration,width,height,includeBackground,measure,pieceColumns,encodeCrop,symbolWidth});
+    return buildStudioLogoPieceMotion({bitmap,brandName,accent,duration,programmeDuration,width,height,includeBackground,measure,pieceColumns,pieceStyle,encodeCrop,symbolWidth});
   }
   const time = v => tick(v * duration / 10), paper = bitmap?'#24133e':'#f5f1ff', dark = bitmap&&!separateBitmap?'#f5f3ff':'#090714';
   const markWidth=bitmap?Math.min(82,42/ratio*bitmap.bounds[2]/bitmap.bounds[3]):34;

@@ -33,6 +33,8 @@ do not describe fragment masking as inferred ribbon geometry or path morphing.
 The owner then requested every word to construct from pieces and explicitly
 selected the supplied Gradient Tech identity as the new app logo. Preserve its
 original gradient and lettering in the app and movie; keep prior edits available.
+The owner requested another version for comparison. Preserve both native
+projects and wait for the owner's A/B selection before scheduling these logo films.
 
 At the end of every Studio session, update product readiness, capability and
 combination matrices, exact remaining blockers, evidence and next task.

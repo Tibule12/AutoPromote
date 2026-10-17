@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.29",
+  "knowledge_version": "1.0.30",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -5135,6 +5135,42 @@
         "default_known": true
       },
       "unit": "slices",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.piece_style",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Logo piece choreography",
+      "status": "PARTIAL",
+      "meaning": "Chooses a symbol-first spring assembly or a word-first triangular cascade, authoring ordinary editable layers and keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "spring",
+          "diamond"
+        ],
+        "default": "spring",
+        "default_known": true
+      },
+      "unit": "choreography",
       "keyframeable": "UNSUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "SUPPORTED",

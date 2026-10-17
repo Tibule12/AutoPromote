@@ -1,6 +1,7 @@
 // Author a piece construction using ordinary images, masked titles and keys.
 // Cropping preserves source RGBA; these are bitmap pieces, not vector contours.
 import { separateStudioLogoParts } from './studioLogoParts';
+import { buildStudioLogoDiamondMotion } from './studioLogoDiamondMotion';
 
 export function cropStudioLogoBitmap(bitmap, bounds) {
   const [x,y,w,h]=bounds, canvas=document.createElement('canvas');
@@ -11,9 +12,11 @@ export function cropStudioLogoBitmap(bitmap, bounds) {
 }
 
 export function buildStudioLogoPieceMotion({bitmap,brandName,accent,duration,programmeDuration,width,height,
-  includeBackground,measure,symbolWidth=28,pieceColumns=11,encodeCrop=cropStudioLogoBitmap}) {
+  includeBackground,measure,symbolWidth=28,pieceColumns=11,pieceStyle='spring',encodeCrop=cropStudioLogoBitmap}) {
   if(!Number.isInteger(pieceColumns)||pieceColumns<2||pieceColumns>16)throw Error('Choose 2–16 wordmark slices.');
+  if(!['spring','diamond'].includes(pieceStyle))throw Error('Choose Spring assembly or Diamond cascade.');
   const [symbol,wordmark]=separateStudioLogoParts(bitmap,symbolWidth);
+  if(pieceStyle==='diamond')return buildStudioLogoDiamondMotion({bitmap,symbol,wordmark,brandName,accent,duration,programmeDuration,width,height,includeBackground,measure,pieceColumns,encodeCrop});
   const [bx,by,bw,bh]=bitmap.bounds,ratio=width/height,layout=720*ratio;
   const layers=[],groups=[],markIds=[],time=t=>Math.round(t*duration/10*90000)/90000;
   const ease=[.18,1,.3,1],spring=[.2,1.35,.35,1],soft=[.65,0,.35,1];

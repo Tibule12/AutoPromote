@@ -35,7 +35,7 @@ async function main(){
    nativeAppLogoDecoded=await logo.evaluate(i=>i.naturalWidth===1200&&i.naturalHeight===269&&i.getBoundingClientRect().width>80);
    assert(nativeAppLogoDecoded);
    assert.equal(restored.snapshot.overlays.filter(o=>o.name.startsWith('Wordmark pieces /')).length,2*(config.pieceColumns||11));
-   assert.equal(restored.snapshot.overlays.filter(o=>o.name.startsWith('Words /')&&o.mask?.enabled).length,15);
+   assert.equal(restored.snapshot.overlays.filter(o=>o.name.startsWith('Words /')&&o.mask?.enabled).length,config.pieceStyle==='diamond'?20:15);
   }
   const lockup=restored.snapshot.overlays.find(o=>o.name==='Mark / continuous original lockup');
   assert(lockup&&!lockup.mask?.enabled,'Settled identity must be continuous');

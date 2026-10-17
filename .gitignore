@@ -114,3 +114,7 @@ reports/studio-logo-word-pieces-20261017/*
 !frontend/public/favicon.png
 !frontend/public/logo192.png
 !frontend/public/logo512.png
+
+# Private native alternate logo comparison and owner session evidence.
+reports/studio-logo-diamond-cascade-20261017/*
+!reports/studio-logo-diamond-cascade-20261017/README.md
