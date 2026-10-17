@@ -6,6 +6,8 @@ This isolated fix branch is based on `origin/main` commit `858d538b51879c718d49f
 
 All 20 requested alerts (#1164–#1183) were confirmed open on main through the GitHub API. The source corrections are implemented; current PR CodeQL and CI evidence is recorded in [PR #488](https://github.com/Tibule12/AutoPromote/pull/488). Main alerts cannot be reported closed before a reviewed merge and main analysis.
 
+CodeQL diff-informed filtering is disabled in this workflow so remediation checks also include existing findings on unchanged lines. This uses the same [CodeQL action setting](https://github.com/github/codeql-action/blob/main/.github/workflows/codescanning-config-cli.yml) as its own full-result tests; query coverage is not reduced. Full-result SARIF is compared with main for the requested alerts; unrelated baseline findings remain outside this request.
+
 | Alerts | Correction |
 |---|---|
 | #1167, #1168 | Worker reads/cancellation accept validated job IDs instead of arbitrary URLs. Axios uses a server-configured base URL, encoded relative job paths, fixed authentication, no proxy and no redirects. Callers cannot override the destination or transport policy. GET connection recovery still retries once; cancellation never retries. |
