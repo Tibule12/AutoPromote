@@ -45,10 +45,12 @@ stagingStorageAuth.getCredentials = async () => ({
   client_email: `studio-analysis-smoke@${projectId}.iam.gserviceaccount.com`,
 });
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const authMiddleware = require("../src/authMiddleware");
 const { getPlanCapabilities } = require("../src/config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("../src/services/billingService");
 const app = express();
+app.use(rateLimit({ windowMs: 60000, max: 3000, standardHeaders: true, legacyHeaders: false }));
 app.disable("x-powered-by");
 app.use(express.json({ limit: "2mb" }));
 app.get("/api/health", (_req, res) => res.json({ projectId, status: "OK" }));

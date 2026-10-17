@@ -3,18 +3,12 @@ import { act, render, waitFor } from "@testing-library/react";
 import TimelineSourceFilmstrip from "../TimelineSourceFilmstrip";
 
 test("a failed source stops sampling that source and leaves the timeline usable", async () => {
-  const create = document.createElement.bind(document);
   const load = jest.fn();
-  jest.spyOn(document, "createElement").mockImplementation((name, ...args) => {
-    const node = create(name, ...args);
-    if (name === "video")
-      node.load = () => {
-        if (node.hasAttribute("src")) {
-          load();
-          setTimeout(() => node.dispatchEvent(new Event("error")), 0);
-        }
-      };
-    return node;
+  jest.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(function () {
+    if (this.hasAttribute("src")) {
+      load();
+      setTimeout(() => this.dispatchEvent(new Event("error")), 0);
+    }
   });
   jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({});
   try {
@@ -57,8 +51,10 @@ test("filmstrip uses one separate muted decoder, bounds source seeks and release
         },
       },
     });
-    node.load = jest.fn(() => setTimeout(() => node.dispatchEvent(new Event("loadedmetadata")), 0));
     return node;
+  });
+  jest.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(function () {
+    setTimeout(() => this.dispatchEvent(new Event("loadedmetadata")), 0);
   });
   const draw = jest.fn();
   jest

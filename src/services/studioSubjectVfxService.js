@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const axios = require("axios");
-const { readStudioWorker } = require("./studioWorkerRead");
+const { readStudioWorker, cancelStudioWorker, workerConfig } = require("./studioWorkerRead");
 const admin = require("firebase-admin");
 const { getStudioSourceBucket, resolveOwnedStudioVideoSource } = require("./studioSourceService");
 const {
@@ -16,26 +16,6 @@ const error = (statusCode, message) => Object.assign(new Error(message), { statu
 const validId = value => /^[A-Za-z0-9_-]{8,128}$/.test(value || "");
 const MAX_OUTPUT_BYTES = 75 * 1024 * 1024;
 
-function workerConfig(kind) {
-  const cpu=kind==='model_artifact_cpu';
-  const raw = process.env[cpu?'STUDIO_MODEL_VFX_URL':'STUDIO_NVIDIA_VFX_URL'];
-  const secret = process.env[cpu?'STUDIO_MODEL_VFX_SECRET':'STUDIO_NVIDIA_VFX_SECRET'];
-  if (!raw || !secret || secret.length < 32)
-    throw error(
-      503,
-      cpu?"Subject preview is unavailable. Your edit is saved.":"NVIDIA subject rendering is offline. Your edit is saved; connect the VFX worker to render it."
-    );
-  const url = new URL(raw);
-  if (
-    !["http:", "https:"].includes(url.protocol) ||
-    url.username ||
-    url.password ||
-    url.search ||
-    url.hash
-  )
-    throw error(503, cpu?"Subject preview configuration is unavailable.":"Invalid NVIDIA worker configuration.");
-  return { url: raw.replace(/\/$/, ""), headers: { Authorization: `Bearer ${secret}` } };
-}
 const db = () => admin.firestore();
 const jobs = () => db().collection("studio_subject_vfx_jobs");
 const lease = kind => db().collection("studio_subject_vfx_capacity").doc(kind==='model_artifact_cpu'?'model_artifact_cpu':'nvidia');
@@ -165,9 +145,8 @@ async function getSubjectVfxPreview({ ownerUid, jobId }) {
   if (data.expiresAtMs <= Date.now())
     throw error(410, "Subject render expired. Render the saved effect again.");
   if (!["completed", "failed", "cancelled"].includes(data.status)) {
-    const config = workerConfig(data.executionKind);
-    const response = await readStudioWorker(`${config.url}/jobs/${jobId}`, {
-      headers: config.headers,
+    const response = await readStudioWorker(jobId, {
+      executionKind: data.executionKind,
       timeout: 15000,
       maxRedirects: 0,
     });
@@ -202,8 +181,9 @@ async function getSubjectVfxPreview({ ownerUid, jobId }) {
         receipt.frames !== Math.round(seconds * 24)
       )
         throw error(502, "Subject render did not preserve the selected picture clock.");
-      const media = await readStudioWorker(`${config.url}/jobs/${jobId}/media`, {
-        headers: config.headers,
+      const media = await readStudioWorker(jobId, {
+        executionKind: data.executionKind,
+        resource: "media",
         responseType: "arraybuffer",
         timeout: 60000,
         maxRedirects: 0,
@@ -286,12 +266,7 @@ async function cancelSubjectVfxPreview({ ownerUid, jobId }) {
   const { ref, data } = await getOwnedJob(ownerUid, jobId);
   if (["completed", "failed", "cancelled"].includes(data.status))
     return { jobId, status: data.status };
-  const config = workerConfig(data.executionKind);
-  const response = await axios.delete(`${config.url}/jobs/${jobId}`, {
-    headers: config.headers,
-    timeout: 15000,
-    maxRedirects: 0,
-  });
+  const response = await cancelStudioWorker(jobId, { executionKind: data.executionKind });
   if (response.data?.status !== "cancelled")
     throw error(502, "Cancellation has not been confirmed. Check this job again.");
   await ref.update({ status: "cancelled" });

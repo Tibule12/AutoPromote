@@ -1,3 +1,4 @@
+import { reloadMediaElement } from "../utils/security";
 import React, { useEffect, useState } from "react";
 
 const thumbnailCache = new Map();
@@ -78,7 +79,7 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
           if (source !== src) {
             await waitFor("loadedmetadata", () => {
               video.src = src;
-              video.load();
+              reloadMediaElement(video);
             });
             source = src;
           }
@@ -106,13 +107,13 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
         }
       }
       video.removeAttribute("src");
-      video.load();
+      reloadMediaElement(video);
       video.remove();
     })();
     return () => {
       controller.abort();
       video.removeAttribute("src");
-      video.load();
+      reloadMediaElement(video);
       video.remove();
     };
   }, [signature]);

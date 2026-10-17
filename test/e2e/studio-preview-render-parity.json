@@ -4395,5 +4395,51 @@
       "S03",
       "S04"
     ]
+  },
+  "securityAlertRemediation20261017": {
+    "status": "IMPLEMENTED_LOCAL_CHECKS_PASSED_PENDING_PR_CODEQL",
+    "evidence": "reports/security-alerts-20261017/README.md",
+    "requestedCodeqlAlerts": [
+      1164,
+      1165,
+      1166,
+      1167,
+      1168,
+      1169,
+      1170,
+      1171,
+      1172,
+      1173,
+      1174,
+      1175,
+      1176,
+      1177,
+      1178,
+      1179,
+      1180,
+      1181,
+      1182,
+      1183
+    ],
+    "requestedDependencyAlerts": 25,
+    "publishedUpgradeAlerts": 20,
+    "temporarilyMitigatedNoPatchedReleaseAlerts": [
+      713,
+      714,
+      720,
+      729,
+      751
+    ],
+    "backendCases": 34,
+    "ownedSubjectServiceCases": 18,
+    "frontendCases": 35,
+    "additionalAdversarialCases": 2,
+    "sharedReplaySourceMatch": true,
+    "readinessPromotion": false,
+    "noProjectMutation": true,
+    "newGpuJobs": 0,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "nextTask": "Verify PR CodeQL and security CI on the pushed branch; reviewed integration is required before main alerts close. Replace temporary dependency patches when official fixed releases exist. Shared S02/S03/S04 remains separately owned."
   }
 }

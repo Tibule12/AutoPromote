@@ -5,7 +5,7 @@
     "lint": "eslint --ext .js index.js lib --max-warnings=0",
     "format": "prettier --write \"**/*.{js,json}\"",
     "format:check": "prettier --check \"**/*.{js,json}\"",
-    "postinstall": "node copy-server.js",
+    "postinstall": "node security/apply-dependency-patches.cjs && node copy-server.js",
     "serve": "firebase emulators:start --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
@@ -20,7 +20,7 @@
   "dependencies": {
     "@sentry/node": "^7.72.0",
     "autopromote-server": "file:..",
-    "compression": "^1.7.4",
+    "compression": "^1.8.2",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.18.1",
@@ -102,7 +102,11 @@
     },
     "minimatch@10": {
       "brace-expansion": "5.0.7"
-    }
+    },
+    "compression": "$compression",
+    "proxy-addr": "2.0.8",
+    "@fastify/busboy": "3.2.3",
+    "braces": "3.0.3"
   },
   "private": true
 }

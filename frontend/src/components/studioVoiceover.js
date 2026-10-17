@@ -1,3 +1,4 @@
+import { reloadMediaElement } from "../utils/security";
 import { isStudioAudioTrackAudible } from "./studioAudioTracks";
 import { studioUploadedAudioBinding } from "./studioAudioSourceBindings";
 
@@ -90,5 +91,5 @@ export async function readVoiceoverDuration(file, url) {
       audio.onerror = () => finish(new Error("This recording could not be decoded."));
       audio.preload = "metadata"; audio.src = url;
     });
-  } finally { audio.removeAttribute("src"); audio.load(); }
+  } finally { audio.removeAttribute("src"); reloadMediaElement(audio); }
 }
