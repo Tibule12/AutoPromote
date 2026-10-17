@@ -17,7 +17,12 @@ export async function askProductAssistance(input, signal) {
 // external/private URLs or HTML. React escapes all question and result prose.
 const docUrl = value => typeof value === 'string' && /^\/api\/product-assistance\/docs\/[a-z0-9_./#-]+$/i.test(value) && !value.includes('..') ? `${API_BASE_URL}${value}` : undefined;
 const DocLink = ({ url, children }) => <a href={docUrl(url)} target="_blank" rel="noreferrer">{children}</a>;
-export default function ProductAssistance({ request = askProductAssistance }) {
+export function ProductAssistanceLauncher({ onClick, className = "product-assistance-open" }) {
+  return <button type="button" className={className} aria-label="Ask AutoPromote" title="Ask AutoPromote" onClick={onClick || (() => window.dispatchEvent(new Event('autopromote:open-product-help')))}>
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 11.5a8 8 0 0 1-8 8H5l-3 2V11.5a9 9 0 0 1 18 0Z" /><path d="M7 11h.01M11 11h.01M15 11h.01" /></svg>
+  </button>;
+}
+export default function ProductAssistance({ request = askProductAssistance, launcher = true }) {
   const [open, setOpen] = useState(false), [question, setQuestion] = useState('');
   const [mode, setMode] = useState('EXPLAIN'), [context, setContext] = useState({});
   const [result, setResult] = useState(null), [busy, setBusy] = useState(false), [error, setError] = useState('');
@@ -35,7 +40,9 @@ export default function ProductAssistance({ request = askProductAssistance }) {
     finally { clearTimeout(deadline); if (attempt === sequence.current) setBusy(false); }
   };
   const close = () => { ++sequence.current; controller.current?.abort(); setOpen(false); setBusy(false); priorFocus.current?.focus(); };
+  const openHelp = () => { priorFocus.current = document.activeElement; setContext({}); setQuestion(''); setResult(null); setError(''); setOpen(true); };
   useEffect(() => {
+    const openGlobalHelp = () => openHelp();
     const help = event => {
       const id = event.detail?.selected_feature_id;
       if (typeof id !== 'string' || !/^[a-z0-9_.]{1,100}$/.test(id)) return;
@@ -45,7 +52,8 @@ export default function ProductAssistance({ request = askProductAssistance }) {
       run('What is this?', 'EXPLAIN', safe);
     };
     window.addEventListener('autopromote:product-help', help);
-    return () => { window.removeEventListener('autopromote:product-help', help); controller.current?.abort(); };
+    window.addEventListener('autopromote:open-product-help', openGlobalHelp);
+    return () => { window.removeEventListener('autopromote:product-help', help); window.removeEventListener('autopromote:open-product-help', openGlobalHelp); controller.current?.abort(); };
     // The request adapter is stable; mutable result/mode/context are not captured.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request]);
@@ -60,9 +68,7 @@ export default function ProductAssistance({ request = askProductAssistance }) {
     }
   };
   return <>
-    <button type="button" className="product-assistance-open" onClick={() => {
-      priorFocus.current = document.activeElement; setContext({}); setQuestion(''); setResult(null); setError(''); setOpen(true);
-    }}>Ask AutoPromote</button>
+    {launcher && <ProductAssistanceLauncher onClick={openHelp} />}
     {open && createPortal(<div className="product-assistance-backdrop" onClick={event => { if (event.target === event.currentTarget) close(); }}>
       <aside className="product-assistance-panel" role="dialog" aria-modal="true" aria-labelledby="product-assistance-title" ref={dialogRef} onKeyDown={onKey}>
         <div className="product-assistance-heading"><h2 id="product-assistance-title">Ask AutoPromote</h2><button type="button" aria-label="Close product help" onClick={close}>×</button></div>

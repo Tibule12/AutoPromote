@@ -1,6 +1,6 @@
 # Publishing
 
-Development documentation • product 1.2.0 • knowledge 1.0.23 • 2026-10-16
+Development documentation • product 1.2.0 • knowledge 1.0.24 • 2026-10-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -24,7 +24,7 @@ Connects supported platform accounts through existing permissions. Displayed pla
 2. Open Publisher and review the account, Page or posting destination returned by the provider.
 3. Resolve a provider reconnect or permission error before publishing.
 
-**Preview:** Publisher shows the selected media with current account and destination information. A connected label alone does not confirm current posting permission.
+**Preview:** Publisher shows the selected media with current account and destination information. A connected label alone does not confirm current posting permission. Queue, Publisher and Connections bundle recognizable vector brand marks locally; the logo is not a posting-permission check.
 
 **Final render:** Connection checks do not render or generate media.
 
@@ -65,6 +65,7 @@ Schedules owned completed media through the existing account-linked pipeline. Sc
 3. Review the exact destinations and timing, then choose Schedule posts.
 4. Open Schedule and verify each requested platform has the intended pending schedule.
 5. Use Queue period to review the next seven days or all schedules. Load another page when more entries remain.
+6. Review the complete upcoming calendar with brand icons, each destination’s exact publish time and its current status. The release list scrolls independently when many entries exist.
 
 **Preview:** Publisher previews the selected movie and review details; Queue displays pending owned schedules.
 
@@ -76,6 +77,7 @@ Schedules owned completed media through the existing account-linked pipeline. Sc
 - An upload acknowledgement does not prove every schedule was created.
 - A pending schedule needs an operating scheduler and posting worker. Only a successful provider result confirms publication.
 - Fresh uploads and edited replacement files still require upload allowance. Reusing stored media for a schedule does not increase new-content upload capacity.
+- If this account has opted into 24-hour published-video retention, its owned publishing copies expire 24 hours after every intended destination confirms publication. Pending, paused, failed, recurring, shared or transforming work keeps its file. Expired copies are not selectable for a new schedule; upload the file again. Publication history remains.
 
 **Common errors**
 

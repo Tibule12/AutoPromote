@@ -2,7 +2,8 @@
 // Every mutation is a normal signed-in Queue or Publisher form action.
 const fs=require('fs'),path=require('path'),assert=require('assert/strict'),crypto=require('crypto');
 const {chromium}=require('playwright');
-const dir=path.resolve('reports/studio-platform-packaging-20261016'),file=path.join(dir,'platform-packages.json');
+const dir=path.resolve(process.env.STUDIO_PLATFORM_PACKAGES_DIR||'reports/studio-platform-packaging-20261016'),file=path.join(dir,'platform-packages.json');
+const authState=path.resolve(process.env.STUDIO_PUBLISHER_SESSION||path.join(dir,'proof/publisher-session.private.json'));
 const labels={youtube:'YouTube',tiktok:'TikTok',instagram:'Instagram',linkedin:'LinkedIn',facebook:'Facebook',reddit:'Reddit'};
 const digest=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 async function main(){
@@ -16,7 +17,8 @@ async function main(){
  if(reconcile)assert(post.contentId&&post.status==='UPLOAD_ACKNOWLEDGED_QUEUE_UNVERIFIED','Reconcile only an existing acknowledged content record');
  else assert(!['SUBMITTING','SUBMISSION_UNCERTAIN','UPLOAD_ACKNOWLEDGED_QUEUE_UNVERIFIED'].includes(post.status),'Reconcile the existing acknowledgement before retrying');
  const browser=await chromium.launch({channel:'chromium',headless:true,args:['--mute-audio','--host-resolver-rules=MAP localhost 127.0.0.1']});
- const context=await browser.newContext({storageState:path.join(dir,'proof/publisher-session.private.json'),timezoneId:book.timezone,viewport:{width:1800,height:1200},acceptDownloads:true});
+ fs.mkdirSync(path.join(dir,'proof'),{recursive:true});
+ const context=await browser.newContext({storageState:authState,timezoneId:book.timezone,viewport:{width:1800,height:1200},acceptDownloads:true});
  const page=await context.newPage();page.setDefaultTimeout(60000);const rows=new Map(),mutations=[];let redditName;
  const persist=()=>fs.writeFileSync(file,JSON.stringify(book,null,2)+'\n');
  page.on('response',async r=>{
@@ -103,7 +105,7 @@ async function main(){
   if(reconcile)assert.equal(mutations.length,0,'Reconciliation must not submit another upload');
   post.queueVerified=true;post.verifiedAt=new Date().toISOString();post.status='SCHEDULED_VERIFIED_IN_APP';post.schedules=[{id:row.id,contentId:row.contentId,platform:row.platform,startTime:row.startTime,status:row.status,isActive:row.isActive,frequency:row.frequency}];post.nativeUserFlow=true;delete post.lastError;persist();
   fs.writeFileSync(path.join(dir,'proof',`${post.postId}-native-mutations.json`),JSON.stringify(mutations,null,2));console.log(JSON.stringify({postId:id,platform:post.platform,localTime:post.localTime,status:post.status}));
- }catch(e){post.lastError=e.message;if(post.status==='SUBMITTING'&&!post.contentId)post.status='SUBMISSION_UNCERTAIN';persist();await page.screenshot({path:path.join(dir,'proof',`${id}-failure.png`)}).catch(()=>{});fs.writeFileSync(path.join(dir,'proof',`${id}-failure.private.txt`),(await page.locator('body').innerText()).slice(-20000),{mode:0o600});throw e;}
+ }catch(e){post.lastError=e.message;const body=(await page.locator('body').innerText()).slice(-20000);if(!post.contentId&&/upload limit/i.test(body)&&/was not uploaded/i.test(body)){post.status='BLOCKED_UPLOAD_ALLOWANCE';post.preflightBlocked={at:new Date().toISOString(),fileNotUploaded:true,code:'UPLOAD_CAP_EXCEEDED'};}else if(post.status==='SUBMITTING'&&!post.contentId)post.status='SUBMISSION_UNCERTAIN';persist();await page.screenshot({path:path.join(dir,'proof',`${id}-failure.png`)}).catch(()=>{});fs.writeFileSync(path.join(dir,'proof',`${id}-failure.private.txt`),body,{mode:0o600});throw e;}
  finally{await browser.close();}
 }
 main().catch(e=>{console.error(e.stack);process.exitCode=1;});

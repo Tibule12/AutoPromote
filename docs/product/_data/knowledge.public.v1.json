@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.23",
+  "knowledge_version": "1.0.24",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-16",
+  "updated_at": "2026-10-17",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -3696,12 +3696,16 @@
       "controls": [],
       "workflow": [
         "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Review the result and its limitations before saving or exporting.",
+        "Open Billing to read the effective account upload and auto-publish allowances. An administrator can grant an audited account upload allowance without resetting usage or changing the subscription price.",
+        "Use the chat icon in the dashboard header for documentation help. It opens the same read-only product assistance panel; the separate floating chatbot is removed."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "An expired sign-in needs the existing authentication flow. Do not share passwords or tokens with support."
+        "An expired sign-in needs the existing authentication flow. Do not share passwords or tokens with support.",
+        "An account-specific upload allowance does not grant credits, additional connected-platform capacity or unlimited posting. Publishing has its own enforced allowance.",
+        "Local scheduled production and cleanup require this computer to be running and connected. Source-backed local verification does not deploy the changes to hosted production."
       ],
       "common_errors": [
         {
@@ -3712,7 +3716,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-17",
       "product_version": "1.2.0"
     },
     {
@@ -4426,7 +4430,7 @@
         "Open Publisher and review the account, Page or posting destination returned by the provider.",
         "Resolve a provider reconnect or permission error before publishing."
       ],
-      "preview_behavior": "Publisher shows the selected media with current account and destination information. A connected label alone does not confirm current posting permission.",
+      "preview_behavior": "Publisher shows the selected media with current account and destination information. A connected label alone does not confirm current posting permission. Queue, Publisher and Connections bundle recognizable vector brand marks locally; the logo is not a posting-permission check.",
       "render_behavior": "Connection checks do not render or generate media.",
       "limitations": [
         "Provider permissions, token health, account allowance and destination access apply.",
@@ -4442,7 +4446,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-13",
+      "updated_at": "2026-10-17",
       "product_version": "1.2.0"
     },
     {
@@ -4472,7 +4476,8 @@
         "Choose connected destinations, review platform-specific options and set a future date and time.",
         "Review the exact destinations and timing, then choose Schedule posts.",
         "Open Schedule and verify each requested platform has the intended pending schedule.",
-        "Use Queue period to review the next seven days or all schedules. Load another page when more entries remain."
+        "Use Queue period to review the next seven days or all schedules. Load another page when more entries remain.",
+        "Review the complete upcoming calendar with brand icons, each destination’s exact publish time and its current status. The release list scrolls independently when many entries exist."
       ],
       "preview_behavior": "Publisher previews the selected movie and review details; Queue displays pending owned schedules.",
       "render_behavior": "Scheduling uses the selected completed movie. It does not rerender or allocate a generation worker.",
@@ -4480,7 +4485,8 @@
         "Provider permissions, destination access and account allowance apply.",
         "An upload acknowledgement does not prove every schedule was created.",
         "A pending schedule needs an operating scheduler and posting worker. Only a successful provider result confirms publication.",
-        "Fresh uploads and edited replacement files still require upload allowance. Reusing stored media for a schedule does not increase new-content upload capacity."
+        "Fresh uploads and edited replacement files still require upload allowance. Reusing stored media for a schedule does not increase new-content upload capacity.",
+        "If this account has opted into 24-hour published-video retention, its owned publishing copies expire 24 hours after every intended destination confirms publication. Pending, paused, failed, recurring, shared or transforming work keeps its file. Expired copies are not selectable for a new schedule; upload the file again. Publication history remains."
       ],
       "common_errors": [
         {
@@ -4491,7 +4497,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-16",
+      "updated_at": "2026-10-17",
       "product_version": "1.2.0"
     },
     {

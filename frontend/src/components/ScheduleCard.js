@@ -1,5 +1,6 @@
 import React from "react";
 import "./ScheduleCard.css";
+import PlatformIcon from "./PlatformIcon";
 
 function PlatformBadge({ platform }) {
   const colorMap = {
@@ -16,24 +17,10 @@ function PlatformBadge({ platform }) {
     telegram: "#2CA5E0",
     snapchat: "#FFFC00",
   };
-  const emojiMap = {
-    tiktok: "🎵",
-    youtube: "▶️",
-    instagram: "📷",
-    twitter: "🪶",
-    facebook: "📘",
-    spotify: "🎧",
-    pinterest: "📌",
-    linkedin: "🔗",
-    reddit: "👽",
-    discord: "💬",
-    telegram: "✈️",
-    snapchat: "👻",
-  };
   const color = colorMap[platform] || "#9aa4b2";
   return (
     <span className="platform-badge" style={{ background: color }} title={platform}>
-      {emojiMap[platform] || "🌐"} {platform}
+      <PlatformIcon platform={platform} /> {platform}
     </span>
   );
 }

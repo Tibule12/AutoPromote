@@ -17,6 +17,10 @@ const child = spawn(python, ['-m','uvicorn','main_media_server:app','--host','12
     CUDA_VISIBLE_DEVICES: '', VIRAL_EXPORT_ENCODER:'cpu',
     OMP_NUM_THREADS:'2', OPENBLAS_NUM_THREADS:'2', PYTHONPATH:worker,
     LOCAL_MEDIA_OUTPUT_BASE_URL:`http://127.0.0.1:${port}`,
+    // The authenticated Node owner persists this loopback output durably.
+    // Avoid a second worker-to-cloud upload blocking the async health loop
+    // for fifteen minutes after a network change during local CPU work.
+    LOCAL_MEDIA_OUTPUT_ONLY:'true', ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK:'true',
     MEDIA_WORKER_ALLOWED_ORIGINS:'http://localhost:5000',
     FIREBASE_STATUS_UPDATES_ENABLED:'false' },
 });

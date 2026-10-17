@@ -22,6 +22,10 @@ test("source categories use workflow provenance and never infer from titles", ()
   expect([studio, generated, project].map(canonicalAssetSource)).toEqual(["studio", "generated", "assets"]);
   expect(sourceLabels(project).origin).toBe("");
 });
+test("expired published copies cannot be selected as reusable media", () => {
+  expect(assetFromContent({ id: "expired", url: file.url, storageRetentionStatus: "deleted_after_publication" })).toBeNull();
+  expect(assetFromContent({ id: "expiring", url: file.url, storageRetentionStatus: "deleting_after_publication" })).toBeNull();
+});
 
 test("the picker collapses media references while retaining distinct edits", () => {
   const output = "https://firebasestorage.googleapis.com/v0/b/project/o/studio%2Frender.mp4";

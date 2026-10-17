@@ -346,11 +346,11 @@ function toPositiveFiniteNumber(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
-async function getPromotionQuotaSnapshot(userId, tierId, testerAccess = null) {
+async function getPromotionQuotaSnapshot(userId, tierId, testerAccess = null, billingData = {}) {
   const plan = getPlan(tierId);
   const platformPostQuotaRaw =
     billingService && typeof billingService.getPlatformPostMonthlyQuota === "function"
-      ? billingService.getPlatformPostMonthlyQuota(tierId, plan, testerAccess)
+      ? billingService.getPlatformPostMonthlyQuota(tierId, plan, testerAccess, billingData)
       : 0;
   const normalizedQuota =
     toPositiveFiniteNumber(platformPostQuotaRaw) ||
@@ -394,11 +394,11 @@ async function evaluateUploadReadiness(userId, options = {}, { uploadRequired = 
     ? "queued_new_upload"
     : "publish_now";
 
-  const [{ tierId, tier, testerAccess }, usageStats] = await Promise.all([
+  const [{ tierId, tier, testerAccess, billingData }, usageStats] = await Promise.all([
     billingService.getEffectiveTierSnapshot(userId),
     getUserUsageStats(userId),
   ]);
-  const promotionQuota = await getPromotionQuotaSnapshot(userId, tierId, testerAccess);
+  const promotionQuota = await getPromotionQuotaSnapshot(userId, tierId, testerAccess, billingData);
 
   const base = {
     allowed: true,
@@ -1478,6 +1478,8 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
     if ((content.user_id || content.userId) !== userId)
       return res.status(403).json({ error: "Forbidden" });
 
+    require("./services/contentMediaDependency").assertAvailable(content);
+
     const allowedPlatforms = ["youtube", "tiktok", "instagram", "linkedin", "facebook", "reddit"];
     if (!Array.isArray(platforms) || !platforms.length ||
         new Set(platforms).size !== platforms.length || platforms.some(p => !allowedPlatforms.includes(p)))
@@ -1533,7 +1535,7 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
     res.json({ success: true, schedules });
   } catch (error) {
     console.error("[POST /:contentId/promotion-schedules] Error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(error.status || 500).json({ error: error.status ? error.message : "Internal server error", ...(error.code ? { code: error.code } : {}) });
   }
 });
 

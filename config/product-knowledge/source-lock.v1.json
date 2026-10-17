@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed native five-word Studio delivery and 24 platform packages; documented unchanged owned-media scheduling without another upload while preserving ownership, platform and distribution entitlements. No readiness promotion.",
-  "reviewed_at": "2026-10-16T17:59:29.514Z",
-  "catalog_sha256": "6521d035111c85ef35272043ef8d30a27d1bcf07641e4d93a2d279d70d65244d",
+  "reason": "Final reviewed Studio continuity binds 24 verified schedules, 49 server guards and the exact narrated Queue tour; no capability readiness promotion.",
+  "reviewed_at": "2026-10-17T06:08:27.669Z",
+  "catalog_sha256": "8cf67336a7aad122446b709d72795dcc556e659342555bfb1e01296198e7664e",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "73b23cb3ae2df134cc878480cbaa46eeb76d3b2f4c7fb1c1fd9e0cf030d5f22f"
+      "sha256": "d6e8d3255bfdf1fdbe87526dd21107643e359bbd1d8ad01c25ed4c63c4cad2a4"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -35,7 +35,7 @@
     },
     {
       "path": "frontend/src/App.js",
-      "sha256": "9a9285bdae832e835e6362522c638625b83222f3b3829adab7a0dce7878b288d"
+      "sha256": "d45acf4eb6b9cd8c560c390e7207827a743d18dccf5524529be2355698e9c862"
     },
     {
       "path": "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
@@ -51,7 +51,11 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/SchedulesPanel.js",
-      "sha256": "1b19109a2961340c849083ab1a5294e68fb8c29c580a689fb0c58959a58b8c7a"
+      "sha256": "2e9c0dd481e876f542534cf5c6e3fecee99285c5472e179727b63e32697d4162"
+    },
+    {
+      "path": "frontend/src/UserDashboard_full.js",
+      "sha256": "ad453ce765492cf3a75b4d9fb2934ea4aabb0a7fdc81876c61bf2fe14b69738b"
     },
     {
       "path": "frontend/src/__tests__/UnifiedPublisher.release.test.js",
@@ -62,12 +66,16 @@
       "sha256": "9a28d50cd0402f9131fcf2bd1701633deb77bf863940654179a93d77fb9646f4"
     },
     {
+      "path": "frontend/src/components/PlatformIcon.js",
+      "sha256": "6cb316b9311a38154e19de9729f4c7b2fb665d309f54ea0fc368ee8dcc0482fc"
+    },
+    {
       "path": "frontend/src/components/ProductAssistance.css",
-      "sha256": "c097dd47b4e618bdaca8af5f313a68fcb5faab8ed048f148612b993990245c57"
+      "sha256": "a10e2ab56e68ab1c64744079d2af7adf6b016f8f1a194ae3d390d61ba80d197c"
     },
     {
       "path": "frontend/src/components/ProductAssistance.js",
-      "sha256": "4b5c8209e9405617e660c48c92aed35d0360e315c908493e7318d1e787e86290"
+      "sha256": "a6e8891fce952edd72d249832f3320a65fbfee6222503454d3515bfe2cb44901"
     },
     {
       "path": "frontend/src/components/ProductHelpButton.js",
@@ -311,7 +319,7 @@
     },
     {
       "path": "src/contentRoutes.js",
-      "sha256": "8b11651b376a1fc08f66c5a5d83fdadbf68f6784a4bdae2415bd32b8caf66f9b"
+      "sha256": "70475f2f4d74f8f5f04c9ceb58fae5c5b6ba6c75d68fc50de79e05c647d4829b"
     },
     {
       "path": "src/creativeTemplates/showcase.js",
@@ -343,7 +351,7 @@
     },
     {
       "path": "src/promotionService.js",
-      "sha256": "73e123540ae85301d59f0c8b95a20b41f1151d26533611d243dec2669381a62c"
+      "sha256": "c43220b8a01cf2d097a0b9212029652c552ce159ccaee308440cb5554c0b9158"
     },
     {
       "path": "src/routes/platformRoutes.js",
@@ -355,7 +363,15 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "3db5658625bf06e4356f16a02e5315d64413be8ef82ba2eeb9d40750ab7c23fa"
+      "sha256": "0400631a6a62e7097d19ac1e94eb0906e6e10ab9815c98058630ac0b4ccc0e09"
+    },
+    {
+      "path": "src/services/__tests__/publishedVideoRetention.test.js",
+      "sha256": "54d4000593443e4f5dbb9a5411f2c1c1de7706cb2bf7429bf6dc9f37ca64ac53"
+    },
+    {
+      "path": "src/services/billingService.js",
+      "sha256": "ca9ee3f83620041610761691030ca66d1ac9798d42cad587f12cafb6fa7ba0b5"
     },
     {
       "path": "src/services/contentFactoryProviders.js",
@@ -364,6 +380,10 @@
     {
       "path": "src/services/contentIdeaEngine.js",
       "sha256": "ebceaab3b057aeab5dafd4e172a01ea345f17c69a68eb49cc50d6437aba254d2"
+    },
+    {
+      "path": "src/services/contentMediaDependency.js",
+      "sha256": "3f67e3062419ac3e308c579d58ee626c658c403142d36ee5da02611c692adba8"
     },
     {
       "path": "src/services/linkedinService.js",
@@ -375,7 +395,11 @@
     },
     {
       "path": "src/services/promotionTaskQueue.js",
-      "sha256": "4595df1b557eea7339b9f7664cfa32caf52626cb19e259c923f85c18b8236631"
+      "sha256": "ac5dead737688d81502b5abe671bd579cf6799cc980bd8e9323675655347a375"
+    },
+    {
+      "path": "src/services/publishedVideoRetention.js",
+      "sha256": "76f82f5cfc7a9e52eaadcb18625cee51cd1b97855f204ab1eb64a4695db6f081"
     },
     {
       "path": "src/services/publishingIntent.js",
@@ -414,8 +438,12 @@
       "sha256": "169c5c6724c9f94b69a3b57fc30a386632445cb1f6c4e2a31822e594c5bf50ec"
     },
     {
-      "path": "src/services/viralOptimizationService.js",
-      "sha256": "96b079ee8c986f17690a3928bdc40f46cdb7761998b24b44a94a80aa87f483b1"
+      "path": "src/services/uploadAllowance.js",
+      "sha256": "c89c902f45ff83798f23799ce7229a48aecf93aa7512388da89cc5c3bd20a11e"
+    },
+    {
+      "path": "test/admin-upload-allowance.jest.test.js",
+      "sha256": "9011c72554e34bf1af8df2706f4c5d56ebf9b4aa593f7a7c043e2da57ac92c54"
     },
     {
       "path": "test/content-existing-schedule.jest.test.js",
@@ -423,11 +451,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "5c0b1c74d24586444598d3e7a221b89cfe7a26f6ab3dbe4227cfe8517545884a"
+      "sha256": "da6cc979861bb9368699bfc3d364839272222efaec42e508b0744b6ddbb21263"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "2c256424b95fa49a2d242967185c02f329a232e93f555a8490f3f89eea2cd49b"
+      "sha256": "e90ac12041f05a09fa46bc35bb3027c679b5d4712ba04863a9ff9677fffa8208"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

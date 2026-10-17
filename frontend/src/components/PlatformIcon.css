@@ -1,0 +1,16 @@
+.platform-brand-icon {
+  display: block;
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  flex: 0 0 auto;
+  filter: brightness(0) invert(1);
+}
+
+.platform-badge .platform-brand-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  margin-right: 4px;
+}

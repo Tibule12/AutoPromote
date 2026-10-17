@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ProductAssistance, { askProductAssistance } from '../ProductAssistance';
+import ProductAssistance, { askProductAssistance, ProductAssistanceLauncher } from '../ProductAssistance';
 import ProductHelpButton from '../ProductHelpButton';
 
 const reply = (id = 'studio.keyframes', status = 'FUNCTIONAL') => ({
@@ -9,6 +9,16 @@ const reply = (id = 'studio.keyframes', status = 'FUNCTIONAL') => ({
   features: [{ feature_id: id, name: 'Motion / Transform Keyframes', status, location: 'Studio → Motion', next_step: 'Select a layer.', how_to_use: ['Move the playhead.'], preview_behavior: 'Scoped preview', render_behavior: 'Existing render', limitations: ['Whole parity unqualified'], dependencies: [], common_errors: [] }],
   controls: [], tasks: [], documentation_gap: null,
   sources: { label: 'Based on AutoPromote documentation', knowledge_version: '1.0.0', product_version: '1.2.0', updated_at: '2026-10-13', documentation_url: '/api/product-assistance/docs/README.md' },
+});
+test('one icon launcher opens help and Escape restores keyboard focus', () => {
+  render(<><ProductAssistanceLauncher className="topbar-icon-btn" /><ProductAssistance launcher={false} /></>);
+  const launcher = screen.getByRole('button', { name: 'Ask AutoPromote' });
+  expect(launcher).toHaveTextContent('');
+  launcher.focus(); fireEvent.click(launcher);
+  expect(screen.getByRole('dialog')).toBeInTheDocument();
+  fireEvent.keyDown(screen.getByLabelText('Question'), { key: 'Escape' });
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(launcher).toHaveFocus();
 });
 test('contextual button sends only stable feature context and displays grounded status/sources', async () => {
   const request = jest.fn().mockResolvedValue(reply());

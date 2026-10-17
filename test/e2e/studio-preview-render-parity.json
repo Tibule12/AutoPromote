@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-16",
+  "updatedAt": "2026-10-17",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -845,24 +845,28 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S04",
-    "lastSessionKind": "FIVE_WORD_NATIVE_EDIT_AND_PLATFORM_PACKAGING",
-    "lastSessionRealCapabilityRuns": 2,
+    "lastSessionKind": "DAILY_STUDIO_NATIVE_PRODUCTION_PUBLISHING_AND_RUNNER_RECOVERY",
+    "lastSessionRealCapabilityRuns": 4,
     "lastSessionGpuJobsStarted": 0,
-    "exactBlockersSource": "reports/studio-platform-packaging-20261016/checkpoint.json",
+    "exactBlockersSource": "reports/daily-studio/2026-10-17/checkpoint.json",
     "updateAtEveryStudioSessionEnd": true,
     "recordValidation": {
       "command": "node test/e2e/validate-studio-contract.js",
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-platform-packaging-20261016/README.md",
+    "lastSessionEvidence": "reports/daily-studio/README.md",
     "lastSessionAutomatedChecks": {
-      "publisherWorkflow": 9,
-      "serverScheduleGuards": 7,
+      "dailyContract": 12,
+      "serverGuards": 49,
+      "uiFocusedFinal": 24,
+      "fullStudioSuiteQualified": false,
       "strictAppBuild": "PASS",
-      "fullStudioSuiteQualified": false
+      "serverSuites": 10,
+      "knowledgeTests": 17,
+      "knowledgeGeneratedFiles": 42
     },
-    "nextSlice": "Continue qualified daily creative packages through the normal Publisher; shared S04 spatial/path timing, then S03 occurrence/group ownership, retaining S02 picture/sound/export latency.",
+    "nextSlice": "Keep verified daily publishing; future fresh creative batches remain quality-gated. Shared S04 spatial/path timing, then S03 occurrence/group ownership, retaining S02 picture/sound/export latency.",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -5715,6 +5719,148 @@
       ],
       "otherSessionsPreserved": true,
       "gpuJobs": 0
+    }
+  },
+  "dailyStudioProduction20261017": {
+    "date": "2026-10-17",
+    "status": "SCHEDULED_VERIFIED",
+    "reviewedStories": 4,
+    "selectedEditableLayers": 54,
+    "selectedKeys": 256,
+    "nativeFullRecordings": 4,
+    "editableBackups": 4,
+    "destinationPackages": 24,
+    "verifiedDestinationSchedules": 24,
+    "verifiedDestinationMediaHashes": 24,
+    "newPublisherContentUploads": 4,
+    "providerPublicationVerified": false,
+    "nativeUserFlow": true,
+    "directProjectGraphInjection": false,
+    "coffeeChanges": 0,
+    "auditedAccountAllowance": {
+      "explicitOwnerAuthorization": true,
+      "uploads": 150,
+      "platformPosts": 1000,
+      "usageReset": false,
+      "subscriptionOrPriceChange": false,
+      "otherAccountsChanged": false
+    },
+    "publishedVideoRetention": {
+      "hoursAfterLastConfirmedDestination": 24,
+      "optedInAccountOnly": true,
+      "pendingPausedFailedRecurringSharedTransformWorkHeld": true,
+      "objectOwnershipAndGenerationVerifiedBeforeDeletion": true,
+      "timerEveryMinutes": 10,
+      "actualScanExpiredObjects": 0
+    },
+    "runtime": {
+      "userInstalledDistroAppArmorProfile": true,
+      "serviceContextWorkspaceWriteAllowed": true,
+      "serviceContextOutsideWriteDenied": true,
+      "first0400AttemptFailedBeforeCommandsAndRetained": true,
+      "repairedActualServiceInvocation": "PASS_ALREADY_COMPLETE_NO_RESUBMISSION",
+      "newModelProductionAfterRepairVerified": false,
+      "ownLocalServicesStopped": true,
+      "dailyAndRetentionTimersEnabled": true
+    },
+    "ui": {
+      "bundledBrandIcons": 12,
+      "queuePublisherConnections": true,
+      "singleHeaderHelpIcon": true,
+      "legacyFloatingChatbotMounted": false,
+      "boundedReleaseList": true,
+      "largerFullFramePreview": true,
+      "upcomingCalendarCardsShown": 25,
+      "upcomingSchedulesForToday": 24,
+      "priorPausedReleaseDestinations": 6
+    },
+    "evidence": {
+      "daybook": "reports/daily-studio/2026-10-17/day.json",
+      "queue": "reports/daily-studio/2026-10-17/queue-verified.json",
+      "report": "reports/daily-studio/README.md",
+      "checkpoint": "reports/daily-studio/2026-10-17/checkpoint.json",
+      "serviceSandbox": "reports/daily-studio/sandbox-preflight.private.json",
+      "nativeUi": "reports/daily-studio/2026-10-17/proof/brand-assistance-native.json",
+      "serverTests": "reports/daily-studio/2026-10-17/final-server-results.json",
+      "narration": "reports/daily-studio/2026-10-17/schedule-tour/narration-receipt.json",
+      "narratedTour": "reports/daily-studio/2026-10-17/schedule-tour/proof-v3/verified-delivery.json",
+      "serviceShutdown": "reports/daily-studio/2026-10-17/services-stopped.private.json"
+    },
+    "checks": {
+      "dailyContract": 12,
+      "serverGuards": 49,
+      "uiFocusedFinal": 24,
+      "fullStudioSuiteQualified": false,
+      "strictAppBuild": "PASS",
+      "serverSuites": 10,
+      "knowledgeTests": 17,
+      "knowledgeGeneratedFiles": 42
+    },
+    "formalReadinessCounts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "paidGpuJobs": 0,
+    "paidExternalModelJobs": 0,
+    "localCpuTtsPresetNarration": true,
+    "limits": [
+      "Editorial studies are not founder/showroom/hero approval.",
+      "Whole predictive picture/live sound, human listening and smoothness remain unqualified.",
+      "S04 spatial/path timing, S03 occurrence ownership and S02 picture/sound/export latency remain open.",
+      "Changes are on the working branch; no main merge or production deployment."
+    ],
+    "nextTaskId": "S04",
+    "nextSlice": "Keep verified daily publishing; future fresh creative batches remain quality-gated. Shared S04 spatial/path timing, then S03 occurrence/group ownership, retaining S02 picture/sound/export latency.",
+    "narratedScheduleTour": {
+      "verifiedAt": "2026-10-17T06:07:27.166Z",
+      "projectId": "viral-project-19fc1edd-2712-4596-a16d-dbd09e8456f3",
+      "canonicalHash": "389e2dbda4df7ad874d65ee29540582d4d04e5c88790723e39e20fca756c1c41",
+      "outputSha256": "32965ce2f8e62fc4e1a1382b0fe9c93ec9bd01bf6656d79c5928626738f09f64",
+      "submittedJobId": "viral_ccac9675b34d967f1551dcfa6820c90c3e9fc6276127288c9bc729abf998ac51",
+      "seconds": 31.708333,
+      "completeNativeStudioPlayback": true,
+      "timelineVisible": true,
+      "backupCanonicalHashMatches": true,
+      "ownedInputHashesVerified": [
+        {
+          "label": "voice",
+          "sha256": "aff9fa520e794f221f268bc34929d7d5751288548e720783e6896a176961e58c",
+          "ownedDownloadedBytesMatch": true
+        },
+        {
+          "label": "screen",
+          "sha256": "70f0cc5821d70bd742838c416a5ea52d82966651fe41ea187c9eb1705e7b90d7",
+          "ownedDownloadedBytesMatch": true
+        }
+      ],
+      "calendarCardsShown": 25,
+      "activeSchedulesToday": 24,
+      "priorPausedReleaseDestinations": 6,
+      "noContentOrScheduleWrites": true,
+      "sourceCaptureFps": 3.7913206955976815,
+      "studioRecordingCaptureFps": 19.029138240898174,
+      "loadingTransitionsHoldPreviousActualFrame": true,
+      "listeningAndSmoothnessQualified": false,
+      "movie": "reports/daily-studio/2026-10-17/schedule-tour/proof-v3/schedule-walkthrough/final.mp4",
+      "fullStudioRecording": "reports/daily-studio/2026-10-17/schedule-tour/proof-v3/schedule-walkthrough/edited-in-studio.mp4",
+      "editableBackup": "reports/daily-studio/2026-10-17/schedule-tour/proof-v3/SCHEDULE-WALKTHROUGH.autopromote.json",
+      "audioMeasurements": {
+        "integratedLUFS": -15.26,
+        "truePeakDBTP": -1.98,
+        "humanListeningQualified": false
+      }
+    },
+    "nativeCpuExports": {
+      "accepted": 13,
+      "ownedCompleted": 12,
+      "preservedOrphanExcluded": 1,
+      "narratedTourExports": 3,
+      "selectedNarratedTour": "proof-v3",
+      "earlierTourDraftsPreserved": true
     }
   }
 }

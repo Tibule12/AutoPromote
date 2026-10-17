@@ -136,6 +136,8 @@ const FEATURE_PRICES = {
   processing_fee_percent: 0.0,
 };
 
+const { effectiveUploadLimit } = require("./uploadAllowance");
+
 function buildTesterTier(baseTier) {
   return {
     ...baseTier,
@@ -155,7 +157,7 @@ function buildTesterTier(baseTier) {
   };
 }
 
-function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null) {
+function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null, billingData = {}) {
   if (testerAccess) return TESTER_PROGRAM.usageLimits.queuedPlatformPosts;
   const normalized = normalizePlanId(planId || "free");
   const defaultPlatformPostQuotas = {
@@ -166,13 +168,15 @@ function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null) {
     enterprise: 2000,
   };
   const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(normalized).toUpperCase()}`;
-  return (
+  const base = (
     parseInt(process.env[envKey] || "", 10) ||
     parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
     defaultPlatformPostQuotas[normalized] ||
     (plan && plan.features ? Number(plan.features.wolfHuntTasks) : 0) ||
     0
   );
+  const allowance = billingData.publishingAllowance?.monthlyLimit;
+  return Number.isInteger(allowance) && allowance >= 1 && allowance <= 10000 ? Math.max(base, allowance) : base;
 }
 
 async function resolveEffectiveTierId(userId, billingData, userData) {
@@ -274,7 +278,9 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
   const tierId = await resolveEffectiveTierId(userId, billingData, userData);
   const baseTier = TIERS[tierId.toUpperCase()] || TIERS.FREE;
   const testerAccess = getActiveTesterAccess(userData);
-  const tier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const selectedTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const tier = { ...selectedTier,
+    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData) };
 
   try {
     const normalizedStatus = String(
@@ -326,7 +332,9 @@ async function calculateCreatorCharge(userId, intent, _featuresSelected = []) {
   const userTierId = await resolveEffectiveTierId(userId, billingData, userData);
   const baseTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
   const testerAccess = getActiveTesterAccess(userData);
-  const userTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const selectedTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const userTier = { ...selectedTier,
+    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData) };
 
   // 2. Check Upload Caps (for Organic/Commercial)
   const used = billingData.uploads_this_month || 0;

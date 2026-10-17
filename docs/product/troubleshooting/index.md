@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Development documentation • product 1.2.0 • knowledge 1.0.23 • 2026-10-16
+Development documentation • product 1.2.0 • knowledge 1.0.24 • 2026-10-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -248,6 +248,8 @@ An authenticated account, project ownership and applicable entitlements are chec
 
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
+3. Open Billing to read the effective account upload and auto-publish allowances. An administrator can grant an audited account upload allowance without resetting usage or changing the subscription price.
+4. Use the chat icon in the dashboard header for documentation help. It opens the same read-only product assistance panel; the separate floating chatbot is removed.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -256,6 +258,8 @@ An authenticated account, project ownership and applicable entitlements are chec
 **Limits**
 
 - An expired sign-in needs the existing authentication flow. Do not share passwords or tokens with support.
+- An account-specific upload allowance does not grant credits, additional connected-platform capacity or unlimited posting. Publishing has its own enforced allowance.
+- Local scheduled production and cleanup require this computer to be running and connected. Source-backed local verification does not deploy the changes to hosted production.
 
 **Common errors**
 

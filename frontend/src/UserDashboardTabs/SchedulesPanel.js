@@ -16,6 +16,7 @@ import {
   zonedFieldsToIso,
 } from "./scheduleReleaseModel";
 import "./SchedulesPanel.css";
+import PlatformIcon from "../components/PlatformIcon";
 
 const dateLabel = (value, timezone) =>
   formatScheduleTime(value, timezone, { dateStyle: "medium", timeStyle: undefined });
@@ -23,14 +24,6 @@ const clockLabel = (value, timezone) =>
   formatScheduleTime(value, timezone, { dateStyle: undefined, timeStyle: "short" });
 const actionIds = release =>
   Array.from(new Set(release.destinations.map(item => item.schedule.id)));
-const PLATFORM_GLYPHS = {
-  facebook: "f",
-  instagram: "◎",
-  linkedin: "in",
-  reddit: "●",
-  tiktok: "♪",
-  youtube: "▶",
-};
 
 function originLabel(content) {
   if (!content) return "";
@@ -460,10 +453,10 @@ const SchedulesPanel = ({
                       <img src={media.poster} alt={`${selected.title} poster`} />
                     ) : (
                       <div className="schedule-media-empty">
-                        Media preview unavailable
+                        {media.expired ? "Published video removed from storage" : "Media preview unavailable"}
                         <br />
                         <small>
-                          The queue has no accessible poster or media URL for this release.
+                          {media.expired ? "The 24-hour retention period has ended. Publication history is kept. Upload the video again to schedule a new post." : "The queue has no accessible poster or media URL for this release."}
                         </small>
                       </div>
                     )}
@@ -529,8 +522,7 @@ const SchedulesPanel = ({
                               }
                             >
                               <span className={`schedule-platform-icon platform-${item.platform}`}>
-                                {PLATFORM_GLYPHS[item.platform] ||
-                                  (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
+                                <PlatformIcon platform={item.platform} />
                               </span>
                               <strong>{PLATFORM_NAMES[item.platform] || item.platform}</strong>
                               <StatusPill status={item.status} />
@@ -758,8 +750,7 @@ const SchedulesPanel = ({
                           title={PLATFORM_NAMES[item.platform] || item.platform}
                           className={`schedule-platform-icon platform-${item.platform}`}
                         >
-                          {PLATFORM_GLYPHS[item.platform] ||
-                            (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
+                          <PlatformIcon platform={item.platform} />
                         </span>
                       ))}
                     </span>

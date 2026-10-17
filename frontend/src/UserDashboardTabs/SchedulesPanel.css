@@ -812,6 +812,7 @@
 .schedule-workspace {
   grid-template-columns: minmax(310px, 29%) minmax(0, 1fr);
   gap: 12px;
+  align-items: start;
 }
 .schedule-release-list,
 .schedule-detail,
@@ -821,7 +822,12 @@
   border-color: #273d5c;
   box-shadow: none;
 }
-.schedule-release-list { padding: 10px; }
+.schedule-release-list {
+  padding: 10px;
+  max-height: 560px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
 .schedule-list-heading {
   display: flex;
   align-items: center;
@@ -910,7 +916,7 @@
   white-space: nowrap;
 }
 .schedule-detail-main {
-  grid-template-columns: minmax(145px, 28%) minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 38%) minmax(0, 1fr);
   gap: 12px;
   margin-bottom: 10px;
 }

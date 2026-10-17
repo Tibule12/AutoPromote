@@ -47,6 +47,7 @@ export function uniquePublisherAssets(assets) {
 }
 
 export function assetFromContent(content) {
+  if (["deleting_after_publication", "deleted_after_publication"].includes(content.storageRetentionStatus)) return null;
   const url = [content.persistentMediaUrl, content.url, content.mediaUrl, content.media_url,
     content.downloadInfo?.url, content.processedUrl].find(value => typeof value === "string" && /^https?:\/\//i.test(value));
   if (!url) return null;

@@ -44,7 +44,6 @@ import {
   inferUploadMediaType,
   uploadSourceFileViaBackend,
 } from "./utils/sourceUpload";
-import ChatWidget from "./ChatWidget";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import { Sentry } from "./sentryClient";
 import TestSentryButton from "./components/TestSentryButton";
@@ -1939,9 +1938,7 @@ function App() {
         </Routes>
       </Suspense>
 
-      {/* AI Chat Widget - only show when user is logged in */}
-      {user && <ProductAssistance />}
-      {user && <ChatWidget user={user} />}
+      {user && <ProductAssistance launcher={false} />}
     </div>
   );
 }

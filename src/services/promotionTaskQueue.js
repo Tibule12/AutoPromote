@@ -267,7 +267,7 @@ async function enqueueYouTubeUploadTask({
     const { attachSignature } = require("../utils/docSigner");
     task = attachSignature(baseTask);
   } catch (_) {}
-  await ref.set(task);
+  await require("./contentMediaDependency").writeMediaDependency(db, contentId, ref, task);
   try {
     require("./metricsRecorder").incrCounter("tiktok.enqueue.succeeded");
   } catch (_) {}
@@ -733,14 +733,14 @@ async function enqueuePlatformPostTask({
   try {
     console.log("[enqueue] checking quota for uid", uid);
     const { getEffectiveTierSnapshot } = require("./billingService");
-    const { tierId: planTier, testerAccess } = await getEffectiveTierSnapshot(uid);
+    const { tierId: planTier, testerAccess, billingData } = await getEffectiveTierSnapshot(uid);
     console.log("[enqueue] plan tier:", planTier);
     const { getPlan } = require("./planService");
     const { getPlatformPostMonthlyQuota } = require("./billingService");
     const plan = getPlan(planTier);
     const quota =
       getPlatformPostMonthlyQuota && typeof getPlatformPostMonthlyQuota === "function"
-        ? getPlatformPostMonthlyQuota(planTier, plan, testerAccess)
+        ? getPlatformPostMonthlyQuota(planTier, plan, testerAccess, billingData)
         : plan.monthlyTaskQuota || 0;
     if (quota > 0) {
       // Count successful or still-live platform post tasks this calendar month.
@@ -910,7 +910,7 @@ async function enqueuePlatformPostTask({
     const { attachSignature } = require("../utils/docSigner");
     task = attachSignature(baseTask);
   } catch (_) {}
-  await ref.set(task);
+  await require("./contentMediaDependency").writeMediaDependency(db, contentId, ref, task);
   try {
     const { recordPlatformPostDuplicate, recordTaskEnqueued } = require("./aggregationService");
     recordPlatformPostDuplicate(false);

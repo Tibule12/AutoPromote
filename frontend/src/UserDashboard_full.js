@@ -28,6 +28,7 @@ import FloatingActions from "./components/FloatingActions";
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
 import VoiceOverGuide from "./components/VoiceOverGuide";
+import { ProductAssistanceLauncher } from "./components/ProductAssistance";
 import AdminKyc from "./AdminKyc";
 import { auth } from "./firebaseClient";
 import { sendEmailVerification } from "firebase/auth";
@@ -1456,6 +1457,7 @@ const UserDashboard = ({
             <strong>{currentPageMeta.title}</strong>
           </div>
           <div className="topbar-actions">
+            <ProductAssistanceLauncher className="topbar-icon-btn" />
             <VoiceOverGuide activeTab={activeTab} />
             <button
               className={`topbar-icon-btn ${activeTab === "notifications" ? "is-active" : ""}`}

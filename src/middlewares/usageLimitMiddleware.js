@@ -126,7 +126,7 @@ function usageLimitMiddleware(options = {}) {
       const userData = userDoc.data() || {};
 
       // Determine the user's subscription tier
-      const { tierId: subscriptionTier, testerAccess } = await getEffectiveTierSnapshot(
+      const { tierId: subscriptionTier, testerAccess, tier } = await getEffectiveTierSnapshot(
         userId,
         null,
         userData
@@ -134,9 +134,9 @@ function usageLimitMiddleware(options = {}) {
       const isPaidTier = subscriptionTier !== "free";
 
       // Determine upload limit for the user based on plan
-      const planLimit = testerAccess
+      const planLimit = tier?.monthly_upload_cap ?? (testerAccess
         ? TESTER_PROGRAM.usageLimits.uploads
-        : SUBSCRIPTION_UPLOAD_LIMITS[subscriptionTier] ?? FREE_UPLOAD_LIMIT;
+        : SUBSCRIPTION_UPLOAD_LIMITS[subscriptionTier] ?? FREE_UPLOAD_LIMIT);
       if (planLimit === Infinity) {
         req.userUsage = {
           limit: planLimit,
@@ -279,7 +279,7 @@ async function getUserUsageStats(userId) {
     const userDoc = await db.collection("users").doc(userId).get();
     const userData = userDoc.data() || {};
 
-    const { tierId: normalizedTier, testerAccess } = await getEffectiveTierSnapshot(
+    const { tierId: normalizedTier, testerAccess, tier } = await getEffectiveTierSnapshot(
       userId,
       null,
       userData
@@ -300,9 +300,9 @@ async function getUserUsageStats(userId) {
       usageCount += data.count || 1;
     });
 
-    const planLimit = testerAccess
+    const planLimit = tier?.monthly_upload_cap ?? (testerAccess
       ? TESTER_PROGRAM.usageLimits.uploads
-      : SUBSCRIPTION_UPLOAD_LIMITS[normalizedTier] ?? FREE_UPLOAD_LIMIT;
+      : SUBSCRIPTION_UPLOAD_LIMITS[normalizedTier] ?? FREE_UPLOAD_LIMIT);
     return {
       isPaid: isPaidTier,
       limit: planLimit,

@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["date", "status", "storiesProduced", "schedulesVerified", "blockers"],
+  "properties": {
+    "date": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": [
+        "SCHEDULED_VERIFIED",
+        "PRODUCED_WAITING_ALLOWANCE",
+        "NEEDS_REVISION",
+        "WAITING_LOGIN",
+        "WAITING_DISK",
+        "WAITING_RUNTIME",
+        "FAILED"
+      ]
+    },
+    "storiesProduced": { "type": "integer", "minimum": 0, "maximum": 4 },
+    "schedulesVerified": { "type": "integer", "minimum": 0, "maximum": 24 },
+    "blockers": { "type": "array", "items": { "type": "string" } }
+  }
+}

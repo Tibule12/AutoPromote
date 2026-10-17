@@ -761,6 +761,43 @@
         "reports/studio-noise-pressure-20261016/README.md"
       ],
       "reason": "User rejected the prior creative level. Import ordinary static layer/group masks for editable sliced typography and reveal windows, and retain title layout while rendering denser glyph assets for enlarged text. Technical evidence does not establish creative approval or broad picture parity."
+    },
+    {
+      "feature_id": "publishing.schedule",
+      "documentation_impact": [
+        "FEATURE",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/UserDashboardTabs/SchedulesPanel.js",
+        "frontend/src/UserDashboardTabs/SchedulesPanel.css",
+        "frontend/src/components/PlatformIcon.js",
+        "src/services/publishedVideoRetention.js",
+        "src/services/contentMediaDependency.js",
+        "reports/daily-studio/README.md"
+      ],
+      "reason": "Verify four real native edits and 24 adapted schedules with exact owned media hashes; show full upcoming queue and brand icons, and document opted-in confirmed-publication retention with dependency guards. No provider-publication or readiness promotion."
+    },
+    {
+      "feature_id": "system.account",
+      "documentation_impact": [
+        "FEATURE",
+        "DEPENDENCIES",
+        "READINESS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "src/services/uploadAllowance.js",
+        "src/services/billingService.js",
+        "frontend/src/components/ProductAssistance.js",
+        "frontend/src/UserDashboard_full.js",
+        "frontend/src/App.js"
+      ],
+      "reason": "Owner explicitly requested an audited account-specific capacity increase and 24-hour published-copy retention. Normal account limits remain enforced. Replace the visible text help launcher and legacy floating chatbot with one accessible header icon."
     }
   ]
 }

@@ -1,0 +1,85 @@
+# Daily Studio production
+
+**17 October 2026: four new reviewed Studio edits have 24 verified schedules — four on each of six platforms.** Each destination has its own copy and publishing time. All 24 Queue inputs match the selected movie hashes. Four files were uploaded through normal Publisher; the other destinations reuse those exact owned Project assets. Coffee and preceding schedules were preserved. A schedule is not a confirmed provider publication.
+
+At the owner's explicit request, this account now has **150 uploads and 1000 platform posts monthly**, without resetting usage or changing the subscription price. Signed-in Billing confirms 24/150 uploads. Published-video retention is enabled for this account: remove eligible publishing copies 24 hours after the last confirmed destination, while retaining post history. The installed cleanup service scanned 120 content records and deleted **zero objects**; dependent or unconfirmed content stays protected.
+
+Queue, Publisher and Connections now use locally bundled real platform SVGs. One header chat icon opens Ask AutoPromote; the old floating chatbot and visible text launcher are removed. The release list scrolls beside a larger complete-frame video preview.
+
+The daily user timer is installed and enabled for 04:00 SAST, with recovery at 10:00 and 16:00. Its first actual 04:00 run failed before command execution because Ubuntu denied bubblewrap user-namespace mapping. The user subsequently loaded the prepared distro AppArmor profile. The repaired preflight passes **inside the actual user-service context**, proving an allowed workspace write and a denied outside write with zero model calls. A real service invocation then validated today's completed batch and exited without resubmitting anything. The original failed attempt remains retained. Fresh model production after the repair is not yet verified.
+
+## Selected edits
+
+Every selected movie is a native 10-second, 240-frame, 1280×720/24fps export with stereo 48kHz sound. Each has its complete Studio playback recording, exact editable backup and owned export receipt. Public clips are focused excerpts exported through Studio from those actual recordings. The whole picture and matching timeline remain visible. Complete recordings are retained separately; landscape clips are not described as vertical Shorts.
+
+| Editing problem / result | Layers / keys | Public Studio clip | Separate movie | Complete playback / editable project |
+| --- | ---: | --- | --- | --- |
+| Pacing contrast — “Slow down to stand out” | 15 / 65 | [6.8-second clip](2026-10-17/pacing-contrast/proof/excerpt/focused-recording/final.mp4) | [Movie](2026-10-17/pacing-contrast/proof/pacing-contrast/final.mp4) | [Recording](2026-10-17/pacing-contrast/proof/pacing-contrast/edited-in-studio.mp4) · [Project](2026-10-17/pacing-contrast/proof/pacing-contrast.autopromote.json) |
+| Revisable split type — balanced independent bands | 10 / 48 | [8.1-second clip](2026-10-17/editable-reveal/proof/refinement/excerpt/focused-recording/final.mp4) | [Movie](2026-10-17/editable-reveal/proof/refinement/editable-reveal/final.mp4) | [Recording](2026-10-17/editable-reveal/proof/refinement/editable-reveal/edited-in-studio.mp4) · [Project](2026-10-17/editable-reveal/proof/refinement/editable-reveal.autopromote.json) |
+| Visual hierarchy — competing words resolve to “Focus” | 15 / 81 | [7.8-second clip](2026-10-17/visual-hierarchy/proof/excerpt/focused-recording/final.mp4) | [Movie](2026-10-17/visual-hierarchy/proof/visual-hierarchy/final.mp4) | [Recording](2026-10-17/visual-hierarchy/proof/visual-hierarchy/edited-in-studio.mp4) · [Project](2026-10-17/visual-hierarchy/proof/visual-hierarchy.autopromote.json) |
+| Picture/type/sound accents — “Make the moment land” | 14 / 62 | [8.5-second clip](2026-10-17/sound-alignment/proof/excerpt/focused-recording/final.mp4) | [Movie](2026-10-17/sound-alignment/proof/sound-alignment/final.mp4) | [Recording](2026-10-17/sound-alignment/proof/sound-alignment/edited-in-studio.mp4) · [Project](2026-10-17/sound-alignment/proof/sound-alignment.autopromote.json) |
+
+The concepts use ordinary editable titles, artwork, masks, motion keys and original sound. There is no unrelated headphones footage. Graphics import/history, independent title-colour edit/Undo, save and cold reopen pass on the source projects. The split-type revision also uses native Duplicate, three polygon-mask edits and a frame-height edit, followed by exact cold reopen. Its earlier draft is preserved. Narrow impact artwork has corrected intrinsic dimensions before import, so native contain layout produces the intended bars.
+
+All **256 selected saved key tuples** match the actual compiled native requests. Movies and complete recordings independently decode. Actual opening/action/payoff contact sheets, timeline frames and public-excerpt samples were inspected. Sound measures −21.23, −23.12, −23.51 and −22.65 LUFS, with peaks below −6 dBTP; these measurements do not constitute human listening. Public excerpts reduce held tails and have separate native export/decode receipts.
+
+Capture rates are approximately 20.90, 21.13, 21.00 and 20.38fps, separate from the 24fps movies and encoded recordings. Capture does not establish smoothness. Whole predictive live picture/sound parity and human listening remain open. Editorial review of these craft studies is separate from founder, showroom/hero and formal product approval. S04 spatial/path timing, S03 occurrence ownership and S02 picture/sound/export latency remain open; readiness counts are unchanged.
+
+## Publishing
+
+The [private daybook](2026-10-17/day.json) retains hashes, reviews, exact native receipts and the failed automated attempt. The [24 destination packages](2026-10-17/platform-packages.json) provide separate audience/problem/hook/payoff/title/caption/CTA choices. YouTube uses editing/search language; TikTok a conversational problem; Instagram visual/niche language; LinkedIn revision workflow; Reddit a craft question and honest self-promotion; Facebook a relatable creator problem. Independent SAST times span 08:15–22:00 on 17 October. The [cold Queue verification](2026-10-17/queue-verified.json) confirms 24 once-only native schedules and their exact downloaded input hashes.
+
+Publisher initially returned `UPLOAD_CAP_EXCEEDED` before upload at 20/20; that attempt created no content or schedule. The owner then explicitly requested a larger allowance. The audited server-owned account update raised uploads to 150 and platform posts to 1000, preserving usage, price and other accounts. The four uploads and 24 schedules were subsequently completed through the real signed-in Studio/Publisher/Queue controls. Future automation cannot grant itself further allowance. The user confirmed the earlier Reddit post published and cancelled that investigation.
+
+## Narrated schedule demonstration
+
+The [narrated tour](2026-10-17/schedule-tour/proof-v3/schedule-walkthrough/final.mp4) shows the actual signed-in Queue, loaded previews, destination copy, independently staggered times and the reschedule controls. Every currently upcoming calendar entry appears: today's 24 schedules and the earlier paused Headphones release with six destinations. It cancels the example reschedule dialog and makes no content or schedule mutations. The account email and navigation are cropped out; the real videos, timeline recordings and calendar remain visible.
+
+The separate [complete Studio playback](2026-10-17/schedule-tour/proof-v3/schedule-walkthrough/edited-in-studio.mp4) and [editable backup](2026-10-17/schedule-tour/proof-v3/SCHEDULE-WALKTHROUGH.autopromote.json) retain the actual screen recording and independently editable narration track. Narration uses the local CPU Kokoro-82M `bf_emma` preset, with no identity cloning or paid external model call. The [transcript and source receipt](2026-10-17/schedule-tour/narration-receipt.json) retain six segments totalling 31.501 seconds. This tour is a separate reviewable asset; it is not an extra scheduled fifth post.
+
+The raw Queue capture measured approximately 3.79 actual frames/second; duplicated frames preserve wall-clock narration timing, holding the last actual clear frame during loading transitions. It is a readable interface walkthrough, not smoothness qualification. The earlier buffering draft and failed capture attempts remain preserved. Human listening and general live picture/sound parity remain separate checks.
+
+## Allowance and storage retention
+
+The allowance is kept in server-owned `user_billing`, consistently applied to upload, publishing, billing-status and worker checks. The authenticated admin control and explicit operator script require a reason and retain an atomic audit record. Client-editable profile values do not grant capacity.
+
+Retention waits for confirmed successful non-simulated publication on every intended destination, then uses the latest confirmation time. Pending, paused, failed, recurring, transform-dependent, shared or unconfirmed content is held. A transaction claim prevents new schedules/tasks racing deletion. Only this account's owned `uploads/videos/` objects qualify, with ownership, video type and storage-generation checks. Local films, editable projects, source libraries, models, thumbnails and other accounts are preserved. Queue history remains and expired publishing media cannot be scheduled again without a new upload.
+
+The persistent user cleanup timer runs every ten minutes. It is active now on this computer; the server also contains the same cleanup hook for a future deployment. The root Firebase wrapper now exports the actual storage service, fixing the earlier missing-service cleanup skip. Existing stored videos are not claimed deleted: the first real scan found zero eligible objects.
+
+Future runs must produce four different worthwhile results, inspect actual output, preserve the complete movie/timeline/project, and use normal signed-in Studio/Publisher/Queue. The detailed start-to-end tutorial remains a separate round. The local computer must be on and connected; retained logins, account allowance and the 5GiB reserve must remain usable. No API-key fallback, paid GPU restart, separate editing engine, recurring reposts, main merge or deployment is configured.
+
+## Runner repair and evidence
+
+The earlier terminal-only sandbox probe passed inside the IDE's different AppArmor context and did not establish service readiness. The actual 04:00 run exposed that distinction. The new model-free preflight launches a short-lived user-service sandbox probe with the same workspace/network configuration before starting a model task. It fails before model consumption if that context cannot enforce the required boundary.
+
+Following the official [Codex Linux setup](https://learn.chatgpt.com/docs/sandboxing), Ubuntu's `apparmor-profiles` package was downloaded and its exact bubblewrap profile extracted and compiled without kernel loading. The user ran the reviewable [setup script](../../scripts/daily-studio/sandbox-prerequisite.sh) with administrator authentication. A subsequent actual service-context probe passes workspace writes and rejects outside writes. The script pins the reviewed profile hash and preserves a different existing administrator profile. It does not disable the global AppArmor setting or switch Codex to unrestricted execution.
+
+Twelve daily-contract cases, 49 focused server guards and 24 final UI checks pass. These cover source/backup mismatch, native excerpt receipts, prior-media reuse, duplicate schedules, day/time/platform/crop/recurrence guards, admin authorization, account entitlements, deletion protection, expired media and the single help launcher. The strict normal App build, product knowledge checks and Studio continuity validator pass. Passing them does not prove creative quality, full Studio qualification or provider publication. Expected allowance/login waits remain explicit and exit success never substitutes for verified schedule receipts.
+
+The original four-edit production accepted ten native CPU exports, with nine owned completion/download/decode receipts: four selected movies, four public excerpts and the preserved first split-type draft. One earlier split-type job lost its API connection while the worker cloud upload stalled, then returned a fallback after the API exited. Its owner status remained processing. The job, project and observation are preserved and excluded from completion counts. Native Duplicate recovery happened only after the worker actually reported idle. The schedule tour adds three separately retained native exports: two earlier drafts and the selected final capture. Total accepted exports are 13, with 12 owned completions and the one preserved original orphan. The selected tour is 31.708 seconds/761 frames, with matching editable-backup and screen/voice input hashes; its full Studio playback ends naturally beside the timeline. Narration measures −15.26 LUFS and −1.98 dBTP, separate from human listening. No external post was duplicated.
+
+The local CPU launcher now uses its existing loopback output transport, with the authenticated Node owner persisting output durably. The selected split-type revision and excerpt verify that path through exact native download hashes. General crash recovery is not claimed. The local App server also forwards same-origin API requests so Billing receives real JSON instead of the static index page. Backup recovery waits for its input to be enabled; finished-file recovery uses the normal export-receipt control without another render.
+
+Own local App, API and CPU launcher were stopped after the worker reported idle; foreign services and both enabled timers were preserved. Date directories, credentials and raw logs are private and ignored by Git. The installed task uses the existing ChatGPT-signed-in CLI, a durable lock, private attempt logs, a three-hour process budget and a service process-group deadline. It preserves sources, finished films, editable projects and auth, and stops only its own services. The implementation follows the official [non-interactive execution documentation](https://learn.chatgpt.com/docs/non-interactive-mode). The OS timer is separate from in-app scheduled tasks.
+
+## Operate
+
+```sh
+systemctl --user status autopromote-daily-studio.timer
+systemctl --user list-timers autopromote-daily-studio.timer
+systemctl --user status autopromote-published-retention.timer
+node scripts/daily-studio/run.js --preflight
+node scripts/daily-studio/run.js --validate --date 2026-10-17
+node scripts/daily-studio/run.js --validate --scheduled --date 2026-10-17
+```
+
+Both validations pass for 17 October. The scheduled validation requires all 24 exact Queue rows and destination input hashes; prepared packages alone cannot pass it. Daily production and cleanup require this computer to remain on with network access, retained authentication and the unchanged 5GiB reserve.
+
+```sh
+# Stop future triggers and an active daily service.
+systemctl --user disable --now autopromote-daily-studio.timer
+systemctl --user stop autopromote-daily-studio.service
+```
+
+`scripts/daily-studio/install.js --install` restores the installed units without overwriting different existing units. A fresh checkout can prepare the reviewed Ubuntu prerequisite with `bash scripts/daily-studio/sandbox-prerequisite.sh --prepare`, followed by its administrator-only `--install` action when required. The first failed model attempt remains retained; the next complete model-run outcome must be assessed separately.

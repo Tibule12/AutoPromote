@@ -285,6 +285,7 @@ export function scheduleMedia(schedule, content, platform = schedule?.platform) 
   const settings = schedule?.platformSpecificSettings || {};
   const options = destinationOptions(content, platform);
   const base = releaseMedia(content);
+  if (base.expired) return base;
   const mediaUrl = value => firstMediaUrl(value.media_url, value.mediaUrl, value.videoUrl, value.imageUrl);
   const posterUrl = value => firstMediaUrl(value.posterUrl, value.thumbnailUrl, value.thumbnail_url, value.coverImage);
   const url = mediaUrl(settings) || mediaUrl(options) || base.url;
@@ -299,6 +300,8 @@ export function scheduleMedia(schedule, content, platform = schedule?.platform) 
 
 export function releaseMedia(content) {
   if (!content) return { poster: "", url: "", kind: "" };
+  if (["deleting_after_publication", "deleted_after_publication"].includes(content.storageRetentionStatus))
+    return { poster: "", url: "", kind: "video", expired: true };
   const poster = firstMediaUrl(
     content.posterUrl,
     content.thumbnailUrl,

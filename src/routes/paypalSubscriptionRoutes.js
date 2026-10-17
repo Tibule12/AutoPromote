@@ -77,11 +77,11 @@ function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
   return match ? match.id : null;
 }
 
-function getPlatformPostQuota(planId, plan) {
+function getPlatformPostQuota(planId, plan, billingData = {}) {
   return (
     (getPlatformPostMonthlyQuota &&
       typeof getPlatformPostMonthlyQuota === "function" &&
-      getPlatformPostMonthlyQuota(planId, plan)) ||
+      getPlatformPostMonthlyQuota(planId, plan, null, billingData)) ||
     (plan && plan.features && plan.features.wolfHuntTasks) ||
     0
   );
@@ -385,7 +385,7 @@ function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
           analytics: "Basic analytics",
           support: "Founding Tester feedback lane",
         }
-      : effectivePlan.features,
+      : { ...effectivePlan.features, uploads: snapshot.tier?.monthly_upload_cap ?? effectivePlan.features.uploads },
     cancelledAt: subscription.cancelledAt || snapshot.userData?.subscriptionCancelledAt || null,
     expiresAt:
       snapshot.testerAccess
@@ -1204,10 +1204,10 @@ router.get("/usage", authMiddleware, async (req, res) => {
       platformTaskSnap = { docs: [] };
     }
 
-    const uploadLimit = plan.features.uploads;
+    const uploadLimit = effectiveTier.tier?.monthly_upload_cap ?? plan.features.uploads;
     const communityPostLimit = plan.features.communityPosts;
     const missionOpportunityLimit = plan.features.wolfHuntTasks;
-    const platformPostLimit = getPlatformPostQuota(tier, plan);
+    const platformPostLimit = getPlatformPostQuota(tier, plan, effectiveTier.billingData);
     const isUnlimited = value =>
       value === Infinity || value === "unlimited" || value === "Unlimited";
 
@@ -1244,6 +1244,7 @@ router.get("/usage", authMiddleware, async (req, res) => {
     const topUpBalance = userData.credits || 0;
 
     const usage = {
+      storageRetention: effectiveTier.billingData?.storageRetention?.publishedVideoHours === 24 ? { publishedVideoHours: 24 } : null,
       uploads: {
         used: uploadsUsed,
         limit: isUnlimited(uploadLimit) ? null : uploadLimit,
@@ -1299,7 +1300,7 @@ router.get("/usage", authMiddleware, async (req, res) => {
       success: true,
       tier,
       usage,
-      features: plan.features,
+      features: { ...plan.features, uploads: uploadLimit },
       creditCosts: CREDIT_COSTS,
       topUpPacks: CREDIT_TOP_UP_PACKS,
     });

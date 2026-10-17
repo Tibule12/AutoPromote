@@ -265,7 +265,8 @@ class MonetizationService {
       };
 
       const tier = this.getTierConfig(tierId);
-      const limits = tier.limits;
+      const limits = { ...tier.limits,
+        monthlyUploads: effectiveSnapshot?.tier?.monthly_upload_cap ?? tier.limits.monthlyUploads };
 
       // Check monthly limits
       const canPerformAction = this.canPerformAction(subscription, action, limits);

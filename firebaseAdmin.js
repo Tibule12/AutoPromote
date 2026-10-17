@@ -235,4 +235,9 @@ if (bypass) {
 
   module.exports.admin = admin;
   module.exports.db = db;
+  Object.defineProperty(module.exports, 'storage', {
+    configurable: true,
+    enumerable: true,
+    get() { return admin.storage ? admin.storage() : null; }
+  });
 }
