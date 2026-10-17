@@ -1,8 +1,6 @@
 name: Security regressions
 
 on:
-  push:
-    branches: ['fix/security-alerts-*']
   pull_request:
     branches: [main]
     paths:

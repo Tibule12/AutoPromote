@@ -9,7 +9,7 @@ test('temporary dependency mitigations reject the actual malformed signature and
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'autopromote-security-patches-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const packages = {};
-  for (const name of ['braces', 'node-forge']) {
+  for (const name of ['braces', 'fill-range', 'to-regex-range', 'is-number', 'node-forge']) {
     const source = path.dirname(require.resolve(name + '/package.json'));
     const version = JSON.parse(fs.readFileSync(path.join(source, 'package.json'))).version;
     fs.cpSync(source, path.join(root, 'node_modules', name), { recursive: true });
