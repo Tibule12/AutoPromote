@@ -2,8 +2,32 @@ import React from "react";
 import { render, fireEvent, screen, waitFor } from "@testing-library/react";
 import StudioVoiceoverPreview from "../StudioVoiceoverPreview";
 import { uploadVoiceoversForRender, voiceoverTrackAudible, constantMusicDuckGain,
-  voiceoverPcmEligible, voiceoverPcmKey, createVoiceoverPcmBuffer } from "../studioVoiceover";
+  voiceoverPcmEligible, voiceoverPcmKey, createVoiceoverPcmBuffer, readVoiceoverDuration } from "../studioVoiceover";
 import { buildViralRenderData } from "../viralRenderPayload";
+
+test("duration decoding rejects unsafe sources and preserves blob and signed URLs", async () => {
+  const descriptor = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src");
+  const elements = [];
+  const setSource = jest.spyOn(HTMLMediaElement.prototype, "src", "set").mockImplementation(function (value) {
+    elements.push(this);
+    descriptor.set.call(this, value);
+    Object.defineProperty(this, "duration", { value: 2, configurable: true });
+    setTimeout(() => this.onloadedmetadata?.(), 0);
+  });
+  const load = jest.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+  const file = new Blob(["recording"], { type: "audio/webm" });
+  try {
+    for (const url of ["javascript:alert(1)", "data:text/html;base64,PHNjcmlwdD4="])
+      await expect(readVoiceoverDuration(file, url)).rejects.toThrow("could not be decoded");
+    expect(setSource).not.toHaveBeenCalled();
+    for (const url of ["blob:https://example.com/recording", "https://example.com/voice.wav?signature=a%2Bb%2Fc%3D"]) {
+      await expect(readVoiceoverDuration(file, url)).resolves.toBe(2);
+      expect(setSource).toHaveBeenLastCalledWith(url);
+    }
+    expect(elements.every(element => !element.hasAttribute("src"))).toBe(true);
+    expect(load).toHaveBeenCalledTimes(2);
+  } finally { jest.restoreAllMocks(); }
+});
 
 test("uploads a full-length recording and preserves trim, zero gain and kind through the actual render builder", async () => {
   const file = new File(["recording"], "take.webm", { type: "audio/webm" });

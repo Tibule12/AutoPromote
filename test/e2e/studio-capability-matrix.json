@@ -11545,7 +11545,7 @@
     ],
     "backendCases": 34,
     "ownedSubjectServiceCases": 18,
-    "frontendCases": 35,
+    "frontendCases": 37,
     "additionalAdversarialCases": 2,
     "sharedReplaySourceMatch": true,
     "readinessPromotion": false,

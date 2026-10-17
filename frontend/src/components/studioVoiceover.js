@@ -1,4 +1,4 @@
-import { reloadMediaElement } from "../utils/security";
+import { getSafeMediaSource, reloadMediaElement } from "../utils/security";
 import { isStudioAudioTrackAudible } from "./studioAudioTracks";
 import { studioUploadedAudioBinding } from "./studioAudioSourceBindings";
 
@@ -74,6 +74,8 @@ export function constantMusicDuckGain(track) {
 export async function readVoiceoverDuration(file, url) {
   if (!(file instanceof Blob) || !file.size || file.size > 128 * 1024 * 1024)
     throw new Error("Choose an audio recording smaller than 128 MB.");
+  const safeUrl = getSafeMediaSource(url);
+  if (!safeUrl) throw new Error("This recording could not be decoded.");
   const audio = document.createElement("audio");
   try {
     return await new Promise((resolve, reject) => {
@@ -89,7 +91,7 @@ export async function readVoiceoverDuration(file, url) {
       const timer = setTimeout(() => finish(new Error("The recording could not be read. Choose another audio file.")), 15000);
       audio.onloadedmetadata = () => finish();
       audio.onerror = () => finish(new Error("This recording could not be decoded."));
-      audio.preload = "metadata"; audio.src = url;
+      audio.preload = "metadata"; audio.src = safeUrl;
     });
   } finally { audio.removeAttribute("src"); reloadMediaElement(audio); }
 }

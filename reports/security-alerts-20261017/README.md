@@ -14,7 +14,7 @@ CodeQL diff-informed filtering is disabled in this workflow so remediation check
 | #1182, #1183 | First-error AJV validation, bounded iterative JSON preflight before serialization/schema traversal, and explicit calls to statically named capability validators prevent prototype-name dispatch and excessive nesting. Getters, custom serializers, non-JSON objects and nonfinite numbers are rejected. |
 | #1174–#1181 | All four local acceptance/preview hosts register express-rate-limit before file access, proxying or authorization. The two local app listeners are independently bounded. |
 | #1165, #1166, #1169, #1170 | Media source/poster values pass through the shared protocol validator and attribute URL encoder. Existing signed URL encoding is preserved. |
-| #1171, #1172 | Decoder loading/cleanup invokes the native HTMLMediaElement prototype method explicitly, preserving media behavior without a dynamic HTML-loading method call. |
+| #1171, #1172 | Decoder sources use the same protocol validation and URL encoding. Loading/cleanup invokes the native HTMLMediaElement prototype method explicitly, preserving media behavior without a dynamic HTML-loading method call. |
 | #1173 | Markdown report escaping handles existing backslashes before pipe escaping, and normalizes both CR/LF. |
 | #1164 | Refund reconciliation logging uses a literal format string and separate job/error values. |
 
@@ -47,9 +47,11 @@ The Functions package is also added to Dependabot's configured update directorie
 
 - 34 backend cases: worker transport/SSRF, hostile contract inputs and the existing model lifecycle.
 - 18 owned subject-render service cases.
-- 35 UI cases: media URLs, native decoder lifetime, voiceover, subject controls and release workflow.
+- 37 UI cases: media URLs, native decoder lifetime, voiceover, subject controls and release workflow.
 - 2 additional security cases: actual local-host HTTP rate enforcement and real malformed RSA/brace regressions. The dependency regression passes with both unpatched and already-mitigated installations.
 - All four package manifests/lock dependency maps agree; every requested package occurrence meets its patched minimum where a release exists.
 - The shared Director replay bundle matches its source. Studio contract validation passes with unchanged readiness counts (2UNIMPLEMENTED/1BROKEN/9PARTIAL/17FUNCTIONAL/0PRO/0PRODUCTION). No new visual or product-readiness qualification is claimed.
 
 Local preview and worker tests use ephemeral loopback servers; no actual model/GPU/provider operation or user-project mutation is executed. The [PR security CI](https://github.com/Tibule12/AutoPromote/actions/runs/39052973155) passes all 89 focused checks, shared replay and Studio validation on commit `a2e93477`. Frontend build, backend CI, Semgrep and emulator smoke checks also pass. The first CodeQL scan identified a related dynamic-call flow through the Map lookup; a follow-up replaces all such dispatch with an explicit switch over the five statically named validators. The 36 Node backend/adversarial cases pass again after that correction. Latest CodeQL findings and remote commit verification are recorded in the PR, so the evidence follows the final pushed revision.
+
+The first full-result scan (analysis `1973372525`, 90 findings versus main's 108) verified 18 requested finding locations absent but exposed two remaining decoder `src` assignments, now tracked as alerts 1185/1186. Both assignments now pass through the shared safe-source helper and reject unsafe protocols before decoding. Two additional UI regressions cover rejection, continued timeline usability, blob URLs, signed URLs and decoder cleanup. The complete local UI suite passes 37 cases after these corrections; the final full-result scan is tracked in the PR.
