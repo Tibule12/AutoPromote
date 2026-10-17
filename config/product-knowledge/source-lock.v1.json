@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed owner-rejected prior film, schedule-first native minute and word project, audio and IDE codec receipts, current-only backup control and exact fresh restore; unchanged formal readiness.",
-  "reviewed_at": "2026-10-17T08:45:23.917Z",
+  "reason": "Reviewed owner-authorized final-film scheduling through normal Publisher: six exact native-master schedules, independent destination copy and SAST times, one upload and five owned-asset reuses, unchanged earlier upcoming schedules and readiness.",
+  "reviewed_at": "2026-10-17T08:59:32.704Z",
   "catalog_sha256": "943dd9057d6c2a9eccbc7ee739c4494077444081aa6dce0d8246fadc3f0215f1",
   "sources": [
     {
@@ -451,11 +451,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "c8d2518e3a75f6c3dea4cae811732dad9ae50429dd3e13e1ef32459bb66a19ce"
+      "sha256": "44e9e9496c374ce2a6167e825ae5f2191f47aee90eb2ea622f40ed1990896ccc"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "d313fda20212b4a565f97a553d1e63cf2b785d91ecf6e7cb6872ea934924fcd3"
+      "sha256": "dce5bbb4064334e3b9317e2198208d512612d60ea2302fc020394538f96d374c"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
