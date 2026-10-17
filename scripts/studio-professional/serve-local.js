@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 const express = require('express');
+const rateLimit = require("express-rate-limit");
 const path = require('node:path');
 const build = path.resolve(__dirname, '../../reports/studio-professional-editing-20261013/proof/local-app');
 const app = express();
+app.use(rateLimit({ windowMs: 60000, max: 3000, standardHeaders: true, legacyHeaders: false }));
 app.use(express.static(build));
 app.get(/.*/, (_req, res) => res.sendFile(path.join(build, 'index.html')));
 // The other editing track owns ::1:5000. Keep its listener untouched. Our

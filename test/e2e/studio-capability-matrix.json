@@ -11508,5 +11508,53 @@
       "S03",
       "S04"
     ]
+  },
+  "securityAlertRemediation20261017": {
+    "status": "IMPLEMENTED_VALIDATION_EVIDENCE_IN_PR_488",
+    "evidence": "reports/security-alerts-20261017/README.md",
+    "requestedCodeqlAlerts": [
+      1164,
+      1165,
+      1166,
+      1167,
+      1168,
+      1169,
+      1170,
+      1171,
+      1172,
+      1173,
+      1174,
+      1175,
+      1176,
+      1177,
+      1178,
+      1179,
+      1180,
+      1181,
+      1182,
+      1183
+    ],
+    "requestedDependencyAlerts": 25,
+    "publishedUpgradeAlerts": 20,
+    "temporarilyMitigatedNoPatchedReleaseAlerts": [
+      713,
+      714,
+      720,
+      729,
+      751
+    ],
+    "backendCases": 34,
+    "ownedSubjectServiceCases": 18,
+    "frontendCases": 37,
+    "additionalAdversarialCases": 2,
+    "sharedReplaySourceMatch": true,
+    "readinessPromotion": false,
+    "noProjectMutation": true,
+    "newGpuJobs": 0,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "nextTask": "Review latest PR #488 CodeQL and security CI evidence before integration; main alerts require a reviewed merge and main analysis. Replace temporary dependency patches when official fixed releases exist. Shared S02/S03/S04 remains separately owned.",
+    "prEvidence": "https://github.com/Tibule12/AutoPromote/pull/488",
+    "securityRegressionRun": "https://github.com/Tibule12/AutoPromote/actions/runs/39052973155"
   }
 }

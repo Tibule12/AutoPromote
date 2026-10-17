@@ -2,19 +2,29 @@ import React from "react";
 import { act, render, waitFor } from "@testing-library/react";
 import TimelineSourceFilmstrip from "../TimelineSourceFilmstrip";
 
+test("unsafe thumbnail sources never reach the decoder and leave the timeline usable", async () => {
+  const setSource = jest.spyOn(HTMLMediaElement.prototype, "src", "set");
+  jest.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+  jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({});
+  try {
+    const { container } = render(<TimelineSourceFilmstrip frames={[
+      { id: "unsafe-script", src: "javascript:alert(1)", previewTime: 0 },
+      { id: "unsafe-html", src: "data:text/html;base64,PHNjcmlwdD4=", previewTime: 1 },
+    ]} />);
+    await waitFor(() => expect(container.querySelector(".pro-source-filmstrip").dataset.samplingError)
+      .toBe("Thumbnail media source unavailable"));
+    expect(setSource).not.toHaveBeenCalled();
+    expect(container.querySelectorAll("img")).toHaveLength(0);
+  } finally { jest.restoreAllMocks(); }
+});
+
 test("a failed source stops sampling that source and leaves the timeline usable", async () => {
-  const create = document.createElement.bind(document);
   const load = jest.fn();
-  jest.spyOn(document, "createElement").mockImplementation((name, ...args) => {
-    const node = create(name, ...args);
-    if (name === "video")
-      node.load = () => {
-        if (node.hasAttribute("src")) {
-          load();
-          setTimeout(() => node.dispatchEvent(new Event("error")), 0);
-        }
-      };
-    return node;
+  jest.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(function () {
+    if (this.hasAttribute("src")) {
+      load();
+      setTimeout(() => this.dispatchEvent(new Event("error")), 0);
+    }
   });
   jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({});
   try {
@@ -57,8 +67,10 @@ test("filmstrip uses one separate muted decoder, bounds source seeks and release
         },
       },
     });
-    node.load = jest.fn(() => setTimeout(() => node.dispatchEvent(new Event("loadedmetadata")), 0));
     return node;
+  });
+  jest.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(function () {
+    setTimeout(() => this.dispatchEvent(new Event("loadedmetadata")), 0);
   });
   const draw = jest.fn();
   jest

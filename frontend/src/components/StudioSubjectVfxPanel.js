@@ -1,3 +1,4 @@
+import { getSafeMediaSource } from "../utils/security";
 import { useEffect, useRef, useState } from "react";
 import { validateSubjectVfxScene, subjectVfxRevision } from "./studioSubjectVfxContract";
 import "./StudioSubjectVfxPanel.css";
@@ -524,7 +525,7 @@ export default function StudioSubjectVfxPanel({
             <video
               key={source?.url}
               ref={video}
-              src={source?.url}
+              src={getSafeMediaSource(source?.url)}
               preload="metadata"
               playsInline
               aria-label="Select subject in source footage"
@@ -813,7 +814,7 @@ export default function StudioSubjectVfxPanel({
                 controls
                 playsInline
                 preload="metadata"
-                src={item.preview.url}
+                src={getSafeMediaSource(item.preview.url)}
                 aria-label="Rendered subject effects with original audio"
                 onPlaying={() => setPlayed(true)}
                 onError={() => {

@@ -39,7 +39,7 @@
     "flag:uploads": "node ./scripts/flag-bad-uploads.js",
     "export:flagged": "node ./scripts/export-flagged-uploads.js",
     "hold:flagged": "node ./scripts/bulk-hold-flagged.js",
-    "postinstall": "node ./scripts/build-frontend-on-render.js",
+    "postinstall": "node autopromote-functions/security/apply-dependency-patches.cjs && node ./scripts/build-frontend-on-render.js",
     "prepare": "node -e \"const fs=require('fs'), cp=require('child_process'); const tryRun=(p)=>{ if(fs.existsSync(p)){ cp.execFileSync(process.execPath, [p], {stdio:'inherit'}); return true; } return false; }; if(tryRun('./scripts/ensure-husky.js')) process.exit(0); if(tryRun('../scripts/ensure-husky.js')) process.exit(0); if(tryRun('../../scripts/ensure-husky.js')) process.exit(0); console.log('No ensure-husky script found in CWD or parents; skipping husky install');\"",
     "verify:frontend-build": "node ./scripts/verify-frontend-build.js",
     "build:studio-director-replay": "node ./scripts/build-studio-director-replay.js",
@@ -67,9 +67,9 @@
     "@sentry/react": "^7.120.4",
     "@sentry/tracing": "^7.72.0",
     "ajv": "6.15.0",
-    "axios": "^1.18.1",
+    "axios": "^1.20.0",
     "bcryptjs": "^2.4.3",
-    "compression": "^1.8.1",
+    "compression": "^1.8.2",
     "cors": "^2.8.5",
     "discord-interactions": "^4.4.0",
     "dotenv": "^16.6.1",
@@ -95,7 +95,7 @@
     "uuid": "^14.0.0"
   },
   "overrides": {
-    "axios": "^1.18.1",
+    "axios": "$axios",
     "websocket-driver": "0.7.5",
     "morgan": "1.12.1",
     "hono": "4.13.5",
@@ -172,7 +172,11 @@
     },
     "minimatch@10": {
       "brace-expansion": "5.1.0"
-    }
+    },
+    "compression": "$compression",
+    "proxy-addr": "2.0.8",
+    "@fastify/busboy": "3.2.3",
+    "braces": "3.0.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

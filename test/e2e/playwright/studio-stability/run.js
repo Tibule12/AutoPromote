@@ -295,7 +295,7 @@ async function main() {
     console.log(JSON.stringify(record(id,values,{reviewedAt:new Date().toISOString()})));return;
   }
   if(command==='report') {
-    const data=read();const escape=v=>String(v??'').replace(/\|/g,'\\|').replace(/\n/g,' ');
+    const data=read();const escape=v=>String(v??'').replace(/\\/g,'\\\\').replace(/\|/g,'\\|').replace(/[\r\n]/g,' ');
     const gpuCell=row=>row.latestRetestDate
       ? `${row.latestRetestGpuUsed?'Yes':'No'} · ${row.latestRetestDate}${!row.latestRetestGpuUsed&&row.gpuUsed?'; prior GPU evidence retained':''}`
       : `${row.gpuUsed?'Yes':'No'} · historical`;

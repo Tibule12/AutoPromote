@@ -4,6 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const root = path.resolve(__dirname, "..");
 const folder = path.resolve(
   root,
@@ -150,6 +151,7 @@ webpack(config, (error, stats) => {
     return;
   }
   const app = express();
+  app.use(rateLimit({ windowMs: 60000, max: 3000, standardHeaders: true, legacyHeaders: false }));
   app.use("/api", (_req, res) =>
     res.status(404).json({ error: "LOCAL_INTERACTION_FIXTURE_HAS_NO_API" })
   );

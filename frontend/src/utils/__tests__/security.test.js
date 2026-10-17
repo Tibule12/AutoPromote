@@ -1,4 +1,4 @@
-import { applySafeMediaSource, sanitizeMediaUrl } from "../security";
+import { applySafeMediaSource, sanitizeMediaUrl, getSafeMediaSource, reloadMediaElement } from "../security";
 
 describe("security media URLs", () => {
   test("preserves signed media URLs that already contain encoded query parameters", () => {
@@ -30,16 +30,42 @@ describe("security media URLs", () => {
 
   test("reloads playable media only when its source changes or clears", () => {
     const video = document.createElement("video");
-    video.load = jest.fn();
+    const nativeLoad = jest.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+    video.load = jest.fn(() => { throw new Error("Untrusted own load method"); });
 
     expect(applySafeMediaSource(video, "blob:https://example.com/source-video")).toBe(true);
-    expect(video.load).toHaveBeenCalledTimes(1);
+    expect(nativeLoad).toHaveBeenCalledTimes(1);
 
     expect(applySafeMediaSource(video, "blob:https://example.com/source-video")).toBe(true);
-    expect(video.load).toHaveBeenCalledTimes(1);
+    expect(nativeLoad).toHaveBeenCalledTimes(1);
 
     expect(applySafeMediaSource(video, null)).toBe(false);
-    expect(video.load).toHaveBeenCalledTimes(2);
+    expect(nativeLoad).toHaveBeenCalledTimes(2);
     expect(video.hasAttribute("src")).toBe(false);
+    expect(video.load).not.toHaveBeenCalled();
+    nativeLoad.mockRestore();
   });
+});
+
+
+test("React media attributes preserve signatures and encode HTML delimiters", () => {
+  const signed = "https://storage.googleapis.com/bucket/video.mp4?X-Goog-Signature=a%2Bb%2Fc%3D";
+  expect(getSafeMediaSource(signed)).toBe(signed);
+  expect(getSafeMediaSource('javascript:alert(1)')).toBeUndefined();
+  expect(getSafeMediaSource('data:text/html;base64,PHNjcmlwdD4=')).toBeUndefined();
+  expect(getSafeMediaSource('blob:https://example.com/<img onerror="attack">')).not.toMatch(/[<>" ]/);
+  expect(getSafeMediaSource('data:image/png;base64,aGVsbG8=')).toBe('data:image/png;base64,aGVsbG8=');
+});
+
+test("native media reload ignores an overridden instance method", () => {
+  const video = document.createElement('video');
+  const nativeLoad = jest.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
+  video.load = jest.fn();
+  try {
+    reloadMediaElement(video);
+    expect(nativeLoad).toHaveBeenCalledTimes(1);
+    expect(video.load).not.toHaveBeenCalled();
+    reloadMediaElement(document.createElement('div'));
+    expect(nativeLoad).toHaveBeenCalledTimes(1);
+  } finally { nativeLoad.mockRestore(); }
 });

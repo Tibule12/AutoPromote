@@ -1,3 +1,4 @@
+import { getSafeMediaSource, reloadMediaElement } from "../utils/security";
 import React, { useEffect, useState } from "react";
 
 const thumbnailCache = new Map();
@@ -76,9 +77,11 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
         if (failedSources.has(src)) continue;
         try {
           if (source !== src) {
+            const safeSrc = getSafeMediaSource(src);
+            if (!safeSrc) throw new Error("Thumbnail media source unavailable");
             await waitFor("loadedmetadata", () => {
-              video.src = src;
-              video.load();
+              video.src = safeSrc;
+              reloadMediaElement(video);
             });
             source = src;
           }
@@ -106,13 +109,13 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
         }
       }
       video.removeAttribute("src");
-      video.load();
+      reloadMediaElement(video);
       video.remove();
     })();
     return () => {
       controller.abort();
       video.removeAttribute("src");
-      video.load();
+      reloadMediaElement(video);
       video.remove();
     };
   }, [signature]);

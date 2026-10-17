@@ -1,3 +1,4 @@
+import { getSafeMediaSource } from "../utils/security";
 import React, { useEffect, useRef, useState } from 'react';
 import { auth } from '../firebaseClient';
 import ProductHelpButton from './ProductHelpButton';
@@ -50,7 +51,7 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
           const player = document.createElement(mediaType); player.preload = 'metadata';
           const timer = setTimeout(() => { player.removeAttribute('src'); reject(new Error('Could not read media duration.')); }, 15000);
           player.onloadedmetadata = () => { clearTimeout(timer); resolve(player.duration); player.removeAttribute('src'); };
-          player.onerror = () => { clearTimeout(timer); reject(new Error('Unsupported media.')); }; player.src = url;
+          player.onerror = () => { clearTimeout(timer); reject(new Error('Unsupported media.')); }; player.src = getSafeMediaSource(url) || "";
         }); } finally { URL.revokeObjectURL(url); }
       }
       const uploaded = await uploadSourceFileViaBackend({ file, mediaType, fileName: file.name,

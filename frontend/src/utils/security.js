@@ -55,7 +55,8 @@ export function sanitizeMediaUrl(url) {
 }
 
 export function getSafeMediaSource(url) {
-  return sanitizeMediaUrl(url) || undefined;
+  const safeUrl = sanitizeMediaUrl(url);
+  return safeUrl ? encodeSafeAttributeUrl(safeUrl) || undefined : undefined;
 }
 
 function encodeSafeAttributeUrl(url) {
@@ -64,6 +65,12 @@ function encodeSafeAttributeUrl(url) {
   } catch {
     return "";
   }
+}
+
+// Use the native media operation explicitly: no jQuery-style HTML load sink.
+export function reloadMediaElement(element) {
+  const MediaElement = element?.ownerDocument?.defaultView?.HTMLMediaElement;
+  if (MediaElement && element instanceof MediaElement) MediaElement.prototype.load.call(element);
 }
 
 export function applySafeMediaSource(element, url) {
@@ -77,7 +84,7 @@ export function applySafeMediaSource(element, url) {
   }
   const reloadPlayableMedia = () => {
     if (isPlayableMedia && typeof element.load === "function") {
-      element.load();
+      reloadMediaElement(element);
     }
   };
   if (!safeAttributeUrl) {

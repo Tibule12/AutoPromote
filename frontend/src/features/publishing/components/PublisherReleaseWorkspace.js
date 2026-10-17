@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getPlatformName } from "../utils/publishingUtils";
 import { PUBLISHER_PLATFORMS, PUBLISHER_STEPS, destinationCopy, mediaUrl, sourceLabels } from "../utils/publisherWorkflow";
 import { formatScheduleTime, timezoneLabel } from "../../../UserDashboardTabs/scheduleReleaseModel";
-import { sanitizeUrl } from "../../../utils/security";
+import { getSafeMediaSource } from "../../../utils/security";
 
 const glyphs = { facebook: "f", instagram: "◎", linkedin: "in", reddit: "●", tiktok: "♪", youtube: "▶" };
 export function PublisherPlatformIcon({ platform }) {
@@ -17,12 +17,12 @@ function ReleaseMedia({ file, preview, poster, onMetadata, label = "Release medi
     setObjectUrl(url);
     return () => URL.revokeObjectURL(url);
   }, [file]);
-  const url = sanitizeUrl(mediaUrl(file) || objectUrl || preview || "");
+  const url = getSafeMediaSource(mediaUrl(file) || objectUrl || preview || "");
   const type = String(file?.type || "");
   const image = type.startsWith("image") || /\.(png|jpe?g|webp|gif)(?:[?#]|$)/i.test(url);
   if (!url) return <div className="release-media-empty">Choose a finished video or image</div>;
   return image ? <img className="release-media" src={url} alt={label} /> :
-    <video className="release-media" src={url} poster={sanitizeUrl(poster || file?.thumbnailUrl || "") || undefined} controls preload="metadata" aria-label={label} onLoadedMetadata={event => onMetadata?.(event.currentTarget)} />;
+    <video className="release-media" src={url} poster={getSafeMediaSource(poster || file?.thumbnailUrl || "") || undefined} controls preload="metadata" aria-label={label} onLoadedMetadata={event => onMetadata?.(event.currentTarget)} />;
 }
 
 export default function PublisherReleaseWorkspace({
@@ -94,7 +94,7 @@ export default function PublisherReleaseWorkspace({
             {assetTab !== "upload" && !assetsLoading && assets.length > 12 && <label className="release-asset-search">Find an asset<input type="search" value={assetQuery} onChange={event => { setAssetQuery(event.target.value); setShowAllAssets(false); }} placeholder="Search by name or template" /></label>}
             {assetTab === "upload" ? <label className="release-upload"><strong>Choose a video or image</strong><span>Upload from your device</span><input aria-label="Upload release media" type="file" accept="video/*,image/*" onChange={onUploadFile} /></label> : <div className="release-asset-grid" aria-busy={assetsLoading}>
               {!assetsLoading && displayedAssets.map(asset => <button key={asset.sourceContentId} type="button" aria-pressed={!!file && sourceAsset?.sourceContentId === asset.sourceContentId} onClick={() => onSelectAsset(asset)}>
-                {asset.thumbnailUrl ? <img src={sanitizeUrl(asset.thumbnailUrl)} alt="" /> : <span className="release-asset-placeholder" aria-hidden="true">▷</span>}
+                {asset.thumbnailUrl ? <img src={getSafeMediaSource(asset.thumbnailUrl)} alt="" /> : <span className="release-asset-placeholder" aria-hidden="true">▷</span>}
                 <strong>{asset.name}</strong>{sourceLabels(asset).template && <small>{sourceLabels(asset).template}</small>}
               </button>)}
               {assetsLoading ? <p role="status">Loading {assetTab === "assets" ? "project" : assetTab} assets…</p> : !matchingAssets.length && <p>{assetQuery ? "No assets match that search." : `No available ${assetTab === "assets" ? "project" : assetTab} assets in this workspace. Use another source or upload media.`}</p>}

@@ -867,7 +867,7 @@ const refundViralRenderJobIfNeeded = async (userId, jobId, data, reason = "worke
     }
     return refundResult;
   } catch (error) {
-    console.error(`[MediaRoute] Could not reconcile viral render refund for ${jobId}:`, error.message);
+    console.error("[MediaRoute] Could not reconcile viral render refund for %s: %s", jobId, error.message);
     return { success: false, message: error.message };
   }
 };

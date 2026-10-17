@@ -20,6 +20,9 @@ jobs:
   analyze:
     name: Perform CodeQL Analysis
     runs-on: ubuntu-latest
+    env:
+      # Remediation must verify existing findings, including unchanged route lines.
+      CODEQL_ACTION_DIFF_INFORMED_QUERIES: 'false'
 
     steps:
       - name: Checkout repository

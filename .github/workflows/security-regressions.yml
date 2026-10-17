@@ -1,0 +1,55 @@
+name: Security regressions
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'frontend/src/**'
+      - '**/package*.json'
+      - 'scripts/**'
+      - 'test/**'
+      - 'autopromote-functions/security/**'
+      - '.github/workflows/security-regressions.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+      - name: Install locked backend dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Apply and verify temporary upstream mitigations
+        run: |
+          node autopromote-functions/security/apply-dependency-patches.cjs
+          node autopromote-functions/security/apply-dependency-patches.cjs
+      - name: Exercise worker SSRF, validation, rate limiting and dependency regressions
+        run: node --test test/e2e/studio-worker-read-recovery.test.js test/model-runtime/contract-security.test.js test/model-runtime/runtime.test.js test/dependency-security-patches.test.js test/local-preview-rate-limit.test.js
+      - name: Verify owned subject-render lifecycle
+        env:
+          FIREBASE_ADMIN_BYPASS: '1'
+          CI_ROUTE_IMPORTS: '1'
+          OPENAI_LOGGING_ENABLED: '1'
+        run: npx --no-install jest --runInBand --selectProjects server --runTestsByPath test/studioSubjectVfxService.jest.test.js
+      - name: Install locked frontend dependencies
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
+      - name: Exercise media URL, decoder and publishing regressions
+        working-directory: frontend
+        env:
+          CI: 'true'
+        run: npm test -- --watchAll=false --runInBand --runTestsByPath src/utils/__tests__/security.test.js src/components/__tests__/TimelineSourceFilmstrip.test.js src/components/__tests__/studioVoiceover.test.js src/components/__tests__/StudioSubjectVfxPanel.test.js src/__tests__/UnifiedPublisher.release.test.js
+      - name: Verify shared Studio replay and readiness records
+        run: |
+          npm run check:studio-director-replay
+          node test/e2e/validate-studio-contract.js
