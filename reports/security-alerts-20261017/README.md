@@ -4,12 +4,12 @@ This isolated fix branch is based on `origin/main` commit `858d538b51879c718d49f
 
 ## CodeQL scope
 
-All 20 requested alerts (#1164–#1183) were confirmed open on main through the GitHub API. The source corrections are implemented; the PR CodeQL run must verify their classification. Main alerts cannot be reported closed before a reviewed merge and main analysis.
+All 20 requested alerts (#1164–#1183) were confirmed open on main through the GitHub API. The source corrections are implemented; current PR CodeQL and CI evidence is recorded in [PR #488](https://github.com/Tibule12/AutoPromote/pull/488). Main alerts cannot be reported closed before a reviewed merge and main analysis.
 
 | Alerts | Correction |
 |---|---|
 | #1167, #1168 | Worker reads/cancellation accept validated job IDs instead of arbitrary URLs. Axios uses a server-configured base URL, encoded relative job paths, fixed authentication, no proxy and no redirects. Callers cannot override the destination or transport policy. GET connection recovery still retries once; cancellation never retries. |
-| #1182, #1183 | First-error AJV validation, bounded iterative JSON preflight before serialization/schema traversal, and Map-backed capability validators prevent prototype-name dispatch and excessive nesting. Getters, custom serializers, non-JSON objects and nonfinite numbers are rejected. |
+| #1182, #1183 | First-error AJV validation, bounded iterative JSON preflight before serialization/schema traversal, and explicit calls to statically named capability validators prevent prototype-name dispatch and excessive nesting. Getters, custom serializers, non-JSON objects and nonfinite numbers are rejected. |
 | #1174–#1181 | All four local acceptance/preview hosts register express-rate-limit before file access, proxying or authorization. The two local app listeners are independently bounded. |
 | #1165, #1166, #1169, #1170 | Media source/poster values pass through the shared protocol validator and attribute URL encoder. Existing signed URL encoding is preserved. |
 | #1171, #1172 | Decoder loading/cleanup invokes the native HTMLMediaElement prototype method explicitly, preserving media behavior without a dynamic HTML-loading method call. |
@@ -50,4 +50,4 @@ The Functions package is also added to Dependabot's configured update directorie
 - All four package manifests/lock dependency maps agree; every requested package occurrence meets its patched minimum where a release exists.
 - The shared Director replay bundle matches its source. Studio contract validation passes with unchanged readiness counts (2UNIMPLEMENTED/1BROKEN/9PARTIAL/17FUNCTIONAL/0PRO/0PRODUCTION). No new visual or product-readiness qualification is claimed.
 
-Local preview and worker tests use ephemeral loopback servers; no actual model/GPU/provider operation or user-project mutation is executed. The new security CI repeats the focused checks. PR CodeQL results and remote commit verification are recorded separately after push.
+Local preview and worker tests use ephemeral loopback servers; no actual model/GPU/provider operation or user-project mutation is executed. The [PR security CI](https://github.com/Tibule12/AutoPromote/actions/runs/39052973155) passes all 89 focused checks, shared replay and Studio validation on commit `a2e93477`. Frontend build, backend CI, Semgrep and emulator smoke checks also pass. The first CodeQL scan identified a related dynamic-call flow through the Map lookup; a follow-up replaces all such dispatch with an explicit switch over the five statically named validators. The 36 Node backend/adversarial cases pass again after that correction. Latest CodeQL findings and remote commit verification are recorded in the PR, so the evidence follows the final pushed revision.

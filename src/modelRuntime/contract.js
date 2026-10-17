@@ -8,8 +8,28 @@ const hash = value => crypto.createHash('sha256').update(Buffer.isBuffer(value) 
 const fail = (code, statusCode = 400) => Object.assign(new Error(code), { code, statusCode });
 const ajv = new Ajv({ allErrors: false, strictNumbers: true });
 const requestValidator = ajv.compile(schemas.request);
-const inputs = new Map(Object.entries(schemas.inputs).map(([key, schema]) => [key, ajv.compile(schema)]));
-const outputs = new Map(Object.entries(schemas.outputs).map(([key, schema]) => [key, ajv.compile(schema)]));
+function capabilityValidators(definitions) {
+  return Object.freeze({
+    understand_video: ajv.compile(definitions.understand_video),
+    detect_object: ajv.compile(definitions.detect_object),
+    segment_subject: ajv.compile(definitions.segment_subject),
+    track_object: ajv.compile(definitions.track_object),
+    generate_video: ajv.compile(definitions.generate_video),
+  });
+}
+const inputs = capabilityValidators(schemas.inputs);
+const outputs = capabilityValidators(schemas.outputs);
+// Select only statically named validators; request values never name a method.
+function validateCapability(validators, capability, value) {
+  switch (capability) {
+    case 'understand_video': return validators.understand_video(value);
+    case 'detect_object': return validators.detect_object(value);
+    case 'segment_subject': return validators.segment_subject(value);
+    case 'track_object': return validators.track_object(value);
+    case 'generate_video': return validators.generate_video(value);
+    default: return false;
+  }
+}
 const clean = value => JSON.parse(stable(value));
 // Reject excessive depth, cycles and non-JSON values before schema traversal
 // or serialization. Never invoke user-supplied getters or toJSON methods.
@@ -44,8 +64,7 @@ function request(input) {
   // JSON round-tripping must not turn NaN or a class instance into valid input.
   if (!input || !boundedJson(input, 48 * 1024) || !requestValidator(input))
     throw fail('MODEL_CAPABILITY_REQUEST_INVALID');
-  const validateParameters = inputs.get(input.capability);
-  if (!validateParameters || !validateParameters(input.parameters))
+  if (!validateCapability(inputs, input.capability, input.parameters))
     throw fail('MODEL_CAPABILITY_REQUEST_INVALID');
   const r = input.sourceRange;
   if (r.endTick <= r.startTick || r.endTick - r.startTick > 30 * 90000)
@@ -77,8 +96,7 @@ function selectModel(capability, { models = registry, modelId = models.defaults[
   return clean(model);
 }
 function validateOutput(capability, output) {
-  const validate = outputs.get(capability);
-  if (!validate || !boundedJson(output, 512 * 1024) || !validate(output))
+  if (!boundedJson(output, 512 * 1024) || !validateCapability(outputs, capability, output))
     throw fail('MODEL_CAPABILITY_OUTPUT_INVALID', 502);
   return clean(output);
 }
