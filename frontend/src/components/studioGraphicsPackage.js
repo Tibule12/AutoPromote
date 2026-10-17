@@ -74,8 +74,8 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
       text(layer.text, 500, 'title text'); color(layer.color);
       if (layer.strokeColor !== undefined) color(layer.strokeColor);
       if (layer.strokeWidth !== undefined) number(layer.strokeWidth, 0, 8, 'Outline width');
-      if (![400, 600, 700, 800, 900].includes(layer.fontWeight) || !['left', 'center', 'right'].includes(layer.textAlign))
-        throw Error('Choose a supported Inter weight and title alignment.');
+      if (![400, 600, 800, 900].includes(layer.fontWeight) || !['left', 'center', 'right'].includes(layer.textAlign))
+        throw Error('Choose Inter weight 400, 600, 800 or 900 and a supported title alignment.');
       if (layer.svg !== undefined || layer.height !== undefined) throw Error('Text layers use copy and title sizing; artwork uses SVG and height.');
       return { ...layer };
     }

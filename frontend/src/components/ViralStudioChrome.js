@@ -1,4 +1,5 @@
 import React from "react";
+import AutoPromoteLogo from './AutoPromoteLogo';
 
 export const VIRAL_STUDIO_WORKSPACE_MODES = [
   {
@@ -109,10 +110,7 @@ export function ViralStudioHeader({
     <header className="studio-header">
       <div className="studio-header-copy">
         <div className="studio-brand-lockup">
-          <span className="studio-brand-mark" aria-hidden="true">
-            A
-          </span>
-          <strong>AutoPromote</strong>
+          <AutoPromoteLogo compact />
         </div>
         <div className="studio-project-title">
           <div>

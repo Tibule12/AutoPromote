@@ -53,6 +53,21 @@ def check_real_title_compositor_renders_timed_fades_and_keyframe_position(tmp_pa
 
 
 class StudioTextTests(unittest.TestCase):
+    def test_every_importable_title_weight_has_matching_browser_worker_font_and_renders(self):
+        import hashlib
+        from python_media_worker.studio_text import WEIGHTS
+        root = Path(__file__).resolve().parents[1]
+        assert set(WEIGHTS) == {400, 600, 800, 900}
+        with tempfile.TemporaryDirectory() as temp:
+            for weight, name in WEIGHTS.items():
+                worker = root / 'python_media_worker/assets/fonts' / f'Inter-{name}.ttf'
+                browser = root / 'frontend/src/components/motion/fonts' / worker.name
+                assert hashlib.sha256(worker.read_bytes()).digest() == hashlib.sha256(browser.read_bytes()).digest()
+                output = Path(temp) / f'{weight}.png'
+                geometry = render_title_asset({'text': 'Schedule.', 'fontWeight': weight, 'shadow': 'none'}, output, 1280, 720)
+                assert geometry['lines'] == ['Schedule.']
+                assert np.asarray(Image.open(output))[..., 3].max() > 200
+
     def test_large_titles_keep_geometry_with_sharper_glyph_edges(self):
         with tempfile.TemporaryDirectory() as temp:
             results, geometry = [], []

@@ -6,6 +6,7 @@ export default function StudioLogoMotionPanel({ onBuild, locked, programmeDurati
   const [accent,setAccent]=useState('#a855f7'), [duration,setDuration]=useState(10);
   const [background,setBackground]=useState(true), [busy,setBusy]=useState(false), [message,setMessage]=useState('');
   const [separateBitmap,setSeparateBitmap]=useState(false),[symbolWidth,setSymbolWidth]=useState(28);
+  const [pieceConstruction,setPieceConstruction]=useState(false),[pieceColumns,setPieceColumns]=useState(11);
   return <details className="advanced-tool-section kinetic-type-panel" data-testid="studio-logo-motion">
     <summary>Logo motion</summary>
     <p>Build editable logo motion at the start of your programme. SVG shapes stay separate. A separated image symbol assembles through three masked components, accelerates along forward routes, then resolves into its original wordmark. Each layer and its keys remain editable.</p>
@@ -34,12 +35,17 @@ export default function StudioLogoMotionPanel({ onBuild, locked, programmeDurati
     <label>Accent<input aria-label="Logo motion accent" type="color" value={accent} disabled={busy || locked} onChange={e=>setAccent(e.target.value)}/></label>
     {bitmap?<>
       <label><input type="checkbox" checked={separateBitmap} disabled={busy||locked} onChange={e=>setSeparateBitmap(e.target.checked)}/>Separate left symbol from wordmark</label>
-      {separateBitmap?<label>Symbol width (%)<input aria-label="Logo symbol width" type="number" min={10} max={60} value={symbolWidth} disabled={busy||locked} onChange={e=>setSymbolWidth(Number(e.target.value))}/></label>:null}
+      {separateBitmap?<>
+        <label>Symbol width (%)<input aria-label="Logo symbol width" type="number" min={10} max={60} value={symbolWidth} disabled={busy||locked} onChange={e=>setSymbolWidth(Number(e.target.value))}/></label>
+        <label><input type="checkbox" checked={pieceConstruction} disabled={busy||locked} onChange={e=>setPieceConstruction(e.target.checked)}/>Construct words from pieces</label>
+        {pieceConstruction?<label>Wordmark slices<input aria-label="Logo wordmark slices" type="number" min={2} max={16} value={pieceColumns} disabled={busy||locked} onChange={e=>setPieceColumns(Number(e.target.value))}/></label>:null}
+        {pieceConstruction?<p>Interlocking image slices assemble the original wordmark. Five words each assemble from three masked text pieces. Edit their text, masks and keys in the timeline.</p>:null}
+      </>:null}
     </>:null}
     <label>Duration (s)<input aria-label="Logo motion duration" type="number" min={8} max={Math.min(14,programmeDuration)} step={.5} value={duration} disabled={busy || locked} onChange={e=>setDuration(Number(e.target.value))}/></label>
     <label><input type="checkbox" checked={background} disabled={busy || locked} onChange={e=>setBackground(e.target.checked)}/>Add background</label>
     <button type="button" disabled={busy || locked || programmeDuration<8} onClick={async()=>{
-      setBusy(true);setMessage('');try{await onBuild({svg,bitmap,brandName,accent,duration,separateBitmap,symbolWidth,includeBackground:background});
+      setBusy(true);setMessage('');try{await onBuild({svg,bitmap,brandName,accent,duration,separateBitmap,symbolWidth,pieceConstruction:separateBitmap&&pieceConstruction,pieceColumns,includeBackground:background});
         setMessage('Logo motion created. Edit the layers and keys in the timeline; Undo removes the composition.');
       }catch(error){setMessage(error.message);}finally{setBusy(false);}}}>
       {busy?'Building logo motion…':'Build editable logo motion'}

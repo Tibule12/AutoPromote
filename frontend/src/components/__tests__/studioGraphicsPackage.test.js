@@ -37,6 +37,7 @@ test('unknown fields, duplicate keys, out-of-range timing and foreign groups fai
     d => { d.layers[0].keys[1].time = 5; },
     d => { d.groups[0].layerIds.push('foreign'); },
     d => { d.layers[0].scale = Infinity; },
+    d => { d.layers[0].fontWeight = 700; },
     d => { d.width = 720; d.height = 1280; },
   ]) {
     const input = spec(); mutate(input);

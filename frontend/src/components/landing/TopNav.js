@@ -1,13 +1,9 @@
+import AutoPromoteLogo from '../AutoPromoteLogo';
+
 const TopNav = ({ onSignIn }) => (
   <header className="ap-top-nav">
     <a href="/" className="ap-logo" aria-label="AutoPromote home">
-      <span className="ap-logo-mark" aria-hidden="true">
-        ▶
-      </span>
-      <span className="ap-logo-copy">
-        <strong>AutoPromote</strong>
-        <small>Creator OS</small>
-      </span>
+      <AutoPromoteLogo />
     </a>
     <nav className="ap-nav-links" aria-label="Primary">
       <a href="#product-tour">Product Tour</a>

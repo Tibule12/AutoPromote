@@ -1,0 +1,21 @@
+.ap-brand-logo {
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  flex: 0 1 auto;
+  width: 196px;
+  max-width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f6f2ff;
+  line-height: 0;
+}
+.ap-brand-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  object-fit: contain;
+}
+.ap-brand-logo--compact { width: 150px; padding: 6px 8px; border-radius: 8px; }
+@media (max-width: 480px) { .lp-brand .ap-brand-logo { width: 164px; } }

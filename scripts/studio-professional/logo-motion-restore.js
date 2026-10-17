@@ -29,6 +29,14 @@ async function main(){
   assert.deepEqual(restored.snapshot.motionKeyframes,backup.snapshot.motionKeyframes);
   const images=restored.snapshot.overlays.filter(o=>o.type==='image');
   assert(images.length>0);assert(images.every(o=>o.sourceStoragePath||o.storagePath));
+  let nativeAppLogoDecoded=false;
+  if(config.pieceConstruction){
+   const logo=page.locator('.studio-brand-lockup .ap-brand-logo img');await logo.evaluate(i=>i.decode());
+   nativeAppLogoDecoded=await logo.evaluate(i=>i.naturalWidth===1200&&i.naturalHeight===269&&i.getBoundingClientRect().width>80);
+   assert(nativeAppLogoDecoded);
+   assert.equal(restored.snapshot.overlays.filter(o=>o.name.startsWith('Wordmark pieces /')).length,2*(config.pieceColumns||11));
+   assert.equal(restored.snapshot.overlays.filter(o=>o.name.startsWith('Words /')&&o.mask?.enabled).length,15);
+  }
   const lockup=restored.snapshot.overlays.find(o=>o.name==='Mark / continuous original lockup');
   assert(lockup&&!lockup.mask?.enabled,'Settled identity must be continuous');
   await seek(page,8);await page.waitForFunction(()=>Array.from(document.querySelector('[data-testid="hook-preview-frame"]')?.querySelectorAll('img')||[])
@@ -38,7 +46,7 @@ async function main(){
   fs.writeFileSync(path.join(out,'receipt.json'),JSON.stringify({projectId:restored.id,canonicalHash:receipt.projectHash,
    backupSha256:hash(fs.readFileSync(backupFile)),exactFreshNativeRestore:true,keys:restored.snapshot.motionKeyframes.length,
    compiledKeyTuplesExact:true,ownedImageLayers:images.length,continuousOriginalLockup:true,visibleOwnedLogoDecoded:true,
-   renderingOrPublishingWrites:writes,wholeLiveParityQualified:false},null,2));
+   renderingOrPublishingWrites:writes,nativeAppLogoDecoded,wholeLiveParityQualified:false},null,2));
   console.log('Exact current logo backup, compiled keys and owned logo decoder verified in a fresh signed-in App.');
  }finally{await browser.close();}
 }

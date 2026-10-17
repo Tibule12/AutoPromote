@@ -15,7 +15,7 @@ async function main(){
  const action=process.argv[2]||'design';
  if(action==='design')assert(!fs.existsSync(path.join(folder,'native-design.json')),'Preserve the completed logo project');
  const context=await chromium.launchPersistentContext(path.resolve('reports/studio-keyframe-selection-20261015/proof/browser-profile.private'),{
-  channel:'chromium',headless:true,args:['--mute-audio','--disk-cache-size=16777216','--host-resolver-rules=MAP localhost 127.0.0.1'],viewport:{width:1920,height:1200}});
+  channel:'chromium',headless:true,args:['--mute-audio','--disk-cache-size=16777216','--host-resolver-rules=MAP localhost 127.0.0.1'],viewport:{width:1920,height:config.browserHeight||1200}});
  const page=context.pages()[0];page.setDefaultTimeout(60000);let renders=0;
  page.on('request',r=>{if(new URL(r.url()).pathname==='/api/media/process')renders++;});
  try{
@@ -40,6 +40,42 @@ async function main(){
    console.log('Normal project duplicate and native component cleanup complete.');return;
   }
   await page.getByRole('button',{name,exact:true}).click();await h.rail(page);await pause(page);await seek(page,0);
+  if(action==='type-weight'){
+   assert(config.pieceConstruction);await q.tool(page,'Graphics');const before=await save(page,'before-weight-repair');
+   const titles=before.snapshot.overlays.filter(o=>o.type==='text');assert.equal(titles.length,20);
+   for(let i=0;i<titles.length;i++){
+    await page.locator('.title-layer-list button').nth(i).click();
+    await page.getByTestId('title-editor').getByText('Weight',{exact:true}).locator('..').locator('select').selectOption('800');
+   }
+   const final=await save(page,'supported-title-weights');assert(final.snapshot.overlays.filter(o=>o.type==='text').every(o=>o.fontWeight===800));
+   assert.equal(final.snapshot.motionKeyframes.length,727);
+   await page.reload();await page.getByRole('button',{name:'Viral Clip Studio',exact:true}).click();
+   await page.getByRole('button',{name,exact:true}).click();await h.rail(page);await pause(page);
+   const cold=await save(page,'supported-title-weights-cold');assert.equal(hash(cold.snapshot.studioDocument),hash(final.snapshot.studioDocument));
+   fs.writeFileSync(path.join(folder,'native-weight-repair.json'),JSON.stringify({projectId:cold.id,canonicalHash:hash(cold.snapshot.studioDocument),nativeTitleWeight:800,ordinaryTitleLayersEdited:20,exactColdReopen:true,rendersSubmitted:renders},null,2));
+   assert.equal(renders,0);console.log('All words changed to the bundled 800 weight through native typography; exact cold reopen passed.');return;
+  }
+  if(action==='piece-size'){
+   assert(config.pieceConstruction);await q.tool(page,'Graphics');
+   const before=await save(page,'before-piece-size'),titles=before.snapshot.overlays.filter(o=>o.type==='text');
+   assert.equal(titles.length,20);
+   for(let i=0;i<titles.length;i++){
+    await page.locator('.title-layer-list button').nth(i).click();
+    await range(page.getByLabel('Title size',{exact:true}),1.5);
+    if(i===0){
+     const changed=await save(page,'piece-size-first');assert.equal(changed.snapshot.overlays.find(o=>o.id===titles[i].id).scale,1.5);
+     await page.getByTestId('studio-undo-button').click();assert.equal(decisions((await save(page,'piece-size-undo')).snapshot.studioDocument),decisions(before.snapshot.studioDocument));
+     await page.getByTestId('studio-redo-button').click();assert.equal(decisions((await save(page,'piece-size-redo')).snapshot.studioDocument),decisions(changed.snapshot.studioDocument));
+    }
+   }
+   const final=await save(page,'readable-piece-type');assert(final.snapshot.overlays.filter(o=>o.type==='text').every(o=>o.scale===1.5));
+   for(const at of [5.25,6,6.75,7.5,8.1,9.5]){await seek(page,at);await page.getByTestId('hook-preview-frame').screenshot({path:path.join(folder,`readable-${at}.png`)});}
+   await page.reload();await page.getByRole('button',{name:'Viral Clip Studio',exact:true}).click();
+   await page.getByRole('button',{name,exact:true}).click();await h.rail(page);await pause(page);
+   const cold=await save(page,'readable-piece-cold');assert.equal(hash(cold.snapshot.studioDocument),hash(final.snapshot.studioDocument));
+   assert.equal(renders,0);fs.writeFileSync(path.join(folder,'native-type-refinement.json'),JSON.stringify({projectId:cold.id,canonicalHash:hash(cold.snapshot.studioDocument),nativeTitleSize:1.5,ordinaryTitleLayersEdited:20,nativeSizeEditUndoRedo:true,exactColdReopen:true,rendersSubmitted:renders},null,2));
+   console.log('All word pieces enlarged through native Title size; Undo/Redo and exact cold reopen passed.');return;
+  }
   if(action==='refine'){
    const before=await save(page,'before-rule-refinement');await q.tool(page,'Motion');
    await page.getByRole('button',{name:'Transform keyframes',exact:true}).click();
@@ -78,6 +114,14 @@ async function main(){
   }
   if(action==='recover'){await h.recover(page,config.output);assert.equal(renders,0);return;}
   if(action==='view'){
+   if(config.pieceConstruction){
+    const timeline=page.getByTestId('studio-pro-timeline');
+    await timeline.getByRole('button',{name:'Composition layers',exact:true}).click();
+    const collapse=timeline.getByRole('button',{name:/^Collapse .+ layers$/});
+    while(await collapse.count())await collapse.first().click();
+    process.env.STUDIO_QA_TIMELINE_HEIGHT=String(config.timelineHeight||560);
+    await timeline.locator('.pro-timeline-scroll').hover();await page.mouse.wheel(0,-2400);
+   }
    await require('../creative-templates/materials-editing-proof').view(page,config.output);
    const download=page.waitForEvent('download');await page.getByRole('button',{name:'Download project backup',exact:true}).click();
    await(await download).saveAs(path.join(folder,config.backupName));assert.equal(renders,0);return;
@@ -89,6 +133,10 @@ async function main(){
   await page.getByLabel('Logo motion image',{exact:true}).setInputFiles(path.join(base,'assets/AutoPromote-Gradient-Tech-Logo.png'));
   await panel.getByRole('status').filter({hasText:'selected.'}).waitFor();
   if(config.separateBitmap)await panel.getByRole('checkbox',{name:'Separate left symbol from wordmark',exact:true}).check();
+  if(config.pieceConstruction){
+   await panel.getByRole('checkbox',{name:'Construct words from pieces',exact:true}).check();
+   await panel.getByLabel('Logo wordmark slices',{exact:true}).fill(String(config.pieceColumns||11));
+  }
   const stop=await recording(page);
   try{
    await page.getByRole('button',{name:'Build editable logo motion',exact:true}).click();
@@ -97,7 +145,10 @@ async function main(){
    const built=await save(page,'logo-created');
    if(config.separateBitmap){
     assert(built.snapshot.overlays.some(o=>o.name==='Mark / gradient symbol'));
-    assert(built.snapshot.overlays.some(o=>o.name==='Mark / original gradient wordmark'));
+    if(config.pieceConstruction){
+     assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Wordmark pieces /')).length,2*(config.pieceColumns||11));
+     assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Words /')&&o.mask?.enabled).length,15);
+    }else assert(built.snapshot.overlays.some(o=>o.name==='Mark / original gradient wordmark'));
     assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Construction / symbol ribbon')).length,3);
    }else assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Mark / image band')).length,3);
    assert.equal(built.snapshot.overlays.filter(o=>o.name.startsWith('Wordmark /')).length,0,'Retain the PNG lettering');
@@ -126,7 +177,8 @@ async function main(){
    keys:cold.snapshot.motionKeyframes.length,groups:cold.snapshot.compoundClips.length,seconds:10,
    actualReusableLogoControl:true,nativeBuildUndoRedo:true,nativeIndependentTaglineEditUndo:true,exactColdReopen:true,
    nativeControlsOnly:true,graphInjection:false,sourceImageSha256:hash(fs.readFileSync(path.join(base,'assets/AutoPromote-Gradient-Tech-Logo.png'))),
-   originalGradientAndLetteringRetained:true,separateSymbolAndWordmark:!!config.separateBitmap,nativeMusicVolume:.6,rendersSubmitted:renders};
+   originalGradientAndLetteringRetained:true,separateSymbolAndWordmark:!!config.separateBitmap,
+   nativePieceConstructionControl:!!config.pieceConstruction,nativeMusicVolume:.6,rendersSubmitted:renders};
   assert.equal(renders,0);fs.writeFileSync(path.join(folder,'native-design.json'),JSON.stringify(geometry,null,2));
   const designFile=path.join(base,'design.json');
   const design=JSON.parse(fs.readFileSync(designFile));Object.assign(design,{layers:geometry.layers,groups:geometry.groups,keys:geometry.keys});fs.writeFileSync(designFile,JSON.stringify(design,null,2));

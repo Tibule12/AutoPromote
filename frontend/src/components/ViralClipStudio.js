@@ -24058,11 +24058,11 @@ const ViralClipStudio = ({
                   <StudioLogoMotionPanel locked={!!trackStates.graphics?.locked} programmeDuration={liveTimelineDuration}
                     onBuild={async options => {
                       const projectId = activeProjectIdRef.current, signature = lastSnapshotSignatureRef.current;
-                      await document.fonts.load('700 36px "Studio Inter"');
+                      await document.fonts.load('800 36px "Studio Inter"');
                       if (activeProjectIdRef.current !== projectId || lastSnapshotSignatureRef.current !== signature)
                         throw Error('The edit changed while the brand font loaded. Build the logo motion again.');
                       const canvas = document.createElement('canvas'), context = canvas.getContext('2d');
-                      context.font = '700 36px "Studio Inter"';
+                      context.font = '800 36px "Studio Inter"';
                       const stage = phoneFrameRef.current, aspect = (stage?.clientWidth || 1280) / (stage?.clientHeight || 720);
                       return importGraphicsComposition(buildStudioLogoMotion({ ...options, programmeDuration:liveTimelineDuration,
                         width:Math.round(720*aspect), height:720, measure:value=>context.measureText(value).width }));

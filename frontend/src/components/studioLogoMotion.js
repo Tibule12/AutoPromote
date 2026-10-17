@@ -2,9 +2,10 @@
 // History, preview, grouping and export keep using the canonical editor.
 import { sanitizeLogoSvg } from './motion/sanitizeLogoSvg';
 import { separateStudioLogoParts } from './studioLogoParts';
+import { buildStudioLogoPieceMotion } from './studioLogoPieceMotion';
 
-// Same geometry as LandingNavbar's public AutoPromote mark, separated into
-// its three strokes so each can be edited and animated independently.
+// Legacy three-stroke example, separated into editable components. Uploaded
+// identities retain their own artwork; the app brand uses the supplied PNG.
 export const AUTOPROMOTE_LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#f5f1ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 25 16 7"/><path d="M16 7 27 25"/><path d="M10 21h12"/></svg>';
 const EASE = [.16, 1, .3, 1], SOFT = [.65, 0, .35, 1];
 const tick = t => Math.round(t * 90000) / 90000;
@@ -33,7 +34,7 @@ function splitLogo(markup) {
 
 export function buildStudioLogoMotion({ svg = AUTOPROMOTE_LOGO_SVG, bitmap, brandName = 'AutoPromote',
   accent = '#a855f7', duration = 10, programmeDuration, width = 1280, height = 720,
-  includeBackground = true, separateBitmap = false, symbolWidth = 28, measure }) {
+  includeBackground = true, separateBitmap = false, symbolWidth = 28, measure, pieceConstruction = false, pieceColumns = 11, encodeCrop }) {
   if (!Number.isFinite(programmeDuration) || !Number.isFinite(duration) || duration < 8 || duration > 14 || duration > programmeDuration)
     throw Error('Use an 8–14 second intro that fits this programme.');
   if (![width,height].every(v => Number.isFinite(v) && v >= 16 && v <= 4096)) throw Error('Invalid programme dimensions.');
@@ -53,6 +54,10 @@ export function buildStudioLogoMotion({ svg = AUTOPROMOTE_LOGO_SVG, bitmap, bran
   } else source=splitLogo(svg);
   const {parts,full}=source, layers = [], markIds = [], typeIds = [], ratio = width / height;
   if (ratio < .5 || ratio > 2) throw Error('Use a portrait, square or landscape programme between 1:2 and 2:1.');
+  if(pieceConstruction){
+    if(!bitmap||!separateBitmap)throw Error('Choose a bitmap and separate its symbol before constructing words from pieces.');
+    return buildStudioLogoPieceMotion({bitmap,brandName,accent,duration,programmeDuration,width,height,includeBackground,measure,pieceColumns,encodeCrop,symbolWidth});
+  }
   const time = v => tick(v * duration / 10), paper = bitmap?'#24133e':'#f5f1ff', dark = bitmap&&!separateBitmap?'#f5f3ff':'#090714';
   const markWidth=bitmap?Math.min(82,42/ratio*bitmap.bounds[2]/bitmap.bounds[3]):34;
   const markHeight=bitmap?markWidth*ratio*bitmap.bounds[3]/bitmap.bounds[2]:Math.min(100,34*ratio);
@@ -197,7 +202,7 @@ export function buildStudioLogoMotion({ svg = AUTOPROMOTE_LOGO_SVG, bitmap, bran
     if (/\s/.test(char)) return;
     const start=5.05+i*.065, centre=measure(chars.slice(0,i).join(''))+measure(char)/2;
     const x=left+centre*scale/layoutWidth*100;
-    const item=add(`Wordmark / ${char} ${i+1}`,start,10,{type:'text',text:char,fontWeight:700,textAlign:'center',color:paper,width:90,scale,x,y:49});
+    const item=add(`Wordmark / ${char} ${i+1}`,start,10,{type:'text',text:char,fontWeight:800,textAlign:'center',color:paper,width:90,scale,x,y:49});
     key(item,'x',[[start,x+5],[start+.55,x],[10,x]]);
     key(item,'y',[[start,66],[start+.55,49],[10,49]]);
     key(item,'rotation',[[start,-12],[start+.55,0],[10,0]]);key(item,'opacity',[[start,0],[start+.25,1],[10,1]]);

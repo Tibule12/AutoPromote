@@ -30,6 +30,9 @@ The owner rejected the initial basic reveal and clarified that the logo's
 components should drive its motion. Preserve those rejected movies and projects.
 Distinguish native masked bitmap components from editable vector contours;
 do not describe fragment masking as inferred ribbon geometry or path morphing.
+The owner then requested every word to construct from pieces and explicitly
+selected the supplied Gradient Tech identity as the new app logo. Preserve its
+original gradient and lettering in the app and movie; keep prior edits available.
 
 At the end of every Studio session, update product readiness, capability and
 combination matrices, exact remaining blockers, evidence and next task.

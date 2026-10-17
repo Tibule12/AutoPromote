@@ -1,5 +1,6 @@
 import { useState } from "react";
 import LandingIcon from "./LandingIcon";
+import AutoPromoteLogo from "../AutoPromoteLogo";
 
 export const LANDING_SECTIONS = [
   ["The Workspace", "workspace"],
@@ -18,14 +19,7 @@ export function scrollToLandingSection(id) {
 export function LandingBrand() {
   return (
     <a className="lp-brand" href="/#/" aria-label="AutoPromote home">
-      <span className="lp-brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 32 32" width="24" height="24" fill="none" focusable="false">
-          <path d="M5 25 16 7l11 18M10 21h12" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
-      <span>
-        AutoPromote<span className="lp-brand-dot">.</span>
-      </span>
+      <AutoPromoteLogo />
     </a>
   );
 }

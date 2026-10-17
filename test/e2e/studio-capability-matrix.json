@@ -13600,5 +13600,165 @@
       "height": 0
     },
     "actualCaptureFramesVisuallyReviewed": true
+  },
+  "logoWordPieceConstruction20261017": {
+    "updatedAt": "2026-10-17T12:23:10.913Z",
+    "status": "NATIVE_WORD_PIECES_EXPORTED_PLAYED_AND_RESTORED",
+    "ownerDirection": "Every word constructs from pieces; the supplied Gradient Tech identity becomes the app logo.",
+    "precedingRibbonFilmPreserved": true,
+    "sourceName": "AutoPromote Gradient Tech Logo.png",
+    "sourceSha256": "062f560550e591c86a1636c5da200cb9a236978c695f16fb7e958f75ad76b397",
+    "originalSourceUnchanged": true,
+    "selectedMovie": "reports/studio-logo-word-pieces-20261017/proof/word-piece-construction/final.mp4",
+    "movieSha256": "b177ca5f7792cef686a8762bfae84274e12e09f048b2b9ec717b3900429fc685",
+    "projectId": "viral-project-37e2dce7-a082-4816-8dcd-8229bee816d6",
+    "canonicalHash": "762af0d2f5729674324ffda98091bcb7cb6c91d4a61a34eda3424efc3b06b7d4",
+    "submittedJobId": "viral_9d1ebe451ec7a39d9e0abb50821f45f5f7cfa43051e189ef035f6a711b07627e",
+    "seconds": 10,
+    "frames": 240,
+    "resolution": [
+      1280,
+      720
+    ],
+    "fps": 24,
+    "editableLayers": 52,
+    "groups": 6,
+    "motionKeys": 727,
+    "nativeWordmarkImagePieces": 22,
+    "nativeTextPieces": 15,
+    "words": [
+      "Create.",
+      "Schedule.",
+      "Publish.",
+      "Move",
+      "forward."
+    ],
+    "nativeBuildUndoRedo": true,
+    "nativeTextColourEditUndo": true,
+    "nativeTitleSizeEditUndoRedo": true,
+    "exactColdReopen": true,
+    "allCompiledKeyTuplesAndMasksExact": true,
+    "independentFullDecode": true,
+    "completeNativeFinishedPlayback": true,
+    "actualTimelineRecording": "reports/studio-logo-word-pieces-20261017/proof/word-piece-construction/edited-in-studio.mp4",
+    "screenCaptureFps": 16.887579473736118,
+    "exactFreshNativeBackupRestore": true,
+    "backup": "reports/studio-logo-word-pieces-20261017/proof/AUTOPROMOTE-WORD-PIECES.autopromote.json",
+    "backupSha256": "529de77d248164d3d9c841184e4627f5469672c79ae9c59eff0583f5eafc803d",
+    "audio": {
+      "movieSha256": "b177ca5f7792cef686a8762bfae84274e12e09f048b2b9ec717b3900429fc685",
+      "sourceReference": "assets/identity-pieces.wav",
+      "workingSource": "assets/identity-pieces.m4a",
+      "sourceCorrelation": 0.996744312580588,
+      "expectedNativeGain": 0.6,
+      "observedNativeGain": 0.5944936549981444,
+      "sampleRate": 48000,
+      "stereo": true,
+      "measuredIntegratedLufs": -24.78,
+      "measuredTruePeakDbtp": -6.05,
+      "measuredLoudnessRangeLu": 4.4,
+      "humanListening": false
+    },
+    "visual": {
+      "movieSha256": "b177ca5f7792cef686a8762bfae84274e12e09f048b2b9ec717b3900429fc685",
+      "canonicalHash": "762af0d2f5729674324ffda98091bcb7cb6c91d4a61a34eda3424efc3b06b7d4",
+      "actualMovieContactSheetViewed": true,
+      "actualStudioMidpointSampleViewed": true,
+      "selectedStudioLayout": {
+        "viewport": {
+          "width": 1920,
+          "height": 1400
+        },
+        "frame": {
+          "x": 453.78125,
+          "y": 152,
+          "width": 764.4375,
+          "height": 429.984375
+        },
+        "timeline": {
+          "x": 0,
+          "y": 641,
+          "width": 1920,
+          "height": 759
+        },
+        "allFiveWordGroupsVisible": true,
+        "sourceVideoAndAudioVisible": true,
+        "musicTrackVisible": true,
+        "sourcePictureUncropped": true
+      },
+      "nativeMasterFps": 24,
+      "observedScreenCaptureFps": 16.887579473736118,
+      "screenCaptureSmoothnessQualified": false,
+      "originalGradientAndLetteringPreserved": true,
+      "continuousSettledIdentity": true,
+      "continuousSettledText": true,
+      "creativeAcceptanceByOwner": false,
+      "humanListening": false
+    },
+    "appBrand": {
+      "sharedComponent": "frontend/src/components/AutoPromoteLogo.js",
+      "originalEmbeddedBytesVerified": true,
+      "nativeStudioBrandDecoded": true,
+      "placements": [
+        "landing navigation/footer",
+        "sign-in",
+        "registration and email verification",
+        "dashboard sidebar",
+        "Studio header",
+        "sign-out dialog",
+        "shared footer",
+        "browser and touch icons"
+      ],
+      "evidence": "reports/studio-logo-word-pieces-20261017/proof/brand-review.json",
+      "signedInEvidence": "reports/studio-logo-word-pieces-20261017/proof/brand-signed-in-review.json"
+    },
+    "acceptedNativeCpuJobs": 2,
+    "completedNativeCpuJobs": 1,
+    "failedUnsupportedWeightJobPreserved": true,
+    "nativeTitleWeight": 800,
+    "newContentUploads": 0,
+    "newSchedules": 0,
+    "paidGpuOrExternalModelJobs": 0,
+    "earlierMediaAndScheduleLedgersPreserved": true,
+    "founderCreativeApproval": false,
+    "showroomPromotion": false,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "wholeLivePredictiveParityQualified": false,
+    "smoothnessQualified": false,
+    "humanListening": false,
+    "checks": {
+      "focusedLogoGraphicsAndExistingDialogCases": 33,
+      "workerTitleCases": 5,
+      "knowledgeCases": 17,
+      "strictNormalAppBuild": "PASS",
+      "freshNativeRestore": "PASS"
+    },
+    "formalReadinessCounts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "limits": [
+      "Original bitmap crops and native text masks are ordinary 2D layers; no inferred glyph outlines, vector morphs or 3D geometry.",
+      "Text pieces are separate ordinary title copies. Edit matching pieces together after authoring; the continuous close is an additional ordinary title.",
+      "Private ten-second source; the existing one-minute public-story requirement and earlier schedules remain unchanged.",
+      "Whole predictive picture/sound, smoothness, human listening and founder creative acceptance remain separate."
+    ],
+    "nextTaskId": "S04",
+    "nextSlice": "Owner review of word-piece motion; continue shared spatial/path timing, then S03 occurrence/group ownership while retaining S02 picture/sound/export latency.",
+    "evidence": {
+      "report": "reports/studio-logo-word-pieces-20261017/README.md",
+      "delivery": "reports/studio-logo-word-pieces-20261017/delivery.json",
+      "nativeDesign": "reports/studio-logo-word-pieces-20261017/proof/native-design.json",
+      "nativeRefinement": "reports/studio-logo-word-pieces-20261017/proof/native-type-refinement.json",
+      "render": "reports/studio-logo-word-pieces-20261017/proof/word-piece-construction/render-receipt.json",
+      "restore": "reports/studio-logo-word-pieces-20261017/proof/fresh-restore/receipt.json",
+      "playback": "reports/studio-logo-word-pieces-20261017/proof/word-piece-construction/studio-playback.json",
+      "audio": "reports/studio-logo-word-pieces-20261017/proof/audio-review.json"
+    }
   }
 }

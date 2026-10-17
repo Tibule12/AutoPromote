@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import AutoPromoteLogo from './AutoPromoteLogo';
 import { Link, useLocation } from "react-router";
 import { PUBLIC_SITE_URL } from "../config";
 import "./Footer.css";
@@ -106,7 +107,7 @@ const Footer = () => {
         {/* Connect / Newsletter Column */}
         <div className="ap-footer-col ap-col-newsletter">
           <div className="ap-logo" aria-label="AutoPromote logo">
-            AutoPromote
+            <AutoPromoteLogo />
           </div>
           <p className="ap-newsletter-desc">Subscribe to our newsletter for the latest updates.</p>
           <button

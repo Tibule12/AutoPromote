@@ -46,7 +46,7 @@
   text-decoration: none;
 }
 
-.logout-dialog__brand > span {
+.logout-dialog__brand > span:not(.ap-brand-logo) {
   display: grid;
   width: 31px;
   height: 31px;

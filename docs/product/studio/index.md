@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.28 • 2026-10-17
+Development documentation • product 1.2.0 • knowledge 1.0.29 • 2026-10-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -2085,10 +2085,11 @@ Builds a logo intro as ordinary editable artwork, masks, groups and motion keys.
 2. Select a local image up to 250 KB or an SVG up to 100 KB, with a maximum of 4096 pixels per side. SVG files need a viewBox or numeric dimensions. Image logos use their visible alpha bounds as a viewport; the source file is not rewritten.
 3. Choose the brand name, accent, background and an 8–14 second duration that fits the programme. Build editable logo motion at the programme start.
 4. For an image with a left-hand symbol and separate lettering, enable Separate left symbol from wordmark. Symbol width places the search boundary; the builder follows transparent space and rejects cuts through opaque artwork. Three separately masked fragments assemble the symbol, which accelerates along forward routes before joining the original wordmark.
-5. Edit the resulting ordinary layers, masks, groups and keys. Undo removes the authored composition. Add and time sound through the normal Sound controls.
-6. Review the actual preview, save/reopen and export through the existing Studio workflow.
+5. Enable Construct words from pieces to assemble the original bitmap wordmark from 2–16 interlocking slices. Five words each construct from three independently masked title pieces, with staggered rebounds before a continuous close.
+6. Edit the resulting ordinary layers, masks, groups and keys. Undo removes the authored composition. Add and time sound through the normal Sound controls.
+7. Review the actual preview, save/reopen and export through the existing Studio workflow.
 
-**Preview:** The builder writes ordinary graphics into the existing project. SVG shapes become raster artwork. Raster identities can use three reveal bands, or separate symbol and original wordmark along a transparent seam. Separated symbols assemble through three ordinary polygon-masked fragments, then use one continuous symbol during camera travel. With a background, a dark stage resolves to a light field. Both treatments finish on one continuous original lockup. Ordinary preview evaluates existing transforms, masks and opacity keys.
+**Preview:** The builder writes ordinary graphics into the existing project. SVG shapes become raster artwork. Raster identities can use three reveal bands, or separate symbol and original wordmark along a transparent seam. Separated symbols assemble through three ordinary polygon-masked fragments, then use one continuous symbol during camera travel. With a background, a dark stage resolves to a light field. Both treatments finish on one continuous original lockup. Ordinary preview evaluates existing transforms, masks and opacity keys. Piece construction crops the original decoded RGBA into narrow image slices without redrawing the wordmark. Each slice has two complementary masks. Create., Schedule., Publish., Move and forward. each assemble from three zigzag-masked ordinary text layers; matching continuous titles replace the settled fragments.
 
 **Final render:** The standard graphics importer, canonical document and composition renderer compile the same authored layers, masks, groups and keys. No separate logo render engine or paid model is started.
 
@@ -2102,12 +2103,14 @@ Builds a logo intro as ordinary editable artwork, masks, groups and motion keys.
 - Background choice covers underlying footage. Sound is added separately through normal Sound controls. Whole live picture/sound and smoothness remain separate qualification.
 - Symbol separation requires visible transparent space between a left-hand symbol and its lettering. Adjust the 10–60% boundary or use the full-logo reveal when the source cannot be separated.
 - Symbol construction uses three polygon-masked bitmap fragments. It does not infer semantic ribbon boundaries or reconstruct editable vector paths from a PNG. Masks and transforms can be revised with the existing Studio controls.
+- Piece construction requires a decoded image with a separable left symbol. Wordmark slices are bitmap crops, not inferred letters or vector outlines. The five-word text is a creation preset; after building, matching text pieces are ordinary separate layers and must be edited together.
+- Titles use bundled Inter weights 400, 600, 800 and 900. Logo word-piece creation uses 800; graphics import rejects unsupported 700 before authoring or export.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Logo motion brand name](../control-reference/index.md#studio-logo_motion-brand_name), [Logo motion duration](../control-reference/index.md#studio-logo_motion-duration), [Logo motion accent](../control-reference/index.md#studio-logo_motion-accent), [Add background](../control-reference/index.md#studio-logo_motion-background), [Separate left symbol from wordmark](../control-reference/index.md#studio-logo_motion-separate_symbol), [Logo symbol width](../control-reference/index.md#studio-logo_motion-symbol_width)
+**Controls:** [Logo motion brand name](../control-reference/index.md#studio-logo_motion-brand_name), [Logo motion duration](../control-reference/index.md#studio-logo_motion-duration), [Logo motion accent](../control-reference/index.md#studio-logo_motion-accent), [Add background](../control-reference/index.md#studio-logo_motion-background), [Separate left symbol from wordmark](../control-reference/index.md#studio-logo_motion-separate_symbol), [Logo symbol width](../control-reference/index.md#studio-logo_motion-symbol_width), [Construct words from pieces](../control-reference/index.md#studio-logo_motion-piece_construction), [Logo wordmark slices](../control-reference/index.md#studio-logo_motion-piece_columns)
 
 **Guides:** No task guide in V1.
 

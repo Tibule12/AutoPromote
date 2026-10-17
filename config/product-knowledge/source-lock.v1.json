@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final source/continuity review of native component construction, unchanged full-image spacing, completed owner-bound CPU movie/playback/restore and explicit raster/path/creative limits.",
-  "reviewed_at": "2026-10-17T11:15:14.128Z",
-  "catalog_sha256": "55b27bfdee8ba0dd89aa35ccdf1ea8017608de24ca3678d80dc75c6773756c2b",
+  "reason": "Completed native word-piece movie, all five word groups and sound visible in actual Studio playback, exact fresh backup restore, source-identical app branding, bundled 800-weight repair and recorded technical/creative limits.",
+  "reviewed_at": "2026-10-17T12:23:11.672Z",
+  "catalog_sha256": "7b6cd0bb544d57ec893548ca13eef67d86156eeb3c7a6f3be855cb23bd92a511",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -55,7 +55,7 @@
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
-      "sha256": "ad453ce765492cf3a75b4d9fb2934ea4aabb0a7fdc81876c61bf2fe14b69738b"
+      "sha256": "65fa1b311de828757d486bf0a26ed4df845a90f73a9db25ede3ba7417aa7bb8c"
     },
     {
       "path": "frontend/src/__tests__/UnifiedPublisher.release.test.js",
@@ -139,7 +139,7 @@
     },
     {
       "path": "frontend/src/components/StudioLogoMotionPanel.js",
-      "sha256": "7c278c81e20f55cc1cbdbb8602bf43a111275641a782d1aed46c9c753555ebc6"
+      "sha256": "d85c764905d7adb22bc61c9834fc3311b869427232ae393a215f4e9412019d21"
     },
     {
       "path": "frontend/src/components/StudioMaskPathEditor.js",
@@ -159,7 +159,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "dc28a04dc4429e028d4f9f2e66f83dad3835bb234c6bb7b7ad903878eb42e6f5"
+      "sha256": "c1594d2c79f482272f11ce1cc82fc070743532b8427ac1b16d08636a91ff84ca"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -199,7 +199,7 @@
     },
     {
       "path": "frontend/src/components/studioGraphicsPackage.js",
-      "sha256": "b01f277dbd2eb1dc0077ce525f3c128197999a53378e4bca9c19cebeac9c717c"
+      "sha256": "9a0f01947ba0e6e611de0b5e436fe8dab97afe498f9cbb8b5933d567bf5e12d0"
     },
     {
       "path": "frontend/src/components/studioGroupTiming.js",
@@ -223,11 +223,15 @@
     },
     {
       "path": "frontend/src/components/studioLogoMotion.js",
-      "sha256": "d547b4a70b63bae7fffb05ea9accb6da1140e16d45db965365eada3ce5032b5c"
+      "sha256": "71f041d88646a3272ddabf986d861bdaa4c335851e7cde26d485f83a6bbd55a6"
     },
     {
       "path": "frontend/src/components/studioLogoParts.js",
       "sha256": "998ddb81cf3e25287ac66e43e56a87fa66b017a42b26f6b1986d888ba25d3246"
+    },
+    {
+      "path": "frontend/src/components/studioLogoPieceMotion.js",
+      "sha256": "ec33c816117e1c8838d4cacb1ec0738fee101db8d94b05a78e36c0c76b9d241a"
     },
     {
       "path": "frontend/src/components/studioMaskGeometry.js",
@@ -463,11 +467,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "2210cf6eacca95c0be9696fa6bbe1817521527032bb88db953a7b808e7083649"
+      "sha256": "a1745990b75ceec7781a0d34c5197f0d3f676501bd7475a2c9e00dae9348cea4"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "8f91f6380d1cffc0391a00c6b6bec55f1868dc201daf3951f547c9ef41e0e9ad"
+      "sha256": "fc8c854d5fc78ccbd250fc1ba1e50befdc1dc0d89bab8e0b86db4d5c55ca3236"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

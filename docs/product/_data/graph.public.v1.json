@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.28",
+  "knowledge_version": "1.0.29",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1235,6 +1235,16 @@
     },
     {
       "id": "studio.logo_motion.symbol_width",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.piece_construction",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.piece_columns",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -3199,6 +3209,16 @@
       "from": "studio.logo_motion",
       "type": "editable_with",
       "to": "studio.logo_motion.symbol_width"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.piece_construction"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.piece_columns"
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.28 • 2026-10-17
+Development documentation • product 1.2.0 • knowledge 1.0.29 • 2026-10-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -154,6 +154,8 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.logo_motion.background | Add background | boolean | source-dependent … source-dependent | none | true | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 | studio.logo_motion.separate_symbol | Separate left symbol from wordmark | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 | studio.logo_motion.symbol_width | Logo symbol width | number | 10 … 60 | percent of visible logo width | 28 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.piece_construction | Construct words from pieces | boolean | source-dependent … source-dependent | boolean | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.piece_columns | Logo wordmark slices | number | 2 … 16 | slices | 11 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -1980,6 +1982,30 @@ Applies to: new logo-motion composition. Requires: studio.logo_motion.
 ID: `studio.logo_motion.symbol_width` • **PARTIAL**
 
 Places the initial symbol/wordmark boundary as a percentage of the visible image width; the seam follows transparent space around it.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-piece_construction"></a>
+
+## Construct words from pieces
+
+ID: `studio.logo_motion.piece_construction` • **PARTIAL**
+
+Creates interlocking image slices and three masked text pieces per word through ordinary graphics and keys.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-piece_columns"></a>
+
+## Logo wordmark slices
+
+ID: `studio.logo_motion.piece_columns` • **PARTIAL**
+
+Sets the number of original bitmap wordmark slices; each slice is animated as two interlocking pieces.
 
 Applies to: new logo-motion composition. Requires: studio.logo_motion.
 

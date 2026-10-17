@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.28",
+  "knowledge_version": "1.0.29",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -5069,6 +5069,72 @@
         "default_known": true
       },
       "unit": "percent of visible logo width",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.piece_construction",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Construct words from pieces",
+      "status": "PARTIAL",
+      "meaning": "Creates interlocking image slices and three masked text pieces per word through ordinary graphics and keys.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "boolean",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.piece_columns",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Logo wordmark slices",
+      "status": "PARTIAL",
+      "meaning": "Sets the number of original bitmap wordmark slices; each slice is animated as two interlocking pieces.",
+      "constraints": {
+        "type": "number",
+        "minimum": 2,
+        "maximum": 16,
+        "values": [],
+        "default": 11,
+        "default_known": true
+      },
+      "unit": "slices",
       "keyframeable": "UNSUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "SUPPORTED",

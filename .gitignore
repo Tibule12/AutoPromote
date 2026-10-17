@@ -107,3 +107,10 @@ reports/studio-logo-motion-20261017-*.log
 # Private owner-directed ribbon logo revision.
 reports/studio-logo-ribbons-20261017/*
 !reports/studio-logo-ribbons-20261017/README.md
+
+# Private word-piece movie and authenticated Studio proof.
+reports/studio-logo-word-pieces-20261017/*
+!reports/studio-logo-word-pieces-20261017/README.md
+!frontend/public/favicon.png
+!frontend/public/logo192.png
+!frontend/public/logo512.png
