@@ -6451,5 +6451,105 @@
       "selectedNarratedTour": "proof-v3",
       "earlierTourDraftsPreserved": true
     }
+  },
+  "creatorMinutePresentation20261017": {
+    "date": "2026-10-17",
+    "status": "EXPORTED_NATIVE_PLAYBACK_AND_FRESH_BACKUP_VERIFIED",
+    "projectId": "viral-project-0305a63b-fb79-48bb-a542-543c64b64344",
+    "canonicalHash": "843539179b8446f7b00a30ccb121438486448cdab77a78cdcc91dfcc6d6490e4",
+    "outputSha256": "3c00b9daa75ac4b8306aaa214a8b22c948321d923741ab3dd25f62bb84a11e14",
+    "submittedJobId": "viral_7a620b54ad0b434572f57aae32126aeb84dd8f2aed1b7aa374d3bc8ac58f08d9",
+    "seconds": 60,
+    "frames": 1440,
+    "resolution": [
+      1600,
+      1000
+    ],
+    "fps": 24,
+    "motionKeys": 132,
+    "nativeControlsOnly": true,
+    "directProjectGraphInjection": false,
+    "sameClockResultInsert": true,
+    "originalFullRecordingsPreserved": true,
+    "fullNativeFinishedMoviePlayback": true,
+    "exactFreshBackupRestore": true,
+    "pausedResultDecoderTime": 0.466666,
+    "actualVideoAlphaSamples": 4,
+    "maximumVideoAlphaBoundaryErrorPixels": 1,
+    "unchangedTolerancePixels": 2,
+    "screenCaptureFps": 18.019963139935665,
+    "screenCaptureProvesSmoothness": false,
+    "localCpuPresetNarration": true,
+    "voicePreset": "Kokoro af_heart",
+    "measuredLoudnessLUFS": -18.2,
+    "measuredTruePeakDbTP": -5.0,
+    "humanListeningVerified": false,
+    "scheduleFilm": {
+      "actualUpcomingCardsAtCapture": 23,
+      "movieSha256": "9c676c33c211379ea0d84e963604fae8e27a0b69b67595a004be53c926904a12",
+      "publicDeliverable": "standalone narrated film",
+      "studioPlaybackAndBackup": "private QA only"
+    },
+    "dailyPolicy": {
+      "futurePublicSeconds": 60,
+      "storiesPerDay": 4,
+      "platformsPerStory": 6,
+      "retentionBeatsRequired": 3,
+      "specificViewerQuestionRequired": true,
+      "existingStoriesPreserved": 4,
+      "existingSchedulesPreserved": 24
+    },
+    "repairScope": [
+      "Shared canonical image/video pose compositor now applies saved video position, scale and opacity keys to moving source frames.",
+      "Paused native B-roll preview follows the programme playhead; keyed media does not inherit conflicting CSS entrance transforms.",
+      "Normal JSON backups retain bounded local File bytes and metadata alongside history, with existing ownership checks.",
+      "A supersampled title-mask test now compares programme-space output bounds; the prior assertion also fails on HEAD."
+    ],
+    "newPublishingWrites": 0,
+    "newPaidGpuJobs": 0,
+    "newPaidExternalModelJobs": 0,
+    "mainMerge": false,
+    "deployment": false,
+    "evidence": {
+      "report": "reports/daily-studio/README.md",
+      "delivery": "reports/daily-studio/2026-10-17/creator-minute/proof-v3/delivery.json",
+      "technical": "reports/daily-studio/2026-10-17/creator-minute/proof-v3/creator-minute/final.mp4.technical.json",
+      "nativePlayback": "reports/daily-studio/2026-10-17/creator-minute/proof-v3/creator-minute/studio-playback.json",
+      "freshBackup": "reports/daily-studio/2026-10-17/creator-minute/proof-v3/backup-restore/receipt.json",
+      "actualVideoAlpha": "reports/daily-studio/2026-10-17/creator-minute/proof-v3/review/video-alpha-review.json",
+      "selectedFrames": "reports/daily-studio/2026-10-17/creator-minute/proof-v3/review/contact.jpg",
+      "precedingDay": "reports/daily-studio/2026-10-17/creator-minute/preceding-day-preserved.json",
+      "serviceShutdown": "reports/daily-studio/2026-10-17/creator-minute/services-stopped.private.json"
+    },
+    "formalReadinessCounts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "limits": [
+      "Whole predictive live picture/sound parity, human listening and playback smoothness remain unqualified.",
+      "The two prior creative drafts and rejected first minute export remain retained; technical success is not founder/showroom/hero approval.",
+      "Fresh future-day creative production and provider publication are separate from policy and existing schedule verification.",
+      "Landscape preserves the full result and timeline; no vertical Shorts claim."
+    ],
+    "nextTaskId": "S04",
+    "nextSlice": "S04 spatial/path timing, then S03 source-occurrence/group ownership, retaining S02 whole picture/sound/listening/smoothness and export latency.",
+    "checks": {
+      "workerRegressionTests": 200,
+      "workerSubtests": 16,
+      "focusedFrontendChecks": 13,
+      "frontendSkipped": 128,
+      "dailyContractAndStorageChecks": 15,
+      "productKnowledgeChecks": 17,
+      "strictAppBuild": "PASS",
+      "sourceLint": "PASS",
+      "studioContinuityValidation": "PASS",
+      "freshNativeBackupRestore": "PASS"
+    },
+    "ownLocalServicesStopped": true,
+    "dailyAndRetentionTimersActive": true
   }
 }

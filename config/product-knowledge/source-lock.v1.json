@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final reviewed Studio continuity binds 24 verified schedules, 49 server guards and the exact narrated Queue tour; no capability readiness promotion.",
-  "reviewed_at": "2026-10-17T06:08:27.669Z",
-  "catalog_sha256": "8cf67336a7aad122446b709d72795dcc556e659342555bfb1e01296198e7664e",
+  "reason": "Reviewed corrected sixty-second native presentation, video pose and paused-clock repairs, portable media backups, scoped passing checks and unchanged readiness; owned QA services stopped.",
+  "reviewed_at": "2026-10-17T07:39:21.967Z",
+  "catalog_sha256": "f8162d1b093f4d48b9d75c53adf903b8e439a03dbe95f709f98f3541b6eb8a51",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -155,7 +155,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "9d0d1df82a16aee5fc8124f082a9b5f7696ea61328e84c3af194eea6f115c62b"
+      "sha256": "ed8588f1c5cd688487ad961df0a925ac9d624dd5f9322469e556a8e5e2fadbb9"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -291,7 +291,7 @@
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
-      "sha256": "ca8b1992e515d64fa431e23695f31011cc53fdb1520fba2c16b7bcb3ad1e79f2"
+      "sha256": "bc522de58d3c60c5c454ec278c0dcd0a65bdca2e087ac925ed29ce9b784a96a9"
     },
     {
       "path": "python_media_worker/studio_motion.py",
@@ -451,11 +451,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "da6cc979861bb9368699bfc3d364839272222efaec42e508b0744b6ddbb21263"
+      "sha256": "30ebe8b0533b06ae5707c8ae74649d25086320e46be1e04ba5027f6e3487fa20"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "e90ac12041f05a09fa46bc35bb3027c679b5d4712ba04863a9ff9677fffa8208"
+      "sha256": "2222d76b4ffb7e7efdecf0a1535cdf970c3b10bb458164cfb95ad12120c0d67f"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

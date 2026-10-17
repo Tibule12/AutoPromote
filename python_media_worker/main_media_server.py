@@ -33258,9 +33258,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             return f"{filter_body}[{output_label}];"
 
         try:
-            from .studio_layer_motion import composition_layer, render_image_layer_motion
+            from .studio_layer_motion import composition_layer, render_image_layer_motion, render_video_layer_motion
         except ImportError:
-            from studio_layer_motion import composition_layer, render_image_layer_motion
+            from studio_layer_motion import composition_layer, render_image_layer_motion, render_video_layer_motion
 
         # Process Video Overlays
         overlay_chain_start = len(filter_chain)
@@ -33314,6 +33314,26 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             
             if ov_path:
                 block_start, block_input = len(filter_chain), current_v_label
+                layer_plan = composition_layer(request.composition_plan, ov.id)
+                if layer_plan and layer_plan.get("motion_keyframes"):
+                    # A moving video uses the same canonical pose/alpha
+                    # compositor as images, after ordinary B-roll preparation.
+                    motion_layer_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_video_motion_{input_idx}.mov")
+                    overlay_temp_paths.append(motion_layer_path)
+                    receipt = await asyncio.to_thread(render_video_layer_motion,
+                        ov_path, motion_layer_path, ov, layer_plan, base_width, base_height,
+                        rendered_timeline_duration, speed_plan, 30)
+                    if getattr(ov, "useOverlayAudio", False) and has_audio_stream(ov_path):
+                        inputs.extend(["-itsoffset", str(rendered_timeline_time(cue_start)), "-i", ov_path])
+                        overlay_audio_specs.append((input_idx, ov))
+                        input_idx += 1
+                    inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", motion_layer_path])
+                    filter_chain.append(f"[{current_v_label}][{input_idx}:v]overlay=0:0:"
+                                        f"eof_action=pass:format=auto[v{input_idx}];")
+                    current_v_label = f"v{input_idx}"
+                    input_idx += 1
+                    remember_overlay_block(ov, block_start, block_input)
+                    continue
                 # Start the first selected B-roll frame at its cue, not at the
                 # programme's zero. Return/loop/hold and speed are baked above.
                 inputs.extend(["-itsoffset", str(rendered_timeline_time(cue_start)), "-i", ov_path])

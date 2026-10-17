@@ -140,6 +140,21 @@ async function render(page, name) {
     result = await Promise.race([done, new Promise((_, reject) => {
       renderTimeout = setTimeout(() => reject(new Error('Render exceeded its 12-minute CPU budget')), 720000);
     })]);
+  } catch (error) {
+    // The observer deadline does not cancel the accepted worker job. Retain
+    // its actual post-upload graph and portable native backup before closing.
+    try {
+      const pending = await save(page, `${name}-accepted-pending`);
+      fs.writeFileSync(path.join(folder, `${name}-accepted-pending.json`), JSON.stringify({
+        submittedJobId, startedAt, projectId: pending.id,
+        projectHash: hash(pending.snapshot.studioDocument),
+        observerError: error.message, resubmissionAllowed: false,
+      }, null, 2));
+      const waiting = page.waitForEvent('download', { timeout: 30000 });
+      await page.getByRole('button', { name: 'Download project backup', exact: true }).click();
+      await (await waiting).saveAs(path.join(folder, `${name}-accepted-pending.autopromote.json`));
+    } catch (checkpointError) { console.warn('Accepted-job checkpoint:', checkpointError.message); }
+    throw error;
   } finally { clearTimeout(renderTimeout); }
   assert.equal(result.status, 'completed', result.error || 'Render failed');
   // Export materializes newly imported local audio into owned Storage media.

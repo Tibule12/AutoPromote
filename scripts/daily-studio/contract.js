@@ -40,7 +40,7 @@ function prepare(root, date) {
     timezone: policy.timezone,
     status: "PREPARED",
     createdAt: new Date().toISOString(),
-    target: { stories: 4, destinations: 24 },
+    target: { stories: 4, destinations: 24, videoSeconds: policy.publicVideoSeconds },
     stories: [],
     posts: [],
     attempts: [],
@@ -168,6 +168,22 @@ function validateDay(root, book, { requireSchedules = false, priorHashes = [] } 
     "Need four reviewed stories, not filler slots"
   );
   const stories = book.stories.map(s => validateStory(root, s));
+  if (book.target?.videoSeconds !== undefined) {
+    assert.equal(book.target.videoSeconds, policy.publicVideoSeconds);
+    for (const story of book.stories) {
+      assert(story.engagementQuestion?.trim().length > 15,
+        "A minute-long story needs a specific viewer question");
+      assert(story.review?.retentionBeats?.length >= 3,
+        "Review the hook, development and payoff across the minute");
+      const publicReceipt = JSON.parse(artifact(root, story.recordingRenderReceipt).bytes);
+      assert.equal(publicReceipt.outputSha256, story.recordingSha256,
+        "Minute duration receipt belongs to different public media");
+      assert(publicReceipt.actualNativeDownload && publicReceipt.technical?.passed &&
+        publicReceipt.technical?.independentFullDecode, "Verify the native public movie");
+      assert(Math.abs(publicReceipt.technical.seconds - book.target.videoSeconds) <= 1 / 24,
+        "Public videos must be one minute; do not stretch short recordings into filler");
+    }
+  }
   assert.equal(new Set(stories.map(s => s.id)).size, 4);
   assert.equal(
     new Set(stories.map(s => s.movieSha256)).size,

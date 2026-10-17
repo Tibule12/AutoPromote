@@ -208,10 +208,9 @@ async function view(page, name) {
       return observations;
     };
   });
-  const frames = path.join(folder, name, 'studio-recording-frames');
   const storage = require('./proof-storage');
-  storage.requireProofSpace(folder);
-  fs.mkdirSync(frames, { recursive: true });
+  const scratch = storage.recordingScratch(folder, name);
+  const frames = scratch.frames;
   const cdp = await page.context().newCDPSession(page);
   const recorded = [];
   let captureBytes = 0, captureStorageFailure = null;
@@ -267,7 +266,8 @@ async function view(page, name) {
       audioTrackReveal = { nativeSoundInspector: true, sfxLaneVisible: true,
         atOutputSeconds: await output.evaluate(video => video.currentTime) };
     }
-    await page.waitForFunction(() => document.querySelector('[data-testid="studio-after-video"]')?.ended, undefined, { timeout: 60000 });
+    await page.waitForFunction(() => document.querySelector('[data-testid="studio-after-video"]')?.ended,
+      undefined, { timeout: Math.ceil(expectedMovieDuration * 1000) + 15000 });
   } catch (error) {
     const observations = await page.evaluate(() => window.__stopNativeStudioRecordingObservation());
     await cdp.send('Page.stopScreencast');
@@ -317,7 +317,7 @@ async function view(page, name) {
     '-itsoffset', String(audioOffset), '-i', finalMovie, '-map', '0:v:0', '-map', '1:a:0',
     '-vf', `fps=${movieFps},scale=1600:-2`, '-c:v', 'libx264', '-preset', 'fast', '-crf', '24',
     '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', recording]);
-  const recordingScratch = storage.pruneRecordingScratch(frames);
+  const recordingScratch = storage.finishRecordingScratch(scratch, recording);
   const after = await h.save(page, name);
   assert.equal(hash(after.snapshot.studioDocument), hash(before.snapshot.studioDocument));
   fs.writeFileSync(path.join(folder, name, 'studio-playback.json'), JSON.stringify({

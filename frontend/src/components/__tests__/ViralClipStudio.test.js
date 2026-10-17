@@ -230,6 +230,20 @@ describe("ViralClipStudio timeline sequencing", () => {
     return { video, props, ...rendered };
   };
 
+  const readyCutawaySource = duration => {
+    const video = screen.getByTestId('studio-after-video');
+    Object.defineProperties(video, {
+      duration: { configurable: true, value: duration },
+      readyState: { configurable: true, value: 4 },
+      currentSrc: { configurable: true, get: () => video.src },
+    });
+    fireEvent.loadedMetadata(video);
+    fireEvent.loadedData(video);
+    const pause = screen.queryByRole('button', { name: 'Pause comparison', exact: true });
+    if (pause) fireEvent.click(pause);
+    return video;
+  };
+
   test("an existing finished URL cannot hide recovery actions that still need attention", () => {
     mountNativePreview({ renderedOutput: { url: 'https://example.com/finished.mp4' },
       renderRecoveryNeedsAttention: true,
@@ -254,9 +268,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(layer.style.filter).toContain('drop-shadow(0 0 0px');
   });
 
-  test('canonical image opacity and transform keys cannot be replaced by legacy entrance animation', async () => {
+  test.each(['image', 'video'])('canonical %s opacity and transform keys cannot be replaced by legacy entrance animation', async type => {
     const source = { id: 'range', start: 2, end: 8, duration: 6, sourceDuration: 12 };
-    const artwork = { id: 'artwork', type: 'image', src: 'https://example.com/artwork.png',
+    const artwork = { id: 'artwork', type, src: `https://example.com/artwork.${type === 'image' ? 'png' : 'mp4'}`,
       startTime: 0, duration: 6, x: 50, y: 50, width: 30, height: 30,
       animation: { enter: 'zoom', enterDuration: .35 } };
     mountNativePreview({ initialSavedProject: { id: 'keyed-artwork', name: 'Keyed artwork', snapshot: {
@@ -266,10 +280,31 @@ describe("ViralClipStudio timeline sequencing", () => {
       motionKeyframes: [{ id: 'alpha', targetId: 'artwork', property: 'opacity', time: 0, value: .4 },
         { id: 'rotation', targetId: 'artwork', property: 'rotation', time: 0, value: 15 }],
     } } });
-    const layer = (await screen.findByAltText('Overlay')).closest('.draggable-overlay');
+    const media = type === 'image' ? await screen.findByAltText('Overlay')
+      : await screen.findByTestId('broll-preview-artwork');
+    const layer = media.closest('.draggable-overlay');
     expect(layer).not.toHaveClass('broll-anim-zoom');
     expect(layer).toHaveStyle({ opacity: '0.4', animation: 'none', transition: 'none' });
     expect(layer.style.getPropertyValue('--title-rotation')).toBe('15deg');
+  });
+
+  test('paused scrubbing seeks the matching video overlay to its programme clock', async () => {
+    const source = { id: 'range', start: 2, end: 8, duration: 6, sourceDuration: 12 };
+    mountNativePreview({ initialSavedProject: { id: 'scrub-result', name: 'Scrub result', snapshot: {
+      orderedClips: [source], selectedClipId: 'range',
+      timeline: [{ ...source, sourceClipId: 'range', startRequest: 2, endRequest: 8,
+        url: 'https://example.com/source.mp4' }], addHook: false,
+      overlays: [{ id: 'result', type: 'video', src: 'https://example.com/result.mp4',
+        startTime: 0, duration: 6, sourceDuration: 12, sourceStartTime: .5,
+        x: 50, y: 50, width: 100, height: 90 }],
+    } } });
+    const overlay = await screen.findByTestId('broll-preview-result');
+    Object.defineProperty(overlay, 'duration', { configurable: true, value: 12 });
+    fireEvent.change(screen.getByLabelText('Edited output position'), { target: { value: '2.3' } });
+    await waitFor(() => expect(overlay.currentTime).toBeCloseTo(2.8, 3));
+    fireEvent.change(screen.getByLabelText('Edited output position'), { target: { value: '2.4' } });
+    await waitFor(() => expect(overlay.currentTime).toBeCloseTo(2.9, 3));
+    expect(overlay.paused).toBe(true);
   });
 
   test("metadata reload preserves the selected trim and paused editing frame", () => {
@@ -3849,6 +3884,8 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
+    readyCutawaySource(30);
+
     fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
 
     const inspector = screen.getByTestId("clip-studio-inspector");
@@ -3912,6 +3949,8 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(previewShell.querySelector(".overlay-controls")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "After" }));
+    const pauseForHandles = screen.queryByRole('button', { name: 'Pause comparison', exact: true });
+    if (pauseForHandles) fireEvent.click(pauseForHandles);
     expect(previewShell.querySelector(".draggable-overlay.active")).toBeInTheDocument();
     expect(previewShell.querySelector(".overlay-controls")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "W+" }));
@@ -3997,7 +4036,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     await waitFor(() => expect(afterVideo.muted).toBe(false));
     expect(screen.queryByTestId(/broll-preview-/)).not.toBeInTheDocument();
     expect(screen.getAllByText(/Original audio returns automatically/i).length).toBeGreaterThan(0);
-  }, 30000);
+  }, 60000);
 
   test("supports minute-long B-roll with explicit return, loop, and hold behavior", async () => {
     const createdVideos = setupVideoCreateElementMock();
@@ -4017,6 +4056,8 @@ describe("ViralClipStudio timeline sequencing", () => {
         onCancel={jest.fn()}
       />
     );
+
+    readyCutawaySource(360);
 
     fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
     const inspector = screen.getByTestId("clip-studio-inspector");

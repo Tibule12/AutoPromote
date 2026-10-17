@@ -5,6 +5,7 @@ evaluates those same keys after mapping output time back through speed changes,
 then creates a transparent full-canvas layer for FFmpeg compositing.
 """
 import math
+import json
 import re
 from pathlib import Path
 import subprocess
@@ -172,7 +173,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     box = Image.new("RGBA", (box_width, box_height))
     box.alpha_composite(artwork, ((box_width - artwork.width) // 2, (box_height - artwork.height) // 2))
     artwork = box
-    if _get(overlay, "type") == "image" and not fullscreen:
+    if _get(overlay, "type") in ("image", "video") and not fullscreen:
         # Native media corner rounding applies before the layer's effects and
         # mask. Inverted masks otherwise reveal square corners absent in preview.
         shape = str(_get(overlay, "frameShape", "round") or "round")
@@ -192,7 +193,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     )
     alpha = transform_surface.getchannel("A")
     effects = (layer or {}).get("effects") or {}
-    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") == "image" else 1
+    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") in ("image", "video") else 1
     composed = transform_surface
     shadow = effects.get("shadow") or {}
     if shadow.get("enabled"):
@@ -257,12 +258,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     return destination
 
 
-def render_image_layer_motion(asset_path, output_path, overlay, layer, width, height,
-                              output_duration, speed_plan, fps=30):
-    """Render one timed image layer and return its final-clock placement."""
-    asset = Image.open(asset_path).convert("RGBA")
-    if asset.width * asset.height > 8192 * 8192:
-        raise ValueError("Logo/image layer exceeds the 8192px safety limit")
+def layer_output_window(overlay, output_duration, speed_plan):
     start = max(0, finite(_get(overlay, "start_time", 0), 0))
     edit_end = start + max(.05, finite(_get(overlay, "duration", output_duration), output_duration))
     normalized_speed_plan = list(speed_plan or [])
@@ -273,6 +269,16 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
         output_start = min(output_duration, start)
         output_end = min(output_duration, edit_end)
     clip_duration = max(.05, output_end - output_start)
+    return output_start, clip_duration, normalized_speed_plan
+
+
+def render_image_layer_motion(asset_path, output_path, overlay, layer, width, height,
+                              output_duration, speed_plan, fps=30, *, frame_source=None):
+    """Render canonical media poses; a video supplies decoded frames to this same compositor."""
+    asset = Image.open(asset_path).convert("RGBA") if frame_source is None else None
+    if asset is not None and asset.width * asset.height > 8192 * 8192:
+        raise ValueError("Logo/image layer exceeds the 8192px safety limit")
+    output_start, clip_duration, normalized_speed_plan = layer_output_window(overlay, output_duration, speed_plan)
     motion_blur = ((layer or {}).get("effects") or {}).get("motion_blur") or {}
     samples = max(1, min(8, int(finite(motion_blur.get("samples"), 1)))) if motion_blur.get("enabled") else 1
     shutter = max(0, min(1, finite(motion_blur.get("shutter"), .5)))
@@ -285,6 +291,8 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log)
         try:
             for frame_index in range(math.ceil(clip_duration * fps)):
+                if frame_source is not None:
+                    asset = frame_source(frame_index)
                 absolute_output = output_start + frame_index / fps
                 frame = Image.new("RGBA", (width, height))
                 for sample in range(samples):
@@ -305,6 +313,8 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                         pose["scale"] *= animation["scale"]
                         pose["x"] += animation["x"]
                         pose["y"] += animation["y"]
+                    if pose["opacity"] <= 0:
+                        continue
                     sample_opacity = 1 if sample == samples - 1 else .28 / max(1, samples - 1)
                     frame.alpha_composite(
                         _render_pose(asset, overlay, layer, pose, (width, height), sample_opacity)
@@ -319,3 +329,57 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                 process.kill()
                 process.wait()
     return {"path": str(Path(output_path)), "start_time": output_start, "duration": clip_duration}
+
+
+def render_video_layer_motion(asset_path, output_path, overlay, layer, width, height,
+                              output_duration, speed_plan, fps=30):
+    """The ordinary B-roll preparation already owns trim/loop/hold and retiming.
+
+    Decode its moving pictures once and apply the same pose/mask/alpha renderer
+    as image layers. This replaces only the legacy static placement of keyed
+    video, preserving the existing B-roll source clock and separate audio path.
+    """
+    info = json.loads(subprocess.check_output([
+        "ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+        "stream=width,height", "-of", "json", str(asset_path),
+    ]))
+    stream = info["streams"][0]
+    source_width, source_height = int(stream["width"]), int(stream["height"])
+    if min(source_width, source_height) <= 0 or source_width * source_height > 8192 * 8192:
+        raise ValueError("Video layer exceeds the 8192px safety limit")
+    _, duration, _ = layer_output_window(overlay, output_duration, speed_plan)
+    frame_count = math.ceil(duration * fps)
+    frame_bytes = source_width * source_height * 4
+    command = ["ffmpeg", "-nostdin", "-v", "error", "-threads", "2", "-i", str(asset_path),
+               "-an", "-vf", f"fps={fps}", "-frames:v", str(frame_count),
+               "-f", "rawvideo", "-pix_fmt", "rgba", "pipe:1"]
+    with tempfile.TemporaryFile() as log:
+        decoder = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=log)
+        last_frame = None
+        def frame_source(index):
+            nonlocal last_frame
+            raw = bytearray()
+            while len(raw) < frame_bytes:
+                chunk = decoder.stdout.read(frame_bytes - len(raw))
+                if not chunk:
+                    break
+                raw.extend(chunk)
+            if len(raw) != frame_bytes:
+                # Permit only the existing one-frame delivery rounding tail.
+                if not raw and last_frame is not None and index == frame_count - 1:
+                    return last_frame
+                raise RuntimeError("Prepared video layer ended before its authored duration")
+            last_frame = Image.frombytes("RGBA", (source_width, source_height), bytes(raw))
+            return last_frame
+        try:
+            receipt = render_image_layer_motion(None, output_path, overlay, layer, width, height,
+                output_duration, speed_plan, fps, frame_source=frame_source)
+            if decoder.wait(timeout=30):
+                log.seek(0)
+                raise RuntimeError("Video layer decode failed: " + log.read().decode(errors="replace")[-1600:])
+            return receipt
+        finally:
+            decoder.stdout.close()
+            if decoder.poll() is None:
+                decoder.kill()
+                decoder.wait()

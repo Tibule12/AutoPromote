@@ -15,6 +15,8 @@ function fixture(t) {
     return name;
   };
   const book = c.prepare(root, "2026-10-17");
+  // Historical 17 October fixtures precede the owner's minute-long direction.
+  delete book.target.videoSeconds;
   for (let i = 0; i < 4; i++) {
     // These are validation fixtures only: no fabricated evidence is delivered
     // as a native run or used to qualify Studio or creative readiness.
@@ -119,6 +121,27 @@ test("preparation preserves acknowledgements and saved progress", t => {
 test("validates four distinct reviewed stories and 24 separate schedules", t => {
   const { root, book } = fixture(t);
   assert.equal(c.validateDay(root, book, { requireSchedules: true }).verifiedSchedules, 24);
+});
+test("new minute-long batches require actual public export duration and a viewer question", t => {
+  const { root, book } = fixture(t);
+  book.target.videoSeconds = 60;
+  assert.throws(() => c.validateDay(root, book), /viewer question/);
+  for (const [i, story] of book.stories.entries()) {
+    story.engagementQuestion = "Which platform takes the longest to post to, and why?";
+    story.review.retentionBeats = ["Result in opening second", "Focused actual timing action", "Specific problem payoff"];
+    story.recordingRenderReceipt = `public-${i}.json`;
+    fs.writeFileSync(path.join(root, story.recordingRenderReceipt), JSON.stringify({
+      outputSha256: story.recordingSha256, actualNativeDownload: true,
+      technical: { passed: true, independentFullDecode: true, seconds: 10 },
+    }));
+  }
+  assert.throws(() => c.validateDay(root, book), /one minute/);
+  for (const story of book.stories) {
+    const file = path.join(root, story.recordingRenderReceipt);
+    const receipt = JSON.parse(fs.readFileSync(file)); receipt.technical.seconds = 60;
+    fs.writeFileSync(file, JSON.stringify(receipt));
+  }
+  assert.equal(c.validateDay(root, book).reviewedStories, 4);
 });
 test("a source change invalidates the review", t => {
   const { root, book } = fixture(t);

@@ -120,6 +120,7 @@ import Studio3DPanel from "./threeD/Studio3DPanel";
 import StudioSubjectVfxPanel from "./StudioSubjectVfxPanel";
 import { findUncoveredCaptionSpeechRanges, mapCaptionSilencesToProgramme } from "./studioCaptionCoverage";
 import { historyMediaIdentity, historySubjectVfxIdentity } from "./studioHistoryMedia";
+import { packageStudioBackup } from "./studioProjectBackupMedia";
 import { titleAnimationPose, normalizeStudioTitleText } from "./studioTitleLayout";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
 import { validateSubjectVfxExport, resolveSubjectVfxProgrammePreview, subjectVfxRevision } from "./studioSubjectVfxContract";
@@ -14710,7 +14711,11 @@ const ViralClipStudio = ({
     if (!sourceVideo) return undefined;
 
     const syncOverlayMedia = () => {
-      const outputTime = getPreviewTimelineTime(sourceVideo.currentTime || 0);
+      // Paused accurate-frame sampling can leave the source decoder at its old
+      // position. The native programme playhead still owns the cutaway clock.
+      const outputTime = isPreviewPaused
+        ? previewTimelineTime
+        : getPreviewTimelineTime(sourceVideo.currentTime || 0);
       overlayMediaRefsRef.current.forEach((overlayVideo, overlayId) => {
         if (String(soloPreviewOverlayId) === String(overlayId)) return;
         const overlay = overlays.find(item => String(item.id) === String(overlayId));
@@ -14779,7 +14784,7 @@ const ViralClipStudio = ({
 
         if (
           Number.isFinite(targetTime) &&
-          Math.abs(Number(overlayVideo.currentTime || 0) - targetTime) > 0.18
+          Math.abs(Number(overlayVideo.currentTime || 0) - targetTime) > (isPreviewPaused ? 0.001 : 0.18)
         ) {
           try {
             overlayVideo.currentTime = targetTime;
@@ -14814,6 +14819,8 @@ const ViralClipStudio = ({
     };
   }, [
     activeTimelineIndex,
+    isPreviewPaused,
+    previewTimelineTime,
     overlays,
     previewMuted,
     soloPreviewOverlayId,
@@ -18007,9 +18014,10 @@ const ViralClipStudio = ({
                   if (!saved) return;
                   // Export only this ordinary editable record. Authentication,
                   // other projects and render-recovery session state stay out.
-                  const backup = { id: saved.id, name: saved.name, createdAt: saved.createdAt,
-                    snapshot: saved.snapshot, versions: saved.versions || [] };
-                  const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], {type:"application/json"}));
+                  let backup;
+                  try { backup = await packageStudioBackup(saved); }
+                  catch (error) { setStudioActionMessage(error.message); return; }
+                  const url = URL.createObjectURL(backup);
                   const link = document.createElement("a");
                   link.href = url;
                   link.download = `${saved.name.replace(/[^a-zA-Z0-9_-]+/g, "-")}.autopromote.json`;
@@ -19580,11 +19588,11 @@ const ViralClipStudio = ({
                           const overlayKeys = previewMotionKeyframes.filter(
                             keyframe => String(keyframe.targetId) === String(overlay.id)
                           );
-                          // Canonical image keys own transform and opacity.
+                          // Canonical media keys own transform and opacity.
                           // CSS entrance fill otherwise freezes opacity at1 or
                           // replaces the authored scale/rotation after the entry.
-                          const keyedImage = overlay.type === "image" && overlayKeys.length > 0;
-                          const animClass = anim.enter && !keyedImage ? `broll-anim-${anim.enter}` : "";
+                          const keyedMedia = isMediaOverlay && overlayKeys.length > 0;
+                          const animClass = anim.enter && !keyedMedia ? `broll-anim-${anim.enter}` : "";
                           const overlayMotion = buildMotionAutomationStyle(
                             overlayKeys,
                             previewTimelineTime,
@@ -19663,8 +19671,8 @@ const ViralClipStudio = ({
                                   cropY: overlayMotion.cropY,
                                 }),
                                 borderRadius: isFullscreen ? "0" : frameRadius,
-                                animation: keyedImage ? "none" : undefined,
-                                transition: keyedImage ? "none" : !isStyledTitle && anim.enterDuration
+                                animation: keyedMedia ? "none" : undefined,
+                                transition: keyedMedia ? "none" : !isStyledTitle && anim.enterDuration
                                   ? `opacity ${anim.enterDuration}s ease, transform ${anim.enterDuration}s ease`
                                   : undefined,
                               }}
