@@ -3,14 +3,15 @@
 import json
 import argparse
 import wave
+import os
 from pathlib import Path
 import numpy as np
 
 root = Path(__file__).resolve().parents[2]
-folder = root / 'reports/studio-logo-motion-20261017/assets'
+folder = root / os.environ.get('STUDIO_LOGO_BASE','reports/studio-logo-motion-20261017') / 'assets'
 folder.mkdir(parents=True, exist_ok=True)
-parser=argparse.ArgumentParser();parser.add_argument('--variant',choices=['bands','symbol'],default='bands');args=parser.parse_args()
-stem='identity-symbol' if args.variant=='symbol' else 'identity-score'
+parser=argparse.ArgumentParser();parser.add_argument('--variant',choices=['bands','symbol','ribbons'],default='bands');args=parser.parse_args()
+stem={'bands':'identity-score','symbol':'identity-symbol','ribbons':'identity-ribbons'}[args.variant]
 assert not (folder / (stem+'-original.wav')).exists(), 'Preserve the authored score'
 rate, seconds = 48000, 10
 mix = np.zeros((rate*seconds, 2))
@@ -27,7 +28,8 @@ def add(at, signal, pan=0, label='accent'):
 def clock(length):
     return np.arange(round(length*rate))/rate
 
-for at in ([0,.65,1.35,1.8,3.85,5.55,6.05] if args.variant=='symbol' else [0,.82,.98,1.14,1.9,4.45,5.7]):
+assembly=[0,.22,.48,1.58,3.86,4.23,5.65,6.08] if args.variant=='ribbons' else ([0,.65,1.35,1.8,3.85,5.55,6.05] if args.variant=='symbol' else [0,.82,.98,1.14,1.9,4.45,5.7])
+for at in assembly:
     t = clock(.5)
     phase = 2*np.pi*(48*t+42*(1-np.exp(-28*t))/28)
     bass = np.sin(phase)*np.exp(-13*t)
@@ -37,12 +39,12 @@ for i in range(8):
     t = clock(.32)
     pitch = [293.665,369.994,440,587.33][i%4]
     pluck = (np.sin(2*np.pi*pitch*t)+.18*np.sin(4*np.pi*pitch*t))*np.exp(-18*t)*(1-np.exp(-250*t))
-    add(1.9+i*.06, .12*pluck, np.sin(i*np.pi/4)*.65, 'broadcast pulse')
+    add((2.25+i*.14 if args.variant=='ribbons' else 1.9+i*.06), .12*pluck, np.sin(i*np.pi/4)*.65, 'broadcast pulse')
 for i in range(11):
     t = clock(.18)
     tap = np.sin(2*np.pi*(880+55*i)*t)*np.exp(-38*t)*(1-np.exp(-300*t))
-    add(5.05+i*.065, .035*tap, -.55+i*.11, 'lockup settle')
-for at, length in [(.07,.7),(3.85,1.15)]:
+    add((4.48+i*.075 if args.variant=='ribbons' else 5.05+i*.065), .035*tap, -.55+i*.11, 'lockup settle')
+for at, length in ([(0,.75),(2.8,1.06),(3.9,.55)] if args.variant=='ribbons' else [(.07,.7),(3.85,1.15)]):
     t = clock(length)
     noise = rng.normal(0,1,len(t))
     noise = np.convolve(noise,np.ones(19)/19,mode='same')

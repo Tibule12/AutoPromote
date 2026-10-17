@@ -26,6 +26,10 @@ On 17 October the owner explicitly moved Studio onto logo motion, starting
 with `AutoPromote Gradient Tech Logo.png`. This supersedes the earlier
 no-logo-work restriction for that requested track. Use the ordinary Studio
 controls and canonical engine; keep unrelated branding experiments out of scope.
+The owner rejected the initial basic reveal and clarified that the logo's
+components should drive its motion. Preserve those rejected movies and projects.
+Distinguish native masked bitmap components from editable vector contours;
+do not describe fragment masking as inferred ribbon geometry or path morphing.
 
 At the end of every Studio session, update product readiness, capability and
 combination matrices, exact remaining blockers, evidence and next task.

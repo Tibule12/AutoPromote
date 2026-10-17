@@ -8,7 +8,7 @@ export default function StudioLogoMotionPanel({ onBuild, locked, programmeDurati
   const [separateBitmap,setSeparateBitmap]=useState(false),[symbolWidth,setSymbolWidth]=useState(28);
   return <details className="advanced-tool-section kinetic-type-panel" data-testid="studio-logo-motion">
     <summary>Logo motion</summary>
-    <p>Build a signal reveal and broadcast pulse at the start of your programme. SVG shapes stay separate; image logos keep their original colours and lettering in editable reveal bands.</p>
+    <p>Build editable logo motion at the start of your programme. SVG shapes stay separate. A separated image symbol assembles through three masked components, accelerates along forward routes, then resolves into its original wordmark. Each layer and its keys remain editable.</p>
     <label>Logo image<input aria-label="Logo motion image" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" disabled={busy || locked}
       onChange={async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;
         setBusy(true);try{

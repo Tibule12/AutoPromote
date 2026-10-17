@@ -2,7 +2,7 @@
 // Restore the exact native logo backup into an independent authenticated App.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {chromium}=require('playwright'),root=path.resolve(__dirname,'../..');
-const base=path.join(root,'reports/studio-logo-motion-20261017'),folder=path.join(base,'proof');
+const base=path.resolve(root,process.env.STUDIO_LOGO_BASE||'reports/studio-logo-motion-20261017'),folder=path.resolve(process.env.STUDIO_LOGO_PROOF_DIR||path.join(base,'proof'));
 process.env.STUDIO_KINETIC_PROOF_DIR=path.join(folder,'fresh-restore');
 const {pause,seek}=require('./kinetic-type-proof'),h=require('../creative-templates/studio-proof');
 const {hash}=require('../../src/creativeTemplates/contract');

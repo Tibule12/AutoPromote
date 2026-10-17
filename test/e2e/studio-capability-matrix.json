@@ -13043,7 +13043,7 @@
     "localCpuPresetNarration": true,
     "voicePreset": "Kokoro af_heart",
     "measuredLoudnessLUFS": -18.2,
-    "measuredTruePeakDbTP": -5.0,
+    "measuredTruePeakDbTP": -5,
     "humanListeningVerified": false,
     "scheduleFilm": {
       "actualUpcomingCardsAtCapture": 23,
@@ -13173,7 +13173,7 @@
         8,
         20
       ],
-      "narrationPauseMaxAmplitude": 0.0,
+      "narrationPauseMaxAmplitude": 0,
       "motionSourceCorrelation": 0.9989389394920052,
       "nativeMusicGain": 0.6,
       "observedMusicGain": 0.5978276294957461,
@@ -13475,5 +13475,130 @@
       "actualFrames": "reports/studio-logo-motion-20261017/proof/actual-film-contact.jpg",
       "serviceShutdown": "reports/studio-logo-motion-20261017/services-stopped.private.json"
     }
+  },
+  "logoRibbonConstruction20261017": {
+    "updatedAt": "2026-10-17T11:14:00.449Z",
+    "status": "NATIVE_MASKED_COMPONENT_REVISION_EXPORTED_PLAYED_AND_RESTORED",
+    "previousMovieCreativelyRejected": true,
+    "previousMovieSha256": "64cd82d923f51d6a640beff1867d69c24819afb78ee6c35d368bbd8df9bc5712",
+    "sourceName": "AutoPromote Gradient Tech Logo.png",
+    "sourceSha256": "062f560550e591c86a1636c5da200cb9a236978c695f16fb7e958f75ad76b397",
+    "originalSourceUnchanged": true,
+    "selectedMovie": "reports/studio-logo-ribbons-20261017/proof/ribbon-construction/final.mp4",
+    "movieSha256": "1029f52e42b3a4edacc40f488263e3ac4c9353270d747f0f0762630da8a0ec3d",
+    "projectId": "viral-project-56d01a6d-8587-4076-b9ce-478916a4c6b1",
+    "canonicalHash": "434e247b1af2e67a1604fa282fee0e900c5d2eee969f1f60b61d20ea26828ae6",
+    "submittedJobId": "viral_ce08ea9932dd58da8b394e6a6d3e68a4b12ac4a54c4d30e2175d176162b6cb59",
+    "seconds": 10,
+    "frames": 240,
+    "resolution": [
+      1280,
+      720
+    ],
+    "fps": 24,
+    "editableLayers": 15,
+    "groups": 1,
+    "motionKeys": 164,
+    "nativeMaskedSymbolComponents": 3,
+    "semanticRibbonInference": false,
+    "editableVectorContours": false,
+    "nativeBuildUndoRedo": true,
+    "nativeTaglineColourEditUndo": true,
+    "nativeRuleGeometryEditUndoRedo": true,
+    "nativeHeroMotionBlur": {
+      "samples": 4,
+      "shutter": 0.5
+    },
+    "exactColdReopen": true,
+    "allCompiledKeyTuplesExact": true,
+    "independentFullDecode": true,
+    "completeNativeFinishedPlayback": true,
+    "actualTimelineRecording": "reports/studio-logo-ribbons-20261017/proof/ribbon-construction/edited-in-studio.mp4",
+    "screenCaptureFps": 19.547833054268178,
+    "exactFreshNativeBackupRestore": true,
+    "backup": "reports/studio-logo-ribbons-20261017/proof/AUTOPROMOTE-RIBBON-CONSTRUCTION.autopromote.json",
+    "backupSha256": "00c0e60fe203b8f0ee812ac13d01815264ed3a6475a9bb349a4d37764a72955c",
+    "audio": {
+      "movieSha256": "1029f52e42b3a4edacc40f488263e3ac4c9353270d747f0f0762630da8a0ec3d",
+      "sourceReference": "assets/identity-ribbons.wav",
+      "workingSource": "assets/identity-ribbons.m4a",
+      "sourceCorrelation": 0.9947851982953633,
+      "expectedNativeGain": 0.6,
+      "observedNativeGain": 0.5945765847287722,
+      "sampleRate": 48000,
+      "stereo": true,
+      "measuredIntegratedLufs": -22.37,
+      "measuredTruePeakDbtp": -4.86,
+      "measuredLoudnessRangeLu": 9.2,
+      "humanListening": false
+    },
+    "workingAudio": "Smaller AAC working copy imported through normal Sound; original WAV preserved",
+    "firstUploadObservationExpiredBeforeAnyRenderRequest": true,
+    "acceptedNativeCpuJobs": 1,
+    "uploadObservationBudgetMs": 360000,
+    "localIdeReviewCopy": "reports/studio-logo-ribbons-20261017/proof/ribbon-construction/final.ide-preview.mp4",
+    "ideVideoPacketsUnchanged": true,
+    "checks": {
+      "focusedLogoAndGraphicsCases": 25,
+      "knowledgeCases": 17,
+      "strictNormalAppBuild": "PASS",
+      "freshNativeRestore": "PASS"
+    },
+    "newContentUploads": 0,
+    "newSchedules": 0,
+    "paidGpuOrExternalModelJobs": 0,
+    "earlierMediaAndScheduleLedgersPreserved": true,
+    "founderCreativeApproval": false,
+    "showroomPromotion": false,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "wholeLivePredictiveParityQualified": false,
+    "smoothnessQualified": false,
+    "humanListening": false,
+    "formalReadinessCounts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "limits": [
+      "Masked bitmap components retain source pixels; no automatic vector contours, semantic ribbon extraction, path morphs or 3D geometry.",
+      "Whole predictive picture/sound, smoothness, human listening and founder creative acceptance remain separate.",
+      "Ten-second private source; standing purposeful one-minute public story format and previous schedules remain unchanged.",
+      "Native CPU export latency remains a limitation; observed export time includes asset preparation and download, rather than a speed qualification."
+    ],
+    "nextTaskId": "S04",
+    "nextSlice": "Review the actual component revision with sound; continue shared spatial/path timing, then S03 occurrence/group ownership while retaining S02 picture/sound/export latency.",
+    "evidence": {
+      "report": "reports/studio-logo-ribbons-20261017/README.md",
+      "delivery": "reports/studio-logo-ribbons-20261017/delivery.json",
+      "nativeDesign": "reports/studio-logo-ribbons-20261017/proof/native-design.json",
+      "nativeRefinement": "reports/studio-logo-ribbons-20261017/proof/native-refinement.json",
+      "render": "reports/studio-logo-ribbons-20261017/proof/ribbon-construction/render-receipt.json",
+      "restore": "reports/studio-logo-ribbons-20261017/proof/fresh-restore/receipt.json",
+      "playback": "reports/studio-logo-ribbons-20261017/proof/ribbon-construction/studio-playback.json",
+      "audio": "reports/studio-logo-ribbons-20261017/proof/audio-review.json",
+      "services": "reports/studio-logo-ribbons-20261017/services-stopped.private.json",
+      "persistence": "reports/studio-logo-ribbons-20261017/artifact-persistence.private.json"
+    },
+    "ownedServicesStopped": true,
+    "foreignServicesPreserved": true,
+    "dailyAndRetentionTimersActive": true,
+    "nativeExportElapsedSeconds": 715.115,
+    "visibleAfterFrame": {
+      "x": 439.5625,
+      "y": 152,
+      "width": 792.875,
+      "height": 445.984375
+    },
+    "decoderElementRect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "actualCaptureFramesVisuallyReviewed": true
   }
 }

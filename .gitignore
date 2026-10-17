@@ -103,3 +103,7 @@ reports/studio-logo-motion-20261017/*
 !reports/studio-logo-motion-20261017/README.md
 reports/studio-logo-motion-20261017-*.log
 
+
+# Private owner-directed ribbon logo revision.
+reports/studio-logo-ribbons-20261017/*
+!reports/studio-logo-ribbons-20261017/README.md

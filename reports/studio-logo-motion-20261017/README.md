@@ -1,5 +1,7 @@
 # AutoPromote gradient logo motion
 
+The owner rejected this reveal's creative level on 17 October. Its original movies, editable projects and technical receipts are retained. [The component-construction revision is here](../studio-logo-ribbons-20261017/README.md); neither technical success nor that revision establishes founder creative approval.
+
 [Watch the logo movie with IDE-compatible audio](proof/gradient-momentum/final.ide-preview.mp4) · [Actual complete Studio playback and editable timeline](proof/gradient-momentum/edited-in-studio.ide-preview.mp4) · [Editable project backup](proof/AUTOPROMOTE-GRADIENT-MOMENTUM.autopromote.json)
 
 The owner selected **AutoPromote Gradient Tech Logo.png**. Its original gradient, symbol and lettering are retained. The mark crosses the opening frame, settles at centre, sends a sparse broadcast pulse and moves into its original wordmark. A continuous original image completes the resolve, with a short original sonic signature and the editable line “Create. Publish. Move forward.” The ten-second source is a private logo identity; it is not an extra scheduled public story.

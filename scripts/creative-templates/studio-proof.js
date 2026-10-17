@@ -100,6 +100,8 @@ async function apply(page, name) {
     templateRef: record.snapshot.creativeTemplateInstance.templateRef }));
 }
 async function render(page, name) {
+  const uploadBudget = Number(process.env.STUDIO_QA_UPLOAD_BUDGET_MS || 120000);
+  assert(Number.isSafeInteger(uploadBudget) && uploadBudget >= 120000 && uploadBudget <= 600000, 'Use a bounded 2–10 minute native upload observation budget');
   require('./proof-storage').requireProofSpace(folder);
   const pause = page.getByRole('button', { name: 'Pause comparison', exact: true });
   if (await pause.isVisible()) await pause.click();
@@ -128,7 +130,7 @@ async function render(page, name) {
   await page.getByLabel('Export frame rate', { exact: true }).selectOption(process.env.STUDIO_QA_EXPORT_FPS || '24');
   page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button', { name: /^Render (Final Clip|Again)$/ }).click();
-  const acknowledgedUntil = Date.now() + 120000;
+  const acknowledgedUntil = Date.now() + uploadBudget;
   while (!submittedJobId && Date.now() < acknowledgedUntil) {
     const failure = page.getByTestId('studio-export-error');
     if (await failure.isVisible()) throw new Error(await failure.innerText());
