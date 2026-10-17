@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.25",
+  "knowledge_version": "1.0.26",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-17",
@@ -37,7 +37,8 @@
         "Select a source, layer or group on its timeline row. Group bars remain available when property rows are collapsed.",
         "Move a group with a pointer gesture or frame nudge; its descendant starts and keys move in one history transaction. Drag or nudge its In/Out edges to limit visibility while keeping child source edits and hidden keys.",
         "Selecting a group focuses its property rows; select an ordinary child clip to edit that child’s keys. Graphics and child-track locks block group timing changes.",
-        "Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported."
+        "Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported.",
+        "Download project backup saves the current editable project and available media. Select Include saved versions in backup when the saved-version history is also needed; this choice does not delete local versions. Owned media access is re-authorized when restoring."
       ],
       "preview_behavior": "Group In/Out uses a half-open programme-time visibility range around assembled child graphics. Group move shifts canonical child timing and keys, retaining source phase. The same derived group range clips linked motion cues for preview and export. Property focus and clip selection do not change the edit.",
       "render_behavior": "The shared composition plan carries group timing into the CPU compositor. The existing inverse programme clock gates the group’s assembled output at the same In/Out range. Source clips, child animation and audio use their existing compilation paths.",

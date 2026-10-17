@@ -47,3 +47,17 @@ test('invalid local references and oversized packages are rejected', async () =>
   const large = new File([new Uint8Array(16 * 1024 * 1024)], 'large.mp4');
   await expect(packageStudioBackup({ snapshot: { file: large } })).rejects.toThrow('20 MB');
 });
+
+test('current-project backup succeeds when an older saved version exceeds the limit, preserving that version locally', async () => {
+  const current = new File(['current media'], 'current.mp4', { type: 'video/mp4' });
+  const historical = new File([new Uint8Array(16 * 1024 * 1024)], 'old.mp4');
+  const saved = { id: 'project', name: 'Edit', snapshot: { file: current },
+    versions: [{ snapshot: { file: historical } }] };
+  const backup = JSON.parse(await text(await packageStudioBackup(saved, { includeVersions: false })));
+  expect(backup.versions).toEqual([]);
+  expect(backup.mediaFiles).toHaveLength(1);
+  expect(backup.mediaFiles[0].name).toBe('current.mp4');
+  expect(saved.versions[0].snapshot.file).toBe(historical);
+  expect(saved.snapshot.file).toBe(current);
+  await expect(packageStudioBackup(saved, { includeVersions: true })).rejects.toThrow('20 MB');
+});

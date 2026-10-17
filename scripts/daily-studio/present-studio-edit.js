@@ -102,6 +102,30 @@ async function main() {
           await page.waitForFunction(() => document.querySelector('[aria-label="Project name"]')?.value.endsWith(" copy"));
           await page.getByLabel("Project name", { exact: true }).fill(config.projectName);
         }
+        if (config.additionalGraphics) {
+          await seek(page, 0);
+          await page.waitForFunction(({width,height}) => {
+            const video = document.querySelector('[data-testid="studio-after-video"]');
+            return video && video.readyState >= 2 && video.videoWidth === width && video.videoHeight === height;
+          }, {width:config.width,height:config.height}, {timeout:90000});
+          await q.tool(page, "Graphics");
+          const importer = page.getByTestId("studio-graphics-import");
+          if (!await importer.evaluate(e => e.open)) await importer.locator("summary").click();
+          await page.getByLabel("Graphics composition file", { exact: true }).setInputFiles(path.join(root, config.additionalGraphics));
+          await importer.getByRole("status").waitFor();
+          const status = await importer.getByRole("status").innerText();
+          assert(status.includes("imported."), status);
+          if (config.moveAddedLayerBehindVideo) {
+            await q.tool(page, "Motion");
+            await page.getByRole("button", { name:"Logo & layers", exact:true }).click();
+            await page.getByRole("button", { name:`Move ${config.moveAddedLayerBehindVideo} down`, exact:true }).click();
+          }
+          const amended = await h.save(page, "additional-graphics");
+          const backdrop = amended.snapshot.overlays.find(o => o.name === config.moveAddedLayerBehindVideo);
+          const result = amended.snapshot.overlays.find(o => o.type === "video");
+          assert(backdrop && result);
+          assert(amended.snapshot.compositionOrder.indexOf(backdrop.id) < amended.snapshot.compositionOrder.indexOf(result.id));
+        }
         if (config.voiceSource) {
           await q.tool(page, "Sound");
           const start = page.getByLabel(`Start for ${path.basename(config.voiceSource)}`, { exact: true });
@@ -117,6 +141,16 @@ async function main() {
         await page.getByRole("button", { name: config.projectName, exact: true }).click();
         await h.rail(page); await pause(page);
         verifyKeys(await h.save(page, "source-resumed"), "main-video", config.camera);
+      } else {
+      if (config.sequenceBackup) {
+        const sequenceFile = path.join(root, config.sequenceBackup);
+        const sequence = read(sequenceFile);
+        await page.waitForFunction(() => document.querySelector('[aria-label="Restore project backup"]')?.disabled === false);
+        await page.getByLabel("Restore project backup", { exact: true }).setInputFiles(sequenceFile);
+        await page.getByRole("button", { name: sequence.name, exact: true }).click();
+        await h.rail(page); await pause(page);
+        const restoredSequence = await h.save(page, "sequence-restored");
+        assert.equal(hash(restoredSequence.snapshot.studioDocument), hash(sequence.snapshot.studioDocument));
       } else {
       await page.locator(".creator-studio-dropzone input").setInputFiles(path.join(root, config.source));
       await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
@@ -160,6 +194,8 @@ async function main() {
         assert.equal(appended.snapshot.timeline.length, index + 2);
       }
       assert(Math.abs(programmeEnd - config.duration) < 1 / 90000);
+      }
+      await backup(page, "SEQUENCE.autopromote.json");
       await seek(page, 0);
       await page.waitForFunction(({ width, height }) => {
         const video = document.querySelector('[data-testid="studio-after-video"]');
@@ -224,11 +260,13 @@ async function main() {
         if (await originalAudio.isChecked()) await originalAudio.uncheck();
         await page.getByTestId("background-sound-input").setInputFiles(path.join(root, config.soundSource));
         const duck = page.getByLabel(/Duck under speech/);
-        if (!await duck.isChecked()) await duck.check();
+        if (config.musicDucking === false) {
+          if (await duck.isChecked()) await duck.uncheck();
+        } else if (!await duck.isChecked()) await duck.check();
         const loop = page.getByLabel(/Loop for the full clip/);
         if (!await loop.isChecked()) await loop.check();
         await range(page.locator(".inspector-range").filter({ hasText: "Background volume" })
-          .locator("input[type=range]"), 15);
+          .locator("input[type=range]"), config.musicVolume ?? 15);
         prepared = await h.save(page, "narrated");
       }
       }
@@ -240,6 +278,17 @@ async function main() {
       if (config.voiceSource) {
         assert.equal(prepared.snapshot.voiceovers.length, 1);
         assert.equal(prepared.snapshot.voiceovers[0].startTime, 0);
+      }
+      if (config.duplicateBeforeBackup) {
+        const authored = prepared;
+        await page.getByRole("button", { name: "Duplicate", exact: true }).first().click();
+        await page.waitForFunction(() => document.querySelector('[aria-label="Project name"]')?.value.endsWith(" copy"));
+        await page.getByLabel("Project name", { exact: true }).fill(config.projectName);
+        prepared = await h.save(page, "delivery-copy");
+        assert.notEqual(prepared.id, authored.id);
+        assert.deepEqual(prepared.snapshot.motionKeyframes, authored.snapshot.motionKeyframes);
+        assert.equal(prepared.snapshot.overlays.length, authored.snapshot.overlays.length);
+        console.log("Native delivery duplicate preserves the edit with a compact version history.");
       }
       await backup(page, "PRESENTATION-before-export.autopromote.json");
       await page.reload();

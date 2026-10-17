@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed corrected sixty-second native presentation, video pose and paused-clock repairs, portable media backups, scoped passing checks and unchanged readiness; owned QA services stopped.",
-  "reviewed_at": "2026-10-17T07:39:21.967Z",
-  "catalog_sha256": "f8162d1b093f4d48b9d75c53adf903b8e439a03dbe95f709f98f3541b6eb8a51",
+  "reason": "Reviewed owner-rejected prior film, schedule-first native minute and word project, audio and IDE codec receipts, current-only backup control and exact fresh restore; unchanged formal readiness.",
+  "reviewed_at": "2026-10-17T08:45:23.917Z",
+  "catalog_sha256": "943dd9057d6c2a9eccbc7ee739c4494077444081aa6dce0d8246fadc3f0215f1",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -155,7 +155,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "ed8588f1c5cd688487ad961df0a925ac9d624dd5f9322469e556a8e5e2fadbb9"
+      "sha256": "513c2d94a775860f598c226804344bbd45a6639242c18773848620d11ad641a9"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -451,11 +451,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "30ebe8b0533b06ae5707c8ae74649d25086320e46be1e04ba5027f6e3487fa20"
+      "sha256": "c8d2518e3a75f6c3dea4cae811732dad9ae50429dd3e13e1ef32459bb66a19ce"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "2222d76b4ffb7e7efdecf0a1535cdf970c3b10bb458164cfb95ad12120c0d67f"
+      "sha256": "d313fda20212b4a565f97a553d1e63cf2b785d91ecf6e7cb6872ea934924fcd3"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

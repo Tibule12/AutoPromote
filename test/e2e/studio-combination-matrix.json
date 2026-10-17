@@ -6550,6 +6550,134 @@
       "freshNativeBackupRestore": "PASS"
     },
     "ownLocalServicesStopped": true,
-    "dailyAndRetentionTimersActive": true
+    "dailyAndRetentionTimersActive": true,
+    "ownerCreativeReview": "REJECTED",
+    "ownerRejectionEvidence": "reports/daily-studio/2026-10-17/creator-minute/owner-rejection.json"
+  },
+  "scheduleFirstRevision20261017": {
+    "date": "2026-10-17",
+    "status": "NATIVE_MOVIE_PLAYBACK_CURRENT_BACKUP_AND_FRESH_RESTORE_VERIFIED",
+    "ownerPreviousMinuteReview": "REJECTED",
+    "previousRejectedMovieRetained": true,
+    "projectId": "viral-project-2146c3e4-b5ec-40f0-bbbf-6f35d162df83",
+    "canonicalHash": "cea5d459ecbf26ecf2225c51d420d6b39e1925eab7edda0de5b70b1797be3726",
+    "outputSha256": "ce7a266b672b0de7f2b7a4751773b99e3aad08134406298b320f25747f2930e0",
+    "submittedJobId": "viral_eeae362ae1b05df08af45c72c81f2b3533294866db1c06eca2b5cb17cd24ef9e",
+    "seconds": 60,
+    "frames": 1440,
+    "resolution": [
+      1600,
+      1000
+    ],
+    "fps": 24,
+    "presentationOverlays": 48,
+    "presentationKeys": 580,
+    "wordStudy": {
+      "seconds": 12,
+      "layers": 46,
+      "keys": 521,
+      "words": [
+        "STOP",
+        "POSTING",
+        "START",
+        "CREATING",
+        "AGAIN"
+      ],
+      "projectId": "viral-project-bf74fbe0-e3e7-4ada-afe5-c7e954512190",
+      "canonicalHash": "3a9deecebc06e0239336cfe0308926e0f68008d7c3d3550cc270aeba8fc51faf",
+      "outputSha256": "1df48802a9e9e65e5d017d4b2bf1f77b383af846e4fc14139c64f1d428337265",
+      "actualMatchingStudioRecordingRetained": true,
+      "editableBackupRetained": true
+    },
+    "actualDashboardOpens": true,
+    "actualCalendarCardsAtCapture": 20,
+    "scheduleCaptureAt": "2026-10-17T07:49:33.070Z",
+    "nativeControlsOnly": true,
+    "directProjectGraphInjection": false,
+    "allSavedKeysMatchCompiledRequests": true,
+    "independentFullDecode": true,
+    "completeNativePlayback": true,
+    "exactFreshCurrentBackupRestore": true,
+    "currentBackupSha256": "a44f9f49cd69e3425b6b7642b9f30f58ceee180647d8d6301179687eb61941c5",
+    "currentBackupBytes": 966731,
+    "backupUi": {
+      "currentProjectByDefault": true,
+      "includeSavedVersionsExplicitOption": true,
+      "savedVersionsNotDeleted": true,
+      "unchangedMaximumBytes": 20971520,
+      "oversizedFullHistoryAttemptRetained": true
+    },
+    "audio": {
+      "motionSection": [
+        8,
+        20
+      ],
+      "narrationPauseMaxAmplitude": 0.0,
+      "motionSourceCorrelation": 0.9989389394920052,
+      "nativeMusicGain": 0.6,
+      "observedMusicGain": 0.5978276294957461,
+      "motionIntegratedLUFS": -20.7,
+      "motionTruePeakDbTP": -5.5,
+      "allSevenSectionsContainAudio": true,
+      "localCpuPresetNarration": "Kokoro af_heart",
+      "humanListeningVerified": false
+    },
+    "editorReviewCopy": {
+      "audioCodec": "mp3",
+      "videoPacketsUnchanged": true,
+      "nativeSourceSha256": "ce7a266b672b0de7f2b7a4751773b99e3aad08134406298b320f25747f2930e0",
+      "previewSha256": "08125d6fc994ec6db982389e4361119befd169b130ece3ff5599665b0c2406b2",
+      "canonicalPublishingMasterReplaced": false,
+      "exactCauseOfPriorIdeSilenceConfirmed": false,
+      "primaryCodecDocumentation": "https://code.visualstudio.com/api/extension-guides/webview#supported-media-formats"
+    },
+    "screenCaptureFps": 20.057163676984672,
+    "smoothnessQualified": false,
+    "nativeCpuExports": 2,
+    "newPublisherContentUploads": 0,
+    "newSchedulingWrites": 0,
+    "existingDailyStoriesPreserved": 4,
+    "existingDailyScheduleLedgerPreserved": 24,
+    "newPaidGpuJobs": 0,
+    "newPaidExternalModelJobs": 0,
+    "ownLocalServicesStopped": true,
+    "dailyAndRetentionTimersActive": true,
+    "mainMerge": false,
+    "productionDeployment": false,
+    "founderCreativeApproval": false,
+    "formalReadinessCounts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    },
+    "checks": {
+      "backupRegressionTests": 4,
+      "strictNormalAppBuild": "PASS",
+      "sourceLint": "PASS",
+      "dailyContractAndStorageTests": 15
+    },
+    "evidence": {
+      "report": "reports/daily-studio/README.md",
+      "delivery": "reports/daily-studio/2026-10-17/schedule-first-v3/proof-final/delivery.json",
+      "technical": "reports/daily-studio/2026-10-17/schedule-first-v3/proof-final/schedule-first/final.mp4.technical.json",
+      "nativePlayback": "reports/daily-studio/2026-10-17/schedule-first-v3/proof-final/schedule-first/studio-playback.json",
+      "freshRestore": "reports/daily-studio/2026-10-17/schedule-first-v3/proof-final/backup-restore/receipt.json",
+      "audio": "reports/daily-studio/2026-10-17/schedule-first-v3/proof-final/review/audio-review.json",
+      "editorPreview": "reports/daily-studio/2026-10-17/schedule-first-v3/proof-final/schedule-first/final.ide-preview.mp4.receipt.json",
+      "frameInspection": "reports/daily-studio/2026-10-17/schedule-first-v3/proof-final/review/final-review.json",
+      "serviceShutdown": "reports/daily-studio/2026-10-17/schedule-first-v3/services-stopped.private.json"
+    },
+    "limits": [
+      "Technical/editorial inspection is separate from founder creative acceptance and human listening.",
+      "Whole live predictive picture/sound, captured UI/picture clock age, frame delivery and smoothness remain unqualified.",
+      "S04 spatial/path timing, S03 source-occurrence/group ownership and S02 picture/sound/export latency remain open.",
+      "The schedule treatment public deliverable is standalone; full presentation Studio playback is private QA. Landscape preserves the full picture and is not labelled a vertical Short.",
+      "Current project backups omit saved-version history by explicit default; history remains available through its native checkbox and the original project."
+    ],
+    "nextTaskId": "S04",
+    "nextSlice": "Owner review of the revised film; shared S04 spatial/path timing, then S03 occurrence/group ownership, retaining S02 picture/sound/export latency."
   }
 }

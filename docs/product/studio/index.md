@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.25 • 2026-10-17
+Development documentation • product 1.2.0 • knowledge 1.0.26 • 2026-10-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -29,6 +29,7 @@ Shows the real composition as separate front-to-back layer and group rows, with 
 5. Move a group with a pointer gesture or frame nudge; its descendant starts and keys move in one history transaction. Drag or nudge its In/Out edges to limit visibility while keeping child source edits and hidden keys.
 6. Selecting a group focuses its property rows; select an ordinary child clip to edit that child’s keys. Graphics and child-track locks block group timing changes.
 7. Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported.
+8. Download project backup saves the current editable project and available media. Select Include saved versions in backup when the saved-version history is also needed; this choice does not delete local versions. Owned media access is re-authorized when restoring.
 
 **Preview:** Group In/Out uses a half-open programme-time visibility range around assembled child graphics. Group move shifts canonical child timing and keys, retaining source phase. The same derived group range clips linked motion cues for preview and export. Property focus and clip selection do not change the edit.
 

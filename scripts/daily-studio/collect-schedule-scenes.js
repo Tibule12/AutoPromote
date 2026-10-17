@@ -6,7 +6,8 @@ const fs = require("node:fs"),
   assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 const root = path.resolve(__dirname, "../..");
-const folder = path.join(root, "reports/daily-studio/2026-10-17/schedule-tour/creative-v2/assets");
+const folder = path.resolve(root, process.env.STUDIO_SCHEDULE_SCENES_DIR ||
+  "reports/daily-studio/2026-10-17/schedule-tour/creative-v2/assets");
 fs.mkdirSync(folder, { recursive: true });
 const book = JSON.parse(
   fs.readFileSync(path.join(root, "reports/daily-studio/2026-10-17/platform-packages.json"))

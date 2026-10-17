@@ -43,9 +43,13 @@ for name, text in lines:
     voice_name = spec.get('voice', 'bf_emma')
     speed = spec.get('speed', 1.02)
     lang = spec.get('lang', 'en-gb')
-    audio, rate = voice.create(text, voice=voice_name, speed=speed, lang=lang)
     budget = spec.get('budgets', {}).get(name)
-    if budget and len(audio)/rate > budget-.12:
+    if text.strip():
+        audio, rate = voice.create(text, voice=voice_name, speed=speed, lang=lang)
+    else:
+        assert budget and budget > 0, 'A deliberate narration pause needs its duration'
+        audio, rate = np.zeros(round(budget*24000), dtype=np.float32), 24000
+    if text.strip() and budget and len(audio)/rate > budget-.12:
         speed = min(1.15, speed*(len(audio)/rate)/(budget-.2))
         audio, rate = voice.create(text, voice=voice_name, speed=speed, lang=lang)
     if budget:

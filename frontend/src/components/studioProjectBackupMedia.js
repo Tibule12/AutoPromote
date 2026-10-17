@@ -3,7 +3,7 @@ const MARKER = '__autopromoteMediaFile';
 const LIMIT = 20 * 1024 * 1024;
 const forbidden = key => ['__proto__', 'prototype', 'constructor'].includes(key);
 
-export async function packageStudioBackup(saved) {
+export async function packageStudioBackup(saved, { includeVersions = true } = {}) {
   const files = [], references = new WeakMap(), contents = new Map();
   let encodedBytes = 0;
   async function visit(value, depth = 0) {
@@ -44,7 +44,7 @@ export async function packageStudioBackup(saved) {
     return result;
   }
   const project = await visit({ id: saved.id, name: saved.name, createdAt: saved.createdAt,
-    snapshot: saved.snapshot, versions: saved.versions || [] });
+    snapshot: saved.snapshot, versions: includeVersions ? saved.versions || [] : [] });
   const blob = new Blob([JSON.stringify({ ...project, ...(files.length ? { mediaFiles: files } : {}) }, null, 2)],
     { type: 'application/json' });
   if (blob.size > LIMIT) throw new Error('Project backup exceeds 20 MB.');

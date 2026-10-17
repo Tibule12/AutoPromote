@@ -209,6 +209,18 @@ async function view(page, name) {
     };
   });
   const storage = require('./proof-storage');
+  const captureGeometry = await output.evaluate(v => {
+    const rect = e => {
+      if (!e) return null;
+      const r = e.getBoundingClientRect();
+      return { x:r.x, y:r.y, width:r.width, height:r.height };
+    };
+    return { viewport:{ width:innerWidth, height:innerHeight }, video:rect(v),
+      frame:rect(document.querySelector('[data-testid="hook-preview-frame"]')),
+      timeline:rect(document.querySelector('[data-testid="studio-pro-timeline"]')),
+      source:{ width:v.videoWidth, height:v.videoHeight },
+      objectFit:getComputedStyle(v).objectFit };
+  });
   const scratch = storage.recordingScratch(folder, name);
   const frames = scratch.frames;
   const cdp = await page.context().newCDPSession(page);
@@ -323,7 +335,7 @@ async function view(page, name) {
   fs.writeFileSync(path.join(folder, name, 'studio-playback.json'), JSON.stringify({
     createdAt: new Date().toISOString(), playback, canonicalHash: hash(after.snapshot.studioDocument),
     nativeFinishedOutput: true, timelineVisible: true, audioTrackReveal, recording, screencastFrames: recorded.length,
-    recordingScratch,
+    recordingScratch, captureGeometry,
     recordingCapture: { captureSeconds, screenFramesPerSecond, movieFps,
       encodedScreenRecordingFps: movieFps, sparseCapture,
       smoothPlaybackEvidence: false,

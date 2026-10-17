@@ -2751,6 +2751,7 @@ const ViralClipStudio = ({
   const [projectName, setProjectName] = useState("Untitled viral edit");
   const [savedProjects, setSavedProjects] = useState([]);
   const [projectSaveState, setProjectSaveState] = useState("unsaved");
+  const [backupIncludeVersions, setBackupIncludeVersions] = useState(false);
   const [projectSourcesRefreshing, setProjectSourcesRefreshing] = useState(false);
   const [sourceAccessGenerations, setSourceAccessGenerations] = useState({ projectId: null, byPath: {} });
   const projectSourceRefreshVersionRef = useRef(0);
@@ -18015,7 +18016,7 @@ const ViralClipStudio = ({
                   // Export only this ordinary editable record. Authentication,
                   // other projects and render-recovery session state stay out.
                   let backup;
-                  try { backup = await packageStudioBackup(saved); }
+                  try { backup = await packageStudioBackup(saved, { includeVersions: backupIncludeVersions }); }
                   catch (error) { setStudioActionMessage(error.message); return; }
                   const url = URL.createObjectURL(backup);
                   const link = document.createElement("a");
@@ -18025,6 +18026,11 @@ const ViralClipStudio = ({
                   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
                 }}>Download project backup</button>
               </div>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", marginTop: "5px" }}>
+                <input type="checkbox" checked={backupIncludeVersions}
+                  onChange={event => setBackupIncludeVersions(event.target.checked)} />
+                Include saved versions in backup
+              </label>
               <small className={`studio-project-save-state is-${projectSaveState}`}>
                 {projectSaveState === "saved"
                   ? `Saved locally${projectSavedAt ? ` · ${new Date(projectSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}`
