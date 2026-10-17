@@ -2117,7 +2117,8 @@
       }
     ],
     "latestLogoSchedulingEvidence": "reports/daily-studio/2026-10-17/logo-comparison/publishing/queue-verified.json",
-    "latestStandaloneFinalSchedulingEvidence": "reports/daily-studio/2026-10-17/standalone-results/publishing/queue-verified.json"
+    "latestStandaloneFinalSchedulingEvidence": "reports/daily-studio/2026-10-17/standalone-results/publishing/queue-verified.json",
+    "latestPrivateHumanTestEvidence": "reports/studio-human-demo-20261017/evidence.json"
   },
   "privateFounderFilmV4Preparation": {
     "date": "2026-10-08",
@@ -7605,5 +7606,34 @@
     "report": "reports/daily-studio/2026-10-17/standalone-results/publishing/README.md",
     "nextTaskId": "S04",
     "nextSlice": "Preserve existing daily publishing and paired final-result receipts. Shared S04 spatial/path timing, then S03 occurrence/group ownership, retaining S02 predictive picture/sound/export latency."
+  },
+  "privateAiHumanTest20261017": {
+    "status": "PRIVATE_AI_HUMAN_TEST_DELIVERED_FOR_REVIEW",
+    "evidence": "reports/studio-human-demo-20261017/evidence.json",
+    "report": "reports/studio-human-demo-20261017/README.md",
+    "technicalValidation": "reports/studio-human-demo-20261017/technical-validation.json",
+    "providerGenerations": 1,
+    "estimatedGenerationUsd": 0.8,
+    "actualBilledUsd": null,
+    "canonicalCpuExports": 2,
+    "normalSignedInStudioImport": true,
+    "editableTitles": 3,
+    "historyAndExactColdReopen": true,
+    "selectedVoiceRepairBypassed": true,
+    "allCompiledTitleFieldsExact": true,
+    "fullDecodeFrames": 192,
+    "completeMatchingTimelinePlayback": true,
+    "independentNativeBackupRestore": true,
+    "readinessPromotion": false,
+    "creativeApproval": false,
+    "publicRelease": false,
+    "customerGenerationIntegration": false,
+    "remainingBlockers": [
+      "Perceptual speech/lip synchronization and full human sound/creative judgment",
+      "Normal common-runtime/customer human-video generation integration",
+      "Qualified shared template and explicit public/showroom release",
+      "Whole predictive picture/sound, screen-capture smoothness, S04/S03 and S02/export latency"
+    ],
+    "nextTask": "Owner character/voice review, then longer demonstration around real Studio, Publisher and Queue; retain shared S04/S03/S02 priorities"
   }
 }

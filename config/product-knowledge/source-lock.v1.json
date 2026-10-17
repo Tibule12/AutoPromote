@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Verified both owner-selected logo films and nine matching standalone finals through native Publisher/Queue; exact source hashes, independent copy and times, original recording preservation, no duplicate active destinations.",
-  "reviewed_at": "2026-10-17T13:40:30.100Z",
+  "reason": "Private one-take AI-human test: normal Studio import, editable disclosure/subtitles, voice-repair bypass, two CPU exports, complete matching playback and independent backup restore; no customer generation or public capability promotion",
+  "reviewed_at": "2026-10-17T18:18:28.653Z",
   "catalog_sha256": "c716d93ed63add9a3cc4a3857b024e8c079c181d266aa620f4fed61a7c798781",
   "sources": [
     {
@@ -471,11 +471,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "8d4bd2ac902c7bb6b1e1619a01846d7c5fd2dc5872ffdb1f160ff9eb9c982e24"
+      "sha256": "ad2599d5c0cccc3dba40c6419c7cc9cdf9355df352d5a66c8360375a5598724c"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "cda3cc398c620f8bb286f461012c9b4fb6a08a0fac58208a6f29fe20c1d4c724"
+      "sha256": "2eda6f1a14836e094d284b4aac9774d0700666e06e18f719a347db6bb36c6e3b"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

@@ -45,6 +45,18 @@ destination schedules; the 18 existing paused final IDs are retained and resumed
 Preserve the recording/result coverage and original recordings at
 `reports/daily-studio/2026-10-17/standalone-results/publishing/README.md`.
 
+The owner then paused welcome-page redesign to request a short AI-human speech
+test. One eight-second Veo 3.1 Fast take with generated dialogue is retained at
+`reports/studio-human-demo-20261017/README.md`. Normal signed-in Studio import,
+editable disclosure/subtitles, voice-repair bypass, history/cold recovery, two
+CPU exports, full matching playback and independent backup restore pass. The
+selected native export preserves the generated voice; the first default-repair
+movie/project also remain. This is a private external-provider source test,
+not a customer-facing generation/lip-sync integration or approved public hero.
+One provider generation was estimated at $0.80; no additional take or GPU
+instance restart is authorized by that bounded test. Review character/voice
+before the longer story around real Studio, Publisher and Queue recordings.
+
 At the end of every Studio session, update product readiness, capability and
 combination matrices, exact remaining blockers, evidence and next task.
 Update preview/render parity when affected. Validate with

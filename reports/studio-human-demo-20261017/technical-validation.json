@@ -1,0 +1,31 @@
+{
+  "sourceSha256": "3f52133a3e90da04f38c1b0d3286668db0ee048fb51eaab1d67833cdb3aabed6",
+  "nativeOutputSha256": "c47a0b4eff2e376777e3dc07a06005bf4b1436902dad7251f7e7208759461d4f",
+  "reviewCopySha256": "e67a4260c50b81420c9f84f3de4cddc80a431822ba782513b51a431523798bdb",
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "frames": 192,
+  "seconds": 8,
+  "fullDecode": true,
+  "nativeAudio": {
+    "codec": "aac",
+    "sampleRate": 48000,
+    "sourceCorrelation": 0.9983523432546244,
+    "sourceGain": 0.984545899812646,
+    "comparedMonoSamples": 384000
+  },
+  "reviewCopy": {
+    "audioCodec": "mp3",
+    "videoPacketsIdentical": true
+  },
+  "providerGenerations": 1,
+  "estimatedGenerationUsd": 0.8,
+  "actualBilledUsd": null,
+  "nativeRenderReceiptMatched": true,
+  "verifiedLipSync": false,
+  "professionalHumanListening": false,
+  "publicRelease": false,
+  "scheduled": false,
+  "customerGenerationIntegration": false
+}
