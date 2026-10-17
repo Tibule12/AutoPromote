@@ -68,7 +68,8 @@ test('missing major surface is an error while adjacent deferred surfaces are war
 test('safe public projection excludes internal-only records and strips all source/provenance/model fields',()=>{
   const b=clone();b.features[0].source_evidence[0].path='/home/private/sentinel';b.features[0].examples.push({label:'private',kind:'RETAINED_PRIVATE_EVIDENCE',evidence_path:'gs://private/prompt',qualification:'private'});
   b.features[0].privateSentinel='SECRET';const p=k.projectPublic(b),serialized=JSON.stringify(p);
-  assert.equal(p.features.length,100);assert.ok(!serialized.includes('SECRET'));assert.ok(!serialized.includes('source_evidence'));
+  assert.equal(p.features.length,101);assert.ok(p.features.some(f=>f.feature_id==='studio.logo_motion'));
+  assert.ok(!serialized.includes('SECRET'));assert.ok(!serialized.includes('source_evidence'));
   assert.ok(!serialized.includes('model_capabilities'));assert.ok(!serialized.includes('evidence_path'));assert.ok(!serialized.includes('readiness_authority'));
   assert.ok(!serialized.includes('/home/'));assert.ok(!serialized.includes('generation.narration'));assert.ok(!serialized.includes('config/model-runtime'));
   for(const control of p.controls)assert.equal(Object.hasOwn(control,'field'),false);

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.26",
+  "knowledge_version": "1.0.27",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-17",
@@ -6750,6 +6750,107 @@
           "kind": "IMPLEMENTATION"
         }
       ]
+    },
+    {
+      "feature_id": "studio.logo_motion",
+      "name": "Logo motion",
+      "area": "Studio",
+      "summary": "Builds a logo intro as ordinary editable artwork, masks, groups and motion keys. Image logos preserve their supplied gradient colours and lettering; vector components can move independently.",
+      "purpose": "Turn a supplied identity into a revisable signal reveal, broadcast pulse and readable brand resolve through the shared Studio controls.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "SVG logos with 1–8 top-level shapes or groups",
+        "PNG, JPEG or WebP logos"
+      ],
+      "requires": [
+        "studio.motion"
+      ],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.logo_motion.brand_name",
+        "studio.logo_motion.duration",
+        "studio.logo_motion.accent",
+        "studio.logo_motion.background",
+        "studio.logo_motion.separate_symbol",
+        "studio.logo_motion.symbol_width"
+      ],
+      "workflow": [
+        "Open Graphics → Logo motion in an owned programme at least eight seconds long.",
+        "Select a local image up to 250 KB or an SVG up to 100 KB, with a maximum of 4096 pixels per side. SVG files need a viewBox or numeric dimensions. Image logos use their visible alpha bounds as a viewport; the source file is not rewritten.",
+        "Choose the brand name, accent, background and an 8–14 second duration that fits the programme. Build editable logo motion at the programme start.",
+        "For an image with a left-hand symbol and separate lettering, enable Separate left symbol from wordmark. Symbol width places the search boundary; the builder follows transparent space and rejects cuts through opaque artwork. The symbol leads, then the original wordmark joins it.",
+        "Edit the resulting ordinary layers, masks, groups and keys. Undo removes the authored composition. Add and time sound through the normal Sound controls.",
+        "Review the actual preview, save/reopen and export through the existing Studio workflow."
+      ],
+      "preview_behavior": "The builder writes ordinary graphics into the existing project. SVG shapes become raster artwork. Raster identities can use three reveal bands, or separate symbol and original wordmark along a transparent seam; both finish on one continuous original lockup. Ordinary preview evaluates the existing transforms, masks and opacity keys.",
+      "render_behavior": "The standard graphics importer, canonical document and composition renderer compile the same authored layers, masks, groups and keys. No separate logo render engine or paid model is started.",
+      "limitations": [
+        "Development feature; no professional, production or showroom qualification.",
+        "The composition uses 2D transforms and masks. It does not create editable vector contours, automatic 3D geometry, shape morphs or particles.",
+        "Image logos retain their existing lettering; they do not become editable text characters. Pixels with alpha above 32 determine the visible viewport; source bytes inside the artwork remain unchanged.",
+        "Programme aspect must be between 1:2 and 2:1. The intro starts at programme time zero and must fit the programme.",
+        "The existing project limit of 128 graphics, 8192 imported keys, 2 MiB aggregate inline artwork and 4 MiB graphics input remains. Each SVG artwork payload may contain up to 512 KiB, allowing bounded embedded local logo pixels.",
+        "Background choice covers underlying footage. Sound is added separately through normal Sound controls. Whole live picture/sound and smoothness remain separate qualification.",
+        "Symbol separation requires visible transparent space between a left-hand symbol and its lettering. Adjust the 10–60% boundary or use the full-logo reveal when the source cannot be separated."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [
+        "studio.motion",
+        "studio.keyframes",
+        "creative.motion_graphics"
+      ],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [
+        "animated logo",
+        "brand reveal",
+        "logo animation",
+        "gradient logo"
+      ],
+      "readiness_authority": {
+        "matrix_id": "motion_graphics"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioLogoMotionPanel.js",
+          "anchor": "StudioLogoMotionPanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioLogoMotion.js",
+          "anchor": "buildStudioLogoMotion",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioLogoParts.js",
+          "anchor": "separateStudioLogoParts",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioGraphicsPackage.js",
+          "anchor": "buildStudioGraphicsPackage",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"motion_graphics\"",
+          "kind": "READINESS"
+        }
+      ]
     }
   ],
   "controls": [
@@ -13468,6 +13569,258 @@
           "kind": "IMPLEMENTATION"
         }
       ]
+    },
+    {
+      "control_id": "studio.logo_motion.brand_name",
+      "label": "Logo motion brand name",
+      "meaning": "Names the authored composition. SVG builds create measured editable brand letters; image builds preserve supplied lettering.",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "field": "brandName",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": "AutoPromote",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioLogoMotionPanel.js",
+          "anchor": "Logo motion",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.logo_motion.duration",
+      "label": "Logo motion duration",
+      "meaning": "Sets the duration of the created intro, within the current programme length. It does not stretch existing footage.",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "field": "duration",
+      "constraints": {
+        "type": "number",
+        "minimum": 8,
+        "maximum": 14,
+        "values": [],
+        "default": 10,
+        "default_known": true
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioLogoMotionPanel.js",
+          "anchor": "Logo motion",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.logo_motion.accent",
+      "label": "Logo motion accent",
+      "meaning": "Sets the six-digit colour of the authored broadcast pulse, sweep and rule, preserving supplied logo colours.",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "field": "accent",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": "#a855f7",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioLogoMotionPanel.js",
+          "anchor": "Logo motion",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.logo_motion.background",
+      "label": "Add background",
+      "meaning": "Adds the composition backdrop over source footage; disable to retain the underlying picture.",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "field": "includeBackground",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": true,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioLogoMotionPanel.js",
+          "anchor": "Logo motion",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.logo_motion.separate_symbol",
+      "label": "Separate left symbol from wordmark",
+      "meaning": "Finds a transparent seam so the original symbol and lettering can move independently. It rejects an opaque cut rather than erasing artwork.",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "field": "separateBitmap",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioLogoMotionPanel.js",
+          "anchor": "Logo motion",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.logo_motion.symbol_width",
+      "label": "Logo symbol width",
+      "meaning": "Places the initial symbol/wordmark boundary as a percentage of the visible image width; the seam follows transparent space around it.",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "field": "symbolWidth",
+      "constraints": {
+        "type": "number",
+        "minimum": 10,
+        "maximum": 60,
+        "values": [],
+        "default": 28,
+        "default_known": true
+      },
+      "unit": "percent of visible logo width",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioLogoMotionPanel.js",
+          "anchor": "Logo motion",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
     }
   ],
   "tasks": [
@@ -16579,6 +16932,46 @@
       "from": "studio.titles",
       "type": "editable_with",
       "to": "studio.title.outline_color"
+    },
+    {
+      "type": "requires",
+      "to": "studio.motion",
+      "from": "studio.logo_motion"
+    },
+    {
+      "type": "rendered_by",
+      "to": "studio.render",
+      "from": "studio.logo_motion"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.logo_motion.brand_name",
+      "from": "studio.logo_motion"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.logo_motion.duration",
+      "from": "studio.logo_motion"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.logo_motion.accent",
+      "from": "studio.logo_motion"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.logo_motion.background",
+      "from": "studio.logo_motion"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.logo_motion.separate_symbol",
+      "from": "studio.logo_motion"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.logo_motion.symbol_width",
+      "from": "studio.logo_motion"
     }
   ],
   "template_bindings": [

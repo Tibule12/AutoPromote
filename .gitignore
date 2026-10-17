@@ -98,3 +98,8 @@ rewrite_backend_jcut.py
 fix_indentation.py
 *.bak
 
+# Private native logo-motion media, account session logs and exact receipts.
+reports/studio-logo-motion-20261017/*
+!reports/studio-logo-motion-20261017/README.md
+reports/studio-logo-motion-20261017-*.log
+

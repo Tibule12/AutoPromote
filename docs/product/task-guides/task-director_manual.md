@@ -1,6 +1,6 @@
 # Modify Director edits manually
 
-Development documentation • product 1.2.0 • knowledge 1.0.26 • 2026-10-17
+Development documentation • product 1.2.0 • knowledge 1.0.27 • 2026-10-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 

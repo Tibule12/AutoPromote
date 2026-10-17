@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.26 • 2026-10-17
+Development documentation • product 1.2.0 • knowledge 1.0.27 • 2026-10-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -2058,6 +2058,55 @@ The Creator panel can illustrate an intended attachment; that browser study does
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
 **Controls:** No source-qualified editable control is recorded.
+
+**Guides:** No task guide in V1.
+
+**Templates:** No pinned shared-template binding recorded.
+
+## Logo motion
+
+ID: `studio.logo_motion` • **PARTIAL** • DETERMINISTIC
+
+Builds a logo intro as ordinary editable artwork, masks, groups and motion keys. Image logos preserve their supplied gradient colours and lettering; vector components can move independently.
+
+**Purpose:** Turn a supplied identity into a revisable signal reveal, broadcast pulse and readable brand resolve through the shared Studio controls.
+
+**Available to:** signed-in users with owned project and applicable entitlement
+
+**Media:** SVG logos with 1–8 top-level shapes or groups, PNG, JPEG or WebP logos
+
+**Requires:** studio.motion (FUNCTIONAL)
+
+**Optional:** None recorded.
+
+**Workflow**
+
+1. Open Graphics → Logo motion in an owned programme at least eight seconds long.
+2. Select a local image up to 250 KB or an SVG up to 100 KB, with a maximum of 4096 pixels per side. SVG files need a viewBox or numeric dimensions. Image logos use their visible alpha bounds as a viewport; the source file is not rewritten.
+3. Choose the brand name, accent, background and an 8–14 second duration that fits the programme. Build editable logo motion at the programme start.
+4. For an image with a left-hand symbol and separate lettering, enable Separate left symbol from wordmark. Symbol width places the search boundary; the builder follows transparent space and rejects cuts through opaque artwork. The symbol leads, then the original wordmark joins it.
+5. Edit the resulting ordinary layers, masks, groups and keys. Undo removes the authored composition. Add and time sound through the normal Sound controls.
+6. Review the actual preview, save/reopen and export through the existing Studio workflow.
+
+**Preview:** The builder writes ordinary graphics into the existing project. SVG shapes become raster artwork. Raster identities can use three reveal bands, or separate symbol and original wordmark along a transparent seam; both finish on one continuous original lockup. Ordinary preview evaluates the existing transforms, masks and opacity keys.
+
+**Final render:** The standard graphics importer, canonical document and composition renderer compile the same authored layers, masks, groups and keys. No separate logo render engine or paid model is started.
+
+**Limits**
+
+- Development feature; no professional, production or showroom qualification.
+- The composition uses 2D transforms and masks. It does not create editable vector contours, automatic 3D geometry, shape morphs or particles.
+- Image logos retain their existing lettering; they do not become editable text characters. Pixels with alpha above 32 determine the visible viewport; source bytes inside the artwork remain unchanged.
+- Programme aspect must be between 1:2 and 2:1. The intro starts at programme time zero and must fit the programme.
+- The existing project limit of 128 graphics, 8192 imported keys, 2 MiB aggregate inline artwork and 4 MiB graphics input remains. Each SVG artwork payload may contain up to 512 KiB, allowing bounded embedded local logo pixels.
+- Background choice covers underlying footage. Sound is added separately through normal Sound controls. Whole live picture/sound and smoothness remain separate qualification.
+- Symbol separation requires visible transparent space between a left-hand symbol and its lettering. Adjust the 10–60% boundary or use the full-logo reveal when the source cannot be separated.
+
+**Common errors**
+
+- Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
+
+**Controls:** [Logo motion brand name](../control-reference/index.md#studio-logo_motion-brand_name), [Logo motion duration](../control-reference/index.md#studio-logo_motion-duration), [Logo motion accent](../control-reference/index.md#studio-logo_motion-accent), [Add background](../control-reference/index.md#studio-logo_motion-background), [Separate left symbol from wordmark](../control-reference/index.md#studio-logo_motion-separate_symbol), [Logo symbol width](../control-reference/index.md#studio-logo_motion-symbol_width)
 
 **Guides:** No task guide in V1.
 

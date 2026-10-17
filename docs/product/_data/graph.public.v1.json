@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.26",
+  "knowledge_version": "1.0.27",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -500,6 +500,11 @@
     },
     {
       "id": "publishing.analytics",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion",
       "kind": "feature",
       "status": "PARTIAL"
     },
@@ -1200,6 +1205,36 @@
     },
     {
       "id": "studio.title.outline_color",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.brand_name",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.duration",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.accent",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.background",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.separate_symbol",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.symbol_width",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -3124,6 +3159,46 @@
       "from": "studio.titles",
       "type": "editable_with",
       "to": "studio.title.outline_color"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "requires",
+      "to": "studio.motion"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.brand_name"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.duration"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.accent"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.background"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.separate_symbol"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.symbol_width"
     }
   ]
 }

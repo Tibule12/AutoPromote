@@ -18,6 +18,8 @@ import StudioKineticTypePanel from './StudioKineticTypePanel';
 import { buildStudioKineticType } from './studioKineticType';
 import StudioGraphicsImport from './StudioGraphicsImport';
 import { buildStudioGraphicsPackage } from './studioGraphicsPackage';
+import StudioLogoMotionPanel from './StudioLogoMotionPanel';
+import { buildStudioLogoMotion } from './studioLogoMotion';
 import { editStudioPositionPose } from './studioMotionEditing';
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
@@ -24053,6 +24055,18 @@ const ViralClipStudio = ({
                     </span>
                   </div>
 
+                  <StudioLogoMotionPanel locked={!!trackStates.graphics?.locked} programmeDuration={liveTimelineDuration}
+                    onBuild={async options => {
+                      const projectId = activeProjectIdRef.current, signature = lastSnapshotSignatureRef.current;
+                      await document.fonts.load('700 36px "Studio Inter"');
+                      if (activeProjectIdRef.current !== projectId || lastSnapshotSignatureRef.current !== signature)
+                        throw Error('The edit changed while the brand font loaded. Build the logo motion again.');
+                      const canvas = document.createElement('canvas'), context = canvas.getContext('2d');
+                      context.font = '700 36px "Studio Inter"';
+                      const stage = phoneFrameRef.current, aspect = (stage?.clientWidth || 1280) / (stage?.clientHeight || 720);
+                      return importGraphicsComposition(buildStudioLogoMotion({ ...options, programmeDuration:liveTimelineDuration,
+                        width:Math.round(720*aspect), height:720, measure:value=>context.measureText(value).width }));
+                    }} />
                   <StudioGraphicsImport onImport={importGraphicsComposition} locked={!!trackStates.graphics?.locked} />
 
                   <div className="title-preset-grid" aria-label="Add title layer">

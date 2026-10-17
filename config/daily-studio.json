@@ -20,7 +20,7 @@
   "dailyNewUploadTarget": 4,
   "authState": "reports/studio-platform-packaging-20261016/proof/publisher-session.private.json",
   "referencePackage": "reports/studio-platform-packaging-20261016/platform-packages.json",
-  "nativeAuthoringReference": "scripts/studio-professional/five-words-proof.js",
+  "nativeAuthoringReference": "scripts/studio-professional/logo-motion-proof.js",
   "nativeSchedulingReference": "scripts/creative-templates/schedule-platform-packages.js",
   "paidGpuAllowed": false,
   "quotaOverrideAllowed": false,

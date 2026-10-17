@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.26 • 2026-10-17
+Development documentation • product 1.2.0 • knowledge 1.0.27 • 2026-10-17
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -148,6 +148,12 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.media.replace_sequence | Replace entire sequence | string | source-dependent … source-dependent | action | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNSUPPORTED |
 | studio.media.remove_unused | Remove unused media | string | source-dependent … source-dependent | action | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNSUPPORTED |
 | studio.title.outline_color | Outline color | string | source-dependent … source-dependent | hex color | "#000000" | UNSUPPORTED | PARTIAL | PARTIAL | UNSUPPORTED |
+| studio.logo_motion.brand_name | Logo motion brand name | string | source-dependent … source-dependent | none | "AutoPromote" | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.duration | Logo motion duration | number | 8 … 14 | seconds | 10 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.accent | Logo motion accent | string | source-dependent … source-dependent | none | "#a855f7" | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.background | Add background | boolean | source-dependent … source-dependent | none | true | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.separate_symbol | Separate left symbol from wordmark | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.symbol_width | Logo symbol width | number | 10 … 60 | percent of visible logo width | 28 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -1906,3 +1912,75 @@ Sets the ordinary title outline color in saved state, native preview and CPU out
 Applies to: ordinary text layer. Requires: studio.titles.
 
 - Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate.
+
+<a id="studio-logo_motion-brand_name"></a>
+
+## Logo motion brand name
+
+ID: `studio.logo_motion.brand_name` • **PARTIAL**
+
+Names the authored composition. SVG builds create measured editable brand letters; image builds preserve supplied lettering.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-duration"></a>
+
+## Logo motion duration
+
+ID: `studio.logo_motion.duration` • **PARTIAL**
+
+Sets the duration of the created intro, within the current programme length. It does not stretch existing footage.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-accent"></a>
+
+## Logo motion accent
+
+ID: `studio.logo_motion.accent` • **PARTIAL**
+
+Sets the six-digit colour of the authored broadcast pulse, sweep and rule, preserving supplied logo colours.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-background"></a>
+
+## Add background
+
+ID: `studio.logo_motion.background` • **PARTIAL**
+
+Adds the composition backdrop over source footage; disable to retain the underlying picture.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-separate_symbol"></a>
+
+## Separate left symbol from wordmark
+
+ID: `studio.logo_motion.separate_symbol` • **PARTIAL**
+
+Finds a transparent seam so the original symbol and lettering can move independently. It rejects an opaque cut rather than erasing artwork.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-symbol_width"></a>
+
+## Logo symbol width
+
+ID: `studio.logo_motion.symbol_width` • **PARTIAL**
+
+Places the initial symbol/wordmark boundary as a percentage of the visible image width; the seam follows transparent space around it.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.

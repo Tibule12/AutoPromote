@@ -62,6 +62,19 @@ test('SVG artwork uses the existing safe static sanitizer before decoding', () =
   expect(validated.layers[1].svg).not.toMatch(/script|https:\/\/external/);
 });
 
+test('embedded local logo artwork fits the per-layer bound while aggregate and oversize inputs stay rejected',()=>{
+  const input=spec(),logo=artwork('local-logo');
+  const svg=length=>'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><image href="data:image/png;base64,'+
+    'A'.repeat(length)+'" width="100" height="100"/></svg>';
+  logo.svg=svg(300000);input.layers.push(logo);
+  expect(validateStudioGraphicsPackage(input,{duration:4,aspect:16/9}).layers[1].svg).toContain('data:image/png;base64,');
+  logo.svg=svg(512*1024);
+  expect(()=>validateStudioGraphicsPackage(input,{duration:4,aspect:16/9})).toThrow('bounded inline SVG');
+  input.layers=Array.from({length:7},(_,i)=>({...artwork('logo-'+i),svg:svg(320000)}));
+  input.groups=[];
+  expect(()=>validateStudioGraphicsPackage(input,{duration:4,aspect:16/9})).toThrow('import budget');
+});
+
 test('a failed artwork decode releases every created URL and preserves all existing edits', async () => {
   const input = spec(); input.layers.push(artwork('one'), artwork('two'));
   const overlays = [{ id: 'existing' }], keyframes = [{ id: 'existing-key' }], revokeUrl = jest.fn(); let id = 0;

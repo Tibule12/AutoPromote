@@ -79,7 +79,7 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
       if (layer.svg !== undefined || layer.height !== undefined) throw Error('Text layers use copy and title sizing; artwork uses SVG and height.');
       return { ...layer };
     }
-    if (layer.type !== 'artwork' || typeof layer.svg !== 'string' || layer.svg.length > 200000)
+    if (layer.type !== 'artwork' || typeof layer.svg !== 'string' || layer.svg.length > 512 * 1024)
       throw Error('Artwork must contain a bounded inline SVG.');
     if (['text', 'color', 'fontWeight', 'textAlign', 'strokeWidth', 'strokeColor'].some(field => layer[field] !== undefined))
       throw Error('Artwork styling belongs in its SVG, not in title fields.');

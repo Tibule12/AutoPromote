@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed owner-authorized final-film scheduling through normal Publisher: six exact native-master schedules, independent destination copy and SAST times, one upload and five owned-asset reuses, unchanged earlier upcoming schedules and readiness.",
-  "reviewed_at": "2026-10-17T08:59:32.704Z",
-  "catalog_sha256": "943dd9057d6c2a9eccbc7ee739c4494077444081aa6dce0d8246fadc3f0215f1",
+  "reason": "Reviewed reusable native logo motion, bounded original-PNG and SVG handling, transparent-seam separation, all six creation controls, selected exact native movie/timeline/restore and unchanged Studio qualification limits.",
+  "reviewed_at": "2026-10-17T10:20:41.684Z",
+  "catalog_sha256": "fbccb6562a5dfe30a5bf40a55be9c2f3025974d1fe78769331bd71cea2fec7d8",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -138,6 +138,10 @@
       "sha256": "f748481d18ed70c90a1ce251884ce19dfdee0e18d6cf54986c9ae2a70722cc36"
     },
     {
+      "path": "frontend/src/components/StudioLogoMotionPanel.js",
+      "sha256": "baa99c6d285c2920589f289ca930fd1fb817c266d2f930197ed4ca157d1ae681"
+    },
+    {
       "path": "frontend/src/components/StudioMaskPathEditor.js",
       "sha256": "9121c1894e7e9da67bb499e9d6e4e77aa59924cfd0f9e5900397757f77d8f5a7"
     },
@@ -155,7 +159,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "513c2d94a775860f598c226804344bbd45a6639242c18773848620d11ad641a9"
+      "sha256": "dc28a04dc4429e028d4f9f2e66f83dad3835bb234c6bb7b7ad903878eb42e6f5"
     },
     {
       "path": "frontend/src/components/motion/soundDesign.js",
@@ -195,7 +199,7 @@
     },
     {
       "path": "frontend/src/components/studioGraphicsPackage.js",
-      "sha256": "b3c7a875e846adeacedea9e407503d84ae71a108ae4a721d2cd43dd7ab240528"
+      "sha256": "b01f277dbd2eb1dc0077ce525f3c128197999a53378e4bca9c19cebeac9c717c"
     },
     {
       "path": "frontend/src/components/studioGroupTiming.js",
@@ -216,6 +220,14 @@
     {
       "path": "frontend/src/components/studioLayerOrder.js",
       "sha256": "583dc05accb65c478d0bfb8b5d3f8deb9c8d827624860e98d84b0aa171acdf8a"
+    },
+    {
+      "path": "frontend/src/components/studioLogoMotion.js",
+      "sha256": "d2485746eaebc48dee6b3c3044f51bfee2bc556ee8c94925e223f56b06a4f064"
+    },
+    {
+      "path": "frontend/src/components/studioLogoParts.js",
+      "sha256": "998ddb81cf3e25287ac66e43e56a87fa66b017a42b26f6b1986d888ba25d3246"
     },
     {
       "path": "frontend/src/components/studioMaskGeometry.js",
@@ -451,11 +463,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "44e9e9496c374ce2a6167e825ae5f2191f47aee90eb2ea622f40ed1990896ccc"
+      "sha256": "07ec32c58686bf40a857d5b7b0a63495d8d6bd18ae44ce202dbf2868b62998b9"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "dce5bbb4064334e3b9317e2198208d512612d60ea2302fc020394538f96d374c"
+      "sha256": "59f49758f4a9593a0336af061b58e82e3cb72827dc08a816f67134b1a4716e23"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

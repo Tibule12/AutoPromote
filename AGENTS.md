@@ -21,8 +21,11 @@ authentication for “Make One Like This”.
 They govern current readiness and the next task. Earlier handoffs/reports are
 historical evidence. Preserve working fixes and all existing local changes.
 Do not create separate automatic/manual/generated editing engines.
-Prioritize the ordered shared-system backlog; no branding/logo work or
-isolated creative experiments.
+Follow the latest owner direction while retaining the shared-system backlog.
+On 17 October the owner explicitly moved Studio onto logo motion, starting
+with `AutoPromote Gradient Tech Logo.png`. This supersedes the earlier
+no-logo-work restriction for that requested track. Use the ordinary Studio
+controls and canonical engine; keep unrelated branding experiments out of scope.
 
 At the end of every Studio session, update product readiness, capability and
 combination matrices, exact remaining blockers, evidence and next task.
