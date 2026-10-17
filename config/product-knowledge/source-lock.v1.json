@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Completed alternate native logo comparison: original A graph/media preserved, B curve refinements and same-film playback/restore verified; scheduling explicitly waits for owner selection.",
-  "reviewed_at": "2026-10-17T12:50:39.608Z",
+  "reason": "Verified both owner-selected logo films and nine matching standalone finals through native Publisher/Queue; exact source hashes, independent copy and times, original recording preservation, no duplicate active destinations.",
+  "reviewed_at": "2026-10-17T13:40:30.100Z",
   "catalog_sha256": "c716d93ed63add9a3cc4a3857b024e8c079c181d266aa620f4fed61a7c798781",
   "sources": [
     {
@@ -471,11 +471,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "4efd12e516cbc60f8a0f2eeac5f2bbc6b5251ab8757b3fad4a3a547b9dfb7bf9"
+      "sha256": "8d4bd2ac902c7bb6b1e1619a01846d7c5fd2dc5872ffdb1f160ff9eb9c982e24"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "212e4000a9d6504756d8e917a7c0e294c021fdb3d9af4c3f5e0ceedb8716de67"
+      "sha256": "cda3cc398c620f8bb286f461012c9b4fb6a08a0fac58208a6f29fe20c1d4c724"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

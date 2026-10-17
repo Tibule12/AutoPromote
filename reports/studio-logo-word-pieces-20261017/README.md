@@ -1,5 +1,7 @@
 # AutoPromote — words constructed from pieces
 
+17 October update: the owner selected both films with “schedule both.” Each now has six verified destination schedules: A on 18 October and B on 19 October, with platform-specific copy and staggered times. [Schedule table and exact receipts](../daily-studio/2026-10-17/logo-comparison/publishing/README.md). This supersedes the selection wait described in the earlier delivery notes below; provider publication is separate.
+
 The owner asked for every word to break into pieces and combine creatively, then selected the supplied Gradient Tech identity as the app logo. The preceding ribbon movie and project remain available.
 
 Watch [the new movie](proof/word-piece-construction/final.ide-preview.mp4), [the complete matching Studio playback](proof/word-piece-construction/edited-in-studio.ide-preview.mp4), or restore [the editable project](proof/AUTOPROMOTE-WORD-PIECES.autopromote.json). Native AAC masters remain alongside the IDE audio copies; the encoded video is unchanged.

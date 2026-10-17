@@ -1,6 +1,8 @@
 # Logo comparison — Diamond cascade B
 
-The owner requested another version before choosing what to schedule. Both films preserve the supplied Gradient Tech logo, the same five words and a ten-second length. Nothing is newly scheduled.
+17 October update: the owner selected both films with “schedule both.” Each now has six verified destination schedules: A on 18 October and B on 19 October, with platform-specific copy and staggered times. [Schedule table and exact receipts](../daily-studio/2026-10-17/logo-comparison/publishing/README.md). This supersedes the selection wait described in the earlier delivery notes below; provider publication is separate.
+
+The owner requested another version before choosing what to schedule. Both films preserve the supplied Gradient Tech logo, the same five words and a ten-second length. The original comparison delivery below predates the scheduling update above.
 
 | Version | Sequence | Movie |
 | --- | --- | --- |
@@ -13,4 +15,4 @@ B is authored through the normal Graphics → Logo motion → Construct words fr
 
 B project: `viral-project-2329935a-ba63-4200-97fc-311da3c70760`. Canonical hash: `8250857cb420d2f93f878c5399475f658659bef8cb04f75261923d38b9ecabbb`. Movie SHA-256: `576d188a7219e2d42db1a5c4c698c8b6859fc59dc0c4e8a78a69ccc59323c3d5`. The film is 1280 × 720, 24 fps, 10 seconds, stereo 48 kHz AAC. Thirty-seven focused frontend and 17 product-knowledge cases, strict normal App build, lint and Studio contract validation pass.
 
-Owner choice is pending. Use the normal Publisher for the selected version with platform-specific packaging once selected. The comparisons do not change earlier schedules or the standing purposeful daily-story work. Bitmap pieces remain raster crops/masks, and matching text fragments are separate ordinary title copies. No inferred vector/glyph contours, morphs, 3D or professional/production/showroom qualification is claimed. Human listening, whole predictive picture/sound and capture smoothness remain separate; the recording reports its observed cadence. Formal counts stay 2 UNIMPLEMENTED / 1 BROKEN / 9 PARTIAL / 17 FUNCTIONAL / 0 PRO-READY / 0 PRODUCTION-READY. No paid job, main merge or deployment.
+The owner subsequently selected both; verified normal Publisher schedules are linked above. The comparisons do not change earlier schedules or the standing purposeful daily-story work. Bitmap pieces remain raster crops/masks, and matching text fragments are separate ordinary title copies. No inferred vector/glyph contours, morphs, 3D or professional/production/showroom qualification is claimed. Human listening, whole predictive picture/sound and capture smoothness remain separate; the recording reports its observed cadence. Formal counts stay 2 UNIMPLEMENTED / 1 BROKEN / 9 PARTIAL / 17 FUNCTIONAL / 0 PRO-READY / 0 PRODUCTION-READY. No paid job, main merge or deployment.

@@ -1,0 +1,725 @@
+{
+  "verifiedAt": "2026-10-17T13:40:08.456Z",
+  "films": [
+    {
+      "storyId": "coffee",
+      "label": "Coffee",
+      "projectId": "viral-project-b1621c4a-963e-4d94-95cb-12d7cd91b28f",
+      "canonicalHash": "c3145c27418ec90344f4624ffcdedb8288327fc3c57e8318dcfcc99f48fbf88b",
+      "standaloneMovie": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/ember/final.mp4",
+      "standaloneMovieSha256": "6232995e6640f2f77832c5b38c797c087f944370974524faa055f597ff7f4eea",
+      "matchingRecording": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/ember/edited-in-studio.mp4",
+      "matchingRecordingSha256": "79fb68e356a636b3a4eedd664142c01f177bb1d92930d205600e4ba986dafb59",
+      "recordingDestinations": [
+        {
+          "id": "xjuGuCWemGYofFY8jw5o",
+          "platform": "youtube"
+        },
+        {
+          "id": "ww922edzEfRBBJYmFioU",
+          "platform": "reddit"
+        },
+        {
+          "id": "l57mmPoweFUxe5MR3sCy",
+          "platform": "tiktok"
+        },
+        {
+          "id": "UjqaQwVrnoGnTTSuJP3M",
+          "platform": "instagram"
+        },
+        {
+          "id": "9mEsm1mOSDSb2wszb8XK",
+          "platform": "linkedin"
+        },
+        {
+          "id": "2ZtvMouHIn9LKvQC5zNd",
+          "platform": "facebook"
+        }
+      ],
+      "finalDestinations": [
+        {
+          "id": "HsHgaNiBc60kvSNBSPH9",
+          "platform": "youtube",
+          "startTime": "2026-10-18T07:00:00.000Z",
+          "localTime": "2026-10-18T09:00",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "bVuKCzTBRZrKxkB3cNPB",
+          "platform": "tiktok",
+          "startTime": "2026-10-18T06:30:00.000Z",
+          "localTime": "2026-10-18T08:30",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "2AcKHe0sRVKQr2gK0DOC",
+          "platform": "instagram",
+          "startTime": "2026-10-18T06:45:00.000Z",
+          "localTime": "2026-10-18T08:45",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "vAGVBqk4IOkKXC7QCnQu",
+          "platform": "linkedin",
+          "startTime": "2026-10-18T06:15:00.000Z",
+          "localTime": "2026-10-18T08:15",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "hZuHRcplCz4Z8W3iGKEl",
+          "platform": "facebook",
+          "startTime": "2026-10-18T07:15:00.000Z",
+          "localTime": "2026-10-18T09:15",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "BQXoxbttJA22v7QRqElb",
+          "platform": "reddit",
+          "startTime": "2026-10-18T08:30:00.000Z",
+          "localTime": "2026-10-18T10:30",
+          "retainedOriginalSchedule": true
+        }
+      ]
+    },
+    {
+      "storyId": "cycling",
+      "label": "Cycling",
+      "projectId": "viral-project-58bd9438-cc18-496e-b760-8e3b603abda3",
+      "canonicalHash": "d54b1be37002d782df10dad0b7e0b6b025ac328e6288a5c41f6c5b95278782d0",
+      "standaloneMovie": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/final.mp4",
+      "standaloneMovieSha256": "f2635326113b932203f6e00c8477370165a3a1b6a9a05f5591f1579edcb6fc4d",
+      "matchingRecording": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/velo/edited-in-studio.mp4",
+      "matchingRecordingSha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "recordingDestinations": [
+        {
+          "id": "ufaY8tyeucXTbSIxmbVc",
+          "platform": "reddit"
+        },
+        {
+          "id": "CUw7ofJ8U1ZtWoZsUvjx",
+          "platform": "facebook"
+        },
+        {
+          "id": "57y9reOkPpt58URHdPgc",
+          "platform": "linkedin"
+        },
+        {
+          "id": "UUmvi1fKahqItL1I5CaX",
+          "platform": "instagram"
+        },
+        {
+          "id": "tlUNbQzNXrKxaKBY7fay",
+          "platform": "tiktok"
+        },
+        {
+          "id": "luc32JOZG41vhTtHNMj1",
+          "platform": "youtube"
+        }
+      ],
+      "finalDestinations": [
+        {
+          "id": "UahBPparDi49k1T9QyWN",
+          "platform": "youtube",
+          "startTime": "2026-10-18T11:00:00.000Z",
+          "localTime": "2026-10-18T13:00",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "hxMICyfy407A0VrB85Sk",
+          "platform": "tiktok",
+          "startTime": "2026-10-18T10:45:00.000Z",
+          "localTime": "2026-10-18T12:45",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "Z7uCnxRRmRJ5JJ0bSpG5",
+          "platform": "instagram",
+          "startTime": "2026-10-18T10:15:00.000Z",
+          "localTime": "2026-10-18T12:15",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "HSMXtUG9XU7csw01q2gY",
+          "platform": "linkedin",
+          "startTime": "2026-10-18T10:15:00.000Z",
+          "localTime": "2026-10-18T12:15",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "01fDRarK7szZ6M92hcGI",
+          "platform": "facebook",
+          "startTime": "2026-10-18T13:15:00.000Z",
+          "localTime": "2026-10-18T15:15",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "KBKswldmGKBb8Fc21xxM",
+          "platform": "reddit",
+          "startTime": "2026-10-18T14:00:00.000Z",
+          "localTime": "2026-10-18T16:00",
+          "retainedOriginalSchedule": true
+        }
+      ]
+    },
+    {
+      "storyId": "headphones",
+      "label": "Headphones",
+      "projectId": "viral-project-942013f8-6051-4aca-9aba-391bca268a7e",
+      "canonicalHash": "2891edc6bfacf3958c8620062804b45666320a2bb7453ddb783eb1af2444afe1",
+      "standaloneMovie": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/final.mp4",
+      "standaloneMovieSha256": "6abb780af1dddab25348a3e7aef563ed422a0853ca22ce49036fd5ca77bf5231",
+      "matchingRecording": "../AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/launch-template/materials-editing-20261010/onda/edited-in-studio.mp4",
+      "matchingRecordingSha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "recordingDestinations": [
+        {
+          "id": "1qP0LfC0aA86kG0ZTfzC",
+          "platform": "reddit"
+        },
+        {
+          "id": "SKFOB9Y79m6d6WcxdbJI",
+          "platform": "facebook"
+        },
+        {
+          "id": "clOTO8PZ1v7UV5Fqlgc8",
+          "platform": "linkedin"
+        },
+        {
+          "id": "FfCKfvRYwY4AtoCPtt38",
+          "platform": "instagram"
+        },
+        {
+          "id": "I9bTI5rBmJRCNWVvhtLy",
+          "platform": "tiktok"
+        },
+        {
+          "id": "ckaxIofCGmqcw4cQTLMg",
+          "platform": "youtube"
+        }
+      ],
+      "finalDestinations": [
+        {
+          "id": "D2VHPPuZK35h5sS8I6cg",
+          "platform": "youtube",
+          "startTime": "2026-10-18T19:15:00.000Z",
+          "localTime": "2026-10-18T21:15",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "754gq8IM6fIISE0NSv3o",
+          "platform": "tiktok",
+          "startTime": "2026-10-18T17:00:00.000Z",
+          "localTime": "2026-10-18T19:00",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "K2rGMvc1qxb5lglaaSEI",
+          "platform": "instagram",
+          "startTime": "2026-10-18T18:30:00.000Z",
+          "localTime": "2026-10-18T20:30",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "IkWRsO9cdCy5ZCHKSQ6K",
+          "platform": "linkedin",
+          "startTime": "2026-10-18T15:15:00.000Z",
+          "localTime": "2026-10-18T17:15",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "hpIB96nX58oKHYYoISgG",
+          "platform": "facebook",
+          "startTime": "2026-10-18T18:45:00.000Z",
+          "localTime": "2026-10-18T20:45",
+          "retainedOriginalSchedule": true
+        },
+        {
+          "id": "G19pw4pWJd9rzYyuYRM1",
+          "platform": "reddit",
+          "startTime": "2026-10-18T20:00:00.000Z",
+          "localTime": "2026-10-18T22:00",
+          "retainedOriginalSchedule": true
+        }
+      ]
+    },
+    {
+      "storyId": "masked-type",
+      "label": "Sliced type",
+      "projectId": "viral-project-15a353fe-c3c6-4112-890d-ade65ec4efcd",
+      "canonicalHash": "36457f190c267c70f0aeb9db58af051a240d79d65031287cc08a4d7c7f8ae3b1",
+      "standaloneMovie": "reports/studio-noise-pressure-20261016/proof/noise-pressure/final.mp4",
+      "standaloneMovieSha256": "8eb6422025d8d5e456ed7973f333d086a58df4916ac824f52f62465939782a53",
+      "matchingRecording": "reports/studio-platform-packaging-20261016/proof/recording-excerpt/type-bands-excerpt/final.mp4",
+      "matchingRecordingSha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "recordingDestinations": [
+        {
+          "id": "hTne9P2hP2mc9WsXLktw",
+          "platform": "reddit"
+        },
+        {
+          "id": "GuUABrxBywfryTW1mvjf",
+          "platform": "facebook"
+        },
+        {
+          "id": "1Ru4QJJiRTpf7cLnGWnE",
+          "platform": "linkedin"
+        },
+        {
+          "id": "Po1tifSu0a50XkYzAZzJ",
+          "platform": "instagram"
+        },
+        {
+          "id": "xeHqiOHZg2ZU9TnLiKoZ",
+          "platform": "tiktok"
+        },
+        {
+          "id": "GxnHHtll1OoMRAmJhnGb",
+          "platform": "youtube"
+        }
+      ],
+      "finalDestinations": [
+        {
+          "id": "hyEVtaXa8ILcuYTV4HY0",
+          "platform": "youtube",
+          "startTime": "2026-10-19T07:00:00.000Z",
+          "localTime": "2026-10-19T09:00",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "H9E0uQydLu066fwYFa5n",
+          "platform": "tiktok",
+          "startTime": "2026-10-19T06:30:00.000Z",
+          "localTime": "2026-10-19T08:30",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "2FLZqMaGSQLD6o5xNzm4",
+          "platform": "instagram",
+          "startTime": "2026-10-19T06:45:00.000Z",
+          "localTime": "2026-10-19T08:45",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "Q9Nw7FdPwlkBFmQKpNt4",
+          "platform": "linkedin",
+          "startTime": "2026-10-19T06:15:00.000Z",
+          "localTime": "2026-10-19T08:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "TIgcmRhHYimm8b8ufkbK",
+          "platform": "facebook",
+          "startTime": "2026-10-19T07:15:00.000Z",
+          "localTime": "2026-10-19T09:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "BksROVIuhyXcwbndE5Xc",
+          "platform": "reddit",
+          "startTime": "2026-10-19T08:30:00.000Z",
+          "localTime": "2026-10-19T10:30",
+          "retainedOriginalSchedule": false
+        }
+      ]
+    },
+    {
+      "storyId": "five-words",
+      "label": "Five-word motion",
+      "projectId": "viral-project-6df914df-68ac-47dd-9cfd-18bbbec43df0",
+      "canonicalHash": "30204699ca875856dbdf9188ef7d0f345b7434d48a7e3de169666218c232591d",
+      "standaloneMovie": "reports/studio-five-words-20261016/proof/five-words/final.mp4",
+      "standaloneMovieSha256": "266a94d0b9835ed77b4a878931cccc066fded61719a7c5b91dd4b96af11977c0",
+      "matchingRecording": "reports/studio-five-words-20261016/proof/five-words/edited-in-studio.mp4",
+      "matchingRecordingSha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "recordingDestinations": [
+        {
+          "id": "04ul7N7Upe58HSoRqMQx",
+          "platform": "reddit"
+        },
+        {
+          "id": "oJD9eb56OGFcOqGbGDRG",
+          "platform": "facebook"
+        },
+        {
+          "id": "bN7owcrwMLu7uGbXggBJ",
+          "platform": "linkedin"
+        },
+        {
+          "id": "yfukhdimEADR4ei0UARP",
+          "platform": "instagram"
+        },
+        {
+          "id": "iRaaYzEmscm13jIzpYq4",
+          "platform": "tiktok"
+        },
+        {
+          "id": "P7Tmda1F4wRdCU2CtFGm",
+          "platform": "youtube"
+        }
+      ],
+      "finalDestinations": [
+        {
+          "id": "V6hqnaZrDfETWE32O6uW",
+          "platform": "youtube",
+          "startTime": "2026-10-19T11:00:00.000Z",
+          "localTime": "2026-10-19T13:00",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "ww1RSu4Minsz5gtYqIPM",
+          "platform": "tiktok",
+          "startTime": "2026-10-19T10:45:00.000Z",
+          "localTime": "2026-10-19T12:45",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "r99xqycwvfmJCGK9S3Bc",
+          "platform": "instagram",
+          "startTime": "2026-10-19T10:15:00.000Z",
+          "localTime": "2026-10-19T12:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "jQ1qBlnf3S26XoF3bTok",
+          "platform": "linkedin",
+          "startTime": "2026-10-19T10:15:00.000Z",
+          "localTime": "2026-10-19T12:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "Emnn4gjKcT8btg5lF8lh",
+          "platform": "facebook",
+          "startTime": "2026-10-19T13:15:00.000Z",
+          "localTime": "2026-10-19T15:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "s1dAraw8oKGvDdQYQ5w2",
+          "platform": "reddit",
+          "startTime": "2026-10-19T14:00:00.000Z",
+          "localTime": "2026-10-19T16:00",
+          "retainedOriginalSchedule": false
+        }
+      ]
+    },
+    {
+      "storyId": "pacing-contrast",
+      "label": "Pacing contrast",
+      "projectId": "viral-project-51476247-1d0c-4b0b-b560-ee08b426abe0",
+      "canonicalHash": "14518709449d6d9ab6f9a165841c43676c125ead44cfe054aca23d1d97996285",
+      "standaloneMovie": "reports/daily-studio/2026-10-17/pacing-contrast/proof/pacing-contrast/final.mp4",
+      "standaloneMovieSha256": "04e5937fbda1c417375b05365c20866fbd73f42c59a24cee5b15e495df56be36",
+      "matchingRecording": "reports/daily-studio/2026-10-17/pacing-contrast/proof/excerpt/focused-recording/final.mp4",
+      "matchingRecordingSha256": "d2e9c65202d06cde4aeb460af0ffad7faab49d61df73aa1de3245637988585ec",
+      "recordingDestinations": [
+        {
+          "id": "3Vc3cMlBHNcnqL8iUdGY",
+          "platform": "reddit"
+        },
+        {
+          "id": "s4krrFWzeg3m3Yk2yzjp",
+          "platform": "facebook"
+        },
+        {
+          "id": "a1oBB6fbhTfYf12PyY1Q",
+          "platform": "youtube"
+        },
+        {
+          "id": "UTS8qqqUe3jmvNr6OsuB",
+          "platform": "instagram"
+        },
+        {
+          "id": "HW0WnPn7iats7UGANwGW",
+          "platform": "tiktok"
+        },
+        {
+          "id": "ncWct1OJRI63vDTPA8vl",
+          "platform": "linkedin"
+        }
+      ],
+      "finalDestinations": [
+        {
+          "id": "lo2rrpQy37oRSz9uqnnh",
+          "platform": "youtube",
+          "startTime": "2026-10-19T19:15:00.000Z",
+          "localTime": "2026-10-19T21:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "dT9kNSohMe7I9ylccrZ6",
+          "platform": "tiktok",
+          "startTime": "2026-10-19T17:00:00.000Z",
+          "localTime": "2026-10-19T19:00",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "ZHAiAGhcHjvp4alKtkpn",
+          "platform": "instagram",
+          "startTime": "2026-10-19T18:30:00.000Z",
+          "localTime": "2026-10-19T20:30",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "IIqo93n8dVTv4pwdK8Vv",
+          "platform": "linkedin",
+          "startTime": "2026-10-19T15:15:00.000Z",
+          "localTime": "2026-10-19T17:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "TY6NmiFzkZru6TJyOsYf",
+          "platform": "facebook",
+          "startTime": "2026-10-19T18:45:00.000Z",
+          "localTime": "2026-10-19T20:45",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "CrhB8dSWiS2iLP6EpCMC",
+          "platform": "reddit",
+          "startTime": "2026-10-19T20:00:00.000Z",
+          "localTime": "2026-10-19T22:00",
+          "retainedOriginalSchedule": false
+        }
+      ]
+    },
+    {
+      "storyId": "editable-reveal",
+      "label": "Split-text reveal",
+      "projectId": "viral-project-f0c26619-3616-4503-84f1-8136a9eb2d20",
+      "canonicalHash": "d47359df5c68e41a644e67405d916eac27095e107c6495df2aeaa5b8670ba2b5",
+      "standaloneMovie": "reports/daily-studio/2026-10-17/editable-reveal/proof/refinement/editable-reveal/final.mp4",
+      "standaloneMovieSha256": "44cb13a445b913beb32e9c540b6760ca78b5157395cb0b7621f2e4bb6d3bc943",
+      "matchingRecording": "reports/daily-studio/2026-10-17/editable-reveal/proof/refinement/excerpt/focused-recording/final.mp4",
+      "matchingRecordingSha256": "ca7dafe766b77803d1e040a6bd683eac949dd13d8ec8c0e78f066c75be1338a0",
+      "recordingDestinations": [
+        {
+          "id": "94zaJe0WwcHmx6oXo2Qs",
+          "platform": "reddit"
+        },
+        {
+          "id": "rkcl8GBbP8apraiZQ9pQ",
+          "platform": "facebook"
+        },
+        {
+          "id": "Qn9oolmi9boCXJe9gFzN",
+          "platform": "youtube"
+        },
+        {
+          "id": "eUrjKPoPmc3MzOja7dNz",
+          "platform": "tiktok"
+        },
+        {
+          "id": "8rRoa3rw8Fd6QxpiIacY",
+          "platform": "instagram"
+        },
+        {
+          "id": "TCJezDkGNdHYeSQ0LiRy",
+          "platform": "linkedin"
+        }
+      ],
+      "finalDestinations": [
+        {
+          "id": "OcR1MEBTobYGlUncdYCl",
+          "platform": "youtube",
+          "startTime": "2026-10-20T07:00:00.000Z",
+          "localTime": "2026-10-20T09:00",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "RhZGV26f7j1QAqnjqMEv",
+          "platform": "tiktok",
+          "startTime": "2026-10-20T06:30:00.000Z",
+          "localTime": "2026-10-20T08:30",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "NDdNPG794fahnyLsOLbb",
+          "platform": "instagram",
+          "startTime": "2026-10-20T06:45:00.000Z",
+          "localTime": "2026-10-20T08:45",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "VrSL3Ka33sWKQddzy5R1",
+          "platform": "linkedin",
+          "startTime": "2026-10-20T06:15:00.000Z",
+          "localTime": "2026-10-20T08:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "R6LE0lSE6eFZkVZUsOfU",
+          "platform": "facebook",
+          "startTime": "2026-10-20T07:15:00.000Z",
+          "localTime": "2026-10-20T09:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "08wIoN0FImXuLOBrpUKB",
+          "platform": "reddit",
+          "startTime": "2026-10-20T08:30:00.000Z",
+          "localTime": "2026-10-20T10:30",
+          "retainedOriginalSchedule": false
+        }
+      ]
+    },
+    {
+      "storyId": "visual-hierarchy",
+      "label": "Visual hierarchy",
+      "projectId": "viral-project-463d94a2-a384-41dd-ad22-f97ab1759bc5",
+      "canonicalHash": "142b2e7190342d59540cfd97e982d7208f2bf23b0a38070d607e898800ca40f0",
+      "standaloneMovie": "reports/daily-studio/2026-10-17/visual-hierarchy/proof/visual-hierarchy/final.mp4",
+      "standaloneMovieSha256": "db00a134a2b58e44c8affb4e03e44658f3625ccc72b1227b6e64c07499482571",
+      "matchingRecording": "reports/daily-studio/2026-10-17/visual-hierarchy/proof/excerpt/focused-recording/final.mp4",
+      "matchingRecordingSha256": "b9e402b9cea259c82e9610617ffc5585d6ce98098ef17c2350fde8ce89fc6107",
+      "recordingDestinations": [
+        {
+          "id": "0jlH50J8ytb2t7NM40Ve",
+          "platform": "reddit"
+        },
+        {
+          "id": "9UElrvc8wg3heNeuCIIn",
+          "platform": "tiktok"
+        },
+        {
+          "id": "yV5V02gbf9krwXhGWNCR",
+          "platform": "facebook"
+        },
+        {
+          "id": "7ZBBxErUzsCauNFajRrD",
+          "platform": "instagram"
+        },
+        {
+          "id": "DIstjZcVyFyY40tvY5CJ",
+          "platform": "youtube"
+        },
+        {
+          "id": "iHtqngkjclcj8dcOLU5X",
+          "platform": "linkedin"
+        }
+      ],
+      "finalDestinations": [
+        {
+          "id": "C0UhN3AXHa2GFoUpl52g",
+          "platform": "youtube",
+          "startTime": "2026-10-20T11:00:00.000Z",
+          "localTime": "2026-10-20T13:00",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "EwxwU0h1W2DaRoN9yeX1",
+          "platform": "tiktok",
+          "startTime": "2026-10-20T10:45:00.000Z",
+          "localTime": "2026-10-20T12:45",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "zvZ5iEDbL9MkMX2eAJtV",
+          "platform": "instagram",
+          "startTime": "2026-10-20T10:15:00.000Z",
+          "localTime": "2026-10-20T12:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "fRgJRNZLf5sGEoStG4A4",
+          "platform": "linkedin",
+          "startTime": "2026-10-20T10:15:00.000Z",
+          "localTime": "2026-10-20T12:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "RSk5HPKOP9x7WMRVs5CZ",
+          "platform": "facebook",
+          "startTime": "2026-10-20T13:15:00.000Z",
+          "localTime": "2026-10-20T15:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "4Kx3dWNEhvOSUnIC0t7e",
+          "platform": "reddit",
+          "startTime": "2026-10-20T14:00:00.000Z",
+          "localTime": "2026-10-20T16:00",
+          "retainedOriginalSchedule": false
+        }
+      ]
+    },
+    {
+      "storyId": "sound-alignment",
+      "label": "Picture and sound timing",
+      "projectId": "viral-project-efaa341d-7a1f-4d30-9218-fa68cde9cbe4",
+      "canonicalHash": "d28d5b15da9084dbffb350a95ef729c24fe0fc357bad3e7e415f6c9135f65284",
+      "standaloneMovie": "reports/daily-studio/2026-10-17/sound-alignment/proof/sound-alignment/final.mp4",
+      "standaloneMovieSha256": "f574230f197c37525e4e9f7f3ada995ec276614f3c049b2d588fb660ad309cba",
+      "matchingRecording": "reports/daily-studio/2026-10-17/sound-alignment/proof/excerpt/focused-recording/final.mp4",
+      "matchingRecordingSha256": "f6b75e3b851590e28d9378556de2ddeb4447a6102b903eb541ad2331e701d16e",
+      "recordingDestinations": [
+        {
+          "id": "FNoxRnp16fKQAGHGMNRS",
+          "platform": "reddit"
+        },
+        {
+          "id": "LqvFnnxhAzNFSF3gkFos",
+          "platform": "youtube"
+        },
+        {
+          "id": "y0Vn6asxUJYhATK8zwY0",
+          "platform": "tiktok"
+        },
+        {
+          "id": "vy8tEaylrpHLTHA3uhxU",
+          "platform": "facebook"
+        },
+        {
+          "id": "3yQ6FZb5nvPRYPFENGgC",
+          "platform": "instagram"
+        },
+        {
+          "id": "aAMKUV3mCeSFbe0xX2Zj",
+          "platform": "linkedin"
+        }
+      ],
+      "finalDestinations": [
+        {
+          "id": "HBOIgo6ZeG8OyXsCn5dA",
+          "platform": "youtube",
+          "startTime": "2026-10-20T19:15:00.000Z",
+          "localTime": "2026-10-20T21:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "uAqZoSzMD2SyJd1cHdoT",
+          "platform": "tiktok",
+          "startTime": "2026-10-20T17:00:00.000Z",
+          "localTime": "2026-10-20T19:00",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "aeNQiZWMSbHbhq0xnhZc",
+          "platform": "instagram",
+          "startTime": "2026-10-20T18:30:00.000Z",
+          "localTime": "2026-10-20T20:30",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "vLQiPo8GYr9BsrpsUck7",
+          "platform": "linkedin",
+          "startTime": "2026-10-20T15:15:00.000Z",
+          "localTime": "2026-10-20T17:15",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "6s8quDIh3FzF1PDUjaSW",
+          "platform": "facebook",
+          "startTime": "2026-10-20T18:45:00.000Z",
+          "localTime": "2026-10-20T20:45",
+          "retainedOriginalSchedule": false
+        },
+        {
+          "id": "RGeupBs4xjaYzR1TYnsW",
+          "platform": "reddit",
+          "startTime": "2026-10-20T20:00:00.000Z",
+          "localTime": "2026-10-20T22:00",
+          "retainedOriginalSchedule": false
+        }
+      ]
+    }
+  ]
+}

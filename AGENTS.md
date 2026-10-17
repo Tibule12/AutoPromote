@@ -33,8 +33,17 @@ do not describe fragment masking as inferred ribbon geometry or path morphing.
 The owner then requested every word to construct from pieces and explicitly
 selected the supplied Gradient Tech identity as the new app logo. Preserve its
 original gradient and lettering in the app and movie; keep prior edits available.
-The owner requested another version for comparison. Preserve both native
-projects and wait for the owner's A/B selection before scheduling these logo films.
+The owner requested another version for comparison, then explicitly selected
+both with “schedule both” on 17 October. Both native movies have twelve verified
+normal Publisher schedules for 18–19 October, with platform-specific copy/times.
+Preserve both native projects and the exact queue/media receipts at
+`reports/daily-studio/2026-10-17/logo-comparison/publishing/README.md`.
+Scheduling is verified; provider publication remains separate.
+The owner also requested matching final results for the already queued/published
+Studio breakdowns. All nine native finals now have 54 verified 18–20 October
+destination schedules; the 18 existing paused final IDs are retained and resumed.
+Preserve the recording/result coverage and original recordings at
+`reports/daily-studio/2026-10-17/standalone-results/publishing/README.md`.
 
 At the end of every Studio session, update product readiness, capability and
 combination matrices, exact remaining blockers, evidence and next task.
