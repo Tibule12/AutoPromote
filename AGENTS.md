@@ -91,6 +91,14 @@ Browser QA must be headless and muted. Never show or restore the app on the
 user's work screen. A saved command, contract or historical GPU window does
 not authorize starting a paid instance/job. Respect current session steering.
 
+Local frontend rebuilds must preserve the active API origin and build-time UI
+flags, including `REACT_APP_WELCOME_STUDIO_PREVIEW`. Before replacing a local
+App build, check its anonymous welcome page as well as the real signed-in
+workspace/help panel. Use `scripts/creative-templates/verify-preview-entry-points.js`
+with the retained page as `PREVIEW_COMPARE_URL` and the candidate's separate
+local URL as `PREVIEW_CANDIDATE_URL`. Keep the prior build and hashed assets.
+A successful signed-in chatbot test alone does not qualify the welcome page.
+
 Founder requirement (12 October): every delivered Studio edit includes the
 actual Studio recording with its editable timeline and complete final playback,
 plus the separate final movie. External building-in-public scheduling is

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-21T18:04:30.261Z",
+  "updatedAt": "2026-10-21T19:28:46.375062Z",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -8797,5 +8797,25 @@
       "mode": "Combined focused runs against optimized builds; current remote CI must rerun.",
       "newSkipConditions": 0
     }
+  },
+  "welcomePreviewRestoration20261021": {
+    "at": "2026-10-21T19:28:46.375062Z",
+    "report": "reports/welcome-preview-restoration-20261021/README.md",
+    "scope": "Restore the existing local welcome selection after the chatbot rebuild omitted its explicit build flag; retain current API origin and both anonymous/signed-in entry checks.",
+    "anonymousComparisonChecks": 8,
+    "identicalHeroScreenshotPairs": 4,
+    "signedInChatQuestions": 3,
+    "savedProjectRecordsRetained": 43,
+    "newRenders": 0,
+    "paidGpuJobs": 0,
+    "newSchedules": 0,
+    "deployment": false,
+    "mainMerge": false,
+    "readinessPromotion": false,
+    "remainingBlockers": [
+      "Existing shared Studio S02 picture/sound/parity, S04 motion depth and S03 ownership limits remain.",
+      "Private welcome restore does not qualify a public creative/showroom release."
+    ],
+    "nextTask": "Preserve active local build flags and verify anonymous welcome plus signed-in help before replacing future builds; continue the owner-directed documentation and shared Studio backlog."
   }
 }

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Publish the tested documentation chatbot repair on its feature branch: exact/contextual retrieval, typo handling, privacy redaction, safe follow-ups and controlled errors. Reconcile the already committed CI impact declarations replacing private JSON receipts with tracked report summaries; preserve existing feature facts, readiness and execution limits. Both new assistance modules are included in the source fingerprint.",
-  "reviewed_at": "2026-10-21T19:13:37.673Z",
+  "reason": "Local welcome restoration metadata and entry-point regression: preserve the active welcome flag/API origin, existing design/media, all prior matrix records and formal readiness. Four original/candidate hero pairs match exactly; final anonymous and real signed-in checks pass. No renderer, generation or execution-authority change.",
+  "reviewed_at": "2026-10-21T19:30:08.040Z",
   "catalog_sha256": "efa01082173309f97a2153f01091cd4bc6411cdcd45adc30affea65ae4326731",
   "sources": [
     {
@@ -639,7 +639,7 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "4f8ec58fd0e5bd3d6b20996d4422f09e81aec35c7758b5071954f5486b1b4b58"
+      "sha256": "7cdc5966cc2f330d710c2163fdb4248ee0a701bb1d44c13c38e23a7a056147ee"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
