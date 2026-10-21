@@ -18,6 +18,54 @@ from python_media_worker.studio_layer_motion import (
 )
 
 
+def test_still_holds_reuse_one_raster_without_changing_encoded_pixels(tmp_path, monkeypatch):
+    from python_media_worker import studio_layer_motion as motion
+    source, output = tmp_path / "art.png", tmp_path / "holds.mov"
+    Image.new("RGBA", (18, 12), "#55e6ef").save(source)
+    overlay = {"type": "image", "start_time": 0, "duration": 1,
+               "width": 50, "height": 40, "frameShape": "edge"}
+    layer = {"base_transform": {"x": 30, "y": 50, "scale": 1, "opacity": .8},
+             "effects": {"glow": {"enabled": True, "radius": 2, "intensity": .3}},
+             "motion_keyframes": [{"property": "x", "time": 0, "value": 30},
+                 {"property": "x", "time": .5, "value": 70, "easing": "hold"}]}
+    calls = []
+    original = motion._render_pose
+    def observe(*args, **kwargs):
+        calls.append(args[3].copy())
+        return original(*args, **kwargs)
+    monkeypatch.setattr(motion, "_render_pose", observe)
+    render_image_layer_motion(source, output, overlay, layer, 64, 48, 1, [], fps=8)
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
+                                   "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    actual = np.frombuffer(raw, np.uint8).reshape(8, 48, 64, 4)
+    asset = Image.open(source).convert("RGBA")
+    for index, frame in enumerate(actual):
+        expected = original(asset, overlay, layer, layer_pose(layer, overlay, index / 8), (64, 48))
+        np.testing.assert_array_equal(frame, np.asarray(expected))
+    assert len(calls) == 2, "Each distinct held pose is rasterized once"
+
+
+def test_changing_decoded_frames_never_reuse_still_raster(tmp_path, monkeypatch):
+    from python_media_worker import studio_layer_motion as motion
+    calls = []
+    original = motion._render_pose
+    def observe(*args, **kwargs):
+        calls.append(1)
+        return original(*args, **kwargs)
+    monkeypatch.setattr(motion, "_render_pose", observe)
+    output = tmp_path / "changing.mov"
+    render_image_layer_motion(None, output,
+        {"type": "video", "start_time": 0, "duration": .5, "width": 100,
+         "height": 100, "frameShape": "edge"}, {}, 32, 32, .5, [], fps=4,
+        frame_source=lambda index: Image.new("RGBA", (16, 16), "red" if index == 0 else "blue"))
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
+                                  "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    frames = np.frombuffer(raw, np.uint8).reshape(2, 32, 32, 4)
+    np.testing.assert_array_equal(frames[0, 16, 16], [255, 0, 0, 255])
+    np.testing.assert_array_equal(frames[1, 16, 16], [0, 0, 255, 255])
+    assert len(calls) == 2
+
+
 def test_moving_video_uses_canonical_position_scale_opacity_and_changing_source_frames(tmp_path):
     source, output = tmp_path / "moving.mov", tmp_path / "motion.mov"
     subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y",

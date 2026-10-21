@@ -19,14 +19,15 @@ export default function StudioKeyframeVelocityControls({ curve, first, last, dur
   const values = studioCurveVelocity(curve, first, last, duration);
   const unit = property === 'rotation' ? '°/s' : property === 'scale' ? 'scale/s' : property === 'opacity' ? 'opacity/s' : '%/s';
   return <div className="studio-velocity-controls">
-    <div className="motion-position-grid">{[['start', `Start velocity (${unit})`], ['end', `End velocity (${unit})`],
+    <div className="motion-position-grid">{[['start', `Start ${property === 'travel' ? 'travel' : 'velocity'} (${unit})`], ['end', `End ${property === 'travel' ? 'travel' : 'velocity'} (${unit})`],
       ['startInfluence', 'Start influence (%)'], ['endInfluence', 'End influence (%)']].map(([field, label]) =>
       <VelocityNumber key={field} label={label} value={values[field]} disabled={locked || first === last}
         onCommit={value => {
           try { const next = editStudioCurveVelocity(curve, first, last, duration, field, value); setError(''); onUpdate(next); }
           catch (failure) { setError(failure.message); }
         }} />)}</div>
-    <small>Velocity is signed property change per programme second. Influence preserves that endpoint velocity. Editing writes a custom cubic curve.</small>
+    <small>{property === 'travel' ? 'Travel is path progress per programme second. Position and velocity graphs show the resulting movement. Spatial handles shape the route.'
+      : 'Velocity is signed property change per programme second. Influence preserves that endpoint velocity. Editing writes a custom cubic curve.'}</small>
     {error && <span className="pro-keyframe-error" role="alert">{error}</span>}
   </div>;
 }

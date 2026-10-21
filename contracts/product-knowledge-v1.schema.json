@@ -443,7 +443,8 @@
                   "boolean",
                   "string",
                   "enum",
-                  "array"
+                  "array",
+                  "object"
                 ]
               },
               "minimum": {

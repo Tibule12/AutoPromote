@@ -36,7 +36,8 @@ export function editStudioKeyframeSelection(keys, ids, action, { value, clipboar
     if (!clipboard.length || !Number.isFinite(value) || typeof createId !== 'function') throw Error('Copy keyframes before pasting at the playhead.');
     const source = pasteTarget ? retargetStudioKeyframes(clipboard, pasteTarget) : clipboard;
     const first = Math.min(...source.map(key => key.time));
-    const pasted = source.map(key => ({ ...key, ...(key.curve ? { curve: [...key.curve] } : {}), id: createId(), time: tick(value + key.time - first) }));
+    const pasted = source.map(key => ({ ...key, ...(key.curve ? { curve: [...key.curve] } : {}),
+      ...(key.spatialCurve ? { spatialCurve: [...key.spatialCurve] } : {}), id: createId(), time: tick(value + key.time - first) }));
     for (let index = 0; index < pasted.length; index++) {
       const key = pasted[index];
       if ([...keys, ...pasted.slice(0, index)].some(other => other.targetId === key.targetId &&

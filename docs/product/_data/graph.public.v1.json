@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.30",
+  "knowledge_version": "1.0.43",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -505,6 +505,21 @@
     },
     {
       "id": "studio.logo_motion",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector_artwork",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_choreography",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design",
       "kind": "feature",
       "status": "PARTIAL"
     },
@@ -1250,6 +1265,236 @@
     },
     {
       "id": "studio.logo_motion.piece_style",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.spatial_curve",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.spatial_handle",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.add",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.point",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.tangent",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.split",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.point_kind",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.fill",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.stroke",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.closed",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.stroke_start",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.stroke_end",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.stroke_offset",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.enable",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.unit",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.order",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.stagger",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_x",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_y",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_scale",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_rotation",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_opacity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.spread",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.range_start",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.range_end",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.settle",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.progress",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.rebuild",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.remove",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.name",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.family",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.layout",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.weight",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.tracking",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.symbol_size",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.colours",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.gradient",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.assemble",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.build",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.variant",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.svg",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.png",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.contour",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.canvas",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.analytics.sync_latest",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.analytics.release",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -3229,6 +3474,296 @@
       "from": "studio.logo_motion",
       "type": "editable_with",
       "to": "studio.logo_motion.piece_style"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_curve"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_curve"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_handle"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_handle"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.add"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.point"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.tangent"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.split"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.point_kind"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.fill"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.closed"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "requires",
+      "to": "studio.layers"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "optionally_uses",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "optionally_uses",
+      "to": "studio.easing"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke_start"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke_end"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke_offset"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.enable"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.unit"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.order"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.stagger"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_x"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_y"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_scale"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_rotation"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_opacity"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.spread"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.range_start"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.range_end"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.settle"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.progress"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.rebuild"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "requires",
+      "to": "studio.titles"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "requires",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "optionally_uses",
+      "to": "studio.easing"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "optionally_uses",
+      "to": "studio.transforms"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.remove"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "requires",
+      "to": "studio.vector_artwork"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "optionally_uses",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "optionally_uses",
+      "to": "studio.transforms"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.contour"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.name"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.family"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.layout"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.weight"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.tracking"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.symbol_size"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.colours"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.gradient"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.assemble"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.build"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.variant"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.svg"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.png"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.canvas"
+    },
+    {
+      "from": "publishing.analytics",
+      "type": "editable_with",
+      "to": "publishing.analytics.sync_latest"
+    },
+    {
+      "from": "publishing.analytics",
+      "type": "editable_with",
+      "to": "publishing.analytics.release"
     }
   ]
 }

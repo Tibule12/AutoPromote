@@ -83,7 +83,7 @@ async function design(page){
 async function main(){
  const action=process.argv[2]||'setup';
  const context=await chromium.launchPersistentContext(path.resolve('reports/studio-keyframe-selection-20261015/proof/browser-profile.private'),{
- ignoreDefaultArgs:['--disable-dev-shm-usage'],channel:'chromium',headless:true,args:['--mute-audio','--disk-cache-size=16777216','--host-resolver-rules=MAP localhost 127.0.0.1'],viewport:{width:1920,height:1200},acceptDownloads:true});
+ ignoreDefaultArgs:['--disable-dev-shm-usage'],channel:'chromium',headless:true,args:['--mute-audio','--disk-cache-size=16777216',`--host-resolver-rules=MAP localhost ${process.env.STUDIO_QA_LOOPBACK || '127.0.0.1'}`],viewport:{width:1920,height:1200},acceptDownloads:true});
  const page=context.pages()[0];page.setDefaultTimeout(60000);let submissions=0;page.on('request',r=>{if(new URL(r.url()).pathname==='/api/media/process')submissions++;});
  try{
   await page.goto('http://localhost:5000/?studioFiveWords=20261016',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'Viral Clip Studio',exact:true}).click();

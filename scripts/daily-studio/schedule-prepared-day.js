@@ -61,8 +61,14 @@ if (check.status !== 0)
   throw Error("Keep acknowledgements; read-only Queue/media verification needs inspection");
 const evidence = read(path.join(dir, "queue-verified.json")),
   book = read(file);
-for (const post of book.posts)
+for (const post of book.posts) {
   post.verifiedMediaSha256 = evidence.mediaChecks.find(row => row.postId === post.postId)?.sha256;
+  const observed = evidence.checked.find(row => row.postId === post.postId);
+  if (observed) {
+    const { postId, scheduleId, ...schedule } = observed;
+    post.schedules = [{ ...post.schedules[0], ...schedule, id: scheduleId }];
+  }
+}
 c.atomic(file, book);
 syncDay();
 const day = read(dayFile);

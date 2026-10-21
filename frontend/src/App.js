@@ -1632,11 +1632,11 @@ function App() {
         <Routes>
           {/* Static Content Pages */}
           <Route path="/about" element={<About />} />
-          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/*" element={<Blog />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cookies" element={<Cookies />} />
-          <Route path="/docs" element={<Docs />} />
+          <Route path="/docs/*" element={<Docs />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/support" element={<Support />} />
           <Route path="/accessibility" element={<Accessibility />} />

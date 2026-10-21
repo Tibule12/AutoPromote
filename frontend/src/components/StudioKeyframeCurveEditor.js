@@ -84,7 +84,7 @@ export default function StudioKeyframeCurveEditor({ keyframes, focusId, onSelect
         {Number.isFinite(playhead) && playhead >= left.time && playhead <= selected.time &&
           <path d={`M${x((playhead - left.time) / interval)},24V156`} className="curve-playhead" />}
         {graphMode === 'velocity' && <path d={`M22,${velocityY(0)}H278`} className="curve-handle-line" />}
-        {graphMode === 'value' && (selected.easing === "bezier" || drag) && [0, 1].map(handle => {
+        {graphMode === 'value' && !selected.spatialCurve && (selected.easing === "bezier" || drag) && [0, 1].map(handle => {
           const progress = curve[handle * 2], amount = curve[handle * 2 + 1];
           const cx = x(progress), cy = y(first + (last - first) * amount);
           const disabled = locked || last === first;
@@ -107,8 +107,9 @@ export default function StudioKeyframeCurveEditor({ keyframes, focusId, onSelect
         })}
         <text x="22" y="173">{Number(left.time).toFixed(2)}s</text><text x="250" y="173">{Number(selected.time).toFixed(2)}s</text>
       </svg>
-      {selected.easing !== 'hold' && <StudioKeyframeVelocityControls key={selected.id} curve={curve} first={first} last={last}
-        duration={interval} locked={locked} property={selected.property} onUpdate={updateCurve} />}
+      {selected.easing !== 'hold' && <StudioKeyframeVelocityControls key={selected.id} curve={curve}
+        first={selected.spatialCurve ? 0 : first} last={selected.spatialCurve ? 100 : last}
+        duration={interval} locked={locked} property={selected.spatialCurve ? 'travel' : selected.property} onUpdate={updateCurve} />}
       {selected.easing === "bezier" ? <div className="motion-position-grid studio-bezier-coordinates">{["Time 1", "Value 1", "Time 2", "Value 2"].map((label, i) =>
         <label key={label}><span>{label}</span><input aria-label={`Bezier ${label}`} type="number" step="0.01"
           min={i % 2 ? -2 : 0} max={i % 2 ? 2 : 1} disabled={locked} value={curve[i]} onChange={event => {

@@ -68,7 +68,18 @@ test('missing major surface is an error while adjacent deferred surfaces are war
 test('safe public projection excludes internal-only records and strips all source/provenance/model fields',()=>{
   const b=clone();b.features[0].source_evidence[0].path='/home/private/sentinel';b.features[0].examples.push({label:'private',kind:'RETAINED_PRIVATE_EVIDENCE',evidence_path:'gs://private/prompt',qualification:'private'});
   b.features[0].privateSentinel='SECRET';const p=k.projectPublic(b),serialized=JSON.stringify(p);
-  assert.equal(p.features.length,101);assert.ok(p.features.some(f=>f.feature_id==='studio.logo_motion'));
+  assert.deepEqual(p.features.map(f=>f.feature_id).sort(),b.features.filter(f=>f.visibility==='PUBLIC').map(f=>f.feature_id).sort());
+  assert.ok(p.features.some(f=>f.feature_id==='studio.logo_motion'));
+  assert.ok(p.features.some(f=>f.feature_id==='studio.vector_artwork'));
+  assert.ok(p.controls.some(c=>c.control_id==='studio.vector.stroke_start'&&c.keyframeable==='SUPPORTED'));
+  assert.ok(p.controls.some(c=>c.control_id==='studio.vector.stroke_end'&&c.constraints.default===100));
+  assert.ok(p.controls.some(c=>c.control_id==='studio.vector.stroke_offset'&&c.constraints.minimum===-1000&&c.constraints.maximum===1000));
+  assert.ok(p.features.some(f=>f.feature_id==='studio.text_choreography'&&f.status==='PARTIAL'));
+  assert.ok(p.features.some(f=>f.feature_id==='studio.logo_design'&&f.status==='PARTIAL'));
+  assert.ok(p.controls.some(c=>c.control_id==='studio.logo_design.svg'&&c.keyframeable==='UNSUPPORTED'));
+  assert.ok(p.controls.some(c=>c.control_id==='studio.logo_design.name'&&c.constraints.default==='AutoPromote'));
+  assert.ok(p.controls.some(c=>c.control_id==='studio.text_animator.progress'&&c.keyframeable==='SUPPORTED'&&c.constraints.maximum===100));
+  assert.ok(p.controls.some(c=>c.control_id==='studio.text_animator.from_rotation'&&c.constraints.minimum===-360));
   assert.ok(!serialized.includes('SECRET'));assert.ok(!serialized.includes('source_evidence'));
   assert.ok(!serialized.includes('model_capabilities'));assert.ok(!serialized.includes('evidence_path'));assert.ok(!serialized.includes('readiness_authority'));
   assert.ok(!serialized.includes('/home/'));assert.ok(!serialized.includes('generation.narration'));assert.ok(!serialized.includes('config/model-runtime'));

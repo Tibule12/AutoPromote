@@ -176,6 +176,17 @@ async function view(page, name) {
   await output.evaluate(v => {
     const initialSource = v.currentSrc;
     const observations = [];
+    const frameClock = [];
+    let frameCallback = 0;
+    const observeFrame = (_now, metadata) => {
+      if (!v.paused && !v.ended) frameClock.push({
+        mediaTime: metadata.mediaTime,
+        expectedDisplayEpoch: (performance.timeOrigin + metadata.expectedDisplayTime) / 1000,
+        presentedFrames: metadata.presentedFrames,
+      });
+      frameCallback = v.requestVideoFrameCallback(observeFrame);
+    };
+    if (v.requestVideoFrameCallback) frameCallback = v.requestVideoFrameCallback(observeFrame);
     const observe = type => {
       const quality = v.getVideoPlaybackQuality();
       observations.push({ type, wallMs: performance.now(), time: v.currentTime,
@@ -203,6 +214,8 @@ async function view(page, name) {
     window.__stopNativeStudioRecordingObservation = () => {
       clearInterval(timer);
       listeners.forEach(([type, listener]) => v.removeEventListener(type, listener));
+      if (frameCallback) v.cancelVideoFrameCallback(frameCallback);
+      window.__nativeStudioRecordedFrameClock = frameClock;
       observe('final');
       delete window.__stopNativeStudioRecordingObservation;
       return observations;
@@ -218,6 +231,7 @@ async function view(page, name) {
     return { viewport:{ width:innerWidth, height:innerHeight }, video:rect(v),
       frame:rect(document.querySelector('[data-testid="hook-preview-frame"]')),
       timeline:rect(document.querySelector('[data-testid="studio-pro-timeline"]')),
+      workspace:rect(document.querySelector('[data-testid="viral-studio-workspace"]')),
       source:{ width:v.videoWidth, height:v.videoHeight },
       objectFit:getComputedStyle(v).objectFit };
   });
@@ -238,9 +252,10 @@ async function view(page, name) {
     const file = path.join(frames, `${String(recorded.length).padStart(6, '0')}.jpg`);
     fs.writeFileSync(file, bytes);
     captureBytes += bytes.length;
-    // Use one host clock for image delivery and the playing observation. CDP
-    // compositor epoch timestamps can lead the page clock and crop the opening.
-    recorded.push({ file, time: Date.now() / 1000 });
+    const compositorEpoch = Number(event.metadata?.timestamp);
+    assert(Number.isFinite(compositorEpoch) && compositorEpoch > 1e9,
+      'Native capture needs its actual compositor epoch timestamp');
+    recorded.push({ file, time: compositorEpoch, receivedAt: Date.now() / 1000 });
     if (recorded.length === 1) firstFrameReady();
     void cdp.send('Page.screencastFrameAck', { sessionId: event.sessionId });
   });
@@ -257,10 +272,9 @@ async function view(page, name) {
   await page.getByRole('button', { name: 'Play comparison', exact: true }).click();
   let playingTimer, playingAt;
   try {
-      await Promise.race([playing, new Promise((_, reject) => {
+    playingAt = await Promise.race([playing, new Promise((_, reject) => {
       playingTimer = setTimeout(() => reject(new Error('Native decoder did not begin playing')), 15000);
     })]);
-    playingAt = Date.now() / 1000;
   } finally { clearTimeout(playingTimer); }
   console.log('Native decoder playing; observing complete movie.');
   let audioTrackReveal = null;
@@ -294,6 +308,11 @@ async function view(page, name) {
     throw error;
   }
   const observations = await page.evaluate(() => window.__stopNativeStudioRecordingObservation());
+  const frameClock = await page.evaluate(() => {
+    const result = window.__nativeStudioRecordedFrameClock;
+    delete window.__nativeStudioRecordedFrameClock;
+    return result;
+  });
   fs.writeFileSync(path.join(folder, name, 'studio-transport-observation.json'),
     JSON.stringify(observations, null, 2));
   await cdp.send('Page.stopScreencast');
@@ -311,12 +330,22 @@ async function view(page, name) {
     'Native completed movie must not receive its authored speed ramp a second time');
   const concat = path.join(frames, 'frames.ffconcat');
   fs.writeFileSync(concat, 'ffconcat version 1.0\n' + recorded.map((f, i) =>
-    `file '${f.file}'\nduration ${Math.max(.001, (recorded[i + 1]?.time ?? f.time + .1) - f.time)}\n`).join('') + `file '${recorded.at(-1).file}'\n`);
+    `file '${f.file}'\noption framerate 1000\nduration ${Math.max(.001, (recorded[i + 1]?.time ?? f.time + .1) - f.time)}\n`).join('') + `file '${recorded.at(-1).file}'\noption framerate 1000\n`);
   const recording = path.join(folder, name, 'edited-in-studio.mp4');
   if (fs.existsSync(recording)) {
     fs.renameSync(recording, path.join(folder, name, `previous-studio-recording-${hash(fs.readFileSync(recording))}.mp4`));
   }
-  const audioOffset = playingAt - recorded[0].time;
+  assert(frameClock?.length, 'Observe actual native frame presentation before muxing its score');
+  const programmeZeroEpoch = frameClock[0].expectedDisplayEpoch - frameClock[0].mediaTime;
+  const audioOffset = programmeZeroEpoch - recorded[0].time;
+  assert(audioOffset >= 0 && audioOffset < 2, 'Native recording programme offset is out of bounds');
+  fs.writeFileSync(path.join(folder, name, 'studio-recording-clock.json'), JSON.stringify({
+    clock: 'Native requestVideoFrameCallback expected display epoch and CDP compositor epoch',
+    imageDemuxTimebase: '1/1000', playingEventEpoch: playingAt, programmeZeroEpoch,
+    firstCompositorEpoch: recorded[0].time, audioOffset,
+    frames: recorded.map(({ time, receivedAt }) => ({ compositorEpoch: time, receivedAt })),
+    nativeFrames: frameClock, fittedImageAlignment: false,
+  }, null, 2));
   assert.equal(hash(fs.readFileSync(finalMovie)), renderReceipt.outputSha256);
   const probe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0',
     '-show_entries', 'stream=r_frame_rate', '-of', 'json', finalMovie], { encoding: 'utf8' }));
@@ -332,7 +361,10 @@ async function view(page, name) {
   const recordingScratch = storage.finishRecordingScratch(scratch, recording);
   const after = await h.save(page, name);
   assert.equal(hash(after.snapshot.studioDocument), hash(before.snapshot.studioDocument));
-  fs.writeFileSync(path.join(folder, name, 'studio-playback.json'), JSON.stringify({
+  const playbackFile = path.join(folder, name, 'studio-playback.json');
+  if (fs.existsSync(playbackFile)) fs.renameSync(playbackFile,
+    path.join(folder, name, `previous-studio-playback-${Date.now()}.json`));
+  fs.writeFileSync(playbackFile, JSON.stringify({
     createdAt: new Date().toISOString(), playback, canonicalHash: hash(after.snapshot.studioDocument),
     nativeFinishedOutput: true, timelineVisible: true, audioTrackReveal, recording, screencastFrames: recorded.length,
     recordingScratch, captureGeometry,
@@ -342,6 +374,7 @@ async function view(page, name) {
       limitation: 'Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter' },
     recordingAudio: 'Soundtrack muxed from the exact hash-verified export at the observed native playback-start offset; QA browser muted',
     audioOffset, decodedFramesThisPlayback: playback.decodedFrames - decodedBefore,
+    recordingClock: path.join(folder, name, 'studio-recording-clock.json'),
     projectId: before.id, outputSha256: renderReceipt.outputSha256,
     submittedJobId: renderReceipt.submittedJobId, templateRef: renderReceipt.templateRef,
     listeningReview: 'pending founder review', noMocks: true,

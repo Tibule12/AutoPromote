@@ -1,5 +1,6 @@
 // facebookService.js - Facebook Graph API OAuth and page posting
 const { db } = require("../firebaseAdmin");
+const { numericMetric } = require("./platformMetricValues");
 const { safeFetch } = require("../utils/ssrfGuard");
 
 let fetchFn = global.fetch;
@@ -562,7 +563,7 @@ async function getPostStats({ uid, postId, pageId }) {
       const data = await response.json();
       const values = {};
       (data.data || []).forEach(item => {
-        values[item.name] = item.values && item.values[0] ? item.values[0].value : 0;
+        values[item.name] = item.values?.[0]?.value ?? null;
       });
 
       if (Object.keys(values).length === 0) {
@@ -631,7 +632,7 @@ async function getPostStats({ uid, postId, pageId }) {
               const vData = await vRes.json();
               const vVals = {};
               (vData.data || []).forEach(item => {
-                vVals[item.name] = item.values && item.values[0] ? item.values[0].value : 0;
+                vVals[item.name] = item.values?.[0]?.value ?? null;
               });
               console.log(`[Facebook] Video Metrics for ${objectId}:`, JSON.stringify(vVals));
               if (vVals.total_video_views) {
@@ -652,11 +653,12 @@ async function getPostStats({ uid, postId, pageId }) {
 
         return {
           postId,
-          impressions,
-          engagedUsers: parseInt(values.post_engaged_users || 0, 10),
-          likes,
-          comments,
-          shares: 0,
+          impressions: numericMetric(values.post_impressions),
+          views: numericMetric(values.post_video_views, values.total_video_views),
+          engagedUsers: numericMetric(values.post_engaged_users),
+          likes: null,
+          comments: null,
+          shares: null,
           fetchedAt: new Date().toISOString(),
         };
       } catch (_) {}
@@ -691,11 +693,11 @@ async function getPostStats({ uid, postId, pageId }) {
     }
 
     // Prefer reaction count
-    const likes = data.reactions?.summary?.total_count || data.likes?.summary?.total_count || 0;
-    const comments = data.comments?.summary?.total_count || 0;
+    const likes = numericMetric(data.reactions?.summary?.total_count, data.likes?.summary?.total_count);
+    const comments = numericMetric(data.comments?.summary?.total_count);
 
     // Attempt to fetch video views if object_id present
-    let views = 0;
+    let views = null;
     if (data.object_id && data.object_id !== postId) {
       try {
         const vUrl = `https://graph.facebook.com/v19.0/${data.object_id}/video_insights?metric=total_video_views&access_token=${accessToken}`;
@@ -717,8 +719,9 @@ async function getPostStats({ uid, postId, pageId }) {
       postId,
       likes,
       comments,
-      shares: 0,
-      impressions: views, // Populate impressions with views in fallback
+      shares: numericMetric(data.shares?.count),
+      views: numericMetric(views),
+      impressions: null,
       fetchedAt: new Date().toISOString(),
     };
   }
@@ -742,26 +745,26 @@ async function getPostStats({ uid, postId, pageId }) {
       console.warn(
         `[Facebook] Post ${postId} is a video; skipping 'shares' field fetch. (Metrics may be partial)`
       );
-      // Return partial result (zeros) instead of throwing
+      // Permissions or unsupported fields do not establish measured zeros.
       return {
         postId,
-        likes: 0,
-        comments: 0,
-        shares: 0,
+        likes: null,
+        comments: null,
+        shares: null,
         fetchedAt: new Date().toISOString(),
         partial: true,
       };
     }
 
-    // New: If permissions are missing (#10) or any other non-critical graph error (#100), return 0s instead of throwing
+    // Preserve unavailable metrics for permission or unsupported-field responses.
     // This allows the poller to continue updating other metrics (or successfully recording the fetch attempt)
     if (errorText.includes("(#10)") || errorText.includes("(#100)")) {
       console.warn(`[Facebook] Soft fail for post ${postId}: ${errorText.substring(0, 100)}...`);
       return {
         postId,
-        likes: 0,
-        comments: 0,
-        shares: 0,
+        likes: null,
+        comments: null,
+        shares: null,
         fetchedAt: new Date().toISOString(),
         partial: true,
       };

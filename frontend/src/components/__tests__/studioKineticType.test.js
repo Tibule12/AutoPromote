@@ -9,6 +9,10 @@ const build = (changes = {}) => { let id = 0; return buildStudioKineticType({ so
   compounds: [], order: [source.id], width: 1280, height: 720, measure: value => value.length * 20,
   createId: prefix => `${prefix}-${++id}`, ...changes }); };
 
+test('separating cannot silently copy an enabled single-title animator into every fragment', () => {
+  expect(() => build({ source: { ...source, textAnimator: { version: 1 } } })).toThrow('Remove Text choreography');
+});
+
 test('words become ordinary grouped titles and keys; source graph is immutable and unrelated keys survive', () => {
   const foreign = { id: 'keep', targetId: 'other', property: 'x', time: 0, value: 20 };
   const result = build({ keyframes: [foreign] });

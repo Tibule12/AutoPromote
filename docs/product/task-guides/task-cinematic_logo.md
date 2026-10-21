@@ -1,6 +1,6 @@
 # Create a cinematic logo reveal
 
-Development documentation • product 1.2.0 • knowledge 1.0.30 • 2026-10-17
+Development documentation • product 1.2.0 • knowledge 1.0.43 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -17,10 +17,13 @@ Use owned branding and supported authored scene movement; no public-quality logo
 1. Import the owned logo and select a supported draft/preset.
    Feature: `creative.logo_brand`.
 
-2. Author ordinary layers or a bounded 3D scene; review unsupported final fields.
+2. For authored vector pieces, add vector artwork in Graphics and shape its points/tangents. This does not automatically trace a supplied PNG or wordmark. Animate the resulting layer in Motion.
+   Feature: `studio.vector_artwork`. Controls: [studio.vector.add](../control-reference/index.md#studio-vector-add), [studio.vector.point](../control-reference/index.md#studio-vector-point), [studio.vector.tangent](../control-reference/index.md#studio-vector-tangent), [studio.vector.split](../control-reference/index.md#studio-vector-split), [studio.vector.point_kind](../control-reference/index.md#studio-vector-point_kind), [studio.vector.fill](../control-reference/index.md#studio-vector-fill), [studio.vector.stroke](../control-reference/index.md#studio-vector-stroke), [studio.vector.closed](../control-reference/index.md#studio-vector-closed).
+
+3. Author ordinary layers or a bounded 3D scene; review unsupported final fields.
    Feature: `studio.three_d`. Controls: [studio.three_d.material](../control-reference/index.md#studio-three_d-material), [studio.three_d.focallength](../control-reference/index.md#studio-three_d-focallength).
 
-3. Place deliberate sound cues and review the actual final movie.
+4. Place deliberate sound cues and review the actual final movie.
    Feature: `studio.sfx`.
 
 ## Feature readiness
@@ -29,6 +32,7 @@ Use owned branding and supported authored scene movement; no public-quality logo
 - creative.logo_brand — **PARTIAL**: Draft template slots accept owned branding and a reviewed reveal. Rejected earlier logo films remain rejected and are not approved public examples.
 - studio.three_d — **PARTIAL**: Authors bounded 3D scenes and renders them through the existing 3D worker path. Supported transforms are approximate across browser and final render, and several displayed fields are disabled for final output.
 - studio.sfx — **PARTIAL**: Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.
+- studio.vector_artwork — **PARTIAL**: Author editable cubic artwork with single or compound contours, even-odd counters, fill/gradient and stroke; animate it with normal layer keys.
 
 ## Result and limitations
 

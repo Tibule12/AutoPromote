@@ -12,7 +12,7 @@ describe("Footer", () => {
     );
 
     // Check for column headers
-    expect(screen.getByText(/Product/i)).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Footer product" })).toBeInTheDocument();
     expect(screen.getByText(/Resources/i)).toBeInTheDocument();
     expect(screen.getByText(/Company/i)).toBeInTheDocument();
     expect(screen.getByText(/Legal/i)).toBeInTheDocument();
@@ -22,6 +22,12 @@ describe("Footer", () => {
     expect(screen.getByText(/Privacy Policy/i)).toBeInTheDocument();
     expect(screen.getByText(/Documentation/i)).toBeInTheDocument();
     expect(screen.getByText(/About Us/i)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Community" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Status" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(
+      "href",
+      "/privacy"
+    );
 
     // Check for newsletter
     expect(screen.getByText(/Subscribe to our newsletter/i)).toBeInTheDocument();

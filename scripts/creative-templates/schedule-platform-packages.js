@@ -16,13 +16,17 @@ async function main(){
  assert(!post.queueVerified,'Already verified; do not duplicate');
  if(reconcile)assert(post.contentId&&post.status==='UPLOAD_ACKNOWLEDGED_QUEUE_UNVERIFIED','Reconcile only an existing acknowledged content record');
  else assert(!['SUBMITTING','SUBMISSION_UNCERTAIN','UPLOAD_ACKNOWLEDGED_QUEUE_UNVERIFIED'].includes(post.status),'Reconcile the existing acknowledgement before retrying');
- const browser=await chromium.launch({channel:'chromium',headless:true,args:['--mute-audio','--host-resolver-rules=MAP localhost 127.0.0.1']});
+ const browser=await chromium.launch({channel:'chromium',headless:true,args:['--mute-audio',`--host-resolver-rules=MAP localhost ${process.env.STUDIO_QA_LOOPBACK || '127.0.0.1'}`,...(process.env.STUDIO_QA_FORCE_HTTP1==='1'?['--no-proxy-server','--disable-quic','--disable-http2']:[])]});
  fs.mkdirSync(path.join(dir,'proof'),{recursive:true});
  const context=await browser.newContext({storageState:authState,timezoneId:book.timezone,viewport:{width:1800,height:1200},acceptDownloads:true});
  const page=await context.newPage();page.setDefaultTimeout(60000);const rows=new Map(),mutations=[];let redditName;
  const persist=()=>fs.writeFileSync(file,JSON.stringify(book,null,2)+'\n');
  page.on('response',async r=>{
   const url=new URL(r.url());if(url.pathname==='/api/content/my-promotion-schedules'&&r.ok()){for(const s of (await r.json()).schedules||[])rows.set(s.id,s);}
+  if(url.pathname==='/api/content/upload/readiness'&&r.request().method()==='POST'){
+   const readiness=await r.json().catch(()=>({}));
+   fs.writeFileSync(path.join(dir,'proof',`${post.postId}-native-preflight.private.json`),JSON.stringify({observedAt:new Date().toISOString(),nativePublisherResponse:true,httpStatus:r.status(),beforeNewContentUpload:true,data:readiness},null,2),{mode:0o600});
+  }
   if(url.pathname==='/api/reddit/profile'&&r.ok()){const d=await r.json();if(d.connected)redditName=d.name;}
   if(r.request().method()==='POST'&&url.pathname==='/api/content/upload'){
    const d=await r.json().catch(()=>({}));if(d.content?.id){post.contentId=d.content.id;post.status='UPLOAD_ACKNOWLEDGED_QUEUE_UNVERIFIED';post.uploadAcknowledgedAt=new Date().toISOString();persist();}

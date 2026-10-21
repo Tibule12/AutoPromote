@@ -6,6 +6,34 @@ Only numeric data is interpolated into FFmpeg expressions.
 import math
 import re
 
+SPATIAL_CURVE_STEPS = 128
+
+
+def validate_spatial_curve(key):
+    if "spatialCurve" not in key:
+        return
+    controls = key["spatialCurve"]
+    if (key.get("property") not in ("x", "y") or not isinstance(controls, (list, tuple)) or len(controls) != 2
+            or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or abs(v) > 200 for v in controls)):
+        raise ValueError("Spatial handles need X/Y offsets between -200 and 200")
+
+
+def automation_segment_value(first, last, progress, key):
+    if "spatialCurve" not in key:
+        return first + (last - first) * easing_value(progress, key.get("easing", "linear"), key.get("curve"))
+    validate_spatial_curve(key)
+    if key.get("easing") == "hold":
+        return first if progress < 1 else last
+    def sample(p):
+        u = max(0, min(1, easing_value(p, key.get("easing", "linear"), key.get("curve"))))
+        v = 1 - u
+        return (v**3 * first + 3*v*v*u*(first + key["spatialCurve"][0])
+                + 3*v*u*u*(last + key["spatialCurve"][1]) + u**3*last)
+    at = max(0, min(1, progress)) * SPATIAL_CURVE_STEPS
+    index = min(SPATIAL_CURVE_STEPS - 1, int(at))
+    a, b = sample(index / SPATIAL_CURVE_STEPS), sample((index + 1) / SPATIAL_CURVE_STEPS)
+    return a + (b-a)*(at-index)
+
 
 def finite(value, default=0.0):
     try:
@@ -46,6 +74,7 @@ def easing_value(progress, easing, curve=None):
 def automation_expression(keys, default=1.0):
     ordered = {}
     for key in keys or []:
+        validate_spatial_curve(key)
         time = finite(key.get("time"), -1)
         if time >= 0:
             ordered[time] = {**key, "time": time, "value": finite(key.get("value"), default)}
@@ -55,6 +84,7 @@ def automation_expression(keys, default=1.0):
     expression = f"{points[-1]['value']:.8f}"
     for left, right in reversed(list(zip(points, points[1:]))):
         start, end = left["time"], right["time"]
+        span = end-start
         p = f"((t-{start:.8f})/{end-start:.8f})"
         easing = right.get("easing", "linear")
         progress = {"linear": p, "hold": "0", "ease_in": f"pow({p},3)",
@@ -70,6 +100,26 @@ def automation_expression(keys, default=1.0):
                 segment = f"({va:.8f}+({vb-va:.8f})*({p}-{a:.8f})*32)"
                 progress = f"if(lt({p},{b:.8f}),{segment},{progress})"
         value = f"({left['value']:.8f}+({right['value']-left['value']:.8f})*({progress}))"
+        if "spatialCurve" in right and easing != "hold":
+            pieces = []
+            for index in range(SPATIAL_CURVE_STEPS):
+                a, b = index / SPATIAL_CURVE_STEPS, (index + 1) / SPATIAL_CURVE_STEPS
+                va, vb = (automation_segment_value(left['value'], right['value'], v, right) for v in (a, b))
+                # Express each line on the segment's source clock directly.
+                # Repeating a normalized-time formula in every leaf needlessly
+                # exhausts the OS argument limit after a few curved intervals.
+                slope = (vb-va)*SPATIAL_CURVE_STEPS/span
+                intercept = va-slope*(start+a*span)
+                pieces.append(f"({intercept:.8f}+({slope:.8f})*t)")
+            # FFmpeg's expression parser has a bounded recursion depth. A
+            # balanced selection keeps 128 precision samples seven levels deep.
+            def branch(low, high):
+                if high-low == 1:
+                    return pieces[low]
+                middle = (low+high)//2
+                boundary = start+span*middle/SPATIAL_CURVE_STEPS
+                return f"if(lt(t,{boundary:.8f}),{branch(low,middle)},{branch(middle,high)})"
+            value = branch(0, SPATIAL_CURVE_STEPS)
         expression = f"if(lt(t,{end:.8f}),{value},{expression})"
     return f"if(lt(t,{points[0]['time']:.8f}),{points[0]['value']:.8f},{expression})"
 
@@ -121,6 +171,9 @@ def _curve_bounds(keys, base):
     ordered = [points[t] for t in sorted(points)]
     values = [base, *[key["value"] for key in ordered]]
     for left, right in zip(ordered, ordered[1:]):
+        if "spatialCurve" in right:
+            validate_spatial_curve(right)
+            values.extend((left['value'] + right['spatialCurve'][0], right['value'] + right['spatialCurve'][1]))
         if right.get("easing") == "bezier":
             # automation_expression uses these same piecewise-linear samples.
             values.extend(left["value"] + (right["value"] - left["value"]) *

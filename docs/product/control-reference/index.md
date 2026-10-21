@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.30 • 2026-10-17
+Development documentation • product 1.2.0 • knowledge 1.0.43 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -157,6 +157,52 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.logo_motion.piece_construction | Construct words from pieces | boolean | source-dependent … source-dependent | boolean | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 | studio.logo_motion.piece_columns | Logo wordmark slices | number | 2 … 16 | slices | 11 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 | studio.logo_motion.piece_style | Logo piece choreography | string | spring, diamond | choreography | "spring" | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.keyframe.spatial_curve | Curve path / Straighten path | boolean | source-dependent … source-dependent | composition percent | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.spatial_handle | Spatial path handles | array | -200 … 200 | composition percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.add | Add vector artwork | object | source-dependent … source-dependent | layer | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.point | Vector points | array | 0 … 100 | layer percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.tangent | Vector tangents | array | -200 … 200 | layer percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.split | Split after point | array | 2 … 64 | points | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.point_kind | Corner / Smooth point | array | source-dependent … source-dependent | layer percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.fill | Vector fill and gradient | object | source-dependent … source-dependent | paint | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.stroke | Vector stroke | object | 0 … 20 | layer percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.closed | Close vector path | boolean | source-dependent … source-dependent | boolean | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.stroke_start | Stroke start | number | 0 … 100 | path distance percent | 0 | SUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.stroke_end | Stroke end | number | 0 … 100 | path distance percent | 100 | SUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.stroke_offset | Stroke offset | number | -1000 … 1000 | path distance percent | 0 | SUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.enable | Animate this title | object | source-dependent … source-dependent | local unit | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.unit | Animate text by | enum | character, word | local unit | "character" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.order | Text animation order | enum | forward, reverse, center_out, edges_in | local unit | "forward" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.stagger | Stagger | number | 0 … 95 | percent | 65 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_x | Letter travel X (em) | number | -4 … 4 | em | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_y | Letter travel Y (em) | number | -4 … 4 | em | 1.4 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_scale | Starting scale | number | 0 … 2.5 | local unit | 0.35 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_rotation | Starting rotation | number | -360 … 360 | degrees | -35 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_opacity | Starting opacity | number | 0 … 1 | local unit | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.spread | Starting spread | number | -1 … 1 | local unit | 0.3 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.range_start | Range start (%) | number | 0 … 100 | percent | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.range_end | Range end (%) | number | 0 … 100 | percent | 100 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.settle | Text settling curve | enum | linear, ease_out, ease_in_out, back_out | local unit | "back_out" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.progress | Text progress | number | 0 … 100 | percent | 100 | SUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.rebuild | Rebuild entrance keys | number | 0 … 100 | percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.remove | Remove text animator | object | source-dependent … source-dependent | local unit | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.name | Brand name | string | source-dependent … source-dependent | design units | "AutoPromote" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.family | Logo symbol family | enum | flow, orbit, facet | design units | "flow" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.layout | Logo layout | enum | horizontal, stacked, symbol | design units | "horizontal" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.weight | Logo lettering | enum | 600, 900 | design units | 900 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.tracking | Logo letter spacing | number | -2 … 12 | design units | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.symbol_size | Logo symbol size | number | 0.6 … 1.4 | design units | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.colours | Logo colours | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.gradient | Gradient symbol | boolean | source-dependent … source-dependent | design units | true | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.assemble | Assemble logo pieces | boolean | source-dependent … source-dependent | design units | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.build | Add logo to timeline | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.variant | Export logo variant | enum | colour, light, dark | design units | "colour" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.svg | Download logo SVG | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.png | Download logo PNG | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.contour | Vector contour | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.canvas | Start a logo design | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| publishing.analytics.sync_latest | Sync latest platform statistics | array | 1 … 6 | none | [] | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
+| publishing.analytics.release | Published release | string | source-dependent … source-dependent | none | "" | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -1682,13 +1728,13 @@ Applies to: ordinary layers, graphic groups. Requires: studio.keyframes.
 
 ID: `studio.keyframe.start_velocity` • **PARTIAL**
 
-Sets signed endpoint change per programme second for the selected incoming key interval.
+Sets signed endpoint change per programme second for the selected incoming key interval. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.
 
 Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
 
 - Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
 - Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
-- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified.
 
 <a id="studio-keyframe-end_velocity"></a>
 
@@ -1696,13 +1742,13 @@ Applies to: ordinary layer properties, graphic-group properties. Requires: studi
 
 ID: `studio.keyframe.end_velocity` • **PARTIAL**
 
-Sets signed endpoint change per programme second for the selected incoming key interval.
+Sets signed endpoint change per programme second for the selected incoming key interval. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.
 
 Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
 
 - Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
 - Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
-- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified.
 
 <a id="studio-keyframe-start_influence"></a>
 
@@ -1710,13 +1756,13 @@ Applies to: ordinary layer properties, graphic-group properties. Requires: studi
 
 ID: `studio.keyframe.start_influence` • **PARTIAL**
 
-Controls the endpoint time influence while preserving its signed velocity.
+Controls the endpoint time influence while preserving its signed velocity. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.
 
 Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
 
 - Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
 - Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
-- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified.
 
 <a id="studio-keyframe-end_influence"></a>
 
@@ -1724,13 +1770,13 @@ Applies to: ordinary layer properties, graphic-group properties. Requires: studi
 
 ID: `studio.keyframe.end_influence` • **PARTIAL**
 
-Controls the endpoint time influence while preserving its signed velocity.
+Controls the endpoint time influence while preserving its signed velocity. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.
 
 Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
 
 - Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
 - Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
-- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified.
 
 <a id="studio-title-kinetic_unit"></a>
 
@@ -2023,3 +2069,607 @@ Chooses a symbol-first spring assembly or a word-first triangular cascade, autho
 Applies to: new logo-motion composition. Requires: studio.logo_motion.
 
 - Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-keyframe-spatial_curve"></a>
+
+## Curve path / Straighten path
+
+ID: `studio.keyframe.spatial_curve` • **PARTIAL**
+
+Enables or removes spatial handles on an interval with paired neighboring X/Y position keys. Endpoints are retained; X/Y travel timing is coordinated.
+
+Applies to: ordinary image position keys, ordinary title position keys, source position keys. Requires: studio.keyframes, studio.easing.
+
+- Requires paired neighboring X/Y position keys. Bounds apply to handle offsets from the corresponding endpoint.
+- Travel timing is separate from screen-distance speed. Changes to individual keys can change neighboring intervals.
+- Native image/history/reopen/export checks are bounded; broad media, retiming, animated parents and full picture/sound remain unqualified.
+
+<a id="studio-keyframe-spatial_handle"></a>
+
+## Spatial path handles
+
+ID: `studio.keyframe.spatial_handle` • **PARTIAL**
+
+Shapes the route by dragging or arrow-nudging an endpoint-relative handle. Preview follows the temporary drag; release commits once and Escape cancels.
+
+Applies to: ordinary image position keys, ordinary title position keys, source position keys. Requires: studio.keyframes, studio.easing.
+
+- Requires paired neighboring X/Y position keys. Bounds apply to handle offsets from the corresponding endpoint.
+- Travel timing is separate from screen-distance speed. Changes to individual keys can change neighboring intervals.
+- Native image/history/reopen/export checks are bounded; broad media, retiming, animated parents and full picture/sound remain unqualified.
+
+<a id="studio-vector-add"></a>
+
+## Add vector artwork
+
+ID: `studio.vector.add` • **PARTIAL**
+
+Creates an ordinary timed artwork layer with editable cubic geometry.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-point"></a>
+
+## Vector points
+
+ID: `studio.vector.point` • **PARTIAL**
+
+Move an anchor while its relative tangent offsets follow it; remove a selected point within the contour limits.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-tangent"></a>
+
+## Vector tangents
+
+ID: `studio.vector.tangent` • **PARTIAL**
+
+Drag or nudge incoming and outgoing handles relative to the selected anchor. Release commits once; Escape cancels the gesture.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-split"></a>
+
+## Split after point
+
+ID: `studio.vector.split` • **PARTIAL**
+
+Insert a midpoint by exact De Casteljau subdivision, retaining the original cubic geometry.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-point_kind"></a>
+
+## Corner / Smooth point
+
+ID: `studio.vector.point_kind` • **PARTIAL**
+
+Corner collapses both handles. Smooth initializes collinear tangents from neighboring points; later handles remain independently editable.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-fill"></a>
+
+## Vector fill and gradient
+
+ID: `studio.vector.fill` • **PARTIAL**
+
+Choose no fill, solid or a linear gradient, two colors and diagonal, horizontal or vertical direction.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-stroke"></a>
+
+## Vector stroke
+
+ID: `studio.vector.stroke` • **PARTIAL**
+
+Choose outline width in the artwork coordinate box and a six-digit color. An unfilled path requires visible stroke.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-closed"></a>
+
+## Close vector path
+
+ID: `studio.vector.closed` • **PARTIAL**
+
+Join the last anchor back to the first. Closing requires at least three points.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-stroke_start"></a>
+
+## Stroke start
+
+ID: `studio.vector.stroke_start` • **PARTIAL**
+
+Choose the beginning of the visible outline by travelled path distance. Add or remove its key at the playhead; animate through the ordinary timeline and curve editor.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires editable vector artwork and an unlocked image-layer track. Set a nonzero stroke width in Graphics.
+- Values use the programme clock and existing key easing; sampled cubic distance is an approximation. Start greater than or equal to end hides the stroke and preserves fill. Offset shifts the interval: closed contours wrap and open contours clip.
+- Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time.
+
+<a id="studio-vector-stroke_end"></a>
+
+## Stroke end
+
+ID: `studio.vector.stroke_end` • **PARTIAL**
+
+Choose the end of the visible outline by travelled path distance. Add or remove its key at the playhead; animate through the ordinary timeline and curve editor.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires editable vector artwork and an unlocked image-layer track. Set a nonzero stroke width in Graphics.
+- Values use the programme clock and existing key easing; sampled cubic distance is an approximation. Start greater than or equal to end hides the stroke and preserves fill. Offset shifts the interval: closed contours wrap and open contours clip.
+- Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time.
+
+<a id="studio-vector-stroke_offset"></a>
+
+## Stroke offset
+
+ID: `studio.vector.stroke_offset` • **PARTIAL**
+
+Move the selected stroke interval by path distance. Animate positive or negative cumulative values for forward/reverse laps on closed contours; open contours clip at their real endpoints.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires editable vector artwork, a nonzero stroke width and an unlocked image-layer track. Use a partial start/end interval to see a closed outline move.
+- Closed contours wrap continuously across the original seam; open contours clip rather than connecting their endpoints. Equal/crossed start/end ranges remain empty, and fill stays authored.
+- Distance uses 128 samples per cubic; full predictive picture/sound and broad effect/parent/retiming combinations remain separately qualified.
+- Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time.
+
+<a id="studio-text_animator-enable"></a>
+
+## Animate this title
+
+ID: `studio.text_animator.enable` • **PARTIAL**
+
+Create one native text animator and two ordinary entrance progress keys.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-unit"></a>
+
+## Animate text by
+
+ID: `studio.text_animator.unit` • **PARTIAL**
+
+Choose independent letters or words; spaces retain their advance without consuming a slot.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-order"></a>
+
+## Text animation order
+
+ID: `studio.text_animator.order` • **PARTIAL**
+
+Choose the deterministic order of selected units.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-stagger"></a>
+
+## Stagger
+
+ID: `studio.text_animator.stagger` • **PARTIAL**
+
+Share of the progress window spread between the first and last selected unit.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_x"></a>
+
+## Letter travel X (em)
+
+ID: `studio.text_animator.from_x` • **PARTIAL**
+
+Horizontal travel from the starting pose, in 36px logical em units.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_y"></a>
+
+## Letter travel Y (em)
+
+ID: `studio.text_animator.from_y` • **PARTIAL**
+
+Vertical travel from the starting pose, in 36px logical em units.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_scale"></a>
+
+## Starting scale
+
+ID: `studio.text_animator.from_scale` • **PARTIAL**
+
+Starting local unit scale; selected units settle to scale one.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_rotation"></a>
+
+## Starting rotation
+
+ID: `studio.text_animator.from_rotation` • **PARTIAL**
+
+Starting local unit rotation; selected units settle upright.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_opacity"></a>
+
+## Starting opacity
+
+ID: `studio.text_animator.from_opacity` • **PARTIAL**
+
+Starting unit opacity, interpolated by linear local progress.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-spread"></a>
+
+## Starting spread
+
+ID: `studio.text_animator.spread` • **PARTIAL**
+
+Spread units around each line’s center by a share of their center distance.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-range_start"></a>
+
+## Range start (%)
+
+ID: `studio.text_animator.range_start` • **PARTIAL**
+
+Beginning of the selector, measured at ordered source-unit centers.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-range_end"></a>
+
+## Range end (%)
+
+ID: `studio.text_animator.range_end` • **PARTIAL**
+
+End of the selector; equal/crossed ranges leave all units settled.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-settle"></a>
+
+## Text settling curve
+
+ID: `studio.text_animator.settle` • **PARTIAL**
+
+Ease or overshoot unit travel, scale, spread and rotation.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-progress"></a>
+
+## Text progress
+
+ID: `studio.text_animator.progress` • **PARTIAL**
+
+Normal motion property: zero shows the starting arrangement and 100 settles it. Keys may reverse or hold.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-rebuild"></a>
+
+## Rebuild entrance keys
+
+ID: `studio.text_animator.rebuild` • **PARTIAL**
+
+Replace only this title’s progress keys over at most its first 1.8 seconds.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-remove"></a>
+
+## Remove text animator
+
+ID: `studio.text_animator.remove` • **PARTIAL**
+
+Remove local text choreography and only its progress keys while retaining copy, styling and other layer motion. Undo restores it.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-logo_design-name"></a>
+
+## Brand name
+
+ID: `studio.logo_design.name` • **PARTIAL**
+
+Enter the lettering to convert into ordinary editable glyph contours.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-family"></a>
+
+## Logo symbol family
+
+ID: `studio.logo_design.family` • **PARTIAL**
+
+Choose a ribbon ascent, interlocking orbit or geometric facet symbol.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-layout"></a>
+
+## Logo layout
+
+ID: `studio.logo_design.layout` • **PARTIAL**
+
+Arrange the symbol and lettering or create a symbol-only mark.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-weight"></a>
+
+## Logo lettering
+
+ID: `studio.logo_design.weight` • **PARTIAL**
+
+Use the exact bundled Inter SemiBold or Black glyph contours.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-tracking"></a>
+
+## Logo letter spacing
+
+ID: `studio.logo_design.tracking` • **PARTIAL**
+
+Adjust advance spacing before ordinary vector layers are created.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-symbol_size"></a>
+
+## Logo symbol size
+
+ID: `studio.logo_design.symbol_size` • **PARTIAL**
+
+Scale the symbol relative to the wordmark.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-colours"></a>
+
+## Logo colours
+
+ID: `studio.logo_design.colours` • **PARTIAL**
+
+Choose six-digit primary, accent and lettering colours.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-gradient"></a>
+
+## Gradient symbol
+
+ID: `studio.logo_design.gradient` • **PARTIAL**
+
+Use linear gradients or solid symbol fills.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-assemble"></a>
+
+## Assemble logo pieces
+
+ID: `studio.logo_design.assemble` • **PARTIAL**
+
+Create normal staggered opacity, scale, rotation and Y keys for symbol pieces and outlined letters.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-build"></a>
+
+## Add logo to timeline
+
+ID: `studio.logo_design.build` • **PARTIAL**
+
+Add normal vector layers and one graphic group as a single history operation.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-variant"></a>
+
+## Export logo variant
+
+ID: `studio.logo_design.variant` • **PARTIAL**
+
+Preserve colours or export white/ink without changing the project geometry.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-svg"></a>
+
+## Download logo SVG
+
+ID: `studio.logo_design.svg` • **PARTIAL**
+
+Download a transparent portable SVG with real paths and no font or image dependency.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-png"></a>
+
+## Download logo PNG
+
+ID: `studio.logo_design.png` • **PARTIAL**
+
+Download a transparent raster master generated from the same SVG geometry.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-contour"></a>
+
+## Vector contour
+
+ID: `studio.logo_design.contour` • **PARTIAL**
+
+Select an outer contour or counter for ordinary point/tangent editing. This selection itself does not change project geometry.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-canvas"></a>
+
+## Start a logo design
+
+ID: `studio.logo_design.canvas` • **PARTIAL**
+
+Prepare a bundled blank eight-second canvas through the existing Studio entitlement and owned-source upload path.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="publishing-analytics-sync_latest"></a>
+
+## Sync latest platform statistics
+
+ID: `publishing.analytics.sync_latest` • **PARTIAL**
+
+Refreshes up to six newest owned published posts in the selected release or account scope, one per destination. Selection uses publication time independently of the performance-ranked display.
+
+Applies to: video. Requires: publishing.analytics, system.account.
+
+- Five-minute per-post cooldown; only owned successful non-simulated posts qualify.
+- Missing permissions or unsupported platform metrics remain unavailable. The action does not publish content or promise reach.
+
+<a id="publishing-analytics-release"></a>
+
+## Published release
+
+ID: `publishing.analytics.release` • **PARTIAL**
+
+Limits collected statistics and refresh targets to one owned published release within the selected date range.
+
+Applies to: video. Requires: publishing.analytics, system.account.
+
+- Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.
+- Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach.

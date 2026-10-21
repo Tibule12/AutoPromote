@@ -3,9 +3,13 @@ import math
 import re
 
 try:
-    from .studio_motion import automation_expression, _curve_bounds, output_to_programme_expression
+    from .studio_text_animator import validate_text_animation_layer
+    from .studio_vector_shape import validate_vector_shape, validate_vector_trim
+    from .studio_motion import automation_expression, _curve_bounds, output_to_programme_expression, validate_spatial_curve
 except ImportError:
-    from studio_motion import automation_expression, _curve_bounds, output_to_programme_expression
+    from studio_text_animator import validate_text_animation_layer
+    from studio_vector_shape import validate_vector_shape, validate_vector_trim
+    from studio_motion import automation_expression, _curve_bounds, output_to_programme_expression, validate_spatial_curve
 try:
     from .studio_layer_motion import layer_clip_mask
 except ImportError:
@@ -47,8 +51,25 @@ def graphic_group_mask(group, width, height):
     return layer_clip_mask((width, height), mask, feather_scale=height / 720)
 
 
-def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids):
+def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids, *, source_overlays=None):
     """An explicit canonical stack must name every graphic exactly once."""
+    for layer in (plan or {}).get('layers') or []:
+        validate_text_animation_layer(layer)
+        if layer.get("text_animator") is not None and source_overlays is not None:
+            try:
+                from .studio_text_animator import text_layout
+            except ImportError:
+                from studio_text_animator import text_layout
+            sources = [s if isinstance(s, dict) else s.model_dump() for s in source_overlays]
+            source = next((s for s in sources if str(s.get("id")) == str(layer.get("id"))), None)
+            if not source or source.get("type") != "text" or source.get("bRollMode") or source.get("b_roll_mode") or source.get("isCaption"):
+                raise ValueError("Text animators need an ordinary title source")
+            text_layout(source, 1280, layer["text_animator"])
+        validate_vector_trim(layer)
+        if 'vector_shape' in layer:
+            if layer.get('type') != 'image':
+                raise ValueError('Vector artwork needs an image layer')
+            validate_vector_shape(layer['vector_shape'])
     if "order" not in (plan or {}):
         return None
     order = plan["order"]
@@ -115,8 +136,9 @@ def validate_graphic_groups(plan, order):
         if not isinstance(keys, list) or len(keys) > 256:
             raise ValueError("A graphic group supports at most 256 transform keys")
         for key in keys:
-            if not isinstance(key, dict) or set(key) - {"id", "property", "time", "value", "easing", "curve"}:
+            if not isinstance(key, dict) or set(key) - {"id", "property", "time", "value", "easing", "curve", "spatialCurve"}:
                 raise ValueError("Unsupported group transform key fields")
+            validate_spatial_curve(key)
             identity_key, property_name, time, value = key.get("id"), key.get("property"), key.get("time"), key.get("value")
             if (not isinstance(identity_key, str) or not identity_key or identity_key in key_ids or property_name not in GROUP_BOUNDS
                     or isinstance(time, bool) or not isinstance(time, (int, float)) or not math.isfinite(time) or time < 0

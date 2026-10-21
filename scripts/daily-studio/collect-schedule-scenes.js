@@ -10,7 +10,7 @@ const folder = path.resolve(root, process.env.STUDIO_SCHEDULE_SCENES_DIR ||
   "reports/daily-studio/2026-10-17/schedule-tour/creative-v2/assets");
 fs.mkdirSync(folder, { recursive: true });
 const book = JSON.parse(
-  fs.readFileSync(path.join(root, "reports/daily-studio/2026-10-17/platform-packages.json"))
+  fs.readFileSync(path.join(root, process.env.STUDIO_SCHEDULE_PACKAGES || "reports/daily-studio/2026-10-17/platform-packages.json"))
 );
 const labels = {
   youtube: "YouTube",
@@ -25,7 +25,7 @@ async function main() {
   const browser = await chromium.launch({
     channel: "chromium",
     headless: true,
-    args: ["--mute-audio", "--host-resolver-rules=MAP localhost 127.0.0.1"],
+    args: ["--mute-audio", `--host-resolver-rules=MAP localhost ${process.env.STUDIO_QA_LOOPBACK || '127.0.0.1'}`],
   });
   const context = await browser.newContext({
     storageState: path.join(root, require("../../config/daily-studio.json").authState),
@@ -105,6 +105,7 @@ async function main() {
           b = e.closest(".schedule-calendar").getBoundingClientRect();
         return { x: a.x - b.x, y: a.y - b.y, width: a.width, height: a.height };
       });
+      await card.evaluate(e => e.scrollIntoView({ block: "center", inline: "nearest" }));
       await card.screenshot({ path: path.join(folder, file) });
       all.push({
         index: i,
@@ -116,16 +117,17 @@ async function main() {
     }
     const scenes = [];
     const master = book.posts.find(
-      p => p.storyId === "sound-alignment" && p.platform === "youtube"
+      p => p.storyId === (process.env.STUDIO_SCHEDULE_STORY || "sound-alignment") && p.platform === "youtube"
     ).title;
     for (const platform of ["linkedin", "instagram", "facebook", "tiktok", "youtube", "reddit"]) {
-      const post = book.posts.find(p => p.storyId === "sound-alignment" && p.platform === platform),
+      const post = book.posts.find(p => p.storyId === (process.env.STUDIO_SCHEDULE_STORY || "sound-alignment") && p.platform === platform),
         row = rows.get(post.schedules[0].id);
       assert(row, "Actual schedule missing");
       const card = cards
         .filter({ hasText: master })
         .filter({ has: page.locator(`.platform-${platform}`) })
         .first();
+      await card.evaluate(e => e.scrollIntoView({ block: "center", inline: "nearest" }));
       await card.screenshot({ path: path.join(folder, `${platform}-card.png`) });
       const calendarText = await card.innerText();
       await card.click();
@@ -175,7 +177,7 @@ async function main() {
       realContentId: new Set(scenes.map(s => s.contentId)).size === 1 ? scenes[0].contentId : null,
       wholeCalendar: "whole-calendar.png",
       reschedule: "real-reschedule-dialog.png",
-      selectedActualScheduledVideo: book.posts.find(p => p.storyId === "sound-alignment").media,
+      selectedActualScheduledVideo: book.posts.find(p => p.storyId === (process.env.STUDIO_SCHEDULE_STORY || "sound-alignment")).media,
     };
     assert(
       result.realContentId,

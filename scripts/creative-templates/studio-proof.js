@@ -101,6 +101,9 @@ async function apply(page, name) {
 }
 async function render(page, name) {
   const uploadBudget = Number(process.env.STUDIO_QA_UPLOAD_BUDGET_MS || 120000);
+  const renderBudget = Number(process.env.STUDIO_QA_RENDER_OBSERVATION_BUDGET_MS || 720000);
+  assert(Number.isSafeInteger(renderBudget) && renderBudget >= 720000 && renderBudget <= 1800000,
+    'Use a bounded 12–30 minute CPU observation budget; a deadline never authorizes resubmission');
   assert(Number.isSafeInteger(uploadBudget) && uploadBudget >= 120000 && uploadBudget <= 600000, 'Use a bounded 2–10 minute native upload observation budget');
   require('./proof-storage').requireProofSpace(folder);
   const pause = page.getByRole('button', { name: 'Pause comparison', exact: true });
@@ -140,7 +143,7 @@ async function render(page, name) {
   let renderTimeout, result;
   try {
     result = await Promise.race([done, new Promise((_, reject) => {
-      renderTimeout = setTimeout(() => reject(new Error('Render exceeded its 12-minute CPU budget')), 720000);
+      renderTimeout = setTimeout(() => reject(new Error(`Render exceeded its ${renderBudget / 60000}-minute CPU observation budget`)), renderBudget);
     })]);
   } catch (error) {
     // The observer deadline does not cancel the accepted worker job. Retain

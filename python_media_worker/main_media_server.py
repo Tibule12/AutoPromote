@@ -24,6 +24,12 @@ import urllib.request
 import urllib.parse
 import warnings
 import cv2  # OpenCV (Phase 1)
+try:
+    from .studio_render_scratch import studio_render_scratch_directory
+    from .studio_ffmpeg_limits import bounded_studio_ffmpeg_command
+except ImportError:
+    from studio_render_scratch import studio_render_scratch_directory
+    from studio_ffmpeg_limits import bounded_studio_ffmpeg_command
 import numpy as np
 import ffmpeg  # FFmpeg (Phase 1)
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
@@ -63,6 +69,7 @@ try:
         build_studio_timeline_mux_args,
         resolve_studio_audio_bitrate,
         build_studio_audio_delivery_filter,
+        resolve_studio_programme_duration,
         build_segment_transition_filters,
         build_speed_filter_complex,
         find_uncovered_caption_speech_ranges,
@@ -81,6 +88,7 @@ except ImportError:
         build_studio_timeline_mux_args,
         resolve_studio_audio_bitrate,
         build_studio_audio_delivery_filter,
+        resolve_studio_programme_duration,
         build_segment_transition_filters,
         build_speed_filter_complex,
         find_uncovered_caption_speech_ranges,
@@ -8718,6 +8726,17 @@ def reviewed_axis_expression(keyframes, axis, fallback=.5):
     return f"if(lt(t,{ordered[0][0]:.6f}),{ordered[0][1]:.8f},{branch(0, len(segments)-1)})"
 
 
+def studio_sequence_canvas_dimensions(width, height, reframe):
+    """Keep a wide Preserve frame sequence independent of its original upload."""
+    reframe = reframe or {}
+    if (reframe.get("enabled") and reframe.get("mode") == "center"
+            and reframe.get("aspect") == "16:9"):
+        # Normalizing landscape clips into an original portrait upload first
+        # bakes bars into every occurrence. A later wide fit cannot undo them.
+        return get_reframe_output_dimensions("16:9")
+    return width, height
+
+
 def build_studio_sequence_video_filters(normalize_filter, fps, source_framing=False):
     # Framing keys are evaluated on the delivery clock, after resetting a
     # trimmed source's first timestamp. Resampling an already-cropped 30fps
@@ -12573,6 +12592,7 @@ def health_check():
         "maxVideoSeconds": MEDIA_WORKER_MAX_VIDEO_SECONDS,
         "maxFileMb": MEDIA_WORKER_MAX_FILE_MB,
         "tmpDir": os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp")),
+        "studioRenderTmpDir": studio_render_scratch_directory(os.path.dirname(__file__)),
         "whisperReady": FasterWhisperModel is not None or whisper is not None,
     }
 
@@ -31629,7 +31649,7 @@ async def render_viral_clip(request: RenderViralRequest):
         explicit_layer_order = validate_layer_order(request.composition_plan,
             [str(overlay.id) for overlay in request.overlays],
             [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
-            [graphic["id"] for graphic in resolved_three_d])
+            [graphic["id"] for graphic in resolved_three_d], source_overlays=request.overlays)
         validate_graphic_groups(request.composition_plan, explicit_layer_order)
         subject_items = validate_resolved_subject_vfx(getattr(request, "subjectVfx", None))
         if subject_items and not request.timeline_segments:
@@ -31658,7 +31678,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     explicit_layer_order = validate_layer_order(request.composition_plan,
         [str(overlay.id) for overlay in request.overlays],
         [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
-        [graphic["id"] for graphic in request.threeDGraphics or []])
+        [graphic["id"] for graphic in request.threeDGraphics or []], source_overlays=request.overlays)
     validate_graphic_groups(request.composition_plan, explicit_layer_order)
     logger.info(f"Rendering viral clip for {request.video_url} with {len(request.overlays)} overlays (SmartCrop={request.smart_crop}, AutoCaptions={request.auto_captions})")
 
@@ -31735,7 +31755,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         ))
 
     job_id = provided_job_id or str(uuid.uuid4())
-    SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    SHARED_TMP_DIR = studio_render_scratch_directory(os.path.dirname(__file__))
     if not os.path.exists(SHARED_TMP_DIR): os.makedirs(SHARED_TMP_DIR)
 
     input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_input.mp4")
@@ -31833,6 +31853,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         else:
             normalized_segments = []
 
+        programme_duration = resolve_studio_programme_duration(
+            normalized_segments, request.start_time, request.end_time,
+            (request.editor_timeline or {}).get("programme_duration_ticks"),
+        )
+
         if normalized_segments:
             segment_paths = []
             segment_audio_paths = []
@@ -31848,6 +31873,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             timeline_canvas_height -= timeline_canvas_height % 2
             sequence_reframe = (request.finish_plan or {}).get("reframe") or {}
             sequence_framing_keys = sequence_reframe.get("keyframes") or []
+            timeline_canvas_width, timeline_canvas_height = studio_sequence_canvas_dimensions(
+                timeline_canvas_width, timeline_canvas_height, sequence_reframe)
             # Cover each raw source before concat. Padding unlike source
             # aspects first bakes black bars into an already-portrait master,
             # which a later whole-sequence crop cannot recover.
@@ -32579,9 +32606,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         # 2.75. Apply the Studio speed plan before captions and overlays so
         # transcription, caption timing, B-roll, and audio share one final clock.
-        pre_speed_duration = get_media_duration(working_path) or max(
-            0.0, float(request.end_time) - float(request.start_time)
-        )
+        # AAC padding and CFR rounding in intermediates cannot lengthen the
+        # user's programme or append an unrequested speed-plan tail.
+        pre_speed_duration = programme_duration
         speed_plan = normalize_speed_plan(
             pre_speed_duration,
             request.speed_segments,
@@ -33397,6 +33424,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 layer_has_motion = bool(
                     layer_plan
                     and (
+                        layer_plan.get("vector_shape") is not None
+                        or
                         layer_plan.get("motion_keyframes")
                         or (layer_effects.get("mask") or {}).get("enabled")
                         or float((layer_plan.get("base_transform") or {}).get("crop_x") or 0) > 0
@@ -33591,14 +33620,24 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             text_asset = os.path.join(SHARED_TMP_DIR, f"{job_id}_title_{idx}.png")
             text_motion = os.path.join(SHARED_TMP_DIR, f"{job_id}_title_{idx}.mov")
             overlay_temp_paths.extend([text_asset, text_motion])
-            geometry = render_title_asset(txt.model_dump(), text_asset, base_width, base_height)
             layer_plan = dict(composition_layer(request.composition_plan, txt.id) or {})
+            title_animator = None
+            if layer_plan.get("text_animator"):
+                try:
+                    from .studio_text_animator import AnimatedTitle
+                except ImportError:
+                    from studio_text_animator import AnimatedTitle
+                title_animator = AnimatedTitle(txt.model_dump(), base_width, base_height, layer_plan["text_animator"])
+                geometry = title_animator.geometry
+                title_animator.frame(100).save(text_asset)
+            else:
+                geometry = render_title_asset(txt.model_dump(), text_asset, base_width, base_height)
             layer_plan.update(anchor_x=geometry["anchorX"], anchor_y=geometry["anchorY"])
             layer_plan["clip_box"] = geometry["clipBox"]
             rendered_title = txt.model_copy(update={key: value for key, value in geometry.items() if key not in {"lines", "clipBox"}})
             receipt = await asyncio.to_thread(render_image_layer_motion, text_asset, text_motion,
                                              rendered_title, layer_plan, base_width, base_height,
-                                             rendered_timeline_duration, speed_plan, 30)
+                                             rendered_timeline_duration, speed_plan, 30, title_animator=title_animator)
             inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", text_motion])
             next_label = f"text_overlay_{idx}"
             filter_chain.append(f"[{current_v_label}][{input_idx}:v]overlay=0:0:eof_action=pass:format=auto[{next_label}];")
@@ -34129,6 +34168,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              cmd.extend(build_viral_export_encode_args(delivery_profile))
              cmd.extend(["-movflags", "+faststart", "-y", output_path])
         
+        cmd = bounded_studio_ffmpeg_command(cmd)
         report_progress(75, "Rendering final video")
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.30",
+  "knowledge_version": "1.0.43",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-17",
+  "updated_at": "2026-10-21",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -31,6 +31,7 @@
         "studio.timeline.at_playhead"
       ],
       "workflow": [
+        "Use a laptop or desktop with a screen at least 900 pixels wide and a precise pointer. Choose a tool in the left rail; its controls open in the inspector beside Preview. Scroll inside the inspector to reach its lower sections while keeping the preview and timeline visible.",
         "Use Composition layers to inspect each title, artwork or scene on its own row. Expand a layer’s keyframes to edit its existing transform properties. Bars show clip timing; opacity, occlusion and parent group gates determine the picture.",
         "Use At playhead to filter by current clip timing and all parent group gates. This display filter changes no project decisions. Use Sequence tracks for source footage and track mix controls.",
         "Move an ordinary animated layer using its bar or arrow keys. Its canonical transform keys move by the same bounded delta. Undo restores layer timing and keys together.",
@@ -50,12 +51,20 @@
         {
           "condition": "Feature unavailable or output stale",
           "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        },
+        {
+          "condition": "The timeline editor does not open on a small or touch-only screen",
+          "resolution": "Open the project on a laptop or desktop with at least 900 pixels of screen width, hover support and a precise pointer. The desktop editing notice is intentional."
         }
       ],
       "related_features": [],
       "templates_using_feature": [],
-      "aliases": [],
-      "updated_at": "2026-10-15",
+      "aliases": [
+        "Studio controls",
+        "inspector",
+        "editing controls"
+      ],
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {
@@ -339,7 +348,7 @@
       "name": "Motion / Transform Keyframes",
       "area": "Studio",
       "status": "FUNCTIONAL",
-      "summary": "Edit property keys and sampled motion paths directly over the picture, or shape value/velocity curves in the timeline. Manual edits, Director/template keys, saving and export use the same canonical animation data.",
+      "summary": "Edit property keys, spatial position handles and value/velocity graphs on the same editable project. Curve the route between paired positions while retaining ordinary history, saving and final compilation.",
       "purpose": "Create deliberate editable movement and retain the same keys across manual editing, Director proposals, saving and final compilation.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
@@ -378,19 +387,24 @@
         "studio.keyframe.start_velocity",
         "studio.keyframe.end_velocity",
         "studio.keyframe.start_influence",
-        "studio.keyframe.end_influence"
+        "studio.keyframe.end_influence",
+        "studio.keyframe.spatial_curve",
+        "studio.keyframe.spatial_handle"
       ],
       "workflow": [
+        "Open Motion → Transform keyframes and choose the Target layer. Read X, Y, Scale, Rotate and Opacity at the playhead. Scroll down for keyframes, value/easing fields and the separate Start/End velocity and influence controls.",
         "Show motion keyframes in the timeline and expand an ordinary visual layer or graphic group, including targets without animation keys.",
         "Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.",
         "Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.",
+        "At each playhead position, inspect X, Y, Scale, Rotate, Opacity and Crop X/Y for the evaluated pose. A zero-opacity key displays 0% in Motion.",
         "Drag empty property-lane space to box-select across expanded rows. Shift/Ctrl/Command adds; Alt subtracts; Escape or pointer cancellation restores the prior selection. Shift/Ctrl/Command-click also selects individual keys. Drag, frame-nudge, scale spacing, apply interpolation or delete with the batch toolbar.",
         "Copy with the toolbar or Ctrl/Command+C. Choose Original layers or an existing visual layer in Paste to, then paste at the playhead with the toolbar or Ctrl/Command+V. A single-source-layer clipboard can target another layer; supported property values, spacing, easing and curves are retained with fresh key identities.",
         "Owning-track locks prevent changes. Group values use their own five-property bounds; group key selection opens Composite with the shared curve editor. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.",
         "In Motion, Add position key writes an X/Y pair at the playhead. Drag a path point over the picture or nudge with Arrow keys (Shift increases the step). The picture follows the temporary drag; release commits the pair once, while Escape/cancellation restores the prior edit. Paths sample actual X/Y interpolation and map animated parent coordinates.",
         "Select a timeline key, open Graph editor and choose Value graph or Velocity graph. Edit the interval arriving at that key. Signed velocity uses property units per programme second; endpoint influence preserves endpoint velocity. Numeric edits commit on Enter/blur and write the existing four cubic handles.",
         "Once a transform is animated, Motion inspector value edits write a key at the playhead. The static fallback is retained for the base transform; it no longer overrides visible key-driven values.",
-        "Editing motion keys while viewing a completed movie switches After to Live Edit. The prior download remains available through Export; it is not presented as an updated movie."
+        "Editing motion keys while viewing a completed movie switches After to Live Edit. The prior download remains available through Export; it is not presented as an updated movie.",
+        "For paired position keys, select the layer in Motion → Transform keyframes, place the playhead in the interval and choose Curve path. Drag or arrow-nudge the amber handles; release commits once and Escape cancels. Straighten path retains its endpoints. Check the changed route before export."
       ],
       "preview_behavior": "Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.",
       "render_behavior": "Uses the existing shared compiler/compositor and interpolation expressions where supported. Group keys retain canonical target ownership and are projected into the group composition plan; output time maps back to the programme clock. Inspect the actual exported movie; the status does not certify every combination.",
@@ -398,9 +412,10 @@
         "This dated development snapshot does not establish professional or production readiness.",
         "Two bounded masked image-effect edits preserve eight position/scale/rotation/opacity keys through native save/reopen/export. Inverted-polygon sampled picture passes; one ellipse raster pair still exceeds the strict colour bound. This does not qualify every mask/easing/media or legacy entrance clock.",
         "One native nested image/two-motion project preserves 16 group keys across eight channels, including one custom X Bézier curve. Midpoint, property rows, nudge/lock, reset/remove/undo, save/cold reopen, CPU export and full timeline playback pass; four image geometry pairs pass and decoded source-tone audio is unchanged. Native retiming, broader curves, broader mask/blend combinations, video/owned 3D/deeper groups, full raster and live sound remain unqualified. Existing worker Bézier expressions approximate 32 samples; browser interpolation solves the curve.",
-        "Cross-layer paste requires a single source layer and a current-project destination supporting every copied property and value range. Missing targets, unsupported crop/group bounds, destination locks, half-frame timing collisions and programme overflow reject the whole paste. Original-layers mode supports mixed owners. Clipboard is local to this timeline component; it is not an OS/project interchange format. Freehand lasso, dedicated spatial tangent handles and cross-project interchange are not qualified. Broad media/retiming/full picture and sound qualification remains open.",
-        "Direct path editing changes paired X/Y keys; it does not add a separate spatial-spline representation. Independent X/Y timing curves may create a curved trajectory. Native evidence is an ordinary image over real footage; nested animated-parent coordinate conversion has helper coverage. Broader masks/3D/retiming/full picture and sound remain unqualified.",
-        "Velocity/influence edits write a custom cubic curve, including when converting an easing preset. Flat intervals cannot acquire movement through velocity alone. Influence is1–99%; speeds that exceed the supported handle range reject. Hold has a discontinuous step and no finite editable endpoint velocity. Worker custom curves retain the existing32-sample approximation."
+        "Cross-layer paste requires a single source layer and a current-project destination supporting every copied property and value range. Missing targets, unsupported crop/group bounds, destination locks, half-frame timing collisions and programme overflow reject the whole paste. Original-layers mode supports mixed owners. Clipboard is local to this timeline component; it is not an OS/project interchange format. Freehand lasso and cross-project interchange are not qualified. Broad media/retiming/full picture and sound qualification remains open.",
+        "Velocity/influence edits write a custom cubic curve, including when converting an easing preset. Flat intervals cannot acquire movement through velocity alone. Influence is1–99%; speeds that exceed the supported handle range reject. Hold has a discontinuous step and no finite editable endpoint velocity. Worker custom curves retain the existing32-sample approximation.",
+        "Spatial handles are endpoint-relative position offsets, bounded to ±200 composition percent. The route uses paired neighboring X/Y keys; other keys retain their existing interpolation. Adding or retiming individual keys can change adjacent intervals. Automatic arc-length speed, roving keys, closed vector contours and vector-shape morphs are not provided by these handles.",
+        "Curved intervals share a sampled travel curve in preview and export. Travel progress stays on the authored route; it is distinct from constant screen-distance speed. Native proof covers one image and four intervals; broader retiming, animated parents, other media and whole picture/sound remain unqualified."
       ],
       "common_errors": [
         {
@@ -416,7 +431,9 @@
           "resolution": "Check current keys/source binding and the documented preview/final limitations; inspect mapped frames in the actual movie."
         }
       ],
-      "related_features": [],
+      "related_features": [
+        "studio.logo_design"
+      ],
       "templates_using_feature": [
         {
           "template_id": "product_launch_cinematic_v1",
@@ -447,8 +464,12 @@
           "version": "1.1.2"
         }
       ],
-      "aliases": [],
-      "updated_at": "2026-10-15",
+      "aliases": [
+        "Motion inspector",
+        "transform controls",
+        "velocity controls"
+      ],
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {
@@ -477,13 +498,16 @@
         "studio.keyframe.start_velocity",
         "studio.keyframe.end_velocity",
         "studio.keyframe.start_influence",
-        "studio.keyframe.end_influence"
+        "studio.keyframe.end_influence",
+        "studio.keyframe.spatial_curve",
+        "studio.keyframe.spatial_handle"
       ],
       "workflow": [
         "Select an existing key or pose group for the intended ordinary layer.",
         "Choose linear, ease-in, ease-out, ease-in-out, hold or custom curve; inspect the transition into that key.",
         "For a custom curve, use bounded handles and play the movement; save/reopen and inspect final output.",
-        "Select an arriving key in the timeline Graph editor. Switch between Value and Velocity views; set start/end velocity and influence, or drag the existing value-curve handles. Numeric edits commit once on Enter or blur."
+        "Select an arriving key in the timeline Graph editor. Switch between Value and Velocity views; set start/end velocity and influence, or drag the existing value-curve handles. Numeric edits commit once on Enter or blur.",
+        "Curved position intervals expose Start travel and End travel in path-progress percent per second. Their timing edits coordinate the arriving X/Y pair. Value and Velocity graphs show the resulting property movement; use on-picture handles to change the route."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
@@ -491,7 +515,7 @@
         "The shared curve contract allows Y overshoot -2–2, while some numeric inspector widgets restrict Y to 0–1.",
         "The right-hand key supplies easing for the interval between keys.",
         "This is native 2D property interpolation, distinct from legacy scene-level 3D easing.",
-        "Velocity is signed change in the property per programme second, not screen-path speed. Influence preserves endpoint velocity. Editing a preset converts it to a custom cubic; hold and constant-value intervals have no editable finite motion velocity. Dedicated spatial tangent controls remain unqualified."
+        "Velocity is signed change in the property per programme second, not screen-path speed. Influence preserves endpoint velocity. Editing a preset converts it to a custom cubic; hold and constant-value intervals have no editable finite motion velocity. Spatial handles have bounded native image evidence; broader combinations and constant-distance path speed remain unqualified."
       ],
       "common_errors": [
         {
@@ -502,7 +526,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-17",
       "product_version": "1.2.0"
     },
     {
@@ -524,7 +548,8 @@
       "controls": [],
       "workflow": [
         "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Review the result and its limitations before saving or exporting.",
+        "With 16:9 and Preserve frame, mixed footage is normalized directly into the wide sequence canvas. Portrait sources retain their proportions instead of shrinking all wide clips into the original upload shape."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
@@ -540,7 +565,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-19",
       "product_version": "1.2.0"
     },
     {
@@ -1216,8 +1241,12 @@
         "studio.sfx.trim"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open an owned Studio project, choose Sound and scroll to Sound effects.",
+        "Put the playhead on the cut or reveal, then select a sound preset to add it there. Use Upload for an audio file you own.",
+        "Choose an existing cue in Placed sound effects. The cue buttons wrap into two columns; selecting one moves the playhead to its start.",
+        "In the selected effect card, use On to enable or disable the cue. Set Start, Duration, Effect volume, Fade in and Fade out. Trim start is available for uploaded effects; built-in effects keep that field disabled.",
+        "Use the built-in Effect sound selector to change its preset sound, or preview the selected cue with its preview button. Check the complete mix against the picture.",
+        "Use normal Undo/redo and save/reopen, then export and listen to the resulting movie before publishing."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
@@ -1261,8 +1290,12 @@
           "version": "1.1.2"
         }
       ],
-      "aliases": [],
-      "updated_at": "2026-10-12",
+      "aliases": [
+        "sound cues",
+        "placed sound effects",
+        "SFX controls"
+      ],
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {
@@ -1339,7 +1372,8 @@
       ],
       "workflow": [
         "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Review the result and its limitations before saving or exporting.",
+        "Dense gain curves preserve their sampled values and programme-to-output timing using bounded FFmpeg expression nesting; gain keys do not require removing easing to export."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
@@ -1355,7 +1389,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-19",
       "product_version": "1.2.0"
     },
     {
@@ -1943,9 +1977,10 @@
         "Review the result and its limitations before saving or exporting."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "render_behavior": "The shared worker derives the programme clock from the requested source intervals on the canonical 90 kHz timebase before applying speed. Codec padding in intermediate files cannot append an unrequested speed-plan tail. The declared clock is checked against those intervals. Downloads retain the exact completed output hash.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "The eight-second native 24 fps clock regression is verified at 192 frames. This bounded result does not qualify every fractional source duration, retime, hook, caption, picture or audio combination."
       ],
       "common_errors": [
         {
@@ -1953,10 +1988,12 @@
           "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
         }
       ],
-      "related_features": [],
+      "related_features": [
+        "studio.logo_design"
+      ],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-17",
       "product_version": "1.2.0"
     },
     {
@@ -4393,7 +4430,9 @@
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "No qualified final workflow exists for this feature.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Private welcome-page previews use dated product recordings; these do not update live or qualify a public release, hero or exact template-to-account handoff.",
+        "The private 28-second welcome film is a native Studio edit with matching timeline/backup; this design review does not qualify the public showroom, trusted human creative/listening approval or exact template handoff."
       ],
       "common_errors": [
         {
@@ -4404,7 +4443,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {
@@ -4611,8 +4650,8 @@
       "name": "Analytics",
       "area": "Publishing",
       "status": "PARTIAL",
-      "summary": "Loads account-scoped performance and workflow data with range/entitlement restrictions. Missing platform metrics must not be invented.",
-      "purpose": "Loads account-scoped performance and workflow data with range/entitlement restrictions. Missing platform metrics must not be invented.",
+      "summary": "Shows collected account-owned platform statistics, distinguishes missing counters from measured zero, filters a published release and refreshes its recent destination posts.",
+      "purpose": "Judge published work using real collected metrics without confusing missing data, impressions and video views.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
@@ -4624,16 +4663,25 @@
         "system.account"
       ],
       "optional_capabilities": [],
-      "controls": [],
-      "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+      "controls": [
+        "publishing.analytics.sync_latest",
+        "publishing.analytics.release"
       ],
-      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "workflow": [
+        "Open Analytics and choose the available date range.",
+        "Choose a Published release to inspect that release as new content is published; All published releases restores the account view.",
+        "Read the collected-post coverage and last successful update. Unavailable counters are not zero.",
+        "Use Sync latest platform statistics to refresh up to six recent published posts in the selected scope, one per destination.",
+        "Compare posts within each platform. Review unavailable connections and permissions before drawing performance conclusions."
+      ],
+      "preview_behavior": "Displays collected metrics, unavailable values, collected-post coverage and last successful update. A reported zero remains zero.",
+      "render_behavior": "No video render is performed. An explicit bounded statistics refresh reads connected providers and persists owned post observations.",
       "limitations": [
-        "Provider permissions, connection health and account allowance apply.",
-        "No external platform publication was performed or qualified in this documentation session."
+        "Provider permissions, connection health and account allowance apply. Some destinations provide engagement but no view count.",
+        "The refresh selects up to six owned successful non-simulated posts and has a five-minute per-post cooldown.",
+        "Metrics cover collected posts only. Impressions are separate from views; a combined click-through rate is unavailable without matched attribution.",
+        "Public provider delivery and whole-account collection coverage are separate from source and local signed-in verification.",
+        "Automatic observations remain scheduled through the seven-day collection window even when first-day views are low. Older legacy post records without collection initialization need an explicit refresh; local checks do not deploy backend changes."
       ],
       "common_errors": [
         {
@@ -4644,7 +4692,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {
@@ -4720,6 +4768,234 @@
         "gradient logo"
       ],
       "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "feature_id": "studio.vector_artwork",
+      "name": "Editable vector artwork",
+      "area": "Studio",
+      "status": "PARTIAL",
+      "summary": "Author editable cubic artwork with single or compound contours, even-odd counters, fill/gradient and stroke; animate it with normal layer keys.",
+      "purpose": "Build editable graphic pieces without reducing their authoring geometry to a fixed bitmap.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "authored single-contour vector artwork on ordinary image layers"
+      ],
+      "requires": [
+        "studio.layers"
+      ],
+      "optional_capabilities": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "controls": [
+        "studio.vector.add",
+        "studio.vector.point",
+        "studio.vector.tangent",
+        "studio.vector.split",
+        "studio.vector.point_kind",
+        "studio.vector.fill",
+        "studio.vector.stroke",
+        "studio.vector.closed",
+        "studio.vector.stroke_start",
+        "studio.vector.stroke_end",
+        "studio.vector.stroke_offset"
+      ],
+      "workflow": [
+        "Open Graphics and expand Vector artwork · editable paths. Choose Add vector artwork.",
+        "Drag square points and round tangents; arrow keys nudge, Shift increases the step and Escape cancels a drag.",
+        "Split after point preserves the existing cubic route. Remove points or choose Corner point / Smooth point to reshape it.",
+        "Choose fill, gradient direction/colors and a visible stroke width/color. In Motion → Transform keyframes, select the artwork and animate Stroke start / Stroke end / Stroke offset, or use their timeline rows and value/velocity graph.",
+        "Save and reopen the project, then export and inspect the movie."
+      ],
+      "preview_behavior": "The safe SVG reflects contour decisions and evaluated stroke start/end/offset values in the ordinary image layer. Partial stroke length and offset use the same bounded 128-sample-per-cubic distance measure as export. The contour inspector retains the full editable route.",
+      "render_behavior": "The existing image compositor evaluates canonical stroke start/end/offset keys on the programme clock. It clips open paths or continuously joins wrapped closed-path intervals, preserves the fill, and applies normal layer transforms, masks/effects and composition. The cached image is not the geometry authority.",
+      "limitations": [
+        "Version one retains a single 2–64-point contour. Version two provides one to eight contours with even-odd fill, up to 64 points each and 256 total. Percentage anchors and endpoint-relative tangents remain editable. No arbitrary SVG/PDF path importer or automatic bitmap/letter tracing; Logo Workshop uses exact pre-extracted bundled glyph contours.",
+        "Contour geometry, fill and stroke width/color remain static. Start/end are 0–100 percent of sampled path distance; start greater than or equal to end hides the outline while preserving fill. Offset is −1000 to 1000 percent: closed paths wrap continuously across their original seam, open paths clip at their endpoints. A full closed outline remains full under offset. No per-segment timing, contour morph keys, compound booleans or full pen/zoom workspace.",
+        "Native evidence is bounded to the retained artwork project. Whole raster/audio, arbitrary self-intersections, animated parents, broad retiming and professional/production creative qualification remain separate.",
+        "Version two adds one to eight contours, up to 64 nodes each and 256 total. Closed overlaps cut through the fill; stroke trim/offset follows each contour independently. Boolean unions/subtractions and morph keyframes remain separate."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [
+        "studio.transforms",
+        "studio.keyframes",
+        "studio.export",
+        "studio.logo_design"
+      ],
+      "templates_using_feature": [],
+      "aliases": [
+        "vector logo pieces",
+        "Bezier artwork",
+        "shape points",
+        "draw vector path"
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "feature_id": "studio.text_choreography",
+      "name": "Editable text choreography",
+      "area": "Studio",
+      "status": "PARTIAL",
+      "summary": "Animate individual letters or words inside one editable title using a normal Text progress motion track.",
+      "purpose": "Build expressive type without losing the original copy or duplicating a title for every letter.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "ordinary Inter titles with composed Latin letters, numbers and bundled punctuation"
+      ],
+      "requires": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "optional_capabilities": [
+        "studio.easing",
+        "studio.transforms"
+      ],
+      "controls": [
+        "studio.text_animator.enable",
+        "studio.text_animator.unit",
+        "studio.text_animator.order",
+        "studio.text_animator.stagger",
+        "studio.text_animator.from_x",
+        "studio.text_animator.from_y",
+        "studio.text_animator.from_scale",
+        "studio.text_animator.from_rotation",
+        "studio.text_animator.from_opacity",
+        "studio.text_animator.spread",
+        "studio.text_animator.range_start",
+        "studio.text_animator.range_end",
+        "studio.text_animator.settle",
+        "studio.text_animator.progress",
+        "studio.text_animator.rebuild",
+        "studio.text_animator.remove"
+      ],
+      "workflow": [
+        "Open Graphics, select an ordinary title and expand Text choreography. Choose Animate this title.",
+        "Choose letters or words, ordering, stagger, selector range and the starting travel, scale, rotation, opacity and spread.",
+        "Open Motion → Transform keyframes, select that title and edit Text progress. Reverse or hold its ordinary timeline keys and shape their value/velocity curves.",
+        "Rebuild entrance keys replaces only that title’s progress keys; Remove text animator returns it to a plain title. Other layer motion is retained.",
+        "Save, reopen and export through the normal Studio workflow."
+      ],
+      "preview_behavior": "Explicit per-unit SVG text transforms follow evaluated programme-clock Text progress. One plain copy field remains editable; wrapping uses the same versioned Inter glyph advances as export.",
+      "render_behavior": "The existing title/image compositor transforms immutable glyph or word patches using canonical progress after output speed mapping. Travel padding is excluded from native anchor/mask geometry; held-frame identity includes progress.",
+      "limitations": [
+        "Supported copy is at most 180 composed Latin characters with bundled punctuation and four Inter weights, up to twelve wrapped rows. A word wider than the title box requires more width or an internal line break. Complex scripts, combining sequences, emoji and arbitrary fonts are not supported in this optional animator; existing plain titles retain their path.",
+        "The selector uses unit centers; empty or crossed ranges leave units settled. Stagger is a share of the progress window, not seconds. Opacity uses linear unit progress while geometry uses the selected settling curve.",
+        "This is local glyph placement, not editable glyph outlines, automatic logo tracing or contour morphing. Broader parent/mask/speed combinations, full live raster/audio, smoothness, creative acceptance and professional/production qualification remain separate."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [
+        "studio.titles",
+        "studio.keyframes",
+        "studio.transforms",
+        "studio.export"
+      ],
+      "templates_using_feature": [],
+      "aliases": [
+        "per letter animation",
+        "word animator",
+        "text range selector",
+        "letter stagger",
+        "animate editable text"
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "feature_id": "studio.logo_design",
+      "name": "Logo Workshop",
+      "area": "Studio",
+      "status": "PARTIAL",
+      "summary": "Design a vector symbol and outlined brand lettering, edit their contours in Studio and download transparent SVG/PNG masters.",
+      "purpose": "Create reusable logo artwork and animate its individual pieces on the same Studio timeline.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "native vector artwork with bundled Inter 600/900 Latin letter outlines"
+      ],
+      "requires": [
+        "studio.vector_artwork"
+      ],
+      "optional_capabilities": [
+        "studio.keyframes",
+        "studio.transforms"
+      ],
+      "controls": [
+        "studio.logo_design.canvas",
+        "studio.logo_design.name",
+        "studio.logo_design.family",
+        "studio.logo_design.layout",
+        "studio.logo_design.weight",
+        "studio.logo_design.tracking",
+        "studio.logo_design.symbol_size",
+        "studio.logo_design.colours",
+        "studio.logo_design.gradient",
+        "studio.logo_design.assemble",
+        "studio.logo_design.build",
+        "studio.logo_design.variant",
+        "studio.logo_design.svg",
+        "studio.logo_design.png",
+        "studio.logo_design.contour"
+      ],
+      "workflow": [
+        "Open Studio and choose Start a logo design to prepare a blank canvas through the ordinary owned-source flow. Open Creator Studio, then Graphics → Logo Workshop. Enter a name and choose Flow, Orbit or Facet.",
+        "In the Graphics inspector, the three symbol choices appear together. Enter the Brand name, choose Flow, Orbit or Facet, then use the Layout and Lettering fields below. Scroll down for spacing, symbol size, colours and the controls for adding or downloading the logo.",
+        "Choose horizontal, stacked or symbol-only layout, lettering weight, spacing, symbol size and colours. Optionally enable ordinary assembly motion keys.",
+        "Add logo to timeline. Select its symbol pieces or individual letter outlines under Vector artwork. Choose a contour to edit a counter or outer path.",
+        "Choose a logo group and colour, white or ink variant. Download an SVG or PNG transparent master from the current vector geometry and base layout.",
+        "Save/reopen or restore the native project; use normal Motion controls and the existing final export for a film."
+      ],
+      "preview_behavior": "The design draft and ordinary vector image layers use authored cubic contours and real even-odd counters. Accepted designs become normal grouped vector layers with ordinary motion keys.",
+      "render_behavior": "The shared compiler preserves compound vector geometry; the existing image compositor samples each contour and applies even-odd fill. Stroke trim/offset runs independently on each contour. Static masters use portable SVG paths and a transparent browser PNG, before timeline animation.",
+      "limitations": [
+        "Three editable deterministic symbol families, not an unrestricted AI brief generator or automatic tracing of uploaded logos. Bundled A–Z/a–z letters, numbers, spaces, ampersand, period and hyphen; 1–32 characters, Inter 600/900.",
+        "Each outlined letter is a vector layer after creation. Change its contours or build a new wordmark from the name field; it is not a live text object and does not retain an editable text-to-outline binding.",
+        "Compound artwork supports one to eight contours, 2–64 points per contour (three if closed), at most 256 total. Overlapping fills use even-odd parity. This does not add boolean operations or contour morph animation.",
+        "Master downloads use a flat logo group, vector geometry and base transforms before motion. Masks, crops, rounded frames, glows, shadows and blends must be removed; nested or non-vector members are rejected. Whole film picture/audio, broader combinations, owner creative review and professional/production qualification remain separate.",
+        "Logo letter spacing supports signed drafts: Enter/blur commits; Escape or locking discards an uncommitted draft. The new blank entry prepares an eight-second canvas through the same upload, ownership and entitlement path as other Studio sources."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [
+        "studio.vector_artwork",
+        "studio.keyframes",
+        "studio.transforms",
+        "studio.export"
+      ],
+      "templates_using_feature": [],
+      "aliases": [
+        "logo designer",
+        "design a logo",
+        "brand symbol",
+        "logo master",
+        "outlined lettering",
+        "transparent logo PNG",
+        "logo SVG"
+      ],
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     }
   ],
@@ -8960,7 +9236,7 @@
       ],
       "label": "Start velocity",
       "status": "PARTIAL",
-      "meaning": "Sets signed endpoint change per programme second for the selected incoming key interval.",
+      "meaning": "Sets signed endpoint change per programme second for the selected incoming key interval. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.",
       "constraints": {
         "type": "number",
         "minimum": null,
@@ -8985,9 +9261,9 @@
       "limitations": [
         "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
         "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
-        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified."
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
       ],
-      "updated_at": "2026-10-15",
+      "updated_at": "2026-10-17",
       "product_version": "1.2.0"
     },
     {
@@ -8998,7 +9274,7 @@
       ],
       "label": "End velocity",
       "status": "PARTIAL",
-      "meaning": "Sets signed endpoint change per programme second for the selected incoming key interval.",
+      "meaning": "Sets signed endpoint change per programme second for the selected incoming key interval. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.",
       "constraints": {
         "type": "number",
         "minimum": null,
@@ -9023,9 +9299,9 @@
       "limitations": [
         "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
         "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
-        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified."
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
       ],
-      "updated_at": "2026-10-15",
+      "updated_at": "2026-10-17",
       "product_version": "1.2.0"
     },
     {
@@ -9036,7 +9312,7 @@
       ],
       "label": "Start influence",
       "status": "PARTIAL",
-      "meaning": "Controls the endpoint time influence while preserving its signed velocity.",
+      "meaning": "Controls the endpoint time influence while preserving its signed velocity. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.",
       "constraints": {
         "type": "number",
         "minimum": 1,
@@ -9061,9 +9337,9 @@
       "limitations": [
         "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
         "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
-        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified."
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
       ],
-      "updated_at": "2026-10-15",
+      "updated_at": "2026-10-17",
       "product_version": "1.2.0"
     },
     {
@@ -9074,7 +9350,7 @@
       ],
       "label": "End influence",
       "status": "PARTIAL",
-      "meaning": "Controls the endpoint time influence while preserving its signed velocity.",
+      "meaning": "Controls the endpoint time influence while preserving its signed velocity. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.",
       "constraints": {
         "type": "number",
         "minimum": 1,
@@ -9099,9 +9375,9 @@
       "limitations": [
         "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
         "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
-        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and dedicated spatial tangent handles remain unqualified."
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
       ],
-      "updated_at": "2026-10-15",
+      "updated_at": "2026-10-17",
       "product_version": "1.2.0"
     },
     {
@@ -9909,6 +10185,1614 @@
       ],
       "updated_at": "2026-10-17",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.spatial_curve",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "Curve path / Straighten path",
+      "status": "PARTIAL",
+      "meaning": "Enables or removes spatial handles on an interval with paired neighboring X/Y position keys. Endpoints are retained; X/Y travel timing is coordinated.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "composition percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image position keys",
+        "ordinary title position keys",
+        "source position keys"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Requires paired neighboring X/Y position keys. Bounds apply to handle offsets from the corresponding endpoint.",
+        "Travel timing is separate from screen-distance speed. Changes to individual keys can change neighboring intervals.",
+        "Native image/history/reopen/export checks are bounded; broad media, retiming, animated parents and full picture/sound remain unqualified."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.spatial_handle",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "Spatial path handles",
+      "status": "PARTIAL",
+      "meaning": "Shapes the route by dragging or arrow-nudging an endpoint-relative handle. Preview follows the temporary drag; release commits once and Escape cancels.",
+      "constraints": {
+        "type": "array",
+        "minimum": -200,
+        "maximum": 200,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "composition percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image position keys",
+        "ordinary title position keys",
+        "source position keys"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Requires paired neighboring X/Y position keys. Bounds apply to handle offsets from the corresponding endpoint.",
+        "Travel timing is separate from screen-distance speed. Changes to individual keys can change neighboring intervals.",
+        "Native image/history/reopen/export checks are bounded; broad media, retiming, animated parents and full picture/sound remain unqualified."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.add",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Add vector artwork",
+      "status": "PARTIAL",
+      "meaning": "Creates an ordinary timed artwork layer with editable cubic geometry.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.point",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Vector points",
+      "status": "PARTIAL",
+      "meaning": "Move an anchor while its relative tangent offsets follow it; remove a selected point within the contour limits.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.tangent",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Vector tangents",
+      "status": "PARTIAL",
+      "meaning": "Drag or nudge incoming and outgoing handles relative to the selected anchor. Release commits once; Escape cancels the gesture.",
+      "constraints": {
+        "type": "array",
+        "minimum": -200,
+        "maximum": 200,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.split",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Split after point",
+      "status": "PARTIAL",
+      "meaning": "Insert a midpoint by exact De Casteljau subdivision, retaining the original cubic geometry.",
+      "constraints": {
+        "type": "array",
+        "minimum": 2,
+        "maximum": 64,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.point_kind",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Corner / Smooth point",
+      "status": "PARTIAL",
+      "meaning": "Corner collapses both handles. Smooth initializes collinear tangents from neighboring points; later handles remain independently editable.",
+      "constraints": {
+        "type": "array",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.fill",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Vector fill and gradient",
+      "status": "PARTIAL",
+      "meaning": "Choose no fill, solid or a linear gradient, two colors and diagonal, horizontal or vertical direction.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "paint",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.stroke",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Vector stroke",
+      "status": "PARTIAL",
+      "meaning": "Choose outline width in the artwork coordinate box and a six-digit color. An unfilled path requires visible stroke.",
+      "constraints": {
+        "type": "object",
+        "minimum": 0,
+        "maximum": 20,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.closed",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Close vector path",
+      "status": "PARTIAL",
+      "meaning": "Join the last anchor back to the first. Closing requires at least three points.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "boolean",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.stroke_start",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Stroke start",
+      "status": "PARTIAL",
+      "meaning": "Choose the beginning of the visible outline by travelled path distance. Add or remove its key at the playhead; animate through the ordinary timeline and curve editor.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "path distance percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires editable vector artwork and an unlocked image-layer track. Set a nonzero stroke width in Graphics.",
+        "Values use the programme clock and existing key easing; sampled cubic distance is an approximation. Start greater than or equal to end hides the stroke and preserves fill. Offset shifts the interval: closed contours wrap and open contours clip.",
+        "Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.stroke_end",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Stroke end",
+      "status": "PARTIAL",
+      "meaning": "Choose the end of the visible outline by travelled path distance. Add or remove its key at the playhead; animate through the ordinary timeline and curve editor.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 100,
+        "default_known": true
+      },
+      "unit": "path distance percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires editable vector artwork and an unlocked image-layer track. Set a nonzero stroke width in Graphics.",
+        "Values use the programme clock and existing key easing; sampled cubic distance is an approximation. Start greater than or equal to end hides the stroke and preserves fill. Offset shifts the interval: closed contours wrap and open contours clip.",
+        "Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.stroke_offset",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Stroke offset",
+      "status": "PARTIAL",
+      "meaning": "Move the selected stroke interval by path distance. Animate positive or negative cumulative values for forward/reverse laps on closed contours; open contours clip at their real endpoints.",
+      "constraints": {
+        "type": "number",
+        "minimum": -1000,
+        "maximum": 1000,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "path distance percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires editable vector artwork, a nonzero stroke width and an unlocked image-layer track. Use a partial start/end interval to see a closed outline move.",
+        "Closed contours wrap continuously across the original seam; open contours clip rather than connecting their endpoints. Equal/crossed start/end ranges remain empty, and fill stays authored.",
+        "Distance uses 128 samples per cubic; full predictive picture/sound and broad effect/parent/retiming combinations remain separately qualified.",
+        "Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.enable",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Animate this title",
+      "status": "PARTIAL",
+      "meaning": "Create one native text animator and two ordinary entrance progress keys.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.unit",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Animate text by",
+      "status": "PARTIAL",
+      "meaning": "Choose independent letters or words; spaces retain their advance without consuming a slot.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "character",
+          "word"
+        ],
+        "default": "character",
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.order",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Text animation order",
+      "status": "PARTIAL",
+      "meaning": "Choose the deterministic order of selected units.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "forward",
+          "reverse",
+          "center_out",
+          "edges_in"
+        ],
+        "default": "forward",
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.stagger",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Stagger",
+      "status": "PARTIAL",
+      "meaning": "Share of the progress window spread between the first and last selected unit.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 95,
+        "values": [],
+        "default": 65,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_x",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Letter travel X (em)",
+      "status": "PARTIAL",
+      "meaning": "Horizontal travel from the starting pose, in 36px logical em units.",
+      "constraints": {
+        "type": "number",
+        "minimum": -4,
+        "maximum": 4,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "em",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_y",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Letter travel Y (em)",
+      "status": "PARTIAL",
+      "meaning": "Vertical travel from the starting pose, in 36px logical em units.",
+      "constraints": {
+        "type": "number",
+        "minimum": -4,
+        "maximum": 4,
+        "values": [],
+        "default": 1.4,
+        "default_known": true
+      },
+      "unit": "em",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_scale",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Starting scale",
+      "status": "PARTIAL",
+      "meaning": "Starting local unit scale; selected units settle to scale one.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 2.5,
+        "values": [],
+        "default": 0.35,
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_rotation",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Starting rotation",
+      "status": "PARTIAL",
+      "meaning": "Starting local unit rotation; selected units settle upright.",
+      "constraints": {
+        "type": "number",
+        "minimum": -360,
+        "maximum": 360,
+        "values": [],
+        "default": -35,
+        "default_known": true
+      },
+      "unit": "degrees",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_opacity",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Starting opacity",
+      "status": "PARTIAL",
+      "meaning": "Starting unit opacity, interpolated by linear local progress.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.spread",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Starting spread",
+      "status": "PARTIAL",
+      "meaning": "Spread units around each line’s center by a share of their center distance.",
+      "constraints": {
+        "type": "number",
+        "minimum": -1,
+        "maximum": 1,
+        "values": [],
+        "default": 0.3,
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.range_start",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Range start (%)",
+      "status": "PARTIAL",
+      "meaning": "Beginning of the selector, measured at ordered source-unit centers.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.range_end",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Range end (%)",
+      "status": "PARTIAL",
+      "meaning": "End of the selector; equal/crossed ranges leave all units settled.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 100,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.settle",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Text settling curve",
+      "status": "PARTIAL",
+      "meaning": "Ease or overshoot unit travel, scale, spread and rotation.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "linear",
+          "ease_out",
+          "ease_in_out",
+          "back_out"
+        ],
+        "default": "back_out",
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.progress",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Text progress",
+      "status": "PARTIAL",
+      "meaning": "Normal motion property: zero shows the starting arrangement and 100 settles it. Keys may reverse or hold.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 100,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.rebuild",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Rebuild entrance keys",
+      "status": "PARTIAL",
+      "meaning": "Replace only this title’s progress keys over at most its first 1.8 seconds.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.remove",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Remove text animator",
+      "status": "PARTIAL",
+      "meaning": "Remove local text choreography and only its progress keys while retaining copy, styling and other layer motion. Undo restores it.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.name",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Brand name",
+      "status": "PARTIAL",
+      "meaning": "Enter the lettering to convert into ordinary editable glyph contours.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": "AutoPromote",
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.family",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo symbol family",
+      "status": "PARTIAL",
+      "meaning": "Choose a ribbon ascent, interlocking orbit or geometric facet symbol.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "flow",
+          "orbit",
+          "facet"
+        ],
+        "default": "flow",
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.layout",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo layout",
+      "status": "PARTIAL",
+      "meaning": "Arrange the symbol and lettering or create a symbol-only mark.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "horizontal",
+          "stacked",
+          "symbol"
+        ],
+        "default": "horizontal",
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.weight",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo lettering",
+      "status": "PARTIAL",
+      "meaning": "Use the exact bundled Inter SemiBold or Black glyph contours.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          600,
+          900
+        ],
+        "default": 900,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.tracking",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo letter spacing",
+      "status": "PARTIAL",
+      "meaning": "Adjust advance spacing before ordinary vector layers are created.",
+      "constraints": {
+        "type": "number",
+        "minimum": -2,
+        "maximum": 12,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.symbol_size",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo symbol size",
+      "status": "PARTIAL",
+      "meaning": "Scale the symbol relative to the wordmark.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.6,
+        "maximum": 1.4,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.colours",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo colours",
+      "status": "PARTIAL",
+      "meaning": "Choose six-digit primary, accent and lettering colours.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.gradient",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Gradient symbol",
+      "status": "PARTIAL",
+      "meaning": "Use linear gradients or solid symbol fills.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": true,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.assemble",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Assemble logo pieces",
+      "status": "PARTIAL",
+      "meaning": "Create normal staggered opacity, scale, rotation and Y keys for symbol pieces and outlined letters.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.build",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Add logo to timeline",
+      "status": "PARTIAL",
+      "meaning": "Add normal vector layers and one graphic group as a single history operation.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.variant",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Export logo variant",
+      "status": "PARTIAL",
+      "meaning": "Preserve colours or export white/ink without changing the project geometry.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "colour",
+          "light",
+          "dark"
+        ],
+        "default": "colour",
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.svg",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Download logo SVG",
+      "status": "PARTIAL",
+      "meaning": "Download a transparent portable SVG with real paths and no font or image dependency.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.png",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Download logo PNG",
+      "status": "PARTIAL",
+      "meaning": "Download a transparent raster master generated from the same SVG geometry.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.contour",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Vector contour",
+      "status": "PARTIAL",
+      "meaning": "Select an outer contour or counter for ordinary point/tangent editing. This selection itself does not change project geometry.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.canvas",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Start a logo design",
+      "status": "PARTIAL",
+      "meaning": "Prepare a bundled blank eight-second canvas through the existing Studio entitlement and owned-source upload path.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "publishing.analytics.sync_latest",
+      "feature_ids": [
+        "publishing.analytics"
+      ],
+      "label": "Sync latest platform statistics",
+      "status": "PARTIAL",
+      "meaning": "Refreshes up to six newest owned published posts in the selected release or account scope, one per destination. Selection uses publication time independently of the performance-ranked display.",
+      "constraints": {
+        "type": "array",
+        "minimum": 1,
+        "maximum": 6,
+        "default": [],
+        "default_known": true,
+        "values": []
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "SUPPORTED",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "publishing.analytics",
+        "system.account"
+      ],
+      "limitations": [
+        "Five-minute per-post cooldown; only owned successful non-simulated posts qualify.",
+        "Missing permissions or unsupported platform metrics remain unavailable. The action does not publish content or promise reach."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "publishing.analytics.release",
+      "feature_ids": [
+        "publishing.analytics"
+      ],
+      "label": "Published release",
+      "status": "PARTIAL",
+      "meaning": "Limits collected statistics and refresh targets to one owned published release within the selected date range.",
+      "constraints": {
+        "type": "string",
+        "default": "",
+        "default_known": true,
+        "values": [],
+        "minimum": null,
+        "maximum": null
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "SUPPORTED",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "publishing.analytics",
+        "system.account"
+      ],
+      "limitations": [
+        "Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.",
+        "Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
     }
   ],
   "tasks": [
@@ -10250,11 +12134,22 @@
         "studio.export",
         "creative.logo_brand",
         "studio.three_d",
-        "studio.sfx"
+        "studio.sfx",
+        "studio.vector_artwork"
       ],
       "control_ids": [
         "studio.three_d.material",
-        "studio.three_d.focallength"
+        "studio.three_d.focallength",
+        "studio.keyframe.spatial_curve",
+        "studio.keyframe.spatial_handle",
+        "studio.vector.add",
+        "studio.vector.point",
+        "studio.vector.tangent",
+        "studio.vector.split",
+        "studio.vector.point_kind",
+        "studio.vector.fill",
+        "studio.vector.stroke",
+        "studio.vector.closed"
       ],
       "prerequisites": [
         "system.account"
@@ -10265,6 +12160,20 @@
           "instruction": "Import the owned logo and select a supported draft/preset.",
           "feature_id": "creative.logo_brand",
           "control_ids": []
+        },
+        {
+          "instruction": "For authored vector pieces, add vector artwork in Graphics and shape its points/tangents. This does not automatically trace a supplied PNG or wordmark. Animate the resulting layer in Motion.",
+          "feature_id": "studio.vector_artwork",
+          "control_ids": [
+            "studio.vector.add",
+            "studio.vector.point",
+            "studio.vector.tangent",
+            "studio.vector.split",
+            "studio.vector.point_kind",
+            "studio.vector.fill",
+            "studio.vector.stroke",
+            "studio.vector.closed"
+          ]
         },
         {
           "instruction": "Author ordinary layers or a bounded 3D scene; review unsupported final fields.",
@@ -10289,7 +12198,7 @@
         "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
       ],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-18",
       "product_version": "1.2.0"
     },
     {
@@ -12721,6 +14630,296 @@
       "from": "studio.logo_motion",
       "type": "editable_with",
       "to": "studio.logo_motion.piece_style"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_curve"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_curve"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_handle"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_handle"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.add"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.point"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.tangent"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.split"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.point_kind"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.fill"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.closed"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "requires",
+      "to": "studio.layers"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "optionally_uses",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "optionally_uses",
+      "to": "studio.easing"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke_start"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke_end"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke_offset"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.enable"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.unit"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.order"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.stagger"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_x"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_y"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_scale"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_rotation"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_opacity"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.spread"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.range_start"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.range_end"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.settle"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.progress"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.rebuild"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "requires",
+      "to": "studio.titles"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "requires",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "optionally_uses",
+      "to": "studio.easing"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "optionally_uses",
+      "to": "studio.transforms"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.remove"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "requires",
+      "to": "studio.vector_artwork"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "optionally_uses",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "optionally_uses",
+      "to": "studio.transforms"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.contour"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.name"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.family"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.layout"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.weight"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.tracking"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.symbol_size"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.colours"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.gradient"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.assemble"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.build"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.variant"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.svg"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.png"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.canvas"
+    },
+    {
+      "from": "publishing.analytics",
+      "type": "editable_with",
+      "to": "publishing.analytics.sync_latest"
+    },
+    {
+      "from": "publishing.analytics",
+      "type": "editable_with",
+      "to": "publishing.analytics.release"
     }
   ]
 }

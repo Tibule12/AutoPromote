@@ -13,6 +13,8 @@ export function buildStudioKineticType({ source, overlays, keyframes, compounds,
   entry = .5, travel = 8, tilt = 12, exit = .25, fps = 24, playbackRate = 1 }) {
   if (!source || source.type !== 'text' || source.isCaption || source.bRollMode || source.isRainbow || source.bRollPlaceholder)
     throw Error('Select an ordinary title for kinetic type.');
+  if (source.textAnimator)
+    throw Error('Remove Text choreography before separating this title into independent layers.');
   if ((source.fontFamily || 'Inter') !== 'Inter') throw Error('Choose Inter before separating the title.');
   if (source.bg && source.bg !== 'transparent') throw Error('Choose No background before separating the title.');
   if (source.mask?.enabled || source.tracking?.enabled || (source.blendMode && source.blendMode !== 'normal'))

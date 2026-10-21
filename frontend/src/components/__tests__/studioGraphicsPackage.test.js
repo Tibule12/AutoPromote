@@ -2,6 +2,7 @@ import { buildStudioGraphicsPackage, validateStudioGraphicsPackage } from '../st
 import { buildMotionAutomationStyle } from '../studioAutomation';
 import { adaptStudioSnapshotToDocument } from '../studioProjectDocument';
 import { compileStudioCompositionForRender } from '../studioRenderCompiler';
+import { TEXT_ANIMATOR_DEFAULT } from '../studioTextAnimator';
 
 const spec = () => ({ format: 'autopromote-graphics', version: 1, name: 'Word choreography', width: 1280, height: 720, duration: 4,
   layers: [{ id: 'word', name: 'Word', type: 'text', text: 'BREAK', startTime: 0, duration: 4,
@@ -12,6 +13,20 @@ const artwork = id => ({ id, name: id, type: 'artwork', svg: '<svg xmlns="http:/
   startTime: 0, duration: 4, x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, width: 20, height: 20, keys: [] });
 const build = input => { let id = 0; return buildStudioGraphicsPackage({ input, overlays: [], keyframes: [], compounds: [], order: [],
   duration: 4, aspect: 16 / 9, createId: prefix => `${prefix}-${++id}` }); };
+
+test('native import retains an editable single-title animator and remaps its ordinary progress keys', async () => {
+  const input = spec();
+  Object.assign(input.layers[0], { textAnimator: { ...TEXT_ANIMATOR_DEFAULT }, textProgress: 100,
+    keys: [0, 2].map((time, i) => ({ property: 'textProgress', time, value: i * 100, easing: 'linear' })) });
+  const result = await build(input);
+  expect(result.layers).toHaveLength(1);
+  expect(result.layers[0].text).toBe('BREAK');
+  expect(result.layers[0].textAnimator).toEqual(TEXT_ANIMATOR_DEFAULT);
+  expect(result.keys.every(k => k.targetId === result.layers[0].id)).toBe(true);
+  expect(buildMotionAutomationStyle(result.keys, 1, result.layers[0]).textProgress).toBe(50);
+  delete input.layers[0].textAnimator;
+  expect(() => validateStudioGraphicsPackage(input, { duration: 4, aspect: 16 / 9 })).toThrow();
+});
 
 test('import creates ordinary independent IDs and the same evaluated and compiled keys without altering source layers', async () => {
   const input = spec(), before = JSON.stringify(input), result = await build(input);

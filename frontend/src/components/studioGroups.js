@@ -1,4 +1,4 @@
-import { interpolateAutomationValue, STUDIO_EASINGS } from './studioAutomation';
+import { interpolateAutomationValue, STUDIO_EASINGS, validateSpatialCurve } from './studioAutomation';
 import { STUDIO_EXPORT_BLEND_MODES } from './studioBlendModes';
 import { parseStudioMaskPolygon } from './studioMaskGeometry';
 
@@ -35,6 +35,7 @@ export function validateStudioGroupKeyframes(groups, keyframes) {
   const ids = new Set(groups.filter(g => g.kind === GROUP_KIND).map(g => g.id)), counts = new Map(), times = new Set(), keyIds = new Set();
   for (const key of keyframes || []) {
     if (!ids.has(key.targetId)) continue;
+    validateSpatialCurve(key);
     const bounds = GROUP_BOUNDS[key.property], count = (counts.get(key.targetId) || 0) + 1;
     if (!bounds || typeof key.time !== 'number' || !Number.isFinite(key.time) || key.time < 0 ||
         typeof key.value !== 'number' || !Number.isFinite(key.value) || key.value < bounds[0] || key.value > bounds[1] ||

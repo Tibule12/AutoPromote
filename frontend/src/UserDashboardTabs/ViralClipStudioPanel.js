@@ -87,6 +87,7 @@ function ViralClipStudioPanel({
   const [resumedProject, setResumedProject] = useState(null);
   const [resumingProject, setResumingProject] = useState(false);
   const [restoringBackup, setRestoringBackup] = useState(false);
+  const [preparingLogoCanvas, setPreparingLogoCanvas] = useState(false);
 
   const restoreBackup = async file => {
     if (!file || restoringBackup || subscriptionLoading) return;
@@ -252,6 +253,24 @@ function ViralClipStudioPanel({
     void prepareSource(videos[0]);
   };
 
+  const startLogoCanvas = async () => {
+    if (subscriptionLoading || preparingLogoCanvas) return;
+    if (!canUseFeature("viralClipStudio")) { onUpgrade?.(); return; }
+    const requestId = ++uploadRequestRef.current;
+    setPreparingLogoCanvas(true);
+    setSourceError("");
+    try {
+      const response = await fetch(`${process.env.PUBLIC_URL || ""}/studio/blank-logo-canvas.mp4`);
+      if (!response.ok) throw new Error("The logo canvas could not be loaded. Please try again.");
+      const blob = await response.blob();
+      if (uploadRequestRef.current !== requestId) return;
+      setSelectedClip(null); setAdditionalSourceFiles([]);
+      await prepareSource(new File([blob], "Logo canvas.mp4", { type: "video/mp4" }));
+    } catch (error) {
+      if (uploadRequestRef.current === requestId) { setSourceError(error.message); setSourceState("failed"); }
+    } finally { setPreparingLogoCanvas(false); }
+  };
+
   useEffect(() => {
     if (!autoOpen || sourceState !== "ready" || !sourceFile) return;
     setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration));
@@ -312,6 +331,15 @@ function ViralClipStudioPanel({
         </button>
       ) : null}
       <div className="viral-clips-workspace creator-studio-entry">
+        <div className="creator-studio-logo-entry">
+          <h3>Design a logo</h3>
+          <p>Start with a blank canvas. Build your symbol and lettering in Graphics → Logo Workshop, then export transparent artwork or animate its pieces.</p>
+          <button type="button" className="creator-studio-btn"
+            disabled={preparingLogoCanvas || subscriptionLoading || sourceState === "uploading" || sourceState === "validating" || resumingProject || restoringBackup}
+            onClick={() => void startLogoCanvas()}>
+            {preparingLogoCanvas ? "Preparing logo canvas…" : "Start a logo design"}
+          </button>
+        </div>
         <label className="btn-secondary">
           {restoringBackup ? "Restoring project…" : "Restore project backup"}
           <input type="file" accept="application/json,.json" aria-label="Restore project backup"

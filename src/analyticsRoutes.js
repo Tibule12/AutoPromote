@@ -1,6 +1,7 @@
 const express = require("express");
 const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
+const { normalizeMetrics } = require("./services/platformMetricValues");
 const { getPlanCapabilities } = require("./config/subscriptionPlans");
 const { applyTesterCapabilityAllowlist } = require("./config/testerProgram");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
@@ -30,14 +31,6 @@ function getOwnerId(record) {
   return (
     record.user_id || record.userId || record.uid || record.ownerId || record.creatorId || null
   );
-}
-
-function getNumericMetric(...values) {
-  for (const value of values) {
-    const numericValue = Number(value);
-    if (Number.isFinite(numericValue)) return numericValue;
-  }
-  return 0;
 }
 
 async function fetchOwnedCollectionDocs(collectionName, uid, ownerFields, limit = 200) {
@@ -316,7 +309,7 @@ router.get("/user", authMiddleware, async (req, res) => {
     const postsWithoutEventDate = publishedPostsAllTime.filter(
       post => !getPostEventDate(post)
     ).length;
-    const publishedPosts = publishedPostsAllTime
+    let publishedPosts = publishedPostsAllTime
       .filter(post => {
         const eventDate = getPostEventDate(post);
         if (!startDate) return true;
@@ -335,12 +328,20 @@ router.get("/user", authMiddleware, async (req, res) => {
       `[Analytics] ${publishedPosts.length} published platform posts passed date filter (>= ${filterLabel})`
     );
 
-    const contentIds = new Set(
-      publishedPosts
-        .map(post => post.contentId)
-        .filter(contentId => typeof contentId === "string" && contentId)
-    );
-    const contentTitleMap = await fetchContentTitleMap(contentIds);
+    const requestedRelease = req.query.contentId || "";
+    if (typeof requestedRelease !== "string" || requestedRelease.includes("/") || requestedRelease.length > 200) {
+      return res.status(400).json({ error: "Choose a published release." });
+    }
+    const contentTitleMap = await fetchContentTitleMap(new Set(publishedPosts.map(post => post.contentId).filter(Boolean)));
+    const releaseOptions = [...new Set(publishedPosts.map(post => post.contentId).filter(Boolean))]
+      .map(id => ({ id, title: contentTitleMap.get(id) || "Published release" }));
+    if (requestedRelease) publishedPosts = publishedPosts.filter(post => post.contentId === requestedRelease);
+    const contentIds = new Set(publishedPosts.map(post => post.contentId).filter(Boolean));
+    const targetPlatforms = new Set();
+    const refreshTargets = publishedPosts.filter(post => {
+      if (!['youtube', 'tiktok', 'instagram', 'facebook', 'linkedin', 'reddit'].includes(post.platform) || targetPlatforms.has(post.platform)) return false;
+      targetPlatforms.add(post.platform); return true;
+    }).slice(0, 6).map(post => ({ postId: post.id, platform: post.platform }));
 
     let totalViews = 0;
     let totalLikes = 0;
@@ -351,49 +352,15 @@ router.get("/user", authMiddleware, async (req, res) => {
     let lastUpdatedAt = null;
     let nextUpdateAt = null;
 
+    const coverage = Object.fromEntries(["views", "impressions", "likes", "comments", "shares", "clicks"].map(key => [key, 0]));
+    let postsWithMetrics = 0;
     const topContentCandidates = publishedPosts.map(post => {
       const platform = normalizePlatformName(post.platform);
-      const metrics = post.metrics || {};
-      const views = getNumericMetric(
-        metrics.views,
-        metrics.view_count,
-        metrics.video_views,
-        metrics.video_view_count,
-        metrics.play_count,
-        metrics.plays,
-        metrics.post_impressions,
-        metrics.impressions,
-        metrics.impression_count
-      );
-      const likes = getNumericMetric(
-        metrics.likes,
-        metrics.like_count,
-        metrics.favorite_count,
-        metrics.reaction_count,
-        metrics.score
-      );
-      const shares = getNumericMetric(
-        metrics.shares,
-        metrics.share_count,
-        metrics.retweet_count,
-        metrics.repost_count,
-        metrics.reposts
-      );
-      const clicks = getNumericMetric(
-        metrics.clicks,
-        metrics.click_count,
-        metrics.link_clicks,
-        metrics.post_clicks
-      );
-      const comments = getNumericMetric(
-        metrics.comments,
-        metrics.comment_count,
-        metrics.comments_count,
-        metrics.reply_count,
-        metrics.post_engaged_users,
-        metrics.total_comments
-      );
-
+      const measured = normalizeMetrics(post.metrics);
+      const { views, likes, shares, clicks, comments, impressions } = measured;
+      const hasMetrics = Object.values(measured).some(value => value !== null);
+      if (hasMetrics) postsWithMetrics++;
+      for (const [key, value] of Object.entries(measured)) if (value !== null) coverage[key]++;
       if (!contentByPlatform[platform]) {
         contentByPlatform[platform] = {
           count: 0,
@@ -402,11 +369,19 @@ router.get("/user", authMiddleware, async (req, res) => {
           shares: 0,
           comments: 0,
           clicks: 0,
-          ctr: 0,
+          ctr: null,
+          impressions: 0,
+          measuredPosts: Object.fromEntries(Object.keys(coverage).map(key => [key, 0])),
         };
       }
 
       contentByPlatform[platform].count += 1;
+      contentByPlatform[platform].impressions += impressions;
+      for (const [key, value] of Object.entries(measured)) {
+        if (value !== null) contentByPlatform[platform].measuredPosts[key]++;
+      }
+      const collectedAt = hasMetrics ? parseTimestamp(post.lastMetricsSuccessAt || post.metricsFetchedAt) : null;
+      if (collectedAt && (!lastUpdatedAt || collectedAt > lastUpdatedAt)) lastUpdatedAt = collectedAt;
       contentByPlatform[platform].views += views;
       contentByPlatform[platform].likes += likes;
       contentByPlatform[platform].shares += shares;
@@ -444,8 +419,15 @@ router.get("/user", authMiddleware, async (req, res) => {
       const publishedAt = getPostEventDate(post);
 
       return {
+        postId: post.id,
+        contentId: post.contentId,
+        likes,
         title: resolvedTitle,
+        metricsAvailable: hasMetrics,
+        metricsCollectionStatus: post.metricsCollectionStatus || (hasMetrics ? "collected" : "not_collected"),
+        lastMetricsAttemptAt: parseDateValue(post.lastMetricsCheck)?.toISOString() || null,
         views,
+        impressions,
         clicks,
         platform,
         comments,
@@ -454,15 +436,20 @@ router.get("/user", authMiddleware, async (req, res) => {
       };
     });
 
-    Object.values(contentByPlatform).forEach(platformRow => {
-      platformRow.ctr =
-        platformRow.views > 0
-          ? parseFloat(((platformRow.clicks / platformRow.views) * 100).toFixed(2))
-          : 0;
+    Object.values(contentByPlatform).forEach(row => {
+      for (const key of Object.keys(coverage)) if (!row.measuredPosts[key]) row[key] = null;
+      // Cross-post totals cannot establish an exposure-matched click rate.
+      row.ctr = null;
     });
+    if (!coverage.views) totalViews = null;
+    if (!coverage.likes) totalLikes = null;
+    if (!coverage.shares) totalShares = null;
+    if (!coverage.clicks) totalClicks = null;
 
     const bestCandidate = topContentCandidates.reduce((best, item) => {
       if (!best) return item;
+      if (best.views === null && item.views !== null) return item;
+      if (best.views !== null && item.views === null) return best;
       if (item.views > best.views) return item;
       if (item.views === best.views && item.clicks > best.clicks) return item;
       return best;
@@ -479,13 +466,11 @@ router.get("/user", authMiddleware, async (req, res) => {
       potentialBonus: 0,
     };
 
-    const performanceStatus = publishedPosts.length
-      ? totalViews > 0
-        ? "Live"
-        : "Published with low measurable reach"
-      : "No published platform posts";
+    const performanceStatus = !publishedPosts.length ? "No published platform posts"
+      : !postsWithMetrics ? "Platform statistics unavailable"
+      : postsWithMetrics < publishedPosts.length ? "Partial platform statistics" : "Live platform statistics";
     const motivationMessage = publishedPosts.length
-      ? "Analytics are sourced from published platform post records."
+      ? `${postsWithMetrics} of ${publishedPosts.length} published posts have collected statistics. Unavailable metrics are not zero.`
       : "Publish content to at least one connected platform to generate analytics.";
 
     // 2. Referral Progress (Logic from referralGrowthEngine: 10 friends = $5, 20 = $15)
@@ -515,7 +500,7 @@ router.get("/user", authMiddleware, async (req, res) => {
     let topPlatform = "N/A";
     let maxPlatViews = -1;
     Object.entries(contentByPlatform).forEach(([plat, data]) => {
-      if (data.views > maxPlatViews) {
+      if (data.views !== null && data.views > maxPlatViews) {
         maxPlatViews = data.views;
         topPlatform = plat;
       }
@@ -524,6 +509,7 @@ router.get("/user", authMiddleware, async (req, res) => {
 
     const topContent = topContentCandidates
       .sort((a, b) => {
+        if ((a.views === null) !== (b.views === null)) return a.views === null ? 1 : -1;
         // Prioritize views
         if (b.views !== a.views) return b.views - a.views;
         // Then clicks
@@ -541,6 +527,9 @@ router.get("/user", authMiddleware, async (req, res) => {
     res.json({
       requestedRange,
       range,
+      selectedReleaseId: requestedRelease,
+      releaseOptions,
+      refreshTargets,
       plan: {
         tierId: snapshot.tierId,
         name: entitlements.planName,
@@ -557,7 +546,14 @@ router.get("/user", authMiddleware, async (req, res) => {
       totalShares,
       totalRevenue: 0, // Pay-per-view is disabled; zero to match /content/:id behavior
       totalClicks,
-      ctr: totalViews > 0 ? parseFloat(((totalClicks / totalViews) * 100).toFixed(2)) : 0,
+      ctr: null,
+      measurement: {
+        status: !postsWithMetrics ? "unavailable" : postsWithMetrics < publishedPosts.length ? "partial" : "available",
+        postsWithMetrics,
+        postsWithoutMetrics: publishedPosts.length - postsWithMetrics,
+        measuredPostsByMetric: coverage,
+        note: "Metrics reflect collected posts only. Missing or unsupported values are unavailable; impressions are separate from video views. CTR needs matched click and impression attribution.",
+      },
 
       // Frontend specific keys
       platformBreakdown: entitlements.analytics.platformBreakdown ? contentByPlatform : {},
@@ -580,6 +576,18 @@ router.get("/user", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error getting user analytics:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/refresh-post-metrics", authMiddleware, async (req, res) => {
+  const uid = req.user?.uid || req.userId;
+  if (!uid) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const { refreshOwnedPlatformMetrics } = require("./services/ownedPlatformMetricsRefresh");
+    const results = await refreshOwnedPlatformMetrics(uid, req.body?.postIds);
+    return res.json({ results, refreshedAt: new Date().toISOString() });
+  } catch (error) {
+    return res.status(error.status || 500).json({ error: error.status ? error.message : "Statistics refresh failed." });
   }
 });
 

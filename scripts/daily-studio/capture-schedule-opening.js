@@ -16,7 +16,7 @@ const policy = require('../../config/daily-studio.json');
 async function main() {
   require('../creative-templates/proof-storage').requireProofSpace(folder);
   const browser = await chromium.launch({channel:'chromium',headless:true,
-    args:['--mute-audio','--host-resolver-rules=MAP localhost 127.0.0.1']});
+    args:['--mute-audio',`--host-resolver-rules=MAP localhost ${process.env.STUDIO_QA_LOOPBACK || '127.0.0.1'}`]});
   const context = await browser.newContext({storageState:path.join(root,policy.authState),
     viewport:{width:1920,height:1080},timezoneId:policy.timezone});
   const page = await context.newPage(); page.setDefaultTimeout(60000);
@@ -33,8 +33,8 @@ async function main() {
     await page.locator('.schedule-loading').waitFor({state:'hidden'});
     await page.locator('.schedule-view-timezone select').selectOption(policy.timezone);
     const posts = JSON.parse(fs.readFileSync(path.join(root,
-      'reports/daily-studio/2026-10-17/platform-packages.json'))).posts;
-    const title = posts.find(p=>p.storyId==='sound-alignment'&&p.platform==='youtube').title;
+      process.env.STUDIO_SCHEDULE_PACKAGES || 'reports/daily-studio/2026-10-17/platform-packages.json'))).posts;
+    const title = posts.find(p=>p.storyId===(process.env.STUDIO_SCHEDULE_STORY || 'sound-alignment')&&p.platform==='youtube').title;
     const card = page.locator('.schedule-calendar-card').filter({hasText:title}).first();
     await card.click();
     const video = page.locator('.schedule-detail video').first();

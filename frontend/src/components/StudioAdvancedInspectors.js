@@ -1,5 +1,6 @@
 import React from "react";
-import { STUDIO_EASINGS, groupMotionKeyframesByTime } from "./studioAutomation";
+import { STUDIO_EASINGS, groupMotionKeyframesByTime, buildMotionAutomationStyle } from "./studioAutomation";
+import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from './studioMotionProperties';
 import StudioKeyframeCurveEditor from "./StudioKeyframeCurveEditor";
 import ProductHelpButton from "./ProductHelpButton";
 import { STUDIO_EXPORT_BLEND_MODES } from "./studioBlendModes";
@@ -17,6 +18,27 @@ const Range = ({ label, valueLabel, ...props }) => (
   </label>
 );
 
+function StrokePropertyValue({ descriptor, value, playhead, locked, onCommit }) {
+  const [draft, setDraft] = React.useState(null);
+  // Keep partial signed input out of the graph. Seeking or locking cancels a
+  // draft, so a later blur cannot write it at a different programme position.
+  React.useEffect(() => setDraft(null), [value, playhead, locked]);
+  const commit = () => {
+    if (!locked && draft !== null && draft.trim() !== '' && Number.isFinite(Number(draft))) {
+      const next = Math.max(descriptor.min, Math.min(descriptor.max, Number(draft)));
+      if (next !== value) onCommit(next);
+    }
+    setDraft(null);
+  };
+  return <input aria-label={descriptor.label} type="number" min={descriptor.min} max={descriptor.max}
+    step={descriptor.step} disabled={locked} value={draft ?? Number(value.toFixed(3))}
+    onChange={event => setDraft(event.target.value)} onBlur={commit} onKeyDown={event => {
+      if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur(); }
+      if (event.key === 'Escape') { event.preventDefault(); setDraft(null); }
+      event.stopPropagation();
+    }} />;
+}
+
 export function MotionInspector({
   activeOverlay,
   overlays,
@@ -26,6 +48,9 @@ export function MotionInspector({
   onUpdateOverlay,
   onAddKeyframe,
   onAddPositionKeyframe,
+  onTogglePropertyKeyframe,
+  frameRate = 30,
+  displayRate = 1,
   onUpdateKeyframe,
   onRemoveKeyframe,
   onSeek,
@@ -39,6 +64,7 @@ export function MotionInspector({
     ? keyframes.filter(keyframe => String(keyframe.targetId) === String(activeOverlay.id))
     : [];
   const keyframeGroups = groupMotionKeyframesByTime(targetKeyframes);
+  const evaluated = buildMotionAutomationStyle(targetKeyframes, playhead, activeOverlay || {});
 
   const updateKeyframeGroup = (group, changes) => {
     group.keyframes.forEach(keyframe => onUpdateKeyframe(keyframe.id, changes));
@@ -64,6 +90,7 @@ export function MotionInspector({
       <label className="inspector-select-field">
         <span>Target layer</span>
         <select
+          aria-label="Target layer"
           value={activeOverlay?.id || ""}
           onChange={event => onSelectOverlay(event.target.value)}
         >
@@ -78,6 +105,35 @@ export function MotionInspector({
 
       {activeOverlay ? (
         <>
+          {activeOverlay.textAnimator && <details className="advanced-tool-section" open><summary>Text choreography</summary>
+            <p>0 shows the starting arrangement; 100 settles the selected letters or words. Set order, stagger and starting poses in Titles.</p>
+            <div className="motion-position-grid"><label><span>Text progress (%)</span><StrokePropertyValue key={`${activeOverlay.id}:textProgress`}
+              descriptor={studioMotionPropertiesForTarget(activeOverlay).find(p => p.id === "textProgress")}
+              value={evaluated.textProgress} playhead={playhead} locked={keyframesLocked}
+              onCommit={value => onUpdateOverlay("textProgress", value)} /></label>
+              <button type="button" disabled={keyframesLocked || !onTogglePropertyKeyframe}
+                aria-label={`${motionKeyAtPlayhead(targetKeyframes, activeOverlay.id, "textProgress", playhead, motionKeyframeTolerance(frameRate, displayRate)) ? "Remove" : "Add"} text progress key at playhead`}
+                onClick={() => onTogglePropertyKeyframe?.("textProgress")}>◇ Toggle progress key</button></div>
+          </details>}
+          {activeOverlay.vectorShape && <details className="advanced-tool-section" open>
+            <summary>Draw-on stroke</summary>
+            <p>Reveal the outline by distance along the path. Start ≥ end hides the stroke; the fill stays visible.
+              Offset moves that segment: closed paths loop across the seam; open paths clip at their ends.
+              Set the width and color in Graphics → Vector artwork.</p>
+            {['strokeStart', 'strokeEnd', 'strokeOffset'].map(property => {
+              const descriptor = studioMotionPropertiesForTarget(activeOverlay).find(item => item.id === property);
+              const key = motionKeyAtPlayhead(targetKeyframes, activeOverlay.id, property, playhead,
+                motionKeyframeTolerance(frameRate, displayRate));
+              return <div className="motion-position-grid" key={property}>
+                <label><span>{descriptor.label} (%)</span><StrokePropertyValue key={`${activeOverlay.id}:${property}`}
+                  descriptor={descriptor} value={evaluated[property]} playhead={playhead} locked={keyframesLocked}
+                  onCommit={value => onUpdateOverlay(property, value)} /></label>
+                <button type="button" disabled={keyframesLocked || !onTogglePropertyKeyframe}
+                  aria-label={`${key ? 'Remove' : 'Add'} ${descriptor.label.toLowerCase()} key at playhead`}
+                  aria-pressed={!!key} onClick={() => onTogglePropertyKeyframe?.(property)}>{key ? '◆ Remove key' : '◇ Add key'}</button>
+              </div>;
+            })}
+          </details>}
           <div className="motion-position-grid">
             <label>
               <span>X</span>
@@ -86,7 +142,7 @@ export function MotionInspector({
                 min={0}
                 max={100}
                 step={0.1}
-                value={Number(activeOverlay.x ?? 50).toFixed(1)}
+                value={Number(evaluated.x ?? 50).toFixed(1)}
                 onChange={event => onUpdateOverlay("x", Number(event.target.value))}
               />
             </label>
@@ -97,7 +153,7 @@ export function MotionInspector({
                 min={0}
                 max={100}
                 step={0.1}
-                value={Number(activeOverlay.y ?? 50).toFixed(1)}
+                value={Number(evaluated.y ?? 50).toFixed(1)}
                 onChange={event => onUpdateOverlay("y", Number(event.target.value))}
               />
             </label>
@@ -108,7 +164,7 @@ export function MotionInspector({
                 min={0.1}
                 max={5}
                 step={0.05}
-                value={Number(activeOverlay.scale ?? 1).toFixed(2)}
+                value={Number(evaluated.scale ?? 1).toFixed(2)}
                 onChange={event => onUpdateOverlay("scale", Number(event.target.value))}
               />
             </label>
@@ -119,7 +175,7 @@ export function MotionInspector({
                 min={-360}
                 max={360}
                 step={1}
-                value={Number(activeOverlay.rotation ?? 0).toFixed(0)}
+                value={Number(evaluated.rotation ?? 0).toFixed(0)}
                 onChange={event => onUpdateOverlay("rotation", Number(event.target.value))}
               />
             </label>
@@ -127,11 +183,11 @@ export function MotionInspector({
 
           <Range
             label="Opacity"
-            valueLabel={`${Math.round(Number(activeOverlay.opacity ?? 1) * 100)}%`}
+            valueLabel={`${Math.round(Number(evaluated.opacity ?? 1) * 100)}%`}
             min={0}
             max={1}
             step={0.01}
-            value={Number(activeOverlay.opacity ?? 1)}
+            value={Number(evaluated.opacity ?? 1)}
             onChange={event => onUpdateOverlay("opacity", Number(event.target.value))}
           />
 
@@ -304,20 +360,20 @@ export function MotionInspector({
             <div className="inspector-dual-range">
               <Range
                 label="Crop X"
-                valueLabel={`${Math.round(Number(activeOverlay.cropX || 0))}%`}
+                valueLabel={`${Math.round(Number(evaluated.cropX || 0))}%`}
                 min={0}
                 max={45}
                 step={1}
-                value={Number(activeOverlay.cropX || 0)}
+                value={Number(evaluated.cropX || 0)}
                 onChange={event => onUpdateOverlay("cropX", Number(event.target.value))}
               />
               <Range
                 label="Crop Y"
-                valueLabel={`${Math.round(Number(activeOverlay.cropY || 0))}%`}
+                valueLabel={`${Math.round(Number(evaluated.cropY || 0))}%`}
                 min={0}
                 max={45}
                 step={1}
-                value={Number(activeOverlay.cropY || 0)}
+                value={Number(evaluated.cropY || 0)}
                 onChange={event => onUpdateOverlay("cropY", Number(event.target.value))}
               />
             </div>
@@ -412,6 +468,7 @@ export function MotionInspector({
             })}
           </div>
           <StudioKeyframeCurveEditor key={activeOverlay.id} keyframes={targetKeyframes}
+            valueBounds={Object.fromEntries(studioMotionPropertiesForTarget(activeOverlay).map(item => [item.id, [item.min, item.max]]))}
             playhead={playhead}
             focusId={focusKeyframeId} onUpdate={onUpdateKeyframe} locked={keyframesLocked}
             onSelect={id => onSeek(Number(targetKeyframes.find(key => key.id === id)?.time || 0))} />

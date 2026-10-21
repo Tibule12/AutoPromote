@@ -100,8 +100,15 @@ function previousHashes() {
     const file = path.join(runtime, name, "day.json");
     if (name >= date || !/^\d{4}-\d{2}-\d{2}$/.test(name) || !fs.existsSync(file)) continue;
     const old = read(file);
-    for (const story of old.stories || [])
+    // Unpublished unfinished work may move to a later publication day. Retain
+    // deduplication for reviewed deliveries and every acknowledged/uncertain
+    // destination, rather than treating a saved source draft as publication.
+    for (const story of old.stories || []) {
+      if (story.status !== "REVIEWED") continue;
       for (const hash of [story.movieSha256, story.recordingSha256]) if (hash) hashes.add(hash);
+    }
+    for (const post of old.posts || [])
+      if (post.mediaSha256) hashes.add(post.mediaSha256);
   }
   return [...hashes];
 }

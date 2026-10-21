@@ -57,6 +57,29 @@ One provider generation was estimated at $0.80; no additional take or GPU
 instance restart is authorized by that bounded test. Review character/voice
 before the longer story around real Studio, Publisher and Queue recordings.
 
+The owner subsequently approved returning to shared Studio precision and motion
+capabilities with “then get to work.” Spatial cubic position handles and the
+source-interval programme clock are now implemented and boundedly verified at
+`reports/studio-spatial-paths-20261017/README.md`. Preserve the original extra-frame
+export and early failed captures as well as the corrected native movie, full
+matching timeline playback, exact restore and six geometry pairs. This private
+eight-second engineering example does not qualify the planned one-minute film,
+whole live picture/sound, vector contour editing or normal-account generation.
+Continue shared S04 motion/vector depth and S02 speech/preview precision, then
+S03 occurrence/group ownership. No additional model generation, paid GPU work,
+main merge or deployment is authorized by the engine continuation.
+
+18 October continuation adds native single-contour vector artwork on ordinary
+image layers, using the existing transform/spatial motion and final compositor.
+Preserve the actual editable project, native movie/timeline, independent restore
+and five paired geometry checks at
+`reports/studio-vector-artwork-20261018/README.md`. Static contour authoring does
+not supply automatic logo/letter tracing, animated path morphs, trim paths or
+compound booleans. This private engineering example is not a new selected brand
+identity or the planned one-minute creative production. Continue shared S04 and
+S02 precision, then S03 ownership; paid execution/main/deployment restrictions
+and prior chosen logo/publishing receipts remain unchanged.
+
 At the end of every Studio session, update product readiness, capability and
 combination matrices, exact remaining blockers, evidence and next task.
 Update preview/render parity when affected. Validate with
@@ -78,3 +101,13 @@ schedule or confirmed platform publication. Creative schedule/caption choices
 are delegated. Use appropriate disclosures for stock/demo footage and exclude
 private diagnostic speech. This does not grant production deployment, main
 merge, paid GPU restarts, showroom/hero qualification or product readiness.
+
+18 October creative continuation now delivers the actual one-minute creator film and separate five-word edit at `reports/studio-creator-film-20261018/README.md`. Preserve both native projects, complete timeline recordings, independent exact restores, original sound sources and prior layout. Technical export success is separate from owner creative/listening approval or destination scheduling. The shared compositor reuses only identical held still poses; decoded video remains uncached. Whole predictive parity, capture smoothness and shared S04/S02/S03 limits remain unchanged.
+
+18 October continuation adds ordinary vector Stroke start / Stroke end motion keys, native inspector/timeline rows and the shared sampled-distance outline renderer. Preserve first radial-join export/failure and corrected movie, complete matching timeline, exact backup and restore at `reports/studio-vector-trim-20261018/README.md`. Fill stays visible and crossed/equal trim ranges hide the stroke. This does not add contour morphs, automatic tracing, wrapping offset or a separate engine. Keep shared S04 motion/vector/glyph depth and S02 precision, then S03 ownership; preserve the private creator-minute review and all prior publishing/identity receipts.
+
+18 October continuation adds vector Stroke offset on ordinary motion keys: closed contours wrap across their original seam and open paths clip at endpoints; zero offset preserves prior projects. Preserve the native three-contour edit, first source take, corrected film, complete matching timeline and exact recovery at `reports/studio-vector-offset-20261018/README.md`. Numeric signed drafts commit with Enter/blur; Escape/seek/lock cancel them. This does not add automatic glyph tracing, contour morphs, paid jobs, public creative approval or readiness promotion. Shared S04/S02/S03 priorities, selected identity and publishing receipts remain unchanged.
+
+18 October substantial continuation adds single-copy letter/word Text choreography and a real one-minute film at `reports/studio-text-choreography-20261018/README.md`. Preserve the completed native final, full matching Studio recording, exact backup/fresh restore, original sound, first interrupted export and second observer timeout. All 268 local unit transforms/alpha match at sixteen fixed times; strict colour/edge parity fails 13/16, so do not claim pixel parity or change thresholds to qualify it. No creative/listening/readiness promotion is implied. Prioritize S02 colour/edge diagnosis and CPU latency alongside S04 motion/glyph depth, then S03 ownership; selected identity/publishing and paid/main/deployment restrictions remain.
+
+18 October owner-directed logo design adds Logo Workshop, blank-canvas entry, editable compound vector letter/counter outlines, three symbol families and native transparent SVG/PNG masters. Preserve the AutoPromote study, native film/full timeline, exact restore and source provenance at `reports/studio-logo-design-20261018/README.md`. The selected app identity is unchanged. Static masters use base layout before motion and reject unsupported composition effects. Three settled native vector pairs pass; this does not repair earlier typography colour/edge failures, qualify unrestricted AI design/tracing/morphs or imply creative/PRO/production approval. Keep the shared S02/S04/S03 backlog and existing paid/main/deployment boundaries.

@@ -2,6 +2,9 @@
 // graphics become ordinary layers, groups and property keys immediately.
 import { sanitizeLogoSvg } from './motion/sanitizeLogoSvg';
 import { GROUP_KIND, GROUP_TRANSFORM, GROUP_BOUNDS, studioGroupTree, validateStudioGroupKeyframes, validateStudioGroupComposite } from './studioGroups';
+import { validateSpatialCurve } from './studioAutomation';
+import { validateStudioTextAnimation } from './studioTextAnimator';
+import { validateStudioVectorShape, studioVectorSvg } from './studioVectorShape';
 
 const number = (value, low, high, label) => {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < low || value > high)
@@ -40,7 +43,8 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
     if (!Array.isArray(rows) || rows.length > 256) throw Error('Use at most 256 property keys per layer or group.');
     const times = new Set();
     for (const key of rows) {
-      only(key, ['property', 'time', 'value', 'easing', 'curve'], 'keyframe');
+      only(key, ['property', 'time', 'value', 'easing', 'curve', 'spatialCurve'], 'keyframe');
+      validateSpatialCurve(key);
       if (!limits[key.property] || !easings.includes(key.easing)) throw Error('Unsupported property or interpolation.');
       // Compare on the document's timebase. Decimal start + duration can land
       // just below its exact end key (for example 1.445 + 2.405 versus 3.85).
@@ -65,27 +69,33 @@ export function validateStudioGraphicsPackage(input, { duration, aspect, existin
   };
   const cleanLayers = input.layers.map(layer => {
     only(layer, ['id', 'name', 'type', 'text', 'svg', 'startTime', 'duration', 'x', 'y', 'scale', 'rotation', 'opacity',
-      'width', 'height', 'fontWeight', 'color', 'textAlign', 'strokeWidth', 'strokeColor', 'mask', 'keys'], 'layer');
-    identity(layer);
+      'width', 'height', 'fontWeight', 'color', 'textAlign', 'strokeWidth', 'strokeColor', 'mask', 'keys', 'textAnimator', 'textProgress', 'vectorShape'], 'layer');
+    identity(layer, layer.textAnimator ? { ...bounds, textProgress: [0, 100] } : bounds);
     for (const [property, limits] of Object.entries(bounds)) number(layer[property], ...limits, property);
     number(layer.width, 1, 100, 'Layer width');
     if (layer.mask !== undefined) validateStudioGroupComposite({ mask: layer.mask });
     if (layer.type === 'text') {
+      validateStudioTextAnimation(layer, layer.keys || []);
       text(layer.text, 500, 'title text'); color(layer.color);
       if (layer.strokeColor !== undefined) color(layer.strokeColor);
       if (layer.strokeWidth !== undefined) number(layer.strokeWidth, 0, 8, 'Outline width');
       if (![400, 600, 800, 900].includes(layer.fontWeight) || !['left', 'center', 'right'].includes(layer.textAlign))
         throw Error('Choose Inter weight 400, 600, 800 or 900 and a supported title alignment.');
-      if (layer.svg !== undefined || layer.height !== undefined) throw Error('Text layers use copy and title sizing; artwork uses SVG and height.');
+      if (layer.svg !== undefined || layer.vectorShape !== undefined || layer.height !== undefined) throw Error('Text layers use copy and title sizing; artwork uses SVG and height.');
       return { ...layer };
     }
-    if (layer.type !== 'artwork' || typeof layer.svg !== 'string' || layer.svg.length > 512 * 1024)
+    if (layer.type !== 'artwork' || (!layer.vectorShape && (typeof layer.svg !== 'string' || layer.svg.length > 512 * 1024)))
       throw Error('Artwork must contain a bounded inline SVG.');
-    if (['text', 'color', 'fontWeight', 'textAlign', 'strokeWidth', 'strokeColor'].some(field => layer[field] !== undefined))
+    if (layer.vectorShape) {
+      if (layer.svg !== undefined) throw Error('Choose editable vector geometry or an SVG, not both.');
+      validateStudioVectorShape(layer.vectorShape);
+    }
+    if (['text', 'color', 'fontWeight', 'textAlign', 'strokeWidth', 'strokeColor', 'textAnimator', 'textProgress'].some(field => layer[field] !== undefined))
       throw Error('Artwork styling belongs in its SVG, not in title fields.');
     number(layer.height, 1, 100, 'Artwork height');
-    artworkBytes += layer.svg.length;
-    return { ...layer, svg: sanitizeLogoSvg(layer.svg) };
+    const svg = layer.vectorShape ? studioVectorSvg(layer.vectorShape) : sanitizeLogoSvg(layer.svg);
+    artworkBytes += svg.length;
+    return layer.vectorShape ? { ...layer } : { ...layer, svg };
   });
   const cleanGroups = input.groups.map(group => {
     only(group, ['id', 'name', 'layerIds', 'startTime', 'duration', 'mask', 'keys'], 'group'); identity(group, GROUP_BOUNDS);
@@ -132,7 +142,7 @@ export async function buildStudioGraphicsPackage({ input, overlays, keyframes, c
         bg: 'transparent', shadow: 'none', strokeWidth: layer.strokeWidth || 0, fontFamily: 'Inter', motionDesign: true,
         animation: { enter: 'none', exit: 'none', enterDuration: 0, exitDuration: 0 } };
       if (layer.type === 'artwork') {
-        const file = await rasterize(layer.svg, layer.name), src = createUrl(file); urls.push(src);
+        const file = await rasterize(layer.vectorShape ? studioVectorSvg(layer.vectorShape) : layer.svg, layer.name), src = createUrl(file); urls.push(src);
         Object.assign(ordinary, { type: 'image', file, src, isLocal: true, bRollMode: 'pip', mediaFit: 'contain',
           frameShape: 'edge', borderRadius: 0, glow: { enabled: false }, layerShadow: { enabled: false }, motionBlur: { enabled: false } });
       }

@@ -17,10 +17,13 @@ import StudioMotionPathEditor from './StudioMotionPathEditor';
 import StudioKineticTypePanel from './StudioKineticTypePanel';
 import { buildStudioKineticType } from './studioKineticType';
 import StudioGraphicsImport from './StudioGraphicsImport';
-import { buildStudioGraphicsPackage } from './studioGraphicsPackage';
+import { buildStudioGraphicsPackage, rasterizeStudioArtwork } from './studioGraphicsPackage';
+import StudioVectorShapePanel from './StudioVectorShapePanel';
+import StudioLogoDesignPanel from './StudioLogoDesignPanel';
+import { studioVectorSvg, studioVectorUri, validateStudioVectorShape } from './studioVectorShape';
 import StudioLogoMotionPanel from './StudioLogoMotionPanel';
 import { buildStudioLogoMotion } from './studioLogoMotion';
-import { editStudioPositionPose } from './studioMotionEditing';
+import { editStudioPositionPose, editStudioSpatialPath } from './studioMotionEditing';
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
@@ -123,6 +126,9 @@ import StudioSubjectVfxPanel from "./StudioSubjectVfxPanel";
 import { findUncoveredCaptionSpeechRanges, mapCaptionSilencesToProgramme } from "./studioCaptionCoverage";
 import { historyMediaIdentity, historySubjectVfxIdentity } from "./studioHistoryMedia";
 import { packageStudioBackup } from "./studioProjectBackupMedia";
+import StudioAnimatedText from "./StudioAnimatedText";
+import StudioTextAnimatorPanel from "./StudioTextAnimatorPanel";
+import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { titleAnimationPose, normalizeStudioTitleText } from "./studioTitleLayout";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
 import { validateSubjectVfxExport, resolveSubjectVfxProgrammePreview, subjectVfxRevision } from "./studioSubjectVfxContract";
@@ -2786,9 +2792,10 @@ const ViralClipStudio = ({
   const [trackStates, setTrackStates] = useState(DEFAULT_TRACK_STATES);
   const [motionKeyframes, setMotionKeyframes] = useState([]);
   const [motionPathPreview, setMotionPathPreview] = useState(null);
-  const previewMotionKeyframes = useMemo(() => motionPathPreview
-    ? editStudioPositionPose(motionKeyframes, motionPathPreview.targetId, motionPathPreview.time,
-      motionPathPreview, () => 'transient-position') : motionKeyframes, [motionKeyframes, motionPathPreview]);
+  const previewMotionKeyframes = useMemo(() => !motionPathPreview ? motionKeyframes : motionPathPreview.keys
+    ? [...motionKeyframes.filter(key => key.targetId !== motionPathPreview.targetId), ...motionPathPreview.keys]
+    : editStudioPositionPose(motionKeyframes, motionPathPreview.targetId, motionPathPreview.time,
+      motionPathPreview, () => 'transient-position'), [motionKeyframes, motionPathPreview]);
   const [motionScenes, setMotionScenes] = useState([]);
   const [compositionOrder, setCompositionOrder] = useState(null);
   const [selectedMotionId, setSelectedMotionId] = useState(null);
@@ -10027,7 +10034,11 @@ const ViralClipStudio = ({
   const updateMotionKeyframe = (keyframeId, changes) => {
     const key = motionKeyframes.find(item => item.id === keyframeId);
     if (!key || !allowTimelineTimingEdit(motionKeyframeTrack(key.targetId))) return;
-    const next = motionKeyframes.map(keyframe => keyframe.id === keyframeId ? { ...keyframe, ...changes } : keyframe);
+    // An authored spatial interval travels through one shared timing curve.
+    const timing = Object.fromEntries(Object.entries(changes).filter(([field]) => ['easing', 'curve'].includes(field)));
+    const next = motionKeyframes.map(keyframe => keyframe.id === keyframeId ? { ...keyframe, ...changes }
+      : key.spatialCurve && keyframe.spatialCurve && keyframe.targetId === key.targetId && keyframe.time === key.time &&
+        ['x', 'y'].includes(keyframe.property) ? { ...keyframe, ...timing } : keyframe);
     try { validateStudioGroupKeyframes(compositionGroups.groups, next); }
     catch (error) { setStudioActionMessage(error.message); return; }
     setMotionKeyframes(next);
@@ -10055,6 +10066,17 @@ const ViralClipStudio = ({
     if (!key || !allowTimelineTimingEdit(motionKeyframeTrack(key.targetId))) return;
     setMotionKeyframes(current => current.filter(item => item.id !== id));
     setPreviewFinishedFile(false);
+  };
+
+  const editMotionSpatialPath = (endTime, changes) => {
+    if (!motionInspectorTarget || !allowTimelineTimingEdit(motionKeyframeTrack(motionTargetId))) return;
+    try {
+      const next = editStudioSpatialPath(motionKeyframes, motionTargetId, endTime, changes);
+      validateStudioGroupKeyframes(compositionGroups.groups, next);
+      setMotionKeyframes(next); setPreviewFinishedFile(false); setMotionPathPreview(null);
+      setStudioActionMessage(changes.enabled === false ? 'Path straightened. Position keys and timing are retained.'
+        : 'Spatial path updated. Drag the amber handles to shape its travel.');
+    } catch (error) { setStudioActionMessage(error.message); }
   };
 
   const editMotionKeyframeSelection = (ids, action, options) => {
@@ -15238,10 +15260,13 @@ const ViralClipStudio = ({
       music.muted = false;
       music.defaultMuted = false;
       music.loop = musicTrack?.loop !== false;
-      music.volume =
+      // HTML media volume is limited to unity. The decoded-buffer GainNode
+      // retains the full automation gain; its fallback element must not throw
+      // when a valid 0–200% automation key raises the combined gain above one.
+      music.volume = clampAudioControl(
         clampAudioControl(musicTrack?.volume ?? musicVolume, 0, 0.6, 0.15) *
         previewGain *
-        fadeGain * automationGain * constantMusicDuckGain(musicTrack);
+        fadeGain * automationGain * constantMusicDuckGain(musicTrack), 0, 1, 0);
       music.playbackRate = 1;
       music.preservesPitch = true;
 
@@ -15595,11 +15620,11 @@ const ViralClipStudio = ({
           time: previewTimelineTime,
           fallback: 100,
         }) / 100;
-      music.volume =
+      music.volume = clampAudioControl(
         clampAudioControl(musicTrack?.volume ?? musicVolume, 0, 0.6, 0.15) *
         baseGain *
         fadeGain *
-        automationGain * constantMusicDuckGain(musicTrack);
+        automationGain * constantMusicDuckGain(musicTrack), 0, 1, 0);
       return;
     }
 
@@ -16001,6 +16026,30 @@ const ViralClipStudio = ({
     );
 
     event.target.value = null;
+  };
+
+  const addVectorArtwork = async vectorShape => {
+    if (!allowTimelineTimingEdit('graphics')) throw Error('Unlock the Graphics track.');
+    if (!allowTimelineTimingEdit('broll')) throw Error('Unlock the image layer track.');
+    if (overlays.length >= 128) throw Error('This project has reached its 128-layer limit.');
+    const projectId=activeProjectIdRef.current,signature=lastSnapshotSignatureRef.current;
+    const file=await rasterizeStudioArtwork(studioVectorSvg(vectorShape),'Vector artwork');
+    if (activeProjectIdRef.current!==projectId || lastSnapshotSignatureRef.current!==signature)
+      throw Error('The project changed while artwork was prepared. Add it again.');
+    const id=createSecureId('vector'),aspect=previewAspectRatio||16/9;
+    const layer={id,type:'image',name:'Vector artwork',vectorShape,file,src:URL.createObjectURL(file),isLocal:true,
+      x:50,y:50,width:30,height:30*aspect,startTime:0,duration:liveTimelineDuration,anchorX:50,anchorY:50,
+      bRollMode:'pip',mediaFit:'contain',frameShape:'edge',borderRadius:0,shadow:'none',motionDesign:true,
+      opacity:1,scale:1,rotation:0,animation:{enter:'none',exit:'none',enterDuration:0,exitDuration:0}};
+    setOverlays(previous=>[...previous,layer]);setActiveOverlayId(id);setComparisonMode('after');setPreviewFinishedFile(false);
+    setStudioActionMessage('Vector artwork added. Shape its points here, then animate its layer in Motion.');
+  };
+  const updateVectorArtwork = (id,vectorShape) => {
+    if (!allowTimelineTimingEdit('graphics')) throw Error('Unlock the Graphics track.');
+    if (!allowTimelineTimingEdit('broll')) throw Error('Unlock the image layer track.');
+    validateStudioVectorShape(vectorShape);
+    setOverlays(previous=>previous.map(layer=>layer.id===id?{...layer,vectorShape}:layer));
+    setPreviewFinishedFile(false);
   };
 
   const addLogoMotionLayer = async event => {
@@ -16892,6 +16941,11 @@ const ViralClipStudio = ({
 
   const updateOverlayText = (id, newText) => {
     const safeText = normalizeStudioTitleText(newText);
+    const target = overlays.find(layer => layer.id === id);
+    if (target?.textAnimator) {
+      try { validateStudioTextAnimation({ ...target, text: safeText }); }
+      catch (error) { setStudioActionMessage(error.message); return; }
+    }
     setOverlays(overlays.map(o => (o.id === id ? { ...o, text: safeText } : o)));
   };
 
@@ -17052,6 +17106,11 @@ const ViralClipStudio = ({
   };
 
   const setOverlayStyleOption = (id, key, value) => {
+    const target = overlays.find(layer => layer.id === id);
+    if (target?.textAnimator) {
+      try { validateStudioTextAnimation({ ...target, [key]: value }); }
+      catch (error) { setStudioActionMessage(error.message); return; }
+    }
     setOverlays(prev =>
       prev.map(overlay => (overlay.id === id ? { ...overlay, [key]: value } : overlay))
     );
@@ -19192,7 +19251,8 @@ const ViralClipStudio = ({
                       <StudioMotionPathEditor key={motionTargetId} keyframes={activeMotionTargetKeyframes}
                         target={{ ...motionInspectorTarget, id: motionTargetId }} time={previewTimelineTime}
                         locked={Boolean(trackStates[motionKeyframeTrack(motionTargetId)]?.locked)}
-                        onCommit={editMotionPositionPose} onSeek={time => { pauseSynchronizedPreview(); jumpToOutputTimelineTime(time); }}
+                        onCommit={editMotionPositionPose} onPathChange={editMotionSpatialPath}
+                        onSeek={time => { pauseSynchronizedPreview(); jumpToOutputTimelineTime(time); }}
                         onPreview={point => setMotionPathPreview(point ? { ...point, targetId: motionTargetId } : null)}
                         toDisplay={point => studioGroupProgrammePoint(compositionGroups, motionTargetId,
                           point.x, point.y, previewAspectRatio, 1, motionKeyframes, point.time)}
@@ -19584,7 +19644,6 @@ const ViralClipStudio = ({
                         .map((overlay, index) => {
                           const safeOverlayText = overlay.type === 'text' && !overlay.isCaption && !overlay.bRollMode
                             ? normalizeStudioTitleText(overlay.text) : normalizePlainText(overlay.text);
-                          const safeOverlaySrc = getSafeMediaSource(overlay.src);
                           const isFullscreen = overlay.bRollMode === "fullscreen";
                           const isMediaOverlay = ["video", "image"].includes(overlay.type);
                           const frameShape = normalizeOverlayFrameShape(
@@ -19606,6 +19665,7 @@ const ViralClipStudio = ({
                             previewTimelineTime,
                             overlay
                           );
+                          const safeOverlaySrc = overlay.vectorShape ? studioVectorUri(overlay.vectorShape, overlayMotion) : getSafeMediaSource(overlay.src);
                           const isStyledTitle = overlay.type === "text" && !isFullscreen;
                           const titlePose = isStyledTitle
                             ? titleAnimationPose(overlay, previewTimelineTime)
@@ -19733,6 +19793,8 @@ const ViralClipStudio = ({
                                       )}
                                     </small>
                                   </div>
+                                ) : overlay.textAnimator && isStyledTitle ? (
+                                  <StudioAnimatedText layer={overlay} programmeWidth={720 * previewAspectRatio} progress={overlayMotion.textProgress} />
                                 ) : overlay.isRainbow ? (
                                   <RainbowText
                                     text={safeOverlayText}
@@ -24055,6 +24117,13 @@ const ViralClipStudio = ({
                     </span>
                   </div>
 
+                  <StudioLogoDesignPanel locked={!!trackStates.graphics?.locked||!!trackStates.broll?.locked}
+                    duration={liveTimelineDuration} aspect={previewAspectRatio||16/9}
+                    groups={effectiveCompoundClips} layers={overlays} order={compositionIds}
+                    onBuild={async input => {
+                      if (!allowTimelineTimingEdit('broll')) throw Error('Unlock the image layer track.');
+                      return importGraphicsComposition(input);
+                    }} />
                   <StudioLogoMotionPanel locked={!!trackStates.graphics?.locked} programmeDuration={liveTimelineDuration}
                     onBuild={async options => {
                       const projectId = activeProjectIdRef.current, signature = lastSnapshotSignatureRef.current;
@@ -24068,6 +24137,9 @@ const ViralClipStudio = ({
                         width:Math.round(720*aspect), height:720, measure:value=>context.measureText(value).width }));
                     }} />
                   <StudioGraphicsImport onImport={importGraphicsComposition} locked={!!trackStates.graphics?.locked} />
+                  <StudioVectorShapePanel layers={overlays.filter(layer=>layer.vectorShape)} selectedId={activeOverlayId}
+                    onSelect={setActiveOverlayId} onAdd={addVectorArtwork} onChange={updateVectorArtwork}
+                    locked={!!trackStates.graphics?.locked||!!trackStates.broll?.locked} />
 
                   <div className="title-preset-grid" aria-label="Add title layer">
                     <button type="button" onClick={() => addTextOverlay("headline")}>
@@ -24128,6 +24200,26 @@ const ViralClipStudio = ({
                         />
                       </label>
 
+                      {!activeOverlay.bRollMode && <StudioTextAnimatorPanel key={activeOverlay.id} layer={activeOverlay}
+                        locked={Boolean(trackStates.graphics?.locked)}
+                        onChange={spec => { setOverlayStyleOption(activeOverlay.id, "textAnimator", spec); setPreviewFinishedFile(false); }}
+                        onBuild={spec => {
+                          if (!allowTimelineTimingEdit("graphics")) return;
+                          try {
+                            validateStudioTextAnimation({ ...activeOverlay, textAnimator: spec });
+                            const start = Number(activeOverlay.startTime || 0), end = start + Math.min(1.8, Number(activeOverlay.duration || 3));
+                            setOverlays(layers => layers.map(l => l.id === activeOverlay.id ? { ...l, textAnimator: spec, textProgress: 100 } : l));
+                            setMotionKeyframes(keys => [...keys.filter(k => k.targetId !== activeOverlay.id || k.property !== "textProgress"),
+                              ...[start, end].map((time, i) => ({ id: createSecureId("motion-key"), targetId: activeOverlay.id, property: "textProgress", time, value: i * 100, easing: "linear" }))]);
+                            setPreviewFinishedFile(false); setStudioActionMessage("Text choreography created. Edit Text progress in the Motion timeline.");
+                          } catch (e) { setStudioActionMessage(e.message); }
+                        }}
+                        onDisable={() => {
+                          if (!allowTimelineTimingEdit("graphics")) return;
+                          setOverlays(layers => layers.map(l => { if (l.id !== activeOverlay.id) return l; const { textAnimator, textProgress, ...rest } = l; return rest; }));
+                          setMotionKeyframes(keys => keys.filter(k => k.targetId !== activeOverlay.id || k.property !== "textProgress"));
+                          setPreviewFinishedFile(false);
+                        }} />}
                       <div className="title-typography-row">
                         <label className="inspector-select-field">
                           <span>Font</span>
@@ -24854,13 +24946,17 @@ const ViralClipStudio = ({
                     }}
                     onAddKeyframe={addMotionKeyframesAtPlayhead}
                     onAddPositionKeyframe={() => editMotionPositionPose(previewTimelineTime, buildMotionAutomationStyle(activeMotionTargetKeyframes, previewTimelineTime, motionInspectorTarget))}
+                    onTogglePropertyKeyframe={property => editMotionPropertyAtPlayhead(motionTargetId, property, undefined, true)}
+                    frameRate={exportSettings.fps} displayRate={previewSpeed}
                     onUpdateKeyframe={updateMotionKeyframe}
                     onRemoveKeyframe={removeMotionKeyframe}
                     onSeek={jumpToOutputTimelineTime}
                     showMotionPath={showMotionPath}
                     onToggleMotionPath={() => setShowMotionPath(current => !current)}
                     onResetMotion={() => {
-                      const reset = { x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, cropX: 0, cropY: 0 };
+                      const reset = { x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, cropX: 0, cropY: 0,
+                        ...(motionInspectorTarget?.textAnimator ? { textProgress: 100 } : {}),
+                        ...(motionInspectorTarget?.vectorShape ? { strokeStart: 0, strokeEnd: 100, strokeOffset: 0 } : {}) };
                       if (motionTargetId === "main-video") setMainTransform(current => ({ ...current, ...reset }));
                       else setOverlays(current => current.map(overlay => overlay.id === motionTargetId ? { ...overlay, ...reset } : overlay));
                       setMotionKeyframes(current => current.filter(key => key.targetId !== motionTargetId));

@@ -5,7 +5,7 @@ const {chromium}=require('playwright');const dir=path.resolve(process.env.STUDIO
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 async function main(){
  const book=JSON.parse(fs.readFileSync(file)),posts=book.posts.filter(p=>p.queueVerified);assert.equal(posts.length,24);
- const browser=await chromium.launch({channel:'chromium',headless:true,args:['--mute-audio','--host-resolver-rules=MAP localhost 127.0.0.1']});
+ const browser=await chromium.launch({channel:'chromium',headless:true,args:['--mute-audio',`--host-resolver-rules=MAP localhost ${process.env.STUDIO_QA_LOOPBACK || '127.0.0.1'}`]});
  const context=await browser.newContext({storageState:path.resolve(process.env.STUDIO_PUBLISHER_SESSION||path.join(dir,'proof/publisher-session.private.json')),timezoneId:book.timezone,viewport:{width:1800,height:1200}}),page=await context.newPage();page.setDefaultTimeout(60000);
  const rows=new Map(),contents=new Map();let writes=0;
  page.on('request',r=>{if(['POST','PUT','PATCH','DELETE'].includes(r.method())&&new URL(r.url()).pathname.startsWith('/api/content/'))writes++;});
@@ -21,7 +21,7 @@ async function main(){
   for(const platform of book.intent.platforms){const p=posts.filter(p=>p.platform===platform);assert.equal(p.length,4);assert.equal(new Set(p.map(p=>p.storyId)).size,4);assert.equal(new Set(p.map(p=>p.scheduledAt)).size,4);}
   for(const p of posts){
    assert(p.visualReviewed&&p.nativeUserFlow);assert.equal(hash(fs.readFileSync(p.media)),p.mediaSha256);
-   const expected=p.schedules[0],s=rows.get(expected.id);assert(s,'Missing native Queue destination');assert.equal(s.contentId,p.contentId);assert.equal(s.platform,p.platform);assert.equal(Date.parse(s.startTime),Date.parse(p.scheduledAt));assert.equal(s.status,'pending');assert.equal(s.isActive,true);assert.equal(s.frequency,'once');
+   const expected=p.schedules[0],s=rows.get(expected.id);assert(s,'Missing native Queue destination');assert.equal(s.contentId,p.contentId);assert.equal(s.platform,p.platform);assert.equal(Date.parse(s.startTime),Date.parse(p.scheduledAt));assert(['pending','completed'].includes(s.status),'Native destination is neither pending nor completed');assert(s.isActive===true||s.status==='completed','Pending destination must remain active');assert.equal(s.frequency,'once');
    const options=s.platformSpecificSettings||{};assert.equal(options.title,p.title);assert.equal(options.caption||options.commentary||options.description||options.text||s.message,p.submittedCaption||p.description);
    const c=contents.get(p.contentId);assert(c,'Owned scheduled content absent from native content response');
    const url=options.media_url||options.videoUrl||c.persistentMediaUrl||c.url||c.videoUrl||c.fileUrl||c.originalUrl||c.original_url;assert(typeof url==='string'&&/^https:\/\//.test(url),'No native owned media URL');

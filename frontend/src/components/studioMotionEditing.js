@@ -1,4 +1,4 @@
-import { buildMotionAutomationStyle, interpolateAutomationValue } from './studioAutomation';
+import { buildMotionAutomationStyle, interpolateAutomationValue, validateSpatialCurve, SPATIAL_CURVE_STEPS } from './studioAutomation';
 
 const tick = time => Math.round(time * 90000) / 90000;
 export function editStudioPositionPose(keys, targetId, time, position, createId) {
@@ -18,13 +18,58 @@ export function editStudioPositionPose(keys, targetId, time, position, createId)
 export function studioPositionPath(keys, fallback, draft) {
   const positions = keys.filter(key => ['x', 'y'].includes(key.property));
   const times = [...new Set(positions.map(key => tick(key.time)))].sort((a, b) => a - b);
-  const effective = draft ? editStudioPositionPose(positions, fallback.id, draft.time, draft, () => 'draft') : positions;
+  const effective = draft?.keys || (draft ? editStudioPositionPose(positions, fallback.id, draft.time, draft, () => 'draft') : positions);
   const at = time => ({ time, ...buildMotionAutomationStyle(effective, time, fallback) });
   const points = times.map(at), samples = [];
+  const steps = effective.some(key => key.spatialCurve) ? SPATIAL_CURVE_STEPS : 32;
   for (let index = 0; index < times.length - 1; index++)
-    for (let sample = 0; sample < 32; sample++) samples.push(at(times[index] + (times[index + 1] - times[index]) * sample / 32));
+    for (let sample = 0; sample < steps; sample++) samples.push(at(times[index] + (times[index + 1] - times[index]) * sample / steps));
   if (times.length) samples.push(at(times.at(-1)));
   return { points, samples };
+}
+
+// Each curve is carried by the existing arriving X/Y keys. Keep tangents as
+// offsets so moving an endpoint also moves its attached handle.
+export function studioPositionSegments(keys, targetId) {
+  const positions = keys.filter(key => key.targetId === targetId && ['x', 'y'].includes(key.property));
+  const times = [...new Set(positions.map(key => tick(key.time)))].sort((a, b) => a - b), segments = [];
+  const at = (time, axis) => positions.find(key => tick(key.time) === time && key.property === axis);
+  for (let index = 1; index < times.length; index++) {
+    const start = times[index - 1], end = times[index];
+    const left = ['x', 'y'].map(axis => at(start, axis)), right = ['x', 'y'].map(axis => at(end, axis));
+    if ([...left, ...right].some(key => !key)) continue;
+    right.forEach(validateSpatialCurve);
+    const first = {time: start, x: left[0].value, y: left[1].value}, last = {time: end, x: right[0].value, y: right[1].value};
+    const curved = right.every(key => key.spatialCurve !== undefined);
+    const coordinated = (right[0].easing || 'linear') === (right[1].easing || 'linear') &&
+      JSON.stringify(right[0].curve) === JSON.stringify(right[1].curve);
+    const controls = [0, 1].map(handle => ({ time: handle ? end : start,
+      ...Object.fromEntries(['x', 'y'].map((axis, i) => [axis, (handle ? last : first)[axis] +
+        (right[i].spatialCurve?.[handle] ?? (last[axis] - first[axis]) / 3 * (handle ? -1 : 1))])) }));
+    segments.push({start, end, first, last, controls, curved, coordinated, right});
+  }
+  return segments;
+}
+
+export function editStudioSpatialPath(keys, targetId, endTime, { enabled = true, handle, position } = {}) {
+  const segment = studioPositionSegments(keys, targetId).find(item => tick(item.end) === tick(endTime));
+  if (!segment) throw Error('Add paired X/Y position keys at both ends of this path interval.');
+  if (handle !== undefined && (![0, 1].includes(handle) || !position || ['x', 'y'].some(axis => !Number.isFinite(position[axis]))))
+    throw Error('Choose a path handle and finite coordinates.');
+  const ids = new Set(segment.right.map(key => key.id)), timing = segment.right[0];
+  return keys.map(key => {
+    if (!ids.has(key.id)) return key;
+    const next = {...key, easing: timing.easing || 'linear'};
+    delete next.curve;
+    if (timing.curve) next.curve = [...timing.curve];
+    delete next.spatialCurve;
+    if (enabled) {
+      next.spatialCurve = segment.controls.map((control, i) => control[key.property] - (i ? segment.last : segment.first)[key.property]);
+      if (handle !== undefined) next.spatialCurve[handle] = position[key.property] - (handle ? segment.last : segment.first)[key.property];
+      validateSpatialCurve(next);
+    }
+    return next;
+  });
 }
 
 export function studioPropertyVelocity(keys, property, time, start, end, fallback = 0, limits) {

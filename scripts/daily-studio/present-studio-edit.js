@@ -28,6 +28,8 @@ const { hash } = require("../../src/creativeTemplates/contract");
 const read = file => JSON.parse(fs.readFileSync(file));
 async function backup(page, file) {
   await h.rail(page);
+  const versions = page.getByLabel("Include saved versions in backup", { exact: true });
+  if (await versions.count() && await versions.isChecked()) await versions.uncheck();
   const waiting = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download project backup", exact: true }).click();
   await (await waiting).saveAs(path.join(folder, file));
@@ -62,17 +64,58 @@ function verifyKeys(saved, targetId, poses) {
       assert(key && Math.abs(key.value - value) < .001, `${targetId} ${property} ${time}`);
     }
 }
+async function capturePoses(page, saved, destination, verifyClocks) {
+  fs.mkdirSync(destination, { recursive: true });
+  const insertId = saved.snapshot.overlays.find(layer => layer.type === "video").id;
+  const clocks = [];
+  for (const time of config.poses) {
+    await seek(page, time);
+    if (verifyClocks) {
+      assert(!config.appendClips?.length && !config.resultStart,
+        "Declare a separate clock map for multi-source presentations");
+      await page.waitForFunction(({ id, sourceTime, resultTime }) => {
+        const source = document.querySelector('[data-testid="studio-after-video"]');
+        const insert = document.querySelector(`[data-studio-layer-id="${id}"] video`);
+        return [[source, sourceTime], [insert, resultTime]].every(([video, expected]) =>
+          video && video.readyState >= 2 && !video.seeking && Math.abs(video.currentTime - expected) <= 1 / 24);
+      }, { id: insertId, sourceTime: config.sourceStart + time, resultTime: time }, { timeout: 25000 });
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      clocks.push(await page.evaluate(({ id, time }) => ({ time, decoders: [
+        ["source", document.querySelector('[data-testid="studio-after-video"]')],
+        ["insert", document.querySelector(`[data-studio-layer-id="${id}"] video`)],
+      ].map(([role, video]) => ({ role, currentTime: video.currentTime, readyState: video.readyState,
+        seeking: video.seeking, decodedFrames: video.getVideoPlaybackQuality().totalVideoFrames })) }), { id: insertId, time }));
+    }
+    const target = path.join(destination, `live-${time}.png`);
+    if (fs.existsSync(target)) fs.renameSync(target, target.replace(".png", `.previous-${Date.now()}.png`));
+    await page.getByTestId("hook-preview-frame").screenshot({ path: target });
+  }
+  if (verifyClocks) {
+    const target = path.join(destination, "native-pose-clocks.json");
+    if (fs.existsSync(target)) fs.renameSync(target, target.replace(".json", `.previous-${Date.now()}.json`));
+    fs.writeFileSync(target, JSON.stringify({ canonicalHash: hash(saved.snapshot.studioDocument),
+      nativeSeekedDecoderReadiness: true, visualFramesRequireActualReview: true,
+      limitation: "Paused headless frame callbacks are not reliable; decoder readiness and actual visual poses do not qualify whole live/raster parity.", clocks,
+    }, null, 2));
+  }
+}
 async function main() {
   const action = process.argv[2] || "prepare";
-  assert(["prepare", "all", "render", "recover"].includes(action));
+  assert(["prepare", "all", "render", "recover", "poses"].includes(action));
   if (["prepare", "all"].includes(action)) assert(!fs.existsSync(path.join(folder, "native-edit.json")),
     "Preserve the prepared presentation; use render/recover");
-  const browser = await chromium.launch({ channel: "chromium", headless: true,
-    args: ["--mute-audio", "--host-resolver-rules=MAP localhost 127.0.0.1"] });
-  const context = await browser.newContext({
-    storageState: path.join(root, require("../../config/daily-studio.json").authState),
-    viewport: { width: 1920, height: 1200 }, acceptDownloads: true,
-  });
+  const launch = { channel: "chromium", headless: true,
+    args: ["--mute-audio", `--host-resolver-rules=MAP localhost ${process.env.STUDIO_QA_LOOPBACK || '127.0.0.1'}`] };
+  const profile = process.env.STUDIO_PRESENTATION_PERSISTENT_PROFILE;
+  const browser = profile ? null : await chromium.launch(launch);
+  const context = profile
+    ? await chromium.launchPersistentContext(path.resolve(root, profile), {
+        ...launch, viewport: { width: 1920, height: 1200 }, acceptDownloads: true,
+      })
+    : await browser.newContext({
+        storageState: path.join(root, require("../../config/daily-studio.json").authState),
+        viewport: { width: 1920, height: 1200 }, acceptDownloads: true,
+      });
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
   let submissions = 0;
@@ -83,10 +126,31 @@ async function main() {
     if (p.startsWith("/api/content/") && ["POST", "PUT", "PATCH", "DELETE"].includes(r.method()))
       publishingWrites.push(p);
   });
+  page.on("response", async response => {
+    if (new URL(response.url()).pathname !== "/api/media/process") return;
+    const data = await response.json().catch(() => ({}));
+    fs.writeFileSync(path.join(folder, "submission.json"), JSON.stringify({
+      observedAt: new Date().toISOString(), status: response.status(),
+      jobId: data.jobId || data.job_id, jobStatus: data.status,
+      nativeUiResponse: true, resubmissionAllowed: false,
+    }, null, 2));
+  });
   try {
     await page.goto("http://localhost:5000/", { waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: "Viral Clip Studio", exact: true }).click();
     assert(!await page.evaluate(() => !!window.__E2E_BYPASS));
+    if (action === "poses") {
+      await page.waitForFunction(() => document.querySelector('[aria-label="Restore project backup"]')?.disabled === false);
+      await page.getByLabel("Restore project backup", { exact: true })
+        .setInputFiles(path.join(folder, "PRESENTATION-before-export.autopromote.json"));
+      await page.getByRole("button", { name: config.projectName, exact: true }).click();
+      await h.rail(page); await pause(page); await q.tool(page, "Export");
+      const saved = await h.save(page, `pose-reopened-${Date.now()}`), edit = read(path.join(folder, "native-edit.json"));
+      assert.equal(hash(saved.snapshot.studioDocument), edit.canonicalHash);
+      await capturePoses(page, saved, path.join(folder, "poses-verified"), true);
+      assert.equal(submissions, 0); assert.equal(publishingWrites.length, 0);
+      return;
+    }
     if (["prepare", "all"].includes(action)) {
       let prepared;
       if (config.preparedProjectBackup) {
@@ -131,6 +195,42 @@ async function main() {
           const start = page.getByLabel(`Start for ${path.basename(config.voiceSource)}`, { exact: true });
           await start.fill("0"); await start.blur();
         }
+        if (config.reviseCameraKeys) {
+          await q.tool(page, "Motion");
+          await page.getByRole("button", { name: "Transform keyframes", exact: true }).click();
+          await page.getByLabel("Target layer", { exact: true }).selectOption("main-video");
+          const baseline = await h.save(page, "camera-before-revision");
+          for (const { time, ...properties } of config.camera) {
+            for (const [property, value] of Object.entries(properties)) {
+              const key = baseline.snapshot.motionKeyframes.find(item => item.targetId === "main-video" &&
+                item.property === property && Math.abs(item.time - time) < 1 / 90000);
+              assert(key, `Existing source ${property} key at ${time}`);
+              if (Math.abs(key.value - value) < .001) continue;
+              await page.getByLabel("Curve keyframe", { exact: true }).selectOption(key.id);
+              const input = page.getByLabel("Selected motion key value", { exact: true });
+              await input.fill(String(value)); await input.blur();
+            }
+          }
+        }
+        if (config.reviseResultKeys) {
+          await q.tool(page, "Motion");
+          await page.getByRole("button", { name: "Transform keyframes", exact: true }).click();
+          const baseline = await h.save(page, "result-before-revision");
+          const result = baseline.snapshot.overlays.find(layer => layer.type === "video");
+          assert(result, "Restore the actual same-clock result insert before revising its focus");
+          await page.getByLabel("Target layer", { exact: true }).selectOption(result.id);
+          for (const { time, ...properties } of config.result) {
+            for (const [property, value] of Object.entries(properties)) {
+              const key = baseline.snapshot.motionKeyframes.find(item => item.targetId === result.id &&
+                item.property === property && Math.abs(item.time - time) < 1 / 90000);
+              assert(key, `Existing result ${property} key at ${time}`);
+              if (Math.abs(key.value - value) < .001) continue;
+              await page.getByLabel("Curve keyframe", { exact: true }).selectOption(key.id);
+              const input = page.getByLabel("Selected motion key value", { exact: true });
+              await input.fill(String(value)); await input.blur();
+            }
+          }
+        }
         prepared = await h.save(page, "prepared-resumed");
       } else {
       if (config.sourceProjectBackup) {
@@ -165,9 +265,33 @@ async function main() {
       await q.tool(page, "Color");
       const rounded = page.getByLabel("Rounded main footage", { exact: true });
       if (await rounded.isChecked()) await rounded.uncheck();
-      await seek(page, config.sourceStart + (config.sourceDuration || config.duration));
+      if (config.editingFrameRate) {
+        await q.tool(page, "Export");
+        await page.getByLabel("Export frame rate", { exact: true })
+          .selectOption(String(config.editingFrameRate));
+      }
+      await backup(page, "SOURCE-IMPORTED.autopromote.json");
+      const slipOffset = config.sourceStartViaSlip === true;
+      if (slipOffset) assert(Math.abs(config.sourceStart / .04 - Math.round(config.sourceStart / .04)) < 1e-8,
+        "Use the actual native 0.04-second precision nudge");
+      await seek(page, (slipOffset ? 0 : config.sourceStart) + (config.sourceDuration || config.duration));
       await page.getByTestId("pro-quick-trim-end").click();
-      if (config.sourceStart > 0) {
+      if (slipOffset && config.sourceStart > 0) {
+        await q.tool(page, "Cut");
+        const advanced = page.locator(".precision-edit-details");
+        if (!await advanced.evaluate(element => element.open)) await advanced.locator("summary").click();
+        await page.getByLabel("Precision edit nudge", { exact: true }).selectOption("0.04");
+        const steps = Math.round(config.sourceStart / .04);
+        for (let index = 0; index < steps; index++)
+          await page.getByRole("button", { name: "slip later", exact: true }).click();
+        const offset = await h.save(page, "source-offset");
+        assert(Math.abs(offset.snapshot.timeline[0].startRequest - config.sourceStart) < 1 / 90000);
+        for (let index = 0; index < steps; index++) await page.getByTestId("studio-undo-button").click();
+        assert.equal((await h.save(page, "source-offset-undone")).snapshot.timeline[0].startRequest, 0);
+        for (let index = 0; index < steps; index++) await page.getByTestId("studio-redo-button").click();
+        assert.equal((await h.save(page, "source-offset-redone")).snapshot.timeline[0].startRequest,
+          offset.snapshot.timeline[0].startRequest);
+      } else if (config.sourceStart > 0) {
         await seek(page, config.sourceStart);
         await page.getByTestId("pro-quick-trim-start").click();
       }
@@ -258,6 +382,10 @@ async function main() {
         await voiceStart.fill("0"); await voiceStart.blur();
         const originalAudio = page.getByRole("checkbox", { name: /^Keep original audio/ });
         if (await originalAudio.isChecked()) await originalAudio.uncheck();
+        if (config.voiceRepair === false) {
+          const repair = page.getByLabel("Use voice repair on export", { exact: true });
+          if (await repair.isChecked()) await repair.uncheck();
+        }
         await page.getByTestId("background-sound-input").setInputFiles(path.join(root, config.soundSource));
         const duck = page.getByLabel(/Duck under speech/);
         if (config.musicDucking === false) {
@@ -269,6 +397,40 @@ async function main() {
           .locator("input[type=range]"), config.musicVolume ?? 15);
         prepared = await h.save(page, "narrated");
       }
+      }
+      if (config.resultSoundtrack) {
+        await q.tool(page, "Sound");
+        const original = page.getByRole("checkbox", { name: /^Keep original audio/ });
+        if (await original.isChecked()) await original.uncheck();
+        await page.getByTestId("background-sound-input").setInputFiles(path.join(root, config.resultSoundtrack));
+        for (const label of [/Duck under speech/, /Loop for the full clip/]) {
+          const control = page.getByLabel(label);
+          if (await control.isChecked()) await control.uncheck();
+        }
+        await range(page.locator(".inspector-range").filter({ hasText: "Background volume" })
+          .locator("input[type=range]"), 60);
+        await range(page.getByLabel("Music fade in", { exact: true }), 0);
+        await range(page.getByLabel("Music fade out", { exact: true }), 0);
+        const repair = page.getByLabel("Use voice repair on export", { exact: true });
+        if (await repair.isChecked()) await repair.uncheck();
+        prepared = await h.save(page, "exact-result-soundtrack");
+        assert(prepared.snapshot.addMusic && prepared.snapshot.muteOriginalAudio === true &&
+          prepared.snapshot.musicVolume === .6 && prepared.snapshot.audioRestoration.enabled === false &&
+          prepared.snapshot.voiceovers.length === 0 && prepared.snapshot.soundEffects.length === 0 &&
+          prepared.snapshot.overlays.every(layer => !layer.useOverlayAudio),
+          "Use one exact result soundtrack, with source and overlay audio muted");
+      } else if (config.preserveSourceSoundtrack) {
+        await q.tool(page, "Sound");
+        const original = page.getByRole("checkbox", { name: /^Keep original audio/ });
+        if (!await original.isChecked()) await original.check();
+        const repair = page.getByLabel("Use voice repair on export", { exact: true });
+        if (await repair.isChecked()) await repair.uncheck();
+        prepared = await h.save(page, "source-soundtrack-preserved");
+        assert.equal(prepared.snapshot.audioRestoration.enabled, false);
+        assert(!prepared.snapshot.addMusic && prepared.snapshot.voiceovers.length === 0 &&
+          prepared.snapshot.soundEffects.length === 0 &&
+          prepared.snapshot.overlays.every(layer => !layer.useOverlayAudio),
+        "Preserve exactly the source recording soundtrack");
       }
       verifyKeys(prepared, "main-video", config.camera);
       const result = prepared.snapshot.overlays.find(o => o.type === "video");
@@ -300,17 +462,13 @@ async function main() {
       await q.tool(page, "Export");
       await page.locator("body").click({ position: { x: 1, y: 1 } });
       await page.keyboard.press("Escape");
-      for (const time of config.poses) {
-        await seek(page, time);
-        await page.getByTestId("hook-preview-frame")
-          .screenshot({ path: path.join(folder, `live-${time}.png`) });
-      }
+      await capturePoses(page, reopened, folder, config.verifyNativePoseClocks === true);
       fs.writeFileSync(path.join(folder, "native-edit.json"), JSON.stringify({
         projectId: reopened.id, canonicalHash: hash(reopened.snapshot.studioDocument),
         source: config.source, movie: config.movie, sourceStart: config.sourceStart,
         sourceSha256: hash(fs.readFileSync(path.join(root, config.source))),
         resultSha256: hash(fs.readFileSync(path.join(root, config.movie))),
-        cameraKeys: config.camera.length * 3, resultKeys: config.result.length * 4,
+        cameraKeys: config.camera.reduce((n, pose) => n + Object.keys(pose).length - 1, 0), resultKeys: config.result.length * 4,
         totalKeys: reopened.snapshot.motionKeyframes.length,
         nativeControlsOnly: true, graphInjection: false, exactColdReopen: true,
         importUndoRedo: true, originalFullRecordingPreserved: true,
@@ -373,7 +531,15 @@ async function main() {
     assert.equal(publishingWrites.length, 0);
   } catch (error) {
     await page.screenshot({ path: path.join(folder, `failure-${Date.now()}.png`) }).catch(() => {});
+    if (await page.getByRole("button", { name: "Download project backup", exact: true }).isVisible().catch(() => false))
+      await backup(page, `FAILED-current-${Date.now()}.autopromote.json`).catch(() => {});
     throw error;
-  } finally { await browser.close(); }
+  } finally {
+    try {
+      require("../creative-templates/studio-session").saveAuthenticatedState(
+        await context.storageState({ indexedDB: true }), path.join(folder, "session.private.json"));
+    } catch (error) { console.warn("Retained session checkpoint:", error.message); }
+    if (browser) await browser.close(); else await context.close();
+  }
 }
 main().catch(error => { console.error(error.stack); process.exitCode = 1; });

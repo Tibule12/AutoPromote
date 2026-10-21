@@ -103,6 +103,25 @@ def clamp_speed_rate(value: Any, default: float = 1.0) -> float:
     return max(MIN_SPEED_RATE, min(MAX_SPEED_RATE, rate))
 
 
+def resolve_studio_programme_duration(segments, start_time, end_time, declared_ticks=None):
+    """Keep source ranges authoritative through codec padding/intermediates.
+
+    The declaration is derived from the ordinary Studio export, never another
+    editable clock. Reject a disagreement with the actual requested ranges.
+    """
+    duration = sum(float(_read(segment, "end_time")) - float(_read(segment, "start_time"))
+                   for segment in segments) if segments else float(end_time) - float(start_time)
+    if not math.isfinite(duration) or duration <= 0:
+        raise ValueError("Studio programme requires a positive finite source range")
+    ticks = round(duration * 90000)
+    if declared_ticks is not None:
+        if (isinstance(declared_ticks, bool) or not isinstance(declared_ticks, int)
+                or declared_ticks <= 0 or abs(declared_ticks - ticks) > 1):
+            raise ValueError("Studio programme clock differs from the requested source ranges")
+        ticks = declared_ticks
+    return ticks / 90000
+
+
 def normalize_speed_plan(
     duration: Any,
     speed_segments: Optional[Iterable[Any]] = None,

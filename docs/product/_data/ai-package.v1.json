@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "product_version": "1.2.0",
-  "knowledge_version": "1.0.30",
-  "updated_at": "2026-10-17",
+  "knowledge_version": "1.0.43",
+  "updated_at": "2026-10-21",
   "release_channel": "development",
   "catalogue": "knowledge.public.v1.json",
   "controls": "controls.public.v1.json",
@@ -512,6 +512,21 @@
     },
     {
       "feature_id": "studio.logo_motion",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.vector_artwork",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.text_choreography",
+      "status": "PARTIAL",
+      "documentation": "../studio/index.md"
+    },
+    {
+      "feature_id": "studio.logo_design",
       "status": "PARTIAL",
       "documentation": "../studio/index.md"
     }

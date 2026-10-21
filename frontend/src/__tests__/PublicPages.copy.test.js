@@ -113,8 +113,13 @@ describe("public marketing pages", () => {
       </div>
     );
 
-    expect(screen.getByText(/Mission Board/i)).toBeInTheDocument();
-    expect(screen.getByText(/Monetization Transition/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "An edit you can keep editing" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Reddit", exact: true })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Clearer controls. More useful guides." })
+    ).toBeInTheDocument();
     expect(screen.queryByText(/Viral Bonus System/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Get paid for high-performing views/i)).not.toBeInTheDocument();
     expect(
@@ -125,17 +130,15 @@ describe("public marketing pages", () => {
 
   test("help docs and blog stay aligned with current capability language", () => {
     const helpRender = render(<HelpCenter />);
-    expect(screen.getByText(/Support Scope/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Open support/ })).toHaveAttribute("href", "/support");
     helpRender.unmount();
 
     const docsRender = renderWithPath(<Docs />, "/docs");
-    expect(screen.getByText(/Before You Dive In/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Studio and the timeline" })).toBeInTheDocument();
     docsRender.unmount();
 
     renderWithPath(<Blog />, "/blog");
-    expect(
-      screen.getByText(/Read the latest updates from the AutoPromote team/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Practical notes on editing, packaging/i)).toBeInTheDocument();
     expect(
       screen.queryByText(/creator monetization and cross-platform promotion/i)
     ).not.toBeInTheDocument();

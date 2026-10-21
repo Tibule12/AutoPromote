@@ -9,6 +9,9 @@ import { createSemanticAnalysisReference } from "./studioSemanticTimeline";
 import { createModelArtifactReference } from "./studioModelArtifactReference";
 import { buildSpeedSegmentsFromKeyframes } from "./studioCreatorRecipes";
 import { studioLayerEntries } from "./studioLayerOrder";
+import { validateSpatialCurve } from "./studioAutomation";
+import { validateStudioTextAnimation } from "./studioTextAnimator";
+import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
 
 import {
   STUDIO_EDIT_SETTING_FIELDS, STUDIO_SOURCE_DECISION_FIELDS,
@@ -921,6 +924,16 @@ export const validateStudioProjectDocument = document => {
     fail("INVALID_CLOCK", "Invalid Studio clock.");
   if (!Array.isArray(document.assets) || !Array.isArray(document.clipOccurrences))
     fail("INVALID_DOCUMENT", "Missing assets or clip occurrences.");
+  (document.visualGraph?.settings?.motionKeyframes || []).forEach(validateSpatialCurve);
+  const vectorMotionKeys = [...(document.visualGraph?.settings?.motionKeyframes || []),
+    ...(document.linkedTiming?.keys?.motionKeyframes || []).map(key => ({ ...key.parameters,
+      time: key.atProgrammeTick === null ? NaN : ticksToSeconds(key.atProgrammeTick) }))];
+  (document.layers || []).forEach(layer => {
+    validateStudioTextAnimation({ ...layer.parameters, type: layer.legacyType }, vectorMotionKeys.filter(key => key.targetId === layer.layerId));
+    if (layer.parameters?.vectorShape !== undefined) validateStudioVectorShape(layer.parameters.vectorShape);
+    validateStudioVectorTrim(layer.parameters || {}, vectorMotionKeys
+      .filter(key => key.targetId === layer.layerId));
+  });
   const validParameters = (parameters, fields) => parameters &&
     typeof parameters === "object" && !Array.isArray(parameters) &&
     Object.keys(parameters).every(key => fields.includes(key));

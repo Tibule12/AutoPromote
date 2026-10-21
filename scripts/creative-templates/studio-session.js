@@ -92,8 +92,15 @@ async function openManualSignIn() {
   const { chromium } = require('playwright');
   const profile = process.env.STUDIO_QA_PROFILE ||
     path.join(os.homedir(), '.cache/autopromote-materials-auth-audit-20261010');
+  const args = ['--mute-audio'];
+  const appHost = process.env.STUDIO_QA_APP_HOST;
+  if (appHost) {
+    if (!/^127\.0\.0\.\d{1,3}$/.test(appHost)) throw new Error('Manual Studio must use a local loopback host.');
+    args.push(`--host-resolver-rules=MAP localhost ${appHost}`);
+  }
+  if (process.env.STUDIO_QA_AUTH_HTTP1 === '1') args.push('--no-proxy-server', '--disable-quic', '--disable-http2');
   const context = await chromium.launchPersistentContext(profile, {
-    channel: 'chrome', headless: false, args: ['--mute-audio'],
+    channel: 'chrome', headless: false, args,
     viewport: { width: 1400, height: 900 },
   });
   if (fs.existsSync(sessionPath)) {

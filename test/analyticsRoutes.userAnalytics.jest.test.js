@@ -25,12 +25,13 @@ function createSnapshot(docs) {
 
 describe("analyticsRoutes /user", () => {
   let app;
+  let collections;
 
   beforeEach(() => {
     jest.resetModules();
 
     const recentDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-    const collections = {
+    collections = {
       content: [
         {
           id: "content-1",
@@ -174,4 +175,62 @@ describe("analyticsRoutes /user", () => {
       clicks: 4,
     });
   });
+
+  test("uncollected statistics remain unavailable instead of claiming low reach", async () => {
+    collections.platform_posts[0].metrics = null;
+    const { body } = await request(app).get("/api/analytics/user?range=7d");
+    expect(body.totalViews).toBeNull();
+    expect(body.totalClicks).toBeNull();
+    expect(body.ctr).toBeNull();
+    expect(body.performanceStatus).toBe("Platform statistics unavailable");
+    expect(body.measurement).toMatchObject({ status: "unavailable", postsWithMetrics: 0, postsWithoutMetrics: 1 });
+    expect(body.platformBreakdown.instagram.views).toBeNull();
+    expect(body.topContent[0]).toMatchObject({ postId: "post-1", views: null, metricsAvailable: false });
+  });
+
+  test("a genuine reported zero remains a measured zero", async () => {
+    collections.platform_posts[0].metrics = { view_count: 0, like_count: 0 };
+    const { body } = await request(app).get("/api/analytics/user?range=7d");
+    expect(body.totalViews).toBe(0);
+    expect(body.totalLikes).toBe(0);
+    expect(body.measurement.postsWithMetrics).toBe(1);
+    expect(body.performanceStatus).toBe("Live platform statistics");
+    expect(body.totalShares).toBeNull();
+  });
+
+  test("impressions and Reddit scores are not presented as video views or likes", async () => {
+    collections.platform_posts[0].metrics = { impressions: 100, score: 8, comment_count: 0 };
+    const { body } = await request(app).get("/api/analytics/user?range=7d");
+    expect(body.totalViews).toBeNull();
+    expect(body.totalLikes).toBeNull();
+    expect(body.platformBreakdown.instagram.impressions).toBe(100);
+    expect(body.platformBreakdown.instagram.comments).toBe(0);
+    expect(body.topPlatform).toBe("N/A");
+  });
+  test("release filtering and refresh targets stay within owned published records", async () => {
+    collections.platform_posts.push({ ...collections.platform_posts[0], id: "post-new", contentId: "content-new", metrics: null, createdAt: createTimestamp(new Date()) });
+    const selected = await request(app).get("/api/analytics/user?range=7d&contentId=content-1");
+    expect(selected.body.publishedPostCount).toBe(1);
+    expect(selected.body.refreshTargets).toEqual([{ postId: "post-1", platform: "instagram" }]);
+    const all = await request(app).get("/api/analytics/user?range=7d");
+    expect(all.body.refreshTargets).toEqual([{ postId: "post-new", platform: "instagram" }]);
+    const foreign = await request(app).get("/api/analytics/user?range=7d&contentId=content-2");
+    expect(foreign.body.publishedPostCount).toBe(0);
+    expect(foreign.body.refreshTargets).toEqual([]);
+    expect(foreign.body.releaseOptions.some(row => row.id === "content-2")).toBe(false);
+  });
+
+  test("release filtering rejects document paths", async () => {
+    expect((await request(app).get("/api/analytics/user?contentId=foreign%2Fpost")).status).toBe(400);
+  });
+
+  test("a measured zero ranks ahead of unavailable counts while refresh uses the newest post", async () => {
+    collections.platform_posts[0].metrics = { views: 0 };
+    collections.platform_posts.push({ ...collections.platform_posts[0], id: "new-uncollected", metrics: null, createdAt: createTimestamp(new Date()) });
+    const { body } = await request(app).get("/api/analytics/user?range=7d");
+    expect(body.topContent[0].postId).toBe("post-1");
+    expect(body.viralityTracker.views).toBe(0);
+    expect(body.refreshTargets[0].postId).toBe("new-uncollected");
+  });
+
 });

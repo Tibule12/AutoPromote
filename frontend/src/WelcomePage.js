@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import LandingNavbar from "./components/landing/LandingNavbar";
 import HeroSection from "./components/landing/HeroSection";
 import LandingFeatures from "./components/landing/LandingFeatures";
@@ -12,6 +12,8 @@ import "./components/landing/LandingPage.css";
 import "./components/landing/LandingMotion.css";
 import "./components/landing/LandingCompositing.css";
 import "./components/landing/LandingEditorial.css";
+
+const StudioWelcomePreview = lazy(() => import("./components/landing/StudioWelcomePage"));
 
 function getWorkspaceInviteParams() {
   if (typeof window === "undefined") return null;
@@ -126,6 +128,9 @@ const WorkspaceInviteNotice = ({ onCreateAccount, onSignIn }) => {
 const WelcomePage = ({ onGetStarted, onSignIn }) => {
   const [demoOpen, setDemoOpen] = useState(false);
 
+  if (process.env.REACT_APP_WELCOME_STUDIO_PREVIEW === "true" && !getWorkspaceInviteParams()) {
+    return <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0b0b10" }} />}><StudioWelcomePreview onGetStarted={onGetStarted} onSignIn={onSignIn} /></Suspense>;
+  }
   return (
     <div className="lp-page lp-editorial">
       <a

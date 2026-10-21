@@ -41,6 +41,30 @@ export const sortAutomationKeyframes = keyframes =>
     .filter(keyframe => Number.isFinite(Number(keyframe?.time)))
     .sort((left, right) => Number(left.time) - Number(right.time));
 
+// Offset handles belong to the arriving position key, on the canonical graph.
+// Use the same travel samples as FFmpeg's expression-based group/main paths.
+export const SPATIAL_CURVE_STEPS = 128;
+export const validateSpatialCurve = key => {
+  if (key.spatialCurve === undefined) return;
+  if (!['x', 'y'].includes(key.property) || !Array.isArray(key.spatialCurve) || key.spatialCurve.length !== 2 ||
+      key.spatialCurve.some(value => typeof value !== 'number' || !Number.isFinite(value) || Math.abs(value) > 200))
+    throw Error('Spatial handles need X/Y offsets between -200 and 200.');
+};
+export const automationSegmentValue = (first, last, progress, key) => {
+  if (key.spatialCurve === undefined)
+    return first + (last - first) * applyEasing(progress, key.easing, key.curve);
+  validateSpatialCurve(key);
+  if (key.easing === 'hold') return progress < 1 ? first : last;
+  const sample = p => {
+    const u = clamp(applyEasing(p, key.easing, key.curve), 0, 1), v = 1 - u;
+    return v ** 3 * first + 3 * v ** 2 * u * (first + key.spatialCurve[0]) +
+      3 * v * u ** 2 * (last + key.spatialCurve[1]) + u ** 3 * last;
+  };
+  const at = clamp(progress, 0, 1) * SPATIAL_CURVE_STEPS, index = Math.min(SPATIAL_CURVE_STEPS - 1, Math.floor(at));
+  const a = sample(index / SPATIAL_CURVE_STEPS), b = sample((index + 1) / SPATIAL_CURVE_STEPS);
+  return a + (b - a) * (at - index);
+};
+
 export const upsertAutomationKeyframe = (keyframes, nextKeyframe, tolerance = 0.04) => {
   const next = { easing: "ease_in_out", ...nextKeyframe };
   const existingIndex = (keyframes || []).findIndex(
@@ -73,8 +97,8 @@ export const interpolateAutomationValue = ({ keyframes, property, time, fallback
   const right = ordered[rightIndex];
   if (currentTime === Number(right.time)) return Number(right.value);
   const span = Math.max(0.0001, Number(right.time) - Number(left.time));
-  const progress = applyEasing((currentTime - Number(left.time)) / span, right.easing, right.curve);
-  return Number(left.value) + (Number(right.value) - Number(left.value)) * progress;
+  return automationSegmentValue(Number(left.value), Number(right.value),
+    (currentTime - Number(left.time)) / span, right);
 };
 
 export const buildMotionAutomationStyle = (keyframes, time, fallback = {}) => {
@@ -120,7 +144,12 @@ export const buildMotionAutomationStyle = (keyframes, time, fallback = {}) => {
     time,
     fallback: fallback.cropY ?? 0,
   });
-  return { x, y, scale, rotation, opacity, cropX, cropY };
+  return { x, y, scale, rotation, opacity, cropX, cropY,
+    ...(fallback.textAnimator ? { textProgress: clamp(interpolateAutomationValue({ keyframes, property: "textProgress", time, fallback: fallback.textProgress ?? 100 }), 0, 100) } : {}),
+    ...(fallback.vectorShape ? Object.fromEntries(['strokeStart', 'strokeEnd', 'strokeOffset'].map(property => [property,
+      clamp(interpolateAutomationValue({ keyframes, property, time,
+        fallback: fallback[property] ?? (property === 'strokeEnd' ? 100 : 0) }),
+        property === 'strokeOffset' ? -1000 : 0, property === 'strokeOffset' ? 1000 : 100)])) : {}) };
 };
 
 export const groupMotionKeyframesByTime = keyframes => {

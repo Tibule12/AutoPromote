@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
 import { withWorkspaceHeaders } from "../utils/workspace";
@@ -24,8 +24,14 @@ const WORKFLOW_EVENT_LABELS = {
 const AnalyticsPanel = () => {
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState(null);
+  const [syncingMetrics, setSyncingMetrics] = useState(false);
+  const [metricsSyncMessage, setMetricsSyncMessage] = useState("");
   const [workflowSummary, setWorkflowSummary] = useState(null);
   const [timeRange, setTimeRange] = useState("7d");
+  const [releaseId, setReleaseId] = useState("");
+  const analyticsRequestRef = useRef(0);
+  const analyticsScopeRef = useRef({ timeRange, releaseId });
+  analyticsScopeRef.current = { timeRange, releaseId };
   const [error, setError] = useState("");
   const [workflowError, setWorkflowError] = useState("");
   const [contentItems, setContentItems] = useState([]);
@@ -73,6 +79,11 @@ const AnalyticsPanel = () => {
 
   const loadAnalytics = useCallback(
     async ({ retryCount = 0, forceRefreshToken = false } = {}) => {
+      const scope = analyticsScopeRef.current;
+      if (scope.timeRange !== timeRange || scope.releaseId !== releaseId) return;
+      const requestId = ++analyticsRequestRef.current;
+      const currentRequest = () => requestId === analyticsRequestRef.current &&
+        analyticsScopeRef.current.timeRange === timeRange && analyticsScopeRef.current.releaseId === releaseId;
       if (retryCount === 0) setLoading(true);
 
       try {
@@ -85,7 +96,7 @@ const AnalyticsPanel = () => {
 
         const token = await currentUser.getIdToken(forceRefreshToken);
         const [res, workflowRes] = await Promise.all([
-          fetch(`${API_ENDPOINTS.ANALYTICS_USER}?range=${timeRange}`, {
+          fetch(`${API_ENDPOINTS.ANALYTICS_USER}?range=${timeRange}&contentId=${encodeURIComponent(releaseId)}`, {
             headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
             credentials: "include",
           }).catch(() => ({ ok: false, status: 500 })),
@@ -98,11 +109,14 @@ const AnalyticsPanel = () => {
           ).catch(() => ({ ok: false, status: 500 })),
         ]);
 
+        if (!currentRequest()) return;
         if (res.ok) {
           const data = await res.json();
+          if (!currentRequest()) return;
           setAnalytics(data);
           if (workflowRes.ok) {
             const workflowData = await workflowRes.json();
+            if (!currentRequest()) return;
             setWorkflowSummary(workflowData);
             setWorkflowError("");
           } else {
@@ -136,16 +150,38 @@ const AnalyticsPanel = () => {
             : "Could not load analytics right now."
         );
       } catch (_e) {
+        if (!currentRequest()) return;
         setAnalytics(null);
         setWorkflowSummary(null);
         setWorkflowError("Clip workflow summary is unavailable right now.");
         setError("Could not load analytics right now.");
       } finally {
-        if (retryCount === 0) setLoading(false);
+        if (currentRequest()) setLoading(false);
       }
     },
-    [timeRange]
+    [timeRange, releaseId]
   );
+
+  const syncPlatformMetrics = async () => {
+    const latest = [...(analytics?.refreshTargets || analytics?.topContent || [])].sort((a, b) => Date.parse(b.publishedAt || "") - Date.parse(a.publishedAt || ""));
+    const platforms = new Set();
+    const postIds = latest.filter(item => {
+      if (!item.postId || platforms.has(item.platform)) return false;
+      platforms.add(item.platform); return true;
+    }).slice(0, 6).map(item => item.postId);
+    if (!postIds.length) return;
+    setSyncingMetrics(true); setMetricsSyncMessage("");
+    try {
+      const response = await authedFetch(API_ENDPOINTS.ANALYTICS_USER.replace(/\/user$/, "/refresh-post-metrics"),
+        { method: "POST", body: JSON.stringify({ postIds }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Statistics refresh failed.");
+      const counts = (result.results || []).reduce((all, row) => ({ ...all, [row.status]: (all[row.status] || 0) + 1 }), {});
+      setMetricsSyncMessage(`${counts.collected || 0} posts updated; ${counts.unavailable || 0} unavailable; ${counts.failed || 0} failed; ${counts.cooldown || 0} checked recently.`);
+      await loadAnalytics();
+    } catch (error) { setMetricsSyncMessage(error.message); }
+    finally { setSyncingMetrics(false); }
+  };
 
   useEffect(() => {
     loadAnalytics();
@@ -320,6 +356,9 @@ const AnalyticsPanel = () => {
     referralTracker: { total: 0, nextGoal: 10, potentialBonus: 5 },
   };
 
+  const metricLabel = value => typeof value === "number" && Number.isFinite(value) ? value.toLocaleString() : "Unavailable";
+  const rateLabel = value => typeof value === "number" && Number.isFinite(value) ? `${value.toFixed(1)}%` : "Unavailable";
+
   const sortedPlatformBreakdown = Object.entries(stats.platformBreakdown || {}).sort((a, b) => {
     const aViews = Number((a[1] && a[1].views) || 0);
     const bViews = Number((b[1] && b[1].views) || 0);
@@ -375,17 +414,17 @@ const AnalyticsPanel = () => {
       ["metric", "value"],
       ["plan", analytics?.plan?.name || "Unknown"],
       ["range", stats.range || timeRange],
-      ["totalViews", stats.totalViews || 0],
-      ["totalClicks", stats.totalClicks || 0],
-      ["ctr", stats.ctr || 0],
+      ["totalViews", stats.totalViews ?? "Unavailable"],
+      ["totalClicks", stats.totalClicks ?? "Unavailable"],
+      ["ctr", stats.ctr ?? "Unavailable"],
       ["topPlatform", stats.topPlatform || "N/A"],
       [],
       ["platform", "views", "clicks", "ctr"],
       ...sortedPlatformBreakdown.map(([platform, data]) => [
         platform,
-        data.views || 0,
-        data.clicks || 0,
-        data.ctr || 0,
+        data.views ?? "Unavailable",
+        data.clicks ?? "Unavailable",
+        data.ctr ?? "Unavailable",
       ]),
     ];
     const csv = rows
@@ -423,7 +462,16 @@ const AnalyticsPanel = () => {
             {analyticsEntitlements.summary}
           </div>
         </div>
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
+          <label>Published release{" "}
+            <select aria-label="Published release" value={releaseId} onChange={event => setReleaseId(event.target.value)}>
+              <option value="">All published releases</option>
+              {(analytics?.releaseOptions || []).map(release => <option key={release.id} value={release.id}>{release.title}</option>)}
+            </select>
+          </label>
+          <button type="button" onClick={syncPlatformMetrics} disabled={syncingMetrics || !(stats.refreshTargets || stats.topContent)?.some(item => item.postId)}>
+            {syncingMetrics ? "Syncing statistics…" : "Sync latest platform statistics"}
+          </button>
           {analyticsEntitlements.canExport ? (
             <button type="button" onClick={exportAnalyticsSnapshot}>
               Export CSV
@@ -449,6 +497,10 @@ const AnalyticsPanel = () => {
         </div>
       </div>
 
+      {(stats.measurement || metricsSyncMessage) && <div role="status" className="ap-analytics-source">
+        {stats.measurement && <p>{stats.motivationMessage} {stats.measurement.note}</p>}
+        {metricsSyncMessage && <p>{metricsSyncMessage}</p>}
+      </div>}
       {error ? (
         <div
           style={{
@@ -530,15 +582,15 @@ const AnalyticsPanel = () => {
           <div className="analytics-signal-grid">
             <div>
               <span>Views</span>
-              <strong>{Number(stats.totalViews || 0).toLocaleString()}</strong>
+              <strong>{metricLabel(stats.totalViews)}</strong>
             </div>
             <div>
               <span>Clicks</span>
-              <strong>{Number(stats.totalClicks || 0).toLocaleString()}</strong>
+              <strong>{metricLabel(stats.totalClicks)}</strong>
             </div>
             <div>
               <span>CTR</span>
-              <strong>{Number(stats.ctr || 0).toFixed(1)}%</strong>
+              <strong>{rateLabel(stats.ctr)}</strong>
             </div>
           </div>
           <div className="analytics-signal-chart" aria-label="Platform view comparison">
@@ -555,7 +607,7 @@ const AnalyticsPanel = () => {
                         }}
                       />
                     </i>
-                    <strong>{value.toLocaleString()}</strong>
+                    <strong>{metricLabel(data?.views)}</strong>
                   </div>
                 );
               })
@@ -1011,7 +1063,7 @@ const AnalyticsPanel = () => {
               🔥 Top Post Reach
             </h4>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
-              <span>Top Video: {stats.viralityTracker?.views.toLocaleString()} views</span>
+              <span>Top Video: {metricLabel(stats.viralityTracker?.views)} views</span>
               <span>Goal: {stats.viralityTracker?.nextGoal?.toLocaleString()}</span>
             </div>
             <div
@@ -1105,7 +1157,7 @@ const AnalyticsPanel = () => {
             Total Views
           </div>
           <div style={{ fontSize: "2rem", fontWeight: "bold", color: "var(--text)" }}>
-            {stats.totalViews?.toLocaleString() || 0}
+            {metricLabel(stats.totalViews)}
           </div>
         </div>
 
@@ -1122,7 +1174,7 @@ const AnalyticsPanel = () => {
             Total Clicks
           </div>
           <div style={{ fontSize: "2rem", fontWeight: "bold", color: "var(--text)" }}>
-            {stats.totalClicks?.toLocaleString() || 0}
+            {metricLabel(stats.totalClicks)}
           </div>
         </div>
 
@@ -1139,7 +1191,7 @@ const AnalyticsPanel = () => {
             Click-Through Rate
           </div>
           <div style={{ fontSize: "2rem", fontWeight: "bold", color: "var(--brand)" }}>
-            {stats.ctr?.toFixed(2) || 0}%
+            {rateLabel(stats.ctr)}
           </div>
         </div>
 
@@ -1200,9 +1252,9 @@ const AnalyticsPanel = () => {
                     className="ap-platform-row-stats"
                     style={{ display: "flex", gap: "1rem", color: "var(--muted)" }}
                   >
-                    <span>{data.views || 0} views</span>
-                    <span>{data.clicks || 0} clicks</span>
-                    <span style={{ color: "var(--brand)" }}>{data.ctr?.toFixed(1) || 0}% CTR</span>
+                    <span>{metricLabel(data.views)} views</span>
+                    <span>{metricLabel(data.clicks)} clicks</span>
+                    <span style={{ color: "var(--brand)" }}>{rateLabel(data.ctr)} CTR</span>
                   </div>
                 </div>
               ))}
@@ -1248,7 +1300,7 @@ const AnalyticsPanel = () => {
             marginBottom: "1rem",
           }}
         >
-          <h4 style={{ margin: 0 }}>Top Performing Content</h4>
+          <h4 style={{ margin: 0 }}>Published Content and Collected Statistics</h4>
           {stats.topContent && stats.topContent.length > 5 && (
             <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
               Showing {Math.min(stats.topContent.length, 50)} items
@@ -1328,8 +1380,8 @@ const AnalyticsPanel = () => {
                   >
                     {item.platform || "n/a"}
                   </span>
-                  <span>👁 {item.views || 0}</span>
-                  <span>🖱 {item.clicks || 0}</span>
+                  <span>👁 {metricLabel(item.views)}</span>
+                  <span>🖱 {metricLabel(item.clicks)}</span>
                 </div>
               </div>
             ))}
