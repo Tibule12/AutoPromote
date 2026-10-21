@@ -1,0 +1,11 @@
+# Emulator CPU preview runtime — 21 October 2026
+
+[The failed PR run](https://github.com/Tibule12/AutoPromote/actions/runs/39659965067) completed in 725.472 seconds with 1,751 passing tests, five existing skips and two failures in `studioVoiceBusPreviewService.test.js`. The runner preserved that failure and shut down; it did not repeat Jest.
+
+A new Python 3.12.3 virtual environment reproduces the exact two failing cases (three pass). Directly importing `studio_voice_bus_preview` reveals `ModuleNotFoundError: No module named 'numpy'`. Its shared final mixer in `viral_motion_graphics` also imports Pillow. The development machine already had both packages, so the earlier local pass did not prove that CI's Python runtime was complete.
+
+The emulator workflow now selects Python 3.12, installs `python_media_worker/requirements-ci.txt` (NumPy 1.26.4 and Pillow 11.3.0), and imports the actual preview module before starting Jest. Its child preview process uses the same installed `python` interpreter. This catches missing imports immediately, before the twelve-minute full test run. The pip cache is keyed to the requirements file. FFmpeg/FFprobe installation, single-run failure handling and deadlines remain in place.
+
+With only those pinned dependencies added to the clean environment, the existing voice-bus and source-frame suites pass all eleven cases through `npm run test:emulator` in 3.182 seconds. The run returns exit zero and shuts Firestore down cleanly. This exercises real decoded PCM, compressor gains, hashes, ownership revalidation, cancellation, blocked external references and exact fractional/variable-rate source frames. No test assertions, skip conditions, runtime processing or error disclosure change. Raw CI logs and the isolated virtual environment stay local.
+
+The full remote PR suite must rerun on this commit. This is CI prerequisite evidence, with no readiness promotion, live-account parity qualification, creative approval, new publishing or paid execution. Shared S02 picture/audio/colour/edge/low-alpha/latency, S04 motion/glyph depth and S03 ownership remain. Preserve all native works, identity, publishing receipts and timers. Next: verify corrected PR CI before main integration.

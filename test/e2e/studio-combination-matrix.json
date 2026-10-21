@@ -8817,5 +8817,46 @@
       "Private welcome restore does not qualify a public creative/showroom release."
     ],
     "nextTask": "Preserve active local build flags and verify anonymous welcome plus signed-in help before replacing future builds; continue the owner-directed documentation and shared Studio backlog."
+  },
+  "emulatorCpuRuntime20261021": {
+    "at": "2026-10-21T19:35:40.763779Z",
+    "report": "reports/emulator-python-runtime-20261021/README.md",
+    "scope": "CI Python prerequisites for the unchanged shared CPU voice mixer; no renderer or product behavior change.",
+    "failedCiRun": "https://github.com/Tibule12/AutoPromote/actions/runs/39659965067",
+    "failedCiTests": 2,
+    "failedCiPassedTests": 1751,
+    "failedCiSeconds": 725.472,
+    "cleanEnvironmentReproduction": {
+      "python": "3.12.3",
+      "beforePassed": 3,
+      "beforeFailed": 2,
+      "importError": "ModuleNotFoundError: No module named numpy"
+    },
+    "runtime": {
+      "python": "3.12",
+      "numpy": "1.26.4",
+      "Pillow": "11.3.0",
+      "preflight": "Import actual studio_voice_bus_preview before Jest",
+      "childInterpreter": "python from actions/setup-python"
+    },
+    "emulatorVerification": {
+      "suites": 2,
+      "passed": 11,
+      "skipped": 0,
+      "seconds": 3.182,
+      "exitCode": 0,
+      "emulatorShutdown": "clean"
+    },
+    "productCodeChanged": false,
+    "newSkipConditions": 0,
+    "readinessPromotion": false,
+    "renderJobs": 0,
+    "paidGpuJobs": 0,
+    "newSchedules": 0,
+    "remainingBlockers": [
+      "Full corrected remote CI must complete; focused real CPU/emulator tests do not qualify live-account picture/sound parity or creative/professional/production readiness.",
+      "Shared S02/S04/S03 backlog remains unchanged."
+    ],
+    "nextTask": "Verify the new full PR emulator run; retain selected identity, native works, publishing receipts and all existing timers."
   }
 }

@@ -1,0 +1,5 @@
+# Minimal runtime for real CPU voice-bus previews exercised by Jest.
+# viral_motion_graphics shares the final mixer and imports Pillow at startup.
+# Keep model runtimes and the full media worker dependency stack out of CI.
+numpy==1.26.4
+Pillow==11.3.0

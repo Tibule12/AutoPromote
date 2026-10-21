@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Local welcome restoration metadata and entry-point regression: preserve the active welcome flag/API origin, existing design/media, all prior matrix records and formal readiness. Four original/candidate hero pairs match exactly; final anonymous and real signed-in checks pass. No renderer, generation or execution-authority change.",
-  "reviewed_at": "2026-10-21T19:30:08.040Z",
+  "reason": "Reviewed unchanged Studio voice-mixer imports and clean Python reproduction; CI now installs pinned NumPy/Pillow before its real media tests, with no readiness promotion.",
+  "reviewed_at": "2026-10-21T19:35:42.070Z",
   "catalog_sha256": "efa01082173309f97a2153f01091cd4bc6411cdcd45adc30affea65ae4326731",
   "sources": [
     {
@@ -639,11 +639,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "7cdc5966cc2f330d710c2163fdb4248ee0a701bb1d44c13c38e23a7a056147ee"
+      "sha256": "ad38b885490ecca49c00980e8eca892dd9b3d9fec7a2b6468c02ae6b64b08b12"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "15556341c711d6f56a312f1cde46e8e0b15bda65998dafce01f033e89c53d2bd"
+      "sha256": "7034f06c15b6b074db96b3fd03907e1ff55c76eb8bc7ab599cad94ababa8508f"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

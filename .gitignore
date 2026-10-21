@@ -173,3 +173,7 @@ reports/push-review-20261021/*
 # CI failure logs and browser captures stay local; publish the reviewed summary.
 reports/playwright-ci-fix-20261021/*
 !reports/playwright-ci-fix-20261021/README.md
+
+# Isolated Python environments and raw CI logs are local verification assets.
+reports/emulator-python-runtime-20261021/*
+!reports/emulator-python-runtime-20261021/README.md
