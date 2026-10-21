@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Accumulated branch publication authorized by owner: reconcile unchanged readiness and targeted pre-push tests; preserve private evidence locally and record inherited standalone-lint limits.",
-  "reviewed_at": "2026-10-21T16:45:33.833Z",
+  "reason": "Reviewed isolated CI and bounded Studio fixes; preserve all documented renderer/readiness limits.",
+  "reviewed_at": "2026-10-21T19:06:05.406Z",
   "catalog_sha256": "efa01082173309f97a2153f01091cd4bc6411cdcd45adc30affea65ae4326731",
   "sources": [
     {
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "8434ae80a289226f6e073685415694ce0ac261fa58c73f05544de8247b774c91"
+      "sha256": "18759c8154d0d92abf072351e50921cbacc70e57e67088b56b3c1257b851c90d"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/StudioControls.css",
-      "sha256": "a8fde008b27d141e365bf5d6686b68e189354b5e6e811ea58da6a21b80fc67f1"
+      "sha256": "a80e46366f287021faf2a9b6f2782c32f21c1d9014d4837b575d0b7039c892e6"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "4ef0088c96cea33d5bc3d611b7397700b5050cd6be549c49bd3d5d5e2e98313d"
+      "sha256": "61776286e009f9e2b113852d610253daabf651488e75a54eb0979f3807f1be54"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -631,11 +631,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "58e5f447751ab2f9f1dd9d4bcc3f1703719ade32cee20c990db7ca98c0d289bd"
+      "sha256": "4f8ec58fd0e5bd3d6b20996d4422f09e81aec35c7758b5071954f5486b1b4b58"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "b3327d5453007c43f9adec7e6aa0d33e695163990082388789e4513198f302bf"
+      "sha256": "15556341c711d6f56a312f1cde46e8e0b15bda65998dafce01f033e89c53d2bd"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

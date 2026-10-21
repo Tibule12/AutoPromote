@@ -613,7 +613,7 @@ async function main() {
   // exercises the actual frontend upload control without retransmitting the
   // existing 791 MB object; the intercepted upload response binds the Studio
   // to the full 10-minute cloud source used by the renderer.
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(uploadReferencePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(uploadReferencePath);
   console.log("[frontend-proof] waiting for source preview validation");
   const openStudio = page.getByRole("button", { name: "Open Creator Studio", exact: true });
   try {

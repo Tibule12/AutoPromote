@@ -2,6 +2,11 @@ const express = require("express");
 const request = require("supertest");
 const bodyParser = require("body-parser");
 
+// Scope normalization is local logic; a live provider probe is a separate integration.
+jest.mock("../src/utils/ssrfGuard", () => ({
+  safeFetch: jest.fn(async () => ({ status: 302, headers: { get: () => null }, text: async () => "" })),
+}));
+
 describe("snapchat prepare endpoint", () => {
   jest.setTimeout(10000);
   let app;

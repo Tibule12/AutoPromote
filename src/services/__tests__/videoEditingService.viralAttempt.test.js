@@ -11,8 +11,9 @@ const mockDocRef = id => ({
   update: jest.fn(async data => { mockDocs.set(id, { ...mockDocs.get(id), ...data }); }),
 });
 
-jest.mock("firebase-admin", () => ({
-  firestore: jest.fn(() => ({ collection: jest.fn(() => ({ doc: jest.fn(id => mockDocRef(id)) })) })),
+jest.mock("../../firebaseAdmin", () => ({
+  admin: {},
+  db: { collection: jest.fn(() => ({ doc: jest.fn(id => mockDocRef(id)) })) },
 }));
 jest.mock("../../creditSystem", () => ({ deductCredits: jest.fn(), refundCredits: jest.fn() }));
 jest.mock("../mediaWorkerTaskQueue", () => ({ queueAudioExtractionTask: jest.fn() }));

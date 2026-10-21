@@ -924,7 +924,7 @@
       "source_paths": [
         "frontend/src/components/StudioAdvancedInspectors.js",
         "frontend/src/components/__tests__/StudioMotionInspectorPose.test.js",
-        "reports/studio-boxing-edit-20261019/control-repair.json"
+        "reports/studio-boxing-edit-20261019/README.md"
       ],
       "reason": "Motion transform/crop fields now display the existing evaluated playhead pose, including zero opacity, instead of misleading static base values. Document the seven field values; preserve canonical/render semantics and FUNCTIONAL classification. Two focused component cases, strict build, scoped lint and three actual signed-in field observations are bounded evidence."
     },
@@ -939,7 +939,7 @@
       "source_paths": [
         "python_media_worker/main_media_server.py",
         "python_media_worker/test_studio_mixed_sequence_canvas.py",
-        "reports/studio-boxing-edit-20261019/control-repair.json"
+        "reports/studio-boxing-edit-20261019/README.md"
       ],
       "reason": "Correct the selected wide Preserve frame sequence canvas when the original upload is portrait. Real FFmpeg tests preserve full wide shots and portrait source proportions; other modes retain their existing canvas. Keep FUNCTIONAL and full parity/creative limits."
     },
@@ -954,7 +954,7 @@
       "source_paths": [
         "python_media_worker/studio_audio.py",
         "python_media_worker/test_studio_audio_depth.py",
-        "reports/studio-boxing-edit-20261019/render-repair-verification.json"
+        "reports/studio-boxing-edit-20261019/README.md"
       ],
       "reason": "Preserve every sampled gain segment while balancing expression selection to avoid FFmpeg parser depth failure. Actual 157-point failed envelope and dense held/retimed real PCM regressions pass; no audio-readiness promotion."
     },
@@ -968,7 +968,7 @@
       "status_after": "FUNCTIONAL",
       "source_paths": [
         "frontend/src/components/ViralClipStudio.js",
-        "reports/studio-restaurant-film-20261020/native-mix-polish.json"
+        "reports/studio-restaurant-film-20261020/README.md"
       ],
       "reason": "Bound HTML music-fallback volume to its real browser range for valid raised automation, preventing the observed IndexSizeError while preserving full decoded-buffer GainNode gain. Native 190-percent edit/playback/cold recovery and thirteen focused audio cases pass; whole preview audio parity and readiness remain separate."
     },

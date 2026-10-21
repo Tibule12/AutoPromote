@@ -3058,7 +3058,10 @@ const ViralClipStudio = ({
   const loggedScannerEntryRef = useRef(new Set());
   const [previewFinishedFile, setPreviewFinishedFile] = useState(true);
   const completedOutputUrl = getSafeMediaSource(renderedOutput?.previewUrl || renderedOutput?.url);
-  const renderedOutputUrl = previewFinishedFile ? completedOutputUrl : "";
+  // Both monitor modes have the same identity when no completed movie exists.
+  // The first edit must not turn undefined into a different source window and
+  // rewind a paused authoring frame to the clip start.
+  const renderedOutputUrl = previewFinishedFile ? completedOutputUrl || "" : "";
   const hasCompletedOutput = Boolean(completedOutputUrl);
   // Access recovery can clear and restore a completed URL. Preserve the
   // editor's explicit monitor choice through that transport transition.
@@ -8425,6 +8428,7 @@ const ViralClipStudio = ({
           }
           setMainFrame(current => normalizeMainFrame({
             ...current,
+            enabled: plan.mainFrame ? plan.mainFrame.enabled !== false : current.enabled,
             insetPercent: Number(plan.mainFrame?.insetPercent ?? 2.5),
             radiusPercent: Number(plan.mainFrame?.radiusPercent ?? 10),
             background: plan.mainFrame?.background || "studio_black",
@@ -10036,12 +10040,14 @@ const ViralClipStudio = ({
     if (!key || !allowTimelineTimingEdit(motionKeyframeTrack(key.targetId))) return;
     // An authored spatial interval travels through one shared timing curve.
     const timing = Object.fromEntries(Object.entries(changes).filter(([field]) => ['easing', 'curve'].includes(field)));
-    const next = motionKeyframes.map(keyframe => keyframe.id === keyframeId ? { ...keyframe, ...changes }
+    // A pose updates several property keys in the same React event. Compose
+    // each update against the latest state so later keys retain earlier edits.
+    const applyChanges = current => current.map(keyframe => keyframe.id === keyframeId ? { ...keyframe, ...changes }
       : key.spatialCurve && keyframe.spatialCurve && keyframe.targetId === key.targetId && keyframe.time === key.time &&
         ['x', 'y'].includes(keyframe.property) ? { ...keyframe, ...timing } : keyframe);
-    try { validateStudioGroupKeyframes(compositionGroups.groups, next); }
+    try { validateStudioGroupKeyframes(compositionGroups.groups, applyChanges(motionKeyframes)); }
     catch (error) { setStudioActionMessage(error.message); return; }
-    setMotionKeyframes(next);
+    setMotionKeyframes(applyChanges);
     setPreviewFinishedFile(false);
   };
 

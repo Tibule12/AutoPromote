@@ -51,6 +51,7 @@ jest.mock("../creditSystem", () => ({
 
 jest.mock("../services/videoEditingService", () =>
   jest.fn().mockImplementation(() => ({
+    assertRenderWorkerReady: jest.fn().mockResolvedValue(undefined),
     analyzeVideo: mockAnalyzeVideo,
     startProcessingJob: mockStartProcessingJob,
   }))

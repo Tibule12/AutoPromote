@@ -8,7 +8,10 @@ import { mapProgrammeTickToOutputTick, secondsToTicks, ticksToSeconds } from "./
 // source occurrences and changes of speed inside a cue.
 export const getCaptionPreviewOutputClock = ({ chunk, time, timeMap,
   sourceStart = 0, sourceEnd = Infinity, programmeStart = 0 }) => {
-  if (!chunk || !timeMap?.length || !Number.isFinite(time)) return null;
+  // Manually entered copy has word groups, not source-timed cue bounds.
+  // It must not enter the integer source/programme clock with undefined times.
+  if (!chunk || !timeMap?.length || ![time, chunk.start, chunk.end, sourceStart, programmeStart]
+    .every(Number.isFinite) || sourceStart < 0 || programmeStart < 0) return null;
   const map = sourceTime => {
     const bounded = Math.max(sourceStart, Math.min(sourceEnd, sourceTime));
     const tick = mapProgrammeTickToOutputTick(timeMap,
@@ -40,7 +43,8 @@ export const getCaptionPreviewStyles = (styleName, captionScale = 1, accent = "#
   // restores the base text colour; without an icon it uses the cue accent.
   const textColor = style.animation === "fade_word" && !hasIcon
     ? accent : captionAssColor(style.primary_color);
-  const clock = outputClock || (chunk && Number.isFinite(time) ? { ...chunk, time } : null);
+  const clock = outputClock || (chunk && [time, chunk.start, chunk.end].every(Number.isFinite)
+    ? { ...chunk, time } : null);
   const opacity = style.animation === "fade_word" && clock
     ? Math.max(0, Math.min(1, (clock.time - clock.start) / .1, (clock.end - clock.time) / .15)) : 1;
   const card = style.border_style === 3;

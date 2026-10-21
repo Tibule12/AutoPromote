@@ -120,7 +120,7 @@ function applyJavaRuntime(javaRuntime) {
   process.env.PATH = [javaBin, ...pathEntries.filter(entry => path.resolve(entry) !== path.resolve(javaBin))].join(path.delimiter);
 }
 
-function tryRunFirebaseExec() {
+function tryRunFirebaseExec(cliPath = firebaseCli) {
   const childCommand =
     process.env.SKIP_JEST === '1' || process.env.SKIP_EMULATOR_TEST === '1'
       ? 'node -e "process.exit(0)"'
@@ -129,11 +129,22 @@ function tryRunFirebaseExec() {
     '[run-emulator-or-jest] Attempting: repository Firebase CLI emulators:exec --only firestore',
     JSON.stringify(childCommand)
   );
-  const res = runCommandSync(process.execPath, [firebaseCli, 'emulators:exec', '--only', 'firestore', childCommand], {
-    stdio: 'inherit',
-    env: process.env,
-  });
-  return res.status;
+  const resultDir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'autopromote-emulator-jest-'));
+  const resultFile = path.join(resultDir, 'result.json');
+  try {
+    const res = runCommandSync(process.execPath, [cliPath, 'emulators:exec', '--only', 'firestore', childCommand], {
+      stdio: 'inherit',
+      env: { ...process.env, AUTOPROMOTE_JEST_RESULT_FILE: resultFile },
+    });
+    const testsStarted = fs.existsSync(resultFile);
+    let testResult;
+    try { testResult = testsStarted ? JSON.parse(fs.readFileSync(resultFile, 'utf8')) : null; }
+    catch (_) { /* An interrupted child must not trigger a second suite. */ }
+    return { status: res.status ?? 1, testsStarted,
+      testStatus: testResult?.status };
+  } finally {
+    fs.rmSync(resultDir, { recursive: true, force: true });
+  }
 }
 
 function runJestDirect(envExtras = {}) {
@@ -165,7 +176,7 @@ function runJestDirect(envExtras = {}) {
   }
   // Node recognizes NODE_PATH when run with require('module').Module._initPaths() - many environments honor it
   const res = spawnSync('node', ['./scripts/exec-jest.js'], { stdio: 'inherit', env, shell: false });
-  return res.status;
+  return res.status ?? 1;
 }
 
 function startEmulatorBackground({timeoutMs = 60_000} = {}) {
@@ -364,7 +375,7 @@ async function detectExistingEmulator() {
   }
 }
 
-(async function main() {
+async function main() {
   try {
     // Check the exact installed CLI, retaining the real startup error.
     firebaseCli = resolveFirebaseCli();
@@ -417,12 +428,16 @@ async function detectExistingEmulator() {
     }
 
     // First try emulators:exec path — it's the simplest and isolates env to the child
-    const execCode = (function(){ try { return tryRunFirebaseExec(); } catch (e) { console.warn('[run-emulator-or-jest] tryRunFirebaseExec threw:', e && e.message); return 1; } })();
-    if (execCode === 0) {
+    const execResult = (function(){ try { return tryRunFirebaseExec(); } catch (e) { console.warn('[run-emulator-or-jest] tryRunFirebaseExec threw:', e && e.message); return { status: 1, testsStarted: false }; } })();
+    if (execResult.status === 0) {
       process.exit(0);
     }
+    if (execResult.testsStarted) {
+      console.error('[run-emulator-or-jest] Jest ran inside the emulator and failed; preserving its result without rerunning the suite.');
+      process.exit(execResult.testStatus || execResult.status || 1);
+    }
 
-    console.warn('[run-emulator-or-jest] emulators:exec returned non-zero exit code:', execCode, ' — trying background start path');
+    console.warn('[run-emulator-or-jest] Emulator startup failed before Jest ran:', execResult.status, ' — trying background start path');
 
     // Background-start approach: start emulator, wait for ready, set FIRESTORE_EMULATOR_HOST, run jest, then stop emulator
     let emulatorChild;
@@ -515,4 +530,7 @@ async function detectExistingEmulator() {
     }
     process.exit(1);
   }
-})();
+}
+
+if (require.main === module) main();
+module.exports = { tryRunFirebaseExec };

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-21T16:45:32.911Z",
+  "updatedAt": "2026-10-21T18:04:30.284Z",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -8163,5 +8163,50 @@
     "newPublicationWrites": 0,
     "readinessPromotion": false,
     "nextTask": "Push the accumulated reviewed source commit and prepare the main integration pull request; retain existing shared Studio and audience-observation backlog."
+  },
+  "playwrightUploadSelector20261021": {
+    "at": "2026-10-21T19:00:29.477865Z",
+    "report": "reports/playwright-ci-fix-20261021/README.md",
+    "scope": "CI orchestration and current mocked Studio flows; bounded untimed-caption, podcast-frame, timeline-menu and first-edit authoring-clock repairs. Grouped pose easing/curve updates compose instead of overwriting earlier keys. The tool rail fits its responsive column instead of overlapping the inspector by 20px.",
+    "originalCiFailures": 9,
+    "originalCiRun": "https://github.com/Tibule12/AutoPromote/actions/runs/39637821796",
+    "productCodeChanged": true,
+    "readinessPromotion": false,
+    "remainingBlockers": [
+      "Mocked browser and export-payload checks do not qualify real-account render parity or creative acceptance.",
+      "Shared S02 picture/audio/colour/edge/low-alpha/latency, S04 motion/glyph depth and S03 ownership remain."
+    ],
+    "nextTask": "Verify corrected pull-request CI and address existing CodeQL alerts before main integration; retain the shared Studio backlog and all native projects, identity, publishing receipts and daily/retention/observation timers.",
+    "originalEmulatorFailedSuites": 8,
+    "originalEmulatorFailedTests": 35,
+    "originalEmulatorFirstPassSeconds": 691.635,
+    "renderJobs": 0,
+    "paidGpuJobs": 0,
+    "newSchedules": 0,
+    "disabledTestsAdded": false,
+    "unitEmulatorVerification": {
+      "passed": 712,
+      "skipped": 4,
+      "passedSuites": 145,
+      "seconds": 39.051,
+      "exitCode": 0,
+      "redisReconnectLeakRemoved": true
+    },
+    "runnerRegressionTestsPassed": 7,
+    "studioComponentVerification": {
+      "passed": 131,
+      "seconds": 884.991,
+      "exitCode": 0,
+      "openHandleDiagnostics": true
+    },
+    "groupedPoseExportRegressionPassed": true,
+    "responsiveRailOverlapPixelsRepaired": 20,
+    "previewViewOptionsHitTargetsRepaired": true,
+    "headlessBrowserVerification": {
+      "distinctPassedScenarios": 29,
+      "studioPassedScenarios": 9,
+      "mode": "Combined focused runs against optimized builds; current remote CI must rerun.",
+      "newSkipConditions": 0
+    }
   }
 }

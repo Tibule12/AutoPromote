@@ -1,12 +1,13 @@
 const mockSet = jest.fn();
 const mockExecuteMulticamRenderJob = jest.fn();
 
-jest.mock("firebase-admin", () => ({
-  firestore: jest.fn(() => ({
+jest.mock("../../firebaseAdmin", () => ({
+  admin: {},
+  db: {
     collection: jest.fn(() => ({
       doc: jest.fn(() => ({ set: mockSet })),
     })),
-  })),
+  },
 }));
 
 jest.mock("../cloudRunJobService", () => ({

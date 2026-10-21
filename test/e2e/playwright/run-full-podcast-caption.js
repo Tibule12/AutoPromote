@@ -135,7 +135,7 @@ async function main() {
   await studioNav.click();
 
   console.log(`[frontend-caption] Selecting ${sourcePath}`);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(sourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(sourcePath);
 
   const openStudio = page.getByRole("button", { name: "Open Creator Studio", exact: true });
   const uploadStartedAt = Date.now();

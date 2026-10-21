@@ -169,3 +169,7 @@ reports/welcome-studio-scroll-20261021/*
 # Local pre-push test output; publish only the reviewed summary.
 reports/push-review-20261021/*
 !reports/push-review-20261021/README.md
+
+# CI failure logs and browser captures stay local; publish the reviewed summary.
+reports/playwright-ci-fix-20261021/*
+!reports/playwright-ci-fix-20261021/README.md
