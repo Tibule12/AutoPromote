@@ -41,6 +41,23 @@ button. Authors must register new major surfaces. Broad changed-file discovery
 and a mandatory repository CI gate are not installed by V1; use the check as a
 required review/release step before any future documentation publication.
 
+21 October assistance question qualification adds a rerunnable broad corpus at
+`test/product-assistance/question-coverage.js` and
+`scripts/check-product-assistance-questions.js`. It covers every public feature,
+control and task, plus independent wording, typos, context, greeting, unknown and
+privacy cases. Expected topic/control/guide checks are distinct from successful
+transport. Exact names and aliases, bounded typo normalization and a precomputed
+lexical index share the existing public catalogue; no model or action adapter is
+introduced. Normal human questions containing contact details, source links,
+paths or credential assignments are redacted before retrieval and journal writes.
+Structured unsafe context and oversized/malformed payloads remain rejected.
+Unknown questions ask for clarification; unsupported languages are not presented
+as translated answers. A unique previous feature may supply a safe stable ID for
+an ordinary follow-up, and Clear context removes it. Real network, validation and
+rate-limit failures remain visible with appropriate retry guidance. Corpus
+success is bounded question qualification, not proof of every possible question,
+complete documentation, account diagnosis or product/creative readiness.
+
 ## Internal and public data
 
 Internal JSON contains implementation references, abstract model capability

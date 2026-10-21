@@ -81,8 +81,7 @@ test('unsafe context, secrets, project payloads, unknown IDs and action modes ar
     { question: 'Help', context: { auth_token: 'secret' } },
     { question: 'Help', context: { selected_tool: 'arbitrary-code' } },
     { question: 'Help', context: { capability_availability: { 'studio.keyframes': 'PRO_READY' } } },
-    { question: 'My token=secret says error' }, { question: 'Read https://private.example/x' },
-    { question: 'password: sensitive' }, { question: 'x'.repeat(1001) },
+    { question: 'x'.repeat(1001) },
   ]) assert.throws(() => service.answer(input), /HELP_/);
 });
 test('unsupported, ambiguous and adversarial questions do not invent feature facts', () => {

@@ -7,11 +7,23 @@ export async function askProductAssistance(input, signal) {
   const response = await fetch(`${API_BASE_URL}/api/product-assistance/ask`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input), signal, credentials: 'omit',
+  }).catch(error => {
+    if (error.name === 'AbortError') throw error;
+    throw new Error('Could not reach product help. Check your connection and try again.');
   });
+  if (response.status === 429) {
+    const wait = Math.max(1, Math.min(60, Number(response.headers?.get('Retry-After')) || 60));
+    throw new Error(`You’re asking quickly. Please wait ${wait} seconds, then ask again.`);
+  }
   if (!response.ok) throw new Error(response.status === 400
     ? 'Use a product question and safe feature context. Leave out links, credentials and private project information.'
     : 'Product documentation is temporarily unavailable. Please try again.');
-  return response.json();
+  const reply = await response.json().catch(() => null);
+  if (!reply || typeof reply.answer !== 'string' || !Array.isArray(reply.features) || !Array.isArray(reply.controls) || !Array.isArray(reply.tasks) || !reply.sources ||
+      reply.features.some(f => typeof f.name !== 'string' || typeof f.status !== 'string' || ['how_to_use', 'limitations', 'dependencies', 'common_errors'].some(key => !Array.isArray(f[key])))) {
+    throw new Error('The documentation reply could not be read. Please try again.');
+  }
+  return reply;
 }
 // API documentation paths alone can become links; model/server text cannot inject
 // external/private URLs or HTML. React escapes all question and result prose.
@@ -28,19 +40,29 @@ export default function ProductAssistance({ request = askProductAssistance, laun
   const [result, setResult] = useState(null), [busy, setBusy] = useState(false), [error, setError] = useState('');
   const dialogRef = useRef(null), inputRef = useRef(null), priorFocus = useRef(null), controller = useRef(null);
   const sequence = useRef(0);
+  const lastFeature = useRef(null);
   const run = async (text, selectedMode, selectedContext) => {
+    if (!text.trim()) return;
+    let safeContext = selectedContext;
+    if (!selectedContext.selected_feature_id && lastFeature.current && /^(?:what (?:do i do next|is this)|where (?:is it|do i find it)|how (?:do i (?:do|use) (?:that|it|this)|does (?:it|that|this) work)|show me how|guide me|tell me more)[?!. ]*$/i.test(text.trim())) {
+      safeContext = { ...selectedContext, selected_feature_id: lastFeature.current };
+      setContext(safeContext);
+    }
     controller.current?.abort(); controller.current = new AbortController();
     const attempt = ++sequence.current;
     const deadline = setTimeout(() => { if (attempt === sequence.current) controller.current?.abort(); }, 15000);
     setBusy(true); setError(''); setResult(null);
     try {
-      const answer = await request({ question: text, mode: selectedMode, context: selectedContext }, controller.current.signal);
-      if (attempt === sequence.current) setResult(answer);
+      const answer = await request({ question: text, mode: selectedMode, context: safeContext }, controller.current.signal);
+      if (attempt === sequence.current) {
+        setResult(answer);
+        lastFeature.current = answer.features?.length === 1 ? answer.features[0].feature_id : null;
+      }
     } catch (failure) { if (attempt === sequence.current) setError(failure.name === 'AbortError' ? 'Documentation lookup timed out. Please try again.' : failure.message); }
     finally { clearTimeout(deadline); if (attempt === sequence.current) setBusy(false); }
   };
   const close = () => { ++sequence.current; controller.current?.abort(); setOpen(false); setBusy(false); priorFocus.current?.focus(); };
-  const openHelp = () => { priorFocus.current = document.activeElement; setContext({}); setQuestion(''); setResult(null); setError(''); setOpen(true); };
+  const openHelp = () => { priorFocus.current = document.activeElement; lastFeature.current = null; setContext({}); setQuestion(''); setResult(null); setError(''); setOpen(true); };
   useEffect(() => {
     const openGlobalHelp = () => openHelp();
     const help = event => {
@@ -73,15 +95,16 @@ export default function ProductAssistance({ request = askProductAssistance, laun
       <aside className="product-assistance-panel" role="dialog" aria-modal="true" aria-labelledby="product-assistance-title" ref={dialogRef} onKeyDown={onKey}>
         <div className="product-assistance-heading"><h2 id="product-assistance-title">Ask AutoPromote</h2><button type="button" aria-label="Close product help" onClick={close}>×</button></div>
         <p>Product help from the current documentation. This panel explains workflows; it cannot change your project or run jobs.</p>
-        {context.selected_feature_id && <p>Context: {result?.features?.[0]?.name || 'Selected feature'} <button type="button" onClick={() => { ++sequence.current; controller.current?.abort(); setBusy(false); setContext({}); setResult(null); }}>Clear context</button></p>}
+        {context.selected_feature_id && <p>Context: {result?.features?.[0]?.name || 'Selected feature'} <button type="button" onClick={() => { ++sequence.current; controller.current?.abort(); lastFeature.current = null; setBusy(false); setContext({}); setResult(null); }}>Clear context</button></p>}
         <form onSubmit={event => { event.preventDefault(); run(question, mode, context); }}>
           <label>Question<input ref={inputRef} value={question} maxLength={1000} onChange={event => setQuestion(event.target.value)} placeholder="How do I add keyframes?" /></label>
           <label>Help mode<select value={mode} onChange={event => setMode(event.target.value)}><option value="EXPLAIN">Explain</option><option value="GUIDE">Guide</option><option value="DIAGNOSE">Diagnose</option></select></label>
           <button type="submit" disabled={busy || !question.trim()}>{busy ? 'Looking up documentation…' : 'Ask'}</button>
         </form>
-        {error && <p role="alert">{error}</p>}
+        {error && <div role="alert"><p>{error}</p><button type="button" disabled={busy} onClick={() => run(question, mode, context)}>Try again</button></div>}
         <div aria-live="polite" aria-busy={busy}>
           {result && <>
+            {result.privacy_notice && <p role="status">{result.privacy_notice}</p>}
             <p className="product-assistance-answer">{result.answer}</p>
             {result.features.map(feature => <section key={feature.feature_id} className="product-assistance-feature">
               <h3>{feature.name} <span className={`product-readiness status-${feature.status.toLowerCase()}`}>{feature.status}</span></h3>

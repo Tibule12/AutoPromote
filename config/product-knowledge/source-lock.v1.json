@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed isolated CI and bounded Studio fixes; preserve all documented renderer/readiness limits.",
-  "reviewed_at": "2026-10-21T19:06:05.406Z",
+  "reason": "Publish the tested documentation chatbot repair on its feature branch: exact/contextual retrieval, typo handling, privacy redaction, safe follow-ups and controlled errors. Reconcile the already committed CI impact declarations replacing private JSON receipts with tracked report summaries; preserve existing feature facts, readiness and execution limits. Both new assistance modules are included in the source fingerprint.",
+  "reviewed_at": "2026-10-21T19:13:37.673Z",
   "catalog_sha256": "efa01082173309f97a2153f01091cd4bc6411cdcd45adc30affea65ae4326731",
   "sources": [
     {
@@ -87,7 +87,7 @@
     },
     {
       "path": "frontend/src/components/ProductAssistance.js",
-      "sha256": "a6e8891fce952edd72d249832f3320a65fbfee6222503454d3515bfe2cb44901"
+      "sha256": "f1d14b1b89ba546759eb103f55a90ee54f41bb8e877ecdd951f1a08197bf6bc6"
     },
     {
       "path": "frontend/src/components/ProductHelpButton.js",
@@ -507,11 +507,19 @@
     },
     {
       "path": "src/productAssistance/index.js",
-      "sha256": "fe8331fe1eb6718ca1d3464fbab317f21d559b9b0eb20b90bb84980cfda92860"
+      "sha256": "9c35e61ebf85da14a443201fb8e7ddf6d0a91aae06e99164f7feb2c916b552a7"
     },
     {
       "path": "src/productAssistance/journal.js",
       "sha256": "dce50300af2fcfba4c2e6a3d102bf9036c035e6a00174291f7c9be2d97537eda"
+    },
+    {
+      "path": "src/productAssistance/questionPrivacy.js",
+      "sha256": "5a68a16c068ea6aef7b8a9500d4ae43be5cdee3856f2664d34cecaf2b89c0861"
+    },
+    {
+      "path": "src/productAssistance/retrieval.js",
+      "sha256": "e3baf4f254b6517ce2349ca42dd00b3bf9febb134cbd7b90e19d517adeb78a95"
     },
     {
       "path": "src/productKnowledge/generate.js",
