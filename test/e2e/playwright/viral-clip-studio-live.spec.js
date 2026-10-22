@@ -16,6 +16,40 @@ test.use({
 
 const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
 const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
+const pausePreview = async page => {
+  const pause = page.getByRole("button", { name: "Pause comparison", exact: true });
+  if (await pause.count()) await pause.click();
+  await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("paused", true);
+};
+const playPreview = async page => {
+  const play = page.getByRole("button", { name: "Play comparison", exact: true });
+  if (await play.count()) await play.click();
+  await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("paused", false);
+};
+const expectProgrammeToAdvance = async page => {
+  const position = page.getByLabel("Edited output position");
+  const start = Number(await position.inputValue());
+  await playPreview(page);
+  await expect.poll(async () => Number(await position.inputValue())).toBeGreaterThan(start + .15);
+};
+// Match the frame step of the real transport and leave any inspector draft
+// through normal focus/blur before seeking (seeking deliberately cancels drafts).
+const seekOutput = async (page, seconds) => {
+  const position = page.getByLabel("Edited output position");
+  const value = await position.evaluate((input, requested) => {
+    const min = Number(input.min) || 0, max = Number(input.max);
+    const step = Number(input.step);
+    const frame = step > 0 ? min + Math.round((Number(requested) - min) / step) * step : Number(requested);
+    // Let the browser serialize its valid range value. Floating point products
+    // such as 111 * (1/30) otherwise fail Playwright's exact range-value check.
+    const normalizer = input.cloneNode();
+    normalizer.value = String(Math.max(min, Math.min(max, frame)));
+    return normalizer.value;
+  }, seconds);
+  await position.focus();
+  await position.fill(value);
+  await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("seeking", false);
+};
 const liveSourcePath = path.join(os.tmpdir(), `autopromote-viral-studio-${process.pid}.mp4`);
 const brandLogoPath = path.join(os.tmpdir(), `autopromote-e2e-logo-${process.pid}.png`);
 const generatedHqPreviewPath = path.join(os.tmpdir(), `autopromote-e2e-hq-${process.pid}.mp4`);
@@ -475,6 +509,19 @@ test("records playable voice-over, edits takes, restores audio after reload and 
     window.__E2E_TEST_TOKEN = "e2e-test-token";
     localStorage.setItem("E2E_BYPASS", "true");
     localStorage.setItem("user", JSON.stringify({ uid: "testUser", email: "test@local", name: "Studio Tester" }));
+    // Observe the real Web Audio route: preview gain now lives on its GainNode,
+    // while the media element stays at unity to avoid applying the mix twice.
+    window.__voiceTestGains = new WeakMap();
+    const createMediaSource = AudioContext.prototype.createMediaElementSource;
+    AudioContext.prototype.createMediaElementSource = function (element) {
+      const source = createMediaSource.call(this, element);
+      const connect = source.connect;
+      source.connect = function (destination, ...args) {
+        if (destination instanceof GainNode) window.__voiceTestGains.set(element, destination.gain);
+        return connect.call(this, destination, ...args);
+      };
+      return source;
+    };
     // Actual browser MediaRecorder, supplied a deterministic audio stream instead
     // of asking for or capturing the user's microphone during unattended QA.
     navigator.mediaDevices.getUserMedia = async () => {
@@ -491,15 +538,18 @@ test("records playable voice-over, edits takes, restores audio after reload and 
   const open = async () => {
     await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
     await openViralClipStudioEntry(page);
-    await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+    await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
     await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
     await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+    await pausePreview(page);
+    await seekOutput(page, 0);
+    await expect(page.locator(".studio-pro-timeline")).toBeVisible();
     await page.getByRole("button", { name: "After", exact: true }).click();
   };
   await open();
   const rail = page.locator(".creative-tool-rail");
   await rail.getByRole("button", { name: "Sound", exact: true }).click();
-  await page.getByLabel("Edited output position").fill("1");
+  await seekOutput(page, "1");
   await page.getByRole("button", { name: "Record at playhead", exact: true }).click();
   await expect(page.getByRole("button", { name: "Stop recording", exact: true })).toBeVisible();
   await page.waitForTimeout(3500);
@@ -510,43 +560,46 @@ test("records playable voice-over, edits takes, restores audio after reload and 
   await page.getByLabel("Length for Voice-over 1", { exact: true }).fill("2.5");
   await page.getByLabel("Volume for Voice-over 1", { exact: true }).fill("0.5");
   await page.getByLabel("Preview master volume", { exact: true }).fill("40");
+  await pausePreview(page);
+  await seekOutput(page, 1);
   await page.getByLabel("Automation source").selectOption("voiceover");
   await page.getByRole("button", { name: /Add volume keyframe at/ }).click();
   await page.getByLabel(/voiceover volume at .* seconds/).fill("25");
   const audio = page.getByTestId(/^voiceover-audio-/);
   await expect.poll(() => audio.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2);
   const previewTake = async () => {
-    await page.getByLabel("Edited output position").fill("1.5");
-    await page.getByTestId("studio-after-video").evaluate(video => video.play());
+    await seekOutput(page, "1.5");
+    await playPreview(page);
     await expect(audio).toHaveJSProperty("paused", false);
     await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeGreaterThan(1);
   };
   await previewTake();
-  await expect.poll(() => audio.evaluate(element => element.volume)).toBeCloseTo(.05, 2);
+  await expect.poll(() => audio.evaluate(element => window.__voiceTestGains.get(element)?.value)).toBeCloseTo(.05, 2);
   const voiceTrack = page.locator(".pro-track-row").filter({ hasText: "Voice-over" });
   await voiceTrack.getByRole("button", { name: "Mute track", exact: true }).click();
-  await page.getByLabel("Edited output position").fill("1.5");
-  await page.getByTestId("studio-after-video").evaluate(video => video.play());
+  await seekOutput(page, "1.5");
+  await playPreview(page);
   await expect(audio).toHaveJSProperty("paused", true);
-  await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+  await pausePreview(page);
   await voiceTrack.getByRole("button", { name: "Unmute track", exact: true }).click();
   await voiceTrack.getByRole("button", { name: "Solo track", exact: true }).click();
   await previewTake();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("muted", true);
-  await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+  await pausePreview(page);
   await voiceTrack.getByRole("button", { name: "Unsolo track", exact: true }).click();
   await rail.getByRole("button", { name: "Color", exact: true }).click();
   await expect(audio).toBeAttached();
-  await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+  await pausePreview(page);
   await expect(audio).toHaveJSProperty("paused", true);
   await rail.getByRole("button", { name: "Sound", exact: true }).click();
   await page.getByRole("button", { name: "Mute take", exact: true }).click();
-  await page.getByLabel("Edited output position").fill("1.5");
-  await page.getByTestId("studio-after-video").evaluate(video => video.play());
+  await seekOutput(page, "1.5");
+  await playPreview(page);
   await expect(audio).toHaveJSProperty("paused", true);
-  await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+  await pausePreview(page);
   await page.getByRole("button", { name: "Unmute take", exact: true }).click();
   await page.getByRole("button", { name: "Show media", exact: true }).click();
+  await clickStudioControl(page, page.getByLabel("Project name", { exact: true }));
   await page.getByLabel("Project name", { exact: true }).fill("Voice-over QA checkpoint");
   await clickStudioControl(page, page.getByTestId("studio-save-project"));
   await expect(page.locator(".studio-project-save-state")).toContainText("Saved locally");
@@ -560,7 +613,7 @@ test("records playable voice-over, edits takes, restores audio after reload and 
   await rail.getByRole("button", { name: "Sound", exact: true }).click();
   await page.getByRole("button", { name: "Hide media", exact: true }).click();
   await previewTake();
-  await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+  await pausePreview(page);
   await page.getByLabel("Voice-over takes", { exact: true }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: testInfo.outputPath("voiceover-restored.png") });
   await page.getByRole("button", { name: "Remove take", exact: true }).click();
@@ -612,9 +665,12 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   const open = async () => {
     await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
     await openViralClipStudioEntry(page);
-    await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+    await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
     await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
     await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+    await pausePreview(page);
+    await seekOutput(page, 0);
+    await expect(page.locator(".studio-pro-timeline")).toBeVisible();
     await page.getByRole("button", { name: "After", exact: true }).click();
   };
   await open();
@@ -658,6 +714,7 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
     }
   }
   await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByTestId("reframe-aspect-9-16").click();
   await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
   await expect(page.getByTestId("reframe-aspect-9-16")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("preview-fit-full")).toHaveCount(0);
@@ -676,15 +733,15 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
     await expect.poll(() => page.getByTestId("hook-preview-frame").evaluate(frame => {
       const r = frame.getBoundingClientRect(); return r.width / r.height;
     })).toBeCloseTo(w / h, 2);
-    await page.getByTestId("studio-after-video").evaluate(video => video.play());
+    await playPreview(page);
     await page.waitForTimeout(500);
-    await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+    await pausePreview(page);
     await page.screenshot({ path: testInfo.outputPath(`show-everyone-${aspect}.png`) });
   }
   // The Show Everyone preset intentionally resets prior tracking points and
   // disables tracking. Enable tracking after choosing the preset so the new
   // points belong to the visible two-panel layout.
-  await page.getByLabel("Edited output position").fill("1");
+  await seekOutput(page, "1");
   await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
   await page.getByLabel("top split horizontal").fill("34");
   await page.getByLabel("bottom split horizontal").fill("89");
@@ -692,11 +749,11 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Add top speaker tracking point", exact: true }).click();
   await page.getByRole("button", { name: "Add bottom speaker tracking point", exact: true }).click();
-  await page.getByLabel("Edited output position").fill("4");
+  await seekOutput(page, "4");
   await page.getByLabel("top split horizontal").fill("38");
   await page.getByLabel("bottom split horizontal").fill("90");
   await expect(page.getByLabel("top split horizontal")).toHaveValue("38");
-  await page.getByLabel("Edited output position").fill("2.5");
+  await seekOutput(page, "2.5");
   await expect(page.getByLabel("top split horizontal")).toHaveValue("36");
   await page.getByTestId("reframe-aspect-9-16").click();
   await page.screenshot({ path: testInfo.outputPath("show-everyone-with-tracking.png") });
@@ -725,7 +782,7 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   const bounds = await ruler.boundingBox();
   await ruler.click({ position: { x: bounds.width / 2, y: bounds.height / 2 } });
   await expect.poll(async () => Number(await page.getByLabel("Edited output position").inputValue())).toBeCloseTo(6, 0);
-  await page.getByLabel("Edited output position").fill("1");
+  await seekOutput(page, "1");
   const motionPresets = [
     "AutoPromote launch ident",
     "Impact title",
@@ -744,19 +801,19 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
     await page.getByRole("button", { name: `Add ${preset}`, exact: true }).click();
     await page.getByLabel("Motion headline", { exact: true }).fill(preset === "Moving brand" ? "@AUTOPROMOTE" : preset.toUpperCase());
     await page.getByLabel("Motion duration", { exact: true }).fill("2");
-    await page.getByLabel("Edited output position").fill("1.7");
+    await seekOutput(page, "1.7");
     await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("currentTime", 1.7);
     await expect(page.getByTestId("motion-preview").locator("[data-motion-id]")).toHaveCount(1);
     await expect(page.getByTestId("pro-motion-clip-1")).toContainText(preset === "Moving brand" ? "@AUTOPROMOTE" : preset.toUpperCase());
     await page.screenshot({ path: testInfo.outputPath(`motion-${index + 1}.png`) });
     if (index < motionPresets.length - 1) {
       await page.getByRole("button", { name: "Remove scene", exact: true }).click();
-      await page.getByLabel("Edited output position").fill("1");
+      await seekOutput(page, "1");
     }
   }
   await page.getByLabel("Motion sound", { exact: true }).selectOption("impact");
   await page.getByLabel("Motion start", { exact: true }).fill("5");
-  await page.getByLabel("Edited output position").fill("2");
+  await seekOutput(page, "2");
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("currentTime", 2);
   await expect(page.getByLabel("Edited output position")).toHaveValue("2");
   await page.getByTestId("pro-quick-trim-start").click();
@@ -766,10 +823,11 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   await expect(page.getByLabel("Motion start", { exact: true })).toHaveValue("5");
   await clickStudioControl(page, page.getByTestId("pro-quick-redo"));
   await expect(page.getByLabel("Motion start", { exact: true })).toHaveValue("3");
-  await page.getByLabel("Edited output position").fill("3.7");
+  await seekOutput(page, "3.7");
   await page.getByLabel("Preview master volume").fill("45");
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("muted", false);
   await page.getByRole("button", { name: "Show media", exact: true }).click();
+  await clickStudioControl(page, page.getByLabel("Project name", { exact: true }));
   await page.getByLabel("Project name", { exact: true }).fill("Motion QA checkpoint");
   await clickStudioControl(page, page.getByTestId("studio-save-project"));
   await expect(page.locator(".studio-project-save-state")).toContainText("Saved locally");
@@ -794,10 +852,10 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   await expect(page.getByLabel("Motion headline", { exact: true })).toHaveValue("@AUTOPROMOTE");
   await expect(page.getByLabel("Motion start", { exact: true })).toHaveValue("3");
   await page.getByRole("button", { name: "Hide media", exact: true }).click();
-  await page.getByLabel("Edited output position").fill("3.7");
+  await seekOutput(page, "3.7");
   await page.getByRole("button", { name: "Play motion + sound", exact: true }).click();
   await expect.poll(async () => Number(await page.getByLabel("Edited output position").inputValue())).toBeGreaterThan(3.4);
-  await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+  await pausePreview(page);
   await page.screenshot({ path: testInfo.outputPath("restored-motion-project.png") });
   await toolRail.getByRole("button", { name: "Captions", exact: true }).click();
   await page.getByTestId("generate-live-transcript").click();
@@ -805,7 +863,7 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   await expect(firstCaptionEditor).toHaveValue(/Greetings/);
   const originalFirstCaption = await firstCaptionEditor.inputValue();
   await firstCaptionEditor.fill("Unmuted — spelling corrected.");
-  await page.getByLabel("Edited output position").fill("0.5");
+  await seekOutput(page, "0.5");
   await expect(page.getByTestId("live-caption-preview")).toContainText("spelling corrected");
   await page.getByTestId("studio-undo-button").click();
   await expect(firstCaptionEditor).toHaveValue(originalFirstCaption);
@@ -836,12 +894,15 @@ test("keeps every creative caption style and free placement inside the real prog
 
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
   await expect(openStudio).toBeEnabled({ timeout: 120000 });
   await openStudio.click();
   await expect(page.locator(".viral-studio-overlay")).toBeVisible({ timeout: 120000 });
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
   await page.getByRole("button", { name: "Hide timeline", exact: true }).click();
 
   const inspector = page.getByTestId("clip-studio-inspector");
@@ -918,9 +979,12 @@ test("records the focused Motion workflow and verifies its export payload", asyn
   });
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
   await page.getByRole("button", { name: "After", exact: true }).click();
   await clickStudioControl(page, page.getByTestId("preview-fit-full"));
   const rail = page.getByRole("navigation", { name: "Creative tools" });
@@ -937,14 +1001,14 @@ test("records the focused Motion workflow and verifies its export payload", asyn
       await page.getByLabel("Target number", { exact: true }).fill("50000");
       await page.getByLabel("Number prefix", { exact: true }).fill("R");
     }
-    await page.getByLabel("Edited output position").fill("1.7");
+    await seekOutput(page, "1.7");
     await expect(page.getByTestId("motion-preview").locator("[data-motion-id]")).toHaveCount(1);
     await page.getByRole("button", { name: "Play motion + sound", exact: true }).click();
     await page.waitForTimeout(240);
-    await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+    await pausePreview(page);
     if (preset !== "Moving brand") {
       await page.getByRole("button", { name: "Remove scene", exact: true }).click();
-      await page.getByLabel("Edited output position").fill("1");
+      await seekOutput(page, "1");
     }
   }
   const set = async (label, value) => page.getByLabel(label, { exact: true }).fill(value);
@@ -971,11 +1035,11 @@ test("records the focused Motion workflow and verifies its export payload", asyn
   await page.getByRole("button", { name: "Duplicate scene", exact: true }).click();
   await expect(page.getByTestId("pro-motion-clip-2")).toBeAttached();
   await page.getByRole("button", { name: "Remove scene", exact: true }).click();
-  await page.getByLabel("Edited output position").fill("2");
+  await seekOutput(page, "2");
   await page.getByTestId("pro-quick-trim-start").click();
   await clickStudioControl(page, page.getByTestId("pro-quick-undo"));
   await clickStudioControl(page, page.getByTestId("pro-quick-redo"));
-  await page.getByLabel("Edited output position").fill("3.7");
+  await seekOutput(page, "3.7");
   await expect(page.getByText("Loading edited preview…", { exact: true })).toHaveCount(0, {
     timeout: 15000,
   });
@@ -1012,9 +1076,12 @@ test("records imported logo layer design and verifies preview-to-export keyframe
   });
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
 
   const rail = page.getByRole("navigation", { name: "Creative tools" });
   await rail.getByRole("button", { name: /Motion/ }).click();
@@ -1026,7 +1093,7 @@ test("records imported logo layer design and verifies preview-to-export keyframe
   });
   await expect(page.getByRole("group", { name: /viral_v2_194x56_VIRAL_CLIP_STUDIO.png controls/i })).toBeVisible();
   await expect(page.getByText("6 poses", { exact: true })).toBeVisible();
-  await page.getByLabel("Edited output position").fill("0.4");
+  await seekOutput(page, "0.4");
   const previewLayer = page.locator(".draggable-overlay.is-media-overlay").last();
   await expect(previewLayer).toBeVisible();
   await expect.poll(() => previewLayer.evaluate(node => node.style.getPropertyValue("--title-rotation"))).not.toBe("0deg");
@@ -1140,9 +1207,12 @@ test("designs an AutoPromote 3D logo and verifies HQ preview transport and expor
 
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
 
   const rail = page.getByRole("navigation", { name: "Creative tools" });
   await rail.getByRole("button", { name: "Reframe", exact: true }).click();
@@ -1153,7 +1223,7 @@ test("designs an AutoPromote 3D logo and verifies HQ preview transport and expor
   await page.getByLabel("Main text", { exact: true }).fill("AutoPromote");
   await page.getByLabel("Supporting line", { exact: true }).fill("CREATE WHAT MOVES PEOPLE");
   await page.getByLabel(/Motion intensity/).fill("0.78");
-  await page.getByLabel("Edited output position").fill("2.15");
+  await seekOutput(page, "2.15");
 
   const canvas = page.getByTestId("studio-3d-preview");
   await expect(canvas).toBeVisible();
@@ -1283,13 +1353,16 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await openViralClipStudioEntry(page);
   await expect(page.getByRole("heading", { name: "Viral Clip Studio" })).toBeVisible();
 
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
   await expect(openStudio).toBeEnabled({ timeout: 120000 });
   await openStudio.click();
 
   await expect(page.locator(".viral-studio-overlay")).toBeVisible({ timeout: 120000 });
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
   await expect(page.getByTestId("preview-audio-status")).toContainText("Source audio on");
   await page.getByRole("button", { name: "After", exact: true }).click();
   const programmeAudio = page.getByTestId("studio-after-video");
@@ -1333,13 +1406,13 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
     await toggle.click();
     await toggle.click();
   }
-  const firstTrackHeader = page.locator(".pro-track-header").first();
-  for (const control of ["Hide track", "Lock track", "Mute track", "Solo track"]) {
+  const firstTrackHeader = page.getByTestId("pro-track-row-originalAudio").locator(".pro-track-header");
+  for (const control of ["Dim timeline track", "Lock track", "Mute track", "Solo track"]) {
     const button = firstTrackHeader.getByRole("button", { name: control, exact: true });
     await button.click();
     const restoreName =
-      control === "Hide track"
-        ? "Show track"
+      control === "Dim timeline track"
+        ? "Emphasize timeline track"
         : control === "Lock track"
           ? "Unlock track"
           : control === "Mute track"
@@ -1463,7 +1536,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
     }
   };
   const captureLiveProof = async proofPath => {
-    await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+    await pausePreview(page);
     await page.waitForTimeout(220);
     await page.screenshot({ path: proofPath, fullPage: false });
   };
@@ -1473,14 +1546,14 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await page.getByTestId("creator-section-motion").click();
   await page.getByLabel("Creator zoom amount").fill("1.24");
   await seekAfterPreview(0.5);
-  await page.getByLabel("Edited output position").fill("0.5");
+  await seekOutput(page, "0.5");
   await page.getByTestId("creator-demo-punch_zoom").click();
   await expect(page.getByTestId("studio-creator-preview-layer")).toHaveCount(0);
   await expect(page.locator(".studio-program-canvas")).not.toHaveClass(/creator-canvas-punch/);
   await page.getByRole("button", { name: /Open full X\/Y/i }).click();
   await page.getByRole("button", { name: "Transform keyframes", exact: true }).click();
   await expect(inspector.getByText("3 poses", { exact: true })).toBeVisible();
-  await page.getByLabel("Edited output position").fill("0.8");
+  await seekOutput(page, "0.8");
   // A fitting issue is not zoom proof: use the full real frame for this check.
   await clickStudioControl(page, page.getByTestId("preview-fit-full"));
   await captureLiveProof(path.join("test-results", "studio-motion-keyframes.png"));
@@ -1555,7 +1628,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
     /^8% \/ [\d.]+%$/
   );
   await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute(
-    "data-rounded-locked",
+    "aria-pressed",
     "true"
   );
   await setTimelineExpanded(false);
@@ -1771,6 +1844,11 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await captureLiveProof(path.join("test-results", "viral-clip-studio-live-motion-editor.png"));
 
   await toolRail.getByRole("button", { name: "Composite", exact: true }).click();
+  // Source-video masking is gated until the canonical renderer supports it.
+  // Exercise the implemented shape mask on the headline layer instead.
+  await expect(inspector.getByRole("checkbox", { name: "Enable mask" })).toBeDisabled();
+  await inspector.getByRole("combobox", { name: "Composite target", exact: true })
+    .selectOption({ label: "THE STORY CHANGES HERE" });
   await inspector.getByRole("checkbox", { name: "Enable mask" }).check();
   await inspector.getByRole("button", { name: "ellipse", exact: true }).click();
   await expect(inspector.getByRole("button", { name: "ellipse", exact: true })).toHaveClass(
@@ -1894,22 +1972,13 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await page.getByLabel("Export resolution").selectOption("1080p");
   await page.getByLabel("Export frame rate").selectOption("30");
   await page.getByLabel("Export codec").selectOption("h264");
-  await expect(page.getByTestId("watermark-path-status")).toContainText(
-    "preview = export"
-  );
+  await expect(page.getByTestId("brand-watermark-preview")).toHaveCount(0);
   await seekAfterPreview(0.5);
-  const firstWatermarkPosition = await page
-    .getByTestId("brand-watermark-preview")
-    .getAttribute("data-position");
-  // Exercise real synchronized playback across the next watermark cue.
+  // The automatic brand stamp was removed. Verify actual clean programme
+  // playback instead of the old unqualified preview/export parity label.
   await page.getByRole("button", { name: "After", exact: true }).click();
-  await page.getByRole("button", { name: "Play comparison" }).click();
-  await expect(page.getByTestId("brand-watermark-preview")).not.toHaveAttribute(
-    "data-position",
-    firstWatermarkPosition,
-    { timeout: 12000 }
-  );
-  await page.getByRole("button", { name: "Pause comparison" }).click();
+  await expectProgrammeToAdvance(page);
+  await pausePreview(page);
   // Return to a decoded Episode 3 frame before capturing export readiness.
   await page.getByRole("slider", { name: "Edited output position" }).fill("0");
   await seekAfterPreview(0.5);
@@ -1953,11 +2022,14 @@ test("records focused proof of the synchronized two-speaker stack", async ({ pag
 
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
   await expect(openStudio).toBeEnabled({ timeout: 120000 });
   await openStudio.click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
 
   const inspector = page.getByTestId("clip-studio-inspector");
   await page
@@ -2092,11 +2164,14 @@ test("proves the three-input hero and duo multicamera layout", async ({ page }) 
 
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
   await expect(openStudio).toBeEnabled({ timeout: 120000 });
   await openStudio.click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
 
   const inspector = page.getByTestId("clip-studio-inspector");
   await page
@@ -2141,7 +2216,7 @@ test("proves the three-input hero and duo multicamera layout", async ({ page }) 
   expect(new Set(sourceUrls).size).toBe(3);
   const pauseBeforeProof = page.getByRole("button", { name: "Pause comparison" });
   if (await pauseBeforeProof.count()) await pauseBeforeProof.click();
-  await page.getByLabel("Edited output position").fill("0");
+  await seekOutput(page, "0");
   await expect.poll(() => programmeVideo.evaluate(video => video.currentTime)).toBeLessThan(0.4);
   const startTimes = await Promise.all(
     cameraVideos.map(video => video.evaluate(element => element.currentTime))
@@ -2198,11 +2273,14 @@ test("proves the four-input multicamera grid with moving synchronized test views
 
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
   await expect(openStudio).toBeEnabled({ timeout: 120000 });
   await openStudio.click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
 
   const inspector = page.getByTestId("clip-studio-inspector");
   await page
@@ -2252,7 +2330,7 @@ test("proves the four-input multicamera grid with moving synchronized test views
   const programmeVideo = page.getByTestId("studio-after-video");
   const pauseBeforeProof = page.getByRole("button", { name: "Pause comparison" });
   if (await pauseBeforeProof.count()) await pauseBeforeProof.click();
-  await page.getByLabel("Edited output position").fill("0");
+  await seekOutput(page, "0");
   await expect.poll(() => programmeVideo.evaluate(video => video.currentTime)).toBeLessThan(0.4);
   const startTimes = await Promise.all(
     cameraVideos.map(video => video.evaluate(element => element.currentTime))
@@ -2297,9 +2375,12 @@ test("keeps comparison monitors fitted and transport usable at every output aspe
   });
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
   await page.locator(".creative-tool-rail").getByRole("button", { name: "Reframe", exact: true }).click();
   await page.getByTestId("auto-reframe-toggle").check();
   // This is a manually reviewed host crop, not an automatic-tracking claim.
@@ -2331,7 +2412,7 @@ test("keeps comparison monitors fitted and transport usable at every output aspe
       expect(geometry.before.right).toBeLessThanOrEqual(geometry.after.x);
       expect(Math.max(geometry.before.bottom, geometry.after.bottom)).toBeLessThanOrEqual(geometry.controls.y);
       expect(geometry.before.width/geometry.before.height).toBeCloseTo(16/9, 2);
-      await page.getByLabel("Edited output position").fill("3");
+      await seekOutput(page, "3");
       await expect.poll(() => page.getByTestId("studio-after-video").evaluate(v => v.currentTime)).toBeCloseTo(3, 1);
       await expect.poll(() => page.getByLabel("Untouched source preview").evaluate(v => v.currentTime)).toBeCloseTo(3, 1);
       if (aspect === "9-16") await page.screenshot({ path: testInfo.outputPath(`comparison-${width}.png`) });
@@ -2360,24 +2441,35 @@ test("keeps comparison monitors fitted and transport usable at every output aspe
       const rects = await page.locator(".studio-layout").evaluate(layout => {
         const selectors = [".creative-tool-rail", ".studio-project-rail", ".phone-preview-container", ".studio-sidebar"];
         return selectors.map(s => layout.querySelector(s)).filter(el => el && el.getBoundingClientRect().width > 0)
-          .map(el => { const r = el.getBoundingClientRect(); return { left:r.left, right:r.right }; });
+          .map(el => { const r = el.getBoundingClientRect(); return { left:r.left, right:r.right, top:r.top, bottom:r.bottom }; });
       });
       for (let i = 0; i < rects.length; i++) {
         expect(rects[i].left).toBeGreaterThanOrEqual(0);
         expect(rects[i].right).toBeLessThanOrEqual(1281);
         for (let j = i+1; j < rects.length; j++) {
-          expect(rects[i].right <= rects[j].left + 1 || rects[j].right <= rects[i].left + 1).toBe(true);
+          // Responsive panels may stack. Require disjoint rectangles in the
+          // actual two-dimensional layout rather than horizontal separation.
+          expect(rects[i].right <= rects[j].left + 1 || rects[j].right <= rects[i].left + 1 ||
+            rects[i].bottom <= rects[j].top + 1 || rects[j].bottom <= rects[i].top + 1,
+            JSON.stringify({ mediaOpen, dock, rects, pair: [i, j] })).toBe(true);
         }
       }
       const picture = await page.getByTestId("hook-preview-frame").boundingBox();
       const transport = await page.locator(".preview-custom-controls").boundingBox();
       expect(picture.width/picture.height).toBeCloseTo(9/16, 2);
-      expect(picture.height).toBeGreaterThan(mediaOpen ? 300 : 360);
       expect(picture.y + picture.height).toBeLessThanOrEqual(transport.y);
-      const tabs = page.getByRole("tablist", { name: "Clip Studio tools", exact: true });
+      const tabs = page.getByRole("navigation", { name: "Creative tools", exact: true });
       expect(await tabs.evaluate(el => [...el.querySelectorAll("button")]
         .every(button => button.scrollWidth <= button.clientWidth + 1))).toBe(true);
       await page.screenshot({ path: testInfo.outputPath(`comparison-${dock}-media-${mediaOpen}.png`) });
+      // The compact comparison shares its column with the untouched monitor.
+      // Use the actual enlargement control to inspect a readable programme.
+      await clickStudioControl(page, page.getByTestId("preview-fullscreen-button"));
+      await expect(page.getByTestId("hook-preview-frame")).toHaveClass(/preview-expanded/);
+      expect((await page.getByTestId("hook-preview-frame").boundingBox()).height)
+        .toBeGreaterThan(mediaOpen ? 300 : 360);
+      await page.getByRole("button", { name: "Exit preview", exact: true }).click();
+      await page.getByRole("button", { name: "Compare", exact: true }).click();
     }
   }
   await page.getByRole("button", { name: "Hide media", exact: true }).click();
@@ -2401,9 +2493,12 @@ test("follows existing camera cuts using real full-minute analysis in the progra
   });
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(source);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(source);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
   await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
   await page.getByRole("button", { name: "Left Speaker", exact: false }).click();
   await page.getByLabel("Manual frame horizontal position").fill("29");
@@ -2415,7 +2510,7 @@ test("follows existing camera cuts using real full-minute analysis in the progra
   expect(state.faceTrackingRequests).toBe(1);
   await page.getByRole("button", { name: "After", exact: true }).click();
   for (const [time, side] of [[49.45, "host"], [49.55, "guest"], [52.55, "host"], [53.55, "guest"], [57.35, "host"]]) {
-    await page.getByLabel("Edited output position").fill(String(time));
+    await seekOutput(page, String(time));
     const video = page.getByTestId("studio-after-video");
     await expect.poll(() => video.evaluate(v => v.currentTime)).toBeCloseTo(time, 1);
     await expect(video).toHaveJSProperty("seeking", false);
@@ -2514,13 +2609,14 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
   });
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(source);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(source);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
   const video = page.getByTestId("studio-after-video");
   await expect(video).toHaveJSProperty("readyState", 4);
   await page.getByRole("button", { name: "After", exact: true }).click();
 
-  await page.getByLabel("Edited output position").fill("1.5");
+  await pausePreview(page);
+  await seekOutput(page, "1.5");
   await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("source-split-editor")).toBeVisible();
@@ -2534,7 +2630,8 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
   await expect(page.locator(".pro-framing-speaker-cut")).toHaveCount(1);
   await page.screenshot({ path: testInfo.outputPath("show-everyone-speaker-2-on-top.png") });
 
-  await page.getByLabel("Edited output position").fill("53.6");
+  await pausePreview(page);
+  await seekOutput(page, "53.6");
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(53.6, 1);
   await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
   await expect(page.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "true");
@@ -2549,10 +2646,12 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
   })).toBeCloseTo(9 / 16, 2);
   await page.screenshot({ path: testInfo.outputPath("later-speaker-solo.png") });
 
-  await page.getByLabel("Edited output position").fill("2");
+  await pausePreview(page);
+  await seekOutput(page, "2");
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("source-split-editor")).toBeVisible();
-  await page.getByLabel("Edited output position").fill("53.6");
+  await pausePreview(page);
+  await seekOutput(page, "53.6");
   await expect(page.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "true");
   expect(errors).toEqual([]);
 });
@@ -2572,11 +2671,14 @@ test("proves precision grade, curves and imported LUT on the full 60 second sour
   });
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(source);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(source);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
   await page.getByRole("button", { name: "After", exact: true }).click();
-  await page.getByLabel("Edited output position").fill("3");
+  await seekOutput(page, "3");
   await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
   await page.getByRole("button", { name: "Left Speaker", exact: false }).click();
   await page.getByLabel("Manual frame horizontal position").fill("29");
@@ -2607,12 +2709,12 @@ test("proves precision grade, curves and imported LUT on the full 60 second sour
   await page.locator(".advanced-color-sliders label").filter({ hasText: "Curve · midtones" }).locator("input").fill("20");
   await page.locator(".advanced-color-sliders label").filter({ hasText: "HSL · saturation" }).locator("input").fill("-8");
   await expect(page.getByLabel("RGB parade live")).toBeVisible();
-  await page.getByTestId("studio-after-video").evaluate(video => video.play());
+  await playPreview(page);
   await page.waitForTimeout(2500);
-  await page.getByTestId("studio-after-video").evaluate(video => video.pause());
+  await pausePreview(page);
   await page.screenshot({ path: testInfo.outputPath("full-minute-live-precision-grade.png") });
   for (const time of [49.6, 52.6, 53.6, 57.4, 59.8]) {
-    await page.getByLabel("Edited output position").fill(String(time));
+    await seekOutput(page, String(time));
     await expect.poll(() => page.getByTestId("studio-after-video").evaluate(video => video.currentTime)).toBeCloseTo(time, 1);
   }
   await rack.getByRole("button", { name: "Reset", exact: true }).click();
@@ -2623,7 +2725,7 @@ test("proves precision grade, curves and imported LUT on the full 60 second sour
     name: "confirmed-speaker-names.srt", mimeType: "text/plain", buffer: Buffer.from(
       "1\n00:00:39,100 --> 00:00:40,340\nLisakhanya Mdoda\n\n2\n00:00:52,240 --> 00:00:54,040\nSiphamandla Tsephe\n") });
   await expect(page.getByTestId("caption-segment-editor").locator("textarea").first()).toHaveValue("Lisakhanya Mdoda");
-  await page.getByLabel("Edited output position").fill("39.4");
+  await seekOutput(page, "39.4");
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("seeking", false);
   await expect(page.getByText("Loading edited preview…", { exact: true })).not.toBeVisible();
   await expect(page.getByTestId("live-caption-preview")).toBeVisible();
@@ -2652,13 +2754,16 @@ test("proves Motion Sculpture with real full-body movement footage", async ({ pa
 
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(
     motionSourcePath
   );
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
   await expect(openStudio).toBeEnabled({ timeout: 120000 });
   await openStudio.click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
 
   const toolRail = page.getByRole("navigation", { name: "Creative tools" });
   const inspector = page.getByTestId("clip-studio-inspector");
@@ -2675,10 +2780,8 @@ test("proves Motion Sculpture with real full-body movement footage", async ({ pa
   await page.getByRole("button", { name: "Hide timeline", exact: true }).click();
 
   const motionVideo = page.getByTestId("studio-after-video");
-  await motionVideo.evaluate(async video => {
-    video.currentTime = 5;
-    await video.play();
-  });
+  await seekOutput(page, 5);
+  await playPreview(page);
   const firstTime = await motionVideo.evaluate(video => video.currentTime);
   await page.waitForTimeout(3000);
   const secondTime = await motionVideo.evaluate(video => video.currentTime);
@@ -2702,7 +2805,7 @@ test("proves Motion Sculpture with real full-body movement footage", async ({ pa
     path: path.join("test-results", "viral-clip-studio-live-motion-sculpture.png"),
     fullPage: false,
   });
-  await motionVideo.evaluate(video => video.pause());
+  await pausePreview(page);
   expect(pageErrors).toEqual([]);
 });
 
@@ -2727,17 +2830,20 @@ test("records the complete frontend-first creator feature tour without rendering
 
   await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
   await openViralClipStudioEntry(page);
-  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.locator('.viral-studio-entry-panel input[type="file"][accept="video/*"]').setInputFiles(liveSourcePath);
   const openStudio = page.getByRole("button", { name: "Open Creator Studio" });
   await expect(openStudio).toBeEnabled({ timeout: 120000 });
   await openStudio.click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+  await pausePreview(page);
+  await seekOutput(page, 0);
+  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
   await page.getByRole("button", { name: "After", exact: true }).click();
   const studioProofStartSeconds = Math.max(0, (Date.now() - recordingEpoch) / 1000 - 0.8);
 
-  for (const controlName of ["Safe zones", "Grid"]) {
-    const control = page.getByRole("button", { name: controlName, exact: true });
-    if ((await control.getAttribute("aria-pressed")) === "true") await control.click();
+  for (const controlId of ["preview-safe-zones", "preview-grid"]) {
+    const control = page.getByTestId(controlId);
+    if ((await control.getAttribute("aria-pressed")) === "true") await clickStudioControl(page, control);
   }
 
   const toolRail = page.getByRole("navigation", { name: "Creative tools" });
@@ -2771,19 +2877,8 @@ test("records the complete frontend-first creator feature tour without rendering
     await page.waitForTimeout(220);
   };
   const seekProgramme = async time => {
-    await programme.evaluate(async (video, targetTime) => {
-      video.pause();
-      const ready = new Promise(resolve => {
-        const timeout = window.setTimeout(resolve, 900);
-        video.addEventListener("seeked", () => {
-          window.clearTimeout(timeout);
-          resolve();
-        }, { once: true });
-      });
-      video.currentTime = Math.min(Number(targetTime), Math.max(0, video.duration - 0.1));
-      await ready;
-      video.dispatchEvent(new Event("timeupdate", { bubbles: true }));
-    }, time);
+    await pausePreview(page);
+    await seekOutput(page, time);
     await page.waitForTimeout(140);
   };
 
@@ -2807,9 +2902,9 @@ test("records the complete frontend-first creator feature tour without rendering
     await seekProgramme(index + 0.5);
     await workbench.getByTestId(`creator-demo-${demo}`).click();
     await expect(page.getByTestId("studio-creator-preview-layer")).toHaveCount(0);
-    await programme.evaluate(video => video.play());
+    await playPreview(page);
     await page.waitForTimeout(750);
-    await programme.evaluate(video => video.pause());
+    await pausePreview(page);
   }
   await page.waitForTimeout(500);
   await workbench.getByRole("button", { name: /Open full X\/Y/i }).click();
@@ -2817,7 +2912,7 @@ test("records the complete frontend-first creator feature tour without rendering
   await inspector.getByRole("spinbutton", { name: "X", exact: true }).fill("39");
   await inspector.getByRole("spinbutton", { name: "Y", exact: true }).fill("43");
   await inspector.getByRole("button", { name: /Add transform keyframe/i }).click();
-  await page.getByLabel("Edited output position").fill("3");
+  await seekOutput(page, "3");
   await inspector.getByRole("spinbutton", { name: "X", exact: true }).fill("63");
   await inspector.getByRole("spinbutton", { name: "Y", exact: true }).fill("54");
   await inspector.getByRole("button", { name: /Add transform keyframe/i }).click();
@@ -3029,31 +3124,24 @@ test("records the complete frontend-first creator feature tour without rendering
   await workbench.getByLabel("Reaction emoji").fill("😂");
   await workbench.getByLabel("Creator effect intensity").fill("82");
   await workbench.getByRole("button", { name: "Apply smooth speed ramp" }).click();
-  await programme.evaluate(video => video.play());
+  await playPreview(page);
   await page.waitForTimeout(1700);
-  await programme.evaluate(video => video.pause());
+  await pausePreview(page);
 
-  // SECTION 12 — the moving brand mark uses the same timed path in preview/export.
+  // SECTION 12 — clean programme playback in the full-screen monitor.
   await workbench.getByTestId("creator-clear-preview").click();
   await toolRail.getByRole("button", { name: "Reframe", exact: true }).click();
   await inspector.getByTestId("reframe-aspect-16-9").click();
   await inspector.getByTestId("reframe-preserve-frame").click();
   await toolRail.getByRole("button", { name: "Export", exact: true }).click();
-  await expect(page.getByTestId("watermark-path-status")).toContainText("preview = export");
+  await expect(page.getByTestId("brand-watermark-preview")).toHaveCount(0);
   await seekProgramme(5.2);
-  const initialWatermarkPosition = await page
-    .getByTestId("brand-watermark-preview")
-    .getAttribute("data-position");
-  await page.getByRole("button", { name: "Play comparison", exact: true }).click();
+  await expectProgrammeToAdvance(page);
   await clickStudioControl(page, page.getByTestId("preview-fullscreen-button"));
-  await expect(page.getByTestId("brand-watermark-preview")).not.toHaveAttribute(
-    "data-position",
-    initialWatermarkPosition,
-    { timeout: 12000 }
-  );
+  await expect(page.getByTestId("hook-preview-frame")).toHaveClass(/preview-expanded/);
   await page.waitForTimeout(900);
   await page.getByRole("button", { name: "Exit preview", exact: true }).click();
-  await page.getByRole("button", { name: "Pause comparison", exact: true }).click();
+  await pausePreview(page);
 
   // SECTION 13 — editable semantic suggestion and reusable style.
   await toolRail.getByRole("button", { name: "Creator FX", exact: true }).click();

@@ -10,6 +10,10 @@ if (!process.env.NODE_ENV) process.env.NODE_ENV = "test";
 if (!process.env.ALLOW_PAYMENTS_DEV_MOCK) process.env.ALLOW_PAYMENTS_DEV_MOCK = "true";
 if (!process.env.RATE_LIMIT_GLOBAL_MAX) process.env.RATE_LIMIT_GLOBAL_MAX = "1000";
 if (!process.env.ENABLE_BACKGROUND_JOBS) process.env.ENABLE_BACKGROUND_JOBS = "false";
+// Unit/emulator tests exercise the local rate limiter. An unconfigured Redis
+// connection retries forever after Jest finishes; real Redis integration must
+// explicitly opt in and own its client teardown.
+if (!process.env.REDIS_DISABLED) process.env.REDIS_DISABLED = "true";
 
 if (!process.env.DEBUG_TEST_LOGS) {
   const originalLog = console.log;
@@ -97,9 +101,8 @@ global.setInterval = (...args) => {
 };
 global.setTimeout = (...args) => {
   const id = __origSetTimeout(...args);
-  try {
-    if (id && typeof id.unref === "function") id.unref();
-  } catch (e) {}
+  // Finite test/SDK deadlines must keep Node alive while their promises settle.
+  // Unref'ing every timeout can let Jest exit with no completed report.
   __testTimeouts.push(id);
   return id;
 };

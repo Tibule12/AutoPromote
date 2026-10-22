@@ -1,60 +1,193 @@
-const crypto = require('crypto');
-const Ajv = require('ajv');
-const schemas = require('../../contracts/model-capabilities-v1.json');
-const registry = require('../../config/model-runtime/registry.v1.json');
-const stable = value => JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item)
-  ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
-const hash = value => crypto.createHash('sha256').update(Buffer.isBuffer(value) || typeof value === 'string' ? value : stable(value)).digest('hex');
+const crypto = require("crypto");
+const Ajv = require("ajv");
+const schemas = require("../../contracts/model-capabilities-v1.json");
+const registry = require("../../config/model-runtime/registry.v1.json");
+const stable = value =>
+  JSON.stringify(value, (_key, item) =>
+    item && typeof item === "object" && !Array.isArray(item)
+      ? Object.fromEntries(
+          Object.keys(item)
+            .sort()
+            .map(key => [key, item[key]])
+        )
+      : item
+  );
+const hash = value =>
+  crypto
+    .createHash("sha256")
+    .update(Buffer.isBuffer(value) || typeof value === "string" ? value : stable(value))
+    .digest("hex");
 const fail = (code, statusCode = 400) => Object.assign(new Error(code), { code, statusCode });
-const ajv = new Ajv({ allErrors: true, strictNumbers: true });
+const ajv = new Ajv({ allErrors: false, strictNumbers: true });
 const requestValidator = ajv.compile(schemas.request);
-const inputs = Object.fromEntries(Object.entries(schemas.inputs).map(([key, schema]) => [key, ajv.compile(schema)]));
-const outputs = Object.fromEntries(Object.entries(schemas.outputs).map(([key, schema]) => [key, ajv.compile(schema)]));
+const inputs = Object.fromEntries(
+  Object.entries(schemas.inputs).map(([key, schema]) => [key, ajv.compile(schema)])
+);
+const outputs = Object.fromEntries(
+  Object.entries(schemas.outputs).map(([key, schema]) => [key, ajv.compile(schema)])
+);
 const clean = value => JSON.parse(stable(value));
+function boundedJson(value, maxNodes = 4096) {
+  const pending = [{ value, depth: 0 }],
+    seen = new Set();
+  let nodes = 0;
+  while (pending.length) {
+    const item = pending.pop();
+    if (++nodes > maxNodes || item.depth > 20) return false;
+    if (typeof item.value === "string" && item.value.length > 512 * 1024) return false;
+    if (!item.value || typeof item.value !== "object") continue;
+    if (
+      seen.has(item.value) ||
+      (!Array.isArray(item.value) &&
+        ![Object.prototype, null].includes(Object.getPrototypeOf(item.value)))
+    )
+      return false;
+    seen.add(item.value);
+    const entries = Object.values(item.value);
+    if (entries.length + nodes + pending.length > maxNodes) return false;
+    for (const child of entries) pending.push({ value: child, depth: item.depth + 1 });
+  }
+  return true;
+}
+function validateParameters(input) {
+  switch (input.capability) {
+    case "understand_video":
+      return inputs.understand_video(input.parameters);
+    case "detect_object":
+      return inputs.detect_object(input.parameters);
+    case "segment_subject":
+      return inputs.segment_subject(input.parameters);
+    case "track_object":
+      return inputs.track_object(input.parameters);
+    case "generate_video":
+      return inputs.generate_video(input.parameters);
+    default:
+      return false;
+  }
+}
 function request(input) {
   // JSON round-tripping must not turn NaN or a class instance into valid input.
-  if (!input || Buffer.byteLength(stable(input)) > 48 * 1024 || !requestValidator(input) || !inputs[input.capability](input.parameters))
-    throw fail('MODEL_CAPABILITY_REQUEST_INVALID');
+  if (
+    !input ||
+    !boundedJson(input) ||
+    Buffer.byteLength(stable(input)) > 48 * 1024 ||
+    !requestValidator(input) ||
+    !validateParameters(input)
+  )
+    throw fail("MODEL_CAPABILITY_REQUEST_INVALID");
   const r = input.sourceRange;
   if (r.endTick <= r.startTick || r.endTick - r.startTick > 30 * 90000)
-    throw fail('MODEL_CAPABILITY_RANGE_INVALID');
-  const frames=Math.floor((r.endTick-r.startTick)/3750+.5);
-  if(frames<1 || frames>720)throw fail('MODEL_CAPABILITY_RANGE_INVALID');
-  if (input.sourceStoragePath.includes('..') || input.sourceStoragePath.includes('\\') || input.sourceStoragePath.startsWith('/'))
-    throw fail('MODEL_CAPABILITY_SOURCE_INVALID');
+    throw fail("MODEL_CAPABILITY_RANGE_INVALID");
+  const frames = Math.floor((r.endTick - r.startTick) / 3750 + 0.5);
+  if (frames < 1 || frames > 720) throw fail("MODEL_CAPABILITY_RANGE_INVALID");
+  if (
+    input.sourceStoragePath.includes("..") ||
+    input.sourceStoragePath.includes("\\") ||
+    input.sourceStoragePath.startsWith("/")
+  )
+    throw fail("MODEL_CAPABILITY_SOURCE_INVALID");
   if (new Set(input.dependencyHashes).size !== input.dependencyHashes.length)
-    throw fail('MODEL_CAPABILITY_DEPENDENCIES_INVALID');
+    throw fail("MODEL_CAPABILITY_DEPENDENCIES_INVALID");
   const p = input.parameters;
-  if(input.capability==='detect_object' && p.frameIndex>=frames)throw fail('MODEL_CAPABILITY_FRAME_INVALID');
-  if (input.capability === 'generate_video' && !((p.width === 1280 && p.height === 704) || (p.width === 704 && p.height === 1280)))
-    throw fail('MODEL_CAPABILITY_VIDEO_GEOMETRY_INVALID');
-  if (input.capability === 'segment_subject' && (p.initialBox[0] >= p.initialBox[2] || p.initialBox[1] >= p.initialBox[3]))
-    throw fail('MODEL_CAPABILITY_BOX_INVALID');
-  if(input.capability==='segment_subject' && p.shotPrompts.some((s,i)=>s.frameIndex>=frames ||
-     (i>0 && s.frameIndex<=p.shotPrompts[i-1].frameIndex) || s.box[0]>=s.box[2] || s.box[1]>=s.box[3]))
-    throw fail('MODEL_CAPABILITY_SHOT_PROMPT_INVALID');
-  if (input.capability === 'track_object' && (p.mode !== 'mask_centroid' || !p.maskArtifactHash || !input.dependencyHashes.includes(p.maskArtifactHash) || p.points.length))
-    throw fail('MODEL_CAPABILITY_POINT_TRACKING_UNAVAILABLE', 503);
+  if (input.capability === "detect_object" && p.frameIndex >= frames)
+    throw fail("MODEL_CAPABILITY_FRAME_INVALID");
+  if (
+    input.capability === "generate_video" &&
+    !((p.width === 1280 && p.height === 704) || (p.width === 704 && p.height === 1280))
+  )
+    throw fail("MODEL_CAPABILITY_VIDEO_GEOMETRY_INVALID");
+  if (
+    input.capability === "segment_subject" &&
+    (p.initialBox[0] >= p.initialBox[2] || p.initialBox[1] >= p.initialBox[3])
+  )
+    throw fail("MODEL_CAPABILITY_BOX_INVALID");
+  if (
+    input.capability === "segment_subject" &&
+    p.shotPrompts.some(
+      (s, i) =>
+        s.frameIndex >= frames ||
+        (i > 0 && s.frameIndex <= p.shotPrompts[i - 1].frameIndex) ||
+        s.box[0] >= s.box[2] ||
+        s.box[1] >= s.box[3]
+    )
+  )
+    throw fail("MODEL_CAPABILITY_SHOT_PROMPT_INVALID");
+  if (
+    input.capability === "track_object" &&
+    (p.mode !== "mask_centroid" ||
+      !p.maskArtifactHash ||
+      !input.dependencyHashes.includes(p.maskArtifactHash) ||
+      p.points.length)
+  )
+    throw fail("MODEL_CAPABILITY_POINT_TRACKING_UNAVAILABLE", 503);
   return clean(input);
 }
-function selectModel(capability, { models = registry, modelId = models.defaults[capability] } = {}) {
+function selectModel(
+  capability,
+  { models = registry, modelId = models.defaults[capability] } = {}
+) {
   const model = models.models.find(m => m.id === modelId);
-  if (!model || model.capabilityId !== capability || !model.enabled) throw fail('MODEL_CAPABILITY_UNAVAILABLE', 503);
-  if (!/^[a-f0-9]{40}$/.test(model.revision) || !model.modelVersion || !model.license || !model.weights.length)
-    throw fail('MODEL_REGISTRY_UNPINNED', 503);
+  if (!model || model.capabilityId !== capability || !model.enabled)
+    throw fail("MODEL_CAPABILITY_UNAVAILABLE", 503);
+  if (
+    !/^[a-f0-9]{40}$/.test(model.revision) ||
+    !model.modelVersion ||
+    !model.license ||
+    !model.weights.length
+  )
+    throw fail("MODEL_REGISTRY_UNPINNED", 503);
   return clean(model);
 }
+function validateResult(capability, output) {
+  switch (capability) {
+    case "understand_video":
+      return outputs.understand_video(output);
+    case "detect_object":
+      return outputs.detect_object(output);
+    case "segment_subject":
+      return outputs.segment_subject(output);
+    case "track_object":
+      return outputs.track_object(output);
+    case "generate_video":
+      return outputs.generate_video(output);
+    default:
+      return false;
+  }
+}
 function validateOutput(capability, output) {
-  if (!outputs[capability]?.(output) || Buffer.byteLength(stable(output)) > 512 * 1024)
-    throw fail('MODEL_CAPABILITY_OUTPUT_INVALID', 502);
+  if (
+    !Object.hasOwn(outputs, capability) ||
+    !boundedJson(output, 32768) ||
+    !validateResult(capability, output) ||
+    Buffer.byteLength(stable(output)) > 512 * 1024
+  )
+    throw fail("MODEL_CAPABILITY_OUTPUT_INVALID", 502);
   return clean(output);
 }
 function evidenceFor(artifact) {
-  if (artifact.status !== 'completed') throw fail('MODEL_ARTIFACT_NOT_EVIDENCE', 409);
-  return { evidenceId: `model:${artifact.artifactHash.slice(0,32)}`, kind: 'model_artifact',
-    sourceAssetId: artifact.sourceAssetId, sourceContentHash: artifact.sourceSha256,
-    artifactHash: artifact.artifactHash, analysisType: artifact.capability,
-    modelRevision: artifact.revision, configHash: artifact.configHash,
-    dependencyHashes: artifact.dependencyHashes, statement: null };
+  if (artifact.status !== "completed") throw fail("MODEL_ARTIFACT_NOT_EVIDENCE", 409);
+  return {
+    evidenceId: `model:${artifact.artifactHash.slice(0, 32)}`,
+    kind: "model_artifact",
+    sourceAssetId: artifact.sourceAssetId,
+    sourceContentHash: artifact.sourceSha256,
+    artifactHash: artifact.artifactHash,
+    analysisType: artifact.capability,
+    modelRevision: artifact.revision,
+    configHash: artifact.configHash,
+    dependencyHashes: artifact.dependencyHashes,
+    statement: null,
+  };
 }
-module.exports = { request, selectModel, validateOutput, evidenceFor, stable, hash, fail, clean, registry, schemas };
+module.exports = {
+  request,
+  selectModel,
+  validateOutput,
+  evidenceFor,
+  stable,
+  hash,
+  fail,
+  clean,
+  registry,
+  schemas,
+};

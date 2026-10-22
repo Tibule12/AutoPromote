@@ -1,10 +1,11 @@
 const mockUpdate = jest.fn().mockResolvedValue(undefined);
 const mockPost = jest.fn();
 
-jest.mock("firebase-admin", () => ({
-  firestore: jest.fn(() => ({
+jest.mock("../firebaseAdmin", () => ({
+  admin: {},
+  db: {
     collection: jest.fn(() => ({ doc: jest.fn(() => ({ update: mockUpdate })) })),
-  })),
+  },
 }));
 jest.mock("axios", () => ({ post: mockPost }));
 jest.mock("../services/mediaWorkerTaskQueue", () => ({ queueAudioExtractionTask: jest.fn() }));

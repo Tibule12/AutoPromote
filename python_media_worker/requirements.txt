@@ -1,7 +1,7 @@
 # Core Media Processing
 ffmpeg-python
 opencv-contrib-python==4.11.0.86
-Pillow 
+Pillow==13.0.0
 numpy>=1.26,<2
 scenedetect
 
@@ -18,7 +18,7 @@ protobuf>=4.25,<5
 fastapi
 uvicorn
 python-multipart 
-requests
+requests==2.34.2
 python-dotenv
 
 # Text-to-Speech & Video Assembly (New)
