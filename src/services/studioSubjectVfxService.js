@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const axios = require("axios");
-const { readStudioWorker } = require("./studioWorkerRead");
+const { readStudioWorker, cancelStudioWorkerJob } = require("./studioWorkerRead");
 const admin = require("firebase-admin");
 const { getStudioSourceBucket, resolveOwnedStudioVideoSource } = require("./studioSourceService");
 const {
@@ -166,8 +166,7 @@ async function getSubjectVfxPreview({ ownerUid, jobId }) {
     throw error(410, "Subject render expired. Render the saved effect again.");
   if (!["completed", "failed", "cancelled"].includes(data.status)) {
     const config = workerConfig(data.executionKind);
-    const response = await readStudioWorker(`${config.url}/jobs/${jobId}`, {
-      headers: config.headers,
+    const response = await readStudioWorker(config, jobId, {
       timeout: 15000,
       maxRedirects: 0,
     });
@@ -202,8 +201,8 @@ async function getSubjectVfxPreview({ ownerUid, jobId }) {
         receipt.frames !== Math.round(seconds * 24)
       )
         throw error(502, "Subject render did not preserve the selected picture clock.");
-      const media = await readStudioWorker(`${config.url}/jobs/${jobId}/media`, {
-        headers: config.headers,
+      const media = await readStudioWorker(config, jobId, {
+        media: true,
         responseType: "arraybuffer",
         timeout: 60000,
         maxRedirects: 0,
@@ -287,11 +286,7 @@ async function cancelSubjectVfxPreview({ ownerUid, jobId }) {
   if (["completed", "failed", "cancelled"].includes(data.status))
     return { jobId, status: data.status };
   const config = workerConfig(data.executionKind);
-  const response = await axios.delete(`${config.url}/jobs/${jobId}`, {
-    headers: config.headers,
-    timeout: 15000,
-    maxRedirects: 0,
-  });
+  const response = await cancelStudioWorkerJob(config, jobId);
   if (response.data?.status !== "cancelled")
     throw error(502, "Cancellation has not been confirmed. Check this job again.");
   await ref.update({ status: "cancelled" });

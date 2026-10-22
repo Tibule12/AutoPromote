@@ -77,11 +77,11 @@ function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
   return match ? match.id : null;
 }
 
-function getPlatformPostQuota(planId, plan, billingData = {}) {
+function getPlatformPostQuota(planId, plan, testerAccess = null, billingData = {}) {
   return (
     (getPlatformPostMonthlyQuota &&
       typeof getPlatformPostMonthlyQuota === "function" &&
-      getPlatformPostMonthlyQuota(planId, plan, null, billingData)) ||
+      getPlatformPostMonthlyQuota(planId, plan, testerAccess, billingData)) ||
     (plan && plan.features && plan.features.wolfHuntTasks) ||
     0
   );
@@ -1207,7 +1207,9 @@ router.get("/usage", authMiddleware, async (req, res) => {
     const uploadLimit = effectiveTier.tier?.monthly_upload_cap ?? plan.features.uploads;
     const communityPostLimit = plan.features.communityPosts;
     const missionOpportunityLimit = plan.features.wolfHuntTasks;
-    const platformPostLimit = getPlatformPostQuota(tier, plan, effectiveTier.billingData);
+    const platformPostLimit = getPlatformPostQuota(
+      tier, plan, effectiveTier.testerAccess, effectiveTier.billingData
+    );
     const isUnlimited = value =>
       value === Infinity || value === "unlimited" || value === "Unlimited";
 

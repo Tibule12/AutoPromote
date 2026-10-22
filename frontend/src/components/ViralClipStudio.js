@@ -24934,7 +24934,7 @@ const ViralClipStudio = ({
                     </section>
                   ) : null}
                   <MotionInspector
-                    activeOverlay={motionInspectorTarget}
+                    activeOverlay={motionInspectorTarget ? { ...motionInspectorTarget, ...activeMotionCurrent } : null}
                     overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}
                     playhead={previewTimelineTime}
                     keyframes={motionKeyframes}

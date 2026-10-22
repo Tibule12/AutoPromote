@@ -96,6 +96,18 @@ export function applySafeMediaSource(element, url) {
   return true;
 }
 
+export function applySafeMediaPoster(element, url) {
+  if (!element || element.tagName !== "VIDEO") return false;
+  const safeUrl = sanitizeMediaUrl(url);
+  const encoded = safeUrl ? encodeSafeAttributeUrl(safeUrl) : "";
+  if (!encoded) {
+    element.removeAttribute("poster");
+    return false;
+  }
+  element.setAttribute("poster", encoded);
+  return true;
+}
+
 // Helper to sanitize URLs for use in src/href.
 export function sanitizeUrl(url) {
   return sanitizeMediaUrl(url);

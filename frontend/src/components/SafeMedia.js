@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useRef } from "react";
-import { applySafeMediaSource } from "../utils/security";
+import { applySafeMediaSource, applySafeMediaPoster } from "../utils/security";
 
 const assignRef = (targetRef, value) => {
   if (!targetRef) return;
@@ -11,12 +11,16 @@ const assignRef = (targetRef, value) => {
 };
 
 const createSafeMediaComponent = tagName => {
-  const SafeMediaComponent = forwardRef(({ src, ...props }, forwardedRef) => {
+  const SafeMediaComponent = forwardRef(({ src, poster, ...props }, forwardedRef) => {
     const localRef = useRef(null);
 
     useEffect(() => {
       applySafeMediaSource(localRef.current, src);
     }, [src]);
+
+    useEffect(() => {
+      applySafeMediaPoster(localRef.current, poster);
+    }, [poster]);
 
     return React.createElement(tagName, {
       ...props,

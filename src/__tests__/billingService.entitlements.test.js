@@ -56,6 +56,24 @@ describe("billingService entitlement enforcement", () => {
       { subscriptionTier: "premium", subscriptionStatus: "active", uploadAllowance: { monthlyLimit: 9999 } });
     expect(snapshot.tier.monthly_upload_cap).toBe(20);
   });
+  it("raises only the account with a server-owned publishing allowance", () => {
+    expect(getPlatformPostMonthlyQuota("premium", null, null, {
+      publishingAllowance: { monthlyLimit: 1000 },
+    })).toBe(1000);
+    expect(getPlatformPostMonthlyQuota("premium")).toBe(150);
+    expect(getPlatformPostMonthlyQuota("enterprise", null, null, {
+      publishingAllowance: { monthlyLimit: 1000 },
+    })).toBe(2000);
+  });
+
+  it.each([0, -1, 10001, 150.5, "1000", NaN, null])(
+    "ignores an invalid publishing allowance: %p", value => {
+      expect(getPlatformPostMonthlyQuota("premium", null, null, {
+        publishingAllowance: { monthlyLimit: value },
+      })).toBe(150);
+    }
+  );
+
   it("denies free-tier bot boost access when the plan does not include it", async () => {
     await expect(checkBotEntitlement("user-1", "bot_boost")).rejects.toThrow(
       "requires a paid subscription"

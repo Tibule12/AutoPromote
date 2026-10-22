@@ -1,3 +1,4 @@
+import { applySafeMediaSource } from "../utils/security";
 import React, { useEffect, useState } from "react";
 
 const thumbnailCache = new Map();
@@ -77,8 +78,7 @@ export default function TimelineSourceFilmstrip({ frames = [] }) {
         try {
           if (source !== src) {
             await waitFor("loadedmetadata", () => {
-              video.src = src;
-              video.load();
+              if (!applySafeMediaSource(video, src)) throw new Error("Invalid thumbnail source.");
             });
             source = src;
           }

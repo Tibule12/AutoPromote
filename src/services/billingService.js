@@ -175,8 +175,11 @@ function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null, b
     (plan && plan.features ? Number(plan.features.wolfHuntTasks) : 0) ||
     0
   );
-  const allowance = billingData.publishingAllowance?.monthlyLimit;
-  return Number.isInteger(allowance) && allowance >= 1 && allowance <= 10000 ? Math.max(base, allowance) : base;
+  // Only server-owned billing data can raise one account's publishing capacity.
+  const allowance = billingData?.publishingAllowance?.monthlyLimit;
+  return Number.isInteger(allowance) && allowance >= 1 && allowance <= 10000
+    ? Math.max(base, allowance)
+    : base;
 }
 
 async function resolveEffectiveTierId(userId, billingData, userData) {

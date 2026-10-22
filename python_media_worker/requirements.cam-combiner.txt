@@ -2,13 +2,13 @@
 # librosa, and imageio dependencies do not belong in this dedicated image.
 ffmpeg-python
 opencv-python-headless>=4.10,<5
-Pillow
+Pillow==13.0.0
 numpy
 
 fastapi
 uvicorn
 python-multipart
-requests
+requests==2.34.2
 python-dotenv
 
 firebase-admin

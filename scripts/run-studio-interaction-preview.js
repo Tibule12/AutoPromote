@@ -4,6 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const root = path.resolve(__dirname, "..");
 const folder = path.resolve(
   root,
@@ -150,6 +151,7 @@ webpack(config, (error, stats) => {
     return;
   }
   const app = express();
+  app.use(rateLimit({ windowMs: 60000, max: 600, standardHeaders: true, legacyHeaders: false }));
   app.use("/api", (_req, res) =>
     res.status(404).json({ error: "LOCAL_INTERACTION_FIXTURE_HAS_NO_API" })
   );
@@ -165,14 +167,25 @@ webpack(config, (error, stats) => {
   app.get("/fixture-second.mp4", (_req, res) => res.sendFile(secondFixture));
   const podcastSource = process.env.STUDIO_PODCAST_SOURCE;
   const captionArtifact = process.env.STUDIO_GPU_CAPTION_ARTIFACT;
-  if (podcastSource) app.get("/podcast-source-45s.mp4", (_req, res) => res.sendFile(path.resolve(root, podcastSource)));
-  if (captionArtifact) app.get("/gpu-caption-artifact.json", (_req, res) => res.sendFile(path.resolve(root, captionArtifact)));
+  if (podcastSource)
+    app.get("/podcast-source-45s.mp4", (_req, res) =>
+      res.sendFile(path.resolve(root, podcastSource))
+    );
+  if (captionArtifact)
+    app.get("/gpu-caption-artifact.json", (_req, res) =>
+      res.sendFile(path.resolve(root, captionArtifact))
+    );
   const factoryRoot = process.env.STUDIO_CONTENT_FACTORY_ROOT;
   if (factoryRoot) {
     // Local evidence only: the production component opens actual generated
     // source files and its own saved project. No backend/auth bypass exists.
-    app.get("/content-factory-project.json", (_req, res) => res.sendFile(path.join(path.resolve(root, factoryRoot), "studio-fixture-project.json")));
-    app.use("/factory-media", express.static(path.resolve(root, factoryRoot), { dotfiles: "deny", index: false }));
+    app.get("/content-factory-project.json", (_req, res) =>
+      res.sendFile(path.join(path.resolve(root, factoryRoot), "studio-fixture-project.json"))
+    );
+    app.use(
+      "/factory-media",
+      express.static(path.resolve(root, factoryRoot), { dotfiles: "deny", index: false })
+    );
   }
   app.use(express.static(config.output.path));
   app.listen(port, "127.0.0.1", () =>

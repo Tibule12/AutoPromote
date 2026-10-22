@@ -5,6 +5,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 python3
     && rm -rf /var/lib/apt/lists/* && python3 -m venv /opt/model
 ENV PATH=/opt/model/bin:$PATH PYTHONPATH=/app NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
 RUN pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu128 \
-    && pip install transformers==4.57.1 accelerate==1.10.1 numpy==1.26.4 Pillow==11.3.0 \
-       google-cloud-storage==3.4.1 jsonschema==4.25.1 requests==2.32.5 sentencepiece==0.2.1
+    && pip install transformers==4.57.1 accelerate==1.10.1 numpy==1.26.4 Pillow==13.0.0 \
+       google-cloud-storage==3.4.1 jsonschema==4.25.1 requests==2.34.2 sentencepiece==0.2.1
 WORKDIR /app

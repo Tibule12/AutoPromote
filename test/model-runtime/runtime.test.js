@@ -139,3 +139,16 @@ test('tracking cannot publish a sparse path as decoded-frame coverage',()=>{
  const r={...base(),capability:'track_object',parameters:{subjectId:'s',maskArtifactHash:'b'.repeat(64)}};
  assert.throws(()=>validateRequestCoverage(r,{subjectId:'s',sourceRange:r.sourceRange,dependencyArtifactHash:r.parameters.maskArtifactHash,samples:[]}),/COVERAGE/);
 });
+
+test('malicious capability keys and excessive traversal fail before validator dispatch', () => {
+ for (const capability of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+  assert.throws(() => request({ ...base(), capability }), /MODEL_CAPABILITY_REQUEST_INVALID/);
+  assert.throws(() => require('../../src/modelRuntime/contract').validateOutput(capability, {}), /MODEL_CAPABILITY_OUTPUT_INVALID/);
+ }
+ let nested = {};
+ for (let i = 0; i < 20000; i++) nested = { child: nested };
+ assert.throws(() => request({ ...base(), parameters: nested }), /MODEL_CAPABILITY_REQUEST_INVALID/);
+ const cycle = {}; cycle.self = cycle;
+ assert.throws(() => request({ ...base(), parameters: cycle }), /MODEL_CAPABILITY_REQUEST_INVALID/);
+ assert.throws(() => request({ ...base(), parameters: { values: Array(5000).fill(1) } }), /MODEL_CAPABILITY_REQUEST_INVALID/);
+});

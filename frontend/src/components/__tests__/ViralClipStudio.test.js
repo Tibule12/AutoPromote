@@ -1581,6 +1581,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     render(<ViralClipStudio videoUrl="https://example.com/programme.mp4"
       clips={[{ id: "programme", start: 0, end: 12, duration: 12 }]}
       onSave={onSave} onCancel={jest.fn()} />);
+    readyCutawaySource(12);
     const video = screen.getByTestId("studio-after-video");
     video.currentTime = 2;
     fireEvent.timeUpdate(video);
@@ -3917,7 +3918,6 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
 
     readyCutawaySource(30);
-
     fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
 
     const inspector = screen.getByTestId("clip-studio-inspector");
@@ -4090,7 +4090,6 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
 
     readyCutawaySource(360);
-
     fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
     const inspector = screen.getByTestId("clip-studio-inspector");
     const createdBeforeUpload = createdVideos.length;
@@ -5024,6 +5023,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
     readyCutawaySource(12);
 
+    readyCutawaySource(12);
     const inspector = screen.getByTestId("clip-studio-inspector");
     fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
     fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
@@ -5181,6 +5181,9 @@ describe("ViralClipStudio timeline sequencing", () => {
         ),
       });
 
+    global.fetch.mockResolvedValue({ ok: true,
+      json: jest.fn(() => Promise.resolve({ has_audio: true,
+        silence_segments: [{ start: 0, end: 2 }, { start: 6, end: 12 }] })) });
     render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
@@ -5233,6 +5236,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         onStatusChange={jest.fn()}
       />
     );
+    readyCutawaySource(12);
 
     const inspector = screen.getByTestId("clip-studio-inspector");
     fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
@@ -5649,6 +5653,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
+    readyCutawaySource(10);
     const inspector = screen.getByTestId("clip-studio-inspector");
     fireEvent.click(within(inspector).getByRole("tab", { name: /Motion/i }));
     fireEvent.click(screen.getByRole("button", { name: "Transform keyframes", exact: true }));
@@ -5685,6 +5690,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         layers: expect.arrayContaining([
           expect.objectContaining({
             id: "main-video",
+            // Animated property edits update the playhead key, preserving the base pose.
             base_transform: expect.objectContaining({ x: 35, y: 42 }),
             motion_keyframes: expect.arrayContaining([
               expect.objectContaining({ property: "x", time: 0, value: 35, easing: "bezier", curve: [0.33, 0.3, 0.67, 0.8] }),
@@ -6106,6 +6112,9 @@ describe("ViralClipStudio timeline sequencing", () => {
         }}
         onDirectorReview={onDirectorReview} onSave={jest.fn()} onCancel={jest.fn()}
       />);
+      readyCutawaySource(20);
+      fireEvent.click(screen.getByRole("button", { name: "Show media", exact: true }));
+      fireEvent.click(await screen.findByText(/Open saved project/));
       fireEvent.click(await screen.findByRole("button", {
         name: "Restore previous version of Checkpoint project",
       }));

@@ -1,11 +1,16 @@
 """Ensure a complete audio track cannot conceal a truncated picture stream."""
 import ast
+import asyncio
+import json
+import shutil
+import tempfile
 from pathlib import Path
 import re
 import subprocess
+import sys
 from types import SimpleNamespace
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 
 class StudioDeliveryTimingTests(unittest.TestCase):
@@ -75,6 +80,63 @@ class StudioDeliveryTimingTests(unittest.TestCase):
                         [{"start": 15, "end": float("inf"), "reason": "Invalid"}]]:
             with self.subTest(planned=planned), self.assertRaises(ValueError):
                 self.validate(planned_black_ranges=planned)
+
+
+class StudioAuthoredDurationRenderTests(unittest.TestCase):
+    def test_aac_packet_padding_cannot_extend_the_authored_trim_or_speed_map(self):
+        from . import main_media_server as worker
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "source.mp4"
+            delivery = Path(folder) / "final.mp4"
+            subprocess.run([
+                "ffmpeg", "-v", "error", "-f", "lavfi", "-i", "color=blue:s=320x180:r=24:d=4",
+                "-f", "lavfi", "-i", "sine=frequency=880:sample_rate=22050:duration=4",
+                "-c:v", "libx264", "-threads", "1", "-pix_fmt", "yuv420p",
+                "-c:a", "aac", "-shortest", "-y", str(source),
+            ], check=True, capture_output=True)
+
+            async def ingest(_url, destination, **_kwargs):
+                shutil.copyfile(source, destination)
+                return destination
+
+            def upload(path):
+                shutil.copyfile(path, delivery)
+                return str(delivery)
+
+            # The deployment check omits output_settings. Explicit 30/60 fps
+            # and the sequence/retime paths must use the same authored clock.
+            for settings, sequence, speed, duration in [
+                (None, False, 1, 2),
+                ({"fps": "60"}, False, 1, 2),
+                ({"fps": "30"}, True, 1.25, 1.6),
+            ]:
+                with self.subTest(settings=settings, sequence=sequence, speed=speed):
+                    request = worker.RenderViralRequest(
+                        video_url="isolated-source", start_time=0, end_time=2,
+                        timeline_segments=[worker.ViralTimelineSegment(url="isolated-source", start_time=0, end_time=2)] if sequence else None,
+                        preview_speed=speed, output_settings=settings,
+                        auto_captions=False, smart_crop=False, professional_cleanup=True,
+                        finish_plan={"enabled": True, "color": {"contrast": 1.05},
+                                     "visualizer": {"enabled": True, "mode": "wave", "position": "top"}},
+                        sound_effects=[{"id": "impact", "builtIn": True, "tone": "impact",
+                                        "startTime": .5, "duration": .35, "volume": .15, "enabled": True}],
+                        brand_watermark=False,
+                    )
+                    with patch.object(worker, "materialize_video_input", ingest), \
+                         patch.object(worker, "upload_file_to_firebase", upload), \
+                         patch.object(worker, "__file__", str(Path(folder) / "worker" / "main_media_server.py")), \
+                         patch("sys.path", [str(Path(__file__).parent), *sys.path]):
+                        result = asyncio.run(worker.render_viral_clip_impl(request))
+                    self.assertEqual(result["status"], "completed")
+                    self.assertEqual(result["final_quality_gate"]["duration"]["expected"], duration)
+                    self.assertTrue(result["audio_proof"]["verified"])
+                    probe = json.loads(subprocess.check_output([
+                        "ffprobe", "-v", "error", "-count_frames", "-show_streams", "-of", "json", str(delivery),
+                    ]))
+                    video = next(s for s in probe["streams"] if s["codec_type"] == "video")
+                    rate = int(settings["fps"]) if settings else 24
+                    self.assertEqual(int(video["nb_read_frames"]), round(duration * rate))
+                    self.assertAlmostEqual(float(video["duration"]), duration, places=3)
 
 
 if __name__ == "__main__":

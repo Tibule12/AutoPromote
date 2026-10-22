@@ -1,3 +1,4 @@
+import { SafeImage, SafeVideo } from "../../../components/SafeMedia";
 import React, { useEffect, useState } from "react";
 import { getPlatformName } from "../utils/publishingUtils";
 import { PUBLISHER_PLATFORMS, PUBLISHER_STEPS, destinationCopy, mediaUrl, sourceLabels } from "../utils/publisherWorkflow";
@@ -21,8 +22,8 @@ function ReleaseMedia({ file, preview, poster, onMetadata, label = "Release medi
   const type = String(file?.type || "");
   const image = type.startsWith("image") || /\.(png|jpe?g|webp|gif)(?:[?#]|$)/i.test(url);
   if (!url) return <div className="release-media-empty">Choose a finished video or image</div>;
-  return image ? <img className="release-media" src={url} alt={label} /> :
-    <video className="release-media" src={url} poster={sanitizeUrl(poster || file?.thumbnailUrl || "") || undefined} controls preload="metadata" aria-label={label} onLoadedMetadata={event => onMetadata?.(event.currentTarget)} />;
+  return image ? <SafeImage className="release-media" src={url} alt={label} /> :
+    <SafeVideo className="release-media" src={url} poster={sanitizeUrl(poster || file?.thumbnailUrl || "") || undefined} controls preload="metadata" aria-label={label} onLoadedMetadata={event => onMetadata?.(event.currentTarget)} />;
 }
 
 export default function PublisherReleaseWorkspace({

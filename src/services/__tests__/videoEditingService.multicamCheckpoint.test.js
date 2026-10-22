@@ -122,10 +122,6 @@ describe("VideoEditingService multicam checkpoint contract", () => {
       })
     ).resolves.toEqual({ status: "good", cameras: {} });
 
-    expect(postWorker).toHaveBeenCalledWith(
-      "/multicam/preflight-sync",
-      expect.any(Object),
-      300000
-    );
+    expect(postWorker).toHaveBeenCalledWith("/multicam/preflight-sync", expect.any(Object), 300000);
   });
 });
