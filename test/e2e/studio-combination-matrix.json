@@ -5030,6 +5030,8 @@
     "nativeStudioQualification": false,
     "readinessPromotion": false,
     "cloudPromotion": "Pending repaired workflow execution",
-    "nextSharedTask": "Retain S02 full picture/sound, S03 ownership and S04 depth"
+    "nextSharedTask": "Retain S02 full picture/sound, S03 ownership and S04 depth",
+    "deploymentHarnessFailure": "https://github.com/Tibule12/AutoPromote/actions/runs/39716521973",
+    "harnessRepair": "Real-handler regression uses isolated temporary scratch; checkout remains read-only; render checks unchanged."
   }
 }
