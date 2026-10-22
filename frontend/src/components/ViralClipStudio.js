@@ -18489,12 +18489,12 @@ const ViralClipStudio = ({
                           return (
                             <article key={angle.assetId}>
                               <strong>Camera {index + 1}: {asset.name}</strong>
-                              <video
+                              <SafeVideo
                                 ref={video => {
                                   if (video) filmAnglePreviewRefsRef.current.set(asset.id, video);
                                   else filmAnglePreviewRefsRef.current.delete(asset.id);
                                 }}
-                                src={getSafeMediaSource(asset.url) || undefined}
+                                src={asset.url}
                                 controls
                                 playsInline
                                 preload="metadata"

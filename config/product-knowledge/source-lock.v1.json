@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review complete frontend production integration, preserved Studio security and native welcome release assets.",
-  "reviewed_at": "2026-10-22T16:13:07.983Z",
+  "reason": "Preserve reviewed Studio frontend behavior while securing imported camera-angle sources and posters through the existing SafeVideo component.",
+  "reviewed_at": "2026-10-22T16:21:24.499Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "69b2e94978de05780e0e4bee89eb84a1aec62a5a4d4b5c9b62ee1f7ddc35d842"
+      "sha256": "f6559cac9e536fd5e66fcaf60df52007600a4ac1c408d32d713b45d0e0e8b5c1"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
