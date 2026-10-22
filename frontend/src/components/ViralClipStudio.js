@@ -2966,6 +2966,8 @@ const ViralClipStudio = ({
   const captionGenerationInFlightRef = useRef(false);
   const captionSegmentsRef = useRef(captionSegments);
   captionSegmentsRef.current = captionSegments;
+  const captionOverrideRef = useRef(captionTextOverride);
+  captionOverrideRef.current = captionTextOverride;
   const [studioActionMessage, setStudioActionMessage] = useState(
     "Split preview is live. Edit on the right and compare the untouched source beside it."
   );
@@ -8629,6 +8631,8 @@ const ViralClipStudio = ({
 
     const requestedTranslation = Boolean(translateToEnglish);
     const retainedSegments = normalizeCaptionSegments(captionSegments);
+    const retainedOverride = captionTextOverride;
+    const transcriptionProjectId = activeProjectIdRef.current;
     const activeSourceClip = sourceClip || currentTimelineClip;
     const captionSourceClipId = activeSourceClip?.sourceClipId || activeSourceClip?.id || selectedClip?.id || "main";
     const defaultCaptionSourceId = timeline.find(clip => clip.id === "main")?.sourceClipId || "main";
@@ -8864,8 +8868,10 @@ const ViralClipStudio = ({
         throw new Error("The caption service did not confirm an English translation.");
       }
 
+      if (activeProjectIdRef.current !== transcriptionProjectId) return false;
       const currentSegments = normalizeCaptionSegments(captionSegmentsRef.current);
-      if (JSON.stringify(captionsForSource(currentSegments, captionSourceClipId, defaultCaptionSourceId)) !== targetBefore) {
+      if (captionOverrideRef.current !== retainedOverride ||
+          JSON.stringify(captionsForSource(currentSegments, captionSourceClipId, defaultCaptionSourceId)) !== targetBefore) {
         throw new Error("Captions for this source changed while speech was being processed. Your edits were kept; regenerate when ready.");
       }
       setCaptionSegments(previous => mergeSourceCaptions(previous, nextSegments, captionSourceClipId, defaultCaptionSourceId));

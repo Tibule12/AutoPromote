@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "codex",
-  "reason": "Reviewed later-frame box and point propagation with actual rejected/passing frames, and source hashes retained for additional scenes.",
-  "reviewed_at": "2026-10-22T03:43:24.097Z",
-  "catalog_sha256": "1a1ff975532de2837d8a9d150ca3814f065fc1661ea239a50e1c828e38fa1923",
+  "reason": "Reviewed native CPU background and caption movie/timeline evidence, pending timed/quick caption protection, edge-refinement user guidance and explicit remaining accuracy/quality limitations.",
+  "reviewed_at": "2026-10-22T04:19:51.261Z",
+  "catalog_sha256": "9438330431a4ef026ab0bf56f5cca6f44e26bdc2152da98f42124edc601cef5d",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "acbaa74c37687da9a8c047d3cce9ac432c284c1a840d3a790fe2dbc8d8c6f87b"
+      "sha256": "dc77d32cdc731d9b2147d283a73ac14d04f10c9c3eee400be6d11446b7cf89c0"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "b49fea9d9b721e7e1f3ae4b09cec9b4a310fa13f02035e80b76d0e9b6ac80098"
+      "sha256": "b2c62649792e31cb90c132f749d59bfceb8248f2277fdca691db6bb1f3986c61"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "4c80050b82b702fe0d64650b34a2ee3513243ea7fc8d33d7b97fbc548853b161"
+      "sha256": "1a126291784cacf096c064ce079dc73c3be376300aa31ba2cfa917ab2b856c89"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

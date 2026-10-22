@@ -15421,19 +15421,32 @@
     "nextTask": "Verify the new full PR emulator run; retain selected identity, native works, publishing receipts and all existing timers."
   },
   "backgroundCaptions20261022": {
-    "status": "NATIVE_CPU_VERIFICATION_IN_PROGRESS",
+    "status": "NATIVE_BACKGROUND_AND_CAPTION_MOVIES_PASS_GENERAL_QUALITY_UNQUALIFIED",
     "evidence": "reports/studio-background-captions-20261022/README.md",
     "changes": [
-      "source identity retained across upload/editor",
-      "caption regeneration scoped per source with pending-edit protection",
-      "later-frame labelled mask points forwarded"
+      "verified source identity survives fresh and additional uploads",
+      "per-source caption regeneration preserves other clips and pending timed/quick edits",
+      "later-frame keep/remove points and authored box reach CPU tracking",
+      "native soft-alpha refinement removes observed equipment fringe"
     ],
     "paidGpuJobs": 0,
+    "newProviderGenerations": 0,
     "readinessPromoted": false,
+    "creativeApproval": false,
+    "captionMovieSha256": "7f3c224d76b08c50d6cd5038c90832943977026ac94c46b3404156ae8ec1e215",
+    "backgroundCaptionMovieSha256": "d01072107c0084427b5834a69d256604668f919b5eeb516c56e99e13d39ce9c2",
+    "backgroundStudioRecordingSha256": "2438cdb34953e6deb5997c2c01456ca18f96f7ab944a942250c19322f10d58bc",
+    "nativeFirstSourceCaptionsUnchanged": true,
+    "nativePendingTimedAndQuickEditsPreserved": true,
+    "refinedMaskFrames": 120,
+    "allOriginalProjectDocumentsUnchanged": 45,
+    "protectedSourceAndPriorFilesUnchanged": 29,
+    "codePush": "e8d07a85",
     "remaining": [
-      "mixed-language wording",
-      "arbitrary-footage matting and naturalness",
-      "full live parity"
+      "mixed-language accuracy",
+      "arbitrary-footage and longer/multi-shot naturalness",
+      "whole live picture/sound parity",
+      "founder creative/listening acceptance"
     ]
   }
 }

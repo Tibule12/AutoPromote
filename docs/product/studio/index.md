@@ -574,6 +574,8 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 4. Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.
 5. Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.
 6. At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.
+7. For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.
+8. After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.
 
 **Preview:** Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.
 
