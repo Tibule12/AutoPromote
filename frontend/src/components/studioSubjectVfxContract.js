@@ -3,6 +3,11 @@ const EFFECT_FIELDS = {
   text_behind: ["text", "x", "y", "font_size", "color"],
   kinetic_type: ["text", "x", "y", "font_size", "color", "tracking", "travel", "align"],
   background_grade: ["exposure", "saturation", "contrast"],
+  foreground_grade: ["exposure", "saturation", "contrast"],
+  foreground_holdout: ["corners", "feather"],
+  background_replace: ["asset_id", "asset_sha256", "blur", "exposure", "saturation"],
+  foreground_refine: ["choke", "feather", "recover_box", "recover_hue", "hue_tolerance", "saturation_min",
+    "detail_box", "dark_max", "clear_box", "reject_hue", "reject_tolerance", "reject_saturation", "reject_value"],
   tracked_callout: ["text", "offset_x", "offset_y", "font_size", "color", "avoid_subject"],
   depth: ["amount"],
   glow: ["color", "strength", "radius"],
@@ -102,9 +107,17 @@ function validateSubjectVfxScene(scene) {
   }
   if (!Array.isArray(scene.effects) || scene.effects.length < 1 || scene.effects.length > 12)
     fail("Add 1–12 subject effect layers.");
+  if (scene.effects.filter(effect => effect.type === "foreground_refine" && (effect.edge_radius > 0 || effect.decontaminate > 0)).length > 1)
+    fail("Use one fine alpha layer after the authored matte corrections.");
   const ids = new Set();
   for (const effect of scene.effects) {
-    const fields = EFFECT_FIELDS[effect?.type];
+    const fields = EFFECT_FIELDS[effect?.type] && [...EFFECT_FIELDS[effect.type],
+      ...(effect.type === "background_replace" && Object.prototype.hasOwnProperty.call(effect, "reveal_seconds") ? ["reveal_seconds"] : []),
+      ...(effect.type === "foreground_refine" ? ["edge_radius", "decontaminate", "detail_polygon", "blue_spill", "clear_paths", "after_refine", "after_holdout", "reject_connected"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)) : [])];
+    if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "after_refine")) fields.push("after_refine");
+    if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "paths")) fields.push("paths");
+    if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "saturation")) fields.push("saturation");
+    if (effect?.type === "background_replace") fields.push(...["surface_corners", "asset_crop"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)));
     if (
       !fields ||
       !keys(effect, ["id", "type", "start", "end", ...fields]) ||
@@ -137,11 +150,17 @@ function validateSubjectVfxScene(scene) {
       exposure: [-3, 1],
       saturation: [0, 2],
       contrast: [0.5, 2],
+      reveal_seconds: [0, 2],
       offset_x: [-500, 500],
       offset_y: [-500, 500],
       amount: [0, 0.06],
       strength: [0, 0.6],
       radius: [0, 40],
+      blur: [0, 40],
+      choke: [0, 3], feather: [0, 3], recover_hue: [0, 360], hue_tolerance: [0, 60], saturation_min: [0, 1],
+      edge_radius: [0, 8], decontaminate: [0, 1],
+      blue_spill: [0, 1],
+      dark_max: [0, 1], reject_hue: [0, 360], reject_tolerance: [0, 60], reject_saturation: [0, 1], reject_value: [0, 1],
       opacity: [0, 0.6],
       speed: [0, 100],
       seed: [0, 2147483647],
@@ -154,6 +173,55 @@ function validateSubjectVfxScene(scene) {
       fail("Invalid text alignment.");
     if (effect.type === "tracked_callout" && typeof effect.avoid_subject !== "boolean")
       fail("Choose whether the callout should avoid the subject.");
+    if (effect.type === "foreground_refine") {
+      if (Object.prototype.hasOwnProperty.call(effect,"reject_connected") && typeof effect.reject_connected!=="boolean")
+        fail("Use a boolean background-connected colour cleanup choice.");
+      if (Object.prototype.hasOwnProperty.call(effect,"after_holdout") &&
+          (typeof effect.after_holdout!=="boolean" || (effect.after_holdout &&
+            (effect.edge_radius>0 || effect.decontaminate>0 || effect.choke>0))))
+        fail("Use protected-object cleanup without a global choke or another alpha solver.");
+      if (Object.prototype.hasOwnProperty.call(effect,"after_refine") &&
+          (typeof effect.after_refine!=="boolean" || (effect.after_refine && (effect.edge_radius>0 || effect.decontaminate>0))))
+        fail("Use a boolean post-matting colour cleanup without another alpha solver.");
+      if (Object.prototype.hasOwnProperty.call(effect, "detail_polygon")) {
+        const points = effect.detail_polygon;
+        if (!Array.isArray(points) || points.length < 3 || points.length > 64 ||
+            !points.every(point => Array.isArray(point) && point.length === 2 && point.every(value => bounded(value, 0, 1))) ||
+            Math.abs(points.reduce((area, point, i) => { const next = points[(i + 1) % points.length]; return area + point[0] * next[1] - next[0] * point[1]; }, 0)) < .000001)
+          fail("Choose 3–64 distinct source-frame points for the detail region.");
+      }
+      if (Object.prototype.hasOwnProperty.call(effect, "edge_radius") && !Number.isInteger(effect.edge_radius))
+        fail("Edge radius uses whole source pixels.");
+      if (!Number.isInteger(effect.choke)) fail("Matte choke uses whole source pixels.");
+      for (const field of ["recover_box", "detail_box", "clear_box"])
+        if (!Array.isArray(effect[field]) || effect[field].length !== 4 ||
+            !effect[field].every(value => bounded(value, 0, 1)) ||
+            effect[field][0] > effect[field][2] || effect[field][1] > effect[field][3])
+          fail("Matte regions must be ordered inside the source frame.");
+    }
+    if (effect.type === "foreground_holdout" && (!Array.isArray(effect.corners) || effect.corners.length !== 4 ||
+      !effect.corners.every(point => Array.isArray(point) && point.length === 2 && point.every(value => bounded(value, 0, 1)))))
+      fail("Choose four source-frame corners for the foreground holdout.");
+    if (effect.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "after_refine") && typeof effect.after_refine !== "boolean")
+      fail("Choose whether to keep the thin detail through cleanup.");
+    for (const field of effect.type === "foreground_holdout" ? ["paths"] : effect.type === "foreground_refine" ? ["clear_paths"] : [])
+      if (Object.prototype.hasOwnProperty.call(effect, field) &&
+        (!Array.isArray(effect[field]) || effect[field].length < 1 || effect[field].length > 32 ||
+         !effect[field].every(points => Array.isArray(points) && points.length >= 3 && points.length <= 64 &&
+           points.every(point => Array.isArray(point) && point.length === 2 && point.every(value => bounded(value, 0, 1))) &&
+           Math.abs(points.reduce((area, point, i) => { const next = points[(i + 1) % points.length]; return area + point[0] * next[1] - next[0] * point[1]; }, 0)) >= .000001)))
+        fail("Use bounded nonempty matte paths with 3–64 source-frame points each (32 holdout or removal paths).");
+    if (effect.type === "background_replace" &&
+        (typeof effect.asset_id !== "string" || !effect.asset_id || effect.asset_id.length > 160 ||
+         !/^[a-f0-9]{64}$/.test(effect.asset_sha256)))
+      fail("Choose a saved background from this project.");
+    if (effect.type === "background_replace" && (effect.surface_corners || effect.asset_crop)) {
+      if (!Array.isArray(effect.surface_corners) || effect.surface_corners.length !== 4 ||
+          !effect.surface_corners.every(point => Array.isArray(point) && point.length === 2 && point.every(value => bounded(value, 0, 1))) ||
+          !Array.isArray(effect.asset_crop) || effect.asset_crop.length !== 4 || !effect.asset_crop.every(value => bounded(value,0,1)) ||
+          effect.asset_crop[0]>=effect.asset_crop[2] || effect.asset_crop[1]>=effect.asset_crop[3])
+        fail("Choose four surface corners and a nonempty replacement crop.");
+    }
     if (
       effect.type === "particles" &&
       (!Number.isInteger(effect.seed) || !Number.isInteger(effect.count))

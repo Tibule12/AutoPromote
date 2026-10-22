@@ -1,12 +1,12 @@
 # Create captions and correct transcription
 
-Development documentation • product 1.2.0 • knowledge 1.0.43 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 ID: `task.captions_correct` • **BROKEN** • SUPPORTED_WITH_LIMITATIONS
 
-Automatic words are currently broken; use reviewed phrase correction and inspect the actual final subset.
+Choose the speech language, generate editable timed lines and review uncertain words before export.
 
 ## Before you start
 
@@ -14,20 +14,23 @@ Automatic words are currently broken; use reviewed phrase correction and inspect
 
 ## Steps
 
-1. Review source transcription and correct the selected phrase rather than trusting repeated automatic words.
+1. Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.
+   Feature: `studio.captions`. Controls: [studio.captions.source_language](../control-reference/index.md#studio-captions-source_language).
+
+2. Review source transcription and correct the selected phrase rather than trusting repeated automatic words.
    Feature: `studio.captions`.
 
-2. Inspect the current phrase at mapped source times in preview and final export.
+3. Inspect the current phrase at mapped source times in preview and final export.
    Feature: `studio.captions`.
 
 ## Feature readiness
 
-- studio.captions — **BROKEN**: Caption controls and reviewed phrase rendering exist, but the retained automatic-word workflow has a repetition defect. Treat automatic word output as broken until that path is repaired and requalified.
+- studio.captions — **BROKEN**: Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
 
 ## Result and limitations
 
 An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.
 
-- The automatic-word repetition defect remains open. A successful reviewed phrase render does not qualify automatic captions.
+- The empty-hint repetition trigger is repaired on retained speech, but code-switched wording still needs correction. Broad automatic transcription, all caption styles and full preview/export parity are not qualified.
 
 Troubleshooting references: system.unsupported_media, studio.revision.

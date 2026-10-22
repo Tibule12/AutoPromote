@@ -30,6 +30,10 @@ try:
 except ImportError:
     from studio_render_scratch import studio_render_scratch_directory
     from studio_ffmpeg_limits import bounded_studio_ffmpeg_command
+try:
+    from .caption_transcription import caption_transcription_options
+except ImportError:
+    from caption_transcription import caption_transcription_options
 import numpy as np
 import ffmpeg  # FFmpeg (Phase 1)
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
@@ -405,7 +409,7 @@ def get_faster_whisper_model(model_name=None):
         or os.getenv("FASTER_WHISPER_MODEL")
         or os.getenv("WHISPER_MODEL")
         or "small"
-    ).strip().lower() or "small"
+    ).strip() or "small"
     device = get_faster_whisper_device()
     compute_type = get_faster_whisper_compute_type(device)
     cache_key = f"{device}::{compute_type}::{resolved_model_name}"
@@ -2112,9 +2116,10 @@ def transcribe_with_openai_diarization(file_path):
             pass
 
 
-def transcribe_captions_with_provider(file_path, *, translate_to_english=False, prompt_hint=""):
+def transcribe_captions_with_provider(file_path, *, translate_to_english=False, prompt_hint="", source_language="auto"):
+    local_options = caption_transcription_options(source_language, translate_to_english=translate_to_english)
     provider = str(os.getenv("VIRAL_CAPTION_TRANSCRIPTION_PROVIDER") or "auto").strip().lower()
-    if not translate_to_english and provider in {"auto", "openai", "openai_diarize", "diarize"}:
+    if not translate_to_english and (source_language == "auto" or provider != "auto") and provider in {"auto", "openai", "openai_diarize", "diarize"}:
         try:
             return transcribe_with_openai_diarization(file_path)
         except Exception as exc:
@@ -2129,11 +2134,7 @@ def transcribe_captions_with_provider(file_path, *, translate_to_english=False, 
         word_timestamps=True,
         prompt_hint=prompt_hint,
         task="translate" if translate_to_english else "transcribe",
-        model_name=(
-            os.getenv("VIRAL_CAPTION_WHISPER_MODEL")
-            or os.getenv("MULTICAM_CAPTION_WHISPER_MODEL")
-            or "digiphyte/swivuriso-turbo"
-        ),
+        **local_options,
     )
 
 def transcription_model_has_unmapped_languages(model_name):
@@ -2159,7 +2160,10 @@ def transcription_model_has_unmapped_languages(model_name):
 def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, prompt_hint="", task=None, model_name=None):
     normalized_language = normalize_transcription_language(language)
     engine = get_transcription_engine()
-    prompt = build_transcription_prompt(prompt_hint)
+    # Faster-Whisper tokenizes an empty string as a leading-space prompt.
+    # That token alone can trigger repeated invented words on mixed speech.
+    # None means no prompt; retain explicit vocabulary hints verbatim.
+    prompt = build_transcription_prompt(prompt_hint) or None
 
     if engine == "faster":
         try:
@@ -34379,6 +34383,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if os.path.exists(thumbnail_output_path):
             os.remove(thumbnail_output_path)
 
+caption_transcription_lock = asyncio.Lock()
+
 @app.post("/transcribe")
 async def transcribe_video(request: Dict[str, str]):
     """
@@ -34401,12 +34407,12 @@ async def transcribe_video(request: Dict[str, str]):
     # 4 GiB Cloud Run instance leaves too little memory for Whisper and can make
     # the kernel kill the worker. Stream the source once and retain only a small
     # mono speech file instead.
-    input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speech.mp3")
+    input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speech.wav")
 
     try:
         # 1. Extract speech audio without materializing another full video.
         if video_url.startswith("http"):
-            subprocess.run(
+            await asyncio.to_thread(subprocess.run,
                 [
                     "ffmpeg",
                     "-v",
@@ -34420,9 +34426,7 @@ async def transcribe_video(request: Dict[str, str]):
                     "-ar",
                     "16000",
                     "-c:a",
-                    "libmp3lame",
-                    "-b:a",
-                    "64k",
+                    "pcm_s16le",
                     "-y",
                     input_path,
                 ],
@@ -34432,7 +34436,7 @@ async def transcribe_video(request: Dict[str, str]):
         else:
             # If local path?
             if os.path.exists(video_url):
-                subprocess.run(
+                await asyncio.to_thread(subprocess.run,
                     [
                         "ffmpeg",
                         "-v",
@@ -34446,9 +34450,7 @@ async def transcribe_video(request: Dict[str, str]):
                         "-ar",
                         "16000",
                         "-c:a",
-                        "libmp3lame",
-                        "-b:a",
-                        "64k",
+                        "pcm_s16le",
                         "-y",
                         input_path,
                     ],
@@ -34462,15 +34464,14 @@ async def transcribe_video(request: Dict[str, str]):
         translate_to_english = str(
             request.get("translate_to_english") or request.get("translateToEnglish") or ""
         ).strip().lower() in {"1", "true", "yes", "on"}
-        result = transcribe_captions_with_provider(
-            input_path,
-            translate_to_english=translate_to_english,
-            prompt_hint=(
-                request.get("hint")
-                or request.get("prompt_hint")
-                or ""
-            ),
-        )
+        async with caption_transcription_lock:
+            result = await asyncio.to_thread(
+                transcribe_captions_with_provider,
+                input_path,
+                translate_to_english=translate_to_english,
+                source_language=request.get("source_language") or "auto",
+                prompt_hint=request.get("hint") or request.get("prompt_hint") or "",
+            )
         caption_quality = filter_caption_transcription_segments(result.get("segments", []))
         segments = annotate_caption_identity_segments(
             caption_quality["segments"],
@@ -34538,9 +34539,19 @@ async def transcribe_video(request: Dict[str, str]):
             ),
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Transcription failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        # Lossless speech files are transient on every terminal path, including
+        # decode/provider failures. Never remove the caller's original video.
+        if input_path != video_url:
+            try:
+                os.remove(input_path)
+            except FileNotFoundError:
+                pass
 
 
 # In-memory job tracker for ingest (survives between requests, lost on restart)

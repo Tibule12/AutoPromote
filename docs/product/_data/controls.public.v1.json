@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.43",
+  "knowledge_version": "1.0.45",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -6791,6 +6791,119 @@
       "limitations": [
         "Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.",
         "Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.captions.source_language",
+      "feature_ids": [
+        "studio.captions"
+      ],
+      "label": "Speech language",
+      "status": "PARTIAL",
+      "meaning": "Selects the speech recognizer and source language for the next automatic caption request. Does not relabel or replace existing lines.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "auto",
+          "en",
+          "af",
+          "za-mixed",
+          "xh",
+          "zu",
+          "st",
+          "tn",
+          "ts",
+          "nr",
+          "ve"
+        ],
+        "default": "auto",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video with speech"
+      ],
+      "dependencies": [
+        "studio.captions"
+      ],
+      "limitations": [
+        "Model wording is an editable review draft; changing this preference does not translate existing captions."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.background_edge_radius",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge detail width",
+      "status": "PARTIAL",
+      "meaning": "Sets the bounded source-guided unknown edge band after choosing Clean background edges. Zero retains existing alpha while colour cleanup can still run.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 8,
+        "values": [],
+        "default": 3,
+        "default_known": true
+      },
+      "unit": "source pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.background_decontaminate",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Remove old background colour",
+      "status": "PARTIAL",
+      "meaning": "Recovers photographed foreground edge colour using the final mask, including protected-object corrections. Zero keeps the photographed edge RGB.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "strength",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified."
       ],
       "updated_at": "2026-10-21",
       "product_version": "1.2.0"

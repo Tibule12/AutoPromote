@@ -2,6 +2,7 @@
 ffmpeg-python
 opencv-contrib-python==4.11.0.86
 Pillow 
+pymatting==1.1.16
 numpy>=1.26,<2
 scenedetect
 

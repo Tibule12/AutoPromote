@@ -177,3 +177,7 @@ reports/playwright-ci-fix-20261021/*
 # Isolated Python environments and raw CI logs are local verification assets.
 reports/emulator-python-runtime-20261021/*
 !reports/emulator-python-runtime-20261021/README.md
+
+# Private background/caption verification.
+reports/studio-background-captions-20261022/*
+!reports/studio-background-captions-20261022/README.md

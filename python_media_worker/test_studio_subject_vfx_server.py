@@ -72,6 +72,15 @@ def test_compute_occupancy_probe_refuses_existing_processes(monkeypatch):
     assert not worker.gpu_available()
     assert "--query-compute-apps=pid" in run.call_args_list[1].args[0]
 
+def test_explicit_cpu_composition_window_is_bounded(monkeypatch):
+    monkeypatch.delenv('STUDIO_VFX_CPU_TIMEOUT_SECONDS',raising=False)
+    assert worker.cpu_timeout()==1100
+    monkeypatch.setenv('STUDIO_VFX_CPU_TIMEOUT_SECONDS','2400')
+    assert worker.cpu_timeout()==2400
+    for value in ['0','3601','invalid']:
+        monkeypatch.setenv('STUDIO_VFX_CPU_TIMEOUT_SECONDS',value)
+        with pytest.raises(ValueError):worker.cpu_timeout()
+
 def test_cpu_artifact_composition_never_probes_or_requires_gpu(client,monkeypatch):
     monkeypatch.setenv('STUDIO_VFX_MODE','model_artifact_cpu')
     monkeypatch.setenv('STUDIO_MODEL_VFX_SECRET',SECRET)
@@ -79,6 +88,7 @@ def test_cpu_artifact_composition_never_probes_or_requires_gpu(client,monkeypatc
     gpu=Mock(side_effect=AssertionError('CPU composition must not probe a GPU'))
     monkeypatch.setattr(worker,'gpu_available',gpu)
     value=spec()
+    value['scene']['effects']=[]
     value['modelInput']={'schemaVersion':1,'artifactHash':'b'*64,'sourceSha256':'c'*64,
         'sourceRange':{'space':'source','startTick':180000,'endTick':720000},
         'manifestSha256':'d'*64,'frameCount':144,'width':960,'height':540,
@@ -92,3 +102,17 @@ def test_cpu_artifact_composition_never_probes_or_requires_gpu(client,monkeypatc
     value['modelInput']['artifactHash']='f'*64
     assert client.post('/jobs',json=value,headers=HEADERS).status_code==409
     gpu.assert_not_called()
+
+def test_detailed_cpu_scene_has_a_bounded_request_budget_without_expanding_gpu_limit(client,monkeypatch):
+    import studio_model_subject_vfx_job as model_job
+    value=spec();value['scene']['editable_detail']='x'*40000
+    assert client.post('/jobs',json=value,headers=HEADERS).status_code==413
+    monkeypatch.setenv('STUDIO_VFX_MODE','model_artifact_cpu')
+    monkeypatch.setenv('STUDIO_MODEL_VFX_SECRET',SECRET)
+    monkeypatch.setattr(model_job,'valid_model_input',lambda _:None)
+    monkeypatch.setattr(model_job,'valid_replacement_assets',lambda _:None)
+    value['modelInput']={'files':{}}
+    assert client.post('/jobs',json=value,headers=HEADERS).status_code==202
+    value['scene']['editable_detail']='x'*(256*1024)
+    assert client.post('/jobs',json=value,headers=HEADERS).status_code==413
+    assert worker.threading.Thread.call_count==1

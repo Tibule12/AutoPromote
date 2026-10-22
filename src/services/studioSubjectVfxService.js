@@ -15,6 +15,7 @@ const hash = value =>
 const error = (statusCode, message) => Object.assign(new Error(message), { statusCode });
 const validId = value => /^[A-Za-z0-9_-]{8,128}$/.test(value || "");
 const MAX_OUTPUT_BYTES = 75 * 1024 * 1024;
+const { resolveSubjectReplacementAssets, replacementIdentity } = require('./studioSubjectReplacementAssets');
 
 function workerConfig(kind) {
   const cpu=kind==='model_artifact_cpu';
@@ -61,7 +62,8 @@ async function sourceIdentity(ownerUid, scene) {
     throw error(422, "Subject rendering currently supports source files up to 512 MB.");
   return { source, sourceBucket, generation: String(metadata.generation),sha256:metadata.metadata?.sha256 || metadata.metadata?.contentHash };
 }
-const requestIdentity=(scene,generation,modelArtifactRef)=>hash({scene,generation,...(modelArtifactRef?{modelArtifactHash:modelArtifactRef.artifactHash}:{})});
+const requestIdentity=(scene,generation,modelArtifactRef,replacements=[])=>hash({scene,generation,...(modelArtifactRef?{modelArtifactHash:modelArtifactRef.artifactHash}:{}),
+  ...(replacements.length?{replacementAssets:replacementIdentity(replacements)}:{})});
 async function release(jobId,kind) {
   await db().runTransaction(async tx => {
     const ref = lease(kind),
@@ -79,10 +81,28 @@ async function createSubjectVfxPreview({ ownerUid, scene: input, clientRequestId
   const { source, sourceBucket, generation,sha256 } = await sourceIdentity(ownerUid, scene);
   const modelInput=modelArtifactRef?await require('./studioModelCapabilityService').resolveSubjectMaskInputs({
     ownerUid,scene,modelArtifactRef,sourceSha256:sha256,sourceGeneration:generation}):null;
-  const requestHash = requestIdentity(scene,generation,modelArtifactRef);
+  let replacementAssets=[];
+  if(scene.effects.some(effect=>effect.type==='background_replace')) {
+    if(!modelArtifactRef)throw error(422,'Create a saved subject mask before replacing the background.');
+    const artifact=await require('./studioModelCapabilityService').ownedModelArtifact({uid:ownerUid,artifactHash:modelArtifactRef.artifactHash});
+    replacementAssets=await resolveSubjectReplacementAssets({ownerUid,projectId:artifact.projectId,scene});
+  }
+  const requestHash = requestIdentity(scene,generation,modelArtifactRef,replacementAssets);
   const requestRef = db()
     .collection("studio_subject_vfx_requests")
     .doc(hash(`${ownerUid}:${clientRequestId}`));
+  if (executionKind === 'model_artifact_cpu') {
+    // A closed browser may stop polling after the CPU job finishes. Reconcile
+    // only this owner's lease through the normal receipt/ownership checks;
+    // never resubmit work or release an unconfirmed/busy worker.
+    const retained = (await lease(executionKind).get()).data();
+    if (retained?.ownerUid === ownerUid && retained.expiresAtMs > Date.now()) {
+      try {
+        const previous = await getSubjectVfxPreview({ ownerUid, jobId: retained.jobId });
+        if (['completed', 'failed', 'cancelled'].includes(previous.status)) await release(retained.jobId, executionKind);
+      } catch (_) { /* The transaction below retains the unavailable lease. */ }
+    }
+  }
   const jobId = crypto.randomUUID();
   const result = await db().runTransaction(async tx => {
     const [existing, capacity] = await Promise.all([tx.get(requestRef), tx.get(lease(executionKind))]);
@@ -106,6 +126,7 @@ async function createSubjectVfxPreview({ ownerUid, scene: input, clientRequestId
       createdAtMs: now,
       expiresAtMs: now + 86400000,
       ...(modelArtifactRef?{executionKind,modelArtifactRef,sourceSha256:sha256}:{}),
+      ...(replacementAssets.length?{replacementAssets:replacementIdentity(replacementAssets)}:{}),
     });
     tx.set(lease(executionKind), { jobId, ownerUid, expiresAtMs: now + 20 * 60000 });
     return { jobId, reused: false };
@@ -125,14 +146,15 @@ async function createSubjectVfxPreview({ ownerUid, scene: input, clientRequestId
       });
     const response = await axios.post(
       `${config.url}/jobs`,
-      { jobId: dispatchedJobId, ownerUid, requestHash, sourceUrl, scene,...(modelInput?{modelInput}:{}) },
+      { jobId: dispatchedJobId, ownerUid, requestHash, sourceUrl, scene,...(modelInput?{modelInput}:{}),
+        ...(replacementAssets.length?{replacementAssets}:{}) },
       { headers: config.headers, timeout: 15000, maxRedirects: 0 }
     );
     if (response.data?.jobId !== dispatchedJobId)
       throw new Error("Worker did not acknowledge this render.");
   } catch (cause) {
     // An uncertain dispatch is retained. Poll the same job ID; never resubmit a new job automatically.
-    const rejected = [400, 401, 403, 409, 422, 429, 503].includes(cause.response?.status);
+    const rejected = [400, 401, 403, 409, 413, 422, 429, 503].includes(cause.response?.status);
     await jobs()
       .doc(dispatchedJobId)
       .update({
@@ -198,6 +220,7 @@ async function getSubjectVfxPreview({ ownerUid, jobId }) {
           receipt.mask_manifest_sha256!==mask?.manifestSha256 ||
           !Number.isFinite(receipt.elapsed_seconds) || receipt.elapsed_seconds<0 ||
           !/^[a-f0-9]{64}$/.test(receipt.implementation_sha256 || ''))) ||
+        (data.replacementAssets?.length && stable(receipt.replacementAssets)!==stable(data.replacementAssets)) ||
         Math.abs(receipt.seconds - seconds) > 1 / 24 + 0.001 ||
         receipt.frames !== Math.round(seconds * 24)
       )
@@ -243,7 +266,8 @@ async function getSubjectVfxPreview({ ownerUid, jobId }) {
           sourceRange:data.modelArtifactRef.sourceRange,confidence:null,parentArtifactHash:data.modelArtifactRef.artifactHash,parameters:data.scene,
           createdAt:new Date(data.createdAtMs).toISOString(),status:'completed',
           output:{storagePath,sha256:receipt.output_sha256,bytes:bytes.length,pixelSha256:receipt.pixel_sha256},
-          provenance:{producer:'studio_subject_vfx',requestHash:data.requestHash,jobId,implementationSha256:receipt.implementation_sha256},
+          provenance:{producer:'studio_subject_vfx',requestHash:data.requestHash,jobId,implementationSha256:receipt.implementation_sha256,
+            ...(data.replacementAssets?.length?{replacementAssets:data.replacementAssets}:{})},
           metrics:{gpuCount:0,device:'cpu',runtimeSeconds:receipt.elapsed_seconds}};
         const artifactHash=hash(artifact),artifactBytes=Buffer.from(stable({...artifact,artifactHash}));
         const file=bucket().file(`temp_studio_vfx/${ownerUid}/${jobId}/artifact-${artifactHash}.json`);
@@ -287,11 +311,20 @@ async function cancelSubjectVfxPreview({ ownerUid, jobId }) {
   if (["completed", "failed", "cancelled"].includes(data.status))
     return { jobId, status: data.status };
   const config = workerConfig(data.executionKind);
-  const response = await axios.delete(`${config.url}/jobs/${jobId}`, {
-    headers: config.headers,
-    timeout: 15000,
-    maxRedirects: 0,
-  });
+  let response;
+  try {
+    response = await axios.delete(`${config.url}/jobs/${jobId}`, {
+      headers: config.headers,
+      timeout: 15000,
+      maxRedirects: 0,
+    });
+  } catch (cause) {
+    // Explicit cancellation can release an uncertain CPU dispatch only when
+    // its authenticated worker confirms that exact job never materialized.
+    if (data.executionKind !== 'model_artifact_cpu' || data.status !== 'dispatch_uncertain' ||
+        cause.response?.status !== 404) throw cause;
+    response = { data: { status: 'cancelled' } };
+  }
   if (response.data?.status !== "cancelled")
     throw error(502, "Cancellation has not been confirmed. Check this job again.");
   await ref.update({ status: "cancelled" });
@@ -308,12 +341,13 @@ async function resolveSubjectVfxExport({ ownerUid, items, timeline }) {
     const scene = validateSubjectVfxScene(item.scene),
       { data } = await getOwnedJob(ownerUid, item.jobId);
     const { generation,sha256 } = await sourceIdentity(ownerUid, scene);
-    if(data.modelArtifactRef)await require('./studioModelCapabilityService').resolveSubjectMaskInputs({
-      ownerUid,scene,modelArtifactRef:data.modelArtifactRef,sourceSha256:sha256,sourceGeneration:generation,signFiles:false});
+    const mask=data.modelArtifactRef?await require('./studioModelCapabilityService').resolveSubjectMaskInputs({
+      ownerUid,scene,modelArtifactRef:data.modelArtifactRef,sourceSha256:sha256,sourceGeneration:generation,signFiles:false}):null;
+    const replacementAssets=data.replacementAssets?.length?await resolveSubjectReplacementAssets({ownerUid,projectId:mask.projectId,scene,signFiles:false}):[];
     if (
       data.status !== "completed" ||
       data.expiresAtMs <= Date.now() ||
-      data.requestHash !== requestIdentity(scene,generation,data.modelArtifactRef)
+      data.requestHash !== requestIdentity(scene,generation,data.modelArtifactRef,replacementAssets)
     )
       throw error(409, "The source or subject effect changed. Render and review it again.");
     const clips = (timeline || []).filter(

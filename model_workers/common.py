@@ -39,14 +39,17 @@ def frame(path, index=0):
     data=run(['ffmpeg','-nostdin','-v','error','-i',str(path),'-vf',f'select=eq(n\\,{index})','-frames:v','1','-f','image2pipe','-c:v','png','pipe:1'])
     return Image.open(io.BytesIO(data)).convert('RGB')
 
-def normalize(source, request, target):
+def normalize(source, request, target, *, max_size=(1280, 720)):
     r=request['sourceRange']; count=math.floor((r['endTick']-r['startTick'])/3750+.5)
     if not 1 <= count <= 720: raise ValueError('Bounded source range required')
     # Same derivative is used by analysis, segmentation, editing and composition.
     # Native source hash/range remain authoritative in the parent artifact.
+    if max_size not in ((1280, 720), (1920, 1080)):
+        raise ValueError('Unsupported normalization bounds')
+    max_width, max_height = max_size
     run(['ffmpeg','-nostdin','-v','error','-ss',str(r['startTick']/90000),'-i',str(source),
          '-frames:v',str(count),'-map','0:v:0','-an','-vf',
-         "scale='min(1280,iw)':'min(720,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2,fps=24,setsar=1",
+         f"scale='min({max_width},iw)':'min({max_height},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2,fps=24,setsar=1",
          '-c:v','libx264','-threads','1','-preset','fast','-crf','17','-pix_fmt','yuv420p','-movflags','+faststart',str(target)])
     geometry=probe(target)
     if int(geometry['nb_read_frames'])!=count: raise ValueError('Source has insufficient frames for requested range')

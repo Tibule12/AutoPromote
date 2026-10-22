@@ -4635,6 +4635,8 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const inspector = screen.getByTestId("clip-studio-inspector");
     fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.change(within(inspector).getByLabelText("Speech language"), {target:{value:"za-mixed"}});
+    expect(global.fetch).not.toHaveBeenCalled();
     fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
 
     await waitFor(() => {
@@ -4649,7 +4651,28 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(JSON.parse(request.body)).toEqual({
       storage_path: "temp/multicam-ingest/test-user/full-podcast.mp4",
       translate_to_english: false,
+      source_language: "za-mixed",
     });
+  });
+
+  test("keeps wording edited while a caption regeneration is pending", async () => {
+    const result = text => ({ok:true,json:async()=>({segments:[{start:0,end:2,text,speaker:"speaker_1",language:"en"}]})});
+    let complete;
+    global.fetch.mockResolvedValueOnce(result("Original spoken line"))
+      .mockImplementationOnce(() => new Promise(resolve => { complete = resolve; }));
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      sourceStoragePath="studio/sources/test-user/source.mp4"
+      clips={[{id:"source-a",start:0,end:4,duration:4}]} onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const inspector=screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab",{name:/Captions/i}));
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+    const line=await within(inspector).findByRole("textbox",{name:"Caption 1 text"});
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+    await waitFor(()=>expect(complete).toBeDefined());
+    fireEvent.change(line,{target:{value:"My reviewed wording"}});
+    await act(async()=>complete(result("Late automatic result")));
+    await waitFor(()=>expect(within(inspector).getByRole("alert")).toHaveTextContent("Your edits were kept"));
+    expect(line).toHaveValue("My reviewed wording");
   });
 
   test("shows an actionable error for the uploaded WhatsApp video and allows a retry", async () => {

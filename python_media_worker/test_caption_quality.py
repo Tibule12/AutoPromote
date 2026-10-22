@@ -2,6 +2,7 @@ import re
 import unittest
 import asyncio
 import tempfile
+import threading
 from unittest.mock import patch
 from fastapi import HTTPException
 
@@ -19,6 +20,30 @@ from python_media_worker.main_media_server import (
 
 
 class CaptionQualityTests(unittest.TestCase):
+    def test_caption_inference_keeps_the_http_event_loop_responsive(self):
+        started, release = threading.Event(), threading.Event()
+        def provider(*args, **kwargs):
+            started.set()
+            release.wait(timeout=3)
+            return {"segments":[], "language":"en"}
+        async def exercise():
+            with tempfile.NamedTemporaryFile(suffix=".mp4") as source, patch(
+                "python_media_worker.main_media_server.subprocess.run"
+            ), patch("python_media_worker.main_media_server.transcribe_captions_with_provider", side_effect=provider):
+                task = asyncio.create_task(transcribe_video({"video_url":source.name}))
+                try:
+                    for _ in range(100):
+                        if started.is_set():
+                            break
+                        await asyncio.sleep(.01)
+                    self.assertTrue(started.is_set())
+                    await asyncio.sleep(.02)
+                    self.assertFalse(task.done(), "The HTTP loop must run while inference is waiting")
+                finally:
+                    release.set()
+                    await task
+        asyncio.run(exercise())
+
     def test_translation_response_marks_english_caption_provenance(self):
         with tempfile.NamedTemporaryFile(suffix=".mp4") as source:
             with patch(

@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const { db } = require("../firebaseAdmin");
+const { subjectVfxRevision } = require("../../frontend/src/components/studioSubjectVfxContract");
 
 const SCHEMA_VERSION = 1;
 const MAX_DOCUMENT_BYTES = 512 * 1024;
@@ -59,20 +60,48 @@ const stale = () => revisionError("STUDIO_PROJECT_REVISION_STALE", 409);
 // Firestore's array representation or its field-name restrictions.
 const boundedJsonTree = root => {
   let nodes = 0;
-  const visit = (value, depth) => {
+  const subjectRevisionPaths = new Set([
+    "layers[].parameters.preview.revision", "layers[].parameters.pending.revision",
+  ]);
+  const subjectRevisions = new Set((Array.isArray(root?.layers) ? root.layers : [])
+    .filter(layer => layer?.type === "subject_vfx")
+    .flatMap(layer => [layer.parameters?.preview?.revision, layer.parameters?.pending?.revision])
+    .filter(value => typeof value === "string"));
+  const lut = root?.visualGraph?.settings?.advancedColor?.lutData;
+  const lutPath = "visualGraph.settings.advancedColor.lutData.data";
+  const completeLut = plain(lut) && Number.isInteger(lut.size) && lut.size >= 2 && lut.size <= 65 &&
+    ownKeys(lut, ["size", "data", "domainMin", "domainMax"]) &&
+    Array.isArray(lut.data) && lut.data.length === 3 * lut.size ** 3 &&
+    [lut.domainMin, lut.domainMax].every(domain => Array.isArray(domain) && domain.length === 3 && domain.every(Number.isFinite)) &&
+    lut.domainMax.every((value, index) => value > lut.domainMin[index]);
+  const visit = (value, depth, path = "") => {
     nodes += 1;
     if (nodes > 60_000 || depth > 18) return false;
     if (value === null || typeof value === "boolean") return true;
-    if (typeof value === "string") return value.length <= 16_384;
+    if (typeof value === "string") {
+      if (value.length <= 16_384) return true;
+      // Native subject revisions serialize the complete editable scene, including
+      // detailed paths. Validate that scene instead of treating it as free text.
+      // All ordinary strings and the document/node/depth limits stay bounded.
+      if (!subjectRevisionPaths.has(path) || !subjectRevisions.has(value) ||
+          value.length > 128 * 1024) return false;
+      try {
+        const scene = JSON.parse(value);
+        return subjectVfxRevision(scene) === value && visit(scene, depth + 1, `${path}.scene`);
+      } catch (_) { return false; }
+    }
     if (typeof value === "number") return Number.isFinite(value);
-    if (Array.isArray(value)) return value.length <= MAX_ITEMS &&
-      value.every(item => visit(item, depth + 1));
+    // A complete native colour cube is a flat numeric grid, not thousands of
+    // timeline commands. Retain the global node/byte/depth bounds and allow
+    // only this exact validated field to exceed the ordinary item limit.
+    if (Array.isArray(value)) return (path === lutPath ? completeLut : value.length <= MAX_ITEMS) &&
+      value.every(item => (path !== lutPath || typeof item === "number") && visit(item, depth + 1, `${path}[]`));
     if (!plain(value)) return false;
     const keys = Object.keys(value);
     return keys.length <= MAX_ITEMS && keys.every(key =>
       key.length <= 160 && !/[\x00-\x1f\x7f]/.test(key) &&
       !["__proto__", "constructor", "prototype"].includes(key) &&
-      visit(value[key], depth + 1)
+      visit(value[key], depth + 1, path ? `${path}.${key}` : key)
     );
   };
   return visit(root, 0);

@@ -263,7 +263,9 @@ export async function uploadSourceFileViaBackend({
       throw new Error('Uploaded audio does not match the selected source bytes.');
     return { ...result, contentHash, ...(audioOwnerUid ? { ownerUid: audioOwnerUid } : {}) };
   };
-  if (["studio_source", "studio_project"].includes(purpose) && file.size > STORAGE_UPLOAD_LIMIT_MB * 1024 * 1024) {
+  // Small Studio videos need the same durable owner/purpose identity as large
+  // recordings. General Firebase uploads cannot satisfy model source binding.
+  if (["studio_source", "studio_project"].includes(purpose) && normalizedMediaType === 'video') {
     const uploaded = await uploadMulticamSourceResumable({
       apiBaseUrl: API_BASE_URL,
       token,

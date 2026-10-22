@@ -139,3 +139,38 @@ test('tracking cannot publish a sparse path as decoded-frame coverage',()=>{
  const r={...base(),capability:'track_object',parameters:{subjectId:'s',maskArtifactHash:'b'.repeat(64)}};
  assert.throws(()=>validateRequestCoverage(r,{subjectId:'s',sourceRange:r.sourceRange,dependencyArtifactHash:r.parameters.maskArtifactHash,samples:[]}),/COVERAGE/);
 });
+
+test('foreground component selections reject ambiguous identities, inverted boxes and cross-cut reuse',()=>{
+ const input={...base(),capability:'segment_subject',parameters:{subjectId:'speaker',initialBox:[.1,.1,.9,1],points:[],shotPrompts:[],
+  components:[{id:'microphone',box:[.2,.2,.6,.8],points:[{position:[.3,.3],label:1}],propagate:false}]}};
+ assert.equal(request(input).parameters.components[0].propagate,false);
+ const duplicate=structuredClone(input);duplicate.parameters.components.push({...duplicate.parameters.components[0]});
+ assert.throws(()=>request(duplicate),{code:'MODEL_CAPABILITY_COMPONENT_SELECTION_INVALID'});
+ const inverted=structuredClone(input);inverted.parameters.components[0].box=[.6,.2,.2,.8];
+ assert.throws(()=>request(inverted),{code:'MODEL_CAPABILITY_COMPONENT_SELECTION_INVALID'});
+ const cut=structuredClone(input);cut.parameters.shotPrompts=[{frameIndex:24,box:[.1,.1,.8,.9]}];
+ assert.throws(()=>request(cut),{code:'MODEL_CAPABILITY_COMPONENT_SELECTION_INVALID'});
+ const corrected=structuredClone(input);
+ corrected.parameters.shotPrompts=[{frameIndex:24,box:[.1,.1,.8,.9],points:[{position:[.5,.5],label:1},{position:[.2,.2],label:0}]}];
+ assert.deepEqual(request(corrected).parameters.shotPrompts,corrected.parameters.shotPrompts);
+ corrected.parameters.shotPrompts[0].points[0].label=0;
+ assert.throws(()=>request(corrected),{code:'MODEL_CAPABILITY_SHOT_PROMPT_INVALID'});
+});
+
+test('a component request cannot silently fall through to a worker that ignores equipment selections',async t=>{
+ const f=await fixture(t);
+ await assert.rejects(f.runtime.submit({ownerUid:'owner',input:{...base(),capability:'segment_subject',parameters:{subjectId:'speaker',
+  initialBox:[.1,.1,.9,1],points:[],shotPrompts:[],components:[{id:'mic',box:[.2,.2,.5,.5],points:[],propagate:false}]}}}),{code:'MODEL_COMPONENT_WORKER_UNAVAILABLE'});
+ assert.equal(f.counts().dispatches,0);
+});
+
+test('matting needs an exact immutable dependency and never falls back to the segmentation default',async t=>{
+ const input={...base(),capability:'segment_subject',parameters:{subjectId:'s',initialBox:[.1,.1,.9,.9],points:[],shotPrompts:[],
+  refinement:{maskArtifactHash:'b'.repeat(64),radius:10,holdouts:[]}}};
+ assert.throws(()=>request(input),{code:'MODEL_MASK_REFINEMENT_DEPENDENCY_REQUIRED'});
+ const f=await fixture(t);input.dependencyHashes=['b'.repeat(64)];
+ await assert.rejects(f.runtime.submit({ownerUid:'owner',input}),{code:'MODEL_ARTIFACT_MISSING'});assert.equal(f.counts().dispatches,0);
+ const unavailable={...registry,refinementDefaults:{segment_subject:'unavailable'}};
+ const runtime=new ModelCapabilityRuntime({jobs:f.jobs,artifacts:f.artifacts,workers:{},authorize:async()=>{},models:unavailable});
+ await assert.rejects(runtime.submit({ownerUid:'owner',input}),{code:'MODEL_CAPABILITY_UNAVAILABLE'});
+});

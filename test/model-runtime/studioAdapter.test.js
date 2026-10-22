@@ -10,8 +10,8 @@ function initial() {
   orderedClips:[],reframeAspect:'16:9',exportSettings:{resolution:'1080p',fps:24,codec:'h264',audioCodec:'aac'},analysisRefs:[]};
  return {snapshot,document:studio.adaptStudioSnapshotToDocument({snapshot,projectId:'project'})};
 }
-function artifact(capability,output,parameters,dependencyHashes=[]) {
- const model=selectModel(capability);const request={capability,parameters,dependencyHashes,projectId:'project',projectRevision:0,sourceAssetId:'source',sourceSha256:h,sourceRange:range};
+function artifact(capability,output,parameters,dependencyHashes=[],sourceRange=range) {
+ const model=selectModel(capability);const request={capability,parameters,dependencyHashes,projectId:'project',projectRevision:0,sourceAssetId:'source',sourceSha256:h,sourceRange};
  const job={id:'job',ownerUid:'owner',model,request,requestHash:hash(request),attemptToken:'token',workerImage:'test-only@sha256:'+'b'.repeat(64),source:{generation:'1'},registryVersion:'test'};
  const files=Object.values(output).filter(v=>v && typeof v==='object' && v.name && v.sha256);
  if(!files.length)files.push({name:'data.json',sha256:'c'.repeat(64),bytes:1,mediaType:'application/json'});
@@ -64,4 +64,28 @@ test('editable layer cannot borrow a model mask from another source range',()=>{
  const next=attachArtifacts({ownerUid:'owner',...p,artifacts:[m]});
  next.document.layers[0].parameters.modelArtifactRef.sourceRange.endTick=180000;
  assert.throws(()=>studio.validateStudioProjectDocument(next.document),/source and range/);
+});
+test('subject import resolves rounded uploaded duration on the exact artifact clock without widening its range',()=>{
+ const sourceRange={space:'source',startTick:0,endTick:780000};
+ const m=artifact('segment_subject',{subjectId:'subject',width:1920,height:1080,fpsNumerator:24,fpsDenominator:1,frameCount:208,
+  sourceRange,maskManifest:file('manifest.json'),maskBundle:file('masks.tar.gz'),coverageBasis:'decoded_frames',confidence:null,warnings:[]},
+  {subjectId:'subject',initialBox:[.1,.2,.6,.9],points:[],shotPrompts:[]},[],sourceRange);
+ const effect={id:'title',type:'text_behind',start:0,end:8.666667,text:'REAL MASK',x:50,y:35,font_size:80,color:'#ffffff'};
+ const options={segmentation:m,sourceStoragePath:'studio/sources/owner/source.mp4',effects:[effect]};
+ const result=editableSubjectScene(options);
+ assert.equal(result.scene.sourceRange.end,780000/90000);
+ assert.equal(result.scene.effects[0].end,780000/90000);
+ assert.equal(result.modelArtifactRef.artifactHash,m.artifactHash);
+ assert.throws(()=>editableSubjectScene({...options,effects:[{...effect,end:780001/90000}]}));
+ assert.throws(()=>editableSubjectScene({...options,effects:[{...effect,start:-.000001}]}));
+ assert.throws(()=>editableSubjectScene({...options,effects:[{...effect,end:'8.666667'}]}));
+});
+
+test('editable artifact retains later-frame keep/remove points instead of a replacement box centre',()=>{
+ const base=mask();
+ const corrected=artifact('segment_subject',base.output,{...base.parameters,
+   shotPrompts:[{frameIndex:24,box:[.1,.2,.6,.9],points:[{position:[.45,.4],label:1},{position:[.8,.1],label:0}]}]});
+ const item=editableSubjectScene({segmentation:corrected,sourceStoragePath:'studio/sources/owner/source.mp4',
+  effects:[{id:'grade',type:'background_grade',start:0,end:3,exposure:0,saturation:1,contrast:1}]});
+ assert.deepEqual(item.scene.prompt.shotPrompts,[{time:1,points:[[.45,.4],[.8,.1]],labels:[1,0]}]);
 });

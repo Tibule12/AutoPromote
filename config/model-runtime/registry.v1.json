@@ -345,6 +345,109 @@
         "trackingKind": "point",
         "adapterStatus": "not yet qualified"
       }
+    },
+    {
+      "id": "sam21-small-cpu-v1",
+      "capabilityId": "segment_subject",
+      "modelFamily": "SAM2.1",
+      "checkpoint": "facebook/sam2.1-hiera-small",
+      "checkpointFile": null,
+      "revision": "ee5bba1d82bb8749febdf90f45e84b687142ba03",
+      "weights": [
+        {
+          "path": "model.safetensors",
+          "size": 184305280,
+          "sha256": "0a4067b11ce1e23d5229203f11c718a823060d15a4b23fa2372a7d4b77cbbc60"
+        }
+      ],
+      "license": "Apache-2.0",
+      "licenseSource": "https://huggingface.co/facebook/sam2.1-hiera-small/blob/ee5bba1d82bb8749febdf90f45e84b687142ba03/README.md",
+      "commercialUse": "permitted_with_license_conditions",
+      "requiredDevice": "cpu",
+      "estimatedVramGiB": 0,
+      "vramEstimateBasis": "Planning estimate, measured peaks recorded per execution; not a qualification claim",
+      "preferredGpu": null,
+      "workerClass": "segmentation-tracking",
+      "workerImage": null,
+      "workerRuntime": {
+        "python": "3.12",
+        "torch": "2.11.0+cu130",
+        "transformers": "4.57.1",
+        "diffusers": null,
+        "adapter": "sam21-small-cpu-v1",
+        "device": "cpu",
+        "transport": "private local Docker; explicit read-only dependency overlay attestation, not a hermetic Cloud Run image"
+      },
+      "inputSchema": "contracts/model-capabilities-v1.json#/inputs/segment_subject",
+      "outputSchema": "contracts/model-capabilities-v1.json#/outputs/segment_subject",
+      "timeoutSeconds": 1800,
+      "retryPolicy": {
+        "maxAttempts": 1,
+        "automaticRetry": false,
+        "uncertainDispatch": "reconcile same execution; never regenerate automatically"
+      },
+      "fallback": null,
+      "modelVersion": "1.0.0",
+      "enabled": true,
+      "availability": "private_local_cpu_qualification_pending",
+      "limits": {
+        "noCrossCutPropagation": true,
+        "supportsComponents": true
+      }
+    },
+    {
+      "id": "vitmatte-small-cpu-v1",
+      "capabilityId": "segment_subject",
+      "modelFamily": "ViTMatte",
+      "checkpoint": "hustvl/vitmatte-small-composition-1k",
+      "checkpointFile": null,
+      "revision": "6a58ad7646403c1df626fbd746900aec7361ea1d",
+      "weights": [
+        {
+          "path": "model.safetensors",
+          "size": 103294572,
+          "sha256": "bda9289db1bb6762d978b42d1c62ae3f34daf7497171a347a1d09657efd788cb"
+        }
+      ],
+      "license": "Apache-2.0",
+      "licenseSource": "https://huggingface.co/hustvl/vitmatte-small-composition-1k/blob/6a58ad7646403c1df626fbd746900aec7361ea1d/README.md",
+      "commercialUse": "permitted_with_license_conditions",
+      "requiredDevice": "cpu",
+      "estimatedVramGiB": 0,
+      "vramEstimateBasis": "Planning estimate, measured peaks recorded per execution; not a qualification claim",
+      "preferredGpu": null,
+      "workerClass": "segmentation-tracking",
+      "workerImage": null,
+      "workerRuntime": {
+        "python": "3.12",
+        "torch": "2.11.0+cu130",
+        "transformers": "4.57.1",
+        "diffusers": null,
+        "adapter": "vitmatte-small-cpu-v1",
+        "device": "cpu",
+        "transport": "private local Docker; explicit read-only dependency overlay attestation, not a hermetic Cloud Run image",
+        "jsonschema": "4.25.1"
+      },
+      "inputSchema": "contracts/model-capabilities-v1.json#/inputs/segment_subject",
+      "outputSchema": "contracts/model-capabilities-v1.json#/outputs/segment_subject",
+      "timeoutSeconds": 2400,
+      "retryPolicy": {
+        "maxAttempts": 1,
+        "automaticRetry": false,
+        "uncertainDispatch": "reconcile same execution; never regenerate automatically"
+      },
+      "fallback": null,
+      "modelVersion": "1.0.0",
+      "enabled": true,
+      "availability": "private_local_cpu_matte_qualification_pending",
+      "limits": {
+        "requiresSegmentationDependency": true,
+        "supportsComponents": true,
+        "noCrossCutPropagation": true
+      }
     }
-  ]
+  ],
+  "refinementDefaults": {
+    "segment_subject": "vitmatte-small-cpu-v1"
+  }
 }

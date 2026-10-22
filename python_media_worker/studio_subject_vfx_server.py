@@ -27,6 +27,14 @@ processes={}
 def cpu_mode():
     return os.environ.get("STUDIO_VFX_MODE")=="model_artifact_cpu"
 
+def cpu_timeout():
+    # Full-resolution source-guided matting can exceed the short preview
+    # window. An explicit local CPU setting remains bounded and cannot alter
+    # the separately authorized NVIDIA deadline.
+    value=int(os.environ.get("STUDIO_VFX_CPU_TIMEOUT_SECONDS","1100"))
+    if not 60<=value<=3600:raise ValueError("CPU composition timeout must be 60–3600 seconds")
+    return value
+
 def root():
     directory=Path(os.environ.get("STUDIO_VFX_JOB_ROOT","/data/studio-subject-vfx"))
     directory.mkdir(parents=True,exist_ok=True)
@@ -87,7 +95,7 @@ def run_job(job_id):
             process=subprocess.Popen([sys.executable,str(Path(__file__).with_name(script)),"--spec",str(directory/"spec.json")],stdout=log,stderr=log,start_new_session=True)
             processes[job_id]=process
         try:
-            process.wait(timeout=1100 if cpu_mode() else min(1100,max(1,remaining()-15)))
+            process.wait(timeout=cpu_timeout() if cpu_mode() else min(1100,max(1,remaining()-15)))
         except subprocess.TimeoutExpired:
             stop(process); raise RuntimeError("CPU composition timed out" if cpu_mode() else "Render stopped before its NVIDIA deadline")
         finally: log.close()
@@ -123,10 +131,11 @@ def health(request:Request):
 async def create(request:Request):
     auth(request)
     body=await request.body()
-    if len(body)>32000: raise HTTPException(413,"Subject spec too large")
+    if len(body)>(256*1024 if cpu_mode() else 32000): raise HTTPException(413,"Subject spec too large")
     try: spec=json.loads(body)
     except ValueError: raise HTTPException(422,"Invalid subject spec")
     fields={"jobId","ownerUid","requestHash","sourceUrl","scene"} | ({"modelInput"} if cpu_mode() else set())
+    if cpu_mode() and isinstance(spec,dict) and "replacementAssets" in spec:fields.add("replacementAssets")
     if (not isinstance(spec,dict) or set(spec)!=fields
         or not isinstance(spec["requestHash"],str) or not re.fullmatch(r"[a-f0-9]{64}",spec["requestHash"])
         or not isinstance(spec["ownerUid"],str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}",spec["ownerUid"])
@@ -135,14 +144,16 @@ async def create(request:Request):
         raise HTTPException(422,"Invalid subject spec")
     if cpu_mode():
         try:
-            try:from .studio_model_subject_vfx_job import valid_model_input,storage_url
-            except ImportError:from studio_model_subject_vfx_job import valid_model_input,storage_url
-            valid_model_input(spec['modelInput']);storage_url(spec['sourceUrl'])
+            try:from .studio_model_subject_vfx_job import valid_model_input,storage_url,valid_replacement_assets
+            except ImportError:from studio_model_subject_vfx_job import valid_model_input,storage_url,valid_replacement_assets
+            valid_model_input(spec['modelInput']);storage_url(spec['sourceUrl']);valid_replacement_assets(spec)
         except (ValueError,TypeError,KeyError):raise HTTPException(422,"Invalid model artifact spec")
     directory=work(spec["jobId"])
     identity={key:value for key,value in spec.items() if key!="sourceUrl"}
     if cpu_mode():identity={**identity,"modelInput":{**spec['modelInput'],"files":{
         key:{k:v for k,v in file.items() if k!='url'} for key,file in spec['modelInput']['files'].items()}}}
+    if cpu_mode() and 'replacementAssets' in spec:
+        identity['replacementAssets']=[{k:v for k,v in asset.items() if k!='url'} for asset in spec['replacementAssets']]
     fingerprint=hashlib.sha256(json.dumps(identity,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     with process_lock:
         if (directory/"state.json").exists():

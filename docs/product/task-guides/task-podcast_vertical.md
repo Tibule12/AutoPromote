@@ -1,6 +1,6 @@
 # Turn a podcast into a vertical promo
 
-Development documentation • product 1.2.0 • knowledge 1.0.43 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -32,7 +32,7 @@ Select an owned conversation excerpt, prepare the authoritative audio and refine
 - cam_combiner.synchronization — **PARTIAL**: Aligns camera material and optional master audio using the existing deterministic synchronization path. Review offsets before editing.
 - director.find_viral_clips — **PARTIAL**: Scans an owned source for candidate clip ranges and recommendations, then sends selected material to editing. A score or suggestion cannot guarantee virality.
 - studio.crop_reframe — **FUNCTIONAL**: Reframes a source or crops an overlay using the shared time map and existing renderer. Preserve subject framing and inspect source geometry at cuts.
-- studio.captions — **BROKEN**: Caption controls and reviewed phrase rendering exist, but the retained automatic-word workflow has a repetition defect. Treat automatic word output as broken until that path is repaired and requalified.
+- studio.captions — **BROKEN**: Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
 
 ## Result and limitations
 
