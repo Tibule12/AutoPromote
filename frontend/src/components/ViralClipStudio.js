@@ -60,6 +60,7 @@ import { buildTimedScriptDraft } from "../utils/captionDrafts";
 import { buildTranscriptGroundedBRollSuggestions } from "./storyBeatPlanner";
 import StudioGeneratedBRollPanel from "./StudioGeneratedBRollPanel";
 import { applyCaptionBulkEdit } from "./studioCaptionBulkEdit";
+import { captionsForSource, mergeSourceCaptions } from "./studioCaptionGeneration";
 import { getMediaAuthToken } from "../utils/mediaAuth";
 import { runStudioSourceShotJob } from "./studioAnalysisJobClient";
 import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from "../hooks/useCinematicEffects";
@@ -2602,6 +2603,7 @@ const getCollisionSafePipPlacement = ({
 const ViralClipStudio = ({
   videoUrl,
   sourceStoragePath = null,
+  sourceContentHash = null,
   sourceName,
   clips,
   images = [],
@@ -2861,6 +2863,7 @@ const ViralClipStudio = ({
     isPrimary: true,
     storagePath: sourceStoragePath || "",
     sourceStoragePath: sourceStoragePath || "",
+    ...(sourceContentHash ? {contentHash: sourceContentHash} : {}),
     duration: Math.max(0, Number(clips?.[0]?.sourceDuration || clips?.[0]?.end || clips?.[0]?.duration || 0)),
     status: sourceStoragePath ? "ready" : "existing",
     progress: 100,
@@ -2957,9 +2960,14 @@ const ViralClipStudio = ({
     ));
   }, []);
   const [translateCaptionsToEnglish, setTranslateCaptionsToEnglish] = useState(false);
+  const [captionSourceLanguage, setCaptionSourceLanguage] = useState("auto");
   const [captionGenerationStatus, setCaptionGenerationStatus] = useState("idle");
   const [captionGenerationMessage, setCaptionGenerationMessage] = useState("");
   const captionGenerationInFlightRef = useRef(false);
+  const captionSegmentsRef = useRef(captionSegments);
+  captionSegmentsRef.current = captionSegments;
+  const captionOverrideRef = useRef(captionTextOverride);
+  captionOverrideRef.current = captionTextOverride;
   const [studioActionMessage, setStudioActionMessage] = useState(
     "Split preview is live. Edit on the right and compare the untouched source beside it."
   );
@@ -3093,6 +3101,7 @@ const ViralClipStudio = ({
       url: videoUrl,
       storagePath: sourceStoragePath || "",
       sourceStoragePath: sourceStoragePath || "",
+      ...(sourceContentHash ? {contentHash: sourceContentHash} : {}),
       duration: 0,
       startRequest: null,
       endRequest: null,
@@ -3542,6 +3551,7 @@ const ViralClipStudio = ({
     captionCoverageMode,
     captionSegments,
     translateCaptionsToEnglish,
+    captionSourceLanguage,
     previewSpeed,
     pacingLevel,
     creativeIntent,
@@ -4141,6 +4151,7 @@ const ViralClipStudio = ({
       normalizeCaptionSegments(splitCaptionSegmentsForReadability(snapshot.captionSegments))
     );
     setTranslateCaptionsToEnglish(!!snapshot.translateCaptionsToEnglish);
+    setCaptionSourceLanguage(snapshot.captionSourceLanguage || "auto");
     setPreviewSpeed(Number(snapshot.previewSpeed ?? 1));
     setPacingLevel(snapshot.pacingLevel || "balanced");
     setCreativeIntent(snapshot.creativeIntent || "energy");
@@ -8620,7 +8631,12 @@ const ViralClipStudio = ({
 
     const requestedTranslation = Boolean(translateToEnglish);
     const retainedSegments = normalizeCaptionSegments(captionSegments);
+    const retainedOverride = captionTextOverride;
+    const transcriptionProjectId = activeProjectIdRef.current;
     const activeSourceClip = sourceClip || currentTimelineClip;
+    const captionSourceClipId = activeSourceClip?.sourceClipId || activeSourceClip?.id || selectedClip?.id || "main";
+    const defaultCaptionSourceId = timeline.find(clip => clip.id === "main")?.sourceClipId || "main";
+    const targetBefore = JSON.stringify(captionsForSource(retainedSegments, captionSourceClipId, defaultCaptionSourceId));
 
     setCaptionGenerationStatus("processing");
     setCaptionGenerationMessage(
@@ -8651,6 +8667,7 @@ const ViralClipStudio = ({
         transcriptionBody = JSON.stringify({
           storage_path: trustedStoragePath,
           translate_to_english: requestedTranslation,
+          source_language: captionSourceLanguage,
         });
         setCaptionGenerationMessage(
           requestedTranslation
@@ -8682,6 +8699,7 @@ const ViralClipStudio = ({
           activeSourceClip?.file?.name || selectedClip?.file?.name || "viral-studio-source.mp4"
         );
         formData.append("translate_to_english", requestedTranslation ? "true" : "false");
+        formData.append("source_language", captionSourceLanguage);
         transcriptionUrl = `${API_BASE_URL}/api/media/transcribe`;
         transcriptionBody = formData;
         transcriptionHeaders = { Authorization: `Bearer ${token}` };
@@ -8778,8 +8796,6 @@ const ViralClipStudio = ({
         if (!completed) throw new Error("Caption transcription timed out. Please retry.");
       }
 
-      const captionSourceClipId =
-        activeSourceClip?.sourceClipId || activeSourceClip?.id || selectedClip?.id || null;
       const responseSegments = Array.isArray(payload?.segments) ? payload.segments : [];
       const languageMode = String(payload?.languageMode || payload?.language_mode || "")
         .trim()
@@ -8852,7 +8868,13 @@ const ViralClipStudio = ({
         throw new Error("The caption service did not confirm an English translation.");
       }
 
-      setCaptionSegments(nextSegments);
+      if (activeProjectIdRef.current !== transcriptionProjectId) return false;
+      const currentSegments = normalizeCaptionSegments(captionSegmentsRef.current);
+      if (captionOverrideRef.current !== retainedOverride ||
+          JSON.stringify(captionsForSource(currentSegments, captionSourceClipId, defaultCaptionSourceId)) !== targetBefore) {
+        throw new Error("Captions for this source changed while speech was being processed. Your edits were kept; regenerate when ready.");
+      }
+      setCaptionSegments(previous => mergeSourceCaptions(previous, nextSegments, captionSourceClipId, defaultCaptionSourceId));
       setCaptionTextOverride("");
       setAutoCaptions(true);
       setComparisonMode("after");
@@ -16373,6 +16395,7 @@ const ViralClipStudio = ({
       url: asset.url,
       storagePath: asset.storagePath,
       sourceStoragePath: asset.storagePath,
+      contentHash: asset.contentHash || null,
       duration,
       startRequest: 0,
       endRequest: duration > 0 ? duration : null,
@@ -16529,6 +16552,7 @@ const ViralClipStudio = ({
         url: uploaded.url,
         storagePath: uploaded.storagePath,
         sourceStoragePath: uploaded.storagePath,
+        ...(uploaded.contentHash || uploaded.sha256 ? {contentHash: uploaded.contentHash || uploaded.sha256} : {}),
         file: null,
         isLocal: false,
         duration: measuredDuration,
@@ -23290,6 +23314,22 @@ const ViralClipStudio = ({
                     />
                   </label>
 
+                  <label className="inspector-field">
+                    <span>Speech language</span>
+                    <select aria-label="Speech language" value={captionSourceLanguage}
+                      disabled={captionGenerationStatus === "processing" || isExporting}
+                      onChange={event => setCaptionSourceLanguage(event.target.value)}>
+                      <option value="auto">Automatic detection</option>
+                      <option value="en">English</option>
+                      <option value="af">Afrikaans</option>
+                      <option value="za-mixed">South African languages / mixed English</option>
+                      <option value="xh">isiXhosa</option><option value="zu">isiZulu</option>
+                      <option value="st">Sesotho</option><option value="tn">Setswana</option>
+                      <option value="ts">Xitsonga</option><option value="nr">isiNdebele</option>
+                      <option value="ve">Tshivenda</option>
+                    </select>
+                    <small>Choose the spoken language if detection misses words. Changing this keeps your current captions; regenerate when ready.</small>
+                  </label>
                   <div className="caption-transcript-actions">
                     <button
                       type="button"
@@ -24977,6 +25017,10 @@ const ViralClipStudio = ({
                 <>
                 <StudioSubjectVfxPanel
                   items={subjectVfxScenes} onChange={setSubjectVfxScenes}
+                  media={projectMedia}
+                  getDocument={() => getEditorSnapshot().studioDocument}
+                  onMediaAdded={asset => setProjectMedia(current => current.some(value => value.id === asset.id)
+                    ? current.map(value => value.id === asset.id ? asset : value) : [...current, asset])}
                   sources={timeline.map(clip => ({ id: String(clip.sourceClipId || clip.id), name: clip.name || clip.file?.name || "Source clip", url: clip.url || videoUrl, storagePath: clip.sourceStoragePath || clip.storagePath || (clip.id === "main" ? sourceStoragePath : null), start: getTimelineClipWindow(clip).start, end: getTimelineClipWindow(clip).end })).filter((clip,index,all) => all.findIndex(value => value.id === clip.id && value.start === clip.start && value.end === clip.end) === index)}
                   getToken={getMediaAuthToken} apiBase={API_BASE_URL} createId={createSecureId}
                   proposal={directorSubjectVfxProposal?.projectId === projectId && directorSubjectVfxProposal?.baseRevision === studioDocumentRef.current?.revision ? directorSubjectVfxProposal : null}

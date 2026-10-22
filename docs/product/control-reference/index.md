@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.43 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -203,6 +203,9 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.logo_design.canvas | Start a logo design | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | publishing.analytics.sync_latest | Sync latest platform statistics | array | 1 … 6 | none | [] | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
 | publishing.analytics.release | Published release | string | source-dependent … source-dependent | none | "" | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
+| studio.captions.source_language | Speech language | enum | auto, en, af, za-mixed, xh, zu, st, tn, ts, nr, ve | none | "auto" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.background_edge_radius | Edge detail width | number | 0 … 8 | source pixels | 3 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.composite.background_decontaminate | Remove old background colour | number | 0 … 1 | strength | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -2673,3 +2676,39 @@ Applies to: video. Requires: publishing.analytics, system.account.
 
 - Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.
 - Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach.
+
+<a id="studio-captions-source_language"></a>
+
+## Speech language
+
+ID: `studio.captions.source_language` • **PARTIAL**
+
+Selects the speech recognizer and source language for the next automatic caption request. Does not relabel or replace existing lines.
+
+Applies to: video with speech. Requires: studio.captions.
+
+- Model wording is an editable review draft; changing this preference does not translate existing captions.
+
+<a id="studio-composite-background_edge_radius"></a>
+
+## Edge detail width
+
+ID: `studio.composite.background_edge_radius` • **PARTIAL**
+
+Sets the bounded source-guided unknown edge band after choosing Clean background edges. Zero retains existing alpha while colour cleanup can still run.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified.
+
+<a id="studio-composite-background_decontaminate"></a>
+
+## Remove old background colour
+
+ID: `studio.composite.background_decontaminate` • **PARTIAL**
+
+Recovers photographed foreground edge colour using the final mask, including protected-object corrections. Zero keeps the photographed edge RGB.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified.

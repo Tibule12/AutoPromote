@@ -1,6 +1,6 @@
 # Captions and reviewed transcription
 
-Development documentation • product 1.2.0 • knowledge 1.0.43 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -8,7 +8,9 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 
 ID: `studio.captions` • **BROKEN** • DETERMINISTIC
 
-Caption controls and reviewed phrase rendering exist, but the retained automatic-word workflow has a repetition defect. Treat automatic word output as broken until that path is repaired and requalified.
+Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
+
+**Purpose:** Generate timed speech drafts, correct wording and speaker/language labels, and retain editable caption styles in the shared Studio project.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -20,8 +22,10 @@ Caption controls and reviewed phrase rendering exist, but the retained automatic
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.
+2. Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.
+3. Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.
+4. Regenerate a selected source without replacing other sources’ caption tracks. If its wording changes while listening, keep the edits and regenerate when ready.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -30,14 +34,16 @@ Caption controls and reviewed phrase rendering exist, but the retained automatic
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review; the prior broad automatic-caption qualification remains open.
+- Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
-- Generate and review captions before rendering.: There are no editable caption phrases for the requested burn-in. Automatic words remain BROKEN. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export.
-- Review every flagged caption line before rendering.: Approve or correct each flagged phrase and timestamp in Captions. Automatic words remain BROKEN; this is a reviewed-phrase workaround, not repaired automatic transcription.
+- Generate and review captions before rendering.: There are no editable caption phrases for the requested burn-in. Automatic wording still needs review. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export.
+- Review every flagged caption line before rendering.: Approve or correct each flagged phrase and timestamp in Captions. Correct all flagged wording and timing; the repaired repetition trigger does not establish accuracy across all speech.
 
-**Controls:** No source-qualified editable control is recorded.
+**Controls:** [Speech language](../control-reference/index.md#studio-captions-source_language)
 
 **Guides:** [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Create captions and correct transcription](../task-guides/task-captions_correct.md)
 

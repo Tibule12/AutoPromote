@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.43",
+  "knowledge_version": "1.0.45",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-21",
@@ -573,8 +573,8 @@
       "name": "Captions and transcription",
       "area": "Studio",
       "status": "BROKEN",
-      "summary": "Caption controls and reviewed phrase rendering exist, but the retained automatic-word workflow has a repetition defect. Treat automatic word output as broken until that path is repaired and requalified.",
-      "purpose": "Caption controls and reviewed phrase rendering exist, but the retained automatic-word workflow has a repetition defect. Treat automatic word output as broken until that path is repaired and requalified.",
+      "summary": "Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.",
+      "purpose": "Generate timed speech drafts, correct wording and speaker/language labels, and retain editable caption styles in the shared Studio project.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
@@ -585,15 +585,21 @@
       ],
       "requires": [],
       "optional_capabilities": [],
-      "controls": [],
+      "controls": [
+        "studio.captions.source_language"
+      ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
+        "Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.",
+        "Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.",
+        "Regenerate a selected source without replacing other sources’ caption tracks. If its wording changes while listening, keep the edits and regenerate when ready."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review; the prior broad automatic-caption qualification remains open.",
+        "Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed."
       ],
       "common_errors": [
         {
@@ -602,17 +608,17 @@
         },
         {
           "condition": "Generate and review captions before rendering.",
-          "resolution": "There are no editable caption phrases for the requested burn-in. Automatic words remain BROKEN. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export."
+          "resolution": "There are no editable caption phrases for the requested burn-in. Automatic wording still needs review. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export."
         },
         {
           "condition": "Review every flagged caption line before rendering.",
-          "resolution": "Approve or correct each flagged phrase and timestamp in Captions. Automatic words remain BROKEN; this is a reviewed-phrase workaround, not repaired automatic transcription."
+          "resolution": "Approve or correct each flagged phrase and timestamp in Captions. Correct all flagged wording and timing; the repaired repetition trigger does not establish accuracy across all speech."
         }
       ],
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {
@@ -804,32 +810,30 @@
         "studio.composite.group_mask_inverted",
         "studio.group_clip.move",
         "studio.group_clip.in",
-        "studio.group_clip.out"
+        "studio.group_clip.out",
+        "studio.composite.background_edge_radius",
+        "studio.composite.background_decontaminate"
       ],
       "workflow": [
-        "Select an owned image or ordinary title in Studio Composite.",
-        "Enable its geometric mask and choose rectangle, ellipse or polygon.",
-        "For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.",
-        "For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.",
-        "Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.",
-        "To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.",
-        "Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.",
-        "Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom Bézier curve in Composite.",
-        "Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.",
-        "Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.",
-        "Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.",
-        "Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation."
+        "Open Studio → Composite and add effects to the selected owned video clip.",
+        "Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.",
+        "Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.",
+        "Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.",
+        "Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.",
+        "At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.",
+        "For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.",
+        "After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot."
       ],
       "preview_behavior": "Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.",
       "render_behavior": "The shared compiler carries group mask/blend decisions and transform keys into the existing CPU compositor. The ordinary geometric matte rasterizer clips assembled local child alpha before transform/opacity; registered request-owned matte scratch is cleaned after the render. RGB blend color weights the blend result by backdrop alpha, preserving foreground color over transparent isolated parents. Group and child blending share the existing leaf compositor and inverse programme clock. Static/Normal paths retain previous pixels. Source/source-VFX/generated-caption stages remain separate; inspect the exact final movie.",
       "limitations": [
-        "Rectangle, ellipse and percentage-polygon image masks and crop animation have scoped native/export boundary evidence. This is deterministic geometry, not AI subject segmentation.",
-        "Group masks and blending are implemented as static decisions; path/radius/feather/inversion/blend animation, broader feather/inversion/modes/media, animated video-layer masks and full alpha/text/effect-order parity remain incomplete.",
+        "Image and title geometric masks support feather and inversion. Inspect their boundaries in the exported movie, especially with soft edges.",
+        "Geometric masks on the main video or video layers currently stop export. Real person/background separation uses Composite’s separately processed subject mask. Arbitrary nesting and global layer/effect order remain incomplete.",
         "This dated development snapshot does not establish professional or production readiness.",
-        "Editable percentage-polygon paths and rectangle radius use the canonical mask object. This adds no animated path, neural segmentation, mask expansion or video-mask support.",
-        "The bounded inverted-polygon/shadow/glow/blur image stack passes four sampled colour pairs with transform/opacity keys. The ellipse stack retains a strict raster failure, and historical landscape edge failures remain open.",
-        "The layer stack has native image/title/two-motion history, cold reopen, exports and scoped visible-image occlusion evidence. Actual owned 3D cross-family export, whole motion/title raster, large/deeper stacks and full raster remain unqualified. Source footage/source VFX and generated captions retain their separate programme stages.",
-        "One native nested image/two-motion edit uses a feathered inner polygon/Multiply and outer rounded-rectangle/Screen while preserving all 16 group keys and child poses/keys. Controls/history/reset/lock/cold/export/full timeline playback and four geometry/image-interior RGB pairs pass; decoded source-tone audio is unchanged. All eight non-Normal modes pass actual FFmpeg transparent/partial/opaque-backdrop fixtures, not every native mode/media/stack. Graphic-group clip bars own descendant starts/keys and visibility; source-occurrence attachment/remapping, group split/duplicate and editable group anchor remain unsupported. Grouped timeline drag order uses Composite. Actual owned 3D/video/deeper groups, native retiming, broader curves/grouped drag/deletion and continuous/full picture/sound remain unqualified. Worker Bézier expressions approximate 32 samples; the browser solves the curve."
+        "Background replacement is optional. Uploads accept PNG, JPEG or WebP up to 32 MB; a scene supports at most twelve effect layers.",
+        "A new video requires its own source-bound mask and available authorized model execution. A saved mask from another video cannot be transferred. An unavailable model service prevents creating a new mask.",
+        "The retained podcast example uses manual source-specific object contours and still has rejected fringes. Those corrections do not prove clean automatic replacement for other users’ footage.",
+        "Optional object holdouts and removal paths are advanced manual normalized source-frame geometry. They do not automatically identify furniture or microphones or track a hand-drawn shape through motion."
       ],
       "common_errors": [
         {
@@ -11793,6 +11797,119 @@
       ],
       "updated_at": "2026-10-21",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.captions.source_language",
+      "feature_ids": [
+        "studio.captions"
+      ],
+      "label": "Speech language",
+      "status": "PARTIAL",
+      "meaning": "Selects the speech recognizer and source language for the next automatic caption request. Does not relabel or replace existing lines.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "auto",
+          "en",
+          "af",
+          "za-mixed",
+          "xh",
+          "zu",
+          "st",
+          "tn",
+          "ts",
+          "nr",
+          "ve"
+        ],
+        "default": "auto",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video with speech"
+      ],
+      "dependencies": [
+        "studio.captions"
+      ],
+      "limitations": [
+        "Model wording is an editable review draft; changing this preference does not translate existing captions."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.background_edge_radius",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge detail width",
+      "status": "PARTIAL",
+      "meaning": "Sets the bounded source-guided unknown edge band after choosing Clean background edges. Zero retains existing alpha while colour cleanup can still run.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 8,
+        "values": [],
+        "default": 3,
+        "default_known": true
+      },
+      "unit": "source pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.background_decontaminate",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Remove old background colour",
+      "status": "PARTIAL",
+      "meaning": "Recovers photographed foreground edge colour using the final mask, including protected-object corrections. Zero keeps the photographed edge RGB.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "strength",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
     }
   ],
   "tasks": [
@@ -12449,16 +12566,25 @@
       "task_id": "task.captions_correct",
       "title": "Create captions and correct transcription",
       "status": "BROKEN",
-      "summary": "Automatic words are currently broken; use reviewed phrase correction and inspect the actual final subset.",
+      "summary": "Choose the speech language, generate editable timed lines and review uncertain words before export.",
       "feature_ids": [
         "studio.captions"
       ],
-      "control_ids": [],
+      "control_ids": [
+        "studio.captions.source_language"
+      ],
       "prerequisites": [
         "system.account"
       ],
       "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
+        {
+          "instruction": "Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
+          "feature_id": "studio.captions",
+          "control_ids": [
+            "studio.captions.source_language"
+          ]
+        },
         {
           "instruction": "Review source transcription and correct the selected phrase rather than trusting repeated automatic words.",
           "feature_id": "studio.captions",
@@ -12476,10 +12602,10 @@
       ],
       "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
       "limitations": [
-        "The automatic-word repetition defect remains open. A successful reviewed phrase render does not qualify automatic captions."
+        "The empty-hint repetition trigger is repaired on retained speech, but code-switched wording still needs correction. Broad automatic transcription, all caption styles and full preview/export parity are not qualified."
       ],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {
@@ -14920,6 +15046,21 @@
       "from": "publishing.analytics",
       "type": "editable_with",
       "to": "publishing.analytics.release"
+    },
+    {
+      "from": "studio.captions",
+      "type": "editable_with",
+      "to": "studio.captions.source_language"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.background_edge_radius"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.background_decontaminate"
     }
   ]
 }

@@ -18,11 +18,18 @@ class ModelCapabilityRuntime {
   }
   async submit({ ownerUid, input }) {
     if (typeof ownerUid !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$/.test(ownerUid)) throw fail('MODEL_OWNER_INVALID', 403);
-    const r = request(input), model = selectModel(r.capability, { models: this.models });
+    const r = request(input), model = selectModel(r.capability, { models: this.models,
+      ...(r.capability==='segment_subject' && r.parameters.refinement ? {modelId:this.models.refinementDefaults?.segment_subject || 'unconfigured'} : {}) });
+    if(r.parameters.refinement && !model.limits?.requiresSegmentationDependency)throw fail('MODEL_MASK_REFINEMENT_UNAVAILABLE',503);
+    if (r.capability==='segment_subject' && r.parameters.components?.length && !model.limits?.supportsComponents)
+      throw fail('MODEL_COMPONENT_WORKER_UNAVAILABLE',503);
     const source = await this.authorize({ ownerUid, request: r, requireCurrentRevision: true });
     if (!source || source.sha256 !== r.sourceSha256 || !source.generation) throw fail('MODEL_SOURCE_UNVERIFIED', 409);
     for (const artifactHash of r.dependencyHashes) {
       const dep = verifyArtifact(await this.artifacts.get(artifactHash), { ownerUid, projectId: r.projectId, sourceSha256: r.sourceSha256 });
+      if(r.capability==='segment_subject' && r.parameters.refinement?.maskArtifactHash===artifactHash &&
+        (dep.capability!=='segment_subject' || dep.sourceAssetId!==r.sourceAssetId || hash(dep.sourceRange)!==hash(r.sourceRange)))
+        throw fail('MODEL_MASK_REFINEMENT_SOURCE_MISMATCH',409);
       if (r.capability === 'track_object' && artifactHash === r.parameters.maskArtifactHash && dep.capability !== 'segment_subject')
         throw fail('MODEL_TRACK_MASK_REQUIRED', 409);
       if (r.capability === 'track_object' && (hash(dep.sourceRange)!==hash(r.sourceRange) || dep.output.subjectId!==r.parameters.subjectId))
@@ -64,7 +71,11 @@ class ModelCapabilityRuntime {
     } catch (cause) {
       const definitelyNotStarted = cause.definitelyNotStarted === true;
       await this.jobs.transition(job.id, job.attemptToken, ['queued','dispatching'], {
-        status: definitelyNotStarted ? 'failed' : 'dispatch_uncertain', error: definitelyNotStarted ? 'MODEL_DISPATCH_REJECTED' : 'MODEL_DISPATCH_RECONCILIATION_REQUIRED' });
+        status: definitelyNotStarted ? 'failed' : 'dispatch_uncertain',
+        // Keep a bounded machine code for diagnosis, never worker stderr, URLs,
+        // credentials or filesystem paths. The public error remains generic.
+        ...(typeof cause.code === 'string' && /^[A-Z][A-Z0-9_]{1,95}$/.test(cause.code) ? { workerErrorCode: cause.code } : {}),
+        error: definitelyNotStarted ? 'MODEL_DISPATCH_REJECTED' : 'MODEL_DISPATCH_RECONCILIATION_REQUIRED' });
       if (definitelyNotStarted) await this.jobs.release(job.id, job.attemptToken);
     }
     return this.present(await this.jobs.get(job.id));

@@ -3,6 +3,7 @@
 // Bridges Node.js backend with Python Media Worker
 
 const axios = require("axios");
+const { captionTranscriptionOptions } = require("./captionTranscriptionOptions");
 const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
 const fs = require("fs");
@@ -1470,7 +1471,8 @@ class VideoEditingService {
   /**
    * Start an async transcription job
    */
-  async startTranscriptionJob(videoUrl, userId, { translateToEnglish = false } = {}) {
+  async startTranscriptionJob(videoUrl, userId, { translateToEnglish = false, sourceLanguage = "auto" } = {}) {
+    ({ translateToEnglish, sourceLanguage } = captionTranscriptionOptions({translateToEnglish, sourceLanguage}));
     const jobId = uuidv4();
     try {
       // Store initial job state
@@ -1482,11 +1484,12 @@ class VideoEditingService {
         status: "queued",
         progress: 0,
         translateToEnglish: !!translateToEnglish,
+        sourceLanguage,
         createdAt: new Date().toISOString(),
       });
 
       // Start background task
-      this.processTranscriptionBackground(jobId, videoUrl, { translateToEnglish }).catch(err => {
+      this.processTranscriptionBackground(jobId, videoUrl, { translateToEnglish, sourceLanguage }).catch(err => {
         console.error(`[VideoTranscribe] Background Job ${jobId} Failed:`, err);
       });
 
@@ -1499,7 +1502,7 @@ class VideoEditingService {
   /**
    * Background processor for transcription
    */
-  async processTranscriptionBackground(jobId, videoUrl, { translateToEnglish = false } = {}) {
+  async processTranscriptionBackground(jobId, videoUrl, { translateToEnglish = false, sourceLanguage = "auto" } = {}) {
     const docRef = db.collection("video_edits").doc(jobId);
     try {
       await docRef.update({ status: "processing", progress: 10 });
@@ -1508,13 +1511,14 @@ class VideoEditingService {
 
       // Call Python Worker
       const response = await axios.post(
-        `${MEDIA_WORKER_URL}/transcribe`,
+        `${process.env.CAPTION_WORKER_URL || MEDIA_WORKER_URL}/transcribe`,
         {
           video_url: videoUrl,
           // The worker intentionally validates this endpoint as Dict[str, str].
           // Sending a JSON boolean makes FastAPI reject the whole request with
           // 422 before transcription starts.
           translate_to_english: translateToEnglish ? "true" : "false",
+          source_language: sourceLanguage,
         },
         {
           // Full podcast transcription can legitimately exceed ten minutes on

@@ -152,7 +152,7 @@
       ],
       "readiness": "PARTIAL",
       "assertion": "Aspect/crop/sourceFocus on each source and speed boundary",
-      "gap": "Landscape→portrait real source-centre fix; broader paired geometry not measured.",
+      "gap": "Landscape\u2192portrait real source-centre fix; broader paired geometry not measured.",
       "sourceRefs": [
         "studio",
         "worker"
@@ -257,7 +257,7 @@
       "latestNativeKeyframeSoundEvidence": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
       "latestNativeKeyframeSoundScope": "Native editable keyframes/export/full finished-file playback, retimed bus audio correction and bounded composition repairs. Whole product/creative parity remains unqualified.",
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
-      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+      "latestProfessionalPropertyScope": "Native unanimated layer \u2192 base-value edit \u2192 individual X keys \u2192 evaluated midpoint \u2192 undo/redo \u2192 remove/undo \u2192 save/cold reopen \u2192 real 3s CPU render/download \u2192 full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
       "latestProfessionalMaskedEffectsEvidence": "reports/studio-professional-masked-effects-20261013/README.md",
       "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified."
     },
@@ -655,7 +655,7 @@
       "latestNativeKeyframeSoundEvidence": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
       "latestNativeKeyframeSoundScope": "Native editable keyframes/export/full finished-file playback, retimed bus audio correction and bounded composition repairs. Whole product/creative parity remains unqualified.",
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
-      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
+      "latestProfessionalPropertyScope": "Native unanimated layer \u2192 base-value edit \u2192 individual X keys \u2192 evaluated midpoint \u2192 undo/redo \u2192 remove/undo \u2192 save/cold reopen \u2192 real 3s CPU render/download \u2192 full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
     },
     {
       "id": "generated_asset_equivalence",
@@ -1095,7 +1095,7 @@
       {
         "at": "2026-10-08T20:14:31.419187+00:00",
         "kind": "S02 verified native transform/clipping/clock repairs and seven-effect NVIDIA preview/recovery",
-        "summary": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29–1.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval."
+        "summary": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29\u20131.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval."
       },
       {
         "lastSessionKind": "S02 verified native transform/clipping/clock repairs and seven-effect NVIDIA preview/recovery",
@@ -1114,7 +1114,7 @@
           "pythonDeliveryTiming": 10,
           "totalPassed": 250,
           "scope": "Distinct scoped checks retained across continuation. This block ran 68 worker/timing checks, three related component passes and one isolated source-metadata pass. Combined component selection had a retained fixture-order failure on source URL refresh; isolated guard passed. Other suites not rerun. Guards do not qualify actual user paths.",
-          "realUserE2E": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29–1.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval.",
+          "realUserE2E": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29\u20131.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval.",
           "visualOrAudioParity": "Scoped transform clipping/cut/exact tail/static geometry PASS; seven-effect GPU preview/PCM identity PASS, final unqualified; full 3D parity FAIL."
         },
         "nextSlice": "S02: recover and visually inspect the same postfix CPU export; prepare seven existing subject effects; execute queued GPU checks after founder renders finish and within 22:00 SAST. Fresh Blender is blocked by daily allowance."
@@ -1157,7 +1157,7 @@
           "Final optimized normal App build PASS with existing lint warnings",
           "Native CPU export/download hash and complete decode PASS",
           "47 native source/final paired geometry:24 PASS/22 FAIL/1 insufficient",
-          "15/15 built-in cues;TapeStop344ms→21ms;whole mix/listening unqualified",
+          "15/15 built-in cues;TapeStop344ms\u219221ms;whole mix/listening unqualified",
           "Fresh full Studio movie playback FAIL at14s;subsequent QA entry signed out"
         ],
         "nextSlice": "S02: recover legitimate signed-in QA session, diagnose the existing completed film14s native stall without rerender; retest image shadow, align dip/frame/crop mapping and capture full live mix before creative review.",
@@ -2184,7 +2184,7 @@
       "velo": 14,
       "onda": 14
     },
-    "nativeDuplicateUndoRedo": "PASS: 14→15→14→15→14",
+    "nativeDuplicateUndoRedo": "PASS: 14\u219215\u219214\u219215\u219214",
     "nativeEmberNavigation": "PASS: five positions retain exact canonical hash",
     "nativeEmberColdRecovery": "PASS: native reload/saved-project entry retains exact canonical hash",
     "lateRecoveryFixes": "Native VELO/ONDA completed-output recovery after reload now observed; broader durability remains unqualified",
@@ -2467,7 +2467,7 @@
     "mainMerge": false,
     "nextSharedTaskId": "S02",
     "remainingBlockers": [
-      "Raw-source playback still has 1.6–1.8 seconds overhead in this short headless/software test; broader long/mixed/speed/mask/camera/audio playback coverage is unqualified.",
+      "Raw-source playback still has 1.6\u20131.8 seconds overhead in this short headless/software test; broader long/mixed/speed/mask/camera/audio playback coverage is unqualified.",
       "Installed Chrome153 exits with SIGSEGV during native download; bundled Chromium147 succeeds. Browser/environment root cause remains unresolved.",
       "Whole-stage paired preview/final picture, cut timing and sound parity remain unqualified.",
       "Full moving-film/sound creative review and founder acceptance remain pending.",
@@ -3747,7 +3747,7 @@
           0.9450306752407928,
           0.9999243683929696
         ],
-        "directMusicLatest": "12.9s fails across a music restart; other sampled windows remain near 0.999765–0.999999.",
+        "directMusicLatest": "12.9s fails across a music restart; other sampled windows remain near 0.999765\u20130.999999.",
         "musicStarts": 3,
         "finalCapture": "audio-live-r5"
       },
@@ -4459,7 +4459,7 @@
     "evidence": "reports/studio-professional-editing-20261013/README.md",
     "checkpoint": "reports/studio-professional-editing-20261013/checkpoint.json",
     "branch": "agent/studio-professional-editing-v1",
-    "scope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+    "scope": "Native unanimated layer \u2192 base-value edit \u2192 individual X keys \u2192 evaluated midpoint \u2192 undo/redo \u2192 remove/undo \u2192 save/cold reopen \u2192 real 3s CPU render/download \u2192 full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
     "gpuJobs": 0,
     "readinessPromotion": false,
     "paidCost": 0,
@@ -5072,7 +5072,7 @@
       "S03",
       "S02"
     ],
-    "nextImplementationSlice": "Continue the user’s motion-design refinement through native Studio controls on the same graph; then shared S04 spatial/path timing and S03 occurrence ownership. Retain S02 picture/sound and export latency limits."
+    "nextImplementationSlice": "Continue the user\u2019s motion-design refinement through native Studio controls on the same graph; then shared S04 spatial/path timing and S03 occurrence ownership. Retain S02 picture/sound and export latency limits."
   },
   "professionalDepthMotion20261016": {
     "date": "2026-10-16",
@@ -7585,7 +7585,7 @@
     "physicalEvidenceVerified": true,
     "ownedQaServicesStopped": true,
     "remainingBlockers": [
-      "Bounded deterministic logo authoring supports Flow/Orbit/Facet and bundled Inter 600/900 A–Z/a–z, digits, space, &, dot and hyphen. Arbitrary-brief AI design, automatic uploaded-logo tracing and arbitrary font conversion are separate.",
+      "Bounded deterministic logo authoring supports Flow/Orbit/Facet and bundled Inter 600/900 A\u2013Z/a\u2013z, digits, space, &, dot and hyphen. Arbitrary-brief AI design, automatic uploaded-logo tracing and arbitrary font conversion are separate.",
       "Outlined letters are normal editable vector layers; changing the source name creates another design rather than live-replacing an existing outline binding. Compound geometry is bounded to eight contours, 64 nodes each and 256 total; boolean operations and morph keys remain separate.",
       "Transparent masters export a flat group of native vectors and base transforms before motion; masks, crops, filters, rounded frames and blends fail explicitly. Nested/non-vector members are rejected.",
       "Three settled opaque native geometry pairs pass fixed thresholds; low-alpha arrivals, whole colour/paint/live sound, broad masks/parents/retiming, capture smoothness and owner creative/listening/public acceptance remain separate.",
@@ -8249,5 +8249,34 @@
       "Shared S02/S04/S03 backlog remains unchanged."
     ],
     "nextTask": "Verify the new full PR emulator run; retain selected identity, native works, publishing receipts and all existing timers."
+  },
+  "backgroundCaptions20261022": {
+    "status": "NATIVE_BACKGROUND_AND_CAPTION_MOVIES_PASS_GENERAL_QUALITY_UNQUALIFIED",
+    "evidence": "reports/studio-background-captions-20261022/README.md",
+    "changes": [
+      "verified source identity survives fresh and additional uploads",
+      "per-source caption regeneration preserves other clips and pending timed/quick edits",
+      "later-frame keep/remove points and authored box reach CPU tracking",
+      "native soft-alpha refinement removes observed equipment fringe"
+    ],
+    "paidGpuJobs": 0,
+    "newProviderGenerations": 0,
+    "readinessPromoted": false,
+    "creativeApproval": false,
+    "captionMovieSha256": "7f3c224d76b08c50d6cd5038c90832943977026ac94c46b3404156ae8ec1e215",
+    "backgroundCaptionMovieSha256": "d01072107c0084427b5834a69d256604668f919b5eeb516c56e99e13d39ce9c2",
+    "backgroundStudioRecordingSha256": "2438cdb34953e6deb5997c2c01456ca18f96f7ab944a942250c19322f10d58bc",
+    "nativeFirstSourceCaptionsUnchanged": true,
+    "nativePendingTimedAndQuickEditsPreserved": true,
+    "refinedMaskFrames": 120,
+    "allOriginalProjectDocumentsUnchanged": 45,
+    "protectedSourceAndPriorFilesUnchanged": 29,
+    "codePush": "e8d07a85",
+    "remaining": [
+      "mixed-language accuracy",
+      "arbitrary-footage and longer/multi-shot naturalness",
+      "whole live picture/sound parity",
+      "founder creative/listening acceptance"
+    ]
   }
 }

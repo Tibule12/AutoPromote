@@ -49,6 +49,73 @@ const timeline = [
   { source_clip_id: "source-a", start_time: 5, end_time: 8 },
 ];
 
+test("thin-detail preservation is explicit, boolean and changes the preview revision", () => {
+  const value=scene();value.effects=[{id:"stem",type:"foreground_holdout",start:0,end:6,
+    corners:[[.3,.3],[.31,.3],[.31,.6],[.3,.6]],feather:0}];
+  const before=subjectVfxRevision(value);
+  expect(validateSubjectVfxScene(value).effects[0]).not.toHaveProperty("after_refine");
+  value.effects[0].after_refine=true;
+  expect(validateSubjectVfxScene(value).effects[0].after_refine).toBe(true);
+  expect(subjectVfxRevision(value)).not.toBe(before);
+  value.effects[0].after_refine=1;
+  expect(()=>validateSubjectVfxScene(value)).toThrow(/thin detail/);
+});
+
+test("fine alpha is bounded, persists in canonical effects and invalidates the previous preview", () => {
+  const value=scene();
+  const refine={id:"edge",type:"foreground_refine",start:0,end:6,choke:0,feather:0,
+    recover_box:[0,0,0,0],recover_hue:0,hue_tolerance:0,saturation_min:1,
+    detail_box:[0,0,0,0],dark_max:0,clear_box:[0,0,0,0],
+    reject_hue:0,reject_tolerance:0,reject_saturation:1,reject_value:1,edge_radius:3,decontaminate:1};
+  const original=reviewed(value);original.preview.receipt={pixel_sha256:"old-pixels"};
+  value.effects.push(refine);
+  expect(validateSubjectVfxScene(value).effects[1]).toEqual(refine);
+  expect(resolveSubjectVfxProgrammePreview([original],"source-a",3)).toBeNull();
+  for(const change of [{edge_radius:2.5},{edge_radius:9},{decontaminate:NaN}]) {
+    const altered=JSON.parse(JSON.stringify(value));Object.assign(altered.effects[1],change);
+    expect(()=>validateSubjectVfxScene(altered)).toThrow();
+  }
+  value.effects.push({...refine,id:"second-edge"});
+  expect(()=>validateSubjectVfxScene(value)).toThrow(/one fine alpha/);
+});
+
+test("background removal paths persist canonically and invalidate previously reviewed pixels",()=>{
+  const value=scene();value.effects=[{id:"garbage",type:"foreground_refine",start:0,end:6,choke:0,feather:0,
+    recover_box:[0,0,0,0],recover_hue:0,hue_tolerance:0,saturation_min:1,detail_box:[0,0,0,0],dark_max:0,
+    clear_box:[0,0,0,0],reject_hue:0,reject_tolerance:0,reject_saturation:1,reject_value:1}];
+  const before=reviewed(JSON.parse(JSON.stringify(value)));
+  value.effects[0].clear_paths=[[[.1,.2],[.3,.2],[.2,.4]]];
+  expect(validateSubjectVfxScene(value).effects[0].clear_paths).toEqual(value.effects[0].clear_paths);
+  expect(subjectVfxRevision(value)).not.toBe(before.preview.revision);
+  value.effects[0].after_refine=true;
+  expect(validateSubjectVfxScene(value).effects[0].after_refine).toBe(true);
+  value.effects[0].edge_radius=1;
+  expect(()=>validateSubjectVfxScene(value)).toThrow(/post-matting/);
+  delete value.effects[0].edge_radius;
+  value.effects[0].after_holdout=true;
+  value.effects[0].reject_connected=true;
+  expect(validateSubjectVfxScene(value).effects[0].reject_connected).toBe(true);
+  value.effects[0].reject_connected=1;
+  expect(()=>validateSubjectVfxScene(value)).toThrow(/background-connected/);
+  value.effects[0].reject_connected=true;
+  expect(validateSubjectVfxScene(value).effects[0].after_holdout).toBe(true);
+  const document=adaptStudioSnapshotToDocument({snapshot:{orderedClips:[{id:"source-a",start:0,end:12}],
+    timeline:[{id:"clip",sourceClipId:"source-a",startRequest:2,endRequest:8}],subjectVfxScenes:[reviewed(value)]},projectId:"paths"});
+  expect(projectStudioLinkedTimingToSnapshot(document).subjectVfxScenes[0].scene.effects[0].clear_paths).toEqual(value.effects[0].clear_paths);
+  expect(projectStudioLinkedTimingToSnapshot(document).subjectVfxScenes[0].scene.effects[0].after_holdout).toBe(true);
+  value.effects[0].choke=1;
+  expect(()=>validateSubjectVfxScene(value)).toThrow(/protected-object/);
+  value.effects[0].choke=0;
+  const triangle=value.effects[0].clear_paths[0];
+  value.effects[0].clear_paths=Array.from({length:32},()=>triangle);
+  expect(validateSubjectVfxScene(value).effects[0].clear_paths).toHaveLength(32);
+  value.effects[0].clear_paths.push(triangle);
+  expect(()=>validateSubjectVfxScene(value)).toThrow(/matte paths/);
+  for(const paths of [[],[[[.1,.2],[.2,.3]]],[[[.1,.2],[.2,.3],[.3,.4]]],[[[.1,.2],[1.1,.2],[.2,.4]]]]){
+    value.effects[0].clear_paths=paths;expect(()=>validateSubjectVfxScene(value)).toThrow(/matte paths/);
+  }
+});
+
 test("programme subject frames stay source-bound and half-open across repeated and trimmed occurrences", () => {
   const item = reviewed();
   item.preview.receipt = { pixel_sha256: "verified-pixels" };
