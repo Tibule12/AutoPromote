@@ -430,7 +430,7 @@
       },
       "inputSchema": "contracts/model-capabilities-v1.json#/inputs/segment_subject",
       "outputSchema": "contracts/model-capabilities-v1.json#/outputs/segment_subject",
-      "timeoutSeconds": 2400,
+      "timeoutSeconds": 7200,
       "retryPolicy": {
         "maxAttempts": 1,
         "automaticRetry": false,

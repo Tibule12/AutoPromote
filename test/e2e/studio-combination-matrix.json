@@ -8887,5 +8887,72 @@
       "whole live picture/sound parity",
       "founder creative/listening acceptance"
     ]
+  },
+  "podcastCaptionFinish20261022": {
+    "status": "THREE_ORIGINAL_PODCAST_NATIVE_DELIVERIES_AND_CAPTION_ISOLATION_VERIFIED",
+    "evidence": "reports/studio-podcast-caption-finish-20261022/README.md",
+    "changes": [
+      "fresh source-bound guest person mask removes old-room islands and moving-sleeve clipping",
+      "native moving-couch and complete microphone preservation with equipment colour applied once",
+      "bounded timed detailed holdouts condition refinement; composition retains learned soft alpha",
+      "generated caption IDs are source-and-line scoped; review and speech-source hint stay on the selected camera",
+      "real native caption generation, independent placement editing and regeneration retain the other source",
+      "background and caption Help guides document the actual native controls"
+    ],
+    "nativeGuestFrames": 90,
+    "nativeHostFrames": 208,
+    "nativeSize": [
+      1920,
+      1080
+    ],
+    "deliveries": [
+      {
+        "theme": "warm-library",
+        "canonicalHash": "38d4f676431cc666fd8d0e4ed4deb66c9765c90af8d336810bb70394bd33bc93",
+        "movieSha256": "899074528ce6e946fb33157dc221e989f2d900ad94b854db42a300c49220177d",
+        "timelineSha256": "e4653efe835fa778c73f156e42f74bb12482023bf90be0c1de924d314945a1b9",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "midnight-studio",
+        "canonicalHash": "cd9052aae86c4d63b2a1108005088db4c7f7a6a43019d43855b6663956df6cf9",
+        "movieSha256": "da7f456b212ba305dd6c8715a1b91da31ed5e40cc7cf80ee427403b7ad5ab4d4",
+        "timelineSha256": "8be1272d6a3f9cb4665ffd2e9df4110566ed013597d6ef96525cf3f9ae5af6ac",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "daylight-loft",
+        "canonicalHash": "e9f513afcdf876e48f745969647c70b6629dfca88604cf81e6d9736d23951af2",
+        "movieSha256": "443f1c6ff42e2bee77ec08d88af08971407325692d87a16824d0cfb7ed75c23a",
+        "timelineSha256": "6a9ae4625feaef14b1dc1d1a923f64f3b8931ebdb7bd83446340f78fefb60b46",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      }
+    ],
+    "preservation": {
+      "preexistingProjectsRetained": 49,
+      "otherCanonicalDocumentsUnchanged": 48,
+      "totalProjectsRetained": 51,
+      "protectedFilesUnchanged": 29,
+      "savedAuthOriginsRetained": true
+    },
+    "allBackgroundsHaveIdenticalDecodedSoundtrack": true,
+    "paidGpuJobs": 0,
+    "readinessPromoted": false,
+    "creativeApproval": false,
+    "humanSoundApproval": false,
+    "remaining": [
+      "founder review of these exact movies and human soundtrack approval",
+      "arbitrary footage and mixed-language accuracy qualification",
+      "whole predictive picture/sound parity and public qualification"
+    ]
   }
 }

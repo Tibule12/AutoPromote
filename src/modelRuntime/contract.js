@@ -27,6 +27,9 @@ function request(input) {
   const p = input.parameters;
   if(input.capability==='segment_subject' && p.refinement && !input.dependencyHashes.includes(p.refinement.maskArtifactHash))
     throw fail('MODEL_MASK_REFINEMENT_DEPENDENCY_REQUIRED');
+  if(input.capability==='segment_subject' && p.refinement?.holdoutGroups?.some(group =>
+      group.end <= group.start || group.end > (r.endTick-r.startTick)/90000 + 1e-8))
+    throw fail('MODEL_MASK_REFINEMENT_HOLDOUT_RANGE_INVALID');
   if(input.capability==='detect_object' && p.frameIndex>=frames)throw fail('MODEL_CAPABILITY_FRAME_INVALID');
   if (input.capability === 'generate_video' && !((p.width === 1280 && p.height === 704) || (p.width === 704 && p.height === 1280)))
     throw fail('MODEL_CAPABILITY_VIDEO_GEOMETRY_INVALID');

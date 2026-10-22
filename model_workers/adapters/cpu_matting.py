@@ -18,6 +18,7 @@ from model_workers.common import sha, canonical, write_json, blob, bundle_masks
 from model_workers.adapters.segmentation import sha_json
 
 
+
 def segment(spec, source, geometry, model_dir, output):
     import cv2
     import torch
@@ -63,6 +64,13 @@ def segment(spec, source, geometry, model_dir, output):
     holdout=Image.new('L',(width,height));draw=ImageDraw.Draw(holdout)
     for polygon in settings['holdouts']:draw.polygon([(round(x*width),round(y*height)) for x,y in polygon],fill=255)
     holdout=np.array(holdout)>127
+    groups=settings.get('holdoutGroups',[])
+    group_masks=[]
+    for group in groups:
+        mask=Image.new('L',(width,height));group_draw=ImageDraw.Draw(mask)
+        for polygon in [group['corners'],*group['paths']]:
+            group_draw.polygon([(round(x*width),round(y*height)) for x,y in polygon],fill=255)
+        group_masks.append((group,np.asarray(mask)>127))
     radius=settings['radius'];kernel=cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*radius+1,)*2)
     decoder=subprocess.Popen(['ffmpeg','-nostdin','-v','error','-i',str(source),'-map','0:v:0','-vsync','0','-pix_fmt','rgb24','-f','rawvideo','pipe:1'],stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
     try:
@@ -71,7 +79,10 @@ def segment(spec, source, geometry, model_dir, output):
                 data=decoder.stdout.read(width*height*3)
                 if len(data)!=width*height*3:raise ValueError('Matting source ended early')
                 rgb=np.frombuffer(data,np.uint8).reshape(height,width,3).copy()
-                selected=((cache.frame(index)>=128)|holdout).astype(np.uint8)
+                selected=(cache.frame(index)>=128)|holdout
+                for group,group_mask in group_masks:
+                    if group['start'] <= index/24 < group['end']:selected |= group_mask
+                selected=selected.astype(np.uint8)
                 inside=cv2.erode(selected,kernel)>0;outside=cv2.dilate(selected,kernel)==0
                 trimap=np.full((height,width),128,np.uint8);trimap[inside]=255;trimap[outside]=0
                 pixels=torch.from_numpy(rgb).permute(2,0,1).float()/127.5-1

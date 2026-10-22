@@ -79,7 +79,7 @@ test('edge refinement requests a saved artifact dependency without selecting a m
  await screen.findByText('Refinement response lost');
  const input=JSON.parse(fetch.mock.calls[5][1].body);
  expect(input.capability).toBe('segment_subject');expect(input.dependencyHashes).toEqual([reference.artifactHash]);
- expect(input.parameters.refinement).toEqual({maskArtifactHash:reference.artifactHash,radius:10,holdouts:[]});
+ expect(input.parameters.refinement).toEqual({maskArtifactHash:reference.artifactHash,radius:10,holdouts:[],holdoutGroups:[]});
  expect(input).not.toHaveProperty('model');
  const saved=JSON.parse(screen.getByTestId('saved-mask').textContent);
  expect(saved.modelArtifactRef).toEqual(reference);expect(saved.maskJob.mode).toBe('refinement');
@@ -122,4 +122,28 @@ test('a stale saved mask requires explicit native reuse and registers the curren
  expect(JSON.parse(fetch.mock.calls[2][1].body)).toEqual({id:scene.id,projectRevision:5});
  expect(fetch.mock.calls.some(([url])=>url.endsWith('/requests'))).toBe(false);
  expect(JSON.parse(screen.getByTestId('saved-mask').textContent).maskJob.reusedAtRevision).toBe(5);
+});
+
+
+test('refinement retains every timed furniture/equipment path and its learned soft edge',async()=>{
+ const protection={id:'mic-support',type:'foreground_holdout',start:1,end:5,
+   corners:[[.1,.2],[.11,.2],[.11,.8],[.1,.8]],paths:[[[.2,.2],[.3,.2],[.3,.8],[.2,.8]]],feather:.4,after_refine:true,saturation:0};
+ const edges={id:'background-edge-cleanup',type:'foreground_refine',start:0,end:6,choke:0,feather:0,edge_radius:5,decontaminate:1,
+  recover_box:[0,0,0,0],recover_hue:0,hue_tolerance:0,saturation_min:1,detail_box:[0,0,0,0],dark_max:0,
+  clear_box:[0,0,0,0],reject_hue:0,reject_tolerance:0,reject_saturation:1,reject_value:1};
+ const detailed={...scene,effects:[...scene.effects,protection,edges]};
+ const refined={...reference,artifactHash:'e'.repeat(64)};
+ global.fetch=jest.fn().mockResolvedValueOnce(response({ok:true,projectId:document.projectId,revision:document.revision}))
+  .mockResolvedValueOnce(response({jobId})).mockResolvedValueOnce(response({jobId,status:'completed'}))
+  .mockResolvedValueOnce(response({scene:detailed,enabled:true,modelArtifactRef:refined}));
+ render(<Harness initial={{scene:detailed,enabled:true,modelArtifactRef:reference}}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Refine saved mask edges'}));
+ await screen.findByText('Subject mask saved. Adjust the background and render a preview; changing effects reuses this mask.');
+ const refinement=JSON.parse(fetch.mock.calls[1][1].body).parameters.refinement;
+ expect(refinement.holdouts).toEqual([]);
+ expect(refinement.holdoutGroups).toEqual([{id:protection.id,start:1,end:5,corners:protection.corners,paths:protection.paths,feather:.4}]);
+ const saved=JSON.parse(screen.getByTestId('saved-mask').textContent);
+ expect(saved.scene.effects.find(e=>e.id===edges.id)).toEqual({...edges,edge_radius:0});
+ expect(saved.scene.effects.find(e=>e.id===protection.id)).toEqual(protection);
+ expect(saved.modelArtifactRef.artifactHash).toBe(refined.artifactHash);
 });

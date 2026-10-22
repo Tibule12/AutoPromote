@@ -403,6 +403,7 @@ Creates editable timed captions with a speech-language choice. Regeneration repl
 2. Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.
 3. Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.
 4. Regenerate a selected source without replacing other sources’ caption tracks. If its wording changes while listening, keep the edits and regenerate when ready.
+5. Check Speech source beside Generate before requesting captions. It identifies the video currently selected on the timeline; each source keeps its own editable caption lines.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -597,7 +598,7 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 
 **Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Enable group mask](../control-reference/index.md#studio-composite-group_mask_enabled), [Group mask shape](../control-reference/index.md#studio-composite-group_mask_shape), [Group mask feather](../control-reference/index.md#studio-composite-group_mask_feather), [Invert group mask](../control-reference/index.md#studio-composite-group_mask_inverted), [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Edge detail width](../control-reference/index.md#studio-composite-background_edge_radius), [Remove old background colour](../control-reference/index.md#studio-composite-background_decontaminate)
 
-**Guides:** No task guide in V1.
+**Guides:** [Replace a background](../task-guides/task-background_replace.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -710,7 +711,7 @@ Uses a real source-bound segmentation result to separate the selected subject ac
 
 **Controls:** [Subject source range](../control-reference/index.md#studio-subject-range), [Subject seed points](../control-reference/index.md#studio-subject-seed_points), [Subject point labels](../control-reference/index.md#studio-subject-seed_labels)
 
-**Guides:** [Put text behind a person](../task-guides/task-text_behind.md)
+**Guides:** [Put text behind a person](../task-guides/task-text_behind.md), [Replace a background](../task-guides/task-background_replace.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -1467,7 +1468,7 @@ Requests a final movie and downloads the exact completed output after applicable
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md), [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Use a creative template](../task-guides/task-use_template.md), [Export a final film](../task-guides/task-final_export.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Replace a background](../task-guides/task-background_replace.md), [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md), [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Use a creative template](../task-guides/task-use_template.md), [Export a final film](../task-guides/task-final_export.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -1580,7 +1581,7 @@ Preserves canonical revision and provenance for manual edits, Director proposals
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Export a final film](../task-guides/task-final_export.md)
+**Guides:** [Replace a background](../task-guides/task-background_replace.md), [Modify Director edits manually](../task-guides/task-director_manual.md), [Export a final film](../task-guides/task-final_export.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -1964,7 +1965,7 @@ The Creator panel offers a cutout/background placement proxy. No qualified full 
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Replace a background](../task-guides/task-background_replace.md)
+**Guides:** No task guide in V1.
 
 **Templates:** No pinned shared-template binding recorded.
 

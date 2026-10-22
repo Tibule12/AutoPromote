@@ -113,7 +113,7 @@ Uses a real source-bound segmentation result to separate the selected subject ac
 
 **Controls:** [Subject source range](../control-reference/index.md#studio-subject-range), [Subject seed points](../control-reference/index.md#studio-subject-seed_points), [Subject point labels](../control-reference/index.md#studio-subject-seed_labels)
 
-**Guides:** [Put text behind a person](../task-guides/task-text_behind.md)
+**Guides:** [Put text behind a person](../task-guides/task-text_behind.md), [Replace a background](../task-guides/task-background_replace.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -381,7 +381,7 @@ The Creator panel offers a cutout/background placement proxy. No qualified full 
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Replace a background](../task-guides/task-background_replace.md)
+**Guides:** No task guide in V1.
 
 **Templates:** No pinned shared-template binding recorded.
 

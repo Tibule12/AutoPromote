@@ -608,3 +608,86 @@ def test_two_surface_replacements_retain_previous_surface_and_original_edges(sou
     assert np.array_equal(output[15,15],[180,80,30])
     assert np.array_equal(output[45,45],[180,80,30])
     assert np.array_equal(output[30,30],[0,0,128])
+
+
+@pytest.mark.parametrize("after_refine", [False, True])
+def test_refined_authored_paths_do_not_restore_rough_old_room_edges(source_cache, after_refine):
+    _, _, cache = source_cache
+    holdout={"id":"mic-support", "type":"foreground_holdout", "start":0, "end":1,
+             "corners":[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],
+             "paths":[[[.25,.2],[.35,.2],[.35,.8],[.25,.8]]],
+             "feather":.5,"after_refine":after_refine,"saturation":0}
+    cache.manifest["refinement"]={"holdoutGroups":[{key:holdout[key] for key in
+        ("id","start","end","corners","paths","feather")} ]}
+    command=plan(cache);command["effects"]=[holdout]
+    renderer=VfxFrameRenderer(command,cache)
+    alpha=Image.fromarray(cache.frame(1))
+    _, result=renderer._prepare_foreground(Image.new("RGB",(128,72),(60,80,100)),alpha,[holdout],128,72)
+    assert np.array_equal(np.asarray(result),np.asarray(alpha)), "Already refined paths must not inflate alpha again"
+    changed={**holdout,"paths":[[[.3,.2],[.4,.2],[.4,.8],[.3,.8]]]}
+    _, edited=renderer._prepare_foreground(Image.new("RGB",(128,72)),alpha,[changed],128,72)
+    assert np.asarray(edited)[30,43]>200, "A subsequent authored path change still applies"
+
+
+def test_foreground_cache_binds_refined_holdout_provenance(source_cache, tmp_path, monkeypatch):
+    _,_,cache=source_cache
+    monkeypatch.setenv("STUDIO_VFX_FOREGROUND_CACHE_DIR",str(tmp_path/"foreground"))
+    holdout={"id":"rig", "type":"foreground_holdout", "start":0, "end":1,
+        "corners":[[.1,.2],[.3,.2],[.3,.8],[.1,.8]], "feather":0,"after_refine":True}
+    command=plan(cache);command["effects"]=[holdout]
+    frame=Image.new("RGB",(128,72),(60,80,100));alpha=Image.fromarray(cache.frame(1))
+    first=VfxFrameRenderer(command,cache)
+    _,old=first.foreground_cache.prepare(frame,alpha,[holdout],lambda:first._prepare_foreground(frame,alpha,[holdout],128,72))
+    assert np.asarray(old)[30,20]==255
+    cache.manifest["refinement"]={"holdoutGroups":[{k:holdout.get(k,[] if k=="paths" else 0) for k in ["id","start","end","corners","paths","feather"]}]}
+    refined=VfxFrameRenderer(command,cache)
+    _,soft=refined.foreground_cache.prepare(frame,alpha,[holdout],lambda:refined._prepare_foreground(frame,alpha,[holdout],128,72))
+    assert np.asarray(soft)[30,20]==0, "A cache from the unrefined provenance cannot reinsert the old rigid outline"
+    assert refined.foreground_cache.hits==0
+
+
+def test_refined_thin_support_survives_colour_cleanup_without_restoring_rough_boundary(source_cache):
+    _,_,cache=source_cache
+    holdout={"id":"mic-support","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],"feather":0,"after_refine":True}
+    cache.manifest["refinement"]={"holdoutGroups":[{k:holdout.get(k,[] if k=="paths" else 0) for k in
+        ("id","start","end","corners","paths","feather")}]}
+    cleanup={"id":"colour","type":"foreground_refine","start":0,"end":1,"choke":0,"feather":0,
+        "clear_box":[.1,.1,.3,.8],"recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,
+        "saturation_min":1,"detail_box":[0,0,0,0],"dark_max":0,"reject_hue":0,
+        "reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    command=plan(cache);command["effects"]=[cleanup,holdout]
+    renderer=VfxFrameRenderer(command,cache)
+    values=np.zeros((72,128),np.uint8);values[30,20]=96;values[30,32]=96
+    frame=Image.new("RGB",(128,72),(60,80,100))
+    _,result=renderer._prepare_foreground(frame,Image.fromarray(values),[cleanup,holdout],128,72)
+    assert np.asarray(result)[30,20]==96
+    assert np.asarray(result)[30,21]==0, "No opaque polygon boundary may be reintroduced"
+    assert np.asarray(result)[30,32]==0, "Cleanup outside the selected support still applies"
+    final_cleanup={**cleanup,"id":"final-exclusion","after_holdout":True}
+    _,final=renderer._prepare_foreground(frame,Image.fromarray(values),[cleanup,holdout,final_cleanup],128,72)
+    assert np.asarray(final)[30,20]==0, "Explicit final background exclusions retain priority"
+
+
+@pytest.mark.parametrize("after_refine", [False, True])
+@pytest.mark.parametrize("decontaminate", [False, True])
+def test_kept_object_colour_applies_once_in_both_cleanup_positions(source_cache, monkeypatch, after_refine, decontaminate):
+    from PIL import ImageEnhance
+    import pymatting
+    monkeypatch.setattr(pymatting,"estimate_foreground_ml",lambda pixels,alpha:pixels)
+    _,_,cache=source_cache
+    holdout={"id":"rig-colour","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[.65,.2],[.75,.2],[.75,.8],[.65,.8]],"feather":0,
+        "after_refine":after_refine,"saturation":.5}
+    fine={"id":"fine","type":"foreground_refine","start":0,"end":1,"edge_radius":0,
+        "decontaminate":1,"choke":0,"feather":0,"clear_box":[0,0,0,0],
+        "recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,"saturation_min":1,
+        "detail_box":[0,0,0,0],"dark_max":0,"reject_hue":0,"reject_tolerance":0,
+        "reject_saturation":1,"reject_value":1}
+    effects=[holdout,*([fine]if decontaminate else [])]
+    command=plan(cache);command["effects"]=effects;renderer=VfxFrameRenderer(command,cache)
+    frame=Image.new("RGB",(128,72),(40,60,190));alpha=Image.fromarray(cache.frame(1))
+    foreground,result=renderer._prepare_foreground(frame,alpha,effects,128,72)
+    assert np.array_equal(np.asarray(result),np.asarray(alpha))
+    assert foreground.getpixel((90,30))==ImageEnhance.Color(frame).enhance(.5).getpixel((90,30))
+    assert foreground.getpixel((120,30))==frame.getpixel((120,30))

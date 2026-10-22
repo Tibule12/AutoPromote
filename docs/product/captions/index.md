@@ -26,6 +26,7 @@ Creates editable timed captions with a speech-language choice. Regeneration repl
 2. Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.
 3. Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.
 4. Regenerate a selected source without replacing other sources’ caption tracks. If its wording changes while listening, keep the edits and regenerate when ready.
+5. Check Speech source beside Generate before requesting captions. It identifies the video currently selected on the timeline; each source keeps its own editable caption lines.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 

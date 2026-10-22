@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "codex",
-  "reason": "Reviewed native CPU background and caption movie/timeline evidence, pending timed/quick caption protection, edge-refinement user guidance and explicit remaining accuracy/quality limitations.",
-  "reviewed_at": "2026-10-22T04:19:51.261Z",
-  "catalog_sha256": "9438330431a4ef026ab0bf56f5cca6f44e26bdc2152da98f42124edc601cef5d",
+  "reason": "Reviewed original podcast repairs, three native movies/full timelines, caption source isolation and native guides. Matrix changes preserve existing entries/readiness and their original encoding.",
+  "reviewed_at": "2026-10-22T22:33:18.849Z",
+  "catalog_sha256": "fc506749fd6949b372ccca9a077bc9e7f51e739fe7eb91d9e67b36ea6ae77742",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -11,7 +11,7 @@
     },
     {
       "path": "config/model-runtime/registry.v1.json",
-      "sha256": "86fa3bec951aa71d48c2ec33df006406c711ac5df0be791e9bae183b6216a125"
+      "sha256": "ce2ef098f47fe20e95d70caa0840c2d413cae415a4f29459c04137e7ef723a93"
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
@@ -23,7 +23,7 @@
     },
     {
       "path": "contracts/model-capabilities-v1.json",
-      "sha256": "958fa697dee59a4b71cd90f7594e306dfef6225616db4326bfe4e3d2316881a7"
+      "sha256": "aa8abeeb712a9a84788d9df82c573d18611af0e6d01d6a7ba2e516a1a10e751b"
     },
     {
       "path": "contracts/product-knowledge-impact-v1.schema.json",
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "dc77d32cdc731d9b2147d283a73ac14d04f10c9c3eee400be6d11446b7cf89c0"
+      "sha256": "8fbe2a3f463b30a068dcad69bec877eecd38034558ed60bda9b4204f1e897c6f"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -427,7 +427,7 @@
     },
     {
       "path": "python_media_worker/studio_vfx_plan.py",
-      "sha256": "d67c7cede6d24559be1fe5dcaa8daade16a44e05edfff932a27d9c6a28dbfcf9"
+      "sha256": "b8987029816ad1bb48913fe0717cec8b960ce26e0b59d270fc0364ef99792cb5"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "b2c62649792e31cb90c132f749d59bfceb8248f2277fdca691db6bb1f3986c61"
+      "sha256": "d89f44556144b6a2e00f8de24a0e56e9daa5ddd28190a38bb410ca8df8145e05"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "1a126291784cacf096c064ce079dc73c3be376300aa31ba2cfa917ab2b856c89"
+      "sha256": "b46eaf86f7309a846ee400214142ace27388e4b7ebe1ccd9b4e4805f89e2cabe"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

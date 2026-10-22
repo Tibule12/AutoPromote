@@ -201,7 +201,8 @@ class VfxFrameRenderer:
             import studio_vfx_foreground_cache as foreground_cache_module
         # Renderer/helper code are bound alongside exact source/alpha/commands.
         self.foreground_cache=foreground_cache_module.ForegroundFrameCache(
-            sha256(Path(__file__))+sha256(Path(foreground_cache_module.__file__)))
+            sha256(Path(__file__))+sha256(Path(foreground_cache_module.__file__))+
+            canonical_hash(cache.manifest.get("refinement",{}).get("holdoutGroups",[])))
         self.assets = {}
         self.fonts = {}
         self.particles = {}
@@ -305,6 +306,14 @@ class VfxFrameRenderer:
                 values=np.where(low>=.999,1,np.where(high<=.001,0,np.minimum(values,refined)))
             return Image.fromarray(np.clip(values*255,0,255).astype(np.uint8))
 
+        # These exact authored paths already conditioned the saved soft matte.
+        # Re-adding their solid polygons would bring old-room edge pixels back.
+        learned_alpha=np.asarray(alpha).copy()
+        baked_groups=self.cache.manifest.get("refinement",{}).get("holdoutGroups",[])
+        def baked_holdout(effect):
+            return {key:effect.get(key,[] if key=="paths" else 0) for key in
+                    ("id","start","end","corners","paths","feather")} in baked_groups
+
         for effect in active:
             if effect["type"] != "foreground_holdout" or effect.get("after_refine",False):continue
             # Authored source-camera holdouts restore thin real equipment.
@@ -316,7 +325,8 @@ class VfxFrameRenderer:
             for points in effect.get("paths",[]):
                 ImageDraw.Draw(holdout).polygon([(round(x*width),round(y*height)) for x,y in points],fill=255)
             if effect["feather"]:holdout=holdout.filter(ImageFilter.GaussianBlur(effect["feather"]))
-            alpha=Image.fromarray(np.maximum(np.asarray(alpha),np.asarray(holdout)))
+            if not baked_holdout(effect):
+                alpha=Image.fromarray(np.maximum(np.asarray(alpha),np.asarray(holdout)))
         for effect in active:
             if effect["type"]=="foreground_refine" and not effect.get("after_refine",False) and not effect.get("after_holdout",False):
                 alpha=refine_alpha(alpha,effect)
@@ -359,9 +369,11 @@ class VfxFrameRenderer:
             for points in effect.get("paths",[]):
                 ImageDraw.Draw(holdout).polygon([(round(x*width),round(y*height)) for x,y in points],fill=255)
             if effect["feather"]:holdout=holdout.filter(ImageFilter.GaussianBlur(effect["feather"]))
-            alpha=Image.fromarray(np.maximum(np.asarray(alpha),np.asarray(holdout)))
-            restored=ImageEnhance.Color(frame).enhance(effect.get("saturation",1))
-            foreground=Image.composite(restored,foreground,holdout)
+            # Preserve the original learned detail through earlier colour
+            # exclusions, while never restoring a solid authored boundary.
+            protection=np.minimum(learned_alpha,np.asarray(holdout)) if baked_holdout(effect) else np.asarray(holdout)
+            alpha=Image.fromarray(np.maximum(np.asarray(alpha),protection))
+            foreground=Image.composite(frame,foreground,holdout)
         for effect in active:
             if effect["type"]=="foreground_refine" and effect.get("after_holdout",False):
                 # Explicit source-frame cleanup may remove a wrongly protected
@@ -393,8 +405,7 @@ class VfxFrameRenderer:
         # Restore an explicitly authored colour treatment on the recovered
         # foreground, never by mixing contaminated source RGB into soft edges.
         for effect in active:
-            if effect["type"] != "foreground_holdout" or not effect.get("after_refine",False) or effect.get("saturation",1)==1:continue
-            if not any(e["type"]=="foreground_refine" and e.get("decontaminate",0) for e in active):continue
+            if effect["type"] != "foreground_holdout" or effect.get("saturation",1)==1:continue
             holdout=Image.new("L",(width,height))
             draw=ImageDraw.Draw(holdout)
             for points in [effect["corners"],*effect.get("paths",[])]:

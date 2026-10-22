@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { createModelArtifactReference } from "./studioModelArtifactReference";
 import { stable, validateSubjectVfxScene } from "./studioSubjectVfxContract";
 
+const refinedMaskResult = (result, refinement) => !refinement ? result : ({
+  ...result, scene: {...result.scene, effects:result.scene.effects.map(effect =>
+    effect.type === "foreground_refine" && effect.edge_radius > 0 ? {...effect, edge_radius:0} : effect)},
+});
+
 // Capability requests contain source/selection contracts only. Model choice,
 // checkpoint, device and worker routing belong to the server runtime.
 export default function StudioSubjectMaskControls({ item, onChange, getDocument, getToken, apiBase, createId }) {
@@ -84,7 +89,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
       // Allow the bounded worker window plus artifact transfer/import. Ending
       // the browser's poll early leaves a successful long refinement detached.
       // The server remains authoritative for execution timeout and cancellation.
-      const deadline = Date.now() + 45 * 60000;
+      const deadline = Date.now() + (refinement ? 125 : 45) * 60000;
       let status;
       do {
         if (!mounted.current) return;
@@ -110,7 +115,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
       createModelArtifactReference(result.modelArtifactRef);
       if (result.scene.id !== scene.id || result.scene.sourceId !== scene.sourceId ||
           result.modelArtifactRef.sourceContentHash !== asset.contentHash) throw new Error("The returned mask targets another source.");
-      onChange({ ...result, maskJob: {...saved,finished:true}, ...(item.maskComponents?.length?{maskComponents:item.maskComponents}:{}) });
+      onChange({ ...refinedMaskResult(result, refinement), maskJob: {...saved,finished:true}, ...(item.maskComponents?.length?{maskComponents:item.maskComponents}:{}) });
       setMessage("Subject mask saved. Adjust the background and render a preview; changing effects reuses this mask.");
     } catch (error) { if (mounted.current) setMessage(error.message); }
     finally { running.current = false; if (mounted.current) setBusy(false); }
@@ -140,7 +145,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
         result.scene.sourceId!==scene.sourceId||result.modelArtifactRef.sourceContentHash!==document.assets.find(asset=>asset.sourceId===scene.sourceId)?.contentHash)
         throw new Error('The source selection changed. The mask remains saved but has not been applied.');
       if(!mounted.current)return;
-      onChange({...result,maskJob:{...saved,finished:true,reusedAtRevision:document.revision},
+      onChange({...refinedMaskResult(result, JSON.parse(saved.selectionJson).refinement),maskJob:{...saved,finished:true,reusedAtRevision:document.revision},
         ...(item.maskComponents?.length?{maskComponents:item.maskComponents}:{})});
       setStaleJob(false);setMessage('Subject mask saved. Adjust the background and render a preview; changing effects reuses this mask.');
     }catch(error){if(mounted.current)setMessage(error.message);}
@@ -190,7 +195,9 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
         value={refinementRadius} onChange={event=>setRefinementRadius(Number(event.target.value))}/></label>
       <button type="button" disabled={busy||pendingRefinement} onClick={()=>{
         mask({maskArtifactHash:item.modelArtifactRef.artifactHash,radius:refinementRadius,
-          holdouts:item.scene.effects.filter(effect=>effect.type==='foreground_holdout').map(effect=>effect.corners)});
+          holdouts:[],holdoutGroups:item.scene.effects.filter(effect=>effect.type==='foreground_holdout').map(effect=>({
+            id:effect.id,start:effect.start,end:effect.end,corners:effect.corners,paths:effect.paths||[],feather:effect.feather,
+          }))});
       }}>Refine saved mask edges</button>
     </>}
     {item.modelArtifactRef && <button type="button" disabled={busy||pendingRefinement} onClick={()=>{

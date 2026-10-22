@@ -592,7 +592,8 @@
         "Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
         "Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.",
         "Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.",
-        "Regenerate a selected source without replacing other sources’ caption tracks. If its wording changes while listening, keep the edits and regenerate when ready."
+        "Regenerate a selected source without replacing other sources’ caption tracks. If its wording changes while listening, keep the edits and regenerate when ready.",
+        "Check Speech source beside Generate before requesting captions. It identifies the video currently selected on the timeline; each source keeps its own editable caption lines."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
@@ -12155,18 +12156,64 @@
     {
       "task_id": "task.background_replace",
       "title": "Replace a background",
-      "status": "PROXY_ONLY",
-      "summary": "The existing browser placement study does not establish a supported final replace a background workflow.",
+      "status": "PARTIAL",
+      "summary": "Optionally replace an owned video’s background image through Studio → Composite, using its own reviewed subject mask.",
       "feature_ids": [
-        "studio.creator.background_replacement"
+        "studio.compositing",
+        "studio.subject_cutout",
+        "studio.revision",
+        "studio.export"
       ],
-      "control_ids": [],
-      "prerequisites": [],
-      "mode": "UNAVAILABLE",
+      "control_ids": [
+        "studio.composite.background_edge_radius",
+        "studio.composite.background_decontaminate"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
         {
-          "instruction": "Read the proxy limitation; no finished model-backed workflow is qualified. Do not export a placement study as proof of this capability.",
-          "feature_id": "studio.creator.background_replacement",
+          "instruction": "Open Studio → Composite, choose Add effects to a clip and select your video occurrence. Keep original background remains the default.",
+          "feature_id": "studio.compositing",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Upload background image for your PNG, JPEG or WebP (up to 32 MB), or select an existing owned image under Background choice.",
+          "feature_id": "studio.compositing",
+          "control_ids": []
+        },
+        {
+          "instruction": "Select the person with Subject point on the paused source. Add Background point exclusions as needed. Leave optional object selections empty for people only, or select furniture and microphones individually. Remove an extra selection if it also keeps the old wall or floor, then add it again with tighter keep/remove points. Use Refine foreground selection and create a new mask when the selected silhouette is wrong; edge cleanup cannot correct a wrongly selected part of the room.",
+          "feature_id": "studio.subject_cutout",
+          "control_ids": []
+        },
+        {
+          "instruction": "Create and review a mask for this exact video/range using the available authorized model workflow, or explicitly reuse its valid owned mask. If model execution is unavailable, background selection alone cannot create a new cutout.",
+          "feature_id": "studio.subject_cutout",
+          "control_ids": []
+        },
+        {
+          "instruction": "Choose Clean background edges to add source-guided refinement without shrinking thin objects. Adjust Edge detail width (0–8 pixels) and Remove old background colour (0–1), then render a new preview and check movement. This cannot recover a missing object selection.",
+          "feature_id": "studio.compositing",
+          "control_ids": [
+            "studio.composite.background_edge_radius",
+            "studio.composite.background_decontaminate"
+          ]
+        },
+        {
+          "instruction": "Render preview and inspect the whole moving scene on bright and dark backgrounds. Check hair, shoulders, moving hands, seats, microphone rods, clamps and gaps. Use matte refinement and optional object holdouts for corrections; advanced paths are manual source-frame geometry.",
+          "feature_id": "studio.compositing",
+          "control_ids": []
+        },
+        {
+          "instruction": "Save the project and reopen it. After changing sources, masks or effect settings, regenerate and review the current preview before export.",
+          "feature_id": "studio.revision",
+          "control_ids": []
+        },
+        {
+          "instruction": "Export the current revision, then watch the complete movie with sound. A completed job or a still image does not establish clean edges throughout the video.",
+          "feature_id": "studio.export",
           "control_ids": []
         }
       ],
@@ -12174,12 +12221,21 @@
         "system.unsupported_media",
         "studio.revision"
       ],
-      "expected_result": "No qualified finished workflow is available for this task.",
+      "expected_result": "An editable source-bound background replacement in the normal Studio project, subject to available mask execution and visual review. Selecting Keep original background removes replacement layers and preserves the other scene settings.",
       "limitations": [
-        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+        "This is a partial development workflow. Broad ordinary-account availability and clean automatic replacement across arbitrary footage are not qualified.",
+        "The native Composite workflow uses real masks. Creator FX background placement is still a browser study and cannot substitute for a processed output.",
+        "The podcast example still has founder-rejected edge fringes and uses manual source-specific corrections. Do not reuse its mask or contours on another upload.",
+        "Holdout/removal paths require advanced manual source-frame geometry; they are not automatic object detection or tracking.",
+        "Replacing the room does not relight photographed people, restore missing furniture, or change the camera perspective."
       ],
-      "aliases": [],
-      "updated_at": "2026-10-12",
+      "aliases": [
+        "change podcast background",
+        "replace video background",
+        "upload my own room image",
+        "keep people and optional objects"
+      ],
+      "updated_at": "2026-10-23",
       "product_version": "1.2.0"
     },
     {
@@ -12579,14 +12635,19 @@
       "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
         {
-          "instruction": "Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
+          "instruction": "Select the timeline clip whose speech you want. In Captions, check that Speech source names that file.",
+          "feature_id": "studio.captions",
+          "control_ids": []
+        },
+        {
+          "instruction": "Choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer. Then generate or regenerate speech captions; the other clips’ lines remain unchanged.",
           "feature_id": "studio.captions",
           "control_ids": [
             "studio.captions.source_language"
           ]
         },
         {
-          "instruction": "Review source transcription and correct the selected phrase rather than trusting repeated automatic words.",
+          "instruction": "Review the editable transcript lines. Correct words, in/out times, speaker and language; adjust placement and the caption style controls. Flagged automatic wording remains a draft until you review it.",
           "feature_id": "studio.captions",
           "control_ids": []
         },
@@ -12605,7 +12666,7 @@
         "The empty-hint repetition trigger is repaired on retained speech, but code-switched wording still needs correction. Broad automatic transcription, all caption styles and full preview/export parity are not qualified."
       ],
       "aliases": [],
-      "updated_at": "2026-10-21",
+      "updated_at": "2026-10-23",
       "product_version": "1.2.0"
     },
     {

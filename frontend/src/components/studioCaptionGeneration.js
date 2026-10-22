@@ -11,3 +11,15 @@ export function mergeSourceCaptions(segments, generated, sourceId, defaultSource
   result.splice(before, 0, ...generated);
   return result;
 }
+
+// Recognizers restart cue numbering for each source. Inspector edits and the
+// canonical layer graph require one stable identity per generated line.
+export const generatedCaptionId = (sourceId, segmentId, index) =>
+  `caption:${encodeURIComponent(String(sourceId))}:${index}:${encodeURIComponent(String(segmentId ?? ""))}`;
+
+// Source timestamps overlap between cameras. A bound cue must never select a
+// different source merely because it has the same time range. Unbound imported
+// subtitles retain the legacy timeline-window behavior.
+export const captionForSourceWindow = (segments, sourceId, window) => segments.find(segment =>
+  (!segment.sourceClipId || String(segment.sourceClipId) === String(sourceId)) &&
+  segment.end > window.start && segment.start < window.end);

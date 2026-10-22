@@ -181,3 +181,6 @@ reports/emulator-python-runtime-20261021/*
 # Private background/caption verification.
 reports/studio-background-captions-20261022/*
 !reports/studio-background-captions-20261022/README.md
+
+reports/studio-podcast-caption-finish-20261022/*
+!reports/studio-podcast-caption-finish-20261022/README.md

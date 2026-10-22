@@ -8,7 +8,7 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 - [Create a product-launch promo](task-product_launch.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Put text behind a person](task-text_behind.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Track text to a moving object](task-tracked_text.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
-- [Replace a background](task-background_replace.md) — PROXY_ONLY; UNAVAILABLE
+- [Replace a background](task-background_replace.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Remove an object](task-remove_object.md) — PROXY_ONLY; UNAVAILABLE
 - [Replace a laptop/phone screen](task-screen_replace.md) — PROXY_ONLY; UNAVAILABLE
 - [Create a cinematic logo reveal](task-cinematic_logo.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS

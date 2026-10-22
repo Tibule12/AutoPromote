@@ -1536,7 +1536,7 @@
     {
       "id": "task.background_replace",
       "kind": "task",
-      "status": "PROXY_ONLY"
+      "status": "PARTIAL"
     },
     {
       "id": "task.remove_object",

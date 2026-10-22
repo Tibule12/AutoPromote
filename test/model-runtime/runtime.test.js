@@ -174,3 +174,19 @@ test('matting needs an exact immutable dependency and never falls back to the se
  const runtime=new ModelCapabilityRuntime({jobs:f.jobs,artifacts:f.artifacts,workers:{},authorize:async()=>{},models:unavailable});
  await assert.rejects(runtime.submit({ownerUid:'owner',input}),{code:'MODEL_CAPABILITY_UNAVAILABLE'});
 });
+
+
+test('refined holdout paths are bounded to their source clock and geometry',()=>{
+ const refinement={maskArtifactHash:'b'.repeat(64),radius:10,holdouts:[],holdoutGroups:[{
+  id:'rig',start:0,end:3,feather:.5,corners:[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],
+  paths:[[[.2,.1],[.3,.1],[.3,.8],[.2,.8]]]}]};
+ const input={...base(),capability:'segment_subject',dependencyHashes:[refinement.maskArtifactHash],
+  parameters:{subjectId:'person',initialBox:[0,0,1,1],points:[{position:[.5,.5],label:1}],shotPrompts:[],refinement}};
+ assert.deepEqual(request(input).parameters.refinement,refinement);
+ const outOfRange=structuredClone(input);outOfRange.parameters.refinement.holdoutGroups[0].end=4;
+ assert.throws(()=>request(outOfRange),/HOLDOUT_RANGE_INVALID/);
+ const reversed=structuredClone(input);reversed.parameters.refinement.holdoutGroups[0].start=3;
+ assert.throws(()=>request(reversed),/HOLDOUT_RANGE_INVALID/);
+ const oversized=structuredClone(input);oversized.parameters.refinement.holdoutGroups[0].paths=Array(33).fill(refinement.holdoutGroups[0].paths[0]);
+ assert.throws(()=>request(oversized),/REQUEST_INVALID/);
+});

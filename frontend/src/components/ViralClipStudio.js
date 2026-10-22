@@ -60,7 +60,7 @@ import { buildTimedScriptDraft } from "../utils/captionDrafts";
 import { buildTranscriptGroundedBRollSuggestions } from "./storyBeatPlanner";
 import StudioGeneratedBRollPanel from "./StudioGeneratedBRollPanel";
 import { applyCaptionBulkEdit } from "./studioCaptionBulkEdit";
-import { captionsForSource, mergeSourceCaptions } from "./studioCaptionGeneration";
+import { captionsForSource, mergeSourceCaptions, generatedCaptionId, captionForSourceWindow } from "./studioCaptionGeneration";
 import { getMediaAuthToken } from "../utils/mediaAuth";
 import { runStudioSourceShotJob } from "./studioAnalysisJobClient";
 import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from "../hooks/useCinematicEffects";
@@ -8494,19 +8494,7 @@ const ViralClipStudio = ({
       if (match) return match;
       const clipWindow = getTimelineClipWindow(clip);
       const clipSourceId = clip.sourceClipId || clip.id || null;
-      const isInsideClipWindow = segment =>
-        segment.end > clipWindow.start && segment.start < clipWindow.end;
-      const caption =
-        normalizedSegments.find(segment => {
-          if (
-            segment.sourceClipId &&
-            clipSourceId &&
-            String(segment.sourceClipId) !== String(clipSourceId)
-          ) {
-            return false;
-          }
-          return isInsideClipWindow(segment);
-        }) || normalizedSegments.find(isInsideClipWindow);
+      const caption = captionForSourceWindow(normalizedSegments, clipSourceId, clipWindow);
       if (!caption) return null;
       return {
         index,
@@ -8823,8 +8811,9 @@ const ViralClipStudio = ({
       );
       const nextSegments = normalizeCaptionSegments(
         splitCaptionSegmentsForReadability(safeResponseSegments)
-      ).map(segment => ({
+      ).map((segment, index) => ({
         ...segment,
+        id: generatedCaptionId(captionSourceClipId, segment.id, index),
         // Older workers might return words with a rejected quality status.
         // Never silently present those words as verified subtitles.
         ...(payload?.transcriptionQuality?.status === "rejected" ||
@@ -23346,6 +23335,9 @@ const ViralClipStudio = ({
                           ? "Regenerate speech captions"
                           : "Generate speech captions"}
                     </button>
+                    <small aria-label="Caption speech source">
+                      Speech source: {currentTimelineClip?.name || selectedClip?.name || "Selected video"}
+                    </small>
                     <small>
                       Creates editable, timestamped lines from clear speech. For songs or choirs,
                       import an SRT/VTT subtitle file or type lyrics below.
