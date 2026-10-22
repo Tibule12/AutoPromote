@@ -3027,7 +3027,10 @@ const ViralClipStudio = ({
   const loggedScannerEntryRef = useRef(new Set());
   const [previewFinishedFile, setPreviewFinishedFile] = useState(true);
   const completedOutputUrl = getSafeMediaSource(renderedOutput?.previewUrl || renderedOutput?.url);
-  const renderedOutputUrl = previewFinishedFile ? completedOutputUrl : "";
+  // Both monitor modes have the same identity when no completed movie exists.
+  // The first edit must not turn undefined into a different source window and
+  // rewind a paused authoring frame to the clip start.
+  const renderedOutputUrl = previewFinishedFile ? completedOutputUrl || "" : "";
   const hasCompletedOutput = Boolean(completedOutputUrl);
   // Access recovery can clear and restore a completed URL. Preserve the
   // editor's explicit monitor choice through that transport transition.
@@ -8306,6 +8309,7 @@ const ViralClipStudio = ({
           }
           setMainFrame(current => normalizeMainFrame({
             ...current,
+            enabled: plan.mainFrame ? plan.mainFrame.enabled !== false : current.enabled,
             insetPercent: Number(plan.mainFrame?.insetPercent ?? 2.5),
             radiusPercent: Number(plan.mainFrame?.radiusPercent ?? 10),
             background: plan.mainFrame?.background || "studio_black",

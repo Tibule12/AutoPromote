@@ -40,3 +40,7 @@ inside bubblewrap with the entire host filesystem read-only, only `/tmp`
 writable, and networking disabled before the workflow is retried.
 
 The corrected11-test timing suite passes in30.953s under the read-only, network-disabled bubblewrap run, including all three real handler renders.
+
+## Production verification
+
+[Run39717028880](https://github.com/Tibule12/AutoPromote/actions/runs/39717028880) passed immutable image regression tests, zero-traffic candidate health and real render, promotion, and production health verification. Revision `media-worker-v1-00115-cus` receives100%production traffic. This records worker deployment verification; native Studio/creative readiness is unchanged.

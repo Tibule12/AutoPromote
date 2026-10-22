@@ -38,3 +38,19 @@ updates:
       - "dependencies"
       - "auto-update"
     reviewers: []
+
+  - package-ecosystem: "npm"
+    directory: "/autopromote-functions"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    insecure-external-code: deny
+    labels: ["dependencies"]
+
+  - package-ecosystem: "pip"
+    directory: "/python_media_worker"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    insecure-external-code: deny
+    labels: ["dependencies"]

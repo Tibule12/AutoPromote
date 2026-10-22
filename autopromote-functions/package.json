@@ -20,7 +20,7 @@
   "dependencies": {
     "@sentry/node": "^7.72.0",
     "autopromote-server": "file:..",
-    "compression": "^1.7.4",
+    "compression": "^1.8.2",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.18.1",
@@ -44,15 +44,15 @@
     "firebase-functions-test": "^3.1.0"
   },
   "overrides": {
-    "axios": "^1.18.1",
+    "axios": "^1.20.0",
     "websocket-driver": "0.7.5",
-    "hono": "4.12.25",
+    "hono": "4.13.11",
     "@hono/node-server": "^1.19.14",
     "protobufjs": "7.6.5",
     "form-data": "$form-data",
     "basic-ftp": "^5.3.1",
-    "follow-redirects": "^1.16.0",
-    "brace-expansion": "5.0.9",
+    "follow-redirects": "^1.16.1",
+    "brace-expansion": "5.0.12",
     "js-yaml": "4.3.2",
     "browserslist": "4.28.7",
     "baseline-browser-mapping": "2.11.0",
@@ -63,9 +63,9 @@
     "minimatch": "^10.2.3",
     "node-forge": "1.4.0",
     "@tootallnate/once": "3.0.1",
-    "@grpc/grpc-js": "1.14.4",
+    "@grpc/grpc-js": "1.14.5",
     "flatted": "3.4.2",
-    "fast-uri": "3.1.7",
+    "fast-uri": "3.1.8",
     "qs": "6.16.0",
     "uuid": "^14.0.0",
     "ws": "8.21.0",
@@ -89,20 +89,29 @@
       "picomatch": "4.0.4"
     },
     "minimatch@3": {
-      "brace-expansion": "1.1.16"
+      "brace-expansion": "1.1.21"
     },
     "minimatch@5": {
-      "brace-expansion": "2.1.2"
+      "brace-expansion": "2.1.7"
     },
     "minimatch@6": {
-      "brace-expansion": "2.1.2"
+      "brace-expansion": "2.1.7"
     },
     "minimatch@9": {
-      "brace-expansion": "2.1.2"
+      "brace-expansion": "2.1.7"
     },
     "minimatch@10": {
-      "brace-expansion": "5.0.7"
-    }
+      "brace-expansion": "5.0.12"
+    },
+    "compression": "$compression",
+    "proxy-addr": "2.0.8",
+    "shell-quote": "1.11.0",
+    "source-map-js": "1.2.2",
+    "launch-editor": "2.14.2",
+    "@fastify/busboy": "3.2.2",
+    "@modelcontextprotocol/sdk": "1.32.0",
+    "ip-address": "10.7.1",
+    "re2": "1.26.1"
   },
   "private": true
 }

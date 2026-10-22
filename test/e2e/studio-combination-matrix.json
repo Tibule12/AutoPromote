@@ -5029,9 +5029,32 @@
     "blackGateUnchanged": true,
     "nativeStudioQualification": false,
     "readinessPromotion": false,
-    "cloudPromotion": "Pending repaired workflow execution",
+    "cloudPromotion": {"run": "https://github.com/Tibule12/AutoPromote/actions/runs/39717028880", "result": "passed", "revision": "media-worker-v1-00115-cus", "trafficPercent": 100, "candidateRealRender": "passed", "productionHealth": "passed"},
     "nextSharedTask": "Retain S02 full picture/sound, S03 ownership and S04 depth",
     "deploymentHarnessFailure": "https://github.com/Tibule12/AutoPromote/actions/runs/39716521973",
     "harnessRepair": "Real-handler regression uses isolated temporary scratch; checkout remains read-only; render checks unchanged."
+  },
+  "securityAndCi20261022": {
+    "scope": "Main-branch security alert repairs and CI regression recovery",
+    "evidenceRef": "reports/security-and-ci-20261022/README.md",
+    "securityBoundaries": [
+      "Server-configured worker origin, fixed relative job paths and no redirects for authenticated reads/cancellation",
+      "Bounded model contract traversal and explicit capability dispatch",
+      "Shared sanitized media source/poster assignment",
+      "Rate limiting on local preview servers and escaped diagnostic Markdown"
+    ],
+    "localEvidence": {
+      "modelAndTransportTests": 45,
+      "securityJestTests": 24,
+      "speechPreviewTests": 5,
+      "emulatorRunnerTests": 7,
+      "pythonRenderAndFinishTests": 16,
+      "frontendBuild": "passed"
+    },
+    "ciAndBrowserQualification": "In progress; retain failures and require the new branch scans",
+    "nativeStudioQualification": false,
+    "readinessPromotion": false,
+    "remainingSharedBlockers": "Retain S02 continuous live picture/sound parity, S03 ownership and S04 depth; source/mock/CPU evidence is not native creative qualification",
+    "nextTask": "Complete alert reanalysis and CI/browser verification, then continue the ordered shared Studio backlog"
   }
 }

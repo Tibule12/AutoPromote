@@ -6,13 +6,18 @@ const mockDocRef = id => ({
     if (mockDocs.has(id)) throw new Error("ALREADY_EXISTS");
     mockDocs.set(id, { ...data });
   }),
-  set: jest.fn(async data => { mockDocs.set(id, { ...data }); }),
+  set: jest.fn(async data => {
+    mockDocs.set(id, { ...data });
+  }),
   get: jest.fn(async () => ({ exists: mockDocs.has(id), data: () => mockDocs.get(id) })),
-  update: jest.fn(async data => { mockDocs.set(id, { ...mockDocs.get(id), ...data }); }),
+  update: jest.fn(async data => {
+    mockDocs.set(id, { ...mockDocs.get(id), ...data });
+  }),
 });
 
-jest.mock("firebase-admin", () => ({
-  firestore: jest.fn(() => ({ collection: jest.fn(() => ({ doc: jest.fn(id => mockDocRef(id)) })) })),
+jest.mock("../../firebaseAdmin", () => ({
+  admin: {},
+  db: { collection: jest.fn(() => ({ doc: jest.fn(id => mockDocRef(id)) })) },
 }));
 jest.mock("../../creditSystem", () => ({ deductCredits: jest.fn(), refundCredits: jest.fn() }));
 jest.mock("../mediaWorkerTaskQueue", () => ({ queueAudioExtractionTask: jest.fn() }));
@@ -66,10 +71,20 @@ describe("video editing viral render attempt claim", () => {
   it("does not reuse an existing job owned by another user", async () => {
     const service = new VideoEditingService();
     service.processJobBackground = jest.fn().mockResolvedValue(null);
-    await service.startProcessingJob("https://example.com/source.mp4", { renderViral: true }, "owner-1", attempt);
+    await service.startProcessingJob(
+      "https://example.com/source.mp4",
+      { renderViral: true },
+      "owner-1",
+      attempt
+    );
 
     await expect(
-      service.startProcessingJob("https://example.com/source.mp4", { renderViral: true }, "owner-2", attempt)
+      service.startProcessingJob(
+        "https://example.com/source.mp4",
+        { renderViral: true },
+        "owner-2",
+        attempt
+      )
     ).rejects.toThrow("Failed to queue video processing job");
     expect(service.processJobBackground).toHaveBeenCalledTimes(1);
   });
@@ -77,15 +92,26 @@ describe("video editing viral render attempt claim", () => {
   it("refunds a charged viral job when the background worker fails", async () => {
     const service = new VideoEditingService();
     service.processJobBackground = jest.fn().mockResolvedValue(null);
-    await service.startProcessingJob("https://example.com/source.mp4", { renderViral: true }, "owner-1", attempt);
+    await service.startProcessingJob(
+      "https://example.com/source.mp4",
+      { renderViral: true },
+      "owner-1",
+      attempt
+    );
     service.processVideo = jest.fn().mockRejectedValue(new Error("worker unavailable"));
 
     await VideoEditingService.prototype.processJobBackground.call(
-      service, attempt.jobId, "https://example.com/source.mp4", { renderViral: true }, "owner-1"
+      service,
+      attempt.jobId,
+      "https://example.com/source.mp4",
+      { renderViral: true },
+      "owner-1"
     );
 
     expect(refundCredits).toHaveBeenCalledWith(
-      "owner-1", attempt.creditReceipt, "viral-render-process-refund",
+      "owner-1",
+      attempt.creditReceipt,
+      "viral-render-process-refund",
       expect.objectContaining({ idempotencyKey: `viral-render-refund:${attempt.jobId}` })
     );
     expect(mockDocs.get(attempt.jobId)).toMatchObject({

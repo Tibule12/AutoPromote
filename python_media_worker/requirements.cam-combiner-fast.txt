@@ -3,13 +3,13 @@
 # this image: they add cold-start bytes but are never used by this render path.
 ffmpeg-python
 opencv-python-headless>=4.10,<5
-Pillow
+Pillow==13.0.0
 numpy
 
 fastapi
 uvicorn
 python-multipart
-requests
+requests==2.34.2
 python-dotenv
 
 firebase-admin

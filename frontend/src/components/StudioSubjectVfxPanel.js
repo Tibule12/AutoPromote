@@ -1,3 +1,4 @@
+import { SafeVideo } from "./SafeMedia";
 import { useEffect, useRef, useState } from "react";
 import { validateSubjectVfxScene, subjectVfxRevision } from "./studioSubjectVfxContract";
 import "./StudioSubjectVfxPanel.css";
@@ -132,9 +133,13 @@ export default function StudioSubjectVfxPanel({
     attempt = useRef(0);
   latest.current = items;
   const item = items.find(value => value.scene.id === selected) || items[0];
-  const source = sources.find(value => value.id === item?.scene.sourceId &&
-    value.start === item?.scene.sourceRange.start && value.end === item?.scene.sourceRange.end) ||
-    sources.find(value => value.id === item?.scene.sourceId);
+  const source =
+    sources.find(
+      value =>
+        value.id === item?.scene.sourceId &&
+        value.start === item?.scene.sourceRange.start &&
+        value.end === item?.scene.sourceRange.end
+    ) || sources.find(value => value.id === item?.scene.sourceId);
   const revision = (() => {
     try {
       return item && subjectVfxRevision(item.scene);
@@ -304,8 +309,16 @@ export default function StudioSubjectVfxPanel({
             : null;
       const created = savedJobId
         ? { jobId: savedJobId }
-        : await request("POST", "", { scene, clientRequestId,
-            ...(item.modelArtifactRef?{modelArtifactRef:item.modelArtifactRef}:{}) }, signal);
+        : await request(
+            "POST",
+            "",
+            {
+              scene,
+              clientRequestId,
+              ...(item.modelArtifactRef ? { modelArtifactRef: item.modelArtifactRef } : {}),
+            },
+            signal
+          );
       if (!isCurrent()) return;
       if (typeof created.jobId !== "string" || !/^[-A-Za-z0-9_]{8,128}$/.test(created.jobId))
         throw new Error("The renderer did not confirm this job. Retry the saved request.");
@@ -361,7 +374,8 @@ export default function StudioSubjectVfxPanel({
                         jobId: created.jobId,
                         url: state.url,
                         revision: initialRevision,
-                        reviewed: current.preview?.reviewed === true &&
+                        reviewed:
+                          current.preview?.reviewed === true &&
                           current.preview?.jobId === created.jobId &&
                           current.preview?.receipt?.pixel_sha256 === state.receipt.pixel_sha256,
                         receipt: state.receipt,
@@ -482,7 +496,8 @@ export default function StudioSubjectVfxPanel({
           <option value="">Add effects to a clip…</option>
           {sources.map(value => (
             <option key={sourceSelectionKey(value)} value={sourceSelectionKey(value)}>
-              {value.name} · {(value.end - value.start).toFixed(1)}s · {value.start.toFixed(1)}–{value.end.toFixed(1)}s
+              {value.name} · {(value.end - value.start).toFixed(1)}s · {value.start.toFixed(1)}–
+              {value.end.toFixed(1)}s
             </option>
           ))}
         </select>
@@ -521,7 +536,7 @@ export default function StudioSubjectVfxPanel({
             Apply these subject effects
           </label>
           <div className="subject-vfx-source">
-            <video
+            <SafeVideo
               key={source?.url}
               ref={video}
               src={source?.url}
@@ -809,7 +824,7 @@ export default function StudioSubjectVfxPanel({
           </div>
           {ready && (
             <div className="subject-vfx-result">
-              <video
+              <SafeVideo
                 controls
                 playsInline
                 preload="metadata"

@@ -1,3 +1,3 @@
 # Minimal runtime for the existing real CPU speech-preview tests.
 numpy==1.26.4
-Pillow==11.3.0
+Pillow==13.0.0
