@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "CI-only dependency review: upgrade the pinned Firebase CLI to support the retained patched stream-json major; no feature availability or readiness change.",
-  "reviewed_at": "2026-10-13T18:17:29.234Z",
+  "reason": "Publishing-only hotfix: honor server-owned account publishing allowances in worker, readiness, billing usage and metrics; other plan limits and existing product capabilities are unchanged.",
+  "reviewed_at": "2026-10-22T03:01:35.110Z",
   "catalog_sha256": "9a1ae0868cc99f489d80b2b9f305887470d3332753d207ed60bf12a8762c8fe9",
   "sources": [
     {
@@ -183,7 +183,7 @@
     },
     {
       "path": "src/contentRoutes.js",
-      "sha256": "33fbd1e5ab786af8da3aa0b6d8903805e8ffa511d3cb73f6da96144a8f5543b6"
+      "sha256": "fc44149b44a011e81b8d49b1635074efda511b7b06c768973e701042a7383a6f"
     },
     {
       "path": "src/creativeTemplates/showcase.js",
@@ -247,7 +247,7 @@
     },
     {
       "path": "src/services/promotionTaskQueue.js",
-      "sha256": "4595df1b557eea7339b9f7664cfa32caf52626cb19e259c923f85c18b8236631"
+      "sha256": "8a38a97f9fb754a17f9449da31a4358958afb52fdd3d6faebe05c60503a3a27a"
     },
     {
       "path": "src/services/publishingIntent.js",

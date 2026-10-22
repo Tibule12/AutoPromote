@@ -155,7 +155,7 @@ function buildTesterTier(baseTier) {
   };
 }
 
-function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null) {
+function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null, billingData = {}) {
   if (testerAccess) return TESTER_PROGRAM.usageLimits.queuedPlatformPosts;
   const normalized = normalizePlanId(planId || "free");
   const defaultPlatformPostQuotas = {
@@ -166,13 +166,18 @@ function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null) {
     enterprise: 2000,
   };
   const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(normalized).toUpperCase()}`;
-  return (
+  const base = (
     parseInt(process.env[envKey] || "", 10) ||
     parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
     defaultPlatformPostQuotas[normalized] ||
     (plan && plan.features ? Number(plan.features.wolfHuntTasks) : 0) ||
     0
   );
+  // Only server-owned billing data can raise one account's publishing capacity.
+  const allowance = billingData?.publishingAllowance?.monthlyLimit;
+  return Number.isInteger(allowance) && allowance >= 1 && allowance <= 10000
+    ? Math.max(base, allowance)
+    : base;
 }
 
 async function resolveEffectiveTierId(userId, billingData, userData) {

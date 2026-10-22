@@ -747,14 +747,14 @@ router.get("/usage/current", authMiddleware, async (req, res) => {
     let planTier = "free";
     try {
       const { getEffectiveTierSnapshot, getPlatformPostMonthlyQuota } = require("../services/billingService");
-      const { tierId } = await getEffectiveTierSnapshot(uid);
+      const { tierId, testerAccess, billingData } = await getEffectiveTierSnapshot(uid);
       planTier = tierId || "free";
       const { getPlan } = require("../services/planService");
       const plan = getPlan(planTier);
       quota =
         (getPlatformPostMonthlyQuota &&
           typeof getPlatformPostMonthlyQuota === "function" &&
-          getPlatformPostMonthlyQuota(planTier, plan)) ||
+          getPlatformPostMonthlyQuota(planTier, plan, testerAccess, billingData)) ||
         plan.monthlyTaskQuota ||
         0;
     } catch (_) {}
