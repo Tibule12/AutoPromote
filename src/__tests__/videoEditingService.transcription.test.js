@@ -51,6 +51,7 @@ describe("Studio caption job results", () => {
       {
         video_url: "https://signed.example/WhatsApp%20Video.mp4",
         translate_to_english: "false",
+        source_language: "auto",
       },
       expect.objectContaining({ timeout: 3600000 })
     );
@@ -80,6 +81,7 @@ describe("Studio caption job results", () => {
     expect(mockPost.mock.calls[0][1]).toEqual({
       video_url: "https://signed.example/video.mp4",
       translate_to_english: "true",
+      source_language: "auto",
     });
     expect(mockUpdate).toHaveBeenLastCalledWith(
       expect.objectContaining({

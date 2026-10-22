@@ -8330,5 +8330,17 @@
       "S04",
       "S03"
     ]
+  },
+  "controlLayoutRepair": {
+    "date": "2026-10-22",
+    "evidence": "reports/studio-menu-layout-20261022/README.md",
+    "scope": "Native Studio View options layout and test fixture integration; no picture/sound readiness qualification.",
+    "readinessPromotion": false,
+    "renderJobs": 0,
+    "nextSharedTasks": [
+      "S02",
+      "S04",
+      "S03"
+    ]
   }
 }

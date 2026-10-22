@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Preserve reviewed Studio frontend behavior while securing imported camera-angle sources and posters through the existing SafeVideo component.",
-  "reviewed_at": "2026-10-22T16:21:24.499Z",
+  "reason": "Review Studio View options control layout and preserve readiness, transaction/retention and source-language semantics.",
+  "reviewed_at": "2026-10-22T16:51:41.927Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/StudioControls.css",
-      "sha256": "a80e46366f287021faf2a9b6f2782c32f21c1d9014d4837b575d0b7039c892e6"
+      "sha256": "c76a0214d2b0df2140a3b6cb4107fe4af2b6d9ad2c498cd2952cd1aad096db31"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "e3e4506bf05bef936175f0d70ecd4315ce937fd7e699a369412974e023ef67a0"
+      "sha256": "77b50da86b7a846d4b25f926e11a59e901338c5ce66f9d0323c99a746a939c42"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "201cad0b2dfaeba51a5bb0942669626e4d2fe67e04527bf2703613ac7350583e"
+      "sha256": "6d54a0501eb1925a0c9c7e82672a82c804fc7387f74db035999b514bbdd5ee10"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
