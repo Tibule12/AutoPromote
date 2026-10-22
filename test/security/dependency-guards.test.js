@@ -8,7 +8,7 @@ patchSecurityDependencies(); // Installation must be idempotent.
 test("RSA verification accepts a real signature and rejects extra nested DigestAlgorithm elements", () => {
   const forge = require("node-forge");
   const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-    modulusLength: 1024,
+    modulusLength: 2048,
     publicExponent: 3,
   });
   const privateRsa = forge.pki.privateKeyFromPem(
