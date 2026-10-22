@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review Studio View options control layout and preserve readiness, transaction/retention and source-language semantics.",
-  "reviewed_at": "2026-10-22T16:51:41.927Z",
+  "reason": "Verify View options actual fit/crop export decisions, seek state and fractional paused-frame shortcut correction.",
+  "reviewed_at": "2026-10-22T17:20:25.688Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "f6559cac9e536fd5e66fcaf60df52007600a4ac1c408d32d713b45d0e0e8b5c1"
+      "sha256": "480eeb7a42444c5af43247f2b82be14684986009b5e8d62e76e9d99737bb4990"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "77b50da86b7a846d4b25f926e11a59e901338c5ce66f9d0323c99a746a939c42"
+      "sha256": "204a83d7fe9cc06e09e862156b211233d73df05ca609995025febd41958c1c06"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "6d54a0501eb1925a0c9c7e82672a82c804fc7387f74db035999b514bbdd5ee10"
+      "sha256": "40668f81509fb118f9feaef007c11e961936fd8b250ca6ca44a205aa130a62dd"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

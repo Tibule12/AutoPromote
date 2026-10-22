@@ -7566,13 +7566,9 @@ const ViralClipStudio = ({
     58,
     42
   )}%`;
-  const effectiveVideoFit = safeFaceFraming
-    ? "contain"
-    : effectiveSmartCrop
-      ? ["speaker_track", "group_stack"].includes(effectiveSmartCropMode)
-        ? "cover"
-        : "contain"
-      : videoFit;
+  const effectiveVideoFit = smartCrop || reframeModeCuts.length
+    ? ["speaker_track", "group_stack"].includes(effectiveSmartCropMode) ? "cover" : "contain"
+    : safeFaceFraming ? "contain" : videoFit;
   const usesPanelFraming = effectiveSmartCrop && !renderedOutputUrl &&
     (effectiveSmartCropMode === "group_stack" || (effectiveSmartCropMode === "center" && reframeAspect !== "16:9"));
   const speakerStackPreviewIsLive =
@@ -7870,7 +7866,7 @@ const ViralClipStudio = ({
     ? "center center"
     : activeSideBySideOverlay
       ? sideBySideObjectPosition
-      : effectiveSmartCrop
+      : smartCrop || reframeModeCuts.length
         ? effectiveSmartCropMode === "speaker_track"
           ? reframeObjectPosition
           : effectiveSmartCropMode === "group_stack"
@@ -8084,21 +8080,32 @@ const ViralClipStudio = ({
   };
 
   const setPreviewFillMode = mode => {
+    // Reframing is painted from the framing track, not the hidden video's
+    // object-fit style. Record the same fit/crop decision that export reads.
+    if (smartCrop || reframeModeCuts.length) {
+      const framingMode = mode === "cover" ? "speaker_track" : "off";
+      setSmartCrop(true);
+      setSmartCropMode(framingMode);
+      recordReframeModeAtPlayhead(framingMode);
+    }
+    setComparisonMode("after");
     if (mode === "cover") {
       setSafeFaceFraming(false);
       setVideoFit("cover");
       setStudioActionMessage(
-        "Fill canvas is active. The preview has no side gaps; drag the focal point if the crop hides something important."
+        "Fill canvas starts here on the framing track. Adjust the focal point if the crop hides something important."
       );
       return;
     }
     setVideoFit("contain");
     setSafeFaceFraming(true);
-    setStudioActionMessage("Fit full frame is active. The entire source stays visible.");
+    setStudioActionMessage("Fit full starts here on the framing track. The entire source stays visible in preview and export.");
   };
 
   const recordReframeModeAtPlayhead = mode => {
-    const time = Number(Math.max(0, previewTimelineTime).toFixed(3));
+    // A rounded-up millisecond is after a fractional paused source frame.
+    // Start the decision on this frame, rather than waiting for playback.
+    const time = Math.floor(Math.max(0, previewTimelineTime) * 1000) / 1000;
     setReframeModeCuts(current => {
       const normalized = normalizeReframeModeCuts(current);
       const baseline =

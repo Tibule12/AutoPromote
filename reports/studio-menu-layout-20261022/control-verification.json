@@ -1,0 +1,79 @@
+{
+  "results": [
+    {
+      "control": "Fit full / Fill canvas",
+      "pixelsDiffer": true,
+      "fractionalPlayhead": "0.0833333333333333"
+    },
+    {
+      "control": "Rounded frame",
+      "pixelsDiffer": true
+    },
+    {
+      "control": "Safe zones",
+      "visible": true
+    },
+    {
+      "control": "Grid",
+      "visible": true
+    },
+    {
+      "control": "Dock canvas",
+      "before": {
+        "x": 452.5625,
+        "y": 152,
+        "width": 286.875,
+        "height": 510
+      },
+      "after": {
+        "x": 1158.78125,
+        "y": 191,
+        "width": 242.4375,
+        "height": 431
+      },
+      "changed": true
+    },
+    {
+      "control": "Fullscreen",
+      "bounds": {
+        "x": 445.5,
+        "y": 12,
+        "width": 549,
+        "height": 976
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "control": "Tools",
+      "visible": true
+    },
+    {
+      "control": "Show Everyone",
+      "splitEditor": true
+    },
+    {
+      "control": "Solo Speaker",
+      "trackingControls": 1,
+      "trackingPressed": "true",
+      "splitEditor": false
+    }
+  ],
+  "errors": [],
+  "jobs": [],
+  "date": "2026-10-22",
+  "mode": "Headless, muted ordinary signed-in Studio; restored retained real footage; normal UI controls; no mocked media responses",
+  "scope": "View options portrait geometry and visible control actions; no creative or whole picture/sound qualification",
+  "focusedStudioCases": 3,
+  "realWorkerFilterCases": 12,
+  "priorFullEmulator": {
+    "passedSuites": 299,
+    "passedTests": 1835,
+    "skippedTests": 5,
+    "exit": 0,
+    "scope": "Before additional framing-control fix"
+  },
+  "desktopMenuLayoutCases": 12
+}
