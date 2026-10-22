@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "reviewer": "Codex",
-  "reason": "Repair View options ancestor clipping and verify actual pointer hit targets in the CI browser.",
-  "reviewed_at": "2026-10-22T18:02:38.346Z",
+  "reviewer": "Codex source review",
+  "reason": "Review Studio View options viewport positioning on open, resize and scroll; preserve output framing and existing readiness.",
+  "reviewed_at": "2026-10-22T18:26:11.440Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/StudioControls.css",
-      "sha256": "56d169432c141489b030c188b721ada93b9cc1f605648205578a1db25664a9a9"
+      "sha256": "3dcaa440a47c866c8b6460e3a053c21e41daf2881045211ab7de328b4b21dbcc"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "13d0e33836530cb9f9e8c0ed21e813e1aada1b369facf96b0822709e80cda86e"
+      "sha256": "62359196a3a531f097644cab7e68003f63f44892aa1307a04790989f12ef2fb0"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "7e35002b1827bbe5b6b590b90e4046032f68e11cd8d10340db9f999083201849"
+      "sha256": "d933524491ae7900249c82c5373569d23805d1150841e9a6e0a901f5ba143498"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

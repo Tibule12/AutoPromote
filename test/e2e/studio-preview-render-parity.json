@@ -8347,7 +8347,7 @@
   "playwrightRuntimeRepair": {
     "date": "2026-10-22",
     "evidence": "reports/playwright-runtime-repair-20261022/README.md",
-    "scope": "Current resumable upload fixture, bounded CI lifecycle, Auto Reframe re-enable and native menu clipping/hit targets; no whole picture/audio or creative qualification.",
+    "scope": "Current resumable upload fixture, bounded CI lifecycle, Auto Reframe re-enable and native menu clipping, viewport placement and hit targets; no whole picture/audio or creative qualification.",
     "readinessPromotion": false,
     "paidJobs": 0,
     "nextSharedTasks": [
