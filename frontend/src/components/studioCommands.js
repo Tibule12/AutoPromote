@@ -367,6 +367,9 @@ const applyOne = (document, operation, idempotencyKey) => {
     ...document,
     clipOccurrences,
     layers,
+    ...(linkedSnapshot.compoundClips ? { editGraph: { ...document.editGraph,
+      settings: { ...document.editGraph.settings, compoundClips: linkedSnapshot.compoundClips },
+    } } : {}),
     linkedTiming: buildStudioLinkedTimingFromSnapshot(linkedSnapshot),
     programmeSpeedKeys,
   });

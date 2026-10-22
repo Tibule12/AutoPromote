@@ -5,7 +5,7 @@ import LandingIcon from "./LandingIcon";
 import PlatformIcon from "../PlatformIcon";
 import "./StudioWelcomePage.css";
 
-const MEDIA = "/_studio-preview/";
+const MEDIA = "/welcome/2026-10-21/";
 const CHANNELS = ["linkedin", "youtube", "instagram", "tiktok", "facebook", "reddit"];
 const NAMES = {
   linkedin: "LinkedIn",

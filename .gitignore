@@ -181,3 +181,13 @@ reports/emulator-python-runtime-20261021/*
 # Private background/caption verification.
 reports/studio-background-captions-20261022/*
 !reports/studio-background-captions-20261022/README.md
+# Native authenticated timeline/audio proof, media and isolated local App.
+reports/studio-linked-preview-20261021/*
+!reports/studio-linked-preview-20261021/README.md
+
+# Private authenticated background/caption runtime evidence and local builds.
+reports/studio-background-captions-20261021/*
+!reports/studio-background-captions-20261021/README.md
+
+# Production welcome verification is source, not a local verify script.
+!frontend/scripts/verify-welcome-assets.js

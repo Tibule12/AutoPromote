@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-21",
+  "sourceReport": "reports/welcome-studio-reel-20261021/README.md",
+  "nativeStudioMovie": true,
+  "recordedScheduleNotLiveState": true,
+  "files": [
+    {
+      "name": "film.mp4",
+      "bytes": 12703902,
+      "sha256": "fcc416f49f3baf217032b9dcf30d40f0b299cddc2ce90f9b4df84b03db184990"
+    },
+    {
+      "name": "film.jpg",
+      "bytes": 40002,
+      "sha256": "d9c96d7739d71c05a97536e9349fe394c6bcde3bd8a829dc86997485918ebdcf"
+    },
+    {
+      "name": "studio.mp4",
+      "bytes": 9778610,
+      "sha256": "270578b38a73fce59b31dcf5c8cc3e035d86cc7880c9f60dac6d52fee78fb2f2"
+    },
+    {
+      "name": "studio.jpg",
+      "bytes": 125171,
+      "sha256": "62e04820aaec83a31a7f66770baefe9f3086df980dba35604943177167b9def2"
+    },
+    {
+      "name": "breakdown.mp4",
+      "bytes": 6695933,
+      "sha256": "0e6fbc8084cf5f56aabdcaccdd5eac970753b2fb6f7a10f358aeb3dad84335d3"
+    },
+    {
+      "name": "breakdown.jpg",
+      "bytes": 49851,
+      "sha256": "e1140a7686ee619132780c1918cf04b7983d881db56f8fbfd671617b876dad49"
+    },
+    {
+      "name": "queue.mp4",
+      "bytes": 255214,
+      "sha256": "e77c8627cde599216ae83dcff105da2026703c6374d8465e09a7a397e87f73fb"
+    },
+    {
+      "name": "queue.png",
+      "bytes": 329294,
+      "sha256": "60e9e70c6a061954d9eca95bf167bb7f18f5df561ba1c0d1d4b9173e0720b82f"
+    },
+    {
+      "name": "calendar.png",
+      "bytes": 58930,
+      "sha256": "909680ddf79b9154259a5d5d26bc3c8c638c99b79948caeda34e7ac12156fe94"
+    },
+    {
+      "name": "release-data.json",
+      "bytes": 4822,
+      "sha256": "8f5c5617a57a4a9e359cc754f429c08dd6990cc2fda2f68d860c9209479161ac"
+    },
+    {
+      "name": "welcome-reel.mp4",
+      "bytes": 4341095,
+      "sha256": "b08d5fb5b05ad0dfc6c791a8ff40b448b9eb2441166f6ba1b94f80708ebf537e"
+    },
+    {
+      "name": "welcome-reel.jpg",
+      "bytes": 40827,
+      "sha256": "59fbfd6315b8d8355cf18bc1a95112982379296e241650c65f95301b49d5b1c3"
+    },
+    {
+      "name": "welcome-reel-studio.mp4",
+      "bytes": 3279513,
+      "sha256": "a6e9eedec26f897438715d0abb68f6186e6930d7a285544df04021734579765b"
+    },
+    {
+      "name": "destination-linkedin.png",
+      "bytes": 60131,
+      "sha256": "d06f1c1230534b493e45e6d377005976c99b3b7134d491166a2ad5f674e46aa6"
+    },
+    {
+      "name": "destination-youtube.png",
+      "bytes": 59945,
+      "sha256": "2351bb1845024b9ebc845a01234e86ab83d36143971d8befc2e4fddea8f2ec23"
+    },
+    {
+      "name": "destination-instagram.png",
+      "bytes": 54971,
+      "sha256": "1c3a03b046dd968d381e96de9b038a761e3ec27dcfb84073cdf614b34b0fd23a"
+    },
+    {
+      "name": "destination-tiktok.png",
+      "bytes": 58964,
+      "sha256": "e522d1511d1a3ff8bcfd447e1edfa1fe7508809d09d6b984c4c69978dbd003c1"
+    },
+    {
+      "name": "destination-facebook.png",
+      "bytes": 57986,
+      "sha256": "fcae361a3a79c5dac540fa412ca3b5f8c17c854c22014c7e91152d6dfed4feb3"
+    },
+    {
+      "name": "destination-reddit.png",
+      "bytes": 61650,
+      "sha256": "ae89d849667ab0c0eae787ebd823d5386a2a42071025fa1af6999d6e29094fc4"
+    }
+  ]
+}

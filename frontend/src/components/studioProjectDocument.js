@@ -320,6 +320,9 @@ export const buildStudioLinkedTimingFromSnapshot = snapshot => {
 // ripple rules as the editor without retaining media payloads in the document.
 export const projectStudioLinkedTimingToSnapshot = document => {
   const snapshot = {
+    ...(document.editGraph?.settings?.compoundClips ? {
+      compoundClips: JSON.parse(JSON.stringify(document.editGraph.settings.compoundClips)),
+    } : {}),
     overlays: [],
     motionScenes: [],
     threeDScenes: [],

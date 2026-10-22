@@ -815,6 +815,18 @@
         "studio.composite.background_decontaminate"
       ],
       "workflow": [
+        "Select an owned image or ordinary title in Studio Composite.",
+        "Enable its geometric mask and choose rectangle, ellipse or polygon.",
+        "For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.",
+        "For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.",
+        "Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.",
+        "To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.",
+        "Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.",
+        "Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom Bézier curve in Composite.",
+        "Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.",
+        "Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.",
+        "Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.",
+        "Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.",
         "Open Studio → Composite and add effects to the selected owned video clip.",
         "Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.",
         "Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.",

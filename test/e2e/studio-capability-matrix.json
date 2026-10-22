@@ -15448,5 +15448,57 @@
       "whole live picture/sound parity",
       "founder creative/listening acceptance"
     ]
+  },
+  "linkedTimelineIntegration": {
+    "evidence": "reports/studio-linked-preview-20261021/README.md",
+    "continuity": {
+      "lastSessionKind": "LINKED_TIMELINE_AND_FADE_CONFORMANCE",
+      "lastSessionEvidence": "reports/studio-linked-preview-20261021/README.md",
+      "lastSessionAutomatedChecks": {
+        "frontendTestsPassed": 126,
+        "serverTestsPassed": 36,
+        "studioComponentCasesPassedAcrossFocusedRuns": 15,
+        "nativeLeadingAndMiddleTrim": true,
+        "groupLayers": 28,
+        "motionKeys": 224,
+        "undoRedoExactDecisions": true,
+        "exactColdReopen": true,
+        "browserErrors": 0,
+        "cpuLayerPoses": 148,
+        "cpuGroupPoses": 7,
+        "actualFfmpegFadeCases": 5,
+        "retimedGainSamples": 241,
+        "maxFadeSampleError": 3.725290298461914e-09,
+        "maxRetimedGainError": 0.0003747041474970736,
+        "anonymousViewportChecks": 8,
+        "authenticatedHelpQuestions": 3,
+        "workerTestsPassed": 23,
+        "strictAppBuild": "PASS",
+        "generatedReplayKernel": "PASS",
+        "wholePictureSoundQualified": false,
+        "nativeExportVerified": true,
+        "nativeFinalFrames": 144,
+        "completeMatchingPlayback": true,
+        "independentExactBackupRestore": true,
+        "nativeGeometryPairsPassed": 4,
+        "nativeGeometryMinIou": 0.9694525904203324,
+        "nativeGeometryMaxBoundaryP95Pixels": 1.0,
+        "freshSuccessfulNativeRenderJobs": 1
+      },
+      "nextSlice": "Continue S02 whole picture/processed sound and strict colour/edge/low-alpha comparisons, cut/fade phase and latency alongside S03 ownership; preserve prior projects, receipts and timers."
+    },
+    "readinessPromotion": false
+  },
+  "productionIntegration": {
+    "date": "2026-10-22",
+    "evidence": "reports/frontend-production-integration-20261022/README.md",
+    "readinessPromotion": false,
+    "newGpuJobs": 0,
+    "newModelGenerations": 0,
+    "remainingSharedTasks": [
+      "S02",
+      "S04",
+      "S03"
+    ]
   }
 }

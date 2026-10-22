@@ -121,7 +121,7 @@ import {
 import SoundWaveform from "./motion/SoundWaveform";
 import MotionPanel from "./motion/MotionPanel";
 import MotionCanvas from "./motion/MotionCanvas";
-import { motionCues, cutMotion, normalizeMotion, generateSmartMotionBeats } from "./motion/motionModel";
+import { motionCues, normalizeMotion, generateSmartMotionBeats } from "./motion/motionModel";
 import Studio3DPanel from "./threeD/Studio3DPanel";
 import StudioSubjectVfxPanel from "./StudioSubjectVfxPanel";
 import { findUncoveredCaptionSpeechRanges, mapCaptionSilencesToProgramme } from "./studioCaptionCoverage";
@@ -133,7 +133,7 @@ import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { titleAnimationPose, normalizeStudioTitleText } from "./studioTitleLayout";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
 import { validateSubjectVfxExport, resolveSubjectVfxProgrammePreview, subjectVfxRevision } from "./studioSubjectVfxContract";
-import { cutStudio3DScenes, normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
+import { normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
 import { SOUND_EFFECT_PRESETS, synthesizeEffect } from "./motion/soundDesign";
 import VideoScopes from "./VideoScopes";
 import {
@@ -149,8 +149,10 @@ import {
   mergeCreatorRecipe,
   findCreatorBeat,
 } from "./studioCreatorRecipes";
-import { rippleTimedItems, rippleTimelineKeys, applyStudioClipMetadata } from "./studioTimelineEdits";
-import { studioGroupTimingRows, editStudioGroupTiming, rippleStudioGroupTiming, clipStudioGroupMotionCues } from "./studioGroupTiming";
+import { studioMusicFadeGain } from "./studioAudioFades";
+import { applyStudioClipMetadata } from "./studioTimelineEdits";
+import { rippleStudioSnapshotLinkedTimeline, splitStudioOverlayAtProgrammeTime } from "./studioTrimTransaction";
+import { studioGroupTimingRows, editStudioGroupTiming, clipStudioGroupMotionCues } from "./studioGroupTiming";
 import { editStudioKeyframeSelection } from "./studioKeyframeSelection";
 import {
   reconcileStudioDocument,
@@ -3381,7 +3383,7 @@ const ViralClipStudio = ({
     const musicTime = musicPreviewSourceRef.current && musicPreviewSourceStateRef.current
       ? musicBufferPosition(musicPreviewSourceStateRef.current, musicPreviewAudioContextRef.current.currentTime)
       : getPreviewMusicTime(programmeTime);
-    const fadeGain = getAudioFadeGain(musicTime, outputPlaybackDuration,
+    const fadeGain = studioMusicFadeGain(musicTime, outputPlaybackDuration,
       musicTrack?.fadeIn, musicTrack?.fadeOut);
     const automationGain = interpolateAutomationValue({ keyframes: audioKeyframes.music,
       property: "volume", time: programmeTime, fallback: 100 }) / 100;
@@ -9005,99 +9007,34 @@ const ViralClipStudio = ({
     setCutRangeEnd(null);
   };
 
-  const rippleLinkedTimeline = (from, to) => {
-    const retime = items => rippleTimedItems(items, from, to, () => createSecureId("retained-layer"));
-    setOverlays(retime);
-    setSoundEffects(retime);
-    setVoiceovers(retime);
-    setAdjustmentLayers(retime);
-    setMotionScenes(current => cutMotion(current, from, to));
-    setCompoundClips(current => rippleStudioGroupTiming(current, from, to));
-    setThreeDScenes(current => cutStudio3DScenes(current, from, to));
-    setMotionKeyframes(current => rippleTimelineKeys(current, from, to));
-    setSpeedKeyframes(current => rippleTimelineKeys(current, from, to));
-    setFinishKeyframes(current => rippleTimelineKeys(current, from, to));
-    setReframeKeyframes(current => rippleTimelineKeys(current, from, to, { preserveRightState: true }));
-    setReframeModeCuts(current => rippleTimelineKeys(current, from, to, { preserveRightState: true }));
-    setSpeakerFocusCuts(current => rippleTimelineKeys(current, from, to, { preserveRightState: true }));
-    setSpeakerStackFraming(current => ({ ...current, ...Object.fromEntries(["top", "bottom"].map(slot => [slot, {
-      ...current[slot],
-      keyframes: rippleTimelineKeys(current[slot].keyframes || [], from, to, { preserveRightState: true }),
-      ...(current[slot].sourceTimeOffsetKeyframes ? {
-        sourceTimeOffsetKeyframes: rippleTimelineKeys(current[slot].sourceTimeOffsetKeyframes, from, to, { preserveRightState: true }),
-      } : {}),
-      ...(current[slot].source_time_offset_keyframes ? {
-        source_time_offset_keyframes: rippleTimelineKeys(current[slot].source_time_offset_keyframes, from, to, { preserveRightState: true }),
-      } : {}),
-    }])) }));
-    setAudioKeyframes(current => Object.fromEntries(Object.entries(current).map(([bus, keys]) => [bus, rippleTimelineKeys(keys, from, to)])));
-  };
-
-  const rippleLinkedTimelineMultiGaps = (gaps) => {
-    if (!Array.isArray(gaps) || !gaps.length) return;
-    const sortedGaps = [...gaps]
-      .filter(g => Number.isFinite(g?.from) && Number.isFinite(g?.to) && g.to > g.from)
-      .sort((a, b) => b.from - a.from);
+  const rippleLinkedTimelineMultiGaps = gaps => {
+    const sortedGaps = (gaps || []).filter(gap => Number.isFinite(gap?.from) &&
+      Number.isFinite(gap?.to) && gap.from >= 0 && gap.to > gap.from).sort((a, b) => b.from - a.from);
     if (!sortedGaps.length) return;
-
-    const retime = items => {
-      let current = items || [];
-      for (const gap of sortedGaps) {
-        current = rippleTimedItems(current, gap.from, gap.to, () => createSecureId("retained-layer"));
-      }
-      return current;
-    };
-
-    const retimeKeys = keys => {
-      let current = keys || [];
-      for (const gap of sortedGaps) {
-        current = rippleTimelineKeys(current, gap.from, gap.to);
-      }
-      return current;
-    };
-
-    setOverlays(retime);
-    setSoundEffects(retime);
-    setVoiceovers(retime);
-    setAdjustmentLayers(retime);
-    setMotionScenes(current => {
-      let res = current || [];
-      for (const gap of sortedGaps) {
-        res = cutMotion(res, gap.from, gap.to);
-      }
-      return res;
-    });
-    setThreeDScenes(current => sortedGaps.reduce((items, gap) => cutStudio3DScenes(items, gap.from, gap.to), current));
-    setMotionKeyframes(retimeKeys);
-    setSpeedKeyframes(retimeKeys);
-    setFinishKeyframes(retimeKeys);
-    setReframeKeyframes(current => sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), current));
-    setReframeModeCuts(current => sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), current));
-    setSpeakerFocusCuts(current => sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), current));
-    setSpeakerStackFraming(current => {
-      const next = { ...current };
-      for (const slot of ["top", "bottom"]) {
-        if (next[slot]) {
-          next[slot] = {
-            ...next[slot],
-            keyframes: sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), next[slot]?.keyframes || []),
-            ...(next[slot]?.sourceTimeOffsetKeyframes ? {
-              sourceTimeOffsetKeyframes: sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), next[slot].sourceTimeOffsetKeyframes),
-            } : {}),
-            ...(next[slot]?.source_time_offset_keyframes ? {
-              source_time_offset_keyframes: sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), next[slot].source_time_offset_keyframes),
-            } : {}),
-          };
-        }
-      }
-      return next;
-    });
-    setAudioKeyframes(current =>
-      Object.fromEntries(
-        Object.entries(current || {}).map(([bus, keys]) => [bus, retimeKeys(keys)])
-      )
-    );
+    // Script cuts, silence removal, manual trims and Director use one linked
+    // edit transaction. Group gates/order and continuation keys move together.
+    const transactionId = createSecureId("ripple");
+    const next = sortedGaps.reduce((snapshot, gap) => rippleStudioSnapshotLinkedTimeline(snapshot,
+      { fromTick: secondsToTicks(gap.from), toTick: secondsToTicks(gap.to) }, transactionId), getEditorSnapshot());
+    setOverlays(next.overlays);
+    setSoundEffects(next.soundEffects);
+    setVoiceovers(next.voiceovers);
+    setAdjustmentLayers(next.adjustmentLayers);
+    setMotionScenes(next.motionScenes);
+    setCompoundClips(next.compoundClips);
+    setCompositionOrder(Array.isArray(next.compositionOrder) ? next.compositionOrder : null);
+    setThreeDScenes(next.threeDScenes);
+    setMotionKeyframes(next.motionKeyframes);
+    setSpeedKeyframes(next.speedKeyframes);
+    setFinishKeyframes(next.finishKeyframes);
+    setReframeKeyframes(next.reframeKeyframes);
+    setReframeModeCuts(next.reframeModeCuts);
+    setSpeakerFocusCuts(next.speakerFocusCuts);
+    setSpeakerStackFraming(next.speakerStackFraming);
+    setAudioKeyframes(next.audioKeyframes);
   };
+
+  const rippleLinkedTimeline = (from, to) => rippleLinkedTimelineMultiGaps([{ from, to }]);
 
   const removePendingCutRange = () => {
     if (!normalizedPendingCutRange || !currentTimelineClip) return;
@@ -9200,27 +9137,13 @@ const ViralClipStudio = ({
             appliedTimelineSignature: null,
           };
 
-          const firstPartDuration = currentPlayhead - overlayStart;
-          const secondPartDuration = overlayEnd - currentPlayhead;
-          const sourceStart = Number(activeOverlay.sourceStartTime || 0);
-
-          const leftOverlay = {
-            ...activeOverlay,
-            duration: firstPartDuration,
-          };
-
-          const rightOverlay = {
-            ...activeOverlay,
-            id: createSecureId("broll-split"),
-            startTime: currentPlayhead,
-            duration: secondPartDuration,
-            sourceStartTime: sourceStart + firstPartDuration,
-          };
-
-          setOverlays(prev =>
-            prev.map(item => (item.id === activeOverlay.id ? leftOverlay : item)).concat(rightOverlay)
-          );
-          setActiveOverlayId(rightOverlay.id);
+          const rightId = createSecureId("broll-split");
+          const next = splitStudioOverlayAtProgrammeTime(cutHistoryBaseline, activeOverlay.id, currentPlayhead, rightId);
+          setOverlays(next.overlays);
+          setCompoundClips(next.compoundClips);
+          setCompositionOrder(Array.isArray(next.compositionOrder) ? next.compositionOrder : null);
+          setMotionKeyframes(next.motionKeyframes);
+          setActiveOverlayId(rightId);
           setStudioActionMessage(`B-roll split at ${formatPreviewTimePrecise(currentPlayhead)} into 2 clips!`);
           return;
         }
@@ -9317,6 +9240,7 @@ const ViralClipStudio = ({
     const next = result.snapshot;
     studioDocumentRef.current = result.document;
     setTimeline(next.timeline);
+    setCompoundClips(next.compoundClips || []);
     setOverlays(next.overlays);
     setSoundEffects(next.soundEffects);
     setVoiceovers(next.voiceovers);
@@ -15277,7 +15201,7 @@ const ViralClipStudio = ({
         36000,
         0
       );
-      const fadeGain = getAudioFadeGain(
+      const fadeGain = studioMusicFadeGain(
         getPreviewMusicTime(previewTimelineTime),
         outputPlaybackDuration,
         musicTrack?.fadeIn,
@@ -15635,7 +15559,7 @@ const ViralClipStudio = ({
         36000,
         0
       );
-      const fadeGain = getAudioFadeGain(
+      const fadeGain = studioMusicFadeGain(
         getPreviewMusicTime(previewTimelineTime),
         outputPlaybackDuration,
         musicTrack?.fadeIn,
@@ -15682,7 +15606,7 @@ const ViralClipStudio = ({
         36000,
         0
       );
-      const fadeGain = getAudioFadeGain(
+      const fadeGain = studioMusicFadeGain(
         musicPreviewSourceRef.current && musicPreviewSourceStateRef.current
           ? musicBufferPosition(musicPreviewSourceStateRef.current, musicPreviewAudioContextRef.current.currentTime)
           : getPreviewMusicTime(previewTimelineTime),
@@ -17329,7 +17253,7 @@ const ViralClipStudio = ({
     const previewTimelineTime = video
       ? clampAudioControl(getPreviewTimelineTime(video.currentTime || 0), 0, 36000, 0)
       : 0;
-    const fadeGain = getAudioFadeGain(
+    const fadeGain = studioMusicFadeGain(
       previewTimelineTime,
       outputTimelineDuration,
       musicTrack?.fadeIn,
@@ -24974,7 +24898,7 @@ const ViralClipStudio = ({
                     </section>
                   ) : null}
                   <MotionInspector
-                    activeOverlay={motionInspectorTarget ? { ...motionInspectorTarget, ...activeMotionCurrent } : null}
+                    activeOverlay={motionInspectorTarget ? { ...motionInspectorTarget, ...buildMotionAutomationStyle(activeMotionTargetKeyframes, previewTimelineTime, motionInspectorTarget) } : null}
                     overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}
                     playhead={previewTimelineTime}
                     keyframes={motionKeyframes}

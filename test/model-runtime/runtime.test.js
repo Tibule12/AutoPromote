@@ -157,7 +157,7 @@ test('foreground component selections reject ambiguous identities, inverted boxe
  const input={...base(),capability:'segment_subject',parameters:{subjectId:'speaker',initialBox:[.1,.1,.9,1],points:[],shotPrompts:[],
   components:[{id:'microphone',box:[.2,.2,.6,.8],points:[{position:[.3,.3],label:1}],propagate:false}]}};
  assert.equal(request(input).parameters.components[0].propagate,false);
- const duplicate=structuredClone(input);duplicate.parameters.components.push({...duplicate.parameters.components[0]});
+ const duplicate=structuredClone(input);duplicate.parameters.components.push(structuredClone(duplicate.parameters.components[0]));
  assert.throws(()=>request(duplicate),{code:'MODEL_CAPABILITY_COMPONENT_SELECTION_INVALID'});
  const inverted=structuredClone(input);inverted.parameters.components[0].box=[.6,.2,.2,.8];
  assert.throws(()=>request(inverted),{code:'MODEL_CAPABILITY_COMPONENT_SELECTION_INVALID'});

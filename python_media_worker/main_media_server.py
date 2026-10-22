@@ -33387,6 +33387,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         # Process Image Overlays (e.g. Cute Captions)
         image_overlays = [o for o in request.overlays if o.type == 'image' and o.src]
+        try:
+            from .studio_image_sources import materialize_studio_image
+        except ImportError:
+            from studio_image_sources import materialize_studio_image
+        image_sources = {}
         
         for ov in image_overlays:
             ov_path = ""
@@ -33397,25 +33402,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                  overlay_temp_paths.append(ov_dl_path)
                  
                  # Async download via executor
-                 import urllib.request
                  loop = asyncio.get_running_loop()
                  try:
-                     def download_image():
-                         # Retain the exact source across bounded transport
-                         # retries. A transient storage disconnect must not
-                         # drop the customer's brand layer or hang the job.
-                         for attempt in range(3):
-                             try:
-                                 with urllib.request.urlopen(ov.src, timeout=30) as response, open(ov_dl_path, "wb") as target:
-                                     shutil.copyfileobj(response, target)
-                                 return
-                             except OSError:
-                                 if attempt == 2:
-                                     raise
-                                 import time
-                                 time.sleep(.25 * (attempt + 1))
-                     await loop.run_in_executor(None, download_image)
-                     ov_path = ov_dl_path
+                     ov_path = await loop.run_in_executor(None, materialize_studio_image, ov.src, ov_dl_path, image_sources)
                  except Exception as e:
                      raise RuntimeError(f"Image layer {ov.id} could not be loaded; export stopped") from e
             else:

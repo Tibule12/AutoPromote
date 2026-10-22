@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, "../.."),
   report = path.join(root, "reports/welcome-real-workflow-20261021"),
   out = path.join(root, "reports/welcome-studio-reel-20261021/review");
 fs.mkdirSync(out, { recursive: true });
-const actual = JSON.parse(fs.readFileSync(path.join(report, "media/release-data.json")));
+const actual = JSON.parse(fs.readFileSync(path.join(root, "frontend/public/welcome/2026-10-21/release-data.json")));
 const names = {
   linkedin: "LinkedIn",
   youtube: "YouTube",
@@ -124,7 +124,7 @@ async function main() {
       await page.waitForFunction(() => document.querySelector("dialog video")?.readyState >= 2);
       assert.equal(
         await page.getByRole("dialog").locator("video").getAttribute("src"),
-        "/_studio-preview/welcome-reel-studio.mp4"
+        "/welcome/2026-10-21/welcome-reel-studio.mp4"
       );
       await page
         .getByRole("dialog")
@@ -179,7 +179,7 @@ async function main() {
           await panel.locator("img").evaluate(img => img.decode());
           assert.equal(
             await panel.locator("img").getAttribute("src"),
-            `/_studio-preview/destination-${post.platform}.png`
+            `/welcome/2026-10-21/destination-${post.platform}.png`
           );
         }
         await page.getByRole("tab", { name: "LinkedIn", exact: true }).click();
@@ -188,7 +188,7 @@ async function main() {
         await page.getByRole("button", { name: "Open the actual Queue", exact: true }).click();
         const dialog = page.getByRole("dialog");
         await dialog.waitFor();
-        assert.equal(await dialog.locator("img").getAttribute("src"), "/_studio-preview/queue.png");
+        assert.equal(await dialog.locator("img").getAttribute("src"), "/welcome/2026-10-21/queue.png");
         await page.keyboard.press("Escape");
         await page.waitForTimeout(50);
         assert(
@@ -199,7 +199,7 @@ async function main() {
         await page.getByRole("button", { name: "Watch the Studio film", exact: true }).click();
         await page.getByRole("dialog").waitFor();
         const v = page.getByRole("dialog").locator("video");
-        assert.equal(await v.getAttribute("src"), "/_studio-preview/film.mp4");
+        assert.equal(await v.getAttribute("src"), "/welcome/2026-10-21/film.mp4");
         assert(await v.evaluate(e => e.controls));
         await v.evaluate(e => e.pause());
         await page.keyboard.press("Escape");

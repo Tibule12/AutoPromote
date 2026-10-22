@@ -37,7 +37,7 @@ test("the first screen shows the actual current Queue rather than the rejected s
   ).toBeInTheDocument();
   expect(
     screen.getByRole("img", { name: /Actual AutoPromote Queue with six real/ })
-  ).toHaveAttribute("src", "/_studio-preview/queue.png");
+  ).toHaveAttribute("src", "/welcome/2026-10-21/queue.png");
   await screen.findByRole("tab", { name: "LinkedIn" });
   expect(document.querySelector('[src$="studio-story.mp4"]')).toBeNull();
   expect(screen.queryByText(/sample workspace|example plan/i)).not.toBeInTheDocument();
@@ -53,10 +53,10 @@ test("platform tabs show the actual fetched copy and separate captured times", a
   expect(within(panel).getByText("21 Oct, 17:35 SAST")).toBeInTheDocument();
   expect(within(panel).getByRole("img")).toHaveAttribute(
     "src",
-    "/_studio-preview/destination-tiktok.png"
+    "/welcome/2026-10-21/destination-tiktok.png"
   );
   expect(fetch).toHaveBeenCalledWith(
-    "/_studio-preview/release-data.json",
+    "/welcome/2026-10-21/release-data.json",
     expect.objectContaining({ signal: expect.anything() })
   );
 });
@@ -67,7 +67,7 @@ test("the real Studio film has sound controls and returns focus to its launch bu
   trigger.focus();
   fireEvent.click(trigger);
   const dialog = screen.getByRole("dialog");
-  expect(dialog.querySelector("video")).toHaveAttribute("src", "/_studio-preview/film.mp4");
+  expect(dialog.querySelector("video")).toHaveAttribute("src", "/welcome/2026-10-21/film.mp4");
   expect(dialog.querySelector("video")).toHaveAttribute("controls");
   fireEvent.click(within(dialog).getByRole("button", { name: "Close preview" }));
   expect(trigger).toHaveFocus();
@@ -108,7 +108,7 @@ test("calendar full view opens the whole Queue and supports zoom and fit", async
   trigger.focus();
   fireEvent.click(trigger);
   const dialog = screen.getByRole("dialog");
-  expect(within(dialog).getByRole("img")).toHaveAttribute("src", "/_studio-preview/queue.png");
+  expect(within(dialog).getByRole("img")).toHaveAttribute("src", "/welcome/2026-10-21/queue.png");
   fireEvent.click(within(dialog).getByRole("button", { name: "Zoom in" }));
   expect(within(dialog).getByLabelText("Image zoom")).toHaveTextContent("125%");
   fireEvent.click(within(dialog).getByRole("button", { name: "Fit image to screen" }));
@@ -121,14 +121,14 @@ test("the welcome film opens the complete native Studio sequence with sound cont
   await screen.findByRole("tab", { name: "LinkedIn" });
   expect(document.querySelector(".wf-reel video")).toHaveAttribute(
     "src",
-    "/_studio-preview/welcome-reel.mp4"
+    "/welcome/2026-10-21/welcome-reel.mp4"
   );
   expect(screen.queryByRole("button", { name: "Pause welcome preview" })).not.toBeInTheDocument();
   const trigger = screen.getByRole("button", { name: "Watch the welcome Studio film with sound" });
   trigger.focus();
   fireEvent.click(trigger);
   const dialog = screen.getByRole("dialog");
-  expect(dialog.querySelector("video")).toHaveAttribute("src", "/_studio-preview/welcome-reel.mp4");
+  expect(dialog.querySelector("video")).toHaveAttribute("src", "/welcome/2026-10-21/welcome-reel.mp4");
   expect(dialog.querySelector("video")).toHaveAttribute("controls");
   fireEvent.click(within(dialog).getByRole("button", { name: "Close preview" }));
   expect(trigger).toHaveFocus();

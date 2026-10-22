@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "reviewer": "codex",
-  "reason": "Reviewed native CPU background and caption movie/timeline evidence, pending timed/quick caption protection, edge-refinement user guidance and explicit remaining accuracy/quality limitations.",
-  "reviewed_at": "2026-10-22T04:19:51.261Z",
-  "catalog_sha256": "9438330431a4ef026ab0bf56f5cca6f44e26bdc2152da98f42124edc601cef5d",
+  "reviewer": "Codex",
+  "reason": "Review complete frontend production integration, preserved Studio security and native welcome release assets.",
+  "reviewed_at": "2026-10-22T16:13:07.983Z",
+  "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -179,7 +179,7 @@
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
-      "sha256": "6724e9969cb430fce2c43f1877329d9bd7f43c5295db237cebb4bf0721e4957a"
+      "sha256": "f779b5f48044a8e103d59d9dedbf69a5f21de8ba4e5f826f7a701e7dacf3de59"
     },
     {
       "path": "frontend/src/components/StudioTextAnimatorPanel.js",
@@ -195,11 +195,11 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "dc77d32cdc731d9b2147d283a73ac14d04f10c9c3eee400be6d11446b7cf89c0"
+      "sha256": "69b2e94978de05780e0e4bee89eb84a1aec62a5a4d4b5c9b62ee1f7ddc35d842"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
-      "sha256": "57532124415c5d8fde1748ddedb0efe06b2ef1a93ba89446310987489406e00c"
+      "sha256": "4de0ec43d476d794ec1e29e130e33fbb46a4f930a732485c8fa8df5a361d8017"
     },
     {
       "path": "frontend/src/components/motion/logoGlyphs.v1.json",
@@ -239,7 +239,7 @@
     },
     {
       "path": "frontend/src/components/studioCommands.js",
-      "sha256": "53233cb2616e5e2352d11987b0c9531348b63c6d77af3c23e45bad9234102294"
+      "sha256": "f0e33918ebaede43f496fe9ee2e5d5a4fc19d64ca0079ad0d8a7272ceaba89df"
     },
     {
       "path": "frontend/src/components/studioCreatorRecipes.js",
@@ -315,7 +315,7 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "3ae058deb36f75f5db599620c8c7f5e3907f7a460b58ee5a56c38dfe41e3e4fc"
+      "sha256": "895c84b4e5c9efcfa70ac79a810a8233efcf78f86ee9442e9987b2a3af77eb47"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
@@ -343,7 +343,7 @@
     },
     {
       "path": "frontend/src/components/studioVoiceover.js",
-      "sha256": "4cc81e2add1aa018cfe4d08cbe5977b8bafaa00a2d91f451bdb9c6a90b198381"
+      "sha256": "8c97560358757a6c97efa75e9db570b7c00ae3cc0183e2dd3dc3413f8e082f4b"
     },
     {
       "path": "frontend/src/components/threeD/studio3DModel.js",
@@ -383,7 +383,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "0e080bca545444fe048521b1442a3309ffee28694dfa9613eacdd48159a119e3"
+      "sha256": "6d1d0374495fe39f9e6f0d9a502b44d1b39267c628ee54ba9aa41014401f8ab6"
     },
     {
       "path": "python_media_worker/assets/studio-text-metrics.v1.json",
@@ -395,7 +395,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "6645414e42c846da2f1390676a5c8f15e625a7ec7e77867d4a67ddfe97125993"
+      "sha256": "5bf45a1335f81d796fd5c4ccc939839d818a69b04956493dd3e619e5080f5b79"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -555,7 +555,7 @@
     },
     {
       "path": "src/services/billingService.js",
-      "sha256": "ca9ee3f83620041610761691030ca66d1ac9798d42cad587f12cafb6fa7ba0b5"
+      "sha256": "fd9e519b10e3ea5f8e36c94794be153e4f2b02684fba774449657b782d032872"
     },
     {
       "path": "src/services/contentFactoryProviders.js",
@@ -631,7 +631,7 @@
     },
     {
       "path": "src/services/studioSubjectVfxService.js",
-      "sha256": "473498bf1732967332c73f1372fda9ffff392c3c4f2b4896186572c39123d9dc"
+      "sha256": "e55cfeade85722ff79b924263f6007e742b372d7b5ab403840fbc81bea64737b"
     },
     {
       "path": "src/services/uploadAllowance.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "b2c62649792e31cb90c132f749d59bfceb8248f2277fdca691db6bb1f3986c61"
+      "sha256": "e3e4506bf05bef936175f0d70ecd4315ce937fd7e699a369412974e023ef67a0"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "1a126291784cacf096c064ce079dc73c3be376300aa31ba2cfa917ab2b856c89"
+      "sha256": "201cad0b2dfaeba51a5bb0942669626e4d2fe67e04527bf2703613ac7350583e"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

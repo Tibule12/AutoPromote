@@ -310,7 +310,14 @@ async function cancelSubjectVfxPreview({ ownerUid, jobId }) {
   if (["completed", "failed", "cancelled"].includes(data.status))
     return { jobId, status: data.status };
   const config = workerConfig(data.executionKind);
-  const response = await cancelStudioWorkerJob(config, jobId);
+  let response;
+  try {
+    response = await cancelStudioWorkerJob(config, jobId);
+  } catch (cause) {
+    if (data.executionKind !== 'model_artifact_cpu' || data.status !== 'dispatch_uncertain' ||
+        cause.response?.status !== 404) throw cause;
+    response = { data: { status: 'cancelled' } };
+  }
   if (response.data?.status !== "cancelled")
     throw error(502, "Cancellation has not been confirmed. Check this job again.");
   await ref.update({ status: "cancelled" });

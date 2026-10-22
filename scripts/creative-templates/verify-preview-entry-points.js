@@ -51,7 +51,7 @@ async function main() {
             const video = page.getByRole('dialog').locator('video');
             await video.evaluate(v => { v.muted = true; v.pause(); });
             await page.waitForFunction(() => Number.isFinite(document.querySelector('dialog video')?.duration));
-            assert.equal(await video.getAttribute('src'), '/_studio-preview/welcome-reel.mp4');
+            assert.equal(await video.getAttribute('src'), '/welcome/2026-10-21/welcome-reel.mp4');
             assert(Math.abs(await video.evaluate(v => v.duration) - 28) < .05);
             await page.keyboard.press('Escape');
             await page.getByRole('link', { name: 'Documentation', exact: true }).first().click();

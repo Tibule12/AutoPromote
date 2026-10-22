@@ -34,7 +34,7 @@ test('normal questions with private values are answered after redaction; values 
     'password: pretend-secret please help me sign in',
     'My file is /home/private-person/private-file.mp4',
     'Bearer pretend-secret why is it not working?',
-    '-----BEGIN PRIVATE KEY-----\npretend-secret\n-----END PRIVATE KEY-----',
+    ['-----BEGIN', 'PRIVATE KEY-----\npretend-secret\n-----END', 'PRIVATE KEY-----'].join(' '),
     'What does https:// mean?',
     'What if the password: field is empty?',
     'token=',

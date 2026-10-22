@@ -568,14 +568,26 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 
 **Workflow**
 
-1. Open Studio → Composite and add effects to the selected owned video clip.
-2. Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.
-3. Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.
-4. Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.
-5. Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.
-6. At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.
-7. For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.
-8. After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.
+1. Select an owned image or ordinary title in Studio Composite.
+2. Enable its geometric mask and choose rectangle, ellipse or polygon.
+3. For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.
+4. For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.
+5. Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.
+6. To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.
+7. Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.
+8. Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom Bézier curve in Composite.
+9. Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.
+10. Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.
+11. Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.
+12. Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.
+13. Open Studio → Composite and add effects to the selected owned video clip.
+14. Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.
+15. Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.
+16. Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.
+17. Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.
+18. At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.
+19. For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.
+20. After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.
 
 **Preview:** Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.
 
