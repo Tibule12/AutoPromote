@@ -191,3 +191,6 @@ reports/studio-background-captions-20261021/*
 
 # Production welcome verification is source, not a local verify script.
 !frontend/scripts/verify-welcome-assets.js
+
+# Reviewed native welcome release media must ship with the frontend.
+!frontend/public/welcome/2026-10-21/*
