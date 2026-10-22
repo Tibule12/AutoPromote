@@ -48,6 +48,8 @@ if (process.argv[2] === "build") {
 if (process.argv[2] !== "serve") throw Error("Use build or serve");
 const express = require("express"),
   app = express();
+const rateLimit = require("express-rate-limit");
+app.use(rateLimit({ windowMs: 60000, max: 600, standardHeaders: true, legacyHeaders: false }));
 app.use("/api", (req, res) => {
   const upstream = http.request(
     {
