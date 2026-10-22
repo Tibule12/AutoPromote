@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Preserve reviewed Studio frontend behavior while securing imported camera-angle sources and posters through the existing SafeVideo component.",
-  "reviewed_at": "2026-10-22T16:21:24.499Z",
+  "reason": "Verify View options actual fit/crop export decisions, seek state and fractional paused-frame shortcut correction.",
+  "reviewed_at": "2026-10-22T17:20:25.688Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/StudioControls.css",
-      "sha256": "a80e46366f287021faf2a9b6f2782c32f21c1d9014d4837b575d0b7039c892e6"
+      "sha256": "c76a0214d2b0df2140a3b6cb4107fe4af2b6d9ad2c498cd2952cd1aad096db31"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "f6559cac9e536fd5e66fcaf60df52007600a4ac1c408d32d713b45d0e0e8b5c1"
+      "sha256": "480eeb7a42444c5af43247f2b82be14684986009b5e8d62e76e9d99737bb4990"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "e3e4506bf05bef936175f0d70ecd4315ce937fd7e699a369412974e023ef67a0"
+      "sha256": "204a83d7fe9cc06e09e862156b211233d73df05ca609995025febd41958c1c06"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "201cad0b2dfaeba51a5bb0942669626e4d2fe67e04527bf2703613ac7350583e"
+      "sha256": "40668f81509fb118f9feaef007c11e961936fd8b250ca6ca44a205aa130a62dd"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

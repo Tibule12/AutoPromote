@@ -11,7 +11,7 @@ source = Path(__file__).with_name("main_media_server.py")
 tree = ast.parse(source.read_text())
 namespace = {"math": math, "re": re, "clamp_float": lambda value, lo, hi: max(lo, min(hi, value))}
 functions = [node for node in tree.body if isinstance(node, ast.FunctionDef)
-             and node.name in {"build_multicam_layout_filter", "build_studio_camera_timeline", "build_studio_multicam_command", "build_reviewed_reframe_filter", "reviewed_axis_expression", "build_safe_vertical_fit_filter"}]
+             and node.name in {"build_multicam_layout_filter", "build_studio_camera_timeline", "build_studio_multicam_command", "build_reviewed_reframe_filter", "reviewed_axis_expression", "build_safe_vertical_fit_filter", "build_reframe_segment_filter"}]
 exec(compile(ast.Module(body=functions, type_ignores=[]), str(source), "exec"), namespace)
 build_filter = namespace["build_multicam_layout_filter"]
 build_timeline = namespace["build_studio_camera_timeline"]
@@ -81,6 +81,28 @@ class StudioMulticamFilterTests(unittest.TestCase):
         self.assertIn("color=black", graph)
         self.assertNotIn("blur", graph)
         self.assertNotIn("split", graph)
+
+    def test_framing_track_fit_and_fill_produce_distinct_portrait_pixels(self):
+        for mode in ["off", "speaker_track"]:
+            with self.subTest(mode=mode):
+                graph = namespace["build_reframe_segment_filter"](
+                    320, 180, 90, 160, {"mode": mode,
+                        "solo_keyframes": [{"time": 0, "x": 50, "y": 50}]})
+                result = subprocess.run([
+                    "ffmpeg", "-v", "error", "-filter_complex_threads", "1",
+                    "-f", "lavfi", "-i", "color=c=red:s=320x180:r=1:d=1",
+                    "-filter_complex", graph, "-map", "[vout]", "-frames:v", "1",
+                    "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1",
+                ], capture_output=True, timeout=20)
+                self.assertEqual(result.returncode, 0, result.stderr.decode())
+                self.assertEqual(len(result.stdout), 90 * 160 * 3)
+                top = tuple(result.stdout[(5 * 90 + 45) * 3:(5 * 90 + 45) * 3 + 3])
+                centre = result.stdout[(80 * 90 + 45) * 3]
+                self.assertGreater(centre, 200)
+                if mode == "off":
+                    self.assertLess(max(top), 10, "Fit full must retain padding around the whole source")
+                else:
+                    self.assertGreater(top[0], 200, "Fill canvas must cover the portrait frame")
 
     def test_retained_ranges_offsets_and_clip_origin_are_shared(self):
         graph, labels, duration = build_timeline(

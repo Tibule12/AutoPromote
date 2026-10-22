@@ -21,6 +21,42 @@
   overflow: visible !important;
 }
 
+/* The toolbar's max-width:100% rule otherwise caps this popup at the narrow
+   View options trigger, leaving each grid column only a few letters wide. */
+.viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-view-options .preview-display-controls {
+  width: 340px !important;
+  max-width: calc(100vw - 24px) !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
+}
+
+.viral-studio-overlay .studio-view-options .preview-reframe-quick-group {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #293448;
+}
+
+.viral-studio-overlay .studio-view-options .preview-display-controls button {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 8px 10px !important;
+  font-size: 12px !important;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  text-align: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
 /* Timeline menus open over the monitor. The dock's desktop clipping rule
    otherwise hides their hit targets behind the preview during normal clicks. */
 .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-pro-timeline-dock.is-open {

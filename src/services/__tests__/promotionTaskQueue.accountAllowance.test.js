@@ -1,4 +1,4 @@
-jest.mock("../../firebaseAdmin", () => ({ db: { collection: jest.fn() }, admin: {} }));
+jest.mock("../../firebaseAdmin", () => ({ db: { collection: jest.fn(), runTransaction: jest.fn() }, admin: {} }));
 jest.mock("../aggregationService", () => ({
   recordTaskCompletion: jest.fn(), recordRateLimitEvent: jest.fn(),
   recordPlatformPostDuplicate: jest.fn(), recordTaskEnqueued: jest.fn(),
@@ -14,7 +14,7 @@ const { db } = require("../../firebaseAdmin");
 const billing = require("../billingService");
 const { enqueuePlatformPostTask } = require("../promotionTaskQueue");
 const environmentKeys = ["CI_ROUTE_IMPORTS", "FIREBASE_ADMIN_BYPASS", "NODE_ENV", "JEST_WORKER_ID"];
-let savedEnvironment, used, taskWrite;
+let savedEnvironment, used, taskWrite, contentWrite, contentState;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -24,6 +24,12 @@ beforeEach(() => {
   process.env.NODE_ENV = "development";
   used = 150;
   taskWrite = jest.fn().mockResolvedValue();
+  contentWrite = jest.fn().mockResolvedValue();
+  contentState = { uid: "allowance-owner" };
+  db.runTransaction.mockImplementation(async callback => callback({
+    get: ref => ref.get(),
+    set: (ref, ...args) => ref.set(...args),
+  }));
   billing.getEffectiveTierSnapshot.mockImplementation(async uid => ({
     tierId: "premium", testerAccess: null,
     billingData: uid === "allowance-owner" ? { publishingAllowance: { monthlyLimit: 1000 } } : {},
@@ -39,9 +45,12 @@ beforeEach(() => {
         return { docs, empty: docs.length === 0, size: docs.length, forEach: visit => docs.forEach(visit) };
       },
       add: jest.fn().mockResolvedValue({ id: "audit-event" }),
-      doc: () => ({
-        id: "new-task", get: async () => ({ exists: false }),
-        set: name === "promotion_tasks" ? taskWrite : jest.fn().mockResolvedValue(),
+      doc: id => ({
+        id: id || "new-task",
+        get: async () => name === "content"
+          ? { exists: true, data: () => contentState }
+          : { exists: false },
+        set: name === "promotion_tasks" ? taskWrite : contentWrite,
       }),
     };
     return query;
@@ -62,6 +71,18 @@ test("the account allowance permits its next scheduled post after the default 15
   expect(result).toMatchObject({ id: "new-task", status: "queued", uid: "allowance-owner" });
   expect(result._testStub).toBeUndefined();
   expect(taskWrite).toHaveBeenCalledTimes(1);
+  expect(db.runTransaction).toHaveBeenCalledTimes(1);
+  expect(contentWrite).toHaveBeenCalledWith(
+    { lastMediaDependencyAt: expect.any(String) }, { merge: true }
+  );
+});
+
+test("the allowance does not bypass expired published-media protection", async () => {
+  contentState.storageRetentionStatus = "deleted_after_publication";
+  await expect(enqueuePlatformPostTask({
+    uid: "allowance-owner", contentId: "owned-film", platform: "instagram", reason: "scheduled_event",
+  })).rejects.toMatchObject({ code: "PUBLISHED_MEDIA_EXPIRED", status: 409 });
+  expect(taskWrite).not.toHaveBeenCalled();
 });
 
 test("another account on the same plan is still blocked at 150", async () => {

@@ -8330,5 +8330,18 @@
       "S04",
       "S03"
     ]
+  },
+  "controlLayoutRepair": {
+    "date": "2026-10-22",
+    "evidence": "reports/studio-menu-layout-20261022/README.md",
+    "scope": "Native Studio View options layout and actual control clicks; Fit full/Fill canvas share the existing export framing track and active seek state. Whole picture/sound conformance remains unqualified.",
+    "readinessPromotion": false,
+    "renderJobs": 0,
+    "nextSharedTasks": [
+      "S02",
+      "S04",
+      "S03"
+    ],
+    "framingRegression": "Native real-footage portrait fit/fill pixels; timed export payload and seek-state regression; real FFmpeg off/speaker_track segment pixels."
   }
 }

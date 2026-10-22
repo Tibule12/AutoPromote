@@ -1378,6 +1378,45 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
   });
 
+  test("Fit full and Fill canvas record export framing decisions at the playhead", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{ id: "fit-fill", start: 0, end: 12, duration: 12 }]}
+      onSave={onSave} onCancel={jest.fn()} />);
+    const video = readyCutawaySource(12);
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" }))
+      .getByRole("button", { name: "Reframe", exact: true }));
+    fireEvent.click(screen.getByTestId("reframe-aspect-4-5"));
+    video.currentTime = 3 + 2 / 30;
+    fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByTestId("preview-fit-full"));
+    expect(screen.getByTestId("preview-fit-full")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByTestId("reframe-aspect-4-5")).toHaveAttribute("aria-pressed", "true");
+    video.currentTime = 6 + 2 / 30;
+    fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByTestId("preview-fill-canvas"));
+    expect(screen.getByTestId("preview-fill-canvas")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "true");
+    video.currentTime = 4;
+    fireEvent.timeUpdate(video);
+    expect(screen.getByTestId("preview-fit-full")).toHaveAttribute("aria-pressed", "true");
+    expect(video).toHaveStyle({ objectFit: "contain", objectPosition: "center center" });
+    video.currentTime = 1;
+    fireEvent.timeUpdate(video);
+    expect(screen.getByTestId("preview-fill-canvas")).toHaveAttribute("aria-pressed", "true");
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].finishPlan.reframe).toMatchObject({
+      enabled: true, aspect: "4:5", mode: "speaker_track",
+      timeline_cuts: [
+        { time: 0, mode: "speaker_track" },
+        { time: 3.066, mode: "off" },
+        { time: 6.066, mode: "speaker_track" },
+      ],
+    });
+  });
+
   test("exports Show Everyone as two reviewed source crops without requiring extra cameras", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     render(<ViralClipStudio videoUrl="https://example.com/interview.mp4"
