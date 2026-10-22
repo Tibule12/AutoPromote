@@ -24552,7 +24552,7 @@ const ViralClipStudio = ({
                     </section>
                   ) : null}
                   <MotionInspector
-                    activeOverlay={motionInspectorTarget}
+                    activeOverlay={motionInspectorTarget ? { ...motionInspectorTarget, ...activeMotionCurrent } : null}
                     overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}
                     playhead={previewTimelineTime}
                     keyframes={motionKeyframes}
@@ -24561,6 +24561,10 @@ const ViralClipStudio = ({
                     onSelectOverlay={setMotionTargetId}
                     onUpdateOverlay={(field, value) => {
                       if (!motionInspectorTarget) return;
+                      if (STUDIO_MOTION_PROPERTIES.some(property => property.id === field)) {
+                        editMotionPropertyAtPlayhead(motionInspectorTarget.id, field, value);
+                        return;
+                      }
                       if (motionInspectorTarget.id === "main-video") setMainTransform(current => ({ ...current, [field]: value }));
                       else setOverlayStyleOption(motionInspectorTarget.id, field, value);
                       setComparisonMode("after");

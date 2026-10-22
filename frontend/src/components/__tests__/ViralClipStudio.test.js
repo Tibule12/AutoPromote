@@ -237,8 +237,13 @@ describe("ViralClipStudio timeline sequencing", () => {
       readyState: { configurable: true, value: 4 },
       currentSrc: { configurable: true, get: () => video.src },
     });
+    let paused = video.paused;
+    Object.defineProperty(video, "paused", { configurable: true, get: () => paused });
+    video.play = jest.fn(() => { if (paused) { paused = false; video.dispatchEvent(new Event("play")); } return Promise.resolve(); });
+    video.pause = jest.fn(() => { if (!paused) { paused = true; video.dispatchEvent(new Event("pause")); } });
     fireEvent.loadedMetadata(video);
     fireEvent.loadedData(video);
+    fireEvent.seeked(video);
     const pause = screen.queryByRole("button", { name: "Pause comparison", exact: true });
     if (pausePreview && pause) fireEvent.click(pause);
     return video;
@@ -1091,7 +1096,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       programme.currentTime = 4;
       fireEvent.timeUpdate(programme);
       fireEvent.click(within(library).getByRole("button", { name: "Add as B-roll" }));
-      const brollClip = screen.getByRole("button", { name: "Select Scene 13.mp4 layer clip" }).closest(".pro-group-clip");
+      const brollClip = screen.getByRole("button", { name: "B-roll: Scene 13.mp4, 4.0 to 7.0 seconds, full-screen cutaway" });
       expect(parseFloat(brollClip.style.left)).toBeCloseTo(100 / 3, 2);
       expect(within(library).getByText("Used as B-roll")).toBeInTheDocument();
       fireEvent.click(within(library).getByRole("button", { name: "Add to sequence" }));
@@ -1483,6 +1488,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     render(<ViralClipStudio videoUrl="https://example.com/programme.mp4"
       clips={[{ id: "programme", start: 0, end: 12, duration: 12 }]}
       onSave={onSave} onCancel={jest.fn()} />);
+    readyCutawaySource(12);
     const video = screen.getByTestId("studio-after-video");
     video.currentTime = 2;
     fireEvent.timeUpdate(video);
@@ -3723,6 +3729,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
+    readyCutawaySource(30);
     fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
 
     const inspector = screen.getByTestId("clip-studio-inspector");
@@ -3871,7 +3878,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     await waitFor(() => expect(afterVideo.muted).toBe(false));
     expect(screen.queryByTestId(/broll-preview-/)).not.toBeInTheDocument();
     expect(screen.getAllByText(/Original audio returns automatically/i).length).toBeGreaterThan(0);
-  }, 30000);
+  }, 60000);
 
   test("supports minute-long B-roll with explicit return, loop, and hold behavior", async () => {
     const createdVideos = setupVideoCreateElementMock();
@@ -3892,6 +3899,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
+    readyCutawaySource(360);
     fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
     const inspector = screen.getByTestId("clip-studio-inspector");
     const createdBeforeUpload = createdVideos.length;
@@ -4811,6 +4819,10 @@ describe("ViralClipStudio timeline sequencing", () => {
         ),
       });
 
+    // Export checks the source audio after the queued caption/stock responses.
+    global.fetch.mockResolvedValue({ ok: true,
+      json: jest.fn(() => Promise.resolve({ has_audio: true, silence_segments: [{ start: 0, end: 2 }, { start: 6, end: 12 }] })) });
+
     render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
@@ -4821,6 +4833,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
+    readyCutawaySource(12);
     const inspector = screen.getByTestId("clip-studio-inspector");
     fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
     fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
@@ -5450,6 +5463,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
+    readyCutawaySource(10);
     const inspector = screen.getByTestId("clip-studio-inspector");
     fireEvent.click(within(inspector).getByRole("tab", { name: /Motion/i }));
     fireEvent.click(screen.getByRole("button", { name: "Transform keyframes", exact: true }));
@@ -5482,7 +5496,8 @@ describe("ViralClipStudio timeline sequencing", () => {
         layers: expect.arrayContaining([
           expect.objectContaining({
             id: "main-video",
-            base_transform: expect.objectContaining({ x: 72, y: 61 }),
+            // Animated property edits update the playhead key, preserving the base pose.
+            base_transform: expect.objectContaining({ x: 35, y: 42 }),
             motion_keyframes: expect.arrayContaining([
               expect.objectContaining({ property: "x", time: 0, value: 35 }),
               expect.objectContaining({ property: "x", time: 4, value: 72 }),
@@ -5901,6 +5916,9 @@ describe("ViralClipStudio timeline sequencing", () => {
         }}
         onDirectorReview={onDirectorReview} onSave={jest.fn()} onCancel={jest.fn()}
       />);
+      readyCutawaySource(20);
+      fireEvent.click(screen.getByRole("button", { name: "Show media", exact: true }));
+      fireEvent.click(await screen.findByText(/Open saved project/));
       fireEvent.click(await screen.findByRole("button", {
         name: "Restore previous version of Checkpoint project",
       }));

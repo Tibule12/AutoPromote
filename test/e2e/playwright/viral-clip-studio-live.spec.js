@@ -2615,6 +2615,7 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
   await expect(video).toHaveJSProperty("readyState", 4);
   await page.getByRole("button", { name: "After", exact: true }).click();
 
+  await pausePreview(page);
   await seekOutput(page, "1.5");
   await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
@@ -2629,6 +2630,7 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
   await expect(page.locator(".pro-framing-speaker-cut")).toHaveCount(1);
   await page.screenshot({ path: testInfo.outputPath("show-everyone-speaker-2-on-top.png") });
 
+  await pausePreview(page);
   await seekOutput(page, "53.6");
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(53.6, 1);
   await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
@@ -2644,9 +2646,11 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
   })).toBeCloseTo(9 / 16, 2);
   await page.screenshot({ path: testInfo.outputPath("later-speaker-solo.png") });
 
+  await pausePreview(page);
   await seekOutput(page, "2");
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("source-split-editor")).toBeVisible();
+  await pausePreview(page);
   await seekOutput(page, "53.6");
   await expect(page.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "true");
   expect(errors).toEqual([]);
@@ -2776,10 +2780,8 @@ test("proves Motion Sculpture with real full-body movement footage", async ({ pa
   await page.getByRole("button", { name: "Hide timeline", exact: true }).click();
 
   const motionVideo = page.getByTestId("studio-after-video");
-  await motionVideo.evaluate(async video => {
-    video.currentTime = 5;
-    await video.play();
-  });
+  await seekOutput(page, 5);
+  await playPreview(page);
   const firstTime = await motionVideo.evaluate(video => video.currentTime);
   await page.waitForTimeout(3000);
   const secondTime = await motionVideo.evaluate(video => video.currentTime);
@@ -2803,7 +2805,7 @@ test("proves Motion Sculpture with real full-body movement footage", async ({ pa
     path: path.join("test-results", "viral-clip-studio-live-motion-sculpture.png"),
     fullPage: false,
   });
-  await motionVideo.evaluate(video => video.pause());
+  await pausePreview(page);
   expect(pageErrors).toEqual([]);
 });
 

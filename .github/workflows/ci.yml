@@ -75,6 +75,8 @@ jobs:
       - name: Install root deps
         run: |
           npm ci
+      - name: Verify dependency security guards
+        run: npm run test:security
       - name: Install functions deps
         run: |
           cd autopromote-functions

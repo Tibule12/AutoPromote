@@ -39,7 +39,7 @@
     "flag:uploads": "node ./scripts/flag-bad-uploads.js",
     "export:flagged": "node ./scripts/export-flagged-uploads.js",
     "hold:flagged": "node ./scripts/bulk-hold-flagged.js",
-    "postinstall": "node ./scripts/build-frontend-on-render.js",
+    "postinstall": "node ./scripts/patch-security-dependencies.js && node ./scripts/build-frontend-on-render.js",
     "prepare": "node -e \"const fs=require('fs'), cp=require('child_process'); const tryRun=(p)=>{ if(fs.existsSync(p)){ cp.execFileSync(process.execPath, [p], {stdio:'inherit'}); return true; } return false; }; if(tryRun('./scripts/ensure-husky.js')) process.exit(0); if(tryRun('../scripts/ensure-husky.js')) process.exit(0); if(tryRun('../../scripts/ensure-husky.js')) process.exit(0); console.log('No ensure-husky script found in CWD or parents; skipping husky install');\"",
     "verify:frontend-build": "node ./scripts/verify-frontend-build.js",
     "build:studio-director-replay": "node ./scripts/build-studio-director-replay.js",
@@ -52,7 +52,8 @@
     "knowledge:check": "node scripts/product-knowledge.js check",
     "knowledge:test": "node --test test/product-knowledge/*.test.js",
     "knowledge:review": "node scripts/product-knowledge.js review",
-    "assistance:test": "node --test test/product-assistance/*.test.js"
+    "assistance:test": "node --test test/product-assistance/*.test.js",
+    "test:security": "node --test test/security/*.test.js test/e2e/studio-worker-read-recovery.test.js"
   },
   "engines": {
     "node": ">=20.18.1"
@@ -103,7 +104,7 @@
     "protobufjs": "7.6.5",
     "form-data": "$form-data",
     "@babel/plugin-transform-modules-systemjs": "7.29.7",
-    "basic-ftp": "^5.3.1",
+    "basic-ftp": "6.2.3",
     "follow-redirects": "^1.16.1",
     "lodash": "^4.18.1",
     "nodemailer": "$nodemailer",
