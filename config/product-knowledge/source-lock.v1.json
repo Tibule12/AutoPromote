@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Correct intermediate AAC packet padding extending authored programme time; real candidate source renders exact duration with unchanged delivery quality gates. Preserve existing capabilities and readiness.",
-  "reviewed_at": "2026-10-22T03:18:53.854Z",
+  "reason": "Keep worker regression scratch inside its temporary fixture under read-only deployment source mounts; actual render quality checks and public capability qualification unchanged.",
+  "reviewed_at": "2026-10-22T03:27:52.954Z",
   "catalog_sha256": "9a1ae0868cc99f489d80b2b9f305887470d3332753d207ed60bf12a8762c8fe9",
   "sources": [
     {
@@ -287,11 +287,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "bf840971539d2b507b8b82dbe57d64445812cbf0d6c15165646f4b92113835db"
+      "sha256": "1d71700847683eddee655fa042a1b0722fde5f461611c1cc5738c81041566a14"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "e6c02300a84b9d8e54619a28fdbf68717e33f2800680b9b9c1ac1731951279a2"
+      "sha256": "161a93b52c10926b8b5f25f5fb9c3b984622a50003dc4a0f71e7f334d710758a"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

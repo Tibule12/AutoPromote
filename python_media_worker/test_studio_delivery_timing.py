@@ -124,6 +124,7 @@ class StudioAuthoredDurationRenderTests(unittest.TestCase):
                     )
                     with patch.object(worker, "materialize_video_input", ingest), \
                          patch.object(worker, "upload_file_to_firebase", upload), \
+                         patch.object(worker, "__file__", str(Path(folder) / "worker" / "main_media_server.py")), \
                          patch("sys.path", [str(Path(__file__).parent), *sys.path]):
                         result = asyncio.run(worker.render_viral_clip_impl(request))
                     self.assertEqual(result["status"], "completed")

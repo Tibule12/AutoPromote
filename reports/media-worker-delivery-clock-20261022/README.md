@@ -29,3 +29,14 @@ The11 timing tests pass, including three real handler renders; two actual
 FFmpeg audio-clock tests pass. Knowledge and all five Studio authority records
 validate. Deployment verification is recorded after the repaired run completes. Whole picture/sound, native workflow and creative/PRO/production
 qualification remain separate; shared S02/S03/S04 priorities are unchanged.
+
+The first repaired workflow (`39716521973`) stops before candidate creation:
+the added real-handler regression tries to allocate scratch under `/workspace`,
+which the image test mounts read-only. Its original125-test failure is retained.
+The regression now relocates only the worker scratch root to its own temporary
+fixture directory, as other handler tests already do; all output/media checks
+remain intact. The source checkout stays read-only. The correction is tested
+inside bubblewrap with the entire host filesystem read-only, only `/tmp`
+writable, and networking disabled before the workflow is retried.
+
+The corrected11-test timing suite passes in30.953s under the read-only, network-disabled bubblewrap run, including all three real handler renders.
