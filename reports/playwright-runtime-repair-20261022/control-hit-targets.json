@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-22",
+  "compiledOrdinaryApp": true,
+  "realSavedLogin": true,
+  "headless": true,
+  "muted": true,
+  "mockedResponses": false,
+  "viewportWidths": [
+    1440,
+    1280,
+    1100,
+    1024
+  ],
+  "media": [
+    "closed",
+    "open"
+  ],
+  "dock": [
+    "center",
+    "side"
+  ],
+  "comparison": [
+    "After",
+    "Compare"
+  ],
+  "cases": 32,
+  "blockedButtons": 0,
+  "browserErrors": 0,
+  "renderOrPublishingJobs": 0,
+  "scope": "Native menu pointer hit targets; no whole render/sound or creative qualification."
+}

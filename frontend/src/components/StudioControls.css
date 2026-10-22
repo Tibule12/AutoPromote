@@ -15,6 +15,13 @@
 
 /* View options can extend over the monitor's transport. Keep the open menu
    above that sibling so its Fullscreen and layout buttons receive clicks. */
+.viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .phone-preview-container:has(.studio-control-menu[open]),
+.viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-panel:has(.studio-control-menu[open]) {
+  position: relative;
+  z-index: 12000 !important;
+  overflow: visible !important;
+}
+
 .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-panel > .panel-heading:has(.studio-control-menu[open]) {
   position: relative;
   z-index: 700;

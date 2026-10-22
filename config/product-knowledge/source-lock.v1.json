@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Repair Playwright resumable-source fixtures and bounded CI lifecycle; restore Auto Reframe after Fit full.",
-  "reviewed_at": "2026-10-22T17:40:14.575Z",
+  "reason": "Repair View options ancestor clipping and verify actual pointer hit targets in the CI browser.",
+  "reviewed_at": "2026-10-22T18:02:38.346Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/StudioControls.css",
-      "sha256": "c76a0214d2b0df2140a3b6cb4107fe4af2b6d9ad2c498cd2952cd1aad096db31"
+      "sha256": "56d169432c141489b030c188b721ada93b9cc1f605648205578a1db25664a9a9"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "f783128023f2d4900378b6efa26cf93ce02d07576cf390961388adc3e07600a2"
+      "sha256": "13d0e33836530cb9f9e8c0ed21e813e1aada1b369facf96b0822709e80cda86e"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "6c72aad2c1ed52974a5909f77bb733760c4a7464cc060802b2087f8be35607e9"
+      "sha256": "7e35002b1827bbe5b6b590b90e4046032f68e11cd8d10340db9f999083201849"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
