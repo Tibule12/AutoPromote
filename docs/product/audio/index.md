@@ -1,6 +1,6 @@
 # Audio editing and sound design
 
-Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
+Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -131,8 +131,12 @@ Places sound cues on the native timeline. Included sound-design presets synthesi
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open an owned Studio project, choose Sound and scroll to Sound effects.
+2. Put the playhead on the cut or reveal, then select a sound preset to add it there. Use Upload for an audio file you own.
+3. Choose an existing cue in Placed sound effects. The cue buttons wrap into two columns; selecting one moves the playhead to its start.
+4. In the selected effect card, use On to enable or disable the cue. Set Start, Duration, Effect volume, Fade in and Fade out. Trim start is available for uploaded effects; built-in effects keep that field disabled.
+5. Use the built-in Effect sound selector to change its preset sound, or preview the selected cue with its preview button. Check the complete mix against the picture.
+6. Use normal Undo/redo and save/reopen, then export and listen to the resulting movie before publishing.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -207,6 +211,7 @@ Edits source-bus volume keys and interpolation alongside native cue gain. Retain
 
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
+3. Dense gain curves preserve their sampled values and programme-to-output timing using bounded FFmpeg expression nesting; gain keys do not require removing easing to export.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 

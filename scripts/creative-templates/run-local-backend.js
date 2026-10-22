@@ -12,6 +12,9 @@ for (const value of [port,workerPort]) if (!Number.isInteger(value) || value < 1
   throw new Error('Invalid local Studio port');
 Object.assign(process.env, { NODE_ENV:'development', PORT:String(port),
   ENABLE_BACKGROUND_JOBS:'false', ENABLE_BACKROUND_JOBS:'false',
+  SCHEDULER_ENABLED:'false', ENABLE_HEALTH_SCANS:'false',
+  CONTENT_FACTORY_ENABLED:'false', ENABLE_CONTENT_FACTORY:'false',
+  FIREBASE_ADMIN_BYPASS:'0', CI_ROUTE_IMPORTS:'0',
   MEDIA_WORKER_URL:`http://127.0.0.1:${workerPort}`, LOCAL_MEDIA_WORKER_URL:`http://127.0.0.1:${workerPort}` });
 const server = require(path.join(root,'src/server')).listen(port,'127.0.0.1', error => {
   // Express 5 also calls its listen callback on failure. Do not report readiness

@@ -28,9 +28,22 @@
         color: #666;
         font-size: 0.9em;
       }
+
+      body { margin:0; max-width:none; padding:0; background:#f7f7f2; color:#242034; }
+      body > nav { display:flex; flex-wrap:wrap; gap:24px; align-items:center; max-width:960px; margin:auto; padding:24px; border-bottom:1px solid #dedfd9; }
+      nav img { width:166px; height:auto; vertical-align:middle; }
+      nav a { color:#613be4; text-decoration:none; font-weight:600; }
+      .container { max-width:900px; margin:40px auto; padding:clamp(24px,5vw,56px); border:1px solid #e1e1d9; border-radius:14px; box-shadow:none; }
+      h1 { font-size:clamp(30px,6vw,48px); letter-spacing:-.04em; line-height:1.15; }
+      h2 { margin-top:30px; font-size:21px; }
+      a { color:#613be4; overflow-wrap:anywhere; }
+      li { margin-bottom:9px; }
+      :focus-visible { outline:3px solid #7758e9; outline-offset:4px; }
+      @media(max-width:600px) { .container { margin:20px 12px; } }
     </style>
   </head>
   <body>
+    <nav aria-label="AutoPromote"><a href="/"><img src="/brand/autopromote-gradient.svg" alt="AutoPromote home" /></a><a href="/#/docs">Product guides</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/#/contact">Contact</a></nav>
     <div class="container">
       <h1>Privacy Policy for AutoPromote</h1>
       <p class="last-updated">

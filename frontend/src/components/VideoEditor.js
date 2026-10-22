@@ -1982,6 +1982,7 @@ function VideoEditor({
             videoUrl={videoSrc}
             sourceName={processedFile?.name || file?.name || "Original source video"}
             sourceStoragePath={processedFile?.storagePath || file?.storagePath || null}
+            sourceContentHash={(processedFile || file)?.contentHash || (processedFile || file)?.sha256 || null}
             initialProjectFiles={initialProjectFiles}
             initialSavedProject={initialSavedProject}
             importedCameraMaster={importedCameraMaster}

@@ -380,7 +380,7 @@ async function getPromotionQuotaSnapshot(userId, tierId, testerAccess = null, bi
   };
 }
 
-async function evaluateUploadReadiness(userId, options = {}) {
+async function evaluateUploadReadiness(userId, options = {}, { uploadRequired = true } = {}) {
   const targetPlatforms = Array.isArray(options.target_platforms)
     ? options.target_platforms.filter(Boolean)
     : [];
@@ -411,7 +411,7 @@ async function evaluateUploadReadiness(userId, options = {}) {
     publishMode,
   };
 
-  if (usageStats.limit !== Infinity && usageStats.remaining <= 0) {
+  if (uploadRequired && usageStats.limit !== Infinity && usageStats.remaining <= 0) {
     return {
       ...base,
       allowed: false,
@@ -1463,9 +1463,13 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { contentId } = req.params;
-    const { time, frequency, platforms = [], platformOptions = {} } = req.body;
+    const { time, frequency, platforms = [], platformOptions = {}, platformTimes = {}, timezone = "UTC" } = req.body;
 
     if (!time) return res.status(400).json({ error: "Missing required field: time" });
+    if (!platformOptions || typeof platformOptions !== "object" || Array.isArray(platformOptions) ||
+        !platformTimes || typeof platformTimes !== "object" || Array.isArray(platformTimes) ||
+        (frequency && !["once", "daily", "weekly", "monthly"].includes(frequency)))
+      return res.status(400).json({ error: "Invalid destination scheduling settings" });
 
     // Verify content belongs to user
     const contentDoc = await db.collection("content").doc(contentId).get();
@@ -1474,16 +1478,45 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
     if ((content.user_id || content.userId) !== userId)
       return res.status(403).json({ error: "Forbidden" });
 
+    require("./services/contentMediaDependency").assertAvailable(content);
+
+    const allowedPlatforms = ["youtube", "tiktok", "instagram", "linkedin", "facebook", "reddit"];
+    if (!Array.isArray(platforms) || !platforms.length ||
+        new Set(platforms).size !== platforms.length || platforms.some(p => !allowedPlatforms.includes(p)))
+      return res.status(400).json({ error: "Choose explicit supported destinations" });
+    for (const platform of platforms) {
+      const instant = Date.parse(platformTimes[platform] || time);
+      if (!Number.isFinite(instant) || instant <= Date.now())
+        return res.status(400).json({ error: "Choose future destination times" });
+      const settings = platformOptions[platform] || {};
+      const ownedUrls = [content.url, content.persistentMediaUrl, content.mediaUrl, content.media_url, content.downloadInfo?.url, content.processedUrl].filter(Boolean);
+      if ([settings.media_url, settings.videoUrl].filter(Boolean).some(url => !ownedUrls.includes(url)))
+        return res.status(400).json({ error: "Use the selected owned media when scheduling existing content" });
+    }
+    try { new Intl.DateTimeFormat("en", { timeZone: timezone }); }
+    catch (_) { return res.status(400).json({ error: "Choose a valid timezone" }); }
+    // This route schedules an already owned content record. It never uploads
+    // bytes or creates another content record. Distribution/plan limits still
+    // apply; a second content-upload allowance is not required.
+    if (!shouldBypassUploadReadinessForTest(req)) {
+      const readiness = await evaluateUploadReadiness(userId, {
+        target_platforms: platforms, scheduled_promotion_time: time,
+        platform_schedule_times: platformTimes,
+      }, { uploadRequired: false });
+      if (!readiness.allowed) return res.status(403).json({ error: readiness.message, code: readiness.code, context: readiness.context });
+    }
+
     const promotionService = require("./promotionService");
     const schedules = [];
-    const platformList = platforms.length > 0 ? platforms : ["all"];
+    const platformList = platforms;
 
     for (const platform of platformList) {
       const scheduleData = {
         platform,
-        startTime: time,
+        startTime: platformTimes[platform] || time,
         frequency: frequency || "once",
-        ...(platformOptions[platform] || {}),
+        timezone,
+        platformSpecificSettings: platformOptions[platform] || {},
       };
       const schedule = await promotionService.schedulePromotion(contentId, scheduleData);
       // Store user_id so GET /my-promotion-schedules can find it
@@ -1502,7 +1535,7 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
     res.json({ success: true, schedules });
   } catch (error) {
     console.error("[POST /:contentId/promotion-schedules] Error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(error.status || 500).json({ error: error.status ? error.message : "Internal server error", ...(error.code ? { code: error.code } : {}) });
   }
 });
 

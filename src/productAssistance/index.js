@@ -2,7 +2,9 @@
 // Bounded documentation assistance. Deliberately has no model, project, billing,
 // render, publication or worker adapters. All answer facts come from public truth.
 const { randomUUID } = require('node:crypto');
-const { loadKnowledge, projectPublic, sha, textRecords } = require('../productKnowledge');
+const { loadKnowledge, projectPublic, sha } = require('../productKnowledge');
+const { createRetrieval, tokens } = require('./retrieval');
+const { redactQuestion } = require('./questionPrivacy');
 const MODES = ['EXPLAIN', 'GUIDE', 'DIAGNOSE'];
 const PRIVATE = /(?:https?:\/\/|gs:\/\/|\/home\/|\/Users\/|C:\\|Bearer\s|(?:token|secret|password|api[_ -]?key)\s*[:=]|eyJ[a-zA-Z0-9_-]{15,}|-----BEGIN|[\w.+-]+@[\w.-]+\.[a-z]{2,})/i;
 const fail = code => Object.assign(new Error(code), { code, status: 400 });
@@ -38,22 +40,43 @@ const STATUS = {
 // Topic routing is independent of the evaluation questions. Aliases + weighted
 // lexical retrieval handle other wording; graph expansion supplies dependencies.
 const TOPICS = [
+  [/\b(split|cut.*(?:two|parts)|split button)\b/i, ['studio.cut'], []],
+  [/\b(trim|shorten)|\bremove\b.*\b(first|last|seconds|end)\b/i, ['studio.trim'], []],
+  [/\b(undo|redo|mistake)|\bdeleted\b.*\baccident/i, ['studio.undo_redo'], []],
+  [/\b(save|reopen)\b.*\b(project|edit)|\bproject\b.*\b(tomorrow|save|reopen)/i, ['studio.persistence'], []],
   [/\b(text|words?|typography)\b.*\b(behind|occlud)|\bbehind\b.*\b(person|someone|subject)/i, ['studio.compositing.text_behind_subject', 'studio.creator.text_behind_subject'], ['task.text_behind']],
   [/\b(cleanup|clean up|remove|erase|replace)\b.*\b(object|thing)|\bobject\b.*\b(cleanup|remov|eras|replac)/i, ['studio.creator.object_cleanup'], ['task.remove_object']],
+  [/\bbackground\b(?!\s+(?:music|noise|sound))|\b(room|halo|fringe|sofa|microphone)\b/i, ['studio.compositing', 'studio.subject_cutout', 'studio.creator.background_replacement'], ['task.background_replace']],
   [/\b(track|tracking|tracked)\b/i, ['studio.tracking', 'studio.creator.tracking'], ['task.tracked_text']],
   [/\b(depth|parallax)\b/i, ['studio.compositing.depth_estimation', 'studio.compositing.mask_depth'], []],
   [/\b(revers|swapp|wrong speaker|other speaker)|\b(speaker|channel)\b.*\b(mapping|reversed|swapped)/i, ['cam_combiner.channel_mapping'], ['task.reversed_channels']],
-  [/\b(cam combiner|podcast cameras?|switch.*cameras?|multicam|multi.camera)\b/i, ['cam_combiner.switching', 'cam_combiner.synchronization'], ['task.cam_combiner']],
+  [/\b(cam combiner|podcast cameras?|switch.*cameras?|multicam|multi.camera)\b|\bcut\b.*\b(person|speaker)\b.*\b(speak|talk)/i, ['cam_combiner.switching', 'cam_combiner.synchronization'], ['task.cam_combiner']],
   [/\bdirector\b/i, ['director.proposals', 'director.review'], ['task.director_manual']],
   [/\b(captions?|subtitles?|transcri)/i, ['studio.captions'], ['task.captions_correct']],
-  [/\b(keyframes?|transform)\b/i, ['studio.keyframes'], []],
+  [/\b(key\s*frames?|transform)\b|\b(?:picture|image)\b.*\bmove\b|\banimat\w*\b.*\b(position|rotation)\b|\bmotion controls\b/i, ['studio.keyframes'], []],
   [/\b(easing|bezier|acceleration)\b/i, ['studio.easing', 'studio.keyframes'], []],
   [/\b(image|photo|picture)\b.*\b(video|moving|motion|animate|animation)|\banimat\w*\b.*\b(image|photo|picture)\b/i, ['generation.image_to_video'], ['task.image_cinematic']],
   [/\b(idea.to.video|idea.*video)\b/i, ['generation.idea_to_video'], []],
-  [/\b(logo|brand reveal)\b/i, ['creative.logo_brand', 'studio.three_d'], ['task.cinematic_logo']],
+  [/\b(logo|brand reveal)\b/i, ['studio.logo_motion', 'creative.logo_brand', 'studio.three_d'], ['task.cinematic_logo']],
+  [/\b(logo workshop|logo designer|design a logo|transparent logo|logo svg)\b/i, ['studio.logo_design'], []],
+  [/\b(?:each letter|stagger words|editable text|letter animation)\b/i, ['studio.text_choreography'], []],
+  [/\bvector\b.*\b(points?|path|draw|edit)|\b(edit|draw)\b.*\bvector\b/i, ['studio.vector_artwork'], []],
   [/\b3d\b/i, ['studio.three_d', 'studio.blender'], ['task.three_d_title']],
   [/\b(templates?|product launch)\b/i, ['studio.templates', 'creative.shared_templates'], ['task.use_template', 'task.product_launch']],
-  [/\b(publish|post|schedule|tiktok|instagram|youtube|reddit|linkedin|facebook)\b/i, ['publishing.publish', 'publishing.connections', 'publishing.schedule'], []],
+  [/\bconnect\w*\b.*\b(platform|account|youtube|instagram|facebook|tiktok|reddit|linkedin)/i, ['publishing.connections'], []],
+  [/\b(schedul\w*|queue)\b|\bcaption and time\b/i, ['publishing.schedule'], []],
+  [/\b(analytics|performed|performance|views)\b/i, ['publishing.analytics'], []],
+  [/\b(publish|post|tiktok|instagram|youtube|reddit|linkedin|facebook)\b/i, ['publishing.publish', 'publishing.connections', 'publishing.schedule'], []],
+  [/\b(download|export|finished (?:video|movie|film))\b/i, ['studio.export', 'studio.render'], ['task.final_export']],
+  [/\b(log\s?in|sign\s?in|password|permission|delete my account)\b/i, ['system.account'], []],
+  [/\b(cost|credits?|balance|upgrade|plan|billing|refund)\b|\b(?:autopromote|subscription)\b.*\bprice\b|\bprice\b.*\b(?:autopromote|subscription)\b/i, ['system.costs'], []],
+  [/\b(cancel|stop)\b.*\b(job|processing|generation)\b/i, ['system.cancellation'], []],
+  [/\b(retry|failed render|queued|processing.*long)\b/i, ['system.retries', 'system.processing_states'], []],
+  [/\b(duck|quieter|speech over|hear speech)\b|\bmusic\b.*\b(speaks?|dialogue)\b/i, ['studio.ducking'], []],
+  [/\b(music|song)\b/i, ['studio.music'], []],
+  [/\b(voice\s?over|narration|recorded voice)\b/i, ['studio.voiceover'], []],
+  [/\b(noisy speech|clean up the sound|background noise|voice repair)\b/i, ['studio.audio_restoration'], []],
+  [/\b(sound effects?|whoosh|sound cues)\b/i, ['studio.sfx'], []],
 ];
 // Actual emitted codes, mapped to existing public documentation. No invented
 // diagnosis: responses quote requirements/limits, not a claimed account cause.
@@ -81,7 +104,9 @@ const BLOCK_MESSAGES = {
 function validateRequest(input, book) {
   if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).some(k => !['question', 'mode', 'context'].includes(k))) throw fail('HELP_INPUT_INVALID');
   const { question, mode = 'EXPLAIN', context = {} } = input;
-  if (typeof question !== 'string' || !question.trim() || question.length > 1000 || PRIVATE.test(question) || /[\x00-\x08]/.test(question)) throw fail('HELP_QUESTION_UNSAFE');
+  if (typeof question !== 'string' || !question.trim() || question.length > 1000 || /[\x00-\x08]/.test(question)) throw fail('HELP_QUESTION_UNSAFE');
+  const sanitized = redactQuestion(question);
+  if (PRIVATE.test(sanitized.question)) throw fail('HELP_QUESTION_UNSAFE');
   if (!MODES.includes(mode)) throw fail('HELP_MODE_UNSUPPORTED');
   if (!context || typeof context !== 'object' || Array.isArray(context) || Object.keys(context).length > 8 || Object.keys(context).some(k => !['active_workspace_id', 'workspace_type', 'selected_feature_id', 'selected_tool', 'selected_media_type', 'capability_availability', 'error_code', 'error_message'].includes(k))) throw fail('HELP_CONTEXT_UNSAFE');
   for (const [key, value] of Object.entries(context)) {
@@ -96,37 +121,31 @@ function validateRequest(input, book) {
   if (context.selected_tool && !['motion', 'transform', 'composite', 'captions', '3d', 'templates', 'creatorfx', 'director', 'cam_combiner'].includes(context.selected_tool)) throw fail('HELP_CONTEXT_UNSAFE');
   if (context.selected_media_type && !['image', 'video', 'audio', 'none'].includes(context.selected_media_type)) throw fail('HELP_CONTEXT_UNSAFE');
   if (context.error_code && !/^[A-Za-z][A-Za-z0-9_]{1,79}$/.test(context.error_code)) throw fail('HELP_CONTEXT_UNSAFE');
-  return { question: question.trim(), mode, context };
+  return { question: sanitized.question.trim().slice(0, 1000), mode, context, redacted: sanitized.redacted };
 }
-const STOP = new Set('how do i can what is the a an my to of for in on it this that does why me about auto promote autopromote please now next'.split(' '));
-const tokens = text => [...new Set((text.toLowerCase().match(/[a-z0-9]+/g) || []).filter(t => t.length > 2 && !STOP.has(t)))];
-function lexical(question, book) {
-  const qs = tokens(question);
-  const records = textRecords(book);
-  return records.map(r => {
-    const title = (r.entry.name || r.entry.title || r.entry.label).toLowerCase();
-    const all = tokens(r.text); const titleWords = tokens(title);
-    const matches = qs.filter(t => all.some(w => w === t));
-    const score = matches.reduce((n, t) => n + Math.log(1 + records.length / (1 + records.filter(x => tokens(x.text).includes(t)).length)) * (titleWords.includes(t) ? 5 : 1), 0);
-    return { ...r, score, matches: matches.length };
-  }).filter(r => r.score >= 5 && r.matches >= Math.min(2, qs.length)).sort((a, b) => b.score - a.score || a.id.localeCompare(b.id)).slice(0, 5);
-}
-function resolve(question, context, book) {
+function resolve(question, context, book, retrieve) {
   const features = [], tasks = [], controls = [];
   const add = (list, id) => { if (!list.includes(id)) list.push(id); };
-  for (const [pattern, fs, ts] of TOPICS) if (pattern.test(question)) { fs.forEach(id => add(features, id)); ts.forEach(id => add(tasks, id)); }
-  if (context.selected_feature_id && (!features.length || /^(what (do i do next|is this)|help|explain|guide me)[?!. ]*$/i.test(question))) {
-    features.unshift(context.selected_feature_id);
-  }
-  if (!features.length) for (const r of lexical(question, book)) {
+  const ranked = retrieve(question, context);
+  const addRecord = r => {
     if (r.kind === 'feature') add(features, r.id);
     if (r.kind === 'task') { add(tasks, r.id); r.entry.feature_ids.slice(0, 2).forEach(id => add(features, id)); }
     if (r.kind === 'control') { add(controls, r.id); r.entry.feature_ids.slice(0, 2).forEach(id => add(features, id)); }
+  };
+  const exact = ranked.filter(r => r.exact && (r.kind !== 'control' || r.contextual)).slice(0, 8);
+  exact.filter(r => r.kind === 'control' && r.contextual || r.kind === 'feature' && (r.titleWords.size > 1 || tokens(question).every(word => r.titleWords.has(word)))).forEach(addRecord);
+  const corrected = retrieve.correct(question);
+  for (const [pattern, fs, ts] of TOPICS) if (pattern.test(question) || pattern.test(corrected)) { fs.forEach(id => add(features, id)); ts.forEach(id => add(tasks, id)); }
+  exact.forEach(addRecord);
+  if (context.selected_feature_id && (!features.length || /^(what (do i do next|is this)|help|explain|guide me)[?!. ]*$/i.test(question))) {
+    features.unshift(context.selected_feature_id);
   }
+  if (!features.length) ranked.slice(0, 5).forEach(addRecord);
+  ranked.filter(r => r.kind === 'control' && r.contextual).slice(0, 10).forEach(r => add(controls, r.id));
   const possibleCode = question.match(/\b[A-Z][A-Z0-9]+(?:_[A-Z0-9]+)+\b/)?.[0];
   const error = context.error_code || context.error_message || Object.keys(BLOCK_MESSAGES).find(message => question === message) ||
     Object.keys(ERRORS).find(code => question.split(/\s+/).includes(code)) || (possibleCode && !Object.keys(STATUS).includes(possibleCode) ? possibleCode : null);
-  const diagnostic = ERRORS[error] || BLOCK_MESSAGES[error];
+  const diagnostic = Object.hasOwn(ERRORS, error) ? ERRORS[error] : Object.hasOwn(BLOCK_MESSAGES, error) ? BLOCK_MESSAGES[error] : null;
   if (diagnostic) features.unshift(diagnostic[0]);
   const unique = [...new Set(features)].slice(0, 5);
   if (!tasks.length) book.tasks.filter(t => t.feature_ids.some(id => unique.includes(id))).slice(0, 3).forEach(t => add(tasks, t.task_id));
@@ -139,6 +158,7 @@ function createAssistance({ internalBook, now = () => Date.now(), capacity = 256
   // Apply public projection even for injected test catalogues. The service never
   // retrieves from internal implementation evidence or internal-only features.
   const book = projectPublic(internalBook);
+  const retrieve = createRetrieval(book);
   const sourceHash = sha(Buffer.from(JSON.stringify(internalBook)));
   const receipts = new Map(), gaps = new Map();
   if (journal) {
@@ -154,13 +174,17 @@ function createAssistance({ internalBook, now = () => Date.now(), capacity = 256
   };
   function answer(input) {
     expire(receipts); expire(gaps);
-    const { question, mode, context } = validateRequest(input, book);
-    const matched = resolve(question, context, book);
-    const unknownError = matched.error && !ERRORS[matched.error] && !BLOCK_MESSAGES[matched.error];
+    const { question, mode, context, redacted } = validateRequest(input, book);
+    const matched = resolve(question, context, book, retrieve);
+    const greeting = /^(?:hi|hello|hey(?: there)?|good (?:morning|afternoon|evening))[\s.!?👋]*$/iu.test(question);
+    const thanks = /^(?:thanks|thank you)(?:[,! .]+that helped)?[.! ]*$/i.test(question);
+    const introduction = /^(?:what (?:is autopromote|can you help me with)|help me get started|i am new here)[?!. ]*$/i.test(question);
+    const asksForGuarantee = /\b(?:guarantee|promise)\b.*\b(?:views|viral|followers|sales|reach)\b/i.test(question);
+    const unknownError = matched.error && !Object.hasOwn(ERRORS, matched.error) && !Object.hasOwn(BLOCK_MESSAGES, matched.error);
     const featureIds = matched.features;
     const primary = book.features.filter(f => featureIds.includes(f.feature_id)).sort((a, b) => featureIds.indexOf(a.feature_id) - featureIds.indexOf(b.feature_id));
     const dependencies = book.features.filter(f => primary.some(p => p.requires.includes(f.feature_id)));
-    const gapReason = unknownError ? 'unknown_error_code' : !primary.length ? 'missing_or_ambiguous_feature_documentation' : null;
+    const gapReason = unknownError ? 'unknown_error_code' : !primary.length && !greeting && !thanks && !introduction ? 'missing_or_ambiguous_feature_documentation' : null;
     const gap = gapReason ? { gap_id: randomUUID(), question, reason: gapReason, candidate_area: context.workspace_type || primary[0]?.area || 'unknown', product_knowledge_version: book.knowledge_version, error_code: unknownError ? matched.error : null, review_status: 'PENDING_REVIEW', created_at: new Date(now()).toISOString() } : null;
     if (gap) retain(gaps, gap.gap_id, gap);
     const selectedTasks = book.tasks.filter(t => matched.tasks.includes(t.task_id));
@@ -191,7 +215,8 @@ function createAssistance({ internalBook, now = () => Date.now(), capacity = 256
     retain(receipts, receipt.receipt_id, receipt);
     if (journal) journal.write({ receipts: [...receipts.values()], gaps: [...gaps.values()] });
     return { mode, read_only: true, execution_authority: 'NONE', actions: [], receipt_id: receipt.receipt_id,
-      answer: unknownError ? 'This error is not documented yet.' : !features.length ? 'I could not resolve this question confidently from AutoPromote documentation. Name the feature or open its contextual Help.' : features.map(f => `${f.name} — ${f.readiness_note} ${f.summary}`).join('\n\n'),
+      answer: unknownError ? 'This error is not documented yet.' : greeting || introduction ? 'Hi! I can help with AutoPromote editing, motion, sound, captions, templates, generation and publishing. What would you like to do?' : thanks ? 'You’re welcome. Ask me about another AutoPromote feature whenever you need help.' : !features.length ? 'I do not have a documented answer to that yet. I can help with AutoPromote editing, sound, templates, generation and publishing. Tell me which feature or task you mean, or open its Help button.' : `${asksForGuarantee ? 'The documentation does not promise guaranteed views or results. ' : ''}${features.map(f => `${f.name} — ${f.readiness_note} ${f.summary}`).join('\n\n')}`,
+      privacy_notice: redacted ? 'I removed private contact details, links, file paths or credentials before looking up your question. Please keep credentials out of chat.' : null,
       features, controls: selectedControls.map(c => ({ ...c, documentation_url: doc(`control-reference/index.md#${slug(c.control_id)}`) })), tasks: relatedTasks,
       relationships: book.relationships.filter(e => used.some(u => (u.feature_id || u.control_id || u.task_id) === e.from) && used.some(u => (u.feature_id || u.control_id || u.task_id) === e.to)),
       sources: { label: 'Based on AutoPromote documentation', knowledge_version: book.knowledge_version, product_version: book.product_version, updated_at: book.updated_at, documentation_url: doc('README.md') },

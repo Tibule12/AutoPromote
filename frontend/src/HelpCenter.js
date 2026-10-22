@@ -1,60 +1,71 @@
 import React from "react";
-import "./Page.css";
-import PublicFeatureAvailability from "./components/PublicFeatureAvailability";
+import { Link } from "react-router";
+import PublicPage, { PageCard } from "./components/public/PublicPage";
 
-const HelpCenter = () => (
-  <div className="ap-page-container">
-    <header className="ap-page-header">
-      <h1>Help Center</h1>
-      <p className="ap-page-subtitle">How can we assist you today?</p>
-    </header>
-
-    <div className="ap-features-grid">
-      <div className="ap-feature-card">
-        <h3>Getting Started</h3>
-        <p>Learn how to connect your accounts and schedule your first post.</p>
-        <a href="/docs">View Guide</a>
+export default function HelpCenter() {
+  return (
+    <PublicPage
+      eyebrow="HELP / FIND YOUR NEXT STEP"
+      title="Where did the workflow get stuck?"
+      intro="Start with the task you’re trying to complete. The right guide is usually more useful than another guess."
+    >
+      <div className="public-grid">
+        <PageCard title="Start a project" to="/docs/getting-started">
+          <p>Import owned footage, open the workspace and prepare the first version.</p>
+        </PageCard>
+        <PageCard title="Edit in Studio" to="/docs/studio">
+          <p>Find layers, inspector controls, keyframes, sound and project backups.</p>
+        </PageCard>
+        <PageCard title="Connect and publish" to="/docs/publishing">
+          <p>Review destination options, reconnect an account and follow the release state.</p>
+        </PageCard>
+        <PageCard title="Understand the numbers" to="/metrics">
+          <p>Separate publication status from the performance data each platform returns.</p>
+        </PageCard>
+        <PageCard title="Plans and billing" to="/pricing" link="View current plans">
+          <p>Check allowances, editing access and credits on the current plan cards.</p>
+        </PageCard>
+        <PageCard title="Contact support" to="/support" link="Open support">
+          <p>
+            Check your plan’s support access and tracked tickets, or use email for a general
+            inquiry.
+          </p>
+        </PageCard>
       </div>
-      <div className="ap-feature-card">
-        <h3>Account & Billing</h3>
-        <p>Manage your subscription, update payment methods, or change your password.</p>
+      <section className="public-faq" aria-label="Common questions">
+        <details>
+          <summary>Why is a submitted video still processing?</summary>
+          <p>
+            A platform can accept an upload before the published post is ready. Check the
+            destination state in the queue before creating another submission.
+          </p>
+        </details>
+        <details>
+          <summary>Why are some analytics missing?</summary>
+          <p>
+            Platforms expose different metrics and update them at different times. Unavailable data
+            is separate from an observed zero.
+          </p>
+        </details>
+        <details>
+          <summary>Can every destination have its own time and caption?</summary>
+          <p>
+            Use the destination settings in Publisher to prepare its available copy, media and
+            scheduling options. Review the timezone before confirming.
+          </p>
+        </details>
+        <details>
+          <summary>What should I send with a support request?</summary>
+          <p>
+            Include the page, destination, approximate time, what you expected and what happened.
+            Add a post or task reference if available. Keep passwords and access tokens private.
+          </p>
+        </details>
+      </section>
+      <div className="public-callout">
+        Need a direct contact? <Link to="/contact">Tell us about the issue</Link> or email{" "}
+        <a href="mailto:thulani@autopromote.org">thulani@autopromote.org</a>.
       </div>
-      <div className="ap-feature-card">
-        <h3>Troubleshooting</h3>
-        <p>Solutions for common upload errors, connection issues, or failed posts.</p>
-      </div>
-      <div className="ap-feature-card">
-        <h3>Contact Support</h3>
-        <p>Need human help? Open a ticket or email us directly.</p>
-        <a href="/support">Contact Us</a>
-      </div>
-    </div>
-
-    <PublicFeatureAvailability
-      title="Support Scope"
-      intro="The support team can help most with the parts of AutoPromote that are live today: account connections, publishing state, scheduling, analytics visibility, and current monetization guidance."
-      items={[
-        {
-          name: "Connected publishing workflows",
-          status: "Live",
-          description:
-            "Best supported for uploads, scheduling, queue state, and platform connection issues.",
-        },
-        {
-          name: "Monetization guidance",
-          status: "Live",
-          description:
-            "Support can help explain how the platform works, subscription tiers, and platform connection issues.",
-        },
-        {
-          name: "Deployment-only features",
-          status: "Deployment-dependent",
-          description:
-            "Some short-link and landing-page behavior depends on how the running environment has been configured.",
-        },
-      ]}
-    />
-  </div>
-);
-
-export default HelpCenter;
+    </PublicPage>
+  );
+}

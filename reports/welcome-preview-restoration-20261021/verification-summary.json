@@ -1,0 +1,58 @@
+{
+  "cause": "The chatbot rebuild omitted the existing REACT_APP_WELCOME_STUDIO_PREVIEW=true build setting.",
+  "restoration": "Existing local welcome page selection restored while retaining the chatbot repair and API origin.",
+  "candidateComparedWithOriginal": {
+    "anonymousViewportChecks": 8,
+    "headingHeroLinksAndMediaMatch": true,
+    "heroScreenshotPixelComparisons": [
+      {
+        "width": 1440,
+        "identicalScreenshotPixels": true
+      },
+      {
+        "width": 390,
+        "identicalScreenshotPixels": true
+      },
+      {
+        "width": 360,
+        "identicalScreenshotPixels": true
+      },
+      {
+        "width": 1200,
+        "identicalScreenshotPixels": true
+      }
+    ],
+    "authenticated": {
+      "realSavedLogin": true,
+      "questions": 3,
+      "savedSessionUnchanged": true,
+      "savedProjectRecordsUnchanged": 43
+    },
+    "browserErrors": []
+  },
+  "finalServedOrigin": {
+    "url": "http://localhost:5006/",
+    "anonymousViewportChecks": 4,
+    "authenticated": {
+      "realSavedLogin": true,
+      "questions": 3,
+      "savedSessionUnchanged": true,
+      "savedProjectRecordsUnchanged": 43
+    },
+    "browserErrors": [],
+    "apiWrites": [
+      "/api/product-assistance/ask",
+      "/api/product-assistance/ask",
+      "/api/product-assistance/ask"
+    ]
+  },
+  "build": "PASS with welcome flag true and API origin preserved",
+  "readinessPromotion": false,
+  "productionDeployment": false,
+  "mainMerge": false,
+  "newProviderOrModelJobs": 0,
+  "newRenders": 0,
+  "sourceAndMediaPreserved": true,
+  "privateBrowserEvidenceRetainedLocally": true,
+  "focusedWelcomeAndChatComponentTestsPassed": 15
+}

@@ -98,3 +98,99 @@ rewrite_backend_jcut.py
 fix_indentation.py
 *.bak
 
+# Private native logo-motion media, account session logs and exact receipts.
+reports/studio-logo-motion-20261017/*
+!reports/studio-logo-motion-20261017/README.md
+reports/studio-logo-motion-20261017-*.log
+
+
+# Private owner-directed ribbon logo revision.
+reports/studio-logo-ribbons-20261017/*
+!reports/studio-logo-ribbons-20261017/README.md
+
+# Private word-piece movie and authenticated Studio proof.
+reports/studio-logo-word-pieces-20261017/*
+!reports/studio-logo-word-pieces-20261017/README.md
+!frontend/public/favicon.png
+!frontend/public/logo192.png
+!frontend/public/logo512.png
+
+# Private native alternate logo comparison and owner session evidence.
+reports/studio-logo-diamond-cascade-20261017/*
+!reports/studio-logo-diamond-cascade-20261017/README.md
+
+# Private local Studio/owner QA: retain summaries, never sessions, builds or media.
+frontend/build
+*.private.*
+reports/**/site-build*/
+reports/**/build/
+reports/**/studio-host/
+reports/**/studio-editor/
+reports/content-performance-audit-20261021/*
+!reports/content-performance-audit-20261021/README.md
+reports/content-performance-test-20261021/*
+!reports/content-performance-test-20261021/README.md
+reports/footer-pages-20261021/*
+!reports/footer-pages-20261021/README.md
+reports/studio-boxing-edit-20261019/*
+!reports/studio-boxing-edit-20261019/README.md
+reports/studio-creator-film-20261018/*
+!reports/studio-creator-film-20261018/README.md
+reports/studio-logo-design-20261018/*
+!reports/studio-logo-design-20261018/README.md
+!reports/studio-logo-design-20261018/control-contract.md
+reports/studio-real-footage-20261018/*
+!reports/studio-real-footage-20261018/README.md
+reports/studio-real-footage-edit-20261018/*
+!reports/studio-real-footage-edit-20261018/README.md
+reports/studio-restaurant-film-20261020/*
+!reports/studio-restaurant-film-20261020/README.md
+reports/studio-spatial-paths-20261017/*
+!reports/studio-spatial-paths-20261017/README.md
+reports/studio-text-choreography-20261018/*
+!reports/studio-text-choreography-20261018/README.md
+!reports/studio-text-choreography-20261018/control-contract.md
+reports/studio-ui-controls-20261021/*
+!reports/studio-ui-controls-20261021/README.md
+reports/studio-vector-artwork-20261018/*
+!reports/studio-vector-artwork-20261018/README.md
+reports/studio-vector-offset-20261018/*
+!reports/studio-vector-offset-20261018/README.md
+!reports/studio-vector-offset-20261018/control-contract.md
+reports/studio-vector-trim-20261018/*
+!reports/studio-vector-trim-20261018/README.md
+reports/welcome-real-workflow-20261021/*
+!reports/welcome-real-workflow-20261021/README.md
+reports/welcome-studio-reel-20261021/*
+!reports/welcome-studio-reel-20261021/README.md
+reports/welcome-studio-scroll-20261021/*
+!reports/welcome-studio-scroll-20261021/README.md
+
+# Local pre-push test output; publish only the reviewed summary.
+reports/push-review-20261021/*
+!reports/push-review-20261021/README.md
+
+# CI failure logs and browser captures stay local; publish the reviewed summary.
+reports/playwright-ci-fix-20261021/*
+!reports/playwright-ci-fix-20261021/README.md
+
+# Isolated Python environments and raw CI logs are local verification assets.
+reports/emulator-python-runtime-20261021/*
+!reports/emulator-python-runtime-20261021/README.md
+
+# Private background/caption verification.
+reports/studio-background-captions-20261022/*
+!reports/studio-background-captions-20261022/README.md
+# Native authenticated timeline/audio proof, media and isolated local App.
+reports/studio-linked-preview-20261021/*
+!reports/studio-linked-preview-20261021/README.md
+
+# Private authenticated background/caption runtime evidence and local builds.
+reports/studio-background-captions-20261021/*
+!reports/studio-background-captions-20261021/README.md
+
+# Production welcome verification is source, not a local verify script.
+!frontend/scripts/verify-welcome-assets.js
+
+# Reviewed native welcome release media must ship with the frontend.
+!frontend/public/welcome/2026-10-21/*

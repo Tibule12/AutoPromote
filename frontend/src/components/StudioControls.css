@@ -6,10 +6,7 @@
 
 /* The responsive grid narrows the tool column below the dashboard's old
    fixed 92px rail. Keep its hit targets inside the actual grid column. */
-.viral-studio-overlay.ap-dashboard-redesign
-  .hook-broll-only-mode
-  .studio-layout
-  > .creative-tool-rail {
+.viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-layout > .creative-tool-rail {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100%;
@@ -18,10 +15,7 @@
 
 /* View options can extend over the monitor's transport. Keep the open menu
    above that sibling so its Fullscreen and layout buttons receive clicks. */
-.viral-studio-overlay.ap-dashboard-redesign
-  .hook-broll-only-mode
-  .preview-panel
-  > .panel-heading:has(.studio-control-menu[open]) {
+.viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-panel > .panel-heading:has(.studio-control-menu[open]) {
   position: relative;
   z-index: 700;
   overflow: visible !important;
@@ -29,9 +23,7 @@
 
 /* Timeline menus open over the monitor. The dock's desktop clipping rule
    otherwise hides their hit targets behind the preview during normal clicks. */
-.viral-studio-overlay.ap-dashboard-redesign
-  .hook-broll-only-mode
-  .studio-pro-timeline-dock.is-open {
+.viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-pro-timeline-dock.is-open {
   /* DashboardRedesign sets both properties with !important on every dock. */
   overflow: visible !important;
   z-index: 650 !important;
@@ -214,6 +206,316 @@
   line-height: 1.5;
   color: #bac8da;
 }
+
+/* Inspector grids must shrink to the rail, rather than clip their intrinsic
+   content width. Keep these rules local to the editor's control surface. */
+.viral-studio-overlay .studio-sidebar {
+  --studio-field-border: #39465e;
+  --studio-field-background: #0c1423;
+  --studio-field-label: #bac8dc;
+  color-scheme: dark;
+  scrollbar-gutter: stable;
+}
+
+.viral-studio-overlay .studio-sidebar *,
+.viral-studio-overlay .studio-sidebar *::before,
+.viral-studio-overlay .studio-sidebar *::after {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.viral-studio-overlay .studio-sidebar .clip-inspector-body {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 12px;
+  gap: 14px;
+}
+
+.viral-studio-overlay .studio-sidebar .inspector-heading-row > div {
+  flex: 1 1 0;
+}
+
+.viral-studio-overlay .studio-sidebar .inspector-heading-row h4 {
+  margin: 5px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.viral-studio-overlay .studio-sidebar :is(p, small) {
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.viral-studio-overlay
+  .studio-sidebar
+  :is(
+    .motion-position-grid label > span,
+    .inspector-select-field > span,
+    .inspector-time-grid label > span,
+    .export-settings-grid label > span,
+    .studio-logo-design label
+  ) {
+  color: var(--studio-field-label);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+.viral-studio-overlay
+  .studio-sidebar
+  :is(
+    input:not([type]),
+    input[type="text"],
+    input[type="number"],
+    input[type="search"],
+    input[type="url"],
+    select,
+    textarea
+  ) {
+  width: 100%;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid var(--studio-field-border);
+  border-radius: 6px;
+  background-color: var(--studio-field-background);
+  color: #edf2fc;
+  font-family: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.viral-studio-overlay .studio-sidebar input::placeholder,
+.viral-studio-overlay .studio-sidebar textarea::placeholder {
+  color: #8796ae;
+}
+
+.viral-studio-overlay .studio-sidebar :is(input, select, textarea, button, summary):focus-visible {
+  outline: 2px solid #b39aff;
+  outline-offset: 2px;
+}
+
+.viral-studio-overlay .studio-sidebar :is(input, select, textarea):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.viral-studio-overlay
+  .studio-sidebar
+  :is(
+    .inspector-choice-grid button,
+    .inspector-inline-actions button,
+    .inspector-primary-action,
+    .mini-toggle-btn,
+    .motion-workspace-toolbar button
+  ) {
+  min-height: 32px;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.viral-studio-overlay .studio-sidebar .advanced-tool-section > summary {
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.viral-studio-overlay .studio-sidebar .inspector-toggle-row {
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+}
+
+.viral-studio-overlay .studio-sidebar .inspector-toggle-row > span {
+  flex: 1 1 0;
+}
+
+.viral-studio-overlay .studio-sidebar .inspector-toggle-row b,
+.viral-studio-overlay .studio-sidebar .inspector-range b {
+  color: var(--studio-field-label);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.viral-studio-overlay .studio-sidebar .inspector-toggle-row small {
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.viral-studio-overlay .studio-sidebar .inspector-toggle-row input[type="checkbox"],
+.viral-studio-overlay .studio-sidebar .studio-logo-design input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin: 0;
+  accent-color: #9a75ff;
+}
+
+.viral-studio-overlay .studio-sidebar .inspector-range input[type="range"] {
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  accent-color: #a080ff;
+}
+
+.viral-studio-overlay
+  .studio-sidebar
+  :is(
+    .studio-graph-key-values,
+    .studio-velocity-controls .motion-position-grid,
+    .motion-position-grid:has(> button)
+  ) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.viral-studio-overlay .studio-sidebar .automation-keyframe-list article {
+  grid-template-columns: minmax(0, 1fr) minmax(68px, 0.7fr) 24px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+}
+
+.viral-studio-overlay .studio-sidebar .automation-keyframe-list article.audio-keyframe-editor {
+  grid-template-columns: minmax(0, 1fr) minmax(68px, 0.7fr) 24px;
+}
+
+.viral-studio-overlay .studio-sidebar .audio-keyframe-editor > input[type="range"] {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: 100%;
+}
+
+.viral-studio-overlay .studio-sidebar .studio-logo-family-grid {
+  gap: 6px;
+}
+
+.viral-studio-overlay .studio-sidebar .studio-logo-family-grid button {
+  gap: 5px;
+  padding: 8px 4px;
+  border-radius: 8px;
+}
+
+.viral-studio-overlay .studio-sidebar .studio-logo-family-grid img {
+  width: 46px;
+  height: 46px;
+}
+
+.viral-studio-overlay .studio-sidebar .studio-logo-family-grid small {
+  font-size: 10px;
+  white-space: normal;
+}
+
+.viral-studio-overlay .studio-sidebar .studio-logo-colours input[type="color"] {
+  width: 100%;
+  height: 32px;
+  padding: 3px;
+  border: 1px solid var(--studio-field-border);
+  border-radius: 6px;
+  background: var(--studio-field-background);
+}
+
+/* Sound uses the same narrow inspector as Motion; its cards must respond to
+   the panel width, not the full browser viewport. Preserve vertical EQ rails. */
+.viral-studio-overlay .studio-sidebar .audio-remix-panel {
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.viral-studio-overlay .studio-sidebar .audio-remix-header {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.viral-studio-overlay .studio-sidebar .audio-remix-header > div {
+  font-size: 13px;
+}
+
+.viral-studio-overlay
+  .studio-sidebar
+  :is(.audio-remix-presets, .audio-remix-hero-controls, .audio-remix-advanced-grid) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.viral-studio-overlay .studio-sidebar .audio-remix-preset strong {
+  white-space: normal;
+  font-size: 11px;
+}
+
+.viral-studio-overlay .studio-sidebar .audio-remix-stepper {
+  gap: 5px;
+  padding: 8px 6px;
+}
+
+.viral-studio-overlay .studio-sidebar .audio-remix-stepper strong {
+  font-size: 18px;
+}
+
+.viral-studio-overlay .studio-sidebar .audio-remix-actions button {
+  height: auto;
+  min-height: 36px;
+  padding: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.viral-studio-overlay .studio-sidebar .audio-remix-utility-row {
+  flex-wrap: wrap;
+}
+
+.viral-studio-overlay .studio-sidebar .audio-remix-utility-row label {
+  flex: 1 1 140px;
+}
+
+.viral-studio-overlay .studio-sidebar :is(.sound-effect-list, .sound-effect-preset-grid) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  overflow: visible;
+}
+
+.viral-studio-overlay .studio-sidebar .sound-effect-preset strong {
+  font-size: 11px;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.viral-studio-overlay .studio-sidebar .sound-effect-chip b {
+  font-size: 11px;
+  white-space: normal;
+}
+
+.viral-studio-overlay .studio-sidebar :is(.sound-effect-chip, .sound-effect-preset) small {
+  color: #a9b8cf;
+  font-size: 10px;
+}
+
+@media (max-width: 820px), (pointer: coarse) {
+  .viral-studio-overlay
+    .studio-sidebar
+    :is(
+      input:not([type]),
+      input[type="text"],
+      input[type="number"],
+      select,
+      .inspector-choice-grid button,
+      .inspector-inline-actions button,
+      .mini-toggle-btn,
+      .motion-workspace-toolbar button
+    ) {
+    min-height: 36px;
+  }
+}
+
 @media (min-width: 821px) and (max-height: 760px) {
   .hook-broll-only-mode .preview-panel > .panel-heading .panel-description,
   .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-intelligence-stack {

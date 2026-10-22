@@ -314,6 +314,57 @@ test("bounds canonical JSON below Firestore document size", async () => {
   expect(firestore.data.size).toBe(0);
 });
 
+test("a native 17-point grade cube registers intact without lifting other JSON limits", async () => {
+  const lutData={size:17,data:Array.from({length:17**3*3},(_,i)=>(i%17)/16),domainMin:[0,0,0],domainMax:[1,1,1]};
+  const graded=adaptStudioSnapshotToDocument({projectId:"graded-podcast",snapshot:{
+    timeline:[{id:"main",sourceClipId:"source",startRequest:0,endRequest:6}],
+    advancedColor:{lutName:"reviewed.cube",lutData,lutIntensity:75},
+  }});
+  expect((await post({document:graded})).status).toBe(201);
+  const saved=await getCurrentOwnedStudioProjectRevision({uid:"reviewer-1",projectId:graded.projectId,firestore});
+  expect(saved.document.visualGraph.settings.advancedColor.lutData).toEqual(lutData);
+  for(const change of [
+    value=>{value.visualGraph.settings.advancedColor.lutData.data.pop();},
+    value=>{value.visualGraph.settings.advancedColor.lutData.data[0]="not a numeric cube";},
+    value=>{value.audioGraph.arbitrary=Array(2001).fill(0);},
+  ]){
+    const invalid=clone(graded);change(invalid);
+    expect(()=>validateStudioProjectRevisionDocument(invalid)).toThrow("STUDIO_PROJECT_REVISION_INVALID");
+  }
+});
+
+test("detailed native subject revisions register without permitting oversized arbitrary strings", async () => {
+  const { subjectVfxRevision } = require("../frontend/src/components/studioSubjectVfxContract");
+  const scene = {
+    version: 1, id: "subject-scene", sourceId: "asset-1", sourceStoragePath: "owned/source.mp4",
+    sourceRange: { start: 0, end: 6 }, prompt: { points: [[.5,.5]], labels: [1], shotPrompts: [] },
+    effects: [{ id: "rig-detail", type: "foreground_holdout", start: 0, end: 6,
+      corners: [[0,0],[.01,0],[.01,.01],[0,.01]], feather: .4, after_refine: true,
+      paths: Array.from({ length: 16 }, (_, i) => Array.from({ length: 64 }, (_, j) =>
+        [.2 + i*.02 + Math.cos(j*Math.PI/32)*.005, .5 + Math.sin(j*Math.PI/32)*.005])),
+    }],
+  };
+  const revision = subjectVfxRevision(scene);
+  expect(revision.length).toBeGreaterThan(16_384);
+  const detailed = document();
+  detailed.layers = [{ layerId: scene.id, type: "subject_vfx", parameters: {
+    scene, preview: { revision }, pending: { revision },
+  } }];
+  expect((await post({ document: detailed })).status).toBe(201);
+  for (const change of [
+    value => { value.audioGraph.arbitrary = revision; },
+    value => { value.layers[0].parameters.preview.revision = "x".repeat(20_000); },
+    value => {
+      const malformed = clone(scene); malformed.effects[0].paths[0].push([.5,.5]);
+      value.layers[0].parameters.preview.revision = JSON.stringify(malformed);
+    },
+    value => { value.layers[0].parameters.pending.revision = " ".repeat(128*1024+1); },
+  ]) {
+    const invalid = clone(detailed); change(invalid);
+    expect(() => validateStudioProjectRevisionDocument(invalid)).toThrow("STUDIO_PROJECT_REVISION_INVALID");
+  }
+});
+
 test("transaction failure publishes neither project head nor revision", async () => {
   firestore.runTransaction = async work => {
     await work({

@@ -1,0 +1,384 @@
+{
+  "verifiedAt": "2026-10-16T17:58:00.016Z",
+  "nativeQueue": true,
+  "normalSignedInUser": true,
+  "readOnlyVerification": true,
+  "postsPerPlatform": 4,
+  "platforms": [
+    "youtube",
+    "tiktok",
+    "instagram",
+    "linkedin",
+    "facebook",
+    "reddit"
+  ],
+  "verifiedDestinationSchedules": 24,
+  "sourceHashesVerified": 24,
+  "uniqueContentRecords": 10,
+  "coffeeMutations": 0,
+  "providerPublicationVerified": false,
+  "checked": [
+    {
+      "postId": "cycling.youtube",
+      "scheduleId": "luc32JOZG41vhTtHNMj1",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "platform": "youtube",
+      "startTime": "2026-10-16T18:15:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "cycling.tiktok",
+      "scheduleId": "tlUNbQzNXrKxaKBY7fay",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "platform": "tiktok",
+      "startTime": "2026-10-16T18:22:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "cycling.instagram",
+      "scheduleId": "UUmvi1fKahqItL1I5CaX",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "platform": "instagram",
+      "startTime": "2026-10-16T18:29:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "cycling.linkedin",
+      "scheduleId": "57y9reOkPpt58URHdPgc",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "platform": "linkedin",
+      "startTime": "2026-10-16T18:36:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "cycling.facebook",
+      "scheduleId": "CUw7ofJ8U1ZtWoZsUvjx",
+      "contentId": "Idv8NQa3wmo1jr3XiKUy",
+      "platform": "facebook",
+      "startTime": "2026-10-16T18:43:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "cycling.reddit",
+      "scheduleId": "ufaY8tyeucXTbSIxmbVc",
+      "contentId": "BgGqkwe2wyMsAZehE4Re",
+      "platform": "reddit",
+      "startTime": "2026-10-16T18:50:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "headphones.youtube",
+      "scheduleId": "ckaxIofCGmqcw4cQTLMg",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "platform": "youtube",
+      "startTime": "2026-10-16T19:05:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "headphones.tiktok",
+      "scheduleId": "I9bTI5rBmJRCNWVvhtLy",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "platform": "tiktok",
+      "startTime": "2026-10-16T19:12:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "headphones.instagram",
+      "scheduleId": "FfCKfvRYwY4AtoCPtt38",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "platform": "instagram",
+      "startTime": "2026-10-16T19:19:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "headphones.linkedin",
+      "scheduleId": "clOTO8PZ1v7UV5Fqlgc8",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "platform": "linkedin",
+      "startTime": "2026-10-16T19:26:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "headphones.facebook",
+      "scheduleId": "SKFOB9Y79m6d6WcxdbJI",
+      "contentId": "vG5AugeyquVTpZP45sdv",
+      "platform": "facebook",
+      "startTime": "2026-10-16T19:33:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "headphones.reddit",
+      "scheduleId": "1qP0LfC0aA86kG0ZTfzC",
+      "contentId": "ZGziuRwPgIcx35etQGf5",
+      "platform": "reddit",
+      "startTime": "2026-10-16T19:40:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "masked-type.youtube",
+      "scheduleId": "GxnHHtll1OoMRAmJhnGb",
+      "contentId": "oZJMMgLQWLAL7ml9izlA",
+      "platform": "youtube",
+      "startTime": "2026-10-16T19:55:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "masked-type.tiktok",
+      "scheduleId": "xeHqiOHZg2ZU9TnLiKoZ",
+      "contentId": "08vvIG3THfEBdCUAI80h",
+      "platform": "tiktok",
+      "startTime": "2026-10-16T20:02:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "masked-type.instagram",
+      "scheduleId": "Po1tifSu0a50XkYzAZzJ",
+      "contentId": "FkHdIAY4KiWuRtpKURTk",
+      "platform": "instagram",
+      "startTime": "2026-10-16T20:09:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "masked-type.linkedin",
+      "scheduleId": "1Ru4QJJiRTpf7cLnGWnE",
+      "contentId": "FkHdIAY4KiWuRtpKURTk",
+      "platform": "linkedin",
+      "startTime": "2026-10-16T20:16:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "masked-type.facebook",
+      "scheduleId": "GuUABrxBywfryTW1mvjf",
+      "contentId": "FkHdIAY4KiWuRtpKURTk",
+      "platform": "facebook",
+      "startTime": "2026-10-16T20:23:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "masked-type.reddit",
+      "scheduleId": "hTne9P2hP2mc9WsXLktw",
+      "contentId": "FkHdIAY4KiWuRtpKURTk",
+      "platform": "reddit",
+      "startTime": "2026-10-16T20:30:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "five-words.youtube",
+      "scheduleId": "P7Tmda1F4wRdCU2CtFGm",
+      "contentId": "xi386OnrFHXC51zkKtXi",
+      "platform": "youtube",
+      "startTime": "2026-10-16T20:45:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "five-words.tiktok",
+      "scheduleId": "iRaaYzEmscm13jIzpYq4",
+      "contentId": "h1BSMZQbwhubgeXYu4ED",
+      "platform": "tiktok",
+      "startTime": "2026-10-16T20:52:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "five-words.instagram",
+      "scheduleId": "yfukhdimEADR4ei0UARP",
+      "contentId": "bY10FJsWRrmvUbHxN3Sp",
+      "platform": "instagram",
+      "startTime": "2026-10-16T20:59:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "five-words.linkedin",
+      "scheduleId": "bN7owcrwMLu7uGbXggBJ",
+      "contentId": "bY10FJsWRrmvUbHxN3Sp",
+      "platform": "linkedin",
+      "startTime": "2026-10-16T21:06:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "five-words.facebook",
+      "scheduleId": "oJD9eb56OGFcOqGbGDRG",
+      "contentId": "bY10FJsWRrmvUbHxN3Sp",
+      "platform": "facebook",
+      "startTime": "2026-10-16T21:13:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    },
+    {
+      "postId": "five-words.reddit",
+      "scheduleId": "04ul7N7Upe58HSoRqMQx",
+      "contentId": "bY10FJsWRrmvUbHxN3Sp",
+      "platform": "reddit",
+      "startTime": "2026-10-16T21:20:00.000Z",
+      "status": "pending",
+      "isActive": true,
+      "frequency": "once"
+    }
+  ],
+  "mediaChecks": [
+    {
+      "postId": "cycling.youtube",
+      "sha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "cycling.tiktok",
+      "sha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "cycling.instagram",
+      "sha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "cycling.linkedin",
+      "sha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "cycling.facebook",
+      "sha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "cycling.reddit",
+      "sha256": "f504b2eec1882f970e11c4c1f67f340b646482c42c4d144cbdeaf586cba9a4b6",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "headphones.youtube",
+      "sha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "headphones.tiktok",
+      "sha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "headphones.instagram",
+      "sha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "headphones.linkedin",
+      "sha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "headphones.facebook",
+      "sha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "headphones.reddit",
+      "sha256": "e34acff54694d442f998e9616a1043d0ee81b66d26affe88355792668ceecc1d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "masked-type.youtube",
+      "sha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "masked-type.tiktok",
+      "sha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "masked-type.instagram",
+      "sha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "masked-type.linkedin",
+      "sha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "masked-type.facebook",
+      "sha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "masked-type.reddit",
+      "sha256": "4eed32c905443b5c5c2715837a5eca83aca7ffd26ab4dfb4d7e32e7ab162f42d",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "five-words.youtube",
+      "sha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "five-words.tiktok",
+      "sha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "five-words.instagram",
+      "sha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "five-words.linkedin",
+      "sha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "five-words.facebook",
+      "sha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "downloadedOwnedBytesMatch": true
+    },
+    {
+      "postId": "five-words.reddit",
+      "sha256": "f0fe73362ce5213e42af0f0a619240b410d85e9a780db8374f06d88cd65f4f28",
+      "downloadedOwnedBytesMatch": true
+    }
+  ]
+}

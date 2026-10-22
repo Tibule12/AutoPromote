@@ -1,6 +1,10 @@
 const express = require("express");
 const request = require("supertest");
 
+jest.mock("../src/utils/ssrfGuard", () => ({
+  safeFetch: jest.fn(async () => ({ status: 302, headers: { get: () => null }, text: async () => "" })),
+}));
+
 describe("snapchat preflight endpoint", () => {
   jest.setTimeout(10000);
   let app;

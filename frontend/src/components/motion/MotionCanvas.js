@@ -40,7 +40,7 @@ function FittedText({ primitive: p }) {
   );
 }
 
-export default function MotionCanvas({ scenes, getTime, time = 0 }) {
+export default function MotionCanvas({ scenes, getTime, time = 0, zIndex }) {
   const root = useRef(null),
     clock = useRef(getTime);
   const [size, setSize] = useState({ w: 1000, h: 1778 });
@@ -61,7 +61,8 @@ export default function MotionCanvas({ scenes, getTime, time = 0 }) {
         setFrame(tick);
         previous = tick;
       }
-      const r = root.current?.getBoundingClientRect();
+      // Ancestor group rotation/scale must not change local canvas geometry.
+      const r = root.current && { width: root.current.clientWidth, height: root.current.clientHeight };
       if (r?.width && r?.height)
         setSize(old =>
           old.w === r.width && old.h === r.height ? old : { w: r.width, h: r.height }
@@ -84,6 +85,7 @@ export default function MotionCanvas({ scenes, getTime, time = 0 }) {
     <svg
       ref={root}
       className="studio-motion-canvas"
+      style={zIndex === undefined ? undefined : { zIndex }}
       viewBox={`0 0 1000 ${h}`}
       aria-label="Motion graphics preview"
       data-testid="motion-preview"

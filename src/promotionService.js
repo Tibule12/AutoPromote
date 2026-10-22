@@ -87,7 +87,7 @@ class PromotionService {
         updatedAt: new Date().toISOString(),
       };
 
-      await scheduleRef.set(promotionScheduleData);
+      await require("./services/contentMediaDependency").writeMediaDependency(db, contentId, scheduleRef, promotionScheduleData);
       const newSchedule = { id: scheduleRef.id, ...promotionScheduleData };
       console.log("✅ Promotion scheduled successfully:", newSchedule);
 

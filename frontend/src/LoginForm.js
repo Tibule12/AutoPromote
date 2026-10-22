@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import "./Auth.css";
+import AutoPromoteLogo from './components/AutoPromoteLogo';
 import { PUBLIC_SITE_URL } from "./config";
 
 const loginHighlights = [
@@ -124,13 +125,7 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
       <div className="auth-stage">
         <section className="auth-stage__panel auth-stage__panel--brand">
           <div className="auth-brand-lockup">
-            <span className="auth-brand-lockup__mark" aria-hidden="true">
-              ▶
-            </span>
-            <span>
-              <strong>AutoPromote</strong>
-              <small>Creator OS</small>
-            </span>
+            <AutoPromoteLogo />
           </div>
           <div className="auth-stage__badge">
             <i aria-hidden="true" />

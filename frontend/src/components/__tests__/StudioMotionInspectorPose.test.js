@@ -1,0 +1,30 @@
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { MotionInspector } from '../StudioAdvancedInspectors';
+
+test('motion controls show the sampled pose while seeking, including a zero-opacity key', () => {
+  const layer={id:'photo',type:'image',name:'Held boxing frame',x:50,y:50,scale:1,rotation:0,opacity:1,cropX:0,cropY:0};
+  const values=[['x',18,82],['y',40,60],['scale',.3,1.2],['rotation',-5,5],['opacity',0,1],['cropX',4,12],['cropY',2,6]];
+  const keys=values.flatMap(([property,a,b])=>[0,2].map((time,i)=>({id:`${property}-${i}`,targetId:'photo',property,time,value:i?b:a,easing:'linear'})));
+  const update=jest.fn();
+  const props={activeOverlay:layer,overlays:[layer],keyframes:keys,onUpdateOverlay:update,onSelectOverlay:jest.fn(),onAddKeyframe:jest.fn(),onAddPositionKeyframe:jest.fn(),onSeek:jest.fn(),onUpdateKeyframe:jest.fn(),onRemoveKeyframe:jest.fn(),onResetMotion:jest.fn()};
+  const {rerender}=render(<MotionInspector {...props} playhead={0}/>);
+  expect(screen.getByRole('spinbutton',{name:'X',exact:true})).toHaveValue(18);
+  expect(screen.getByRole('spinbutton',{name:'Scale',exact:true})).toHaveValue(.3);
+  expect(screen.getByRole('slider',{name:/^Opacity/})).toHaveValue('0');
+  rerender(<MotionInspector {...props} playhead={1}/>);
+  expect(screen.getByRole('spinbutton',{name:'X',exact:true})).toHaveValue(50);
+  expect(screen.getByRole('spinbutton',{name:'Y',exact:true})).toHaveValue(50);
+  expect(screen.getByRole('spinbutton',{name:'Scale',exact:true})).toHaveValue(.75);
+  expect(screen.getByRole('spinbutton',{name:'Rotate',exact:true})).toHaveValue(0);
+  expect(screen.getByRole('slider',{name:/^Opacity/})).toHaveValue('0.5');
+  expect(screen.getByRole('slider',{name:/^Crop X/})).toHaveValue('8');
+  expect(screen.getByRole('slider',{name:/^Crop Y/})).toHaveValue('4');
+  fireEvent.change(screen.getByRole('slider',{name:/^Opacity/}),{target:{value:'1'}});
+  expect(update).toHaveBeenCalledWith('opacity',1);
+  rerender(<MotionInspector {...props} playhead={2}/>);
+  expect(screen.getByRole('spinbutton',{name:'X',exact:true})).toHaveValue(82);
+  expect(screen.getByRole('slider',{name:/^Opacity/})).toHaveValue('1');
+  expect(layer.x).toBe(50);
+  expect(layer.opacity).toBe(1);
+});

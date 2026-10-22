@@ -111,6 +111,7 @@ async function recordPlatformPost({
     metrics: null, // placeholder for Phase 3
     normalizedScore: null, // placeholder for Phase 4
     lastMetricsCheck: null,
+    next_check_at: null,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
@@ -190,6 +191,8 @@ async function tryCreatePlatformPostLock({
     externalId: null,
     payload: payload || {},
     rawOutcome: null,
+    metrics: null,
+    next_check_at: null,
     shortlinkCode: shortlinkCode || null,
     createdAt: now,
     updatedAt: now,

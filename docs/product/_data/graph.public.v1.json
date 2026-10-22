@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.5",
+  "knowledge_version": "1.0.45",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -500,6 +500,26 @@
     },
     {
       "id": "publishing.analytics",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector_artwork",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_choreography",
+      "kind": "feature",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design",
       "kind": "feature",
       "status": "PARTIAL"
     },
@@ -1025,6 +1045,471 @@
     },
     {
       "id": "publishing.queue.load_more",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.geometric_mask.path",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.geometric_mask.radius",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.layer_order",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_x",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_y",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_scale",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_rotation",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_opacity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_mask_enabled",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_mask_shape",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_mask_feather",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.group_mask_inverted",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.group_clip.move",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.group_clip.in",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.group_clip.out",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.selection_scale",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.paste_target",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.start_velocity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.end_velocity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.start_influence",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.end_influence",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_unit",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_style",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_direction",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_stagger",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_entry",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_travel",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_tilt",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.kinetic_exit",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.graphics.import",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.timeline.view",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.timeline.at_playhead",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.media.replace_sequence",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.media.remove_unused",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.title.outline_color",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.brand_name",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.duration",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.accent",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.background",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.separate_symbol",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.symbol_width",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.piece_construction",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.piece_columns",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_motion.piece_style",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.spatial_curve",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.keyframe.spatial_handle",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.add",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.point",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.tangent",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.split",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.point_kind",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.fill",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.stroke",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.closed",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.stroke_start",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.stroke_end",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.vector.stroke_offset",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.enable",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.unit",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.order",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.stagger",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_x",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_y",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_scale",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_rotation",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.from_opacity",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.spread",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.range_start",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.range_end",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.settle",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.progress",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.rebuild",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.text_animator.remove",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.name",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.family",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.layout",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.weight",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.tracking",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.symbol_size",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.colours",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.gradient",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.assemble",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.build",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.variant",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.svg",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.png",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.contour",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.logo_design.canvas",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.analytics.sync_latest",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "publishing.analytics.release",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.captions.source_language",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.background_edge_radius",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.background_decontaminate",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -2709,6 +3194,606 @@
       "from": "publishing.schedule",
       "type": "editable_with",
       "to": "publishing.queue.load_more"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.geometric_mask.path"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.geometric_mask.radius"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.layer_order"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_x"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_y"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_scale"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_rotation"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_opacity"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "optionally_uses",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.composite.group_x"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.composite.group_y"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.composite.group_scale"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.composite.group_rotation"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.composite.group_opacity"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_mask_enabled"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_mask_shape"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_mask_feather"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.group_mask_inverted"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.group_clip.move"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.group_clip.move"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.group_clip.in"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.group_clip.in"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.group_clip.out"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.group_clip.out"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.selection_scale"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.paste_target"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_velocity"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_velocity"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_velocity"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_velocity"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_influence"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.start_influence"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_influence"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.end_influence"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_unit"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_style"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_direction"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_stagger"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_entry"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_travel"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_tilt"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.kinetic_exit"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.graphics.import"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.timeline.view"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "editable_with",
+      "to": "studio.timeline.at_playhead"
+    },
+    {
+      "from": "studio.media_ingest",
+      "type": "editable_with",
+      "to": "studio.media.replace_sequence"
+    },
+    {
+      "from": "studio.media_ingest",
+      "type": "editable_with",
+      "to": "studio.media.remove_unused"
+    },
+    {
+      "from": "studio.titles",
+      "type": "editable_with",
+      "to": "studio.title.outline_color"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "requires",
+      "to": "studio.motion"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "rendered_by",
+      "to": "studio.render"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.brand_name"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.duration"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.accent"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.background"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.separate_symbol"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.symbol_width"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.piece_construction"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.piece_columns"
+    },
+    {
+      "from": "studio.logo_motion",
+      "type": "editable_with",
+      "to": "studio.logo_motion.piece_style"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_curve"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_curve"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_handle"
+    },
+    {
+      "from": "studio.easing",
+      "type": "editable_with",
+      "to": "studio.keyframe.spatial_handle"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.add"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.point"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.tangent"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.split"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.point_kind"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.fill"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.closed"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "requires",
+      "to": "studio.layers"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "optionally_uses",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "optionally_uses",
+      "to": "studio.easing"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke_start"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke_end"
+    },
+    {
+      "from": "studio.vector_artwork",
+      "type": "editable_with",
+      "to": "studio.vector.stroke_offset"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.enable"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.unit"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.order"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.stagger"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_x"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_y"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_scale"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_rotation"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.from_opacity"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.spread"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.range_start"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.range_end"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.settle"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.progress"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.rebuild"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "requires",
+      "to": "studio.titles"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "requires",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "optionally_uses",
+      "to": "studio.easing"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "optionally_uses",
+      "to": "studio.transforms"
+    },
+    {
+      "from": "studio.text_choreography",
+      "type": "editable_with",
+      "to": "studio.text_animator.remove"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "requires",
+      "to": "studio.vector_artwork"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "optionally_uses",
+      "to": "studio.keyframes"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "optionally_uses",
+      "to": "studio.transforms"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.contour"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.name"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.family"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.layout"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.weight"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.tracking"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.symbol_size"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.colours"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.gradient"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.assemble"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.build"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.variant"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.svg"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.png"
+    },
+    {
+      "from": "studio.logo_design",
+      "type": "editable_with",
+      "to": "studio.logo_design.canvas"
+    },
+    {
+      "from": "publishing.analytics",
+      "type": "editable_with",
+      "to": "publishing.analytics.sync_latest"
+    },
+    {
+      "from": "publishing.analytics",
+      "type": "editable_with",
+      "to": "publishing.analytics.release"
+    },
+    {
+      "from": "studio.captions",
+      "type": "editable_with",
+      "to": "studio.captions.source_language"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.background_edge_radius"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.background_decontaminate"
     }
   ]
 }

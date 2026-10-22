@@ -153,13 +153,25 @@ def build_volume_filter(items, duration, speed_plan=None):
         return "", []
     if len(points) == 1:
         return f"volume={points[0]['value']:.6f}", points
-    expression = f"{points[-1]['value']:.6f}"
-    for left, right in reversed(list(zip(points, points[1:]))):
+    segments = []
+    for left, right in zip(points, points[1:]):
         slope = (right["value"]-left["value"])/max(.000001, right["time"]-left["time"])
         segment = f"{left['value']:.6f}+({slope:.8f})*(t-{left['time']:.6f})"
         if right["easing"] == "hold":
             segment = f"{left['value']:.6f}"
-        expression = f"if(lt(t,{right['time']:.6f}),{segment},{expression})"
+        segments.append(segment)
+    segments.append(f"{points[-1]['value']:.6f}")
+    # FFmpeg's evaluator has a bounded parser stack. Curves and speed-boundary
+    # samples can exceed it with an otherwise valid, modest authored envelope.
+    # Keep every existing segment/value and select it with logarithmic nesting.
+    def select_segment(first, last):
+        if first == last:
+            return segments[first]
+        middle = (first + last) // 2
+        boundary = points[middle + 1]['time']
+        return (f"if(lt(t,{boundary:.6f}),{select_segment(first, middle)},"
+                f"{select_segment(middle + 1, last)})")
+    expression = select_segment(0, len(segments) - 1)
     expression = f"if(lt(t,{points[0]['time']:.6f}),{points[0]['value']:.6f},{expression})"
     # WAV decoder blocks can span 20–40ms. Evaluate the envelope on small
     # unpadded blocks so sharp editable fades do not trail their authored time.

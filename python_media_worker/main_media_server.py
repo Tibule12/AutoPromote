@@ -24,6 +24,16 @@ import urllib.request
 import urllib.parse
 import warnings
 import cv2  # OpenCV (Phase 1)
+try:
+    from .studio_render_scratch import studio_render_scratch_directory
+    from .studio_ffmpeg_limits import bounded_studio_ffmpeg_command
+except ImportError:
+    from studio_render_scratch import studio_render_scratch_directory
+    from studio_ffmpeg_limits import bounded_studio_ffmpeg_command
+try:
+    from .caption_transcription import caption_transcription_options
+except ImportError:
+    from caption_transcription import caption_transcription_options
 import numpy as np
 import ffmpeg  # FFmpeg (Phase 1)
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
@@ -63,6 +73,7 @@ try:
         build_studio_timeline_mux_args,
         resolve_studio_audio_bitrate,
         build_studio_audio_delivery_filter,
+        resolve_studio_programme_duration,
         build_segment_transition_filters,
         build_speed_filter_complex,
         find_uncovered_caption_speech_ranges,
@@ -81,6 +92,7 @@ except ImportError:
         build_studio_timeline_mux_args,
         resolve_studio_audio_bitrate,
         build_studio_audio_delivery_filter,
+        resolve_studio_programme_duration,
         build_segment_transition_filters,
         build_speed_filter_complex,
         find_uncovered_caption_speech_ranges,
@@ -397,7 +409,7 @@ def get_faster_whisper_model(model_name=None):
         or os.getenv("FASTER_WHISPER_MODEL")
         or os.getenv("WHISPER_MODEL")
         or "small"
-    ).strip().lower() or "small"
+    ).strip() or "small"
     device = get_faster_whisper_device()
     compute_type = get_faster_whisper_compute_type(device)
     cache_key = f"{device}::{compute_type}::{resolved_model_name}"
@@ -2104,9 +2116,10 @@ def transcribe_with_openai_diarization(file_path):
             pass
 
 
-def transcribe_captions_with_provider(file_path, *, translate_to_english=False, prompt_hint=""):
+def transcribe_captions_with_provider(file_path, *, translate_to_english=False, prompt_hint="", source_language="auto"):
+    local_options = caption_transcription_options(source_language, translate_to_english=translate_to_english)
     provider = str(os.getenv("VIRAL_CAPTION_TRANSCRIPTION_PROVIDER") or "auto").strip().lower()
-    if not translate_to_english and provider in {"auto", "openai", "openai_diarize", "diarize"}:
+    if not translate_to_english and (source_language == "auto" or provider != "auto") and provider in {"auto", "openai", "openai_diarize", "diarize"}:
         try:
             return transcribe_with_openai_diarization(file_path)
         except Exception as exc:
@@ -2121,11 +2134,7 @@ def transcribe_captions_with_provider(file_path, *, translate_to_english=False, 
         word_timestamps=True,
         prompt_hint=prompt_hint,
         task="translate" if translate_to_english else "transcribe",
-        model_name=(
-            os.getenv("VIRAL_CAPTION_WHISPER_MODEL")
-            or os.getenv("MULTICAM_CAPTION_WHISPER_MODEL")
-            or "digiphyte/swivuriso-turbo"
-        ),
+        **local_options,
     )
 
 def transcription_model_has_unmapped_languages(model_name):
@@ -2151,7 +2160,10 @@ def transcription_model_has_unmapped_languages(model_name):
 def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, prompt_hint="", task=None, model_name=None):
     normalized_language = normalize_transcription_language(language)
     engine = get_transcription_engine()
-    prompt = build_transcription_prompt(prompt_hint)
+    # Faster-Whisper tokenizes an empty string as a leading-space prompt.
+    # That token alone can trigger repeated invented words on mixed speech.
+    # None means no prompt; retain explicit vocabulary hints verbatim.
+    prompt = build_transcription_prompt(prompt_hint) or None
 
     if engine == "faster":
         try:
@@ -8718,6 +8730,17 @@ def reviewed_axis_expression(keyframes, axis, fallback=.5):
     return f"if(lt(t,{ordered[0][0]:.6f}),{ordered[0][1]:.8f},{branch(0, len(segments)-1)})"
 
 
+def studio_sequence_canvas_dimensions(width, height, reframe):
+    """Keep a wide Preserve frame sequence independent of its original upload."""
+    reframe = reframe or {}
+    if (reframe.get("enabled") and reframe.get("mode") == "center"
+            and reframe.get("aspect") == "16:9"):
+        # Normalizing landscape clips into an original portrait upload first
+        # bakes bars into every occurrence. A later wide fit cannot undo them.
+        return get_reframe_output_dimensions("16:9")
+    return width, height
+
+
 def build_studio_sequence_video_filters(normalize_filter, fps, source_framing=False):
     # Framing keys are evaluated on the delivery clock, after resetting a
     # trimmed source's first timestamp. Resampling an already-cropped 30fps
@@ -12573,6 +12596,7 @@ def health_check():
         "maxVideoSeconds": MEDIA_WORKER_MAX_VIDEO_SECONDS,
         "maxFileMb": MEDIA_WORKER_MAX_FILE_MB,
         "tmpDir": os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp")),
+        "studioRenderTmpDir": studio_render_scratch_directory(os.path.dirname(__file__)),
         "whisperReady": FasterWhisperModel is not None or whisper is not None,
     }
 
@@ -30901,6 +30925,7 @@ class ViralOverlay(BaseModel):
     fontWeight: int = 900
     textAlign: Literal["left", "center", "right"] = "center"
     strokeWidth: float = 0
+    strokeColor: Optional[str] = None
     shadow: Literal["none", "soft", "strong"] = "soft"
     animation: Optional[Dict[str, Any]] = None
     start_time: Optional[float] = None
@@ -31613,6 +31638,7 @@ async def render_viral_clip(request: RenderViralRequest):
         from .studio_3d_overlay import validate_resolved_overlays
         from .studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
         from .viral_audio_remix import normalize_audio_remix
+        from .studio_composition import validate_layer_order, validate_graphic_groups
     except ImportError:
         # The production container starts this file as a top-level uvicorn
         # module, while the immutable-image test imports it as a package.
@@ -31620,9 +31646,15 @@ async def render_viral_clip(request: RenderViralRequest):
         from studio_3d_overlay import validate_resolved_overlays
         from studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
         from viral_audio_remix import normalize_audio_remix
+        from studio_composition import validate_layer_order, validate_graphic_groups
     try:
         validate_design(request.motionGraphics, [effect.model_dump() for effect in request.sound_effects or []])
-        validate_resolved_overlays(getattr(request, "threeDGraphics", None))
+        resolved_three_d = validate_resolved_overlays(getattr(request, "threeDGraphics", None))
+        explicit_layer_order = validate_layer_order(request.composition_plan,
+            [str(overlay.id) for overlay in request.overlays],
+            [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
+            [graphic["id"] for graphic in resolved_three_d], source_overlays=request.overlays)
+        validate_graphic_groups(request.composition_plan, explicit_layer_order)
         subject_items = validate_resolved_subject_vfx(getattr(request, "subjectVfx", None))
         if subject_items and not request.timeline_segments:
             raise ValueError("Subject renders require an explicit source timeline")
@@ -31643,6 +31675,15 @@ async def render_viral_clip(request: RenderViralRequest):
     return await render_viral_clip_impl(request)
 
 async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: str = None):
+    try:
+        from .studio_composition import validate_layer_order, validate_graphic_groups
+    except ImportError:
+        from studio_composition import validate_layer_order, validate_graphic_groups
+    explicit_layer_order = validate_layer_order(request.composition_plan,
+        [str(overlay.id) for overlay in request.overlays],
+        [str(scene.get("id", "")) for scene in (request.motionGraphics or {}).get("scenes") or []],
+        [graphic["id"] for graphic in request.threeDGraphics or []], source_overlays=request.overlays)
+    validate_graphic_groups(request.composition_plan, explicit_layer_order)
     logger.info(f"Rendering viral clip for {request.video_url} with {len(request.overlays)} overlays (SmartCrop={request.smart_crop}, AutoCaptions={request.auto_captions})")
 
     unresolved_story_visuals = [
@@ -31718,7 +31759,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         ))
 
     job_id = provided_job_id or str(uuid.uuid4())
-    SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    SHARED_TMP_DIR = studio_render_scratch_directory(os.path.dirname(__file__))
     if not os.path.exists(SHARED_TMP_DIR): os.makedirs(SHARED_TMP_DIR)
 
     input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_input.mp4")
@@ -31816,6 +31857,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         else:
             normalized_segments = []
 
+        programme_duration = resolve_studio_programme_duration(
+            normalized_segments, request.start_time, request.end_time,
+            (request.editor_timeline or {}).get("programme_duration_ticks"),
+        )
+
         if normalized_segments:
             segment_paths = []
             segment_audio_paths = []
@@ -31831,6 +31877,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             timeline_canvas_height -= timeline_canvas_height % 2
             sequence_reframe = (request.finish_plan or {}).get("reframe") or {}
             sequence_framing_keys = sequence_reframe.get("keyframes") or []
+            timeline_canvas_width, timeline_canvas_height = studio_sequence_canvas_dimensions(
+                timeline_canvas_width, timeline_canvas_height, sequence_reframe)
             # Cover each raw source before concat. Padding unlike source
             # aspects first bakes black bars into an already-portrait master,
             # which a later whole-sequence crop cannot recover.
@@ -32562,15 +32610,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         # 2.75. Apply the Studio speed plan before captions and overlays so
         # transcription, caption timing, B-roll, and audio share one final clock.
-        # An intermediate MP4 can retain an AAC packet beyond the last picture
-        # after a stream-copy trim. That container padding is not programme time:
-        # feeding it into the speed map lengthens the mix past the authored cut.
-        pre_speed_duration = (
-            sum(float(segment.end_time) - float(segment.start_time)
-                for segment in normalized_segments)
-            if normalized_segments
-            else max(0.0, float(request.end_time) - float(request.start_time))
-        )
+        # AAC padding and CFR rounding in intermediates cannot lengthen the
+        # user's programme or append an unrequested speed-plan tail.
+        pre_speed_duration = programme_duration
         speed_plan = normalize_speed_plan(
             pre_speed_duration,
             request.speed_segments,
@@ -33247,9 +33289,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             return f"{filter_body}[{output_label}];"
 
         try:
-            from .studio_layer_motion import composition_layer, render_image_layer_motion
+            from .studio_layer_motion import composition_layer, render_image_layer_motion, render_video_layer_motion
         except ImportError:
-            from studio_layer_motion import composition_layer, render_image_layer_motion
+            from studio_layer_motion import composition_layer, render_image_layer_motion, render_video_layer_motion
 
         # Process Video Overlays
         overlay_chain_start = len(filter_chain)
@@ -33267,7 +33309,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 time_window = (first, max(first + .05, last))
             block = blend_layer_block(list(filter_chain[start:]), input_label, current_v_label,
                                       overlay.blendMode, base_width, base_height,
-                                      rendered_timeline_duration, f"studio_blend_{len(overlay_filter_blocks)}", time_window)
+                                      rendered_timeline_duration, f"studio_blend_{len(overlay_filter_blocks)}", time_window,
+                                      resolve_viral_export_profile(request.output_settings, base_width, base_height)["fps"] or 30)
             overlay_filter_blocks.append((str(overlay.id), block, input_label, current_v_label))
 
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
@@ -33302,6 +33345,26 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             
             if ov_path:
                 block_start, block_input = len(filter_chain), current_v_label
+                layer_plan = composition_layer(request.composition_plan, ov.id)
+                if layer_plan and layer_plan.get("motion_keyframes"):
+                    # A moving video uses the same canonical pose/alpha
+                    # compositor as images, after ordinary B-roll preparation.
+                    motion_layer_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_video_motion_{input_idx}.mov")
+                    overlay_temp_paths.append(motion_layer_path)
+                    receipt = await asyncio.to_thread(render_video_layer_motion,
+                        ov_path, motion_layer_path, ov, layer_plan, base_width, base_height,
+                        rendered_timeline_duration, speed_plan, 30)
+                    if getattr(ov, "useOverlayAudio", False) and has_audio_stream(ov_path):
+                        inputs.extend(["-itsoffset", str(rendered_timeline_time(cue_start)), "-i", ov_path])
+                        overlay_audio_specs.append((input_idx, ov))
+                        input_idx += 1
+                    inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", motion_layer_path])
+                    filter_chain.append(f"[{current_v_label}][{input_idx}:v]overlay=0:0:"
+                                        f"eof_action=pass:format=auto[v{input_idx}];")
+                    current_v_label = f"v{input_idx}"
+                    input_idx += 1
+                    remember_overlay_block(ov, block_start, block_input)
+                    continue
                 # Start the first selected B-roll frame at its cue, not at the
                 # programme's zero. Return/loop/hold and speed are baked above.
                 inputs.extend(["-itsoffset", str(rendered_timeline_time(cue_start)), "-i", ov_path])
@@ -33324,6 +33387,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         # Process Image Overlays (e.g. Cute Captions)
         image_overlays = [o for o in request.overlays if o.type == 'image' and o.src]
+        try:
+            from .studio_image_sources import materialize_studio_image
+        except ImportError:
+            from studio_image_sources import materialize_studio_image
+        image_sources = {}
         
         for ov in image_overlays:
             ov_path = ""
@@ -33334,25 +33402,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                  overlay_temp_paths.append(ov_dl_path)
                  
                  # Async download via executor
-                 import urllib.request
                  loop = asyncio.get_running_loop()
                  try:
-                     def download_image():
-                         # Retain the exact source across bounded transport
-                         # retries. A transient storage disconnect must not
-                         # drop the customer's brand layer or hang the job.
-                         for attempt in range(3):
-                             try:
-                                 with urllib.request.urlopen(ov.src, timeout=30) as response, open(ov_dl_path, "wb") as target:
-                                     shutil.copyfileobj(response, target)
-                                 return
-                             except OSError:
-                                 if attempt == 2:
-                                     raise
-                                 import time
-                                 time.sleep(.25 * (attempt + 1))
-                     await loop.run_in_executor(None, download_image)
-                     ov_path = ov_dl_path
+                     ov_path = await loop.run_in_executor(None, materialize_studio_image, ov.src, ov_dl_path, image_sources)
                  except Exception as e:
                      raise RuntimeError(f"Image layer {ov.id} could not be loaded; export stopped") from e
             else:
@@ -33365,6 +33417,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 layer_has_motion = bool(
                     layer_plan
                     and (
+                        layer_plan.get("vector_shape") is not None
+                        or
                         layer_plan.get("motion_keyframes")
                         or (layer_effects.get("mask") or {}).get("enabled")
                         or float((layer_plan.get("base_transform") or {}).get("crop_x") or 0) > 0
@@ -33559,14 +33613,24 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             text_asset = os.path.join(SHARED_TMP_DIR, f"{job_id}_title_{idx}.png")
             text_motion = os.path.join(SHARED_TMP_DIR, f"{job_id}_title_{idx}.mov")
             overlay_temp_paths.extend([text_asset, text_motion])
-            geometry = render_title_asset(txt.model_dump(), text_asset, base_width, base_height)
             layer_plan = dict(composition_layer(request.composition_plan, txt.id) or {})
+            title_animator = None
+            if layer_plan.get("text_animator"):
+                try:
+                    from .studio_text_animator import AnimatedTitle
+                except ImportError:
+                    from studio_text_animator import AnimatedTitle
+                title_animator = AnimatedTitle(txt.model_dump(), base_width, base_height, layer_plan["text_animator"])
+                geometry = title_animator.geometry
+                title_animator.frame(100).save(text_asset)
+            else:
+                geometry = render_title_asset(txt.model_dump(), text_asset, base_width, base_height)
             layer_plan.update(anchor_x=geometry["anchorX"], anchor_y=geometry["anchorY"])
             layer_plan["clip_box"] = geometry["clipBox"]
             rendered_title = txt.model_copy(update={key: value for key, value in geometry.items() if key not in {"lines", "clipBox"}})
             receipt = await asyncio.to_thread(render_image_layer_motion, text_asset, text_motion,
                                              rendered_title, layer_plan, base_width, base_height,
-                                             rendered_timeline_duration, speed_plan, 30)
+                                             rendered_timeline_duration, speed_plan, 30, title_animator=title_animator)
             inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", text_motion])
             next_label = f"text_overlay_{idx}"
             filter_chain.append(f"[{current_v_label}][{input_idx}:v]overlay=0:0:eof_action=pass:format=auto[{next_label}];")
@@ -33588,26 +33652,38 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         # Add Motion Graphics Overlay
         if request.motionGraphics and request.motionGraphics.get("scenes"):
             from viral_motion_graphics import generate_transparent_motion_overlay
-            motion_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_motion.mov")
-            creative_adjusted_paths.append(motion_path)
-            report_progress(65, "Drawing reviewed motion graphics")
-            await asyncio.to_thread(
-                generate_transparent_motion_overlay, request.motionGraphics,
-                rendered_timeline_duration, motion_path, 30,
-                base_width, base_height, speed_plan,
-            )
-            inputs.extend(["-i", motion_path])
-            motion_idx = input_idx
-            input_idx += 1
-            next_label = "v_motion"
-            filter_chain.append(
-                f"[{current_v_label}][{motion_idx}:v]overlay=0:0:eof_action=pass[{next_label}];"
-            )
-            current_v_label = next_label
+            motion_groups = ([{**request.motionGraphics, "scenes": [scene]}
+                              for scene in request.motionGraphics["scenes"]]
+                             if explicit_layer_order is not None else [request.motionGraphics])
+            for index, motion_data in enumerate(motion_groups):
+                block_start, block_input = len(filter_chain), current_v_label
+                motion_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_motion_{index}.mov")
+                creative_adjusted_paths.append(motion_path)
+                report_progress(65, "Drawing reviewed motion graphics")
+                rendered_motion_path = await asyncio.to_thread(
+                    generate_transparent_motion_overlay, motion_data,
+                    rendered_timeline_duration, motion_path, 30,
+                    base_width, base_height, speed_plan,
+                )
+                if not rendered_motion_path:
+                    continue
+                inputs.extend(["-i", motion_path])
+                motion_idx = input_idx
+                input_idx += 1
+                next_label = f"v_motion_{index}"
+                motion_format = ":format=auto" if explicit_layer_order is not None else ""
+                filter_chain.append(
+                    f"[{current_v_label}][{motion_idx}:v]overlay=0:0:eof_action=pass{motion_format}[{next_label}];"
+                )
+                current_v_label = next_label
+                if explicit_layer_order is not None:
+                    overlay_filter_blocks.append((str(motion_data["scenes"][0]["id"]),
+                        list(filter_chain[block_start:]), block_input, current_v_label))
 
         if request.threeDGraphics:
             from studio_3d_overlay import download_overlay, validate_overlay_media, validate_resolved_overlays
             for index, graphic in enumerate(validate_resolved_overlays(request.threeDGraphics)):
+                block_start, block_input = len(filter_chain), current_v_label
                 alpha_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_3d_{index}.mov")
                 creative_adjusted_paths.append(alpha_path)
                 report_progress(68, "Compositing reviewed 3D motion graphics")
@@ -33619,15 +33695,41 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 stretch = max(.01, (end - start) / graphic["duration"])
                 layer_label = f"v_3d_input_{index}"
                 next_label = f"v_3d_{index}"
+                graphic_format = ":format=auto" if explicit_layer_order is not None else ""
                 filter_chain.append(
                     f"[{input_idx}:v]format=rgba,scale={base_width}:{base_height}:flags=lanczos,"
                     f"setpts=(PTS-STARTPTS)*{stretch:.8f}+{start:.3f}/TB[{layer_label}];"
                 )
                 filter_chain.append(
-                    f"[{current_v_label}][{layer_label}]overlay=0:0:eof_action=pass:repeatlast=0[{next_label}];"
+                    f"[{current_v_label}][{layer_label}]overlay=0:0:eof_action=pass:repeatlast=0{graphic_format}[{next_label}];"
                 )
                 input_idx += 1
                 current_v_label = next_label
+                if explicit_layer_order is not None:
+                    overlay_filter_blocks.append((graphic["id"], list(filter_chain[block_start:]),
+                                                 block_input, current_v_label))
+
+        if explicit_layer_order is not None:
+            try:
+                from .studio_composition import connect_grouped_layer_blocks, graphic_group_mask
+            except ImportError:
+                from studio_composition import connect_grouped_layer_blocks, graphic_group_mask
+            group_mask_inputs = {}
+            group_fps = resolve_viral_export_profile(request.output_settings, base_width, base_height)["fps"] or 30
+            for index, group in enumerate(request.composition_plan.get("groups", [])):
+                if not group.get("mask", {}).get("enabled"):
+                    continue
+                matte_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_group_mask_{index}.png")
+                overlay_temp_paths.append(matte_path)
+                graphic_group_mask(group, base_width, base_height).save(matte_path)
+                inputs.extend(["-loop", "1", "-framerate", str(group_fps), "-i", matte_path])
+                group_mask_inputs[group["id"]] = f"{input_idx}:v"
+                input_idx += 1
+            ordered_filters, current_v_label = connect_grouped_layer_blocks(
+                overlay_filter_blocks, overlay_base_label, explicit_layer_order,
+                request.composition_plan, base_width, base_height, rendered_timeline_duration, speed_plan,
+                group_fps, group_mask_inputs)
+            filter_chain = filter_chain[:overlay_chain_start] + ordered_filters
 
         # Full-screen B-roll previously covered already-burned words, while
         # browser preview kept captions above the cutaway. Compose first.
@@ -34059,6 +34161,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              cmd.extend(build_viral_export_encode_args(delivery_profile))
              cmd.extend(["-movflags", "+faststart", "-y", output_path])
         
+        cmd = bounded_studio_ffmpeg_command(cmd)
         report_progress(75, "Rendering final video")
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)
@@ -34269,6 +34372,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if os.path.exists(thumbnail_output_path):
             os.remove(thumbnail_output_path)
 
+caption_transcription_lock = asyncio.Lock()
+
 @app.post("/transcribe")
 async def transcribe_video(request: Dict[str, str]):
     """
@@ -34291,12 +34396,12 @@ async def transcribe_video(request: Dict[str, str]):
     # 4 GiB Cloud Run instance leaves too little memory for Whisper and can make
     # the kernel kill the worker. Stream the source once and retain only a small
     # mono speech file instead.
-    input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speech.mp3")
+    input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speech.wav")
 
     try:
         # 1. Extract speech audio without materializing another full video.
         if video_url.startswith("http"):
-            subprocess.run(
+            await asyncio.to_thread(subprocess.run,
                 [
                     "ffmpeg",
                     "-v",
@@ -34310,9 +34415,7 @@ async def transcribe_video(request: Dict[str, str]):
                     "-ar",
                     "16000",
                     "-c:a",
-                    "libmp3lame",
-                    "-b:a",
-                    "64k",
+                    "pcm_s16le",
                     "-y",
                     input_path,
                 ],
@@ -34322,7 +34425,7 @@ async def transcribe_video(request: Dict[str, str]):
         else:
             # If local path?
             if os.path.exists(video_url):
-                subprocess.run(
+                await asyncio.to_thread(subprocess.run,
                     [
                         "ffmpeg",
                         "-v",
@@ -34336,9 +34439,7 @@ async def transcribe_video(request: Dict[str, str]):
                         "-ar",
                         "16000",
                         "-c:a",
-                        "libmp3lame",
-                        "-b:a",
-                        "64k",
+                        "pcm_s16le",
                         "-y",
                         input_path,
                     ],
@@ -34352,15 +34453,14 @@ async def transcribe_video(request: Dict[str, str]):
         translate_to_english = str(
             request.get("translate_to_english") or request.get("translateToEnglish") or ""
         ).strip().lower() in {"1", "true", "yes", "on"}
-        result = transcribe_captions_with_provider(
-            input_path,
-            translate_to_english=translate_to_english,
-            prompt_hint=(
-                request.get("hint")
-                or request.get("prompt_hint")
-                or ""
-            ),
-        )
+        async with caption_transcription_lock:
+            result = await asyncio.to_thread(
+                transcribe_captions_with_provider,
+                input_path,
+                translate_to_english=translate_to_english,
+                source_language=request.get("source_language") or "auto",
+                prompt_hint=request.get("hint") or request.get("prompt_hint") or "",
+            )
         caption_quality = filter_caption_transcription_segments(result.get("segments", []))
         segments = annotate_caption_identity_segments(
             caption_quality["segments"],
@@ -34428,9 +34528,19 @@ async def transcribe_video(request: Dict[str, str]):
             ),
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Transcription failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        # Lossless speech files are transient on every terminal path, including
+        # decode/provider failures. Never remove the caller's original video.
+        if input_path != video_url:
+            try:
+                os.remove(input_path)
+            except FileNotFoundError:
+                pass
 
 
 # In-memory job tracker for ingest (survives between requests, lost on restart)

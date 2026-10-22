@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import "./UserDashboard.css";
+import AutoPromoteLogo from './components/AutoPromoteLogo';
 import ProfilePanel from "./UserDashboardTabs/ProfilePanel";
 import UploadPanel from "./UserDashboardTabs/UploadPanel";
 import ClipStudioWorkspace from "./UserDashboardTabs/ClipStudioWorkspace";
@@ -28,6 +29,7 @@ import FloatingActions from "./components/FloatingActions";
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
 import VoiceOverGuide from "./components/VoiceOverGuide";
+import { ProductAssistanceLauncher } from "./components/ProductAssistance";
 import AdminKyc from "./AdminKyc";
 import { auth } from "./firebaseClient";
 import { sendEmailVerification } from "firebase/auth";
@@ -1456,6 +1458,7 @@ const UserDashboard = ({
             <strong>{currentPageMeta.title}</strong>
           </div>
           <div className="topbar-actions">
+            <ProductAssistanceLauncher className="topbar-icon-btn" />
             <VoiceOverGuide activeTab={activeTab} />
             <button
               className={`topbar-icon-btn ${activeTab === "notifications" ? "is-active" : ""}`}
@@ -1492,16 +1495,7 @@ const UserDashboard = ({
       {activeTab !== "live" && (
         <aside className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Sidebar">
           <div className="dashboard-brand">
-            <span className="dashboard-brand-mark" aria-hidden="true">
-              <svg viewBox="0 0 32 32">
-                <path d="M7 5.5 25 16 7 26.5z" />
-                <path d="m13 11 8.5 5L13 21z" />
-              </svg>
-            </span>
-            <span>
-              <strong>AutoPromote</strong>
-              <small>Creator workspace</small>
-            </span>
+            <AutoPromoteLogo />
           </div>
           <nav className="dashboard-navbar-vertical" role="navigation">
             {DASHBOARD_NAV_GROUPS.map(group => {

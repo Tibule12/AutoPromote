@@ -1,78 +1,67 @@
 import React from "react";
 import ExplainButton from "../components/ExplainButton";
 import MetaConnectionRequirementsNotice from "../components/MetaConnectionRequirementsNotice";
+import PlatformIcon from "../components/PlatformIcon";
 
 const PLATFORM_CONFIG = [
   {
     id: "tiktok",
     label: "TikTok",
-    mark: "♪",
     helper: "Publish short-form video and collect performance data.",
   },
   {
     id: "youtube",
     label: "YouTube",
-    mark: "▶",
     helper: "Upload videos and track channel performance.",
   },
   {
     id: "instagram",
     label: "Instagram",
-    mark: "◎",
     helper: "Publish Reels through your connected Meta business account.",
   },
   {
     id: "facebook",
     label: "Facebook",
-    mark: "f",
     helper: "Publish video and posts to the Pages you manage.",
   },
   {
     id: "twitter",
     label: "X / Twitter",
-    mark: "X",
     helper: "Publish updates, media, and scheduled posts.",
   },
   {
     id: "linkedin",
     label: "LinkedIn",
-    mark: "in",
     helper: "Share professional posts and company updates.",
   },
   {
     id: "reddit",
     label: "Reddit",
-    mark: "r/",
     helper: "Publish to your profile or approved communities.",
   },
   {
     id: "snapchat",
     label: "Snapchat",
-    mark: "S",
     helper: "Publish Snaps when account access is enabled.",
   },
   {
     id: "spotify",
     label: "Spotify",
-    mark: "≋",
     helper: "Use Spotify profile and playlist integrations.",
   },
   {
     id: "discord",
     label: "Discord",
-    mark: "D",
     helper: "Distribute content to connected channels and webhooks.",
   },
   {
     id: "telegram",
     label: "Telegram",
-    mark: "➤",
     helper: "Send releases to connected channels or groups.",
   },
   {
     id: "pinterest",
     label: "Pinterest",
-    mark: "P",
     helper: "Create pins and publish to approved boards.",
   },
 ];
@@ -211,7 +200,7 @@ const ConnectionsPanelRedesign = ({
               className={`connection-platform-card ${connected ? "is-connected" : ""}`}
             >
               <span className={`connection-platform-mark mark-${platform.id}`}>
-                {platform.mark}
+                <PlatformIcon platform={platform.id} />
               </span>
               <div className="connection-platform-copy">
                 <div>

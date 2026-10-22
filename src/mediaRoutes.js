@@ -1,3 +1,4 @@
+const { captionTranscriptionOptions } = require("./services/captionTranscriptionOptions");
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
@@ -958,6 +959,39 @@ const modelCapabilityError = (res, error) => res.status(error.statusCode || 503)
   success: false, code: error.code || 'MODEL_CAPABILITY_UNAVAILABLE',
   message: 'The capability result is unavailable. Your Studio edit is preserved.',
 });
+const subjectMaskAccess=require('./services/studioSubjectMaskAccess');
+const subjectMaskGuards=[subjectMaskAccess.requireSubjectMaskPreview,requireTesterEditingFeature('clipRender')];
+router.post('/studio-subject-masks/requests',subjectMaskGuards,async(req,res)=>{
+  try{return res.status(202).json(await (await modelCapability.getRuntime()).submit({ownerUid:req.user.uid,
+    input:subjectMaskAccess.assertSubjectMaskRequest(req.body)}));}
+  catch(error){return modelCapabilityError(res,error);}
+});
+router.get('/studio-subject-masks/jobs/:jobId',subjectMaskGuards,async(req,res)=>{
+  try{const runtime=await modelCapability.getRuntime();await subjectMaskAccess.ownedSubjectMaskJob(runtime,req.user.uid,req.params.jobId);
+    return res.json(await runtime.reconcile({ownerUid:req.user.uid,jobId:req.params.jobId}));}
+  catch(error){return modelCapabilityError(res,error);}
+});
+router.post('/studio-subject-masks/jobs/:jobId/cancel',subjectMaskGuards,async(req,res)=>{
+  try{const runtime=await modelCapability.getRuntime();await subjectMaskAccess.ownedSubjectMaskJob(runtime,req.user.uid,req.params.jobId);
+    return res.json(await runtime.cancel({ownerUid:req.user.uid,jobId:req.params.jobId}));}
+  catch(error){return modelCapabilityError(res,error);}
+});
+router.post('/studio-subject-masks/jobs/:jobId/subject',subjectMaskGuards,async(req,res)=>{
+  try {
+    const runtime=await modelCapability.getRuntime(),job=await subjectMaskAccess.ownedSubjectMaskJob(runtime,req.user.uid,req.params.jobId);
+    const result=await runtime.getArtifact({ownerUid:req.user.uid,jobId:job.id});
+    if(!result.applicable || Object.keys(req.body || {}).sort().join()!=='effects,id,sourceStoragePath' ||
+       req.body.sourceStoragePath!==job.request.sourceStoragePath)
+      throw Object.assign(new Error('MODEL_SUBJECT_SOURCE_MISMATCH'),{code:'MODEL_SUBJECT_SOURCE_MISMATCH',statusCode:409});
+    await runtime.authorize({ownerUid:req.user.uid,request:job.request,requireCurrentRevision:false});
+    return res.json(require('./modelRuntime/studioAdapter').editableSubjectScene({segmentation:result.artifact,...req.body}));
+  } catch(error){return modelCapabilityError(res,error);}
+});
+router.post('/studio-subject-masks/jobs/:jobId/subject/reuse',subjectMaskGuards,async(req,res)=>{
+  try{return res.json(await subjectMaskAccess.reuseSavedSubjectMask({runtime:await modelCapability.getRuntime(),
+    ownerUid:req.user.uid,jobId:req.params.jobId,input:req.body}));}
+  catch(error){return modelCapabilityError(res,error);}
+});
 router.post('/studio-capabilities/requests', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
   try { return res.status(202).json(await (await modelCapability.getRuntime()).submit({ownerUid:req.user.uid,input:req.body})); }
   catch(error) { return modelCapabilityError(res,error); }
@@ -1054,6 +1088,7 @@ router.post("/studio-assets/resolve", requireTesterEditingFeature("clipRender"),
       storagePath: source.storagePath,
       size: source.size,
       contentType: source.contentType,
+      generation: source.generation,
     });
   } catch (error) {
     return res.status(error.statusCode || 500).json({
@@ -1502,6 +1537,9 @@ router.post(
   requireTesterEditingFeature("audioExtract"),
   async (req, res) => {
     try {
+      let speechOptions;
+      try { speechOptions = captionTranscriptionOptions(req.body); }
+      catch (error) { return res.status(400).json({ error: error.message }); }
       const userId = req.user.uid;
       const storagePath = String(req.body?.storage_path || req.body?.storagePath || "")
         .trim()
@@ -1556,11 +1594,7 @@ router.post(
         expires: Date.now() + 1000 * 60 * 60 * 2,
       });
       const job = await videoEditingService.startTranscriptionJob(url, userId, {
-        translateToEnglish: ["1", "true", "yes", "on"].includes(
-          String(req.body?.translate_to_english ?? req.body?.translateToEnglish ?? "")
-            .trim()
-            .toLowerCase()
-        ),
+        ...speechOptions,
       });
       return res.json({
         success: true,
@@ -1583,6 +1617,9 @@ router.post(
   upload.single("file"),
   async (req, res) => {
     try {
+      let speechOptions;
+      try { speechOptions = captionTranscriptionOptions(req.body); }
+      catch (error) { return res.status(400).json({ error: error.message }); }
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
       const userId = req.user.uid;
@@ -1616,8 +1653,7 @@ router.post(
         try {
           // Old sync: const segments = await videoEditingService.transcribeVideo(url);
           const job = await videoEditingService.startTranscriptionJob(url, userId, {
-            translateToEnglish:
-              String(req.body?.translate_to_english || "").toLowerCase() === "true",
+            ...speechOptions,
           });
           res.json({ success: true, jobId: job.jobId, message: "Transcription started" });
         } catch (err) {

@@ -543,7 +543,7 @@ test("records playable voice-over, edits takes, restores audio after reload and 
     await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
     await pausePreview(page);
     await seekOutput(page, 0);
-    await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+    await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
     await page.getByRole("button", { name: "After", exact: true }).click();
   };
   await open();
@@ -670,7 +670,7 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
     await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
     await pausePreview(page);
     await seekOutput(page, 0);
-    await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+    await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
     await page.getByRole("button", { name: "After", exact: true }).click();
   };
   await open();
@@ -902,7 +902,7 @@ test("keeps every creative caption style and free placement inside the real prog
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
   await page.getByRole("button", { name: "Hide timeline", exact: true }).click();
 
   const inspector = page.getByTestId("clip-studio-inspector");
@@ -984,7 +984,7 @@ test("records the focused Motion workflow and verifies its export payload", asyn
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
   await page.getByRole("button", { name: "After", exact: true }).click();
   await clickStudioControl(page, page.getByTestId("preview-fit-full"));
   const rail = page.getByRole("navigation", { name: "Creative tools" });
@@ -1081,7 +1081,7 @@ test("records imported logo layer design and verifies preview-to-export keyframe
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
 
   const rail = page.getByRole("navigation", { name: "Creative tools" });
   await rail.getByRole("button", { name: /Motion/ }).click();
@@ -1212,7 +1212,7 @@ test("designs an AutoPromote 3D logo and verifies HQ preview transport and expor
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
 
   const rail = page.getByRole("navigation", { name: "Creative tools" });
   await rail.getByRole("button", { name: "Reframe", exact: true }).click();
@@ -1362,7 +1362,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
   await expect(page.getByTestId("preview-audio-status")).toContainText("Source audio on");
   await page.getByRole("button", { name: "After", exact: true }).click();
   const programmeAudio = page.getByTestId("studio-after-video");
@@ -2029,7 +2029,7 @@ test("records focused proof of the synchronized two-speaker stack", async ({ pag
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
 
   const inspector = page.getByTestId("clip-studio-inspector");
   await page
@@ -2171,7 +2171,7 @@ test("proves the three-input hero and duo multicamera layout", async ({ page }) 
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
 
   const inspector = page.getByTestId("clip-studio-inspector");
   await page
@@ -2280,7 +2280,7 @@ test("proves the four-input multicamera grid with moving synchronized test views
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
 
   const inspector = page.getByTestId("clip-studio-inspector");
   await page
@@ -2380,7 +2380,7 @@ test("keeps comparison monitors fitted and transport usable at every output aspe
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
   await page.locator(".creative-tool-rail").getByRole("button", { name: "Reframe", exact: true }).click();
   await page.getByTestId("auto-reframe-toggle").check();
   // This is a manually reviewed host crop, not an automatic-tracking claim.
@@ -2498,7 +2498,7 @@ test("follows existing camera cuts using real full-minute analysis in the progra
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
   await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
   await page.getByRole("button", { name: "Left Speaker", exact: false }).click();
   await page.getByLabel("Manual frame horizontal position").fill("29");
@@ -2646,11 +2646,9 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
   })).toBeCloseTo(9 / 16, 2);
   await page.screenshot({ path: testInfo.outputPath("later-speaker-solo.png") });
 
-  await pausePreview(page);
   await seekOutput(page, "2");
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("source-split-editor")).toBeVisible();
-  await pausePreview(page);
   await seekOutput(page, "53.6");
   await expect(page.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "true");
   expect(errors).toEqual([]);
@@ -2676,7 +2674,7 @@ test("proves precision grade, curves and imported LUT on the full 60 second sour
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
   await page.getByRole("button", { name: "After", exact: true }).click();
   await seekOutput(page, "3");
   await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
@@ -2763,7 +2761,7 @@ test("proves Motion Sculpture with real full-body movement footage", async ({ pa
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
 
   const toolRail = page.getByRole("navigation", { name: "Creative tools" });
   const inspector = page.getByTestId("clip-studio-inspector");
@@ -2837,7 +2835,7 @@ test("records the complete frontend-first creator feature tour without rendering
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await pausePreview(page);
   await seekOutput(page, 0);
-  await expect(page.locator(".studio-pro-timeline")).toBeVisible();
+  await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
   await page.getByRole("button", { name: "After", exact: true }).click();
   const studioProofStartSeconds = Math.max(0, (Date.now() - recordingEpoch) / 1000 - 0.8);
 

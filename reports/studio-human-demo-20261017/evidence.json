@@ -1,0 +1,92 @@
+{
+  "at": "2026-10-17T18:18:27.719Z",
+  "status": "PRIVATE_AI_HUMAN_TEST_DELIVERED_FOR_REVIEW",
+  "ownerDirection": "get to it \u2014 one short AI-human demonstration test",
+  "provider": "Google Vertex AI",
+  "model": "veo-3.1-fast-generate-001",
+  "providerGenerations": 1,
+  "maximumProviderGenerations": 1,
+  "automaticRegeneration": false,
+  "seconds": 8,
+  "sourceSha256": "3f52133a3e90da04f38c1b0d3286668db0ee048fb51eaab1d67833cdb3aabed6",
+  "sourceBytes": 2630508,
+  "ownedStudioSourceMatchesGeneratedSource": true,
+  "estimatedGenerationUsd": 0.8,
+  "actualBilledUsd": null,
+  "vertexApiEnabledForTest": true,
+  "gpuInstancesStarted": 0,
+  "canonicalCpuExports": 2,
+  "selectedProject": {
+    "at": "2026-10-17T18:14:39.835Z",
+    "projectId": "viral-project-564dff92-00b4-427a-858e-55302ff90915",
+    "canonicalHash": "6fed4c1c874c3414c149245a762ec706540c1147d7702f50d346f7c49833032f",
+    "preservedOriginalProjectId": "viral-project-61951467-0062-47d3-ba8a-06b8fac39491",
+    "preservedOriginalProjectHash": "4a88a4e79d3119bb03394fabe058c257190dfb95ff672c16df698266bc08dafe",
+    "sourceSha256": "3f52133a3e90da04f38c1b0d3286668db0ee048fb51eaab1d67833cdb3aabed6",
+    "nativeVoiceRepairBypassUndoRedo": true,
+    "exactColdReopen": true,
+    "voiceRepairEnabled": false,
+    "sourceAudioMuted": false,
+    "editableTitles": 3,
+    "sourceClips": 1,
+    "seconds": 8,
+    "graphInjection": false,
+    "authBypass": false
+  },
+  "selectedNativeMovie": {
+    "projectHash": "6fed4c1c874c3414c149245a762ec706540c1147d7702f50d346f7c49833032f",
+    "outputSha256": "c47a0b4eff2e376777e3dc07a06005bf4b1436902dad7251f7e7208759461d4f",
+    "frames": 192,
+    "fps": 24,
+    "width": 1280,
+    "height": 720,
+    "fullDecode": true
+  },
+  "preservedDefaultVoiceRepairMovie": {
+    "projectHash": "4a88a4e79d3119bb03394fabe058c257190dfb95ff672c16df698266bc08dafe",
+    "outputSha256": "2499c319bf69ceb3f81985fa8f062e91d97cc583ef849fdabda96ec657836f74"
+  },
+  "nativeTitleCount": 3,
+  "allCompiledTitleFieldsExact": true,
+  "compiledVoiceRepairEnabled": false,
+  "sourceAudioValidation": {
+    "codec": "aac",
+    "sampleRate": 48000,
+    "sourceCorrelation": 0.9983523432546244,
+    "sourceGain": 0.984545899812646,
+    "comparedMonoSamples": 384000
+  },
+  "playback": {
+    "ended": true,
+    "time": 8,
+    "rate": 1,
+    "timelineVisible": true,
+    "canonicalHash": "6fed4c1c874c3414c149245a762ec706540c1147d7702f50d346f7c49833032f",
+    "outputSha256": "c47a0b4eff2e376777e3dc07a06005bf4b1436902dad7251f7e7208759461d4f",
+    "recordingCaptureFps": 19.727228702763682,
+    "smoothnessQualified": false
+  },
+  "independentNativeBackupRestore": {
+    "projectId": "viral-project-564dff92-00b4-427a-858e-55302ff90915",
+    "canonicalHash": "6fed4c1c874c3414c149245a762ec706540c1147d7702f50d346f7c49833032f",
+    "backupSha256": "d3fa50c2154733323484feeda8be46da506e75dc6493fdc259724710ed43484c",
+    "exactIndependentNativeRestore": true,
+    "editableTitles": 3,
+    "voiceRepairEnabled": false,
+    "authBypass": false,
+    "renderingOrPublishingWrites": []
+  },
+  "sourceTranscriptionEngines": [
+    "cached Faster-Whisper Small CPU int8",
+    "cached Faster-Whisper Large v3 Turbo CPU int8"
+  ],
+  "transcribedDialogue": "The video's done. Why am I still working?",
+  "professionalHumanListening": false,
+  "verifiedLipSync": false,
+  "customerGenerationIntegration": false,
+  "publicRelease": false,
+  "scheduled": false,
+  "readinessPromotion": false,
+  "concurrentProviderObserverRefusedBeforeSubmission": true,
+  "completedProviderRecheckDidNotResubmit": true
+}

@@ -5,6 +5,7 @@ evaluates those same keys after mapping output time back through speed changes,
 then creates a transparent full-canvas layer for FFmpeg compositing.
 """
 import math
+import json
 import re
 from pathlib import Path
 import subprocess
@@ -14,11 +15,13 @@ import numpy as np
 from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFilter, ImageOps
 
 try:
-    from .studio_motion import easing_value, finite
+    from .studio_vector_shape import rasterize_vector_shape, validate_vector_trim
+    from .studio_motion import automation_segment_value, finite
     from .viral_motion_graphics import edit_clock
     from .viral_render_contract import map_timeline_time
 except ImportError:
-    from studio_motion import easing_value, finite
+    from studio_vector_shape import rasterize_vector_shape, validate_vector_trim
+    from studio_motion import automation_segment_value, finite
     from viral_motion_graphics import edit_clock
     from viral_render_contract import map_timeline_time
 
@@ -54,14 +57,16 @@ def interpolate_layer_value(layer, property_name, time, fallback):
     left, right = keys[right_index - 1], keys[right_index]
     start, end = finite(left.get("time"), 0), finite(right.get("time"), 0)
     progress = (time - start) / max(.0001, end - start)
-    amount = easing_value(progress, right.get("easing", "ease_in_out"), right.get("curve"))
     first, last = finite(left.get("value"), fallback), finite(right.get("value"), fallback)
-    return first + (last - first) * amount
+    if time == end:
+        return last
+    return automation_segment_value(first, last, progress, {"easing": "ease_in_out", **right})
 
 
 def layer_pose(layer, overlay, time):
     base = (layer or {}).get("base_transform") or {}
     return {
+        **({"text_progress": max(0, min(100, interpolate_layer_value(layer, "textProgress", time, base.get("text_progress", 100))))} if (layer or {}).get("text_animator") else {}),
         "x": interpolate_layer_value(layer, "x", time, base.get("x", _get(overlay, "x", 50))),
         "y": interpolate_layer_value(layer, "y", time, base.get("y", _get(overlay, "y", 50))),
         "scale": max(.01, interpolate_layer_value(layer, "scale", time, base.get("scale", _get(overlay, "scale", 1)))),
@@ -69,6 +74,10 @@ def layer_pose(layer, overlay, time):
         "opacity": max(0, min(1, interpolate_layer_value(layer, "opacity", time, base.get("opacity", _get(overlay, "opacity", 1))))),
         "crop_x": max(0, min(45, interpolate_layer_value(layer, "cropX", time, base.get("crop_x", _get(overlay, "cropX", 0))))),
         "crop_y": max(0, min(45, interpolate_layer_value(layer, "cropY", time, base.get("crop_y", _get(overlay, "cropY", 0))))),
+        **({field: max(lo, min(hi, interpolate_layer_value(layer, property_name, time, base.get(field, fallback))))
+            for field, property_name, fallback, lo, hi in [('stroke_start', 'strokeStart', 0, 0, 100),
+                ('stroke_end', 'strokeEnd', 100, 0, 100), ('stroke_offset', 'strokeOffset', 0, -1000, 1000)]}
+           if (layer or {}).get('vector_shape') is not None else {}),
     }
 
 
@@ -106,7 +115,7 @@ def layer_clip_mask(size, mask, crop_x=0, crop_y=0, feather_scale=1):
     elif shape == "rectangle":
         left, top = w * crop_x / 100, h * crop_y / 100
         right, bottom = w - left, h - top
-        radius = max(0, min(50, finite(mask.get("radius") or 6, 6))) if enabled else 0
+        radius = max(0, min(50, finite(mask.get("radius", 6), 6))) if enabled else 0
         rx, ry = min(w * radius / 100, (right - left) / 2), min(h * radius / 100, (bottom - top) / 2)
         if rx and ry:
             draw.rectangle((left + rx, top, right - rx, bottom), fill=255)
@@ -139,6 +148,34 @@ def _effect_layer(alpha, color, opacity, blur):
     return result
 
 
+def _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacity):
+    """Project an unfiltered animated title directly into its bounded canvas.
+
+    Travel padding can be wider than the canvas. Building a square twice its
+    diagonal per frame costs hundreds of MB without adding visible pixels.
+    The same local bitmap and anchor are sampled by an inverse affine map.
+    Filter/mask decisions retain the existing grouped implementation below.
+    """
+    effects = (layer or {}).get('effects') or {}
+    if (not (layer or {}).get('text_animator') or effects.get('shadow', {}).get('enabled')
+            or effects.get('glow', {}).get('enabled') or finite(effects.get('blur'), 0) > 0
+            or effects.get('mask', {}).get('enabled') or pose.get('crop_x') or pose.get('crop_y')):
+        return None
+    width, height = canvas_size
+    anchor_x = max(0, min(100, finite((layer or {}).get('anchor_x', 50), 50))) / 100 * artwork.width
+    anchor_y = max(0, min(100, finite((layer or {}).get('anchor_y', 50), 50))) / 100 * artwork.height
+    x, y = width * pose['x'] / 100, height * pose['y'] / 100
+    angle = math.radians(pose['rotation'])
+    cosine, sine = math.cos(angle), math.sin(angle)
+    projected = artwork.transform(canvas_size, Image.Transform.AFFINE,
+        (cosine, sine, anchor_x - cosine*x - sine*y,
+         -sine, cosine, anchor_y + sine*x - cosine*y), Image.Resampling.BICUBIC)
+    opacity = max(0, min(1, pose['opacity'] * sample_opacity))
+    if opacity < 1:
+        projected.putalpha(projected.getchannel('A').point(lambda value: round(value * opacity)))
+    return projected
+
+
 def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     canvas_width, canvas_height = canvas_size
     fullscreen = str(_get(overlay, "bRollMode", _get(overlay, "b_roll_mode", ""))) == "fullscreen"
@@ -147,8 +184,8 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         # fit. Retain the authored opacity; inactive PIP transforms/anchors
         # must not shrink, rotate or displace its export.
         pose = {**pose, "x": 50, "y": 50, "scale": 1, "rotation": 0}
-    width_percent = max(.1, min(100, finite(_get(overlay, "width", 35), 35)))
-    height_percent = max(.1, min(100, finite(_get(overlay, "height", 35), 35)))
+    width_percent = max(.1, min(1000 if _get(overlay, "type") == "text" else 100, finite(_get(overlay, "width", 35), 35)))
+    height_percent = max(.1, min(1000 if _get(overlay, "type") == "text" else 100, finite(_get(overlay, "height", 35), 35)))
     box_width = canvas_width if fullscreen else max(2, round(canvas_width * width_percent / 100 * pose["scale"]))
     box_height = canvas_height if fullscreen else max(2, round(canvas_height * height_percent / 100 * pose["scale"]))
     fit = "cover" if fullscreen else str(_get(overlay, "mediaFit", _get(overlay, "media_fit", "contain")) or "contain").lower()
@@ -172,7 +209,10 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     box = Image.new("RGBA", (box_width, box_height))
     box.alpha_composite(artwork, ((box_width - artwork.width) // 2, (box_height - artwork.height) // 2))
     artwork = box
-    if _get(overlay, "type") == "image" and not fullscreen:
+    bounded_title = _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacity)
+    if bounded_title is not None:
+        return bounded_title
+    if _get(overlay, "type") in ("image", "video") and not fullscreen:
         # Native media corner rounding applies before the layer's effects and
         # mask. Inverted masks otherwise reveal square corners absent in preview.
         shape = str(_get(overlay, "frameShape", "round") or "round")
@@ -184,41 +224,76 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     anchor_x = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_x", 50), 50))) / 100
     anchor_y = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_y", 50), 50))) / 100
     diagonal = max(8, math.ceil(math.hypot(artwork.width, artwork.height) * 2.1))
-    transform_surface = Image.new("RGBA", (diagonal, diagonal))
     anchor = (diagonal // 2, diagonal // 2)
+    effects = (layer or {}).get("effects") or {}
+    clip_box = (layer or {}).get("clip_box") or {"x": 0, "y": 0, "width": 1, "height": 1}
+    if (abs(pose["rotation"]) <= .001
+            and not (effects.get("shadow") or {}).get("enabled")
+            and not (effects.get("glow") or {}).get("enabled")
+            and finite(effects.get("blur"), 0) <= 0
+            and all(clip_box.get(key, default) == default
+                    for key, default in [("x", 0), ("y", 0), ("width", 1), ("height", 1)])):
+        # With no rotation or surrounding paint, the large transparent rotation
+        # surface contributes no pixels. Keep its exact integer inset/anchor
+        # rounding while composing just the local box into the same canvas.
+        clip = layer_clip_mask(artwork.size, effects.get("mask") or {},
+                               pose.get("crop_x", 0), pose.get("crop_y", 0),
+                               canvas_height / 720 * pose["scale"])
+        if clip is not None:
+            artwork.putalpha(ImageChops.multiply(artwork.getchannel("A"), clip))
+        opacity = max(0, min(1, pose["opacity"] * sample_opacity))
+        if opacity < 1:
+            artwork.putalpha(artwork.getchannel("A").point(lambda value: round(value * opacity)))
+        destination = Image.new("RGBA", canvas_size)
+        x = round(canvas_width * pose["x"] / 100 - anchor[0]) + round(anchor[0] - artwork.width * anchor_x)
+        y = round(canvas_height * pose["y"] / 100 - anchor[1]) + round(anchor[1] - artwork.height * anchor_y)
+        destination.alpha_composite(artwork, (x, y))
+        return destination
+    transform_surface = Image.new("RGBA", (diagonal, diagonal))
     transform_surface.alpha_composite(
         artwork,
         (round(anchor[0] - artwork.width * anchor_x), round(anchor[1] - artwork.height * anchor_y)),
     )
     alpha = transform_surface.getchannel("A")
-    effects = (layer or {}).get("effects") or {}
-    composed = Image.new("RGBA", transform_surface.size)
+    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") in ("image", "video") else 1
+    composed = transform_surface
     shadow = effects.get("shadow") or {}
     if shadow.get("enabled"):
         shadow_layer = _effect_layer(
             alpha,
             shadow.get("color", "#000000"),
             finite(shadow.get("opacity"), .55),
-            finite(shadow.get("blur"), 18),
+            finite(shadow.get("blur"), 18) * effect_units,
         )
-        composed.alpha_composite(
+        shadow_group = Image.new("RGBA", composed.size)
+        shadow_group.alpha_composite(
             shadow_layer,
-            (round(finite(shadow.get("x"), 0)), round(finite(shadow.get("y"), 10))),
+            (round(finite(shadow.get("x"), 0) * effect_units),
+             round(finite(shadow.get("y"), 10) * effect_units)),
         )
+        shadow_group.alpha_composite(composed)
+        composed = shadow_group
     glow = effects.get("glow") or {}
     if glow.get("enabled"):
-        composed.alpha_composite(
-            _effect_layer(
-                alpha,
-                glow.get("color", "#8b5cf6"),
-                finite(glow.get("intensity"), .75),
-                finite(glow.get("radius"), 16),
-            )
+        # CSS applies the next drop-shadow to the preceding filtered group.
+        # The glow therefore includes the authored shadow's coverage and sits
+        # behind the whole group, rather than covering or ignoring that shadow.
+        glow_group = _effect_layer(
+            composed.getchannel("A"), glow.get("color", "#8b5cf6"),
+            finite(glow.get("intensity"), .75),
+            finite(glow.get("radius"), 16) * effect_units,
         )
+        glow_group.alpha_composite(composed)
+        composed = glow_group
     blur = max(0, finite(effects.get("blur"), 0))
+    blur *= effect_units
     if blur > 0:
-        transform_surface = transform_surface.filter(ImageFilter.GaussianBlur(blur))
-    composed.alpha_composite(transform_surface)
+        # Match CSS filtering: blur associated color and alpha together, then
+        # restore straight RGBA for alpha_composite. Otherwise transparent black
+        # contributes to RGB and creates a dark fringe around soft artwork.
+        composed = composed.convert("RGBa").filter(
+            ImageFilter.GaussianBlur(blur)
+        ).convert("RGBA")
     clip_box = (layer or {}).get("clip_box") or {"x": 0, "y": 0, "width": 1, "height": 1}
     clip_size = (max(1, round(box_width * clip_box["width"])), max(1, round(box_height * clip_box["height"])))
     clip = layer_clip_mask(clip_size, effects.get("mask") or {}, pose.get("crop_x", 0), pose.get("crop_y", 0), canvas_height / 720 * pose["scale"])
@@ -245,12 +320,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     return destination
 
 
-def render_image_layer_motion(asset_path, output_path, overlay, layer, width, height,
-                              output_duration, speed_plan, fps=30):
-    """Render one timed image layer and return its final-clock placement."""
-    asset = Image.open(asset_path).convert("RGBA")
-    if asset.width * asset.height > 8192 * 8192:
-        raise ValueError("Logo/image layer exceeds the 8192px safety limit")
+def layer_output_window(overlay, output_duration, speed_plan):
     start = max(0, finite(_get(overlay, "start_time", 0), 0))
     edit_end = start + max(.05, finite(_get(overlay, "duration", output_duration), output_duration))
     normalized_speed_plan = list(speed_plan or [])
@@ -261,6 +331,23 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
         output_start = min(output_duration, start)
         output_end = min(output_duration, edit_end)
     clip_duration = max(.05, output_end - output_start)
+    return output_start, clip_duration, normalized_speed_plan
+
+
+def render_image_layer_motion(asset_path, output_path, overlay, layer, width, height,
+                              output_duration, speed_plan, fps=30, *, frame_source=None, title_animator=None):
+    """Render canonical media poses; a video supplies decoded frames to this same compositor."""
+    # The owned image remains the ordinary import/ownership reference. Editable
+    # contour decisions, rather than its original cached PNG, author the result.
+    vector_shape = (layer or {}).get('vector_shape')
+    validate_vector_trim(layer or {})
+    if vector_shape is not None and frame_source is not None:
+        raise ValueError('Vector artwork cannot replace a decoded video source')
+    asset = (None if vector_shape is not None else
+             Image.open(asset_path).convert("RGBA")) if frame_source is None else None
+    if asset is not None and asset.width * asset.height > 8192 * 8192:
+        raise ValueError("Logo/image layer exceeds the 8192px safety limit")
+    output_start, clip_duration, normalized_speed_plan = layer_output_window(overlay, output_duration, speed_plan)
     motion_blur = ((layer or {}).get("effects") or {}).get("motion_blur") or {}
     samples = max(1, min(8, int(finite(motion_blur.get("samples"), 1)))) if motion_blur.get("enabled") else 1
     shutter = max(0, min(1, finite(motion_blur.get("shutter"), .5)))
@@ -271,8 +358,16 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
     ]
     with tempfile.TemporaryFile() as log:
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log)
+        # An imported still and its layer effects are immutable for this call.
+        # Holds often span hundreds of frames: reuse only the immediately
+        # preceding identical sampled pose, retaining one bounded canvas.
+        # Decoded video frames always go through the compositor independently.
+        held_pose = held_sample_opacity = held_raster = None
+        vector_trim = text_progress = None
         try:
             for frame_index in range(math.ceil(clip_duration * fps)):
+                if frame_source is not None:
+                    asset = frame_source(frame_index)
                 absolute_output = output_start + frame_index / fps
                 frame = Image.new("RGBA", (width, height))
                 for sample in range(samples):
@@ -293,10 +388,24 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                         pose["scale"] *= animation["scale"]
                         pose["x"] += animation["x"]
                         pose["y"] += animation["y"]
+                    if pose["opacity"] <= 0:
+                        continue
                     sample_opacity = 1 if sample == samples - 1 else .28 / max(1, samples - 1)
-                    frame.alpha_composite(
-                        _render_pose(asset, overlay, layer, pose, (width, height), sample_opacity)
-                    )
+                    if frame_source is None and pose == held_pose and sample_opacity == held_sample_opacity:
+                        raster = held_raster
+                    else:
+                        if title_animator is not None and text_progress != pose["text_progress"]:
+                            asset = title_animator.frame(pose["text_progress"])
+                            text_progress = pose["text_progress"]
+                        if vector_shape is not None:
+                            trim = (pose['stroke_start'], pose['stroke_end'], pose['stroke_offset'])
+                            if trim != vector_trim:
+                                asset = rasterize_vector_shape(vector_shape, stroke_start=trim[0], stroke_end=trim[1], stroke_offset=trim[2])
+                                vector_trim = trim
+                        raster = _render_pose(asset, overlay, layer, pose, (width, height), sample_opacity)
+                        if frame_source is None:
+                            held_pose, held_sample_opacity, held_raster = pose, sample_opacity, raster
+                    frame.alpha_composite(raster)
                 process.stdin.write(frame.tobytes())
             process.stdin.close()
             if process.wait(timeout=1800):
@@ -307,3 +416,57 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                 process.kill()
                 process.wait()
     return {"path": str(Path(output_path)), "start_time": output_start, "duration": clip_duration}
+
+
+def render_video_layer_motion(asset_path, output_path, overlay, layer, width, height,
+                              output_duration, speed_plan, fps=30):
+    """The ordinary B-roll preparation already owns trim/loop/hold and retiming.
+
+    Decode its moving pictures once and apply the same pose/mask/alpha renderer
+    as image layers. This replaces only the legacy static placement of keyed
+    video, preserving the existing B-roll source clock and separate audio path.
+    """
+    info = json.loads(subprocess.check_output([
+        "ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+        "stream=width,height", "-of", "json", str(asset_path),
+    ]))
+    stream = info["streams"][0]
+    source_width, source_height = int(stream["width"]), int(stream["height"])
+    if min(source_width, source_height) <= 0 or source_width * source_height > 8192 * 8192:
+        raise ValueError("Video layer exceeds the 8192px safety limit")
+    _, duration, _ = layer_output_window(overlay, output_duration, speed_plan)
+    frame_count = math.ceil(duration * fps)
+    frame_bytes = source_width * source_height * 4
+    command = ["ffmpeg", "-nostdin", "-v", "error", "-threads", "2", "-i", str(asset_path),
+               "-an", "-vf", f"fps={fps}", "-frames:v", str(frame_count),
+               "-f", "rawvideo", "-pix_fmt", "rgba", "pipe:1"]
+    with tempfile.TemporaryFile() as log:
+        decoder = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=log)
+        last_frame = None
+        def frame_source(index):
+            nonlocal last_frame
+            raw = bytearray()
+            while len(raw) < frame_bytes:
+                chunk = decoder.stdout.read(frame_bytes - len(raw))
+                if not chunk:
+                    break
+                raw.extend(chunk)
+            if len(raw) != frame_bytes:
+                # Permit only the existing one-frame delivery rounding tail.
+                if not raw and last_frame is not None and index == frame_count - 1:
+                    return last_frame
+                raise RuntimeError("Prepared video layer ended before its authored duration")
+            last_frame = Image.frombytes("RGBA", (source_width, source_height), bytes(raw))
+            return last_frame
+        try:
+            receipt = render_image_layer_motion(None, output_path, overlay, layer, width, height,
+                output_duration, speed_plan, fps, frame_source=frame_source)
+            if decoder.wait(timeout=30):
+                log.seek(0)
+                raise RuntimeError("Video layer decode failed: " + log.read().decode(errors="replace")[-1600:])
+            return receipt
+        finally:
+            decoder.stdout.close()
+            if decoder.poll() is None:
+                decoder.kill()
+                decoder.wait()

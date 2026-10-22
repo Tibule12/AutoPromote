@@ -1,48 +1,47 @@
 import React from "react";
-import { useLocation, Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import ReactMarkdown from "react-markdown";
+import PublicPage, { PageCard } from "./components/public/PublicPage";
 import posts from "./blog/posts";
 
-const MarkdownRenderer = ({ md }) => {
-  if (!md) return null;
-  return <ReactMarkdown>{md}</ReactMarkdown>;
-};
-
-const Blog = () => {
-  const location = useLocation();
-  // With HashRouter, location.pathname will be the path inside the hash (e.g. "/blog" or "/blog/post-1")
-  const path = location.pathname;
-  // Remove leading /blog and optional slash
-  const slug = path.replace(/^\/blog\/?/, "");
-
-  if (slug) {
-    const post = posts.find(p => p.slug === slug);
-    if (!post) return <div style={{ padding: 24 }}>Post not found.</div>;
-    return (
-      <div style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
-        <Link to="/blog">&larr; Back to Blog</Link>
-        <h1>{post.title}</h1>
-        <small>{post.date}</small>
-        <MarkdownRenderer md={post.content} />
-      </div>
-    );
-  }
-
+export default function Blog() {
+  const slug = useLocation().pathname.replace(/^\/blog\/?/, "");
+  const post = posts.find(p => p.slug === slug);
   return (
-    <div style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
-      <h1>Blog</h1>
-      <p>Read the latest updates from the AutoPromote team.</p>
-      <ul>
-        {posts.map(p => (
-          <li key={p.slug}>
-            <Link to={`/blog/${p.slug}`}>
-              {p.title} — {p.date}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <PublicPage
+      eyebrow="NOTES / MAKING & RELEASING"
+      title={
+        slug
+          ? post?.title || "That article could not be found."
+          : "Better work. More thoughtful releases."
+      }
+      intro={
+        slug
+          ? post?.date
+          : "Practical notes on editing, packaging and learning from what you publish."
+      }
+    >
+      {slug ? (
+        <>
+          <Link className="public-back" to="/blog">
+            ← All articles
+          </Link>
+          {post && (
+            <article className="public-prose">
+              <ReactMarkdown>{post.content.replace(/^#\s+[^\n]+\n/, "")}</ReactMarkdown>
+            </article>
+          )}
+        </>
+      ) : (
+        <div className="public-grid public-grid-two">
+          {posts.map(p => (
+            <PageCard key={p.slug} title={p.title} to={`/blog/${p.slug}`} link="Read article">
+              <p className="public-section-label">{p.date}</p>
+              <p>{p.excerpt || "An earlier note from the AutoPromote team."}</p>
+            </PageCard>
+          ))}
+        </div>
+      )}
+    </PublicPage>
   );
-};
-
-export default Blog;
+}

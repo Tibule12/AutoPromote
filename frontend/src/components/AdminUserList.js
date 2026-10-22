@@ -12,6 +12,24 @@ const AdminUserList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [grantingTesterId, setGrantingTesterId] = useState("");
   const [emailingTesterId, setEmailingTesterId] = useState("");
+  const [allowanceEditor, setAllowanceEditor] = useState(null);
+  const [savingAllowance, setSavingAllowance] = useState(false);
+
+  const saveAllowance = async event => {
+    event.preventDefault();
+    setSavingAllowance(true);
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${allowanceEditor.id}/upload-allowance`, {
+        method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ monthlyLimit: Number(allowanceEditor.monthlyLimit), reason: allowanceEditor.reason }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw Error(body.error || "Could not save upload allowance");
+      setAllowanceEditor(null);
+    } catch (error) { setAllowanceEditor(value => ({ ...value, error: error.message })); }
+    finally { setSavingAllowance(false); }
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -292,6 +310,9 @@ const AdminUserList = () => {
                           ? "Tester expired"
                           : "✨ Grant Tester"}
                 </button>
+                <button onClick={() => setAllowanceEditor({ id: userId, label: r.name || r.email || userId, monthlyLimit: 150, reason: "", error: "" })}>
+                  Upload allowance
+                </button>
                 <button
                   onClick={() => handleImpersonate(userId, r.name || r.email)}
                   style={{
@@ -389,6 +410,17 @@ const AdminUserList = () => {
         </div>
       </div>
 
+      {allowanceEditor && <section role="dialog" aria-label="Account upload allowance" style={{ padding: 20, border: "1px solid #8b5cf6", borderRadius: 12, marginBottom: 16 }}>
+        <h3>Upload allowance — {allowanceEditor.label}</h3>
+        <p>Set this account&apos;s monthly upload capacity. Usage history, subscription and price stay unchanged. Every change is audited.</p>
+        <form onSubmit={saveAllowance}>
+          <label>Monthly uploads <input type="number" min="1" max="10000" step="1" required value={allowanceEditor.monthlyLimit} onChange={event => setAllowanceEditor({ ...allowanceEditor, monthlyLimit: event.target.value })} /></label>
+          <label>Reason <input required minLength={8} maxLength={300} value={allowanceEditor.reason} onChange={event => setAllowanceEditor({ ...allowanceEditor, reason: event.target.value })} /></label>
+          {allowanceEditor.error && <p role="alert">{allowanceEditor.error}</p>}
+          <button type="submit" disabled={savingAllowance}>{savingAllowance ? "Saving…" : "Save account allowance"}</button>
+          <button type="button" disabled={savingAllowance} onClick={() => setAllowanceEditor(null)}>Cancel</button>
+        </form>
+      </section>}
       {loading && <div>Loading users...</div>}
       {error && <div style={{ color: "red" }}>{error}</div>}
 

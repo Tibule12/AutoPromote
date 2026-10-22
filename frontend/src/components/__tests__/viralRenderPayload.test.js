@@ -6,6 +6,15 @@ import {
 } from "../viralRenderPayload";
 
 describe("viralRenderPayload", () => {
+  test("derives the programme clock from the edit instead of retaining a stale intermediate duration", () => {
+    const payload = buildViralRenderData({finalVideoUrl: "https://example.com/source.mp4", selectedClip: {start: 0, end: 8},
+      extraOptions: {timelineSegments: [{id: "a", start_time: 4, end_time: 7, duration: 3},
+        {id: "b", start_time: 10, end_time: 15, duration: 5}],
+      editorTimeline: {track_states: {}, programme_duration_ticks: 723840}}});
+    expect(payload.editor_timeline.programme_duration_ticks).toBe(720000);
+    expect(payload.end_time).toBe(8);
+    expect(payload.editor_timeline.track_states).toEqual({});
+  });
   test("keeps owned source references and scene order in a multi-video render", () => {
     const timelineSegments = [
       { id: "scene-a", url: "https://example.com/a.mp4", sourceStoragePath: "uploads/videos/user/a.mp4", start_time: 2, end_time: 5, duration: 3 },

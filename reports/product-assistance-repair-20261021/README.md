@@ -1,0 +1,18 @@
+# Ask AutoPromote documentation chatbot repair — 21 October 2026
+
+The documentation chatbot on the local preview at `http://localhost:5006/` returned HTTP 503 (`PRODUCT_DOCUMENTATION_UNAVAILABLE`) for ordinary product questions. The associated public guide endpoint also returned 503. The separate podcast preview's API on port 5119 already answered successfully; it was not the failing service.
+
+The integration backend on port 5145 could not initialize its reviewed knowledge catalogue. `knowledge:validate` identified a changed fingerprint for `ViralClipStudio.js`; subsequent diagnosis also captured changed CI evidence in the capability/parity matrices. The existing documentation contract deliberately rejects changed linked sources until their documentation impact is reviewed. The HTTP boundary hid that internal validation reason behind its generic unavailable response.
+
+Review of the actual editor diff found paused-preview empty-URL normalization and explicit podcast frame enablement. The matrix additions describe bounded CI/preview evidence and retain the existing limitations/readiness. These changes require a new source review, without changing the documented feature facts, public guides or readiness claims. The explicit `knowledge:review` command updates `config/product-knowledge/source-lock.v1.json` after that audit. The original lock and source hashes are retained in `source-lock.before.json` and [diagnosis.json](diagnosis.json). No runtime validation bypass, frontend source rewrite, backend restart or App rebuild was needed.
+
+Verification:
+
+- The actual failing API and local app proxy now return 200 for asks and the documentation index, using knowledge 1.0.43.
+- [The headless muted browser check](verify.cjs) reuses the retained real Firebase login in an isolated local-preview context. Explain, Guide and Diagnose each receive real HTTP 200 replies and render their answer without an alert. The known automatic-caption limitation remains BROKEN. The motion guide also renders through the normal documentation page. No responses, authentication or product APIs are mocked.
+- [Guide reply](after-guide.png), [Explain reply](after-explain.png), [Diagnose reply](after-diagnose.png), [documentation page](after-documentation.png). The detailed receipt is `after.private.json`.
+- All 45 product-knowledge/assistance tests pass, including strict fingerprint rejection and explicit-review enforcement. `knowledge:check` passes for all 42 generated files. The ten existing deferred documentation warnings remain. The Studio contract validator passes with its existing counts.
+
+The first browser attempt was stopped during oversized historical project-state import; documentation QA then imports authentication only. An early pre-fix browser observer was also stopped before producing a completed UI receipt. Pre-fix failure is established by the real HTTP probes and strict validation, not a claimed completed pre-fix UI run. The final browser verification completes successfully. The saved session file remains byte-identical, retaining all 43 original project records. No project is opened, edited, exported or overwritten; no render, model/GPU, upload or publication request is made. Existing sources, changes, films, login, schedules and timers are retained. This is a local repair, with no deployment or main merge.
+
+When continuing implementation or readiness-evidence changes, review documentation impact and run `knowledge:review`, `knowledge:check`, and a real chatbot request before declaring the local preview ready. Strict source review remains enabled. Shared Studio visual/preview/motion/ownership limitations and the outstanding engineering CI/CodeQL track are unchanged.

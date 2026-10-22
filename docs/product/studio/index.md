@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
+Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -8,7 +8,9 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 
 ID: `studio.timeline` • **PARTIAL** • DETERMINISTIC
 
-Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.
+Shows the real composition as separate front-to-back layer and group rows, with exact clip timing and expandable transform properties. Sequence tracks remain available for source editing and sound. Both views use the same project and programme clock.
+
+**Purpose:** Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -20,22 +22,31 @@ Displays clip occurrences, layers, audio cues and property keys on the shared pr
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Use a laptop or desktop with a screen at least 900 pixels wide and a precise pointer. Choose a tool in the left rail; its controls open in the inspector beside Preview. Scroll inside the inspector to reach its lower sections while keeping the preview and timeline visible.
+2. Use Composition layers to inspect each title, artwork or scene on its own row. Expand a layer’s keyframes to edit its existing transform properties. Bars show clip timing; opacity, occlusion and parent group gates determine the picture.
+3. Use At playhead to filter by current clip timing and all parent group gates. This display filter changes no project decisions. Use Sequence tracks for source footage and track mix controls.
+4. Move an ordinary animated layer using its bar or arrow keys. Its canonical transform keys move by the same bounded delta. Undo restores layer timing and keys together.
+5. Select a source, layer or group on its timeline row. Group bars remain available when property rows are collapsed.
+6. Move a group with a pointer gesture or frame nudge; its descendant starts and keys move in one history transaction. Drag or nudge its In/Out edges to limit visibility while keeping child source edits and hidden keys.
+7. Selecting a group focuses its property rows; select an ordinary child clip to edit that child’s keys. Graphics and child-track locks block group timing changes.
+8. Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported.
+9. Download project backup saves the current editable project and available media. Select Include saved versions in backup when the saved-version history is also needed; this choice does not delete local versions. Owned media access is re-authorized when restoring.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Group In/Out uses a half-open programme-time visibility range around assembled child graphics. Group move shifts canonical child timing and keys, retaining source phase. The same derived group range clips linked motion cues for preview and export. Property focus and clip selection do not change the edit.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The shared composition plan carries group timing into the CPU compositor. The existing inverse programme clock gates the group’s assembled output at the same In/Out range. Source clips, child animation and audio use their existing compilation paths.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- One real 20-second footage/title/music/SFX project exercises group pointer move, trim, opacity keys, locks, group deletion/undo, source split/history and exact cold reopen. Broader source-occurrence attachment/reordering, group split/duplicate, nested audio/video/owned 3D timing and continuous/full picture/sound remain unqualified. Group trim preserves hidden keys and source phase; it does not retime/stretch child content.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
+- The timeline editor does not open on a small or touch-only screen: Open the project on a laptop or desktop with at least 900 pixels of screen width, hover support and a precise pointer. The desktop editing notice is intentional.
 
-**Controls:** No source-qualified editable control is recorded.
+**Controls:** [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Composition layers / Sequence tracks](../control-reference/index.md#studio-timeline-view), [At playhead](../control-reference/index.md#studio-timeline-at_playhead)
 
 **Guides:** No task guide in V1.
 
@@ -233,13 +244,13 @@ Edits position, scale, rotation, anchor, crop and opacity of ordinary layers. Na
 
 ID: `studio.keyframes` • **FUNCTIONAL** • DETERMINISTIC
 
-Adds property keys to a selected ordinary layer, moves them in the timeline and interpolates poses. Retained evidence covers native controls, undo/redo, reopen and export; whole-stage agreement is still partial.
+Edit property keys, spatial position handles and value/velocity graphs on the same editable project. Curve the route between paired positions while retaining ordinary history, saving and final compilation.
 
 **Purpose:** Create deliberate editable movement and retain the same keys across manual editing, Director proposals, saving and final compilation.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
-**Media:** ordinary text layers, image overlays, video overlays
+**Media:** ordinary text layers, image overlays, video overlays, nested graphic groups
 
 **Requires:** studio.transforms (FUNCTIONAL), studio.timeline (PARTIAL)
 
@@ -247,26 +258,41 @@ Adds property keys to a selected ordinary layer, moves them in the timeline and 
 
 **Workflow**
 
-1. Show motion keyframes in the timeline and expand an ordinary visual layer, including a layer without animation keys.
-2. Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.
-3. Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.
-4. Owning-track locks prevent changes. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
+1. Open Motion → Transform keyframes and choose the Target layer. Read X, Y, Scale, Rotate and Opacity at the playhead. Scroll down for keyframes, value/easing fields and the separate Start/End velocity and influence controls.
+2. Show motion keyframes in the timeline and expand an ordinary visual layer or graphic group, including targets without animation keys.
+3. Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.
+4. Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.
+5. At each playhead position, inspect X, Y, Scale, Rotate, Opacity and Crop X/Y for the evaluated pose. A zero-opacity key displays 0% in Motion.
+6. Drag empty property-lane space to box-select across expanded rows. Shift/Ctrl/Command adds; Alt subtracts; Escape or pointer cancellation restores the prior selection. Shift/Ctrl/Command-click also selects individual keys. Drag, frame-nudge, scale spacing, apply interpolation or delete with the batch toolbar.
+7. Copy with the toolbar or Ctrl/Command+C. Choose Original layers or an existing visual layer in Paste to, then paste at the playhead with the toolbar or Ctrl/Command+V. A single-source-layer clipboard can target another layer; supported property values, spacing, easing and curves are retained with fresh key identities.
+8. Owning-track locks prevent changes. Group values use their own five-property bounds; group key selection opens Composite with the shared curve editor. Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property.
+9. In Motion, Add position key writes an X/Y pair at the playhead. Drag a path point over the picture or nudge with Arrow keys (Shift increases the step). The picture follows the temporary drag; release commits the pair once, while Escape/cancellation restores the prior edit. Paths sample actual X/Y interpolation and map animated parent coordinates.
+10. Select a timeline key, open Graph editor and choose Value graph or Velocity graph. Edit the interval arriving at that key. Signed velocity uses property units per programme second; endpoint influence preserves endpoint velocity. Numeric edits commit on Enter/blur and write the existing four cubic handles.
+11. Once a transform is animated, Motion inspector value edits write a key at the playhead. The static fallback is retained for the base transform; it no longer overrides visible key-driven values.
+12. Editing motion keys while viewing a completed movie switches After to Live Edit. The prior download remains available through Export; it is not presented as an updated movie.
+13. For paired position keys, select the layer in Motion → Transform keyframes, place the playhead in the interval and choose Curve path. Drag or arrow-nudge the amber handles; release commits once and Escape cancels. Straighten path retains its endpoints. Check the changed route before export.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** Uses the existing shared compiler/compositor and interpolation expressions where supported. Group keys retain canonical target ownership and are projected into the group composition plan; output time maps back to the programme clock. Inspect the actual exported movie; the status does not certify every combination.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Two bounded masked image-effect edits preserve eight position/scale/rotation/opacity keys through native save/reopen/export. Inverted-polygon sampled picture passes; one ellipse raster pair still exceeds the strict colour bound. This does not qualify every mask/easing/media or legacy entrance clock.
+- One native nested image/two-motion project preserves 16 group keys across eight channels, including one custom X Bézier curve. Midpoint, property rows, nudge/lock, reset/remove/undo, save/cold reopen, CPU export and full timeline playback pass; four image geometry pairs pass and decoded source-tone audio is unchanged. Native retiming, broader curves, broader mask/blend combinations, video/owned 3D/deeper groups, full raster and live sound remain unqualified. Existing worker Bézier expressions approximate 32 samples; browser interpolation solves the curve.
+- Cross-layer paste requires a single source layer and a current-project destination supporting every copied property and value range. Missing targets, unsupported crop/group bounds, destination locks, half-frame timing collisions and programme overflow reject the whole paste. Original-layers mode supports mixed owners. Clipboard is local to this timeline component; it is not an OS/project interchange format. Freehand lasso and cross-project interchange are not qualified. Broad media/retiming/full picture and sound qualification remains open.
+- Velocity/influence edits write a custom cubic curve, including when converting an easing preset. Flat intervals cannot acquire movement through velocity alone. Influence is1–99%; speeds that exceed the supported handle range reject. Hold has a discontinuous step and no finite editable endpoint velocity. Worker custom curves retain the existing32-sample approximation.
+- Spatial handles are endpoint-relative position offsets, bounded to ±200 composition percent. The route uses paired neighboring X/Y keys; other keys retain their existing interpolation. Adding or retiming individual keys can change adjacent intervals. Automatic arc-length speed, roving keys, closed vector contours and vector-shape morphs are not provided by these handles.
+- Curved intervals share a sampled travel curve in preview and export. Travel progress stays on the authored route; it is distinct from constant screen-distance speed. Native proof covers one image and four intervals; broader retiming, animated parents, other media and whole picture/sound remain unqualified.
 
 **Common errors**
 
-- No selected editable layer: Select an ordinary layer before adding transform keys.
+- No selected editable layer: Select an ordinary layer or a graphic group before adding its supported transform keys.
 - Keyframe edits are locked: Unlock the applicable property/layer in the normal controls before editing.
 - Motion differs after export: Check current keys/source binding and the documented preview/final limitations; inspect mapped frames in the actual movie.
 
-**Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing)
+**Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Selected keyframe time scale](../control-reference/index.md#studio-keyframe-selection_scale), [Keyframe paste destination](../control-reference/index.md#studio-keyframe-paste_target), [Start velocity](../control-reference/index.md#studio-keyframe-start_velocity), [End velocity](../control-reference/index.md#studio-keyframe-end_velocity), [Start influence](../control-reference/index.md#studio-keyframe-start_influence), [End influence](../control-reference/index.md#studio-keyframe-end_influence), [Curve path / Straighten path](../control-reference/index.md#studio-keyframe-spatial_curve), [Spatial path handles](../control-reference/index.md#studio-keyframe-spatial_handle)
 
 **Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
 
@@ -293,6 +319,8 @@ Controls interpolation using linear, ease-in, ease-out, ease-in-out, hold and bo
 1. Select an existing key or pose group for the intended ordinary layer.
 2. Choose linear, ease-in, ease-out, ease-in-out, hold or custom curve; inspect the transition into that key.
 3. For a custom curve, use bounded handles and play the movement; save/reopen and inspect final output.
+4. Select an arriving key in the timeline Graph editor. Switch between Value and Velocity views; set start/end velocity and influence, or drag the existing value-curve handles. Numeric edits commit once on Enter or blur.
+5. Curved position intervals expose Start travel and End travel in path-progress percent per second. Their timing edits coordinate the arriving X/Y pair. Value and Velocity graphs show the resulting property movement; use on-picture handles to change the route.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -303,12 +331,13 @@ Controls interpolation using linear, ease-in, ease-out, ease-in-out, hold and bo
 - The shared curve contract allows Y overshoot -2–2, while some numeric inspector widgets restrict Y to 0–1.
 - The right-hand key supplies easing for the interval between keys.
 - This is native 2D property interpolation, distinct from legacy scene-level 3D easing.
+- Velocity is signed change in the property per programme second, not screen-path speed. Influence preserves endpoint velocity. Editing a preset converts it to a custom cubic; hold and constant-value intervals have no editable finite motion velocity. Spatial handles have bounded native image evidence; broader combinations and constant-distance path speed remain unqualified.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Cubic curve handles](../control-reference/index.md#studio-keyframe-curve)
+**Controls:** [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Cubic curve handles](../control-reference/index.md#studio-keyframe-curve), [Start velocity](../control-reference/index.md#studio-keyframe-start_velocity), [End velocity](../control-reference/index.md#studio-keyframe-end_velocity), [Start influence](../control-reference/index.md#studio-keyframe-start_influence), [End influence](../control-reference/index.md#studio-keyframe-end_influence), [Curve path / Straighten path](../control-reference/index.md#studio-keyframe-spatial_curve), [Spatial path handles](../control-reference/index.md#studio-keyframe-spatial_handle)
 
 **Guides:** No task guide in V1.
 
@@ -332,6 +361,7 @@ Reframes a source or crops an overlay using the shared time map and existing ren
 
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
+3. With 16:9 and Preserve frame, mixed footage is normalized directly into the wide sequence canvas. Portrait sources retain their proportions instead of shrinking all wide clips into the original upload shape.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -355,7 +385,9 @@ Reframes a source or crops an overlay using the shared time map and existing ren
 
 ID: `studio.captions` • **BROKEN** • DETERMINISTIC
 
-Caption controls and reviewed phrase rendering exist, but the retained automatic-word workflow has a repetition defect. Treat automatic word output as broken until that path is repaired and requalified.
+Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
+
+**Purpose:** Generate timed speech drafts, correct wording and speaker/language labels, and retain editable caption styles in the shared Studio project.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -367,8 +399,10 @@ Caption controls and reviewed phrase rendering exist, but the retained automatic
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.
+2. Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.
+3. Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.
+4. Regenerate a selected source without replacing other sources’ caption tracks. If its wording changes while listening, keep the edits and regenerate when ready.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -377,14 +411,16 @@ Caption controls and reviewed phrase rendering exist, but the retained automatic
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review; the prior broad automatic-caption qualification remains open.
+- Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
-- Generate and review captions before rendering.: There are no editable caption phrases for the requested burn-in. Automatic words remain BROKEN. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export.
-- Review every flagged caption line before rendering.: Approve or correct each flagged phrase and timestamp in Captions. Automatic words remain BROKEN; this is a reviewed-phrase workaround, not repaired automatic transcription.
+- Generate and review captions before rendering.: There are no editable caption phrases for the requested burn-in. Automatic wording still needs review. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export.
+- Review every flagged caption line before rendering.: Approve or correct each flagged phrase and timestamp in Captions. Correct all flagged wording and timing; the repaired repetition trigger does not establish accuracy across all speech.
 
-**Controls:** No source-qualified editable control is recorded.
+**Controls:** [Speech language](../control-reference/index.md#studio-captions-source_language)
 
 **Guides:** [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Create captions and correct transcription](../task-guides/task-captions_correct.md)
 
@@ -394,7 +430,9 @@ Caption controls and reviewed phrase rendering exist, but the retained automatic
 
 ID: `studio.titles` • **FUNCTIONAL** • DETERMINISTIC
 
-Places editable title text in ordinary layers with deterministic style, layout and timing. It is distinct from automatic speech transcription.
+Places editable titles, separates word/letter motion and imports authored graphics. Outline width and color share the saved title state, live preview and CPU title rasterizer.
+
+**Purpose:** Author kinetic typography using the same editable layers, group timing and property graph used by preview and export.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -406,22 +444,32 @@ Places editable title text in ordinary layers with deterministic style, layout a
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Add or select an ordinary transparent Inter title in Graphics and set its copy, position, size and duration.
+2. Open Kinetic typography, choose words or letters, movement and order, then set stagger, entrance, travel, rotation and exit.
+3. Build editable text motion. Each word or grapheme becomes an ordinary title in one Type group with editable property keys.
+4. Select individual text layers to change their copy, style or keyframes. Move the Type group to keep child timing together. Undo restores the original title.
+5. Combine the generated type with ordinary imported artwork and group scale keys to author a full-frame composition; all text stays independently editable.
+6. In Graphics, open Import animated graphics and choose an AutoPromote graphics v1 JSON file matching the programme aspect and duration. It adds ordinary editable layers above the current composition; Undo removes the complete import.
+7. Save, reopen and inspect the actual finished movie with its editable timeline.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Generated ordinary layers use existing title layout and canonical motion interpolation on the programme clock; building text motion returns the monitor to Live Edit.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The existing composition compiler and title compositor consume generated ordinary layers and property keys. There is no separate text-animation engine.
 
 **Limits**
 
-- This dated development snapshot does not establish professional or production readiness.
+- Separating supports transparent ordinary Inter titles with no existing motion keys, active mask, tracking, rainbow text or non-normal blend effect.
+- At most 48 units and 128 graphic layers; entrances, stagger, hold and exit must fit the title duration. Position must stay inside the programme.
+- Word/letter controls are authoring inputs. After separation edit the resulting layers and keys; Undo restores the source title.
+- Broad text shaping, continuous picture/sound agreement and professional or production readiness remain unqualified.
+- Successful authoring and export do not establish creative quality or professional readiness.
+- Graphics import supports text and static SVG artwork rasterized to ordinary image assets. Artwork geometry is not converted to editable vector paths. Use the generated layers and property keys after import.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Title text](../control-reference/index.md#studio-title-text), [Title size](../control-reference/index.md#studio-title-scale), [Title text color](../control-reference/index.md#studio-title-color)
+**Controls:** [Title text](../control-reference/index.md#studio-title-text), [Title size](../control-reference/index.md#studio-title-scale), [Title text color](../control-reference/index.md#studio-title-color), [Kinetic unit](../control-reference/index.md#studio-title-kinetic_unit), [Kinetic movement](../control-reference/index.md#studio-title-kinetic_style), [Kinetic order](../control-reference/index.md#studio-title-kinetic_direction), [Kinetic stagger](../control-reference/index.md#studio-title-kinetic_stagger), [Kinetic entrance](../control-reference/index.md#studio-title-kinetic_entry), [Kinetic travel](../control-reference/index.md#studio-title-kinetic_travel), [Kinetic rotation](../control-reference/index.md#studio-title-kinetic_tilt), [Kinetic exit](../control-reference/index.md#studio-title-kinetic_exit), [Import animated graphics](../control-reference/index.md#studio-graphics-import), [Outline color](../control-reference/index.md#studio-title-outline_color)
 
 **Guides:** No task guide in V1.
 
@@ -485,11 +533,12 @@ Applies the supported deterministic visual effects and source-bound subject scen
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** Ordinary image effects preserve colour at transparent blur edges and share programme/layer scaling with preview. Shadow, glow and blur follow the same ordered filter chain. Inspect the exact final film; broad effect, media and combination agreement remains unqualified.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The image-effect repairs do not qualify video effects, every masked stack, full picture/sound or arbitrary composition nesting.
 
 **Common errors**
 
@@ -505,7 +554,9 @@ Applies the supported deterministic visual effects and source-bound subject scen
 
 ID: `studio.compositing` • **PARTIAL** • DETERMINISTIC
 
-Combines ordinary layers with supported blend modes and masks. Global stage order, arbitrary nesting and full preview/export agreement remain incomplete.
+Combines ordinary layers and animated graphic groups with shared order, static masks, alpha-aware blending and editable group clip timing. Broad preview/export picture and sound agreement remains incomplete.
+
+**Purpose:** Compose editable graphic hierarchies while preserving child-local edits, timing and property animation through the shared preview and render path.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -513,28 +564,50 @@ Combines ordinary layers with supported blend modes and masks. Global stage orde
 
 **Requires:** studio.layers (FUNCTIONAL)
 
-**Optional:** None recorded.
+**Optional:** studio.keyframes (FUNCTIONAL)
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Select an owned image or ordinary title in Studio Composite.
+2. Enable its geometric mask and choose rectangle, ellipse or polygon.
+3. For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.
+4. For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.
+5. Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.
+6. To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.
+7. Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.
+8. Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom Bézier curve in Composite.
+9. Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.
+10. Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.
+11. Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.
+12. Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.
+13. Open Studio → Composite and add effects to the selected owned video clip.
+14. Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.
+15. Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.
+16. Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.
+17. Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.
+18. At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.
+19. For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.
+20. After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.
 
-**Final render:** The shared composition compiler carries geometric image masks and crop keyframes. Ordinary title masks use the title layout box rather than shadow padding. When delivery is larger than the source, graphics are composed at delivery resolution. Inspect the exact final movie; full preview/render raster agreement remains unqualified.
+**Final render:** The shared compiler carries group mask/blend decisions and transform keys into the existing CPU compositor. The ordinary geometric matte rasterizer clips assembled local child alpha before transform/opacity; registered request-owned matte scratch is cleaned after the render. RGB blend color weights the blend result by backdrop alpha, preserving foreground color over transparent isolated parents. Group and child blending share the existing leaf compositor and inverse programme clock. Static/Normal paths retain previous pixels. Source/source-VFX/generated-caption stages remain separate; inspect the exact final movie.
 
 **Limits**
 
-- Rectangle, ellipse and percentage-polygon image masks and crop animation have scoped native/export boundary evidence. This is deterministic geometry, not AI subject segmentation.
-- Feathered/inverted masks, animated video-layer masks, arbitrary nesting and full alpha/text/effect-order parity remain incomplete.
+- Image and title geometric masks support feather and inversion. Inspect their boundaries in the exported movie, especially with soft edges.
+- Geometric masks on the main video or video layers currently stop export. Real person/background separation uses Composite’s separately processed subject mask. Arbitrary nesting and global layer/effect order remain incomplete.
 - This dated development snapshot does not establish professional or production readiness.
+- Background replacement is optional. Uploads accept PNG, JPEG or WebP up to 32 MB; a scene supports at most twelve effect layers.
+- A new video requires its own source-bound mask and available authorized model execution. A saved mask from another video cannot be transferred. An unavailable model service prevents creating a new mask.
+- The retained podcast example uses manual source-specific object contours and still has rejected fringes. Those corrections do not prove clean automatic replacement for other users’ footage.
+- Optional object holdouts and removal paths are advanced manual normalized source-frame geometry. They do not automatically identify furniture or microphones or track a hand-drawn shape through motion.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend)
+**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Enable group mask](../control-reference/index.md#studio-composite-group_mask_enabled), [Group mask shape](../control-reference/index.md#studio-composite-group_mask_shape), [Group mask feather](../control-reference/index.md#studio-composite-group_mask_feather), [Invert group mask](../control-reference/index.md#studio-composite-group_mask_inverted), [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Edge detail width](../control-reference/index.md#studio-composite-background_edge_radius), [Remove old background colour](../control-reference/index.md#studio-composite-background_decontaminate)
 
 **Guides:** No task guide in V1.
 
@@ -854,8 +927,12 @@ Places sound cues on the native timeline. Included sound-design presets synthesi
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open an owned Studio project, choose Sound and scroll to Sound effects.
+2. Put the playhead on the cut or reveal, then select a sound preset to add it there. Use Upload for an audio file you own.
+3. Choose an existing cue in Placed sound effects. The cue buttons wrap into two columns; selecting one moves the playhead to its start.
+4. In the selected effect card, use On to enable or disable the cue. Set Start, Duration, Effect volume, Fade in and Fade out. Trim start is available for uploaded effects; built-in effects keep that field disabled.
+5. Use the built-in Effect sound selector to change its preset sound, or preview the selected cue with its preview button. Check the complete mix against the picture.
+6. Use normal Undo/redo and save/reopen, then export and listen to the resulting movie before publishing.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -930,6 +1007,7 @@ Edits source-bus volume keys and interpolation alongside native cue gain. Retain
 
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
+3. Dense gain curves preserve their sampled values and programme-to-output timing using bounded FFmpeg expression nesting; gain keys do not require removing easing to export.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -1309,13 +1387,15 @@ Shows the existing project programme with mapped source frames and sound. Retain
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Reopening a saved owned upload can prepare precise paused source frames without changing the edit, including older uploads without a saved digest. Broad continuous picture and sound agreement with final export remains unqualified.
 
 **Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Accurate paused source pictures remain bounded to qualified clip clocks,90-second windows and128MiB sources. Strict ellipse mask/effect raster agreement and broad continuous picture/sound remain open.
+- The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.
 
 **Common errors**
 
@@ -1353,6 +1433,7 @@ Compiles the canonical project into the existing deterministic final path. Outpu
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The 15 October programme-clock repair removes an erroneous black fade over dim footage. A20s CPU export completes in244.079s with all480 decoded picture frames unchanged; full colour/raster/live sound remains unqualified.
 
 **Common errors**
 
@@ -1385,11 +1466,12 @@ Requests a final movie and downloads the exact completed output after applicable
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The shared worker derives the programme clock from the requested source intervals on the canonical 90 kHz timebase before applying speed. Codec padding in intermediate files cannot append an unrequested speed-plan tail. The declared clock is checked against those intervals. Downloads retain the exact completed output hash.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The eight-second native 24 fps clock regression is verified at 192 frames. This bounded result does not qualify every fractional source duration, retime, hook, caption, picture or audio combination.
 
 **Common errors**
 
@@ -1555,7 +1637,9 @@ Places owned B-roll as ordinary editable video occurrences or layers and mixes i
 
 ID: `studio.media_ingest` • **FUNCTIONAL** • DETERMINISTIC
 
-Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.
+Imports owned media into the ordinary project. A ready video can replace the entire source sequence at the same programme length while retaining timed graphics and soundtrack. Unused project media can be removed with Undo; source files remain stored.
+
+**Purpose:** Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -1569,6 +1653,8 @@ Imports supported owned video, image and audio into canonical assets. Decoding, 
 
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
+3. Select a saved video at least as long as the current programme and choose Replace entire sequence. Graphics and sound keep their programme timing; source captions, cameras and old template bindings are removed. Undo restores the prior sequence.
+4. Remove unused media clears unreferenced library entries and transform keys with no remaining target. Active sources, layer/camera/music/sound references and pending uploads are retained. Stored files are not deleted.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -1577,12 +1663,13 @@ Imports supported owned video, image and audio into canonical assets. Decoding, 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Sequence replacement requires source speed 1 with no speed keys, opening hook or silence removal. A source clip still provides the programme clock; a plain background video may be used.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** No source-qualified editable control is recorded.
+**Controls:** [Replace entire sequence](../control-reference/index.md#studio-media-replace_sequence), [Remove unused media](../control-reference/index.md#studio-media-remove_unused)
 
 **Guides:** [Turn an image into a cinematic scene](../task-guides/task-image_cinematic.md), [Create a product-launch promo](../task-guides/task-product_launch.md), [Animate a person from an image](../task-guides/task-animate_person.md)
 
@@ -1999,6 +2086,196 @@ The Creator panel can illustrate an intended attachment; that browser study does
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
 **Controls:** No source-qualified editable control is recorded.
+
+**Guides:** No task guide in V1.
+
+**Templates:** No pinned shared-template binding recorded.
+
+## Logo motion
+
+ID: `studio.logo_motion` • **PARTIAL** • DETERMINISTIC
+
+Builds a logo intro as ordinary editable artwork, masks, groups and motion keys. Image logos preserve their supplied gradient colours and lettering; vector components can move independently.
+
+**Purpose:** Turn a supplied identity into an editable construction and readable brand resolve through the shared Studio controls.
+
+**Available to:** signed-in users with owned project and applicable entitlement
+
+**Media:** SVG logos with 1–8 top-level shapes or groups, PNG, JPEG or WebP logos
+
+**Requires:** studio.motion (FUNCTIONAL)
+
+**Optional:** None recorded.
+
+**Workflow**
+
+1. Open Graphics → Logo motion in an owned programme at least eight seconds long.
+2. Select a local image up to 250 KB or an SVG up to 100 KB, with a maximum of 4096 pixels per side. SVG files need a viewBox or numeric dimensions. Image logos use their visible alpha bounds as a viewport; the source file is not rewritten.
+3. Choose the brand name, accent, background and an 8–14 second duration that fits the programme. Build editable logo motion at the programme start.
+4. For an image with a left-hand symbol and separate lettering, enable Separate left symbol from wordmark. Symbol width places the search boundary; the builder follows transparent space and rejects cuts through opaque artwork. Three separately masked fragments assemble the symbol, which accelerates along forward routes before joining the original wordmark.
+5. Enable Construct words from pieces to assemble the original bitmap wordmark from 2–16 interlocking slices. Five words each construct from three independently masked title pieces, with staggered rebounds before a continuous close.
+6. Choose Piece choreography: Spring assembly keeps the symbol-first interlocking arrangement; Diamond cascade opens with four triangular pieces per word, moves each complete word into place, then assembles the original logo in centre-out diagonal slices.
+7. Edit the resulting ordinary layers, masks, groups and keys. Undo removes the authored composition. Add and time sound through the normal Sound controls.
+8. Review the actual preview, save/reopen and export through the existing Studio workflow.
+
+**Preview:** The builder writes ordinary graphics into the existing project. SVG shapes become raster artwork. Raster identities can use three reveal bands, or separate symbol and original wordmark along a transparent seam. Separated symbols assemble through three ordinary polygon-masked fragments, then use one continuous symbol during camera travel. With a background, a dark stage resolves to a light field. Both treatments finish on one continuous original lockup. Ordinary preview evaluates existing transforms, masks and opacity keys. Piece construction crops the original decoded RGBA into narrow image slices without redrawing the wordmark. Each slice has two complementary masks. Create., Schedule., Publish., Move and forward. each assemble from three zigzag-masked ordinary text layers; matching continuous titles replace the settled fragments. Diamond cascade is a second authoring arrangement of the same native graph. It uses four triangular masks per word, large opening type, continuous word travel and a centre-out original-logo assembly; Spring assembly remains unchanged.
+
+**Final render:** The standard graphics importer, canonical document and composition renderer compile the same authored layers, masks, groups and keys. No separate logo render engine or paid model is started.
+
+**Limits**
+
+- Development feature; no professional, production or showroom qualification.
+- The composition uses 2D transforms and masks. It does not create editable vector contours, automatic 3D geometry, shape morphs or particles.
+- Image logos retain their existing lettering; they do not become editable text characters. Pixels with alpha above 32 determine the visible viewport; source bytes inside the artwork remain unchanged.
+- Programme aspect must be between 1:2 and 2:1. The intro starts at programme time zero and must fit the programme.
+- The existing project limit of 128 graphics, 8192 imported keys, 2 MiB aggregate inline artwork and 4 MiB graphics input remains. Each SVG artwork payload may contain up to 512 KiB, allowing bounded embedded local logo pixels.
+- Background choice covers underlying footage. Sound is added separately through normal Sound controls. Whole live picture/sound and smoothness remain separate qualification.
+- Symbol separation requires visible transparent space between a left-hand symbol and its lettering. Adjust the 10–60% boundary or use the full-logo reveal when the source cannot be separated.
+- Symbol construction uses three polygon-masked bitmap fragments. It does not infer semantic ribbon boundaries or reconstruct editable vector paths from a PNG. Masks and transforms can be revised with the existing Studio controls.
+- Piece construction requires a decoded image with a separable left symbol. Wordmark slices are bitmap crops, not inferred letters or vector outlines. The five-word text is a creation preset; after building, matching text pieces are ordinary separate layers and must be edited together.
+- Titles use bundled Inter weights 400, 600, 800 and 900. Logo word-piece creation uses 800; graphics import rejects unsupported 700 before authoring or export.
+
+**Common errors**
+
+- Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
+
+**Controls:** [Logo motion brand name](../control-reference/index.md#studio-logo_motion-brand_name), [Logo motion duration](../control-reference/index.md#studio-logo_motion-duration), [Logo motion accent](../control-reference/index.md#studio-logo_motion-accent), [Add background](../control-reference/index.md#studio-logo_motion-background), [Separate left symbol from wordmark](../control-reference/index.md#studio-logo_motion-separate_symbol), [Logo symbol width](../control-reference/index.md#studio-logo_motion-symbol_width), [Construct words from pieces](../control-reference/index.md#studio-logo_motion-piece_construction), [Logo wordmark slices](../control-reference/index.md#studio-logo_motion-piece_columns), [Logo piece choreography](../control-reference/index.md#studio-logo_motion-piece_style)
+
+**Guides:** No task guide in V1.
+
+**Templates:** No pinned shared-template binding recorded.
+
+## Editable vector artwork
+
+ID: `studio.vector_artwork` • **PARTIAL** • DETERMINISTIC
+
+Author editable cubic artwork with single or compound contours, even-odd counters, fill/gradient and stroke; animate it with normal layer keys.
+
+**Purpose:** Build editable graphic pieces without reducing their authoring geometry to a fixed bitmap.
+
+**Available to:** signed-in users with owned project and applicable entitlement
+
+**Media:** authored single-contour vector artwork on ordinary image layers
+
+**Requires:** studio.layers (FUNCTIONAL)
+
+**Optional:** studio.keyframes (FUNCTIONAL), studio.easing (FUNCTIONAL)
+
+**Workflow**
+
+1. Open Graphics and expand Vector artwork · editable paths. Choose Add vector artwork.
+2. Drag square points and round tangents; arrow keys nudge, Shift increases the step and Escape cancels a drag.
+3. Split after point preserves the existing cubic route. Remove points or choose Corner point / Smooth point to reshape it.
+4. Choose fill, gradient direction/colors and a visible stroke width/color. In Motion → Transform keyframes, select the artwork and animate Stroke start / Stroke end / Stroke offset, or use their timeline rows and value/velocity graph.
+5. Save and reopen the project, then export and inspect the movie.
+
+**Preview:** The safe SVG reflects contour decisions and evaluated stroke start/end/offset values in the ordinary image layer. Partial stroke length and offset use the same bounded 128-sample-per-cubic distance measure as export. The contour inspector retains the full editable route.
+
+**Final render:** The existing image compositor evaluates canonical stroke start/end/offset keys on the programme clock. It clips open paths or continuously joins wrapped closed-path intervals, preserves the fill, and applies normal layer transforms, masks/effects and composition. The cached image is not the geometry authority.
+
+**Limits**
+
+- Version one retains a single 2–64-point contour. Version two provides one to eight contours with even-odd fill, up to 64 points each and 256 total. Percentage anchors and endpoint-relative tangents remain editable. No arbitrary SVG/PDF path importer or automatic bitmap/letter tracing; Logo Workshop uses exact pre-extracted bundled glyph contours.
+- Contour geometry, fill and stroke width/color remain static. Start/end are 0–100 percent of sampled path distance; start greater than or equal to end hides the outline while preserving fill. Offset is −1000 to 1000 percent: closed paths wrap continuously across their original seam, open paths clip at their endpoints. A full closed outline remains full under offset. No per-segment timing, contour morph keys, compound booleans or full pen/zoom workspace.
+- Native evidence is bounded to the retained artwork project. Whole raster/audio, arbitrary self-intersections, animated parents, broad retiming and professional/production creative qualification remain separate.
+- Version two adds one to eight contours, up to 64 nodes each and 256 total. Closed overlaps cut through the fill; stroke trim/offset follows each contour independently. Boolean unions/subtractions and morph keyframes remain separate.
+
+**Common errors**
+
+- Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
+
+**Controls:** [Add vector artwork](../control-reference/index.md#studio-vector-add), [Vector points](../control-reference/index.md#studio-vector-point), [Vector tangents](../control-reference/index.md#studio-vector-tangent), [Split after point](../control-reference/index.md#studio-vector-split), [Corner / Smooth point](../control-reference/index.md#studio-vector-point_kind), [Vector fill and gradient](../control-reference/index.md#studio-vector-fill), [Vector stroke](../control-reference/index.md#studio-vector-stroke), [Close vector path](../control-reference/index.md#studio-vector-closed), [Stroke start](../control-reference/index.md#studio-vector-stroke_start), [Stroke end](../control-reference/index.md#studio-vector-stroke_end), [Stroke offset](../control-reference/index.md#studio-vector-stroke_offset)
+
+**Guides:** [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md)
+
+**Templates:** No pinned shared-template binding recorded.
+
+## Editable text choreography
+
+ID: `studio.text_choreography` • **PARTIAL** • DETERMINISTIC
+
+Animate individual letters or words inside one editable title using a normal Text progress motion track.
+
+**Purpose:** Build expressive type without losing the original copy or duplicating a title for every letter.
+
+**Available to:** signed-in users with owned project and applicable entitlement
+
+**Media:** ordinary Inter titles with composed Latin letters, numbers and bundled punctuation
+
+**Requires:** studio.titles (FUNCTIONAL), studio.keyframes (FUNCTIONAL)
+
+**Optional:** studio.easing (FUNCTIONAL), studio.transforms (FUNCTIONAL)
+
+**Workflow**
+
+1. Open Graphics, select an ordinary title and expand Text choreography. Choose Animate this title.
+2. Choose letters or words, ordering, stagger, selector range and the starting travel, scale, rotation, opacity and spread.
+3. Open Motion → Transform keyframes, select that title and edit Text progress. Reverse or hold its ordinary timeline keys and shape their value/velocity curves.
+4. Rebuild entrance keys replaces only that title’s progress keys; Remove text animator returns it to a plain title. Other layer motion is retained.
+5. Save, reopen and export through the normal Studio workflow.
+
+**Preview:** Explicit per-unit SVG text transforms follow evaluated programme-clock Text progress. One plain copy field remains editable; wrapping uses the same versioned Inter glyph advances as export.
+
+**Final render:** The existing title/image compositor transforms immutable glyph or word patches using canonical progress after output speed mapping. Travel padding is excluded from native anchor/mask geometry; held-frame identity includes progress.
+
+**Limits**
+
+- Supported copy is at most 180 composed Latin characters with bundled punctuation and four Inter weights, up to twelve wrapped rows. A word wider than the title box requires more width or an internal line break. Complex scripts, combining sequences, emoji and arbitrary fonts are not supported in this optional animator; existing plain titles retain their path.
+- The selector uses unit centers; empty or crossed ranges leave units settled. Stagger is a share of the progress window, not seconds. Opacity uses linear unit progress while geometry uses the selected settling curve.
+- This is local glyph placement, not editable glyph outlines, automatic logo tracing or contour morphing. Broader parent/mask/speed combinations, full live raster/audio, smoothness, creative acceptance and professional/production qualification remain separate.
+
+**Common errors**
+
+- Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
+
+**Controls:** [Animate this title](../control-reference/index.md#studio-text_animator-enable), [Animate text by](../control-reference/index.md#studio-text_animator-unit), [Text animation order](../control-reference/index.md#studio-text_animator-order), [Stagger](../control-reference/index.md#studio-text_animator-stagger), [Letter travel X (em)](../control-reference/index.md#studio-text_animator-from_x), [Letter travel Y (em)](../control-reference/index.md#studio-text_animator-from_y), [Starting scale](../control-reference/index.md#studio-text_animator-from_scale), [Starting rotation](../control-reference/index.md#studio-text_animator-from_rotation), [Starting opacity](../control-reference/index.md#studio-text_animator-from_opacity), [Starting spread](../control-reference/index.md#studio-text_animator-spread), [Range start (%)](../control-reference/index.md#studio-text_animator-range_start), [Range end (%)](../control-reference/index.md#studio-text_animator-range_end), [Text settling curve](../control-reference/index.md#studio-text_animator-settle), [Text progress](../control-reference/index.md#studio-text_animator-progress), [Rebuild entrance keys](../control-reference/index.md#studio-text_animator-rebuild), [Remove text animator](../control-reference/index.md#studio-text_animator-remove)
+
+**Guides:** No task guide in V1.
+
+**Templates:** No pinned shared-template binding recorded.
+
+## Logo Workshop
+
+ID: `studio.logo_design` • **PARTIAL** • DETERMINISTIC
+
+Design a vector symbol and outlined brand lettering, edit their contours in Studio and download transparent SVG/PNG masters.
+
+**Purpose:** Create reusable logo artwork and animate its individual pieces on the same Studio timeline.
+
+**Available to:** signed-in users with owned project and applicable entitlement
+
+**Media:** native vector artwork with bundled Inter 600/900 Latin letter outlines
+
+**Requires:** studio.vector_artwork (PARTIAL)
+
+**Optional:** studio.keyframes (FUNCTIONAL), studio.transforms (FUNCTIONAL)
+
+**Workflow**
+
+1. Open Studio and choose Start a logo design to prepare a blank canvas through the ordinary owned-source flow. Open Creator Studio, then Graphics → Logo Workshop. Enter a name and choose Flow, Orbit or Facet.
+2. In the Graphics inspector, the three symbol choices appear together. Enter the Brand name, choose Flow, Orbit or Facet, then use the Layout and Lettering fields below. Scroll down for spacing, symbol size, colours and the controls for adding or downloading the logo.
+3. Choose horizontal, stacked or symbol-only layout, lettering weight, spacing, symbol size and colours. Optionally enable ordinary assembly motion keys.
+4. Add logo to timeline. Select its symbol pieces or individual letter outlines under Vector artwork. Choose a contour to edit a counter or outer path.
+5. Choose a logo group and colour, white or ink variant. Download an SVG or PNG transparent master from the current vector geometry and base layout.
+6. Save/reopen or restore the native project; use normal Motion controls and the existing final export for a film.
+
+**Preview:** The design draft and ordinary vector image layers use authored cubic contours and real even-odd counters. Accepted designs become normal grouped vector layers with ordinary motion keys.
+
+**Final render:** The shared compiler preserves compound vector geometry; the existing image compositor samples each contour and applies even-odd fill. Stroke trim/offset runs independently on each contour. Static masters use portable SVG paths and a transparent browser PNG, before timeline animation.
+
+**Limits**
+
+- Three editable deterministic symbol families, not an unrestricted AI brief generator or automatic tracing of uploaded logos. Bundled A–Z/a–z letters, numbers, spaces, ampersand, period and hyphen; 1–32 characters, Inter 600/900.
+- Each outlined letter is a vector layer after creation. Change its contours or build a new wordmark from the name field; it is not a live text object and does not retain an editable text-to-outline binding.
+- Compound artwork supports one to eight contours, 2–64 points per contour (three if closed), at most 256 total. Overlapping fills use even-odd parity. This does not add boolean operations or contour morph animation.
+- Master downloads use a flat logo group, vector geometry and base transforms before motion. Masks, crops, rounded frames, glows, shadows and blends must be removed; nested or non-vector members are rejected. Whole film picture/audio, broader combinations, owner creative review and professional/production qualification remain separate.
+- Logo letter spacing supports signed drafts: Enter/blur commits; Escape or locking discards an uncommitted draft. The new blank entry prepares an eight-second canvas through the same upload, ownership and entitlement path as other Studio sources.
+
+**Common errors**
+
+- Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
+
+**Controls:** [Brand name](../control-reference/index.md#studio-logo_design-name), [Logo symbol family](../control-reference/index.md#studio-logo_design-family), [Logo layout](../control-reference/index.md#studio-logo_design-layout), [Logo lettering](../control-reference/index.md#studio-logo_design-weight), [Logo letter spacing](../control-reference/index.md#studio-logo_design-tracking), [Logo symbol size](../control-reference/index.md#studio-logo_design-symbol_size), [Logo colours](../control-reference/index.md#studio-logo_design-colours), [Gradient symbol](../control-reference/index.md#studio-logo_design-gradient), [Assemble logo pieces](../control-reference/index.md#studio-logo_design-assemble), [Add logo to timeline](../control-reference/index.md#studio-logo_design-build), [Export logo variant](../control-reference/index.md#studio-logo_design-variant), [Download logo SVG](../control-reference/index.md#studio-logo_design-svg), [Download logo PNG](../control-reference/index.md#studio-logo_design-png), [Vector contour](../control-reference/index.md#studio-logo_design-contour), [Start a logo design](../control-reference/index.md#studio-logo_design-canvas)
 
 **Guides:** No task guide in V1.
 

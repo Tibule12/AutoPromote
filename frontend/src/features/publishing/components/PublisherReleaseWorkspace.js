@@ -4,10 +4,10 @@ import { getPlatformName } from "../utils/publishingUtils";
 import { PUBLISHER_PLATFORMS, PUBLISHER_STEPS, destinationCopy, mediaUrl, sourceLabels } from "../utils/publisherWorkflow";
 import { formatScheduleTime, timezoneLabel } from "../../../UserDashboardTabs/scheduleReleaseModel";
 import { sanitizeUrl } from "../../../utils/security";
+import PlatformIcon from "../../../components/PlatformIcon";
 
-const glyphs = { facebook: "f", instagram: "◎", linkedin: "in", reddit: "●", tiktok: "♪", youtube: "▶" };
 export function PublisherPlatformIcon({ platform }) {
-  return <span aria-hidden="true" className={`release-platform-icon ${platform}`}>{glyphs[platform]}</span>;
+  return <span aria-hidden="true" className={`release-platform-icon ${platform}`}><PlatformIcon platform={platform} /></span>;
 }
 
 function ReleaseMedia({ file, preview, poster, onMetadata, label = "Release media" }) {

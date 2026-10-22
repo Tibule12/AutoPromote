@@ -21,6 +21,7 @@ from viral_motion_graphics import (
     prepare_voiceover_samples,
 )
 from studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
+from studio_composition import validate_layer_order, validate_graphic_groups
 
 
 class MotionContractTests(unittest.TestCase):
@@ -99,7 +100,9 @@ return {{effect,pcm:Array.from(synthesizeEffect(effect,48000))}};}})));'''
         implementation = AsyncMock(return_value={"status": "completed"})
         namespace = dict(
             validate_design=validate_design,
-            validate_resolved_overlays=lambda _overlays: None,
+            validate_resolved_overlays=lambda _overlays: [],
+            validate_layer_order=validate_layer_order,
+            validate_graphic_groups=validate_graphic_groups,
             normalize_audio_remix=lambda _remix: None,
             validate_resolved_subject_vfx=validate_resolved_subject_vfx,
             match_subject_vfx=match_subject_vfx,
@@ -108,7 +111,7 @@ return {{effect,pcm:Array.from(synthesizeEffect(effect,48000))}};}})));'''
         )
         exec(compile(ast.Module(body=[handler], type_ignores=[]), "render-handler", "exec"), namespace)
         request = SimpleNamespace(motionGraphics={"version": 99}, sound_effects=[],
-                                  timeline_segments=[], composition_plan=None, async_mode=False)
+                                  timeline_segments=[], composition_plan=None, overlays=[], async_mode=False)
         with self.assertRaises(HttpError) as error:
             asyncio.run(namespace["render_viral_clip"](request))
         self.assertEqual(error.exception.status_code, 422)
@@ -116,6 +119,14 @@ return {{effect,pcm:Array.from(synthesizeEffect(effect,48000))}};}})));'''
         request.motionGraphics = {"version": 1, "scenes": []}
         asyncio.run(namespace["render_viral_clip"](request))
         implementation.assert_awaited_once_with(request)
+        implementation.reset_mock()
+        request.motionGraphics = {"version": 1, "scenes": [{"id": "motion", "preset": "title"}]}
+        request.overlays = [SimpleNamespace(id="image")]
+        request.composition_plan = {"order": ["image", "missing"]}
+        with self.assertRaises(HttpError) as error:
+            asyncio.run(namespace["render_viral_clip"](request))
+        self.assertEqual(error.exception.status_code, 422)
+        implementation.assert_not_called()
 
     def test_invalid_contracts_fail_instead_of_silently_dropping_edits(self):
         for contract in ({"version": 2}, {"scenes": [{}]}, {"scenes": [{}]*25}):

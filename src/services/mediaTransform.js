@@ -107,7 +107,7 @@ async function enqueueMediaTransformTask({ contentId, uid, meta, url, sourceStor
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  await ref.set(baseTask);
+  await require("./contentMediaDependency").writeMediaDependency(db, contentId, ref, baseTask);
   return { id: ref.id, ...baseTask };
 }
 

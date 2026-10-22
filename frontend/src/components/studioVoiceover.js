@@ -1,12 +1,19 @@
 import { applySafeMediaSource } from "../utils/security";
 import { isStudioAudioTrackAudible } from "./studioAudioTracks";
 import { studioUploadedAudioBinding } from "./studioAudioSourceBindings";
+import { studioAudioFadeGain } from "./studioAudioFades";
 
 const finite = (value, fallback) => (Number.isFinite(Number(value)) ? Number(value) : fallback);
 export const voiceoverGain = value => Math.max(0, Math.min(1, finite(value ?? 1, 1)));
 export const voiceoverDuration = take =>
   Math.max(0.05, Math.min(7200, finite(take.duration, 0.05)));
 export const voiceoverTrackAudible = states => isStudioAudioTrackAudible(states, "voiceover");
+
+// Final speech uses sequential FFmpeg afade filters. Their gains multiply;
+// a fade longer than a take starts at zero, rather than ending prematurely.
+export function voiceoverFadeGain(take, elapsed) {
+  return studioAudioFadeGain(elapsed, voiceoverDuration(take), take.fadeIn, take.fadeOut);
+}
 
 // Native media time-stretching remains necessary for retimed speech. Short
 // 1x takes can use the same sample clock as music/SFX without altering pitch.
@@ -57,14 +64,7 @@ export function createVoiceoverPcmBuffer(context, decoded, take) {
     output = buffer.getChannelData(0);
   for (let i = 0; i < count; i++) {
     const time = i / context.sampleRate;
-    const gain = Math.max(
-      0,
-      Math.min(
-        1,
-        take.fadeIn > 0 ? time / take.fadeIn : 1,
-        take.fadeOut > 0 ? (voiceoverDuration(take) - time) / take.fadeOut : 1
-      )
-    );
+    const gain = voiceoverFadeGain(take, time);
     output[i] = input[first + i] * gain;
   }
   return buffer;

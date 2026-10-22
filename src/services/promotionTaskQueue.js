@@ -267,7 +267,7 @@ async function enqueueYouTubeUploadTask({
     const { attachSignature } = require("../utils/docSigner");
     task = attachSignature(baseTask);
   } catch (_) {}
-  await ref.set(task);
+  await require("./contentMediaDependency").writeMediaDependency(db, contentId, ref, task);
   try {
     require("./metricsRecorder").incrCounter("tiktok.enqueue.succeeded");
   } catch (_) {}
@@ -910,7 +910,7 @@ async function enqueuePlatformPostTask({
     const { attachSignature } = require("../utils/docSigner");
     task = attachSignature(baseTask);
   } catch (_) {}
-  await ref.set(task);
+  await require("./contentMediaDependency").writeMediaDependency(db, contentId, ref, task);
   try {
     const { recordPlatformPostDuplicate, recordTaskEnqueued } = require("./aggregationService");
     recordPlatformPostDuplicate(false);

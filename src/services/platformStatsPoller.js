@@ -2,6 +2,8 @@
 // Phase 3 & 4: Poll platform_posts for missing/aged metrics and compute normalized score
 
 const { db, admin } = require("../firebaseAdmin");
+const { normalizeMetrics, numericMetric } = require("./platformMetricValues");
+const { computeNextAnalyticsCheck } = require("./platformMetricsSchedule");
 const {
   fetchFacebookPostMetrics,
   fetchTwitterTweetMetrics,
@@ -105,7 +107,7 @@ async function fetchMetricsForPost(doc) {
       case "twitter":
         return await fetchTwitterTweetMetrics(externalId);
       case "instagram":
-        return await fetchInstagramMediaMetrics(externalId);
+        return await fetchInstagramMediaMetrics(data.uid, externalId);
       case "tiktok":
         return await fetchTikTokMetrics(data.uid, externalId);
       case "youtube":
@@ -129,48 +131,13 @@ function getTimestamp(value) {
   return isNaN(t) ? null : t;
 }
 
-function computeNextAnalyticsCheck(publishedAtMs, nowMs, latestSnapshot) {
-  if (!publishedAtMs || !nowMs) return null;
-
-  const ageMinutes = (nowMs - publishedAtMs) / 60000;
-  const maxMinutes = 7 * 24 * 60; // 7 days
-  if (ageMinutes >= maxMinutes) return null;
-
-  // If after 24h and views are extremely low, stop polling to save costs
-  if (ageMinutes >= 24 * 60 && latestSnapshot && typeof latestSnapshot.views === "number") {
-    if (latestSnapshot.views < 20) return null;
-  }
-
-  const scheduleMinutes = [10, 30, 60, 180, 360, 720, 1440, 2880, 4320, 7200, 10080];
-  for (const minutes of scheduleMinutes) {
-    if (ageMinutes < minutes) {
-      return new Date(publishedAtMs + minutes * 60000).toISOString();
-    }
-  }
-  return null;
-}
-
 function normalizeSnapshot(metrics) {
   if (!metrics || typeof metrics !== "object") return null;
-  const views =
-    parseInt(
-      metrics.view_count || metrics.views || metrics.impressions || metrics.impression_count || 0,
-      10
-    ) || 0;
-  const likes = parseInt(metrics.like_count || metrics.likes || 0, 10) || 0;
-  const comments = parseInt(metrics.comment_count || metrics.comments || 0, 10) || 0;
-  const shares =
-    parseInt(metrics.share_count || metrics.shares || metrics.retweet_count || 0, 10) || 0;
-  const retention = metrics.retention || metrics.watch_time || null;
-  const completion_rate = metrics.completion_rate || null;
   return {
     timestamp: new Date().toISOString(),
-    views,
-    likes,
-    comments,
-    shares,
-    retention,
-    completion_rate,
+    ...normalizeMetrics(metrics),
+    retention: numericMetric(metrics.retention, metrics.watch_time),
+    completion_rate: numericMetric(metrics.completion_rate),
   };
 }
 
@@ -238,10 +205,14 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5 } = {}) {
 
     const nextScheduledCheck = computeNextAnalyticsCheck(publishedAtMs, nowMs, latestSnapshot);
     if (!nextScheduledCheck) {
-      // Stopped polling (either past 7 days or low views after 24h)
+      // The seven-day observation window has ended.
       await doc.ref.set(
         {
-          next_check_at: null,
+          // Missing fields are excluded from both the due query and the
+          // explicit-null new-post query. Null would reselect this ended
+          // observation forever and could crowd newer posts out of a batch.
+          next_check_at: admin.firestore.FieldValue.delete(),
+          metricsObservationEndedAt: admin.firestore.FieldValue.serverTimestamp(),
           last_checked_at: admin.firestore.FieldValue.serverTimestamp(),
           lastMetricsCheck: admin.firestore.FieldValue.serverTimestamp(),
         },
@@ -269,7 +240,7 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5 } = {}) {
         next_check_at: nextScheduledCheck,
       };
 
-      if (metrics) {
+      if (metrics && Object.values(normalizeMetrics(metrics)).some(value => value !== null)) {
         const normalizedScore = computeNormalizedScore(d.platform, metrics);
         const snapshot = normalizeSnapshot(metrics);
         const mergedSnapshots = Array.isArray(snapshots) ? snapshots.slice() : [];
@@ -281,6 +252,8 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5 } = {}) {
         const update = {
           ...baseUpdate,
           metrics,
+          metricsCollectionStatus: "collected",
+          lastMetricsSuccessAt: new Date().toISOString(),
           normalizedScore,
           analytics_snapshots: mergedSnapshots,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -483,7 +456,8 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5 } = {}) {
         // If metrics fetch failed (e.g. permission error), still update the check time
         // to avoid hot-looping the same document.
         try {
-          await doc.ref.set(baseUpdate, { merge: true });
+          await doc.ref.set({ ...baseUpdate, metricsCollectionStatus: "unavailable",
+            metricsCollectionMessage: "Statistics unavailable. Check connection permissions and platform support." }, { merge: true });
           processed++;
         } catch (_) {}
       }

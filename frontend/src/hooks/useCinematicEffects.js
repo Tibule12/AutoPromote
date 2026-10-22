@@ -137,7 +137,7 @@ export const buildCinematicCssFilter = (fx, blurActiveNow = false) => {
   return parts.join(" ");
 };
 
-export default function useCinematicEffects() {
+export default function useCinematicEffects({ clockRef } = {}) {
   const [fx, setFx] = useState(DEFAULT_CINEMATIC_FX);
   const [showPanel, setShowPanel] = useState(false);
   // Track current playback time for timed blur + fades
@@ -159,7 +159,14 @@ export default function useCinematicEffects() {
     if (!needsPlaybackClock) return undefined;
     const tick = () => {
       const v = videoRefInternal.current;
-      if (v) {
+      // Studio's prepared decoders alternate between trimmed source clips.
+      // Finish timing belongs to the whole programme, including paused seeks;
+      // an inactive source decoder can remain parked at zero indefinitely.
+      const programme = clockRef?.current;
+      if (programme && Number.isFinite(programme.currentTime) && Number.isFinite(programme.duration)) {
+        setCurrentTime(Math.max(0, programme.currentTime));
+        setDuration(Math.max(0, programme.duration));
+      } else if (v) {
         setCurrentTime(v.currentTime || 0);
         if (v.duration && Number.isFinite(v.duration)) setDuration(v.duration);
       }
@@ -169,7 +176,7 @@ export default function useCinematicEffects() {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [needsPlaybackClock]);
+  }, [needsPlaybackClock, clockRef]);
 
   const applyPreset = preset => {
     setFx(prev => ({

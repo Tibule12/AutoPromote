@@ -7,35 +7,64 @@ export async function askProductAssistance(input, signal) {
   const response = await fetch(`${API_BASE_URL}/api/product-assistance/ask`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input), signal, credentials: 'omit',
+  }).catch(error => {
+    if (error.name === 'AbortError') throw error;
+    throw new Error('Could not reach product help. Check your connection and try again.');
   });
+  if (response.status === 429) {
+    const wait = Math.max(1, Math.min(60, Number(response.headers?.get('Retry-After')) || 60));
+    throw new Error(`You’re asking quickly. Please wait ${wait} seconds, then ask again.`);
+  }
   if (!response.ok) throw new Error(response.status === 400
     ? 'Use a product question and safe feature context. Leave out links, credentials and private project information.'
     : 'Product documentation is temporarily unavailable. Please try again.');
-  return response.json();
+  const reply = await response.json().catch(() => null);
+  if (!reply || typeof reply.answer !== 'string' || !Array.isArray(reply.features) || !Array.isArray(reply.controls) || !Array.isArray(reply.tasks) || !reply.sources ||
+      reply.features.some(f => typeof f.name !== 'string' || typeof f.status !== 'string' || ['how_to_use', 'limitations', 'dependencies', 'common_errors'].some(key => !Array.isArray(f[key])))) {
+    throw new Error('The documentation reply could not be read. Please try again.');
+  }
+  return reply;
 }
 // API documentation paths alone can become links; model/server text cannot inject
 // external/private URLs or HTML. React escapes all question and result prose.
 const docUrl = value => typeof value === 'string' && /^\/api\/product-assistance\/docs\/[a-z0-9_./#-]+$/i.test(value) && !value.includes('..') ? `${API_BASE_URL}${value}` : undefined;
 const DocLink = ({ url, children }) => <a href={docUrl(url)} target="_blank" rel="noreferrer">{children}</a>;
-export default function ProductAssistance({ request = askProductAssistance }) {
+export function ProductAssistanceLauncher({ onClick, className = "product-assistance-open" }) {
+  return <button type="button" className={className} aria-label="Ask AutoPromote" title="Ask AutoPromote" onClick={onClick || (() => window.dispatchEvent(new Event('autopromote:open-product-help')))}>
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 11.5a8 8 0 0 1-8 8H5l-3 2V11.5a9 9 0 0 1 18 0Z" /><path d="M7 11h.01M11 11h.01M15 11h.01" /></svg>
+  </button>;
+}
+export default function ProductAssistance({ request = askProductAssistance, launcher = true }) {
   const [open, setOpen] = useState(false), [question, setQuestion] = useState('');
   const [mode, setMode] = useState('EXPLAIN'), [context, setContext] = useState({});
   const [result, setResult] = useState(null), [busy, setBusy] = useState(false), [error, setError] = useState('');
   const dialogRef = useRef(null), inputRef = useRef(null), priorFocus = useRef(null), controller = useRef(null);
   const sequence = useRef(0);
+  const lastFeature = useRef(null);
   const run = async (text, selectedMode, selectedContext) => {
+    if (!text.trim()) return;
+    let safeContext = selectedContext;
+    if (!selectedContext.selected_feature_id && lastFeature.current && /^(?:what (?:do i do next|is this)|where (?:is it|do i find it)|how (?:do i (?:do|use) (?:that|it|this)|does (?:it|that|this) work)|show me how|guide me|tell me more)[?!. ]*$/i.test(text.trim())) {
+      safeContext = { ...selectedContext, selected_feature_id: lastFeature.current };
+      setContext(safeContext);
+    }
     controller.current?.abort(); controller.current = new AbortController();
     const attempt = ++sequence.current;
     const deadline = setTimeout(() => { if (attempt === sequence.current) controller.current?.abort(); }, 15000);
     setBusy(true); setError(''); setResult(null);
     try {
-      const answer = await request({ question: text, mode: selectedMode, context: selectedContext }, controller.current.signal);
-      if (attempt === sequence.current) setResult(answer);
+      const answer = await request({ question: text, mode: selectedMode, context: safeContext }, controller.current.signal);
+      if (attempt === sequence.current) {
+        setResult(answer);
+        lastFeature.current = answer.features?.length === 1 ? answer.features[0].feature_id : null;
+      }
     } catch (failure) { if (attempt === sequence.current) setError(failure.name === 'AbortError' ? 'Documentation lookup timed out. Please try again.' : failure.message); }
     finally { clearTimeout(deadline); if (attempt === sequence.current) setBusy(false); }
   };
   const close = () => { ++sequence.current; controller.current?.abort(); setOpen(false); setBusy(false); priorFocus.current?.focus(); };
+  const openHelp = () => { priorFocus.current = document.activeElement; lastFeature.current = null; setContext({}); setQuestion(''); setResult(null); setError(''); setOpen(true); };
   useEffect(() => {
+    const openGlobalHelp = () => openHelp();
     const help = event => {
       const id = event.detail?.selected_feature_id;
       if (typeof id !== 'string' || !/^[a-z0-9_.]{1,100}$/.test(id)) return;
@@ -45,7 +74,8 @@ export default function ProductAssistance({ request = askProductAssistance }) {
       run('What is this?', 'EXPLAIN', safe);
     };
     window.addEventListener('autopromote:product-help', help);
-    return () => { window.removeEventListener('autopromote:product-help', help); controller.current?.abort(); };
+    window.addEventListener('autopromote:open-product-help', openGlobalHelp);
+    return () => { window.removeEventListener('autopromote:product-help', help); window.removeEventListener('autopromote:open-product-help', openGlobalHelp); controller.current?.abort(); };
     // The request adapter is stable; mutable result/mode/context are not captured.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request]);
@@ -60,22 +90,21 @@ export default function ProductAssistance({ request = askProductAssistance }) {
     }
   };
   return <>
-    <button type="button" className="product-assistance-open" onClick={() => {
-      priorFocus.current = document.activeElement; setContext({}); setQuestion(''); setResult(null); setError(''); setOpen(true);
-    }}>Ask AutoPromote</button>
+    {launcher && <ProductAssistanceLauncher onClick={openHelp} />}
     {open && createPortal(<div className="product-assistance-backdrop" onClick={event => { if (event.target === event.currentTarget) close(); }}>
       <aside className="product-assistance-panel" role="dialog" aria-modal="true" aria-labelledby="product-assistance-title" ref={dialogRef} onKeyDown={onKey}>
         <div className="product-assistance-heading"><h2 id="product-assistance-title">Ask AutoPromote</h2><button type="button" aria-label="Close product help" onClick={close}>×</button></div>
         <p>Product help from the current documentation. This panel explains workflows; it cannot change your project or run jobs.</p>
-        {context.selected_feature_id && <p>Context: {result?.features?.[0]?.name || 'Selected feature'} <button type="button" onClick={() => { ++sequence.current; controller.current?.abort(); setBusy(false); setContext({}); setResult(null); }}>Clear context</button></p>}
+        {context.selected_feature_id && <p>Context: {result?.features?.[0]?.name || 'Selected feature'} <button type="button" onClick={() => { ++sequence.current; controller.current?.abort(); lastFeature.current = null; setBusy(false); setContext({}); setResult(null); }}>Clear context</button></p>}
         <form onSubmit={event => { event.preventDefault(); run(question, mode, context); }}>
           <label>Question<input ref={inputRef} value={question} maxLength={1000} onChange={event => setQuestion(event.target.value)} placeholder="How do I add keyframes?" /></label>
           <label>Help mode<select value={mode} onChange={event => setMode(event.target.value)}><option value="EXPLAIN">Explain</option><option value="GUIDE">Guide</option><option value="DIAGNOSE">Diagnose</option></select></label>
           <button type="submit" disabled={busy || !question.trim()}>{busy ? 'Looking up documentation…' : 'Ask'}</button>
         </form>
-        {error && <p role="alert">{error}</p>}
+        {error && <div role="alert"><p>{error}</p><button type="button" disabled={busy} onClick={() => run(question, mode, context)}>Try again</button></div>}
         <div aria-live="polite" aria-busy={busy}>
           {result && <>
+            {result.privacy_notice && <p role="status">{result.privacy_notice}</p>}
             <p className="product-assistance-answer">{result.answer}</p>
             {result.features.map(feature => <section key={feature.feature_id} className="product-assistance-feature">
               <h3>{feature.name} <span className={`product-readiness status-${feature.status.toLowerCase()}`}>{feature.status}</span></h3>

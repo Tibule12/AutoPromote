@@ -1,0 +1,165 @@
+{
+  "date": "2026-10-16",
+  "evidence": "reports/studio-break-loop-depth-20261015/README.md",
+  "checkpoint": "reports/studio-break-loop-depth-20261015/checkpoint.json",
+  "branch": "agent/studio-professional-continuation-v2",
+  "scope": "Native sequence replacement and unused-reference cleanup remove inherited headphones footage; editable layered 2D typography and corrected paper transition.",
+  "projectId": "viral-project-41ce520a-8147-41aa-b84f-c6fb79a2ac6a",
+  "canonicalHash": "f0c5093756c470f4e146c03c5caccc8efc722f6323440ac7f38f212caa2d9f11",
+  "nativeSourceReplaceUndoRedo": true,
+  "oneInkSource": true,
+  "unusedProjectAssetsRemoved": true,
+  "unrelatedFootageReferences": false,
+  "nativeImportUndoRedo": true,
+  "nativeOutlineEditUndo": true,
+  "exactColdReopen": true,
+  "layers": 56,
+  "groups": 1,
+  "keys": 729,
+  "nativeControlsOnly": true,
+  "graphInjection": false,
+  "gpuJobs": 0,
+  "nativeOrphanCleanupUndoRedo": true,
+  "nativeFinishReset": true,
+  "oldFootageKeys": 0,
+  "canonicalHashBeforeAssetMaterialization": "3ef6dc95c3f24c2c79abfa58b266b2327e37ff4390447a82e3a8a86ebfe193f2",
+  "outputSha256": "fdf1a441f8c1901dad939bd7d3704317600ccd20218c2a7a087bb1657a063112",
+  "exactCompiledKeyTuples": 729,
+  "outlinedNativeTitleLayers": 8,
+  "outlineColors": [
+    "#ff5436",
+    "#f4efe6"
+  ],
+  "nativeTransitionCorrection": {
+    "projectId": "viral-project-41ce520a-8147-41aa-b84f-c6fb79a2ac6a",
+    "canonicalHash": "f0c5093756c470f4e146c03c5caccc8efc722f6323440ac7f38f212caa2d9f11",
+    "reason": "Actual first movie had outgoing BREAK/THE LOOP over incoming MAKE during the paper sweep.",
+    "groupId": "graphic-976e30b4-9ee9-40e3-bef9-4e21891abfe9",
+    "nativeGroupOpacityKeys": [
+      {
+        "time": 7.833333333333333,
+        "value": 1,
+        "easing": "ease_in_out"
+      },
+      {
+        "time": 8.166666666666666,
+        "value": 0,
+        "easing": "ease_in_out"
+      }
+    ],
+    "nativeGroupOut": 8.166666666666666,
+    "trimUndoRedo": true,
+    "exactColdReopen": true,
+    "keys": 729,
+    "nativeControlsOnly": true,
+    "newRenderSubmissions": 0,
+    "gpuJobs": 0,
+    "transportQuantization": "Native 24fps transport snapped requested7.85/8.15s to7.833333/8.166667s."
+  },
+  "nativeMoviePlayback": true,
+  "nativeEditableBackup": true,
+  "newRenderSubmissions": 2,
+  "duplicateRecoverySubmissions": 0,
+  "submittedJobIds": [
+    "viral_e7ea9df8c765289f02ae9adb39ae2697849e59312a69e1cf8984c11ff21e4f7f",
+    "viral_464d9f813a55fce18c0d551d942c6331275bcdd252c363bd440cd4531ab4f8f6"
+  ],
+  "firstMovieRetainedForTransitionFailure": true,
+  "finalTechnical": {
+    "passed": true,
+    "sha256": "fdf1a441f8c1901dad939bd7d3704317600ccd20218c2a7a087bb1657a063112",
+    "bytes": 1282784,
+    "seconds": 20,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "20.000000",
+      "frameCount": 480,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "20.000000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 960512,
+      "sampleRate": 48000,
+      "seconds": 20.010666666666665,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-break-loop-depth-20261015/proof/depth-and-rhythm-r2/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  },
+  "recordingCapture": {
+    "captureSeconds": 20.205999851226807,
+    "screenFramesPerSecond": 17.222607273199163,
+    "movieFps": 24,
+    "encodedScreenRecordingFps": 24,
+    "sparseCapture": true,
+    "smoothPlaybackEvidence": false,
+    "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+  },
+  "recordingAudio": "Soundtrack muxed from the exact hash-verified export at the observed native playback-start offset; QA browser muted",
+  "nativeEditingRecording": "reports/studio-break-loop-depth-20261015/proof/editing-in-studio.mp4",
+  "nativeFinalPlaybackRecording": "reports/studio-break-loop-depth-20261015/proof/depth-and-rhythm-r2/edited-in-studio.mp4",
+  "finalMovie": "reports/studio-break-loop-depth-20261015/proof/depth-and-rhythm-r2/final.mp4",
+  "frontendCasesPassed": 100,
+  "workerCasesPassed": 3,
+  "knowledgeCasesPassed": 17,
+  "generatedDocumentationFilesChecked": 42,
+  "strictNormalAppBuild": "PASS",
+  "wholePreviewFinalParityQualified": false,
+  "liveAudioQualified": false,
+  "humanListeningReview": false,
+  "creativeApproval": false,
+  "readinessPromoted": false,
+  "userFeedback": "Earlier film good but not amazing. Remove inherited headphones people. The timeline will be recorded and must show relevant material; edits use Studio controls.",
+  "paidGpuCost": 0,
+  "remainingBlockers": [
+    "Continuous preview/final picture, live audio/listening and recording smoothness remain unqualified.",
+    "S04 dedicated spatial tangents, editable vector paths and text range selectors remain open. Current depth is layered 2D.",
+    "S03 source occurrence/group ownership and S02 full picture/sound/export latency remain open.",
+    "An ink video provides the existing source clock; a source-free composition is not implemented.",
+    "The revised creative result requires user review; no public/showroom/creative/pro/production promotion."
+  ],
+  "nextTaskIds": [
+    "S04",
+    "S03",
+    "S02"
+  ],
+  "nextImplementationSlice": "Continue the requested motion refinement through native controls; then shared spatial/path timing and occurrence ownership, retaining S02 picture/sound and CPU export latency work.",
+  "ownedQaServicesStopped": {
+    "ownedServices": [
+      {
+        "pid": 946922,
+        "role": "cpu-worker",
+        "stopped": true
+      },
+      {
+        "pid": 946915,
+        "role": "cpu-launcher",
+        "stopped": true
+      },
+      {
+        "pid": 946903,
+        "role": "api",
+        "stopped": true
+      },
+      {
+        "pid": 946935,
+        "role": "app",
+        "stopped": true
+      }
+    ],
+    "otherSessionsPreserved": true,
+    "gpuJobs": 0,
+    "productionDeployment": false
+  }
+}

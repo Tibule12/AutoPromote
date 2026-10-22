@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.5",
+  "knowledge_version": "1.0.45",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -31,7 +31,8 @@
         "studio.keyframes"
       ],
       "limitations": [
-        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "The on-picture motion-path editor writes an X/Y pair in one history edit. An in-progress pointer drag is preview-only; release commits ordinary canonical keys and Escape discards it."
       ],
       "updated_at": "2026-10-12",
       "product_version": "1.2.0"
@@ -66,7 +67,8 @@
         "studio.keyframes"
       ],
       "limitations": [
-        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "The on-picture motion-path editor writes an X/Y pair in one history edit. An in-progress pointer drag is preview-only; release commits ordinary canonical keys and Escape discards it."
       ],
       "updated_at": "2026-10-12",
       "product_version": "1.2.0"
@@ -474,15 +476,17 @@
       "render_support": "SUPPORTED",
       "director_edit": "UNVERIFIED",
       "applicable_media": [
-        "ordinary layers"
+        "ordinary layers",
+        "graphic groups"
       ],
       "dependencies": [
         "studio.keyframes"
       ],
       "limitations": [
-        "The current programme/layer range supplies the upper bound; no universal fixed duration is claimed."
+        "The current programme/layer range supplies the upper bound; no universal fixed duration is claimed.",
+        "The property timeline also applies this operation to selected ordinary keys in one history edit. Paste can retain original ownership or target one compatible layer with new identities; timing collisions and destination locks reject the entire change."
       ],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-15",
       "product_version": "1.2.0"
     },
     {
@@ -515,16 +519,19 @@
       "render_support": "SUPPORTED",
       "director_edit": "UNVERIFIED",
       "applicable_media": [
-        "ordinary layers"
+        "ordinary layers",
+        "graphic groups"
       ],
       "dependencies": [
         "studio.easing",
         "studio.keyframes"
       ],
       "limitations": [
-        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "Group evaluation clamps values to each group property’s bounds. Worker Bézier expressions use the existing 32-sample approximation; broad curve/raster equivalence is unqualified.",
+        "The property timeline also applies this operation to selected ordinary keys in one history edit. Paste can retain original ownership or target one compatible layer with new identities; timing collisions and destination locks reject the entire change."
       ],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-15",
       "product_version": "1.2.0"
     },
     {
@@ -560,7 +567,8 @@
         "studio.easing"
       ],
       "limitations": [
-        "Array contains exactly four handles. Shared contract permits Y overshoot; some inspector widgets show narrower Y bounds."
+        "Array contains exactly four handles. Shared contract permits Y overshoot; some inspector widgets show narrower Y bounds.",
+        "The same four values can be edited through signed velocity and influence. Value and velocity graphs are inspection views, not separate animation engines. The sampled path uses the same X/Y evaluator."
       ],
       "updated_at": "2026-10-12",
       "product_version": "1.2.0"
@@ -572,7 +580,7 @@
       ],
       "label": "Layer blend mode",
       "status": "PARTIAL",
-      "meaning": "Chooses how an ordinary overlay blends with the underlying image.",
+      "meaning": "Blends an ordinary layer or assembled group with its sibling backdrop while preserving source-over alpha. Children blend inside their isolated parent.",
       "constraints": {
         "type": "enum",
         "minimum": null,
@@ -597,15 +605,17 @@
       "render_support": "SUPPORTED",
       "director_edit": "UNVERIFIED",
       "applicable_media": [
-        "ordinary layers"
+        "ordinary layers",
+        "graphic groups"
       ],
       "dependencies": [
         "studio.compositing"
       ],
       "limitations": [
-        "Main programme video currently supports normal only; unsupported main-video modes are rejected at export."
+        "Main programme video currently supports normal only; unsupported main-video modes are rejected at export.",
+        "Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified."
       ],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-14",
       "product_version": "1.2.0"
     },
     {
@@ -624,7 +634,7 @@
         "default": 0,
         "default_known": true
       },
-      "unit": "none",
+      "unit": "pixels",
       "keyframeable": "UNSUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "SUPPORTED",
@@ -636,9 +646,10 @@
         "studio.effects"
       ],
       "limitations": [
-        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "Image-layer pixel values use a 720px programme reference and scale with the layer, preview and delivery size. Broader effects remain unqualified."
       ],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-13",
       "product_version": "1.2.0"
     },
     {
@@ -657,7 +668,7 @@
         "default": 16,
         "default_known": true
       },
-      "unit": "none",
+      "unit": "pixels",
       "keyframeable": "UNSUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "SUPPORTED",
@@ -669,9 +680,10 @@
         "studio.effects"
       ],
       "limitations": [
-        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "Image-layer pixel values use a 720px programme reference and scale with the layer, preview and delivery size. Broader effects remain unqualified."
       ],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-13",
       "product_version": "1.2.0"
     },
     {
@@ -723,7 +735,7 @@
         "default": 18,
         "default_known": true
       },
-      "unit": "none",
+      "unit": "pixels",
       "keyframeable": "UNSUPPORTED",
       "preview_support": "PARTIAL",
       "render_support": "SUPPORTED",
@@ -735,9 +747,10 @@
         "studio.effects"
       ],
       "limitations": [
-        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
+        "Image-layer pixel values use a 720px programme reference and scale with the layer, preview and delivery size. Broader effects remain unqualified."
       ],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-13",
       "product_version": "1.2.0"
     },
     {
@@ -3584,6 +3597,3315 @@
         "Queue navigation does not control movie rendering."
       ],
       "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.geometric_mask.path",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Mask polygon path",
+      "status": "PARTIAL",
+      "meaning": "Authors the local polygon of an ordinary geometric layer mask. Incomplete or invalid text stays outside the saved graph until a valid Enter/blur commit.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+        "default_known": true,
+        "values": []
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "image overlays",
+        "ordinary title layers",
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Percentage polygon with3–64 points and at most2048 characters inside its parentheses. Each point contains finite X/Y percentages.",
+        "Path animation, arbitrary SVG paths and neural subject masks are unsupported.",
+        "Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.geometric_mask.radius",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Mask corner radius",
+      "status": "PARTIAL",
+      "meaning": "Sets the local rectangle mask corner radius, independently of the artwork frame. An explicit zero preserves square mask corners.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 50,
+        "default": 6,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "image overlays",
+        "ordinary title layers",
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Rectangle masks only; artwork frame rounding and feathering are separate.",
+        "Radius animation is unsupported.",
+        "Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.layer_order",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Layer order",
+      "status": "PARTIAL",
+      "meaning": "Moves an ordinary graphic, motion scene, owned3D scene or group backward/forward among its siblings. The top row appears in front.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 2000,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static graphic/group sibling order only; source footage/source VFX and generated captions keep their separate stages.",
+        "3D still requires an existing current owned export asset. No generation is triggered by reordering.",
+        "Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and broader nesting remain unqualified.",
+        "Groups preserve contiguous canonical leaf order and isolate masks/blends among siblings. Reorder grouped timeline layers in Composite; source-occurrence attachment/remapping and group split/duplicate and broader animated combinations remain open."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_x",
+      "feature_ids": [
+        "studio.compositing",
+        "studio.keyframes"
+      ],
+      "label": "Group X position",
+      "status": "PARTIAL",
+      "meaning": "Translates the composed group horizontally relative to the programme canvas.",
+      "constraints": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 100,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "percent of stage",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_y",
+      "feature_ids": [
+        "studio.compositing",
+        "studio.keyframes"
+      ],
+      "label": "Group Y position",
+      "status": "PARTIAL",
+      "meaning": "Translates the composed group vertically relative to the programme canvas.",
+      "constraints": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 100,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "percent of stage",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_scale",
+      "feature_ids": [
+        "studio.compositing",
+        "studio.keyframes"
+      ],
+      "label": "Group scale",
+      "status": "PARTIAL",
+      "meaning": "Scales the composed group uniformly about the canvas centre, preserving child-local edits.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 2,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "multiplier",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_rotation",
+      "feature_ids": [
+        "studio.compositing",
+        "studio.keyframes"
+      ],
+      "label": "Group rotation",
+      "status": "PARTIAL",
+      "meaning": "Rotates the composed group about the canvas centre, before the parent translation.",
+      "constraints": {
+        "type": "number",
+        "minimum": -180,
+        "maximum": 180,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "degrees",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_opacity",
+      "feature_ids": [
+        "studio.compositing",
+        "studio.keyframes"
+      ],
+      "label": "Group opacity",
+      "status": "PARTIAL",
+      "meaning": "Fades the composed group once after its children overlap, before parent composition.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "fraction",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image/video/title layers",
+        "motion scenes",
+        "owned 3D alpha scenes"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
+        "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
+        "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
+        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_mask_enabled",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Enable group mask",
+      "status": "PARTIAL",
+      "meaning": "Clips assembled children with the authored local-canvas mask.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.",
+        "Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_mask_shape",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Group mask shape",
+      "status": "PARTIAL",
+      "meaning": "Chooses rectangle, ellipse or percentage polygon in the group’s local programme canvas.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "rectangle",
+          "ellipse",
+          "polygon"
+        ],
+        "default": "rectangle",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.",
+        "Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_mask_feather",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Group mask feather",
+      "status": "PARTIAL",
+      "meaning": "Softens the group matte with Gaussian sigma in 720px programme units before the group transform.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "pixels at 720px programme height",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.",
+        "Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.group_mask_inverted",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Invert group mask",
+      "status": "PARTIAL",
+      "meaning": "Inverts the authored matte after feathering within the local programme canvas.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.",
+        "Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.group_clip.move",
+      "feature_ids": [
+        "studio.timeline",
+        "studio.compositing"
+      ],
+      "label": "Move group clip",
+      "status": "PARTIAL",
+      "meaning": "Moves the group clip and all descendant starts and keys together, preserving durations and source phase.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "programme seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.timeline",
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.",
+        "Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.",
+        "Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.group_clip.in",
+      "feature_ids": [
+        "studio.timeline",
+        "studio.compositing"
+      ],
+      "label": "Group clip In",
+      "status": "PARTIAL",
+      "meaning": "Sets the start of the group’s half-open programme visibility range without changing child content phase.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "programme seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.timeline",
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.",
+        "Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.",
+        "Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.group_clip.out",
+      "feature_ids": [
+        "studio.timeline",
+        "studio.compositing"
+      ],
+      "label": "Group clip Out",
+      "status": "PARTIAL",
+      "meaning": "Sets the end of the group’s half-open visibility range; child keys and source edits remain available.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "programme seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.timeline",
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.",
+        "Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.",
+        "Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified."
+      ],
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.selection_scale",
+      "feature_ids": [
+        "studio.keyframes"
+      ],
+      "label": "Selected keyframe time scale",
+      "status": "PARTIAL",
+      "meaning": "Scales selected key spacing from the first selected key, retaining property values, curves and ownership.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 2,
+        "default_known": true
+      },
+      "unit": "multiplier",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers",
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "A finite factor greater than zero and at most100 is accepted. Scaling is not animated.",
+        "The first selected key stays fixed. Programme-range overflow or collisions reject the operation. Every selected track must be unlocked.",
+        "Group opacity and ordinary multi-property time scaling use the existing canonical key graph and history. Broad media/retiming/full picture and sound qualification remains open."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.paste_target",
+      "feature_ids": [
+        "studio.keyframes"
+      ],
+      "label": "Keyframe paste destination",
+      "status": "PARTIAL",
+      "meaning": "Chooses original owners or a compatible current-project visual layer for copied property animation.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": "",
+        "default_known": true
+      },
+      "unit": "layer ID; empty means original layers",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers",
+        "graphic groups"
+      ],
+      "dependencies": [
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Only one copied source owner may be remapped to a destination. Property identities are retained; unsupported properties and destination value ranges reject the whole paste.",
+        "Destination locks, half-frame collisions and programme overflow reject atomically. Original-layers mode checks original owner locks.",
+        "Clipboard is timeline-local; cross-project/system clipboard interchange is not qualified. Whole picture/sound agreement remains partial."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.start_velocity",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "Start velocity",
+      "status": "PARTIAL",
+      "meaning": "Sets signed endpoint change per programme second for the selected incoming key interval. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.",
+      "constraints": {
+        "type": "number",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "property units per programme second",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layer properties",
+        "graphic-group properties"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.end_velocity",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "End velocity",
+      "status": "PARTIAL",
+      "meaning": "Sets signed endpoint change per programme second for the selected incoming key interval. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.",
+      "constraints": {
+        "type": "number",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "property units per programme second",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layer properties",
+        "graphic-group properties"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.start_influence",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "Start influence",
+      "status": "PARTIAL",
+      "meaning": "Controls the endpoint time influence while preserving its signed velocity. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.",
+      "constraints": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 99,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layer properties",
+        "graphic-group properties"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.end_influence",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "End influence",
+      "status": "PARTIAL",
+      "meaning": "Controls the endpoint time influence while preserving its signed velocity. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.",
+      "constraints": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 99,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layer properties",
+        "graphic-group properties"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_unit",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic unit",
+      "status": "PARTIAL",
+      "meaning": "Sets unit when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "word",
+        "default_known": true,
+        "values": [
+          "word",
+          "letter"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_style",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic movement",
+      "status": "PARTIAL",
+      "meaning": "Sets movement when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "rise",
+        "default_known": true,
+        "values": [
+          "rise",
+          "pop",
+          "spin"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_direction",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic order",
+      "status": "PARTIAL",
+      "meaning": "Sets order when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "forward",
+        "default_known": true,
+        "values": [
+          "forward",
+          "reverse",
+          "center"
+        ]
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_stagger",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic stagger",
+      "status": "PARTIAL",
+      "meaning": "Sets stagger when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "default": 0.12,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_entry",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic entrance",
+      "status": "PARTIAL",
+      "meaning": "Sets entrance when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 3,
+        "default": 0.5,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_travel",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic travel",
+      "status": "PARTIAL",
+      "meaning": "Sets travel when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 30,
+        "default": 8,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation.",
+        "Available for Rise and Spin. Pop changes scale without translation; its travel input is disabled."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_tilt",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic rotation",
+      "status": "PARTIAL",
+      "meaning": "Sets rotation when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 90,
+        "default": 12,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "degrees",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation.",
+        "Available for Spin. Rise and Pop do not author rotation travel; the rotation input is disabled for those movements."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.kinetic_exit",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Kinetic exit",
+      "status": "PARTIAL",
+      "meaning": "Sets exit when creating ordinary editable text units and motion keys.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 3,
+        "default": 0.25,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.",
+        "The edit must satisfy timing, layer-count and supported title-style validation."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.graphics.import",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Import animated graphics",
+      "status": "PARTIAL",
+      "meaning": "Imports authored graphics as ordinary editable titles, artwork, groups, static geometric masks and transform keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "JSON file",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary text layer",
+        "static SVG artwork"
+      ],
+      "dependencies": [
+        "studio.titles",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "AutoPromote graphics v1 JSON; matching programme aspect; timing inside the current programme; at most 128 total graphic layers and 32 new groups; 256 keys per item, 8192 imported keys and 4MiB file size.",
+        "Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.",
+        "Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.",
+        "Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate.",
+        "Optional title strokeWidth 0–8 and strokeColor hex fields use the ordinary title controls and CPU rasterizer.",
+        "Optional layer/group masks use the existing enabled, shape, percentage-polygon path, radius, feather and inversion fields. Masks remain editable in Composite; imported masks are static."
+      ],
+      "updated_at": "2026-10-16",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.timeline.view",
+      "feature_ids": [
+        "studio.timeline"
+      ],
+      "label": "Composition layers / Sequence tracks",
+      "status": "PARTIAL",
+      "meaning": "Switches between the actual composition stack and source/audio sequence tracks. Layer rows expose native selection, move/trim and inline transform keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "layers",
+        "default_known": true,
+        "values": [
+          "layers",
+          "tracks"
+        ]
+      },
+      "unit": "display choice",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "ordinary text/image/video layers",
+        "graphic groups",
+        "motion scenes"
+      ],
+      "dependencies": [
+        "studio.timeline"
+      ],
+      "limitations": [
+        "Display choices do not mutate the canonical project. Source footage remains a base stage; clip timing alone does not certify visible pixels. Whole preview/final picture and sound remain unqualified."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.timeline.at_playhead",
+      "feature_ids": [
+        "studio.timeline"
+      ],
+      "label": "At playhead",
+      "status": "PARTIAL",
+      "meaning": "Filters layer rows by their real half-open timing range intersected with every parent group gate. It does not test opacity or occlusion.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "default": false,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "display choice",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "ordinary text/image/video layers",
+        "graphic groups",
+        "motion scenes"
+      ],
+      "dependencies": [
+        "studio.timeline"
+      ],
+      "limitations": [
+        "Display choices do not mutate the canonical project. Source footage remains a base stage; clip timing alone does not certify visible pixels. Whole preview/final picture and sound remain unqualified."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.media.replace_sequence",
+      "feature_ids": [
+        "studio.media_ingest"
+      ],
+      "label": "Replace entire sequence",
+      "status": "PARTIAL",
+      "meaning": "Replaces source clips at the same programme length while preserving graphics and soundtrack timing. Removes source captions/camera/template bindings. Undo restores the original source state.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "action",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned project media"
+      ],
+      "dependencies": [
+        "studio.media_ingest"
+      ],
+      "limitations": [
+        "Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate.",
+        "Ready video at least as long as the programme; unlocked Video track; source speed 1, no speed keys, opening hook or silence removal. Graphic/sound timing remains intact; source-specific decisions are reset."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.media.remove_unused",
+      "feature_ids": [
+        "studio.media_ingest"
+      ],
+      "label": "Remove unused media",
+      "status": "PARTIAL",
+      "meaning": "Removes unreferenced project-library assets and animation keys with no remaining layer. Retains active sources, camera/audio references and pending uploads. Undo restores entries; stored files remain available.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": null,
+        "default_known": false,
+        "values": []
+      },
+      "unit": "action",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned project media"
+      ],
+      "dependencies": [
+        "studio.media_ingest"
+      ],
+      "limitations": [
+        "Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.title.outline_color",
+      "feature_ids": [
+        "studio.titles"
+      ],
+      "label": "Outline color",
+      "status": "PARTIAL",
+      "meaning": "Sets the ordinary title outline color in saved state, native preview and CPU output. Outline width remains the existing title property.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "default": "#000000",
+        "default_known": true,
+        "values": []
+      },
+      "unit": "hex color",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "ordinary text layer"
+      ],
+      "dependencies": [
+        "studio.titles"
+      ],
+      "limitations": [
+        "Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate."
+      ],
+      "updated_at": "2026-10-15",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.brand_name",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Logo motion brand name",
+      "status": "PARTIAL",
+      "meaning": "Names the authored composition. SVG builds create measured editable brand letters; image builds preserve supplied lettering.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": "AutoPromote",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.duration",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Logo motion duration",
+      "status": "PARTIAL",
+      "meaning": "Sets the duration of the created intro, within the current programme length. It does not stretch existing footage.",
+      "constraints": {
+        "type": "number",
+        "minimum": 8,
+        "maximum": 14,
+        "values": [],
+        "default": 10,
+        "default_known": true
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.accent",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Logo motion accent",
+      "status": "PARTIAL",
+      "meaning": "Sets the six-digit colour of the authored broadcast pulse, sweep and rule, preserving supplied logo colours.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": "#a855f7",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.background",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Add background",
+      "status": "PARTIAL",
+      "meaning": "Adds the composition backdrop over source footage; disable to retain the underlying picture.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": true,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.separate_symbol",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Separate left symbol from wordmark",
+      "status": "PARTIAL",
+      "meaning": "Finds a transparent seam so the original symbol and lettering can move independently. It rejects an opaque cut rather than erasing artwork.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.symbol_width",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Logo symbol width",
+      "status": "PARTIAL",
+      "meaning": "Places the initial symbol/wordmark boundary as a percentage of the visible image width; the seam follows transparent space around it.",
+      "constraints": {
+        "type": "number",
+        "minimum": 10,
+        "maximum": 60,
+        "values": [],
+        "default": 28,
+        "default_known": true
+      },
+      "unit": "percent of visible logo width",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.piece_construction",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Construct words from pieces",
+      "status": "PARTIAL",
+      "meaning": "Creates interlocking image slices and three masked text pieces per word through ordinary graphics and keys.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "boolean",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.piece_columns",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Logo wordmark slices",
+      "status": "PARTIAL",
+      "meaning": "Sets the number of original bitmap wordmark slices; each slice is animated as two interlocking pieces.",
+      "constraints": {
+        "type": "number",
+        "minimum": 2,
+        "maximum": 16,
+        "values": [],
+        "default": 11,
+        "default_known": true
+      },
+      "unit": "slices",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_motion.piece_style",
+      "feature_ids": [
+        "studio.logo_motion"
+      ],
+      "label": "Logo piece choreography",
+      "status": "PARTIAL",
+      "meaning": "Chooses a symbol-first spring assembly or a word-first triangular cascade, authoring ordinary editable layers and keys.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "spring",
+          "diamond"
+        ],
+        "default": "spring",
+        "default_known": true
+      },
+      "unit": "choreography",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "new logo-motion composition"
+      ],
+      "dependencies": [
+        "studio.logo_motion"
+      ],
+      "limitations": [
+        "Creation option. After building, edit the ordinary generated layers and keys through the standard controls."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.spatial_curve",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "Curve path / Straighten path",
+      "status": "PARTIAL",
+      "meaning": "Enables or removes spatial handles on an interval with paired neighboring X/Y position keys. Endpoints are retained; X/Y travel timing is coordinated.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "composition percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image position keys",
+        "ordinary title position keys",
+        "source position keys"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Requires paired neighboring X/Y position keys. Bounds apply to handle offsets from the corresponding endpoint.",
+        "Travel timing is separate from screen-distance speed. Changes to individual keys can change neighboring intervals.",
+        "Native image/history/reopen/export checks are bounded; broad media, retiming, animated parents and full picture/sound remain unqualified."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.keyframe.spatial_handle",
+      "feature_ids": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "label": "Spatial path handles",
+      "status": "PARTIAL",
+      "meaning": "Shapes the route by dragging or arrow-nudging an endpoint-relative handle. Preview follows the temporary drag; release commits once and Escape cancels.",
+      "constraints": {
+        "type": "array",
+        "minimum": -200,
+        "maximum": 200,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "composition percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary image position keys",
+        "ordinary title position keys",
+        "source position keys"
+      ],
+      "dependencies": [
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "limitations": [
+        "Requires paired neighboring X/Y position keys. Bounds apply to handle offsets from the corresponding endpoint.",
+        "Travel timing is separate from screen-distance speed. Changes to individual keys can change neighboring intervals.",
+        "Native image/history/reopen/export checks are bounded; broad media, retiming, animated parents and full picture/sound remain unqualified."
+      ],
+      "updated_at": "2026-10-17",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.add",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Add vector artwork",
+      "status": "PARTIAL",
+      "meaning": "Creates an ordinary timed artwork layer with editable cubic geometry.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.point",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Vector points",
+      "status": "PARTIAL",
+      "meaning": "Move an anchor while its relative tangent offsets follow it; remove a selected point within the contour limits.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.tangent",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Vector tangents",
+      "status": "PARTIAL",
+      "meaning": "Drag or nudge incoming and outgoing handles relative to the selected anchor. Release commits once; Escape cancels the gesture.",
+      "constraints": {
+        "type": "array",
+        "minimum": -200,
+        "maximum": 200,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.split",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Split after point",
+      "status": "PARTIAL",
+      "meaning": "Insert a midpoint by exact De Casteljau subdivision, retaining the original cubic geometry.",
+      "constraints": {
+        "type": "array",
+        "minimum": 2,
+        "maximum": 64,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.point_kind",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Corner / Smooth point",
+      "status": "PARTIAL",
+      "meaning": "Corner collapses both handles. Smooth initializes collinear tangents from neighboring points; later handles remain independently editable.",
+      "constraints": {
+        "type": "array",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.fill",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Vector fill and gradient",
+      "status": "PARTIAL",
+      "meaning": "Choose no fill, solid or a linear gradient, two colors and diagonal, horizontal or vertical direction.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "paint",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.stroke",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Vector stroke",
+      "status": "PARTIAL",
+      "meaning": "Choose outline width in the artwork coordinate box and a six-digit color. An unfilled path requires visible stroke.",
+      "constraints": {
+        "type": "object",
+        "minimum": 0,
+        "maximum": 20,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "layer percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.closed",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Close vector path",
+      "status": "PARTIAL",
+      "meaning": "Join the last anchor back to the first. Closing requires at least three points.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "boolean",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track and image-layer track.",
+        "Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.stroke_start",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Stroke start",
+      "status": "PARTIAL",
+      "meaning": "Choose the beginning of the visible outline by travelled path distance. Add or remove its key at the playhead; animate through the ordinary timeline and curve editor.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "path distance percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires editable vector artwork and an unlocked image-layer track. Set a nonzero stroke width in Graphics.",
+        "Values use the programme clock and existing key easing; sampled cubic distance is an approximation. Start greater than or equal to end hides the stroke and preserves fill. Offset shifts the interval: closed contours wrap and open contours clip.",
+        "Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.stroke_end",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Stroke end",
+      "status": "PARTIAL",
+      "meaning": "Choose the end of the visible outline by travelled path distance. Add or remove its key at the playhead; animate through the ordinary timeline and curve editor.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 100,
+        "default_known": true
+      },
+      "unit": "path distance percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires editable vector artwork and an unlocked image-layer track. Set a nonzero stroke width in Graphics.",
+        "Values use the programme clock and existing key easing; sampled cubic distance is an approximation. Start greater than or equal to end hides the stroke and preserves fill. Offset shifts the interval: closed contours wrap and open contours clip.",
+        "Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.vector.stroke_offset",
+      "feature_ids": [
+        "studio.vector_artwork"
+      ],
+      "label": "Stroke offset",
+      "status": "PARTIAL",
+      "meaning": "Move the selected stroke interval by path distance. Animate positive or negative cumulative values for forward/reverse laps on closed contours; open contours clip at their real endpoints.",
+      "constraints": {
+        "type": "number",
+        "minimum": -1000,
+        "maximum": 1000,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "path distance percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "authored vector artwork"
+      ],
+      "dependencies": [
+        "studio.vector_artwork"
+      ],
+      "limitations": [
+        "Requires editable vector artwork, a nonzero stroke width and an unlocked image-layer track. Use a partial start/end interval to see a closed outline move.",
+        "Closed contours wrap continuously across the original seam; open contours clip rather than connecting their endpoints. Equal/crossed start/end ranges remain empty, and fill stays authored.",
+        "Distance uses 128 samples per cubic; full predictive picture/sound and broad effect/parent/retiming combinations remain separately qualified.",
+        "Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.enable",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Animate this title",
+      "status": "PARTIAL",
+      "meaning": "Create one native text animator and two ordinary entrance progress keys.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.unit",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Animate text by",
+      "status": "PARTIAL",
+      "meaning": "Choose independent letters or words; spaces retain their advance without consuming a slot.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "character",
+          "word"
+        ],
+        "default": "character",
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.order",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Text animation order",
+      "status": "PARTIAL",
+      "meaning": "Choose the deterministic order of selected units.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "forward",
+          "reverse",
+          "center_out",
+          "edges_in"
+        ],
+        "default": "forward",
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.stagger",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Stagger",
+      "status": "PARTIAL",
+      "meaning": "Share of the progress window spread between the first and last selected unit.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 95,
+        "values": [],
+        "default": 65,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_x",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Letter travel X (em)",
+      "status": "PARTIAL",
+      "meaning": "Horizontal travel from the starting pose, in 36px logical em units.",
+      "constraints": {
+        "type": "number",
+        "minimum": -4,
+        "maximum": 4,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "em",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_y",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Letter travel Y (em)",
+      "status": "PARTIAL",
+      "meaning": "Vertical travel from the starting pose, in 36px logical em units.",
+      "constraints": {
+        "type": "number",
+        "minimum": -4,
+        "maximum": 4,
+        "values": [],
+        "default": 1.4,
+        "default_known": true
+      },
+      "unit": "em",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_scale",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Starting scale",
+      "status": "PARTIAL",
+      "meaning": "Starting local unit scale; selected units settle to scale one.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 2.5,
+        "values": [],
+        "default": 0.35,
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_rotation",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Starting rotation",
+      "status": "PARTIAL",
+      "meaning": "Starting local unit rotation; selected units settle upright.",
+      "constraints": {
+        "type": "number",
+        "minimum": -360,
+        "maximum": 360,
+        "values": [],
+        "default": -35,
+        "default_known": true
+      },
+      "unit": "degrees",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.from_opacity",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Starting opacity",
+      "status": "PARTIAL",
+      "meaning": "Starting unit opacity, interpolated by linear local progress.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.spread",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Starting spread",
+      "status": "PARTIAL",
+      "meaning": "Spread units around each line’s center by a share of their center distance.",
+      "constraints": {
+        "type": "number",
+        "minimum": -1,
+        "maximum": 1,
+        "values": [],
+        "default": 0.3,
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.range_start",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Range start (%)",
+      "status": "PARTIAL",
+      "meaning": "Beginning of the selector, measured at ordered source-unit centers.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.range_end",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Range end (%)",
+      "status": "PARTIAL",
+      "meaning": "End of the selector; equal/crossed ranges leave all units settled.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 100,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.settle",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Text settling curve",
+      "status": "PARTIAL",
+      "meaning": "Ease or overshoot unit travel, scale, spread and rotation.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "linear",
+          "ease_out",
+          "ease_in_out",
+          "back_out"
+        ],
+        "default": "back_out",
+        "default_known": true
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.progress",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Text progress",
+      "status": "PARTIAL",
+      "meaning": "Normal motion property: zero shows the starting arrangement and 100 settles it. Keys may reverse or hold.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 100,
+        "default_known": true
+      },
+      "unit": "percent",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.rebuild",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Rebuild entrance keys",
+      "status": "PARTIAL",
+      "meaning": "Replace only this title’s progress keys over at most its first 1.8 seconds.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "percent",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.text_animator.remove",
+      "feature_ids": [
+        "studio.text_choreography"
+      ],
+      "label": "Remove text animator",
+      "status": "PARTIAL",
+      "meaning": "Remove local text choreography and only its progress keys while retaining copy, styling and other layer motion. Undo restores it.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "local unit",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary supported Inter titles"
+      ],
+      "dependencies": [
+        "studio.text_choreography"
+      ],
+      "limitations": [
+        "Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.",
+        "Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.name",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Brand name",
+      "status": "PARTIAL",
+      "meaning": "Enter the lettering to convert into ordinary editable glyph contours.",
+      "constraints": {
+        "type": "string",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": "AutoPromote",
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.family",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo symbol family",
+      "status": "PARTIAL",
+      "meaning": "Choose a ribbon ascent, interlocking orbit or geometric facet symbol.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "flow",
+          "orbit",
+          "facet"
+        ],
+        "default": "flow",
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.layout",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo layout",
+      "status": "PARTIAL",
+      "meaning": "Arrange the symbol and lettering or create a symbol-only mark.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "horizontal",
+          "stacked",
+          "symbol"
+        ],
+        "default": "horizontal",
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.weight",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo lettering",
+      "status": "PARTIAL",
+      "meaning": "Use the exact bundled Inter SemiBold or Black glyph contours.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          600,
+          900
+        ],
+        "default": 900,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.tracking",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo letter spacing",
+      "status": "PARTIAL",
+      "meaning": "Adjust advance spacing before ordinary vector layers are created.",
+      "constraints": {
+        "type": "number",
+        "minimum": -2,
+        "maximum": 12,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.symbol_size",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo symbol size",
+      "status": "PARTIAL",
+      "meaning": "Scale the symbol relative to the wordmark.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0.6,
+        "maximum": 1.4,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.colours",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Logo colours",
+      "status": "PARTIAL",
+      "meaning": "Choose six-digit primary, accent and lettering colours.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.gradient",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Gradient symbol",
+      "status": "PARTIAL",
+      "meaning": "Use linear gradients or solid symbol fills.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": true,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.assemble",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Assemble logo pieces",
+      "status": "PARTIAL",
+      "meaning": "Create normal staggered opacity, scale, rotation and Y keys for symbol pieces and outlined letters.",
+      "constraints": {
+        "type": "boolean",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": false,
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.build",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Add logo to timeline",
+      "status": "PARTIAL",
+      "meaning": "Add normal vector layers and one graphic group as a single history operation.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.variant",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Export logo variant",
+      "status": "PARTIAL",
+      "meaning": "Preserve colours or export white/ink without changing the project geometry.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "colour",
+          "light",
+          "dark"
+        ],
+        "default": "colour",
+        "default_known": true
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.svg",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Download logo SVG",
+      "status": "PARTIAL",
+      "meaning": "Download a transparent portable SVG with real paths and no font or image dependency.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.png",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Download logo PNG",
+      "status": "PARTIAL",
+      "meaning": "Download a transparent raster master generated from the same SVG geometry.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.contour",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Vector contour",
+      "status": "PARTIAL",
+      "meaning": "Select an outer contour or counter for ordinary point/tangent editing. This selection itself does not change project geometry.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.logo_design.canvas",
+      "feature_ids": [
+        "studio.logo_design"
+      ],
+      "label": "Start a logo design",
+      "status": "PARTIAL",
+      "meaning": "Prepare a bundled blank eight-second canvas through the existing Studio entitlement and owned-source upload path.",
+      "constraints": {
+        "type": "object",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "design units",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary native vector logo layers"
+      ],
+      "dependencies": [
+        "studio.logo_design"
+      ],
+      "limitations": [
+        "Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.",
+        "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
+      ],
+      "updated_at": "2026-10-18",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "publishing.analytics.sync_latest",
+      "feature_ids": [
+        "publishing.analytics"
+      ],
+      "label": "Sync latest platform statistics",
+      "status": "PARTIAL",
+      "meaning": "Refreshes up to six newest owned published posts in the selected release or account scope, one per destination. Selection uses publication time independently of the performance-ranked display.",
+      "constraints": {
+        "type": "array",
+        "minimum": 1,
+        "maximum": 6,
+        "default": [],
+        "default_known": true,
+        "values": []
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "SUPPORTED",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "publishing.analytics",
+        "system.account"
+      ],
+      "limitations": [
+        "Five-minute per-post cooldown; only owned successful non-simulated posts qualify.",
+        "Missing permissions or unsupported platform metrics remain unavailable. The action does not publish content or promise reach."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "publishing.analytics.release",
+      "feature_ids": [
+        "publishing.analytics"
+      ],
+      "label": "Published release",
+      "status": "PARTIAL",
+      "meaning": "Limits collected statistics and refresh targets to one owned published release within the selected date range.",
+      "constraints": {
+        "type": "string",
+        "default": "",
+        "default_known": true,
+        "values": [],
+        "minimum": null,
+        "maximum": null
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "SUPPORTED",
+      "render_support": "UNSUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "publishing.analytics",
+        "system.account"
+      ],
+      "limitations": [
+        "Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.",
+        "Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.captions.source_language",
+      "feature_ids": [
+        "studio.captions"
+      ],
+      "label": "Speech language",
+      "status": "PARTIAL",
+      "meaning": "Selects the speech recognizer and source language for the next automatic caption request. Does not relabel or replace existing lines.",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "auto",
+          "en",
+          "af",
+          "za-mixed",
+          "xh",
+          "zu",
+          "st",
+          "tn",
+          "ts",
+          "nr",
+          "ve"
+        ],
+        "default": "auto",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video with speech"
+      ],
+      "dependencies": [
+        "studio.captions"
+      ],
+      "limitations": [
+        "Model wording is an editable review draft; changing this preference does not translate existing captions."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.background_edge_radius",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge detail width",
+      "status": "PARTIAL",
+      "meaning": "Sets the bounded source-guided unknown edge band after choosing Clean background edges. Zero retains existing alpha while colour cleanup can still run.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 8,
+        "values": [],
+        "default": 3,
+        "default_known": true
+      },
+      "unit": "source pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified."
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.background_decontaminate",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Remove old background colour",
+      "status": "PARTIAL",
+      "meaning": "Recovers photographed foreground edge colour using the final mask, including protected-object corrections. Zero keeps the photographed edge RGB.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "strength",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified."
+      ],
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     }
   ]

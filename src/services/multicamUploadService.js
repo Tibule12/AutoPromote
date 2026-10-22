@@ -299,6 +299,7 @@ async function startMulticamUpload({
         deleteAfter: customMetadata.deleteAfter || null,
         expectedSizeBytes: normalizedSize,
         size: normalizedSize,
+        ...((customMetadata.contentHash || customMetadata.sha256) ? { contentHash: customMetadata.contentHash || customMetadata.sha256 } : {}),
         chunkSizeBytes: 16 * 1024 * 1024,
       };
     }
@@ -311,9 +312,15 @@ async function startMulticamUpload({
 
   const downloadToken = crypto.randomUUID();
   const uploadStartedAt = new Date().toISOString();
+  // Uniform-access Studio buckets reject legacy per-object ACLs only when
+  // the browser finishes the transfer. Keep IAM authoritative there; retain
+  // the existing private ACL on legacy buckets and all camera/audio paths.
+  const studioPurpose = ["studio_source", "studio_project"].includes(normalizedPurpose);
+  const uniformStudioBucket = studioPurpose &&
+    (await bucket.getMetadata())[0]?.iamConfiguration?.uniformBucketLevelAccess?.enabled === true;
   const [uploadUrl] = await file.createResumableUpload({
     origin: origin || undefined,
-    private: true,
+    ...(uniformStudioBucket ? {} : { private: true }),
     metadata: {
       contentType: String(contentType || "application/octet-stream").slice(0, 200),
       cacheControl: "private, no-store, max-age=0",
@@ -385,11 +392,20 @@ async function completeMulticamUpload({ userId, storagePath, downloadToken, size
   const deleteAfter = durableStudioSource
     ? null
     : getDeleteAfterFromCompletion(completedAt.getTime());
+  // Only bounded Studio assets enter the model runtime. Hash the finalized,
+  // generation-pinned bytes server-side; never trust a client-supplied hash.
+  // Camera originals/external audio and larger Studio recordings keep their
+  // existing upload/synchronization behavior.
+  const {hashCompletedStudioSource,MAX_MODEL_SOURCE_BYTES}=require('./studioCompletedSourceHash');
+  const contentHash=durableStudioSource && actualSize<=MAX_MODEL_SOURCE_BYTES
+    ? await hashCompletedStudioSource({bucket:admin.storage().bucket(bucketName),storagePath,
+        generation:metadata.generation,size:actualSize}) : null;
   await file.setMetadata({
     ...(durableStudioSource ? {} : { customTime: completedAt.toISOString() }),
     metadata: {
       ...customMetadata,
       uploadCompletedAt: completedAt.toISOString(),
+      ...(contentHash?{sha256:contentHash,contentHash}:{}),
       ...(deleteAfter ? { deleteAfter } : {}),
     },
   });
@@ -399,6 +415,7 @@ async function completeMulticamUpload({ userId, storagePath, downloadToken, size
     storagePath,
     bucketName,
     size: actualSize,
+    ...(contentHash?{contentHash}:{}),
     generation: metadata.generation || null,
     deleteAfter,
     cacheKey: `${bucketName}/${storagePath}#${metadata.generation || "current"}`,

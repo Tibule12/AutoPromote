@@ -58,7 +58,7 @@ def wrap_lines(text, font, maximum):
     return lines
 
 
-def render_title_asset(overlay, output_path, width, height):
+def render_title_asset(overlay, output_path, width, height, *, raster_scale=4):
     output_width, output_height = width, height
     width, height = width*720/height, 720
     if (overlay.get("fontFamily") or "Inter") != "Inter":
@@ -76,35 +76,46 @@ def render_title_asset(overlay, output_path, width, height):
     box_width = min(maximum_width, max(1, max(font.getlength(line) for line in lines)+padding_x*2))
     box_height = line_height*len(lines)+padding_y*2
     margin = math.ceil(24*unit)
-    image = Image.new("RGBA", (math.ceil(box_width)+margin*2, math.ceil(box_height)+margin*2))
+    logical_width, logical_height = math.ceil(box_width)+margin*2, math.ceil(box_height)+margin*2
+    if not math.isfinite(raster_scale) or not 1 <= raster_scale <= 4:
+        raise ValueError("Title raster density must be between one and four")
+    # Preserve the existing logical font metrics/wrapping and mask/anchor box.
+    # Only the bitmap density changes. A large editable title must not magnify
+    # a36px glyph when the shared layer transform grows it to180px or more.
+    density = min(raster_scale, max(1, 8192 / max(logical_width, logical_height) / max(1, output_height/720)))
+    image = Image.new("RGBA", (math.ceil(logical_width*density), math.ceil(logical_height*density)))
     draw = ImageDraw.Draw(image)
-    draw.rounded_rectangle((margin, margin, margin+box_width, margin+box_height), radius=10*unit, fill=color(overlay.get("bg")))
+    draw.rounded_rectangle(tuple(v*density for v in (margin, margin, margin+box_width, margin+box_height)), radius=10*unit*density, fill=color(overlay.get("bg")))
     glyphs = Image.new("RGBA", image.size)
     text_draw = ImageDraw.Draw(glyphs)
     ascent, descent = font.getmetrics()
+    raster_font = ImageFont.truetype(font.path, max(1, round(height/20*density)))
     for index, line in enumerate(lines):
         length = font.getlength(line)
         align = overlay.get("textAlign") or "center"
         x = margin+padding_x if align == "left" else margin+box_width-padding_x-length if align == "right" else margin+(box_width-length)/2
         baseline = margin+padding_y+index*line_height+(line_height-ascent-descent)/2+ascent
-        text_draw.text((x, baseline), line, font=font, anchor="ls", fill=color(overlay.get("color"), "white"),
-                       stroke_width=max(0, round(float(overlay.get("strokeWidth") or 0)*unit/2)), stroke_fill=(0, 0, 0, 235))
+        text_draw.text((x*density, baseline*density), line, font=raster_font, anchor="ls", fill=color(overlay.get("color"), "white"),
+                       stroke_width=max(0, round(float(overlay.get("strokeWidth") or 0)*unit*density/2)),
+                       stroke_fill=color(overlay.get("strokeColor"), "rgba(0,0,0,0.92)"))
     shadow = overlay.get("shadow") or "soft"
     if shadow != "none":
         for y, blur, opacity in ([(4, 7, .95), (1, 1, 1)] if shadow == "strong" else [(3, 5, .72)]):
-            mask = glyphs.getchannel("A").filter(ImageFilter.GaussianBlur(blur*unit)).point(lambda a: round(a*opacity))
+            mask = glyphs.getchannel("A").filter(ImageFilter.GaussianBlur(blur*unit*density)).point(lambda a: round(a*opacity))
             shade = Image.new("RGBA", image.size, (0, 0, 0, 0)); shade.putalpha(mask)
-            image.alpha_composite(shade, (0, round(y*unit)))
+            image.alpha_composite(shade, (0, round(y*unit*density)))
     image.alpha_composite(glyphs)
-    anchor_x = (margin+box_width*float(overlay.get("anchorX", 50))/100)/image.width*100
-    anchor_y = (margin+box_height*float(overlay.get("anchorY", 50))/100)/image.height*100
+    anchor_x = (margin+box_width*float(overlay.get("anchorX", 50))/100)/logical_width*100
+    anchor_y = (margin+box_height*float(overlay.get("anchorY", 50))/100)/logical_height*100
     # Native clip-path uses the title's layout box, excluding our transparent
     # shadow padding. Keep this derived geometry alongside the asset so the
     # shared compositor cannot mistake padding for part of the mask region.
-    clip_box = {"x": margin / image.width, "y": margin / image.height,
-                "width": box_width / image.width, "height": box_height / image.height}
-    image = image.resize((max(1, round(image.width*output_height/720)), max(1, round(image.height*output_height/720))), Image.Resampling.LANCZOS)
+    clip_box = {"x": margin / logical_width, "y": margin / logical_height,
+                "width": box_width / logical_width, "height": box_height / logical_height}
+    logical_output_width = max(1, round(logical_width*output_height/720))
+    logical_output_height = max(1, round(logical_height*output_height/720))
+    image = image.resize((max(1, round(logical_output_width*density)), max(1, round(logical_output_height*density))), Image.Resampling.LANCZOS)
     image.save(output_path)
-    return {"width": image.width/output_width*100, "height": image.height/output_height*100, "mediaFit": "stretch",
+    return {"width": logical_output_width/output_width*100, "height": logical_output_height/output_height*100, "mediaFit": "stretch",
             "anchorX": anchor_x, "anchorY": anchor_y,
             "lines": lines, "clipBox": clip_box}

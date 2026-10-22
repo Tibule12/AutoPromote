@@ -219,7 +219,7 @@ function makeGroup(scene) {
 
 // This canvas is an edit proxy. HQ Blender frames use the same bounded scene
 // model and timeline clock, but not the browser's light/geometry budget.
-export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLevel = 0 }) {
+export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLevel = 0, zIndex }) {
   const hostRef = useRef(null);
   const clockRef = useRef(getTime);
   const levelRef = useRef(audioLevel);
@@ -265,7 +265,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
     const draw = () => {
       raf = requestAnimationFrame(draw);
       if (document.hidden) return;
-      const rect = host.getBoundingClientRect();
+      const rect = { width: host.clientWidth, height: host.clientHeight };
       if (!rect.width || !rect.height) return;
       const resized = rect.width !== width || rect.height !== height;
       if (rect.width && rect.height && (rect.width !== width || rect.height !== height)) {
@@ -323,7 +323,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
   }, [signature]);
 
   if (!scenes.length) return null;
-  return <div className="studio-3d-canvas" ref={hostRef} data-testid="studio-3d-preview" aria-label="3D motion graphics preview">
+  return <div className="studio-3d-canvas" ref={hostRef} style={zIndex === undefined ? undefined : { zIndex }} data-testid="studio-3d-preview" aria-label="3D motion graphics preview">
     {webglFailed ? <div className="studio-3d-fallback">3D live preview is unavailable in this browser. Your scene settings are preserved.</div> : null}
   </div>;
 }

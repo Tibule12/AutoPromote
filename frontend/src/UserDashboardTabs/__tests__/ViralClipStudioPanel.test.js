@@ -56,8 +56,25 @@ describe("ViralClipStudioPanel", () => {
     uploadSourceFileViaBackend.mockResolvedValue({
       url: "https://storage.example/source.mp4",
       storagePath: "uploads/videos/user/source.mp4",
+      contentHash: "a".repeat(64),
       size: 5,
     });
+  });
+
+  test("blank logo entry uploads through the ordinary owned source path", async () => {
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn().mockResolvedValue({ok:true,blob:async()=>new Blob(["blank-canvas"],{type:"video/mp4"})});
+    try {
+      render(<ViralClipStudioPanel />);fireEvent.click(screen.getByRole("button",{name:"Start a logo design"}));
+      await waitFor(()=>expect(uploadSourceFileViaBackend).toHaveBeenCalledTimes(1));
+      expect(uploadSourceFileViaBackend.mock.calls[0][0]).toMatchObject({fileName:"Logo canvas.mp4",purpose:"studio_source",mediaType:"video",token:"firebase-token"});
+      expect(uploadSourceFileViaBackend.mock.calls[0][0].file).toBeInstanceOf(File);
+    } finally { global.fetch = originalFetch; }
+  });
+  test("blank logo entry respects the existing Studio entitlement", () => {
+    const originalFetch = global.fetch;global.fetch=jest.fn();mockStudioAllowed=false;const upgrade=jest.fn();
+    try { render(<ViralClipStudioPanel onUpgrade={upgrade}/>);fireEvent.click(screen.getByRole("button",{name:"Start a logo design"}));expect(upgrade).toHaveBeenCalledTimes(1);expect(global.fetch).not.toHaveBeenCalled();expect(uploadSourceFileViaBackend).not.toHaveBeenCalled(); }
+    finally {global.fetch=originalFetch;}
   });
 
   test("backup restore authorizes every owned media path before saving the unchanged canonical edit", async () => {
@@ -162,6 +179,7 @@ describe("ViralClipStudioPanel", () => {
         url: "https://storage.example/source.mp4",
         storagePath: "uploads/videos/user/source.mp4",
         isRemote: true,
+        contentHash: "a".repeat(64),
         openStudio: true,
       })
     );

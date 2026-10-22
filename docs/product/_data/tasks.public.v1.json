@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.5",
+  "knowledge_version": "1.0.45",
   "tasks": [
     {
       "task_id": "task.image_cinematic",
@@ -339,11 +339,22 @@
         "studio.export",
         "creative.logo_brand",
         "studio.three_d",
-        "studio.sfx"
+        "studio.sfx",
+        "studio.vector_artwork"
       ],
       "control_ids": [
         "studio.three_d.material",
-        "studio.three_d.focallength"
+        "studio.three_d.focallength",
+        "studio.keyframe.spatial_curve",
+        "studio.keyframe.spatial_handle",
+        "studio.vector.add",
+        "studio.vector.point",
+        "studio.vector.tangent",
+        "studio.vector.split",
+        "studio.vector.point_kind",
+        "studio.vector.fill",
+        "studio.vector.stroke",
+        "studio.vector.closed"
       ],
       "prerequisites": [
         "system.account"
@@ -354,6 +365,20 @@
           "instruction": "Import the owned logo and select a supported draft/preset.",
           "feature_id": "creative.logo_brand",
           "control_ids": []
+        },
+        {
+          "instruction": "For authored vector pieces, add vector artwork in Graphics and shape its points/tangents. This does not automatically trace a supplied PNG or wordmark. Animate the resulting layer in Motion.",
+          "feature_id": "studio.vector_artwork",
+          "control_ids": [
+            "studio.vector.add",
+            "studio.vector.point",
+            "studio.vector.tangent",
+            "studio.vector.split",
+            "studio.vector.point_kind",
+            "studio.vector.fill",
+            "studio.vector.stroke",
+            "studio.vector.closed"
+          ]
         },
         {
           "instruction": "Author ordinary layers or a bounded 3D scene; review unsupported final fields.",
@@ -378,7 +403,7 @@
         "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
       ],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-18",
       "product_version": "1.2.0"
     },
     {
@@ -629,16 +654,25 @@
       "task_id": "task.captions_correct",
       "title": "Create captions and correct transcription",
       "status": "BROKEN",
-      "summary": "Automatic words are currently broken; use reviewed phrase correction and inspect the actual final subset.",
+      "summary": "Choose the speech language, generate editable timed lines and review uncertain words before export.",
       "feature_ids": [
         "studio.captions"
       ],
-      "control_ids": [],
+      "control_ids": [
+        "studio.captions.source_language"
+      ],
       "prerequisites": [
         "system.account"
       ],
       "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
+        {
+          "instruction": "Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
+          "feature_id": "studio.captions",
+          "control_ids": [
+            "studio.captions.source_language"
+          ]
+        },
         {
           "instruction": "Review source transcription and correct the selected phrase rather than trusting repeated automatic words.",
           "feature_id": "studio.captions",
@@ -656,10 +690,10 @@
       ],
       "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
       "limitations": [
-        "The automatic-word repetition defect remains open. A successful reviewed phrase render does not qualify automatic captions."
+        "The empty-hint repetition trigger is repaired on retained speech, but code-switched wording still needs correction. Broad automatic transcription, all caption styles and full preview/export parity are not qualified."
       ],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {

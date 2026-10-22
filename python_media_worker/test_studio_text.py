@@ -7,7 +7,7 @@ import unittest
 import tempfile
 
 from python_media_worker.studio_text import render_title_asset
-from python_media_worker.studio_layer_motion import render_image_layer_motion
+from python_media_worker.studio_layer_motion import render_image_layer_motion, _render_pose
 
 
 def check_wrapped_weighted_title_preserves_outline_background_and_alignment(tmp_path):
@@ -53,9 +53,55 @@ def check_real_title_compositor_renders_timed_fades_and_keyframe_position(tmp_pa
 
 
 class StudioTextTests(unittest.TestCase):
+    def test_every_importable_title_weight_has_matching_browser_worker_font_and_renders(self):
+        import hashlib
+        from python_media_worker.studio_text import WEIGHTS
+        root = Path(__file__).resolve().parents[1]
+        assert set(WEIGHTS) == {400, 600, 800, 900}
+        with tempfile.TemporaryDirectory() as temp:
+            for weight, name in WEIGHTS.items():
+                worker = root / 'python_media_worker/assets/fonts' / f'Inter-{name}.ttf'
+                browser = root / 'frontend/src/components/motion/fonts' / worker.name
+                assert hashlib.sha256(worker.read_bytes()).digest() == hashlib.sha256(browser.read_bytes()).digest()
+                output = Path(temp) / f'{weight}.png'
+                geometry = render_title_asset({'text': 'Schedule.', 'fontWeight': weight, 'shadow': 'none'}, output, 1280, 720)
+                assert geometry['lines'] == ['Schedule.']
+                assert np.asarray(Image.open(output))[..., 3].max() > 200
+
+    def test_large_titles_keep_geometry_with_sharper_glyph_edges(self):
+        with tempfile.TemporaryDirectory() as temp:
+            results, geometry = [], []
+            for density in [1, 4]:
+                path = Path(temp)/f"density-{density}.png"
+                spec = {"type": "text", "text": "I", "fontWeight": 900, "color": "white", "shadow": "none"}
+                box = render_title_asset(spec, path, 1280, 720, raster_scale=density)
+                geometry.append(box)
+                pose = {"x": 50, "y": 50, "scale": 5, "rotation": 0, "opacity": 1, "crop_x": 0, "crop_y": 0}
+                frame = _render_pose(Image.open(path).convert("RGBA"), {**spec, **box},
+                    {"anchor_x": box["anchorX"], "anchor_y": box["anchorY"]}, pose, (1280, 720))
+                alpha = np.asarray(frame)[..., 3]
+                y, x = np.where(alpha > 127)
+                row = alpha[(y.min()+y.max())//2]
+                results.append(((x.min(), y.min(), x.max(), y.max()), int(((row > 10) & (row < 245)).sum())))
+            assert geometry[0] == geometry[1]
+            assert max(abs(a-b) for a,b in zip(results[0][0], results[1][0])) <= 1
+            assert results[1][1] <= results[0][1]*.5, results
+
     def test_styled_asset(self):
         with tempfile.TemporaryDirectory() as temp:
             check_wrapped_weighted_title_preserves_outline_background_and_alignment(Path(temp))
+
+    def test_outline_uses_canonical_color_and_preserves_legacy_black(self):
+        with tempfile.TemporaryDirectory() as temp:
+            target = Path(temp)/"outline.png"
+            spec = {"text": "LOOP", "fontWeight": 900, "color": "#121215", "shadow": "none", "strokeWidth": 8}
+            render_title_asset({**spec, "strokeColor": "#ff5436"}, target, 1280, 720)
+            pixels = np.asarray(Image.open(target))
+            red = (pixels[..., 0] > 180) & (pixels[..., 1] < 140) & (pixels[..., 2] < 120) & (pixels[..., 3] > 180)
+            assert red.sum() > 100
+            render_title_asset(spec, target, 1280, 720)
+            legacy = np.asarray(Image.open(target))
+            assert not ((legacy[..., 0] > 180) & (legacy[..., 1] < 140)).any()
 
     def test_real_timed_composition(self):
         with tempfile.TemporaryDirectory() as temp:

@@ -1,48 +1,44 @@
 import React from "react";
-import "./Page.css";
+import { Link } from "react-router";
+import PublicPage from "./components/public/PublicPage";
 
-const Changelog = () => (
-  <div className="ap-page-container">
-    <header className="ap-page-header">
-      <h1>Changelog</h1>
-      <p className="ap-page-subtitle">Latest updates and improvements to AutoPromote.</p>
-    </header>
-
-    <div className="ap-changelog-item">
-      <h3>v1.2.0 - Content Safety & Monetization Transition</h3>
-      <span className="ap-date">January 2026</span>
-      <ul>
-        <li>
-          Expanded <strong>content safety and compliance checks</strong> to reduce avoidable policy
-          issues before publishing.
-        </li>
-        <li>
-          Began the shift away from legacy view-based bonus messaging toward the current
-          mission-driven earning model.
-        </li>
-        <li>Enhanced footer with better navigation and resource links.</li>
-      </ul>
-    </div>
-
-    <div className="ap-changelog-item">
-      <h3>v1.1.0 - Multi-Platform Expansion</h3>
-      <span className="ap-date">December 2025</span>
-      <ul>
-        <li>Added support for Spotify, Snapchat, and Pinterest integrations.</li>
-        <li>Improved video transcoding pipeline for faster uploads.</li>
-        <li>Refined user dashboard UI for better accessibility.</li>
-      </ul>
-    </div>
-
-    <div className="ap-changelog-item">
-      <h3>v1.0.0 - Initial Launch</h3>
-      <span className="ap-date">November 2025</span>
-      <ul>
-        <li>Core scheduling and auto-promotion engine.</li>
-        <li>Basic analytics and user management.</li>
-      </ul>
-    </div>
-  </div>
-);
-
-export default Changelog;
+const updates = [
+  [
+    "21 October 2026",
+    "Clearer controls. More useful guides.",
+    "Studio inspector layouts keep Graphics and Sound controls inside the panel. Motion fields and sound cues are easier to read. The refreshed guides cover inspector navigation, keyframes, Logo Workshop and sound-cue editing.",
+  ],
+  [
+    "21 October 2026",
+    "A clearer picture of a release.",
+    "Publishing and analytics work distinguishes scheduled, processing and published states, preserves unavailable metrics separately from real zeroes, and keeps destination copy and timing visible.",
+  ],
+  [
+    "18 October 2026",
+    "More ways to build motion.",
+    "Studio development adds editable vector artwork, stroke trim and offset, text choreography and Logo Workshop. These use ordinary layers and keys in the same project; capability-specific limits remain in the guides.",
+  ],
+];
+export default function Changelog() {
+  return (
+    <PublicPage
+      eyebrow="PRODUCT NOTES / DEVELOPMENT UPDATES"
+      title="The details keep moving forward."
+      intro="Recent work on editing, publishing and the documentation around them. Check the running app and guides for availability in your account."
+    >
+      <div className="public-prose">
+        {updates.map(([date, title, copy]) => (
+          <section key={title}>
+            <p className="public-section-label">{date}</p>
+            <h2>{title}</h2>
+            <p>{copy}</p>
+          </section>
+        ))}
+        <div className="public-callout">
+          These are development updates, not a guarantee that every change is deployed to every
+          account. <Link to="/docs">Read the capability guides</Link> for scope and limitations.
+        </div>
+      </div>
+    </PublicPage>
+  );
+}

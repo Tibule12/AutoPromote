@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
+Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -25,10 +25,10 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.keyframe.easing | Keyframe easing | enum | linear, ease_in, ease_out, ease_in_out, hold, bezier | none | "ease_in_out" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.keyframe.curve | Cubic curve handles | array | source-dependent … source-dependent | none | [0.33,0,0.67,1] | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.blend | Layer blend mode | enum | normal, multiply, screen, difference, overlay, soft-light, hard-light, color-dodge, luminosity | none | "normal" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
-| studio.effect.blur | Layer blur | number | 0 … 30 | none | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
-| studio.effect.glow_radius | Glow radius | number | 0 … 60 | none | 16 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.effect.blur | Layer blur | number | 0 … 30 | pixels | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.effect.glow_radius | Glow radius | number | 0 … 60 | pixels | 16 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.effect.glow_intensity | Glow intensity | number | 0 … 1 | none | 0.5 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
-| studio.effect.layershadow_blur | Shadow blur | number | 0 … 80 | none | 18 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.effect.layershadow_blur | Shadow blur | number | 0 … 80 | pixels | 18 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.effect.layershadow_opacity | Shadow opacity | number | 0 … 1 | none | 0.55 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.effect.motionblur_samples | Motion blur samples | integer | 2 … 8 | none | 4 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.effect.motionblur_shutter | Motion blur shutter | number | 0.1 … 1 | none | 0.5 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
@@ -113,6 +113,99 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | generation.max_cutaways | Maximum generated cutaways | enum | 1, 2, 3 | none | 2 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | publishing.queue.period | Queue period | enum | week, all | none | "week" | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
 | publishing.queue.load_more | Load more schedules | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
+| studio.geometric_mask.path | Mask polygon path | string | source-dependent … source-dependent | percent | "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.geometric_mask.radius | Mask corner radius | number | 0 … 50 | percent | 6 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.composite.layer_order | Layer order | array | 0 … 2000 | none | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_x | Group X position | number | -100 … 100 | percent of stage | 0 | SUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_y | Group Y position | number | -100 … 100 | percent of stage | 0 | SUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_scale | Group scale | number | 0.1 … 2 | multiplier | 1 | SUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_rotation | Group rotation | number | -180 … 180 | degrees | 0 | SUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_opacity | Group opacity | number | 0 … 1 | fraction | 1 | SUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_mask_enabled | Enable group mask | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_mask_shape | Group mask shape | enum | rectangle, ellipse, polygon | none | "rectangle" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_mask_feather | Group mask feather | number | 0 … 100 | pixels at 720px programme height | 0 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.group_mask_inverted | Invert group mask | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.group_clip.move | Move group clip | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.group_clip.in | Group clip In | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.group_clip.out | Group clip Out | number | 0 … source-dependent | programme seconds | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.keyframe.selection_scale | Selected keyframe time scale | number | 0 … 100 | multiplier | 2 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.keyframe.paste_target | Keyframe paste destination | string | source-dependent … source-dependent | layer ID; empty means original layers | "" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.start_velocity | Start velocity | number | source-dependent … source-dependent | property units per programme second | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.end_velocity | End velocity | number | source-dependent … source-dependent | property units per programme second | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.start_influence | Start influence | number | 1 … 99 | percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.end_influence | End influence | number | 1 … 99 | percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.title.kinetic_unit | Kinetic unit | string | word, letter | none | "word" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_style | Kinetic movement | string | rise, pop, spin | none | "rise" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_direction | Kinetic order | string | forward, reverse, center | none | "forward" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_stagger | Kinetic stagger | number | 0 … 1 | seconds | 0.12 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_entry | Kinetic entrance | number | 0.1 … 3 | seconds | 0.5 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_travel | Kinetic travel | number | 0 … 30 | percent | 8 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_tilt | Kinetic rotation | number | 0 … 90 | degrees | 12 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.title.kinetic_exit | Kinetic exit | number | 0.1 … 3 | seconds | 0.25 | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.graphics.import | Import animated graphics | string | source-dependent … source-dependent | JSON file | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.timeline.view | Composition layers / Sequence tracks | string | layers, tracks | display choice | "layers" | UNSUPPORTED | PARTIAL | UNSUPPORTED | UNSUPPORTED |
+| studio.timeline.at_playhead | At playhead | boolean | source-dependent … source-dependent | display choice | false | UNSUPPORTED | PARTIAL | UNSUPPORTED | UNSUPPORTED |
+| studio.media.replace_sequence | Replace entire sequence | string | source-dependent … source-dependent | action | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNSUPPORTED |
+| studio.media.remove_unused | Remove unused media | string | source-dependent … source-dependent | action | not a fixed default | UNSUPPORTED | PARTIAL | PARTIAL | UNSUPPORTED |
+| studio.title.outline_color | Outline color | string | source-dependent … source-dependent | hex color | "#000000" | UNSUPPORTED | PARTIAL | PARTIAL | UNSUPPORTED |
+| studio.logo_motion.brand_name | Logo motion brand name | string | source-dependent … source-dependent | none | "AutoPromote" | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.duration | Logo motion duration | number | 8 … 14 | seconds | 10 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.accent | Logo motion accent | string | source-dependent … source-dependent | none | "#a855f7" | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.background | Add background | boolean | source-dependent … source-dependent | none | true | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.separate_symbol | Separate left symbol from wordmark | boolean | source-dependent … source-dependent | none | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.symbol_width | Logo symbol width | number | 10 … 60 | percent of visible logo width | 28 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.piece_construction | Construct words from pieces | boolean | source-dependent … source-dependent | boolean | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.piece_columns | Logo wordmark slices | number | 2 … 16 | slices | 11 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.logo_motion.piece_style | Logo piece choreography | string | spring, diamond | choreography | "spring" | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.keyframe.spatial_curve | Curve path / Straighten path | boolean | source-dependent … source-dependent | composition percent | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.keyframe.spatial_handle | Spatial path handles | array | -200 … 200 | composition percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.add | Add vector artwork | object | source-dependent … source-dependent | layer | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.point | Vector points | array | 0 … 100 | layer percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.tangent | Vector tangents | array | -200 … 200 | layer percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.split | Split after point | array | 2 … 64 | points | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.point_kind | Corner / Smooth point | array | source-dependent … source-dependent | layer percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.fill | Vector fill and gradient | object | source-dependent … source-dependent | paint | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.stroke | Vector stroke | object | 0 … 20 | layer percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.closed | Close vector path | boolean | source-dependent … source-dependent | boolean | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.stroke_start | Stroke start | number | 0 … 100 | path distance percent | 0 | SUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.stroke_end | Stroke end | number | 0 … 100 | path distance percent | 100 | SUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.vector.stroke_offset | Stroke offset | number | -1000 … 1000 | path distance percent | 0 | SUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.enable | Animate this title | object | source-dependent … source-dependent | local unit | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.unit | Animate text by | enum | character, word | local unit | "character" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.order | Text animation order | enum | forward, reverse, center_out, edges_in | local unit | "forward" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.stagger | Stagger | number | 0 … 95 | percent | 65 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_x | Letter travel X (em) | number | -4 … 4 | em | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_y | Letter travel Y (em) | number | -4 … 4 | em | 1.4 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_scale | Starting scale | number | 0 … 2.5 | local unit | 0.35 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_rotation | Starting rotation | number | -360 … 360 | degrees | -35 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.from_opacity | Starting opacity | number | 0 … 1 | local unit | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.spread | Starting spread | number | -1 … 1 | local unit | 0.3 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.range_start | Range start (%) | number | 0 … 100 | percent | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.range_end | Range end (%) | number | 0 … 100 | percent | 100 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.settle | Text settling curve | enum | linear, ease_out, ease_in_out, back_out | local unit | "back_out" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.progress | Text progress | number | 0 … 100 | percent | 100 | SUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.rebuild | Rebuild entrance keys | number | 0 … 100 | percent | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.text_animator.remove | Remove text animator | object | source-dependent … source-dependent | local unit | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.name | Brand name | string | source-dependent … source-dependent | design units | "AutoPromote" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.family | Logo symbol family | enum | flow, orbit, facet | design units | "flow" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.layout | Logo layout | enum | horizontal, stacked, symbol | design units | "horizontal" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.weight | Logo lettering | enum | 600, 900 | design units | 900 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.tracking | Logo letter spacing | number | -2 … 12 | design units | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.symbol_size | Logo symbol size | number | 0.6 … 1.4 | design units | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.colours | Logo colours | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.gradient | Gradient symbol | boolean | source-dependent … source-dependent | design units | true | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.assemble | Assemble logo pieces | boolean | source-dependent … source-dependent | design units | false | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.build | Add logo to timeline | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.variant | Export logo variant | enum | colour, light, dark | design units | "colour" | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.svg | Download logo SVG | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.png | Download logo PNG | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.contour | Vector contour | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.logo_design.canvas | Start a logo design | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| publishing.analytics.sync_latest | Sync latest platform statistics | array | 1 … 6 | none | [] | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
+| publishing.analytics.release | Published release | string | source-dependent … source-dependent | none | "" | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
+| studio.captions.source_language | Speech language | enum | auto, en, af, za-mixed, xh, zu, st, tn, ts, nr, ve | none | "auto" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
+| studio.composite.background_edge_radius | Edge detail width | number | 0 … 8 | source pixels | 3 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.composite.background_decontaminate | Remove old background colour | number | 0 … 1 | strength | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -125,6 +218,7 @@ Adjusts position x on the selected ordinary layer. Anchor/crop affect the transf
 Applies to: ordinary layers. Requires: studio.transforms, studio.keyframes.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- The on-picture motion-path editor writes an X/Y pair in one history edit. An in-progress pointer drag is preview-only; release commits ordinary canonical keys and Escape discards it.
 
 <a id="studio-transform-y"></a>
 
@@ -137,6 +231,7 @@ Adjusts position y on the selected ordinary layer. Anchor/crop affect the transf
 Applies to: ordinary layers. Requires: studio.transforms, studio.keyframes.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- The on-picture motion-path editor writes an X/Y pair in one history edit. An in-progress pointer drag is preview-only; release commits ordinary canonical keys and Escape discards it.
 
 <a id="studio-transform-scale"></a>
 
@@ -280,9 +375,10 @@ ID: `studio.keyframe.time` • **FUNCTIONAL**
 
 Places a property key on the programme clock; timeline nudges use the output frame grid.
 
-Applies to: ordinary layers. Requires: studio.keyframes.
+Applies to: ordinary layers, graphic groups. Requires: studio.keyframes.
 
 - The current programme/layer range supplies the upper bound; no universal fixed duration is claimed.
+- The property timeline also applies this operation to selected ordinary keys in one history edit. Paste can retain original ownership or target one compatible layer with new identities; timing collisions and destination locks reject the entire change.
 
 <a id="studio-keyframe-easing"></a>
 
@@ -292,9 +388,11 @@ ID: `studio.keyframe.easing` • **FUNCTIONAL**
 
 Selects the interpolation between property poses. Hold retains the prior value until the next key.
 
-Applies to: ordinary layers. Requires: studio.easing, studio.keyframes.
+Applies to: ordinary layers, graphic groups. Requires: studio.easing, studio.keyframes.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Group evaluation clamps values to each group property’s bounds. Worker Bézier expressions use the existing 32-sample approximation; broad curve/raster equivalence is unqualified.
+- The property timeline also applies this operation to selected ordinary keys in one history edit. Paste can retain original ownership or target one compatible layer with new identities; timing collisions and destination locks reject the entire change.
 
 <a id="studio-keyframe-curve"></a>
 
@@ -307,6 +405,7 @@ Sets the bounded cubic interpolation curve; X handles stay 0–1 and Y handles m
 Applies to: ordinary layers. Requires: studio.easing.
 
 - Array contains exactly four handles. Shared contract permits Y overshoot; some inspector widgets show narrower Y bounds.
+- The same four values can be edited through signed velocity and influence. Value and velocity graphs are inspection views, not separate animation engines. The sampled path uses the same X/Y evaluator.
 
 <a id="studio-composite-blend"></a>
 
@@ -314,11 +413,12 @@ Applies to: ordinary layers. Requires: studio.easing.
 
 ID: `studio.composite.blend` • **PARTIAL**
 
-Chooses how an ordinary overlay blends with the underlying image.
+Blends an ordinary layer or assembled group with its sibling backdrop while preserving source-over alpha. Children blend inside their isolated parent.
 
-Applies to: ordinary layers. Requires: studio.compositing.
+Applies to: ordinary layers, graphic groups. Requires: studio.compositing.
 
 - Main programme video currently supports normal only; unsupported main-video modes are rejected at export.
+- Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified.
 
 <a id="studio-effect-blur"></a>
 
@@ -331,6 +431,7 @@ Adjusts the supported ordinary-layer layer blur. These controls are distinct fro
 Applies to: ordinary layers. Requires: studio.effects.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Image-layer pixel values use a 720px programme reference and scale with the layer, preview and delivery size. Broader effects remain unqualified.
 
 <a id="studio-effect-glow_radius"></a>
 
@@ -343,6 +444,7 @@ Adjusts the supported ordinary-layer glow radius. These controls are distinct fr
 Applies to: ordinary layers. Requires: studio.effects.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Image-layer pixel values use a 720px programme reference and scale with the layer, preview and delivery size. Broader effects remain unqualified.
 
 <a id="studio-effect-glow_intensity"></a>
 
@@ -367,6 +469,7 @@ Adjusts the supported ordinary-layer shadow blur. These controls are distinct fr
 Applies to: ordinary layers. Requires: studio.effects.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Image-layer pixel values use a 720px programme reference and scale with the layer, preview and delivery size. Broader effects remain unqualified.
 
 <a id="studio-effect-layershadow_opacity"></a>
 
@@ -1381,3 +1484,1231 @@ Applies to: video. Requires: publishing.schedule.
 
 - Results remain limited to the selected period.
 - Queue navigation does not control movie rendering.
+
+<a id="studio-geometric_mask-path"></a>
+
+## Mask polygon path
+
+ID: `studio.geometric_mask.path` • **PARTIAL**
+
+Authors the local polygon of an ordinary geometric layer mask. Incomplete or invalid text stays outside the saved graph until a valid Enter/blur commit.
+
+Applies to: image overlays, ordinary title layers, graphic groups. Requires: studio.compositing.
+
+- Percentage polygon with3–64 points and at most2048 characters inside its parentheses. Each point contains finite X/Y percentages.
+- Path animation, arbitrary SVG paths and neural subject masks are unsupported.
+- Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified.
+
+<a id="studio-geometric_mask-radius"></a>
+
+## Mask corner radius
+
+ID: `studio.geometric_mask.radius` • **PARTIAL**
+
+Sets the local rectangle mask corner radius, independently of the artwork frame. An explicit zero preserves square mask corners.
+
+Applies to: image overlays, ordinary title layers, graphic groups. Requires: studio.compositing.
+
+- Rectangle masks only; artwork frame rounding and feathering are separate.
+- Radius animation is unsupported.
+- Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified.
+
+<a id="studio-composite-layer_order"></a>
+
+## Layer order
+
+ID: `studio.composite.layer_order` • **PARTIAL**
+
+Moves an ordinary graphic, motion scene, owned3D scene or group backward/forward among its siblings. The top row appears in front.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Static graphic/group sibling order only; source footage/source VFX and generated captions keep their separate stages.
+- 3D still requires an existing current owned export asset. No generation is triggered by reordering.
+- Native image/title/two-motion edits are qualified for their recorded lifecycle and image occlusion checks; real 3D, large stacks, whole raster and broader nesting remain unqualified.
+- Groups preserve contiguous canonical leaf order and isolate masks/blends among siblings. Reorder grouped timeline layers in Composite; source-occurrence attachment/remapping and group split/duplicate and broader animated combinations remain open.
+
+<a id="studio-composite-group_x"></a>
+
+## Group X position
+
+ID: `studio.composite.group_x` • **PARTIAL**
+
+Translates the composed group horizontally relative to the programme canvas.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
+- At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
+
+<a id="studio-composite-group_y"></a>
+
+## Group Y position
+
+ID: `studio.composite.group_y` • **PARTIAL**
+
+Translates the composed group vertically relative to the programme canvas.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
+- At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
+
+<a id="studio-composite-group_scale"></a>
+
+## Group scale
+
+ID: `studio.composite.group_scale` • **PARTIAL**
+
+Scales the composed group uniformly about the canvas centre, preserving child-local edits.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
+- At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
+
+<a id="studio-composite-group_rotation"></a>
+
+## Group rotation
+
+ID: `studio.composite.group_rotation` • **PARTIAL**
+
+Rotates the composed group about the canvas centre, before the parent translation.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
+- At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
+
+<a id="studio-composite-group_opacity"></a>
+
+## Group opacity
+
+ID: `studio.composite.group_opacity` • **PARTIAL**
+
+Fades the composed group once after its children overlap, before parent composition.
+
+Applies to: ordinary image/video/title layers, motion scenes, owned 3D alpha scenes. Requires: studio.compositing.
+
+- Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.
+- At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.
+- Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.
+- Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified.
+
+<a id="studio-composite-group_mask_enabled"></a>
+
+## Enable group mask
+
+ID: `studio.composite.group_mask_enabled` • **PARTIAL**
+
+Clips assembled children with the authored local-canvas mask.
+
+Applies to: graphic groups. Requires: studio.compositing.
+
+- Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.
+- Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified.
+
+<a id="studio-composite-group_mask_shape"></a>
+
+## Group mask shape
+
+ID: `studio.composite.group_mask_shape` • **PARTIAL**
+
+Chooses rectangle, ellipse or percentage polygon in the group’s local programme canvas.
+
+Applies to: graphic groups. Requires: studio.compositing.
+
+- Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.
+- Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified.
+
+<a id="studio-composite-group_mask_feather"></a>
+
+## Group mask feather
+
+ID: `studio.composite.group_mask_feather` • **PARTIAL**
+
+Softens the group matte with Gaussian sigma in 720px programme units before the group transform.
+
+Applies to: graphic groups. Requires: studio.compositing.
+
+- Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.
+- Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified.
+
+<a id="studio-composite-group_mask_inverted"></a>
+
+## Invert group mask
+
+ID: `studio.composite.group_mask_inverted` • **PARTIAL**
+
+Inverts the authored matte after feathering within the local programme canvas.
+
+Applies to: graphic groups. Requires: studio.compositing.
+
+- Static geometric group mask only; assembled child alpha is clipped before group transform/opacity/blending. No neural segmentation or mask animation.
+- Graphics locks, valid-only polygon drafts, reset/undo and cold persistence apply. One native feathered-polygon/rectangle nested edit and four scoped geometry/interior-color pairs are bounded; broader masks/media/full alpha/raster/live sound remain unqualified.
+
+<a id="studio-group_clip-move"></a>
+
+## Move group clip
+
+ID: `studio.group_clip.move` • **PARTIAL**
+
+Moves the group clip and all descendant starts and keys together, preserving durations and source phase.
+
+Applies to: graphic groups. Requires: studio.timeline, studio.compositing.
+
+- Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.
+- Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.
+- Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified.
+
+<a id="studio-group_clip-in"></a>
+
+## Group clip In
+
+ID: `studio.group_clip.in` • **PARTIAL**
+
+Sets the start of the group’s half-open programme visibility range without changing child content phase.
+
+Applies to: graphic groups. Requires: studio.timeline, studio.compositing.
+
+- Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.
+- Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.
+- Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified.
+
+<a id="studio-group_clip-out"></a>
+
+## Group clip Out
+
+ID: `studio.group_clip.out` • **PARTIAL**
+
+Sets the end of the group’s half-open visibility range; child keys and source edits remain available.
+
+Applies to: graphic groups. Requires: studio.timeline, studio.compositing.
+
+- Programme seconds; UI commits on the selected delivery-frame grid. Pointer gestures commit once, and keyboard arrows nudge one frame (Shift: ten). Graphics or any owned child-track lock blocks the entire operation.
+- Group trim limits visibility and derived linked motion cue ranges; hidden keys, source phase and child timing stay editable. Moving carries descendant group/clip starts and motion/3D keys in one transaction. Bounds protect non-negative owned keys and the current programme range.
+- Source-occurrence attachment/remapping, group split/duplicate, time stretching, broad video/owned 3D/deeper/audio cases and continuous/full preview picture/sound remain unqualified.
+
+<a id="studio-keyframe-selection_scale"></a>
+
+## Selected keyframe time scale
+
+ID: `studio.keyframe.selection_scale` • **PARTIAL**
+
+Scales selected key spacing from the first selected key, retaining property values, curves and ownership.
+
+Applies to: ordinary layers, graphic groups. Requires: studio.keyframes.
+
+- A finite factor greater than zero and at most100 is accepted. Scaling is not animated.
+- The first selected key stays fixed. Programme-range overflow or collisions reject the operation. Every selected track must be unlocked.
+- Group opacity and ordinary multi-property time scaling use the existing canonical key graph and history. Broad media/retiming/full picture and sound qualification remains open.
+
+<a id="studio-keyframe-paste_target"></a>
+
+## Keyframe paste destination
+
+ID: `studio.keyframe.paste_target` • **PARTIAL**
+
+Chooses original owners or a compatible current-project visual layer for copied property animation.
+
+Applies to: ordinary layers, graphic groups. Requires: studio.keyframes.
+
+- Only one copied source owner may be remapped to a destination. Property identities are retained; unsupported properties and destination value ranges reject the whole paste.
+- Destination locks, half-frame collisions and programme overflow reject atomically. Original-layers mode checks original owner locks.
+- Clipboard is timeline-local; cross-project/system clipboard interchange is not qualified. Whole picture/sound agreement remains partial.
+
+<a id="studio-keyframe-start_velocity"></a>
+
+## Start velocity
+
+ID: `studio.keyframe.start_velocity` • **PARTIAL**
+
+Sets signed endpoint change per programme second for the selected incoming key interval. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.
+
+Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
+
+- Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
+- Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified.
+
+<a id="studio-keyframe-end_velocity"></a>
+
+## End velocity
+
+ID: `studio.keyframe.end_velocity` • **PARTIAL**
+
+Sets signed endpoint change per programme second for the selected incoming key interval. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.
+
+Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
+
+- Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
+- Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified.
+
+<a id="studio-keyframe-start_influence"></a>
+
+## Start influence
+
+ID: `studio.keyframe.start_influence` • **PARTIAL**
+
+Controls the endpoint time influence while preserving its signed velocity. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.
+
+Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
+
+- Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
+- Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified.
+
+<a id="studio-keyframe-end_influence"></a>
+
+## End influence
+
+ID: `studio.keyframe.end_influence` • **PARTIAL**
+
+Controls the endpoint time influence while preserving its signed velocity. Curved position intervals use coordinated path-progress timing instead of scalar endpoint speed.
+
+Applies to: ordinary layer properties, graphic-group properties. Requires: studio.keyframes, studio.easing.
+
+- Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.
+- Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.
+- Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified.
+
+<a id="studio-title-kinetic_unit"></a>
+
+## Kinetic unit
+
+ID: `studio.title.kinetic_unit` • **PARTIAL**
+
+Sets unit when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_style"></a>
+
+## Kinetic movement
+
+ID: `studio.title.kinetic_style` • **PARTIAL**
+
+Sets movement when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_direction"></a>
+
+## Kinetic order
+
+ID: `studio.title.kinetic_direction` • **PARTIAL**
+
+Sets order when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_stagger"></a>
+
+## Kinetic stagger
+
+ID: `studio.title.kinetic_stagger` • **PARTIAL**
+
+Sets stagger when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_entry"></a>
+
+## Kinetic entrance
+
+ID: `studio.title.kinetic_entry` • **PARTIAL**
+
+Sets entrance when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-title-kinetic_travel"></a>
+
+## Kinetic travel
+
+ID: `studio.title.kinetic_travel` • **PARTIAL**
+
+Sets travel when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+- Available for Rise and Spin. Pop changes scale without translation; its travel input is disabled.
+
+<a id="studio-title-kinetic_tilt"></a>
+
+## Kinetic rotation
+
+ID: `studio.title.kinetic_tilt` • **PARTIAL**
+
+Sets rotation when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+- Available for Spin. Rise and Pop do not author rotation travel; the rotation input is disabled for those movements.
+
+<a id="studio-title-kinetic_exit"></a>
+
+## Kinetic exit
+
+ID: `studio.title.kinetic_exit` • **PARTIAL**
+
+Sets exit when creating ordinary editable text units and motion keys.
+
+Applies to: ordinary text layer. Requires: studio.titles, studio.keyframes.
+
+- Authoring input; the generated ordinary layers and motion keys are the saved state. Later changes use the existing property timeline.
+- The edit must satisfy timing, layer-count and supported title-style validation.
+
+<a id="studio-graphics-import"></a>
+
+## Import animated graphics
+
+ID: `studio.graphics.import` • **PARTIAL**
+
+Imports authored graphics as ordinary editable titles, artwork, groups, static geometric masks and transform keys.
+
+Applies to: ordinary text layer, static SVG artwork. Requires: studio.titles, studio.keyframes.
+
+- AutoPromote graphics v1 JSON; matching programme aspect; timing inside the current programme; at most 128 total graphic layers and 32 new groups; 256 keys per item, 8192 imported keys and 4MiB file size.
+- Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.
+- Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.
+- Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate.
+- Optional title strokeWidth 0–8 and strokeColor hex fields use the ordinary title controls and CPU rasterizer.
+- Optional layer/group masks use the existing enabled, shape, percentage-polygon path, radius, feather and inversion fields. Masks remain editable in Composite; imported masks are static.
+
+<a id="studio-timeline-view"></a>
+
+## Composition layers / Sequence tracks
+
+ID: `studio.timeline.view` • **PARTIAL**
+
+Switches between the actual composition stack and source/audio sequence tracks. Layer rows expose native selection, move/trim and inline transform keys.
+
+Applies to: ordinary text/image/video layers, graphic groups, motion scenes. Requires: studio.timeline.
+
+- Display choices do not mutate the canonical project. Source footage remains a base stage; clip timing alone does not certify visible pixels. Whole preview/final picture and sound remain unqualified.
+
+<a id="studio-timeline-at_playhead"></a>
+
+## At playhead
+
+ID: `studio.timeline.at_playhead` • **PARTIAL**
+
+Filters layer rows by their real half-open timing range intersected with every parent group gate. It does not test opacity or occlusion.
+
+Applies to: ordinary text/image/video layers, graphic groups, motion scenes. Requires: studio.timeline.
+
+- Display choices do not mutate the canonical project. Source footage remains a base stage; clip timing alone does not certify visible pixels. Whole preview/final picture and sound remain unqualified.
+
+<a id="studio-media-replace_sequence"></a>
+
+## Replace entire sequence
+
+ID: `studio.media.replace_sequence` • **PARTIAL**
+
+Replaces source clips at the same programme length while preserving graphics and soundtrack timing. Removes source captions/camera/template bindings. Undo restores the original source state.
+
+Applies to: owned project media. Requires: studio.media_ingest.
+
+- Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate.
+- Ready video at least as long as the programme; unlocked Video track; source speed 1, no speed keys, opening hook or silence removal. Graphic/sound timing remains intact; source-specific decisions are reset.
+
+<a id="studio-media-remove_unused"></a>
+
+## Remove unused media
+
+ID: `studio.media.remove_unused` • **PARTIAL**
+
+Removes unreferenced project-library assets and animation keys with no remaining layer. Retains active sources, camera/audio references and pending uploads. Undo restores entries; stored files remain available.
+
+Applies to: owned project media. Requires: studio.media_ingest.
+
+- Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate.
+
+<a id="studio-title-outline_color"></a>
+
+## Outline color
+
+ID: `studio.title.outline_color` • **PARTIAL**
+
+Sets the ordinary title outline color in saved state, native preview and CPU output. Outline width remains the existing title property.
+
+Applies to: ordinary text layer. Requires: studio.titles.
+
+- Whole preview/final picture and audio, broader combinations and professional/production qualification remain separate.
+
+<a id="studio-logo_motion-brand_name"></a>
+
+## Logo motion brand name
+
+ID: `studio.logo_motion.brand_name` • **PARTIAL**
+
+Names the authored composition. SVG builds create measured editable brand letters; image builds preserve supplied lettering.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-duration"></a>
+
+## Logo motion duration
+
+ID: `studio.logo_motion.duration` • **PARTIAL**
+
+Sets the duration of the created intro, within the current programme length. It does not stretch existing footage.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-accent"></a>
+
+## Logo motion accent
+
+ID: `studio.logo_motion.accent` • **PARTIAL**
+
+Sets the six-digit colour of the authored broadcast pulse, sweep and rule, preserving supplied logo colours.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-background"></a>
+
+## Add background
+
+ID: `studio.logo_motion.background` • **PARTIAL**
+
+Adds the composition backdrop over source footage; disable to retain the underlying picture.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-separate_symbol"></a>
+
+## Separate left symbol from wordmark
+
+ID: `studio.logo_motion.separate_symbol` • **PARTIAL**
+
+Finds a transparent seam so the original symbol and lettering can move independently. It rejects an opaque cut rather than erasing artwork.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-symbol_width"></a>
+
+## Logo symbol width
+
+ID: `studio.logo_motion.symbol_width` • **PARTIAL**
+
+Places the initial symbol/wordmark boundary as a percentage of the visible image width; the seam follows transparent space around it.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-piece_construction"></a>
+
+## Construct words from pieces
+
+ID: `studio.logo_motion.piece_construction` • **PARTIAL**
+
+Creates interlocking image slices and three masked text pieces per word through ordinary graphics and keys.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-piece_columns"></a>
+
+## Logo wordmark slices
+
+ID: `studio.logo_motion.piece_columns` • **PARTIAL**
+
+Sets the number of original bitmap wordmark slices; each slice is animated as two interlocking pieces.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-logo_motion-piece_style"></a>
+
+## Logo piece choreography
+
+ID: `studio.logo_motion.piece_style` • **PARTIAL**
+
+Chooses a symbol-first spring assembly or a word-first triangular cascade, authoring ordinary editable layers and keys.
+
+Applies to: new logo-motion composition. Requires: studio.logo_motion.
+
+- Creation option. After building, edit the ordinary generated layers and keys through the standard controls.
+
+<a id="studio-keyframe-spatial_curve"></a>
+
+## Curve path / Straighten path
+
+ID: `studio.keyframe.spatial_curve` • **PARTIAL**
+
+Enables or removes spatial handles on an interval with paired neighboring X/Y position keys. Endpoints are retained; X/Y travel timing is coordinated.
+
+Applies to: ordinary image position keys, ordinary title position keys, source position keys. Requires: studio.keyframes, studio.easing.
+
+- Requires paired neighboring X/Y position keys. Bounds apply to handle offsets from the corresponding endpoint.
+- Travel timing is separate from screen-distance speed. Changes to individual keys can change neighboring intervals.
+- Native image/history/reopen/export checks are bounded; broad media, retiming, animated parents and full picture/sound remain unqualified.
+
+<a id="studio-keyframe-spatial_handle"></a>
+
+## Spatial path handles
+
+ID: `studio.keyframe.spatial_handle` • **PARTIAL**
+
+Shapes the route by dragging or arrow-nudging an endpoint-relative handle. Preview follows the temporary drag; release commits once and Escape cancels.
+
+Applies to: ordinary image position keys, ordinary title position keys, source position keys. Requires: studio.keyframes, studio.easing.
+
+- Requires paired neighboring X/Y position keys. Bounds apply to handle offsets from the corresponding endpoint.
+- Travel timing is separate from screen-distance speed. Changes to individual keys can change neighboring intervals.
+- Native image/history/reopen/export checks are bounded; broad media, retiming, animated parents and full picture/sound remain unqualified.
+
+<a id="studio-vector-add"></a>
+
+## Add vector artwork
+
+ID: `studio.vector.add` • **PARTIAL**
+
+Creates an ordinary timed artwork layer with editable cubic geometry.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-point"></a>
+
+## Vector points
+
+ID: `studio.vector.point` • **PARTIAL**
+
+Move an anchor while its relative tangent offsets follow it; remove a selected point within the contour limits.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-tangent"></a>
+
+## Vector tangents
+
+ID: `studio.vector.tangent` • **PARTIAL**
+
+Drag or nudge incoming and outgoing handles relative to the selected anchor. Release commits once; Escape cancels the gesture.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-split"></a>
+
+## Split after point
+
+ID: `studio.vector.split` • **PARTIAL**
+
+Insert a midpoint by exact De Casteljau subdivision, retaining the original cubic geometry.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-point_kind"></a>
+
+## Corner / Smooth point
+
+ID: `studio.vector.point_kind` • **PARTIAL**
+
+Corner collapses both handles. Smooth initializes collinear tangents from neighboring points; later handles remain independently editable.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-fill"></a>
+
+## Vector fill and gradient
+
+ID: `studio.vector.fill` • **PARTIAL**
+
+Choose no fill, solid or a linear gradient, two colors and diagonal, horizontal or vertical direction.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-stroke"></a>
+
+## Vector stroke
+
+ID: `studio.vector.stroke` • **PARTIAL**
+
+Choose outline width in the artwork coordinate box and a six-digit color. An unfilled path requires visible stroke.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-closed"></a>
+
+## Close vector path
+
+ID: `studio.vector.closed` • **PARTIAL**
+
+Join the last anchor back to the first. Closing requires at least three points.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires an unlocked Graphics track and image-layer track.
+- Static contour authoring; layer transforms use the existing motion keys. See vector artwork limitations.
+
+<a id="studio-vector-stroke_start"></a>
+
+## Stroke start
+
+ID: `studio.vector.stroke_start` • **PARTIAL**
+
+Choose the beginning of the visible outline by travelled path distance. Add or remove its key at the playhead; animate through the ordinary timeline and curve editor.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires editable vector artwork and an unlocked image-layer track. Set a nonzero stroke width in Graphics.
+- Values use the programme clock and existing key easing; sampled cubic distance is an approximation. Start greater than or equal to end hides the stroke and preserves fill. Offset shifts the interval: closed contours wrap and open contours clip.
+- Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time.
+
+<a id="studio-vector-stroke_end"></a>
+
+## Stroke end
+
+ID: `studio.vector.stroke_end` • **PARTIAL**
+
+Choose the end of the visible outline by travelled path distance. Add or remove its key at the playhead; animate through the ordinary timeline and curve editor.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires editable vector artwork and an unlocked image-layer track. Set a nonzero stroke width in Graphics.
+- Values use the programme clock and existing key easing; sampled cubic distance is an approximation. Start greater than or equal to end hides the stroke and preserves fill. Offset shifts the interval: closed contours wrap and open contours clip.
+- Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time.
+
+<a id="studio-vector-stroke_offset"></a>
+
+## Stroke offset
+
+ID: `studio.vector.stroke_offset` • **PARTIAL**
+
+Move the selected stroke interval by path distance. Animate positive or negative cumulative values for forward/reverse laps on closed contours; open contours clip at their real endpoints.
+
+Applies to: authored vector artwork. Requires: studio.vector_artwork.
+
+- Requires editable vector artwork, a nonzero stroke width and an unlocked image-layer track. Use a partial start/end interval to see a closed outline move.
+- Closed contours wrap continuously across the original seam; open contours clip rather than connecting their endpoints. Equal/crossed start/end ranges remain empty, and fill stays authored.
+- Distance uses 128 samples per cubic; full predictive picture/sound and broad effect/parent/retiming combinations remain separately qualified.
+- Numeric drafts commit with Enter or blur. Escape cancels; seeking or locking clears a draft without writing it at another time.
+
+<a id="studio-text_animator-enable"></a>
+
+## Animate this title
+
+ID: `studio.text_animator.enable` • **PARTIAL**
+
+Create one native text animator and two ordinary entrance progress keys.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-unit"></a>
+
+## Animate text by
+
+ID: `studio.text_animator.unit` • **PARTIAL**
+
+Choose independent letters or words; spaces retain their advance without consuming a slot.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-order"></a>
+
+## Text animation order
+
+ID: `studio.text_animator.order` • **PARTIAL**
+
+Choose the deterministic order of selected units.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-stagger"></a>
+
+## Stagger
+
+ID: `studio.text_animator.stagger` • **PARTIAL**
+
+Share of the progress window spread between the first and last selected unit.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_x"></a>
+
+## Letter travel X (em)
+
+ID: `studio.text_animator.from_x` • **PARTIAL**
+
+Horizontal travel from the starting pose, in 36px logical em units.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_y"></a>
+
+## Letter travel Y (em)
+
+ID: `studio.text_animator.from_y` • **PARTIAL**
+
+Vertical travel from the starting pose, in 36px logical em units.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_scale"></a>
+
+## Starting scale
+
+ID: `studio.text_animator.from_scale` • **PARTIAL**
+
+Starting local unit scale; selected units settle to scale one.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_rotation"></a>
+
+## Starting rotation
+
+ID: `studio.text_animator.from_rotation` • **PARTIAL**
+
+Starting local unit rotation; selected units settle upright.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-from_opacity"></a>
+
+## Starting opacity
+
+ID: `studio.text_animator.from_opacity` • **PARTIAL**
+
+Starting unit opacity, interpolated by linear local progress.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-spread"></a>
+
+## Starting spread
+
+ID: `studio.text_animator.spread` • **PARTIAL**
+
+Spread units around each line’s center by a share of their center distance.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-range_start"></a>
+
+## Range start (%)
+
+ID: `studio.text_animator.range_start` • **PARTIAL**
+
+Beginning of the selector, measured at ordered source-unit centers.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-range_end"></a>
+
+## Range end (%)
+
+ID: `studio.text_animator.range_end` • **PARTIAL**
+
+End of the selector; equal/crossed ranges leave all units settled.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-settle"></a>
+
+## Text settling curve
+
+ID: `studio.text_animator.settle` • **PARTIAL**
+
+Ease or overshoot unit travel, scale, spread and rotation.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-progress"></a>
+
+## Text progress
+
+ID: `studio.text_animator.progress` • **PARTIAL**
+
+Normal motion property: zero shows the starting arrangement and 100 settles it. Keys may reverse or hold.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-rebuild"></a>
+
+## Rebuild entrance keys
+
+ID: `studio.text_animator.rebuild` • **PARTIAL**
+
+Replace only this title’s progress keys over at most its first 1.8 seconds.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-text_animator-remove"></a>
+
+## Remove text animator
+
+ID: `studio.text_animator.remove` • **PARTIAL**
+
+Remove local text choreography and only its progress keys while retaining copy, styling and other layer motion. Undo restores it.
+
+Applies to: ordinary supported Inter titles. Requires: studio.text_choreography.
+
+- Requires an unlocked Graphics track. Numeric settings commit on Enter/blur; Escape or locking cancels drafts.
+- Text progress uses ordinary programme-clock keys. Copy/font and combination limits are described under Editable text choreography.
+
+<a id="studio-logo_design-name"></a>
+
+## Brand name
+
+ID: `studio.logo_design.name` • **PARTIAL**
+
+Enter the lettering to convert into ordinary editable glyph contours.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-family"></a>
+
+## Logo symbol family
+
+ID: `studio.logo_design.family` • **PARTIAL**
+
+Choose a ribbon ascent, interlocking orbit or geometric facet symbol.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-layout"></a>
+
+## Logo layout
+
+ID: `studio.logo_design.layout` • **PARTIAL**
+
+Arrange the symbol and lettering or create a symbol-only mark.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-weight"></a>
+
+## Logo lettering
+
+ID: `studio.logo_design.weight` • **PARTIAL**
+
+Use the exact bundled Inter SemiBold or Black glyph contours.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-tracking"></a>
+
+## Logo letter spacing
+
+ID: `studio.logo_design.tracking` • **PARTIAL**
+
+Adjust advance spacing before ordinary vector layers are created.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-symbol_size"></a>
+
+## Logo symbol size
+
+ID: `studio.logo_design.symbol_size` • **PARTIAL**
+
+Scale the symbol relative to the wordmark.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-colours"></a>
+
+## Logo colours
+
+ID: `studio.logo_design.colours` • **PARTIAL**
+
+Choose six-digit primary, accent and lettering colours.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-gradient"></a>
+
+## Gradient symbol
+
+ID: `studio.logo_design.gradient` • **PARTIAL**
+
+Use linear gradients or solid symbol fills.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-assemble"></a>
+
+## Assemble logo pieces
+
+ID: `studio.logo_design.assemble` • **PARTIAL**
+
+Create normal staggered opacity, scale, rotation and Y keys for symbol pieces and outlined letters.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-build"></a>
+
+## Add logo to timeline
+
+ID: `studio.logo_design.build` • **PARTIAL**
+
+Add normal vector layers and one graphic group as a single history operation.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-variant"></a>
+
+## Export logo variant
+
+ID: `studio.logo_design.variant` • **PARTIAL**
+
+Preserve colours or export white/ink without changing the project geometry.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-svg"></a>
+
+## Download logo SVG
+
+ID: `studio.logo_design.svg` • **PARTIAL**
+
+Download a transparent portable SVG with real paths and no font or image dependency.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-png"></a>
+
+## Download logo PNG
+
+ID: `studio.logo_design.png` • **PARTIAL**
+
+Download a transparent raster master generated from the same SVG geometry.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-contour"></a>
+
+## Vector contour
+
+ID: `studio.logo_design.contour` • **PARTIAL**
+
+Select an outer contour or counter for ordinary point/tangent editing. This selection itself does not change project geometry.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="studio-logo_design-canvas"></a>
+
+## Start a logo design
+
+ID: `studio.logo_design.canvas` • **PARTIAL**
+
+Prepare a bundled blank eight-second canvas through the existing Studio entitlement and owned-source upload path.
+
+Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
+
+- Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
+- Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
+
+<a id="publishing-analytics-sync_latest"></a>
+
+## Sync latest platform statistics
+
+ID: `publishing.analytics.sync_latest` • **PARTIAL**
+
+Refreshes up to six newest owned published posts in the selected release or account scope, one per destination. Selection uses publication time independently of the performance-ranked display.
+
+Applies to: video. Requires: publishing.analytics, system.account.
+
+- Five-minute per-post cooldown; only owned successful non-simulated posts qualify.
+- Missing permissions or unsupported platform metrics remain unavailable. The action does not publish content or promise reach.
+
+<a id="publishing-analytics-release"></a>
+
+## Published release
+
+ID: `publishing.analytics.release` • **PARTIAL**
+
+Limits collected statistics and refresh targets to one owned published release within the selected date range.
+
+Applies to: video. Requires: publishing.analytics, system.account.
+
+- Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.
+- Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach.
+
+<a id="studio-captions-source_language"></a>
+
+## Speech language
+
+ID: `studio.captions.source_language` • **PARTIAL**
+
+Selects the speech recognizer and source language for the next automatic caption request. Does not relabel or replace existing lines.
+
+Applies to: video with speech. Requires: studio.captions.
+
+- Model wording is an editable review draft; changing this preference does not translate existing captions.
+
+<a id="studio-composite-background_edge_radius"></a>
+
+## Edge detail width
+
+ID: `studio.composite.background_edge_radius` • **PARTIAL**
+
+Sets the bounded source-guided unknown edge band after choosing Clean background edges. Zero retains existing alpha while colour cleanup can still run.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified.
+
+<a id="studio-composite-background_decontaminate"></a>
+
+## Remove old background colour
+
+ID: `studio.composite.background_decontaminate` • **PARTIAL**
+
+Recovers photographed foreground edge colour using the final mask, including protected-object corrections. Zero keeps the photographed edge RGB.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified.

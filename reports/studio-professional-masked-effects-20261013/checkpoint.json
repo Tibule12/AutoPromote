@@ -1,0 +1,390 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-13T20:03:00.138891Z",
+  "branch": "agent/studio-professional-continuation-v2",
+  "capabilityImproved": "Canonical image opacity/transform keys own the preview instead of being overridden by legacy entrance fill and transitions",
+  "changedImplementationFiles": [
+    "frontend/src/components/ViralClipStudio.js",
+    "frontend/src/components/ViralClipStudio.css"
+  ],
+  "nativeCases": [
+    {
+      "kind": "ellipse",
+      "projectId": "viral-project-d2705ec3-8805-470a-bf73-b4533442fa5c",
+      "canonicalHash": "91d57262c3d26d018a9ed0fb4ac29e8735200c923cf8f53f03dc923af7e3961c",
+      "renderJobId": "viral_d8be499df6a293bfec193cabfa472d1a2b0a319ab029ee294148ab31f31d7668",
+      "outputSha256": "a43afb5312f9366390aeefb165b7efa8e6fd939a68f611bf8597efd7d67eff45",
+      "sourceSha256": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+      "graphicSha256": "a6674eb929304a93a9042c1514393bcc419b45ec9a4883e32dfef5aab2d09fd5",
+      "studioRecordingSha256": "1170c8d1fda0a05f6e77d6338cdfe6620739f45dbb631eefa98dc7aa3301a5e9",
+      "keys": [
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-4460f0d1-60c8-4365-9712-c3abf118eaec",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "x",
+          "value": 36,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-bceb0dfc-6b47-4910-ae06-252d6ddfca64",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "scale",
+          "value": 0.75,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-0dee033e-a415-416c-89e8-037d388568c9",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "rotation",
+          "value": -15,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-cf9ab0af-8367-4a0b-af28-03287b9eba1b",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "opacity",
+          "value": 0.65,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-fa905517-61a0-428e-aae7-8e4b29c0a19f",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "x",
+          "value": 64,
+          "time": 2
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-5249a84c-6bc7-4d48-9d7d-1eb96aa16e36",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "scale",
+          "value": 1.1,
+          "time": 2
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-d31a77db-b0f4-419f-8be6-10278cd47963",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "rotation",
+          "value": 15,
+          "time": 2
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-5dc5d037-cfa5-4b5e-98de-81287c063f0d",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "opacity",
+          "value": 0.995,
+          "time": 2
+        }
+      ],
+      "mask": {
+        "enabled": true,
+        "shape": "ellipse",
+        "feather": 18
+      },
+      "nativeUndoRedoSaveColdReopen": true,
+      "ownedCpuExportDownloadFullDecode": true,
+      "completeNativePlaybackAndEditableTimeline": true,
+      "newCpuExports": 1,
+      "renderDownloadWindowSeconds": 75.056,
+      "outputDimensions": [
+        720,
+        1280
+      ],
+      "outputFps": 24,
+      "outputFrames": 72,
+      "parity": {
+        "projectId": "viral-project-d2705ec3-8805-470a-bf73-b4533442fa5c",
+        "canonicalHash": "91d57262c3d26d018a9ed0fb4ac29e8735200c923cf8f53f03dc923af7e3961c",
+        "outputSha256": "a43afb5312f9366390aeefb165b7efa8e6fd939a68f611bf8597efd7d67eff45",
+        "comparisons": [
+          {
+            "time": 0.5,
+            "softEdgePixels": 48041,
+            "nativeFinalRgbRmse": 3.3231194513722566,
+            "nativeReferenceRgbRmse": 2.402548355898963,
+            "finalReferenceRgbRmse": 2.7593210189004336,
+            "passed": true
+          },
+          {
+            "time": 1,
+            "softEdgePixels": 71245,
+            "nativeFinalRgbRmse": 3.111136899502893,
+            "nativeReferenceRgbRmse": 2.3650866789666596,
+            "finalReferenceRgbRmse": 2.575122376063393,
+            "passed": true
+          },
+          {
+            "time": 1.5,
+            "softEdgePixels": 79124,
+            "nativeFinalRgbRmse": 4.3642789274126015,
+            "nativeReferenceRgbRmse": 2.93594217129033,
+            "finalReferenceRgbRmse": 2.913030575866219,
+            "passed": false
+          },
+          {
+            "time": 2.5,
+            "softEdgePixels": 77971,
+            "nativeFinalRgbRmse": 3.9052133739926504,
+            "nativeReferenceRgbRmse": 2.940925925442115,
+            "finalReferenceRgbRmse": 2.8404291364973617,
+            "passed": true
+          }
+        ],
+        "softRegionRgbRmseTolerance": 4,
+        "passed": false,
+        "scope": "Four mapped frames of one native transparent image with position, scale, rotation, opacity, geometric mask, gold shadow, cyan glow and blur. Whole softened effect region, no fitted alignment; broader masks/effects/media/audio/readiness remain unqualified."
+      },
+      "wholeSampledRasterPassed": false,
+      "movie": "reports/studio-professional-masked-effects-20261013/proof/masked-effects/final.mp4",
+      "studioRecording": "reports/studio-professional-masked-effects-20261013/proof/masked-effects/edited-in-studio.mp4"
+    },
+    {
+      "kind": "inverted-polygon",
+      "projectId": "viral-project-30accd51-6d6c-4916-aaaf-02f20142da2a",
+      "canonicalHash": "e6d08d81b2fc43486daca6f4247f302746e466b5b07e5b218b99b5196798c856",
+      "renderJobId": "viral_832782dc7fc3dcd939f243b20869a6e72fe926453374341fcda76a61bb666346",
+      "outputSha256": "bc1447ae11a6747253c8aeb5eddb6600f810058fffb945921d81b035a662fd3c",
+      "sourceSha256": "54716066f228faf208d2e07662e07173ce4e2d1c4f446e839bdbb3cea7d2d8bb",
+      "graphicSha256": "a6674eb929304a93a9042c1514393bcc419b45ec9a4883e32dfef5aab2d09fd5",
+      "studioRecordingSha256": "d79de6cfb7319d7b738fc39eda48044b107cb1a4f58298cb8f44a6b8f9e1ed2a",
+      "keys": [
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-4460f0d1-60c8-4365-9712-c3abf118eaec",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "x",
+          "value": 36,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-bceb0dfc-6b47-4910-ae06-252d6ddfca64",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "scale",
+          "value": 0.75,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-0dee033e-a415-416c-89e8-037d388568c9",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "rotation",
+          "value": -15,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-cf9ab0af-8367-4a0b-af28-03287b9eba1b",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "opacity",
+          "value": 0.65,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-fa905517-61a0-428e-aae7-8e4b29c0a19f",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "x",
+          "value": 64,
+          "time": 2
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-5249a84c-6bc7-4d48-9d7d-1eb96aa16e36",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "scale",
+          "value": 1.1,
+          "time": 2
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-d31a77db-b0f4-419f-8be6-10278cd47963",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "rotation",
+          "value": 15,
+          "time": 2
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-5dc5d037-cfa5-4b5e-98de-81287c063f0d",
+          "targetId": "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+          "property": "opacity",
+          "value": 0.95,
+          "time": 2
+        }
+      ],
+      "mask": {
+        "enabled": true,
+        "shape": "polygon",
+        "feather": 12,
+        "path": "polygon(10% 15%, 80% 5%, 95% 60%, 55% 90%, 5% 65%)",
+        "inverted": true
+      },
+      "nativeUndoRedoSaveColdReopen": true,
+      "ownedCpuExportDownloadFullDecode": true,
+      "completeNativePlaybackAndEditableTimeline": true,
+      "newCpuExports": 1,
+      "renderDownloadWindowSeconds": 75.788,
+      "outputDimensions": [
+        720,
+        1280
+      ],
+      "outputFps": 24,
+      "outputFrames": 72,
+      "parity": {
+        "projectId": "viral-project-30accd51-6d6c-4916-aaaf-02f20142da2a",
+        "canonicalHash": "e6d08d81b2fc43486daca6f4247f302746e466b5b07e5b218b99b5196798c856",
+        "outputSha256": "bc1447ae11a6747253c8aeb5eddb6600f810058fffb945921d81b035a662fd3c",
+        "comparisons": [
+          {
+            "time": 0.5,
+            "softEdgePixels": 24450,
+            "nativeFinalRgbRmse": 3.731455852771957,
+            "nativeReferenceRgbRmse": 3.5934898773908737,
+            "finalReferenceRgbRmse": 2.9949196202152604,
+            "passed": true
+          },
+          {
+            "time": 1,
+            "softEdgePixels": 38979,
+            "nativeFinalRgbRmse": 3.1048849567405346,
+            "nativeReferenceRgbRmse": 2.8181137376934604,
+            "finalReferenceRgbRmse": 2.655256931840478,
+            "passed": true
+          },
+          {
+            "time": 1.5,
+            "softEdgePixels": 55686,
+            "nativeFinalRgbRmse": 2.6521779833122943,
+            "nativeReferenceRgbRmse": 1.91378318146901,
+            "finalReferenceRgbRmse": 2.9349553275027485,
+            "passed": true
+          },
+          {
+            "time": 2.5,
+            "softEdgePixels": 57794,
+            "nativeFinalRgbRmse": 3.300699047849313,
+            "nativeReferenceRgbRmse": 2.287764405836984,
+            "finalReferenceRgbRmse": 2.9877774267975963,
+            "passed": true
+          }
+        ],
+        "softRegionRgbRmseTolerance": 4,
+        "passed": true,
+        "scope": "Four mapped frames of one native transparent image with position, scale, rotation, opacity, geometric mask, gold shadow, cyan glow and blur. Whole softened effect region, no fitted alignment; broader masks/effects/media/audio/readiness remain unqualified."
+      },
+      "wholeSampledRasterPassed": true,
+      "movie": "reports/studio-professional-masked-effects-20261013/proof/inverted/masked-effects/final.mp4",
+      "studioRecording": "reports/studio-professional-masked-effects-20261013/proof/inverted/masked-effects/edited-in-studio.mp4"
+    }
+  ],
+  "previewOpacityBefore": [
+    "1",
+    "1",
+    "1",
+    "1"
+  ],
+  "previewOpacityAfter": [
+    "0.671562",
+    "0.8225",
+    "0.973437",
+    "0.995"
+  ],
+  "sameCompletedExportReusedAfterPreviewRepair": true,
+  "currentSampledRasterPasses": 7,
+  "currentSampledRasterFailures": 1,
+  "initialScaledEllipsePair": {
+    "projectId": "viral-project-d2705ec3-8805-470a-bf73-b4533442fa5c",
+    "canonicalHash": "91d57262c3d26d018a9ed0fb4ac29e8735200c923cf8f53f03dc923af7e3961c",
+    "outputSha256": "a43afb5312f9366390aeefb165b7efa8e6fd939a68f611bf8597efd7d67eff45",
+    "comparisons": [
+      {
+        "time": 0.5,
+        "softEdgePixels": 48041,
+        "nativeFinalRgbRmse": 3.322419913431591,
+        "nativeReferenceRgbRmse": 2.6967700268849404,
+        "finalReferenceRgbRmse": 2.751644777787024,
+        "passed": true
+      },
+      {
+        "time": 1,
+        "softEdgePixels": 71245,
+        "nativeFinalRgbRmse": 3.0238491832175725,
+        "nativeReferenceRgbRmse": 2.1538435719311386,
+        "finalReferenceRgbRmse": 2.583093396178718,
+        "passed": true
+      },
+      {
+        "time": 1.5,
+        "softEdgePixels": 79124,
+        "nativeFinalRgbRmse": 3.8153083572511277,
+        "nativeReferenceRgbRmse": 2.708300432601921,
+        "finalReferenceRgbRmse": 2.924237482527394,
+        "passed": true
+      },
+      {
+        "time": 2.5,
+        "softEdgePixels": 77971,
+        "nativeFinalRgbRmse": 4.488653252377135,
+        "nativeReferenceRgbRmse": 3.5985863068310766,
+        "finalReferenceRgbRmse": 2.854679674131286,
+        "passed": false
+      }
+    ],
+    "softRegionRgbRmseTolerance": 4,
+    "passed": false,
+    "scope": "Four mapped frames of one native transparent image with position, scale, rotation, opacity, geometric mask, gold shadow, cyan glow and blur. Whole softened effect region, no fitted alignment; broader masks/effects/media/audio/readiness remain unqualified."
+  },
+  "actualNativeEllipseStageAfterResize": [
+    720,
+    1280
+  ],
+  "ellipseViewportAfterResize": [
+    1600,
+    1770
+  ],
+  "invertedViewport": [
+    1600,
+    1400
+  ],
+  "toleranceChanged": false,
+  "fittedAlignmentUsed": false,
+  "validation": {
+    "focusedFrontendAutomationMaskCompilerPassed": 21,
+    "focusedNativePreviewComponentPassed": 1,
+    "focusedNativePreviewComponentSkipped": 123,
+    "workerLayerTextCasesPassed": 20,
+    "strictAppBuild": "PASS",
+    "fullStudioSuiteQualified": false,
+    "studioContinuity": "PASS",
+    "knowledgeSourceReviewAndGeneratedConsistency": "PASS",
+    "secretScan": "PASS"
+  },
+  "nativeProjects": 2,
+  "cpuExports": 2,
+  "gpuJobs": 0,
+  "paidGpuRuntimeSeconds": 0,
+  "paidGpuCost": 0,
+  "modelJobs": 0,
+  "productionDeployment": false,
+  "externalPublishing": false,
+  "readinessPromoted": false,
+  "creativeApproved": false,
+  "remainingDefects": [
+    "One ellipse colour pair at1.5s/1:1 native stage fails strict4-code-value RGB RMSE (4.364279)",
+    "Earlier scaled ellipse2.5s pair also fails4-code-value gate (4.488653); failure retained",
+    "Historical landscape soft-mask edges remain unqualified",
+    "Full stage/source raster, moving/cold/broad media and audio parity",
+    "Legacy unkeyed entrance timing, animated mask paths, video effects/masks and global nesting",
+    "Ordinary-account runtime lifecycle and creative/human sound review"
+  ],
+  "nextHighestPriorityTaskId": "S02",
+  "nextTask": "S02 source/graphic raster separation and remaining mask/effect-pair failures; then S03 global composition/nesting and S04 controls."
+}

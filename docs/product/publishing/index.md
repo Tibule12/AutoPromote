@@ -1,6 +1,6 @@
 # Publishing
 
-Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
+Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -24,7 +24,7 @@ Connects supported platform accounts through existing permissions. Displayed pla
 2. Open Publisher and review the account, Page or posting destination returned by the provider.
 3. Resolve a provider reconnect or permission error before publishing.
 
-**Preview:** Publisher shows the selected media with current account and destination information. A connected label alone does not confirm current posting permission.
+**Preview:** Publisher shows the selected media with current account and destination information. A connected label alone does not confirm current posting permission. Queue, Publisher and Connections bundle recognizable vector brand marks locally; the logo is not a posting-permission check.
 
 **Final render:** Connection checks do not render or generate media.
 
@@ -48,7 +48,7 @@ Connects supported platform accounts through existing permissions. Displayed pla
 
 ID: `publishing.schedule` • **PARTIAL** • DETERMINISTIC
 
-Schedules or reposts eligible content through the existing account-linked pipeline. External delivery depends on current connection and platform constraints.
+Schedules owned completed media through the existing account-linked pipeline. Scheduling an unchanged Project asset reuses its content record without consuming another content upload; platform and distribution limits still apply.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -60,11 +60,12 @@ Schedules or reposts eligible content through the existing account-linked pipeli
 
 **Workflow**
 
-1. Select an owned completed movie in Publisher and set the title and description.
+1. Select an owned completed movie from Publisher’s Studio, Generated or Project assets, or upload a new file; set the title and description.
 2. Choose connected destinations, review platform-specific options and set a future date and time.
 3. Review the exact destinations and timing, then choose Schedule posts.
 4. Open Schedule and verify each requested platform has the intended pending schedule.
 5. Use Queue period to review the next seven days or all schedules. Load another page when more entries remain.
+6. Review the complete upcoming calendar with brand icons, each destination’s exact publish time and its current status. The release list scrolls independently when many entries exist.
 
 **Preview:** Publisher previews the selected movie and review details; Queue displays pending owned schedules.
 
@@ -75,6 +76,8 @@ Schedules or reposts eligible content through the existing account-linked pipeli
 - Provider permissions, destination access and account allowance apply.
 - An upload acknowledgement does not prove every schedule was created.
 - A pending schedule needs an operating scheduler and posting worker. Only a successful provider result confirms publication.
+- Fresh uploads and edited replacement files still require upload allowance. Reusing stored media for a schedule does not increase new-content upload capacity.
+- If this account has opted into 24-hour published-video retention, its owned publishing copies expire 24 hours after every intended destination confirms publication. Pending, paused, failed, recurring, shared or transforming work keeps its file. Expired copies are not selectable for a new schedule; upload the file again. Publication history remains.
 
 **Common errors**
 
@@ -177,7 +180,9 @@ Submits selected owned content to eligible connected platforms under the existin
 
 ID: `publishing.analytics` • **PARTIAL** • DETERMINISTIC
 
-Loads account-scoped performance and workflow data with range/entitlement restrictions. Missing platform metrics must not be invented.
+Shows collected account-owned platform statistics, distinguishes missing counters from measured zero, filters a published release and refreshes its recent destination posts.
+
+**Purpose:** Judge published work using real collected metrics without confusing missing data, impressions and video views.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -189,23 +194,29 @@ Loads account-scoped performance and workflow data with range/entitlement restri
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Analytics and choose the available date range.
+2. Choose a Published release to inspect that release as new content is published; All published releases restores the account view.
+3. Read the collected-post coverage and last successful update. Unavailable counters are not zero.
+4. Use Sync latest platform statistics to refresh up to six recent published posts in the selected scope, one per destination.
+5. Compare posts within each platform. Review unavailable connections and permissions before drawing performance conclusions.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Displays collected metrics, unavailable values, collected-post coverage and last successful update. A reported zero remains zero.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** No video render is performed. An explicit bounded statistics refresh reads connected providers and persists owned post observations.
 
 **Limits**
 
-- Provider permissions, connection health and account allowance apply.
-- No external platform publication was performed or qualified in this documentation session.
+- Provider permissions, connection health and account allowance apply. Some destinations provide engagement but no view count.
+- The refresh selects up to six owned successful non-simulated posts and has a five-minute per-post cooldown.
+- Metrics cover collected posts only. Impressions are separate from views; a combined click-through rate is unavailable without matched attribution.
+- Public provider delivery and whole-account collection coverage are separate from source and local signed-in verification.
+- Automatic observations remain scheduled through the seven-day collection window even when first-day views are low. Older legacy post records without collection initialization need an explicit refresh; local checks do not deploy backend changes.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** No source-qualified editable control is recorded.
+**Controls:** [Sync latest platform statistics](../control-reference/index.md#publishing-analytics-sync_latest), [Published release](../control-reference/index.md#publishing-analytics-release)
 
 **Guides:** No task guide in V1.
 

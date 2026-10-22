@@ -1,0 +1,117 @@
+{
+  "createdAt": "2026-10-14T18:13:49.482236Z",
+  "branch": "agent/studio-professional-continuation-v2",
+  "scope": "Shared normal-timeline group clips on a real 20-second retained coffee footage/title/music/SFX edit; no separate engine or new template definition.",
+  "sourceSha256": {
+    "frontend/src/components/studioGroupTiming.js": "90dc50c41af72cdb1882b3f4f602a5ff1265be5263fd9a857f1f89ca57c9148f",
+    "frontend/src/components/StudioGroupTimelineClip.js": "6cf4801e6d7377e55b43e6ca7adce4ba3663671eb9a60648a1e6dce44c8f0e5c",
+    "frontend/src/components/StudioGroupTimingInspector.js": "a35263f30eac29cb84c35e4d0dd629fc98b960ad29b17dc5ad93cfc412bd3e94",
+    "frontend/src/components/StudioGroupInspector.js": "5fd1eb4cde2f0c164f72855cc0dcb7a3c2cecf84e24ec01b2516525bcc8652c2",
+    "frontend/src/components/StudioGroupPreview.js": "ce933429e1b5888ff69d02756c17ff1852b11cfab60a24ac4c23f03b17c2c247",
+    "frontend/src/components/StudioProTimeline.js": "2ff666e40062400b4ed535993b40941442e95a05ef2172d6ed37d515c6e15395",
+    "frontend/src/components/StudioTimeline.css": "a59966437d5b405eb39a564241623235848414fb5d0e3a40a70d2d99b0259bdd",
+    "frontend/src/components/ViralClipStudio.js": "0afbdaf8d95f13cd14afbc7a63a95758a7f432cfde089f799760d4a37881094f",
+    "frontend/src/components/studioGroups.js": "f4654b6e8d5bbcd7b494663222e3830b77d71b5b72d31d5847e695f684247ca0",
+    "frontend/src/components/__tests__/studioGroupTiming.test.js": "781e149320d7da02bb998c0c64fb61aaa0c847220ba725051ebffc08b1c1f709",
+    "frontend/src/components/__tests__/StudioProTimeline.test.js": "781d7cf01d95f82c9f0051b065e5c8e06e67a11a88edd0cc7e579ffaaee6e722",
+    "python_media_worker/studio_composition.py": "1e99003d24034a900eaaeb28bd1d1ec55db85a04e85ae6dd2ce74fb5f7036af1",
+    "python_media_worker/test_studio_composition.py": "6a804c30eb5168c5da7e85a6144b89c7a056039176e779666ed321241ab8e66b",
+    "scripts/studio-professional/group-workflow-proof.js": "2101f57d602523185a67f30842b8824388745dfe403b4b21f322ebc08bcd9139",
+    "scripts/studio-professional/compare-group-workflow.py": "3b4232b81c4cd968c3db12dfe82cc597545e28b361815f0230425d66b8a361a9"
+  },
+  "projectId": "viral-project-358d4e56-32ef-492a-82e3-4be2ec1fe380",
+  "canonicalHash": "e4217013e5887d711f34ace4e9affb5d961cbec8176a2c2a7b2fc6b6e5afb11e",
+  "templateRef": {
+    "templateId": "product_launch_cinematic_v1",
+    "version": "1.1.2",
+    "definitionHash": "6432bd27c16769283529278b62a4c228b5a06476b113b5ab74d852e12c0dea2d"
+  },
+  "groupId": "group-aada8fc0-4555-46c3-89d1-b91a2f98bd95",
+  "groupWindowSeconds": [
+    0.75,
+    1.9583333333333333
+  ],
+  "editableSourceShots": 11,
+  "editableGraphics": 14,
+  "propertyKeys": 164,
+  "groupOpacityKeys": 2,
+  "nativeEditReceipt": "reports/studio-professional-group-workflow-20261014/proof/workflow-native-edit.json",
+  "nativeEditingRecording": {
+    "path": "reports/studio-professional-group-workflow-20261014/proof/editing-in-studio.mp4",
+    "sha256": "a34808eb8f3140a32a517565c4ed7c3c1d5e16248a7e5633f2260246866a2c46",
+    "seconds": 128.84
+  },
+  "finishedStudioRecording": {
+    "path": "reports/studio-professional-group-workflow-20261014/proof/workflow/edited-in-studio.mp4",
+    "sha256": "a13312e054a3c63e8b7f865cb1a780dea230fe5c70e49417878687f28522a499",
+    "playbackReceipt": "reports/studio-professional-group-workflow-20261014/proof/workflow/studio-playback.json",
+    "nativeEnded": true,
+    "editableTimelineVisible": true,
+    "soundtrack": "Exact hash-verified export muxed at the observed 0.082s native-start offset; browser muted",
+    "smoothPlaybackQualified": false
+  },
+  "finalMovie": {
+    "path": "reports/studio-professional-group-workflow-20261014/proof/workflow/final.mp4",
+    "sha256": "fcbec914c6cdd34d5ece1f95eccd5e2b0e03eb19ad6f6bd70ceb478193a70942",
+    "seconds": 20,
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "frames": 480,
+    "audio": "Stereo 48kHz AAC",
+    "fullIndependentDecode": "PASS"
+  },
+  "nativeHistorySaveColdReopen": true,
+  "nativeBackupRestoreAndOwnedExportReceiptRecovery": true,
+  "nativeCpuExports": 1,
+  "resubmittedExports": 0,
+  "paidGpuJobs": 0,
+  "paidGpuRuntimeSeconds": 0,
+  "paidGpuCost": 0,
+  "tests": {
+    "frontendCasesPassed": 111,
+    "compositorAndMotionCasesPassed": 140,
+    "legacyAudioMotionCasesPassed": 21,
+    "subtestsPassed": 261,
+    "strictAppBuild": "PASS",
+    "fullStudioSuiteQualified": false,
+    "knowledgeChecksPassed": 17,
+    "knowledgeSourceReview": "VALID_1.0.14_WITH_10_DECLARED_DEFERRED_SURFACE_WARNINGS",
+    "studioContract": "VALID_29_CAPABILITIES_13_COMBINATIONS_17_PARITY_RECORDS"
+  },
+  "nativeHalfOpenGroupGateSamplesPassed": 9,
+  "declaredFullFootageSourceComparisons": {
+    "passed": 0,
+    "total": 9,
+    "evidence": "reports/studio-professional-group-workflow-20261014/proof/paired-workflow.json",
+    "thresholdsChanged": false,
+    "fittedAlignmentUsedForAcceptance": false
+  },
+  "canonicalAudioGraphUnchanged": true,
+  "wholePreviewFinalParityQualified": false,
+  "readinessPromoted": false,
+  "creativeApproved": false,
+  "publicPromoted": false,
+  "ownedLocalQaStopped": true,
+  "failuresRetained": {
+    "firstNativeEdit": true,
+    "cpuObserverTimeout": true,
+    "firstRecoveryObserverTimeout": true,
+    "signOutAndReceiptRecovery": true,
+    "sourceGeometryComparisons": true,
+    "qaStorageRecovery": "Initial helper inspected persistent-context state before visiting the origin and missed the copied QA stores. The helper now registers an empty origin before reading state. Exact final project restored through normal owned-backup UI and completed export through normal receipt UI; original profiles, all project backups and movies retained."
+  },
+  "remainingBlockers": [
+    "Whole pre-final picture remains unqualified: all nine declared source-feature p95 comparisons fail the unchanged 2px/eight-match bound. False descriptor matches may contribute; diagnostic majority affine fits near identity do not replace or pass acceptance. Dim ending background also differs visibly. No cause established within the bounded investigation.",
+    "The 20-second full-footage CPU job outlasted the 12-minute QA watcher and first 15-minute recovery observer. Completion and owned recovery/download pass; export performance remains a major open gap. startedAt is absent from the recovered receipt, so no exact worker wall runtime is claimed.",
+    "Live whole soundtrack and human listening are unqualified. Canonical audio decisions are unchanged by the group edit; a retained earlier film with a different canonical hash has non-identical PCM (correlation 0.9988210131214916, relative RMS error 0.04855700134475107). This is not a same-graph audio regression proof.",
+    "Group split/duplicate, source-occurrence attachment/remapping, group anchor, mask/blend animation, actual video/owned3D group qualification and broader S04 mechanics remain open.",
+    "Screen capture averages 19.473762455350567 fps for the 24fps movie. Full ended playback passes; smooth playback is not qualified. Prior S02 ellipse raster failure stays open."
+  ],
+  "nextTaskIds": [
+    "S02",
+    "S03",
+    "S04"
+  ],
+  "nextImplementationSlice": "Repair the real-footage pre-final picture and CPU export performance, then shared group split/duplicate/source-occurrence ownership and remaining main-timeline mechanics."
+}

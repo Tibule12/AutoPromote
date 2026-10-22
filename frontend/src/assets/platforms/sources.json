@@ -1,0 +1,50 @@
+{
+  "facebook": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/facebook-f.svg",
+    "sha256": "916cd0bd434ad188a40db799d4a4b58f7478df99fb67470bbe6720fabed17ce4"
+  },
+  "instagram": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/instagram.svg",
+    "sha256": "ed4cc22a7d9483ea8a651b095644f4bbdd4851d832daaea516f752ab6835ad16"
+  },
+  "linkedin": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/linkedin-in.svg",
+    "sha256": "b7ed1758bd2a389278a4a692229f173e937454332015b86df9546d1f91e2c31e"
+  },
+  "reddit": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/reddit-alien.svg",
+    "sha256": "b723c8f1ecfc793254dbe5e4f2031d20e8b635c5af107ed4f36dcc6aeb34b834"
+  },
+  "tiktok": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/tiktok.svg",
+    "sha256": "338c740fd3a36a7dd32e2c98f30246d8510fbe0dd6a28602418c072751df155f"
+  },
+  "youtube": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/youtube.svg",
+    "sha256": "652f1ec4169ebe810803fba8e8a22e993255794e68d8d9cca3bc61d34eec26ab"
+  },
+  "twitter": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/x-twitter.svg",
+    "sha256": "d8cc9e7c9a70573422297556bd03c6d7e349cb84696fc50b042d0c2c342f52c4"
+  },
+  "spotify": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/spotify.svg",
+    "sha256": "0c4310dd1d7689cf53d7663cd0359d696d3b87627ca5b1c9eb3ca9c28b36458f"
+  },
+  "pinterest": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/pinterest-p.svg",
+    "sha256": "eed5e60e2c4f8695a883b3dd9030113d23a0cba2ff28f1feb02c71a9515ed5e5"
+  },
+  "discord": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/discord.svg",
+    "sha256": "5411e43669f6fd0613413ec9f4e605fde9331d112d168da6a228994df25a066d"
+  },
+  "telegram": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/telegram.svg",
+    "sha256": "0aff9f342e7451a572fc88cb8716b13e03a2d29e9e97787a1d597f24acb323f9"
+  },
+  "snapchat": {
+    "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/snapchat.svg",
+    "sha256": "f45c4cac4be541ff799ccbe902dc6a31b02bd9a3935ecdeaa9ae79af54f6e9c5"
+  }
+}

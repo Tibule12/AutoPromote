@@ -1,5 +1,5 @@
+import PublicFooter from "../public/PublicFooter";
 import LandingIcon from "./LandingIcon";
-import { LandingBrand } from "./LandingNavbar";
 
 export function LandingCTA({ onGetStarted }) {
   return (
@@ -21,46 +21,5 @@ export function LandingCTA({ onGetStarted }) {
 }
 
 export default function LandingFooter() {
-  return (
-    <footer className="lp-footer">
-      <div className="lp-footer-top">
-        <div>
-          <LandingBrand />
-          <p>
-            AI video editing.
-            <br />
-            Made for your next great story.
-          </p>
-        </div>
-        <nav aria-label="Footer product">
-          <span>PRODUCT</span>
-          <a href="/#/features">Features</a>
-          <a href="/#/pricing">Pricing</a>
-          <a href="/#/docs">Documentation</a>
-        </nav>
-        <nav aria-label="Footer company">
-          <span>AUTOPROMOTE</span>
-          <a href="/#/about">About</a>
-          <a href="/#/contact">Contact</a>
-          <a href="/#/help">Help Center</a>
-        </nav>
-        <div className="lp-footer-end">
-          <span>MADE TO CREATE.</span>
-          <p>
-            From a conversation
-            <br />
-            to a connection.
-          </p>
-        </div>
-      </div>
-      <div className="lp-footer-bottom">
-        <span>© {new Date().getFullYear()} AutoPromote. All rights reserved.</span>
-        <nav aria-label="Legal">
-          <a href="/#/privacy">Privacy</a>
-          <a href="/#/terms">Terms</a>
-          <a href="/#/accessibility">Accessibility</a>
-        </nav>
-      </div>
-    </footer>
-  );
+  return <PublicFooter />;
 }

@@ -44,7 +44,6 @@ import {
   inferUploadMediaType,
   uploadSourceFileViaBackend,
 } from "./utils/sourceUpload";
-import ChatWidget from "./ChatWidget";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import { Sentry } from "./sentryClient";
 import TestSentryButton from "./components/TestSentryButton";
@@ -1633,11 +1632,11 @@ function App() {
         <Routes>
           {/* Static Content Pages */}
           <Route path="/about" element={<About />} />
-          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/*" element={<Blog />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cookies" element={<Cookies />} />
-          <Route path="/docs" element={<Docs />} />
+          <Route path="/docs/*" element={<Docs />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/support" element={<Support />} />
           <Route path="/accessibility" element={<Accessibility />} />
@@ -1939,9 +1938,7 @@ function App() {
         </Routes>
       </Suspense>
 
-      {/* AI Chat Widget - only show when user is logged in */}
-      {user && <ProductAssistance />}
-      {user && <ChatWidget user={user} />}
+      {user && <ProductAssistance launcher={false} />}
     </div>
   );
 }

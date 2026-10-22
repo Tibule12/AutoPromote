@@ -1025,6 +1025,7 @@ const PayPalSubscriptionPanel = ({
             <div className="usage-item">
               <label>Uploads</label>
               {renderUsageBar(usage.uploads.used, usage.uploads.limit, usage.uploads.unlimited)}
+              {usage.storageRetention?.publishedVideoHours === 24 && <small>Published video copies are removed from app storage 24 hours after every selected destination confirms publication. Queued, paused and failed work keeps its file.</small>}
             </div>
 
             <div className="usage-item">

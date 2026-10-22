@@ -19,6 +19,8 @@ export const STUDIO_SOURCE_DECISION_FIELDS = [
   "generationRef", "provenanceRef", "generationProvenance",
 ];
 export const STUDIO_ADDITIONAL_LAYER_FIELDS = [
+  "textAnimator", "textProgress",
+  "vectorShape", "strokeStart", "strokeEnd", "strokeOffset",
   "mask", "chromaKey", "backgroundRemoval", "tracking", "presenterPolish",
   "sourceMediaId", "generationRef", "provenanceRef", "generationProvenance", "parentId", "clipOwnerId",
 ];

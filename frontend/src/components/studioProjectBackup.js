@@ -1,4 +1,5 @@
 import { validateStudioProjectDocument } from "./studioProjectDocument";
+import { restoreStudioBackupMedia } from "./studioProjectBackupMedia";
 
 const MAX_BACKUP_BYTES = 20 * 1024 * 1024;
 
@@ -30,9 +31,10 @@ export const readStudioProjectBackup = async file => {
   visit(project.snapshot);
   visit(project.versions || []);
   if (!paths.size || paths.size > 100) throw new Error("This backup needs saved, owned Studio media.");
+  const restored = restoreStudioBackupMedia(project);
   return {
     project: { id: project.id, name: project.name, createdAt: project.createdAt,
-      snapshot: project.snapshot, versions: project.versions || [] },
+      snapshot: restored.snapshot, versions: restored.versions || [] },
     mediaPaths: [...paths],
   };
 };

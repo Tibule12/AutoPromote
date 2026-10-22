@@ -5,6 +5,18 @@ const bounded = (value, min, max, fallback = 0) => {
   return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
 };
 export const hasSoftStudioMask = mask => !!mask?.enabled && (!!mask.inverted || Number(mask.feather) > 0);
+export const DEFAULT_STUDIO_MASK_POLYGON = 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)';
+export function parseStudioMaskPolygon(path = DEFAULT_STUDIO_MASK_POLYGON) {
+  const match = /^polygon\((.{1,2048})\)$/.exec(String(path).trim());
+  const pairs = match?.[1].split(',') || [];
+  if (pairs.length < 3 || pairs.length > 64) throw new Error('Use a percentage polygon with 3 to 64 points.');
+  return pairs.map(pair => {
+    const point = /^\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*$/.exec(pair);
+    if (!point || !Number.isFinite(Number(point[1])) || !Number.isFinite(Number(point[2])))
+      throw new Error('Each polygon point needs two finite percentages, for example 10% 20%.');
+    return [Number(point[1]), Number(point[2])];
+  });
+}
 export function studioLayerMaskSvg(mask, cropX, cropY, width, height, programmeScale = 1) {
   if (!mask?.enabled) return null;
   const w = bounded(width, 1, 16384, 1), h = bounded(height, 1, 16384, 1);
@@ -16,18 +28,11 @@ export function studioLayerMaskSvg(mask, cropX, cropY, width, height, programmeS
   if (mask.shape === 'ellipse') {
     shape = `<ellipse cx="${w / 2}" cy="${h / 2}" rx="${w * .48}" ry="${h * .48}" fill="${fill}"${filter}/>`;
   } else if (mask.shape === 'polygon') {
-    const path = mask.path || 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)';
-    const match = /^polygon\((.{1,2048})\)$/.exec(path.trim());
-    const pairs = match?.[1].split(',') || [];
-    if (pairs.length < 3 || pairs.length > 64) throw new Error('Layer polygon mask requires 3 to 64 points');
-    const points = pairs.map(pair => {
-      const point = /^\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*$/.exec(pair);
-      if (!point) throw new Error('Layer mask requires a percentage polygon');
-      return `${Number(point[1]) * w / 100},${Number(point[2]) * h / 100}`;
-    }).join(' ');
+    const points = parseStudioMaskPolygon(mask.path || DEFAULT_STUDIO_MASK_POLYGON)
+      .map(([px, py]) => `${px * w / 100},${py * h / 100}`).join(' ');
     shape = `<polygon points="${points}" fill="${fill}"${filter}/>`;
   } else {
-    const radius = bounded(mask.radius || 6, 0, 50, 6) / 100;
+    const radius = bounded(mask.radius ?? 6, 0, 50, 6) / 100;
     shape = `<rect x="${x}" y="${y}" width="${w - x * 2}" height="${h - y * 2}" rx="${Math.min(w * radius, (w - x * 2) / 2)}" ry="${Math.min(h * radius, (h - y * 2) / 2)}" fill="${fill}"${filter}/>`;
   }
   // Invert alpha directly. A black/white luminance mask applies color-space

@@ -1,5 +1,5 @@
 import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, waitForStudioAudio, pausedStudioFrameRequest, pausedStudioFrameKey } from '../studioSourcePreview';
-import { studioPausedFrameHasIdentityClock, pausedStudioMappedFrameRequest } from '../studioSourcePreview';
+import { studioPausedFrameHasIdentityClock, pausedStudioMappedFrameRequest, studioPausedFrameReceiptMatches } from '../studioSourcePreview';
 import { createOutputTimeMap } from '../studioTime';
 const rampMap = () => createOutputTimeMap(270000, [
   {programmeRange:{space:'programme',startTick:0,endTick:90000},rateNumerator:1,rateDenominator:1},
@@ -52,6 +52,27 @@ test('accurate paused frames preserve source/trim identity and do not alter the 
   expect(pausedStudioFrameKey(frame)).not.toBe(pausedStudioFrameKey({ ...frame, frameIndex: 5 }));
   for (const time of [0, 1, NaN]) expect(pausedStudioFrameRequest(clip, time, 24)).toBeNull();
   expect(pausedStudioFrameRequest({ ...clip, contentHash: '' }, .5, 24)).toBeNull();
+});
+
+test('legacy source sampling binds transient access generation without changing its saved graph', () => {
+  const clip = { id: 'old', sourceStoragePath: 'owned/old.mp4', startRequest: 0, endRequest: 3 };
+  const saved = JSON.stringify(clip);
+  const request = pausedStudioMappedFrameRequest(clip, 1.5, 24, [clip], createOutputTimeMap(270000), '1791917104896000');
+  expect(request).toEqual({ storagePath: clip.sourceStoragePath, sourceGeneration: '1791917104896000',
+    start: 0, end: 3, fps: 24, frameIndex: 36 });
+  expect(JSON.stringify(clip)).toBe(saved);
+  for (const generation of [undefined, 12, '0', 'bad'])
+    expect(pausedStudioFrameRequest(clip, 1.5, 24, generation)).toBeNull();
+  const hashed = { ...clip, sha256: 'b'.repeat(64) };
+  expect(pausedStudioFrameRequest(hashed, 1.5, 24, '12').sourceContentHash).toBe(hashed.sha256);
+  expect(pausedStudioFrameRequest({ ...clip, contentHash: 'corrupt' }, 1.5, 24, '12')).toBeNull();
+  const receipt = { ...request, sourceContentHash: 'a'.repeat(64), contentType: 'image/png' };
+  expect(studioPausedFrameReceiptMatches(request, receipt)).toBe(true);
+  for (const change of [{ sourceGeneration: '13' }, { frameIndex: 35 }, { fps: 30 },
+    { sourceContentHash: '' }, { contentType: 'video/mp4' }])
+    expect(studioPausedFrameReceiptMatches(request, { ...receipt, ...change })).toBe(false);
+  const hashRequest = pausedStudioFrameRequest(hashed, 1.5, 24);
+  expect(studioPausedFrameReceiptMatches(hashRequest, receipt)).toBe(false);
 });
 
 test('programme waits for decoded music rather than advancing silently before canplay', async () => {

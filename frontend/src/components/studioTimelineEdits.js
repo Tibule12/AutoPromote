@@ -31,7 +31,7 @@ export const rippleTimedItems = (items, from, to, createId) => {
   });
 };
 
-export const rippleTimelineKeys = (keys, from, to, { preserveRightState = false } = {}) => {
+export const rippleTimelineKeys = (keys, from, to, { preserveRightState = false, markCut = true } = {}) => {
   if (!(to > from)) return keys;
   const retained = keys
     .filter(key => Number(key.time) < from || Number(key.time) >= to)
@@ -45,7 +45,7 @@ export const rippleTimelineKeys = (keys, from, to, { preserveRightState = false 
     .filter(key => Number(key.time) >= from && Number(key.time) < to)
     .sort((left, right) => Number(right.time) - Number(left.time))[0];
   return lastRemoved
-    ? [...retained, { ...lastRemoved, time: from, cut: true }].sort((left, right) => Number(left.time) - Number(right.time))
+    ? [...retained, { ...lastRemoved, time: from, ...(markCut ? { cut: true } : {}) }].sort((left, right) => Number(left.time) - Number(right.time))
     : retained;
 };
 // Decoder metadata describes the complete source, never the edited occurrence.

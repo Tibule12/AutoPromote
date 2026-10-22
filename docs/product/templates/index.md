@@ -1,6 +1,6 @@
 # Templates
 
-Development documentation • product 1.2.0 • knowledge 1.0.5 • 2026-10-13T17:56:53.682Z
+Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -289,6 +289,8 @@ The public catalogue has no qualified release or hero. The current welcome page 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Private welcome-page previews use dated product recordings; these do not update live or qualify a public release, hero or exact template-to-account handoff.
+- The private 28-second welcome film is a native Studio edit with matching timeline/backup; this design review does not qualify the public showroom, trusted human creative/listening approval or exact template handoff.
 
 **Common errors**
 

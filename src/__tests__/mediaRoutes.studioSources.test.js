@@ -143,6 +143,18 @@ const renderBody = (segments, extra = {}) => ({
 });
 
 describe("owned Studio project sources", () => {
+  it('rejects a changed legacy generation before decoding or charging', async () => {
+    putVideo('studio/sources/owner-1/old.mp4');
+    const response = await request(buildApp()).post('/api/media/studio-assets/source-frame').send({
+      storagePath: 'studio/sources/owner-1/old.mp4', sourceGeneration: '11',
+      start: 0, end: 1, fps: 24, frameIndex: 0,
+    });
+    expect(response.statusCode).toBe(409);
+    expect(response.body.code).toBe('STUDIO_FRAME_SOURCE_CHANGED');
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["studio/sources/attacker/video.mp4", 403],
     ["studio/sources/owner-1/missing.mp4", 404],
@@ -289,6 +301,7 @@ describe("owned Studio project sources", () => {
     expect(refresh.statusCode).toBe(200);
     expect(refresh.body.url).toContain("https://signed.example/");
     expect(refresh.body.storagePath).toBe(first.body.asset.storagePath);
+    expect(refresh.body.generation).toBe('12');
   });
 
   it("refreshes a small Firebase Studio upload but rejects a forged owner", async () => {

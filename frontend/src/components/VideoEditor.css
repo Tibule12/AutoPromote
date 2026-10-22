@@ -1359,8 +1359,10 @@
 }
 
 .viral-render-recovery p {
+  min-width: 0;
   margin: 0;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .viral-render-recovery video {

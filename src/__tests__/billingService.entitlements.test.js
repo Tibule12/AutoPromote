@@ -35,6 +35,27 @@ jest.mock("../firebaseAdmin", () => {
 const { checkBotEntitlement, getEffectiveTierSnapshot, getPlatformPostMonthlyQuota } = require("../services/billingService");
 
 describe("billingService entitlement enforcement", () => {
+  it("keeps daily destination capacity account-specific without lowering larger plans", () => {
+    expect(getPlatformPostMonthlyQuota("premium", null, null, { publishingAllowance: { monthlyLimit: 1000 } })).toBe(1000);
+    expect(getPlatformPostMonthlyQuota("premium")).toBe(150);
+    expect(getPlatformPostMonthlyQuota("enterprise", null, null, { publishingAllowance: { monthlyLimit: 1000 } })).toBe(2000);
+  });
+  it("uses a server-owned upload allowance without upgrading or resetting usage", async () => {
+    const billing = { tier: "premium", status: "active", uploads_this_month: 20,
+      uploadAllowance: { monthlyLimit: 150 } };
+    const snapshot = await getEffectiveTierSnapshot("user-1", billing,
+      { subscriptionTier: "premium", subscriptionStatus: "active" });
+    expect(snapshot.tierId).toBe("premium");
+    expect(snapshot.tier.monthly_upload_cap).toBe(150);
+    expect(snapshot.billingData.uploads_this_month).toBe(20);
+  });
+
+  it("ignores a user-profile upload allowance", async () => {
+    const snapshot = await getEffectiveTierSnapshot("user-1",
+      { tier: "premium", status: "active" },
+      { subscriptionTier: "premium", subscriptionStatus: "active", uploadAllowance: { monthlyLimit: 9999 } });
+    expect(snapshot.tier.monthly_upload_cap).toBe(20);
+  });
   it("raises only the account with a server-owned publishing allowance", () => {
     expect(getPlatformPostMonthlyQuota("premium", null, null, {
       publishingAllowance: { monthlyLimit: 1000 },

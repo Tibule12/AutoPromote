@@ -100,6 +100,11 @@ async function apply(page, name) {
     templateRef: record.snapshot.creativeTemplateInstance.templateRef }));
 }
 async function render(page, name) {
+  const uploadBudget = Number(process.env.STUDIO_QA_UPLOAD_BUDGET_MS || 120000);
+  const renderBudget = Number(process.env.STUDIO_QA_RENDER_OBSERVATION_BUDGET_MS || 720000);
+  assert(Number.isSafeInteger(renderBudget) && renderBudget >= 720000 && renderBudget <= 1800000,
+    'Use a bounded 12–30 minute CPU observation budget; a deadline never authorizes resubmission');
+  assert(Number.isSafeInteger(uploadBudget) && uploadBudget >= 120000 && uploadBudget <= 600000, 'Use a bounded 2–10 minute native upload observation budget');
   require('./proof-storage').requireProofSpace(folder);
   const pause = page.getByRole('button', { name: 'Pause comparison', exact: true });
   if (await pause.isVisible()) await pause.click();
@@ -128,7 +133,7 @@ async function render(page, name) {
   await page.getByLabel('Export frame rate', { exact: true }).selectOption(process.env.STUDIO_QA_EXPORT_FPS || '24');
   page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button', { name: /^Render (Final Clip|Again)$/ }).click();
-  const acknowledgedUntil = Date.now() + 120000;
+  const acknowledgedUntil = Date.now() + uploadBudget;
   while (!submittedJobId && Date.now() < acknowledgedUntil) {
     const failure = page.getByTestId('studio-export-error');
     if (await failure.isVisible()) throw new Error(await failure.innerText());
@@ -138,8 +143,23 @@ async function render(page, name) {
   let renderTimeout, result;
   try {
     result = await Promise.race([done, new Promise((_, reject) => {
-      renderTimeout = setTimeout(() => reject(new Error('Render exceeded its 12-minute CPU budget')), 720000);
+      renderTimeout = setTimeout(() => reject(new Error(`Render exceeded its ${renderBudget / 60000}-minute CPU observation budget`)), renderBudget);
     })]);
+  } catch (error) {
+    // The observer deadline does not cancel the accepted worker job. Retain
+    // its actual post-upload graph and portable native backup before closing.
+    try {
+      const pending = await save(page, `${name}-accepted-pending`);
+      fs.writeFileSync(path.join(folder, `${name}-accepted-pending.json`), JSON.stringify({
+        submittedJobId, startedAt, projectId: pending.id,
+        projectHash: hash(pending.snapshot.studioDocument),
+        observerError: error.message, resubmissionAllowed: false,
+      }, null, 2));
+      const waiting = page.waitForEvent('download', { timeout: 30000 });
+      await page.getByRole('button', { name: 'Download project backup', exact: true }).click();
+      await (await waiting).saveAs(path.join(folder, `${name}-accepted-pending.autopromote.json`));
+    } catch (checkpointError) { console.warn('Accepted-job checkpoint:', checkpointError.message); }
+    throw error;
   } finally { clearTimeout(renderTimeout); }
   assert.equal(result.status, 'completed', result.error || 'Render failed');
   // Export materializes newly imported local audio into owned Storage media.

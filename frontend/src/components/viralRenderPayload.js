@@ -315,7 +315,10 @@ export const buildViralRenderData = ({
   addDefined(payload, "audio_restoration", extraOptions.audioRestoration);
   addDefined(payload, "audio_automation", extraOptions.audioAutomation);
   addDefined(payload, "audio_track_states", extraOptions.audioTrackStates);
-  addDefined(payload, "editor_timeline", extraOptions.editorTimeline);
+  if (isDefined(extraOptions.editorTimeline)) {
+    payload.editor_timeline = { ...extraOptions.editorTimeline,
+      programme_duration_ticks: Math.round(payload.end_time * 90000) };
+  }
   addDefined(payload, "composition_plan", extraOptions.compositionPlan);
   addDefined(payload, "creative_template_instance", extraOptions.creativeTemplateInstance);
 

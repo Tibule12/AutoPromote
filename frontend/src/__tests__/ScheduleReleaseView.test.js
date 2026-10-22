@@ -100,7 +100,7 @@ test("loading does not flash empty counts; missing media and long copy are handl
   const { rerender } = render(<SchedulesPanel schedulesList={[]} loading contentList={[]} />);
   expect(screen.getByRole("status")).toHaveTextContent("Loading your scheduled releases");
   expect(screen.queryByText("No scheduled releases yet")).not.toBeInTheDocument();
-  rerender(<SchedulesPanel schedulesList={schedules} loading={false} contentList={[]} />);
+  rerender(<SchedulesPanel schedulesList={schedules} loading={false} contentList={[]} currentTime={beforeFirstRelease} />);
   expect(screen.getByText(/Media preview unavailable/i)).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: /Final Edit Oct 14/i }));
   fireEvent.click(screen.getByRole("button", { name: /Facebook Scheduled/i }));
@@ -145,7 +145,7 @@ test("timezone conversion round trips and rejects nonexistent DST time", () => {
 
 test("post copy editor targets one destination and does not write until saved", async () => {
   const actions = callbacks();
-  render(<SchedulesPanel schedulesList={schedules} contentList={[]} {...actions} />);
+  render(<SchedulesPanel schedulesList={schedules} contentList={[]} currentTime={beforeFirstRelease} {...actions} />);
   fireEvent.click(screen.getByRole("button", { name: /Final Edit Oct 14/i }));
   fireEvent.click(screen.getByRole("button", { name: /^Edit post\/copy$/i }));
   const editor = screen.getByRole("dialog", { name: "Edit post copy" });

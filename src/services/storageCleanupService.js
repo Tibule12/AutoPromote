@@ -386,6 +386,12 @@ async function cleanupExpiredMulticamRenders() {
 }
 
 module.exports = {
+  cleanupPublishedVideos: async (options = {}) => {
+    if (!storage || !db) return [];
+    return require("./publishedVideoRetention").cleanupPublishedVideos({
+      ...options, db, storage, extractPath: extractOwnedStoragePathFromUrl,
+    });
+  },
   cleanupTempUploads,
   cleanupExpiredSourceUploads,
   cleanupExpiredMulticamRenders,

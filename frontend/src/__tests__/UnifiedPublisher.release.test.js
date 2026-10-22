@@ -28,6 +28,7 @@ beforeEach(() => {
     if (url === API_ENDPOINTS.FACEBOOK_STATUS) return response({ pages: [{ id: "page-1", name: "Coffee", instagram_business_account: { id: "ig-1", username: "coffee" } }] });
     if (url === API_ENDPOINTS.TIKTOK_CREATOR_INFO) return response({ creator: { privacy_level_options: ["PUBLIC_TO_EVERYONE", "SELF_ONLY"], creator_username: "coffee" } });
     if (url === API_ENDPOINTS.CONTENT_UPLOAD_READINESS) return response({ readiness: { allowed: true } });
+    if (String(url).endsWith('/coffee-source/promotion-schedules')) return response({ success: true, schedules: [{ id: 'owned-schedule' }] });
     return response({ meta: { subreddits: [] } });
   });
 });
@@ -57,7 +58,7 @@ test("real platform forms gate delivery; master copy preserves subreddit and med
   expect(onUpload).not.toHaveBeenCalled();
 });
 
-test("scheduled submission reuses owned media and passes exact timezone/instant to existing handler", async () => {
+test("scheduled owned media creates a destination schedule without a second upload or upload-cap check", async () => {
   const form = await startReddit();
   fireEvent.change(within(form).getByLabelText("Subreddit *"), { target: { value: "coffee" } });
   fireEvent.change(within(form).getByLabelText("Title *"), { target: { value: "Coffee on Reddit" } });
@@ -72,14 +73,14 @@ test("scheduled submission reuses owned media and passes exact timezone/instant 
   expect(within(review).getByText("Coffee on Reddit")).toBeInTheDocument();
   expect(within(review).getAllByText(/Africa\/Johannesburg \(UTC\+02\)/).length).toBeGreaterThan(0);
   fireEvent.click(screen.getByRole("button", { name: /Schedule 1 posts/ }));
-  await waitFor(() => expect(onUpload).toHaveBeenCalledTimes(1));
-  const payload = onUpload.mock.calls[0][0];
-  expect(payload.url).toBe(asset.url);
-  expect(payload.schedule).toEqual(expect.objectContaining({ date: "2030-10-21T14:00:00.000Z", timezone: "Africa/Johannesburg", frequency: "once" }));
-  expect(payload.platform_options.reddit).toEqual(expect.objectContaining({ subreddit: "coffee", title: "Coffee on Reddit", kind: "video" }));
-  expect(payload.meta.sourceContentId).toBe(asset.id);
+  await screen.findByText(/scheduled from your existing media/);
+  expect(onUpload).not.toHaveBeenCalled();
   expect(fetch.mock.calls.filter(([, args]) => args?.method === "POST")).toHaveLength(1);
-  expect(fetch.mock.calls.filter(([, args]) => args?.method === "POST")[0][0]).toBe(API_ENDPOINTS.CONTENT_UPLOAD_READINESS);
+  const [url, options] = fetch.mock.calls.find(([, args]) => args?.method === "POST");
+  expect(url).toBe(API_ENDPOINTS.MY_CONTENT.replace(/\/my-content$/, '') + '/coffee-source/promotion-schedules');
+  const payload = JSON.parse(options.body);
+  expect(payload).toEqual(expect.objectContaining({time:'2030-10-21T14:00:00.000Z',timezone:'Africa/Johannesburg',frequency:'once',platforms:['reddit']}));
+  expect(payload.platformOptions.reddit).toEqual(expect.objectContaining({subreddit:'coffee',title:'Coffee on Reddit',kind:'video',videoUrl:asset.url}));
 });
 
 test("destination-specific copy survives switching between real forms and workflow steps", async () => {

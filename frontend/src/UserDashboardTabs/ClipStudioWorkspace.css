@@ -248,3 +248,10 @@
   cursor: pointer;
   margin-top: 12px;
 }
+.creator-studio-logo-entry { padding:24px; margin:20px 0; border:1px solid #465080; border-radius:16px; background:linear-gradient(125deg,#19152c,#0b1728); }
+.creator-studio-logo-entry h3 { margin-top:0; }
+.creator-studio-logo-entry p { max-width:740px; color:#b8c6dd; line-height:1.6; }
+.creator-studio-logo-entry { grid-column:1 / -1; }
+.creator-studio-logo-entry button.creator-studio-btn { pointer-events:auto; cursor:pointer; }
+.creator-studio-logo-entry button.creator-studio-btn:disabled { cursor:wait; opacity:.6; }
+.creator-studio-entry > section[aria-label="Saved Studio projects"] { max-height:360px; overflow:auto; display:grid; align-content:start; gap:6px; }

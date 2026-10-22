@@ -1,12 +1,21 @@
+import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { createOutputTimeMap, createTimeRange, secondsToTicks, ticksToSeconds } from "./studioTime";
 import { projectStudioLinkedTimingToSnapshot, projectStudioEditableStateToSnapshot, validateStudioProjectDocument } from "./studioProjectDocument";
 import { buildAdvancedColorCube } from "./studioColorCube";
 import { assertStudioLayerBlendMode, assertStudioMainBlendMode } from "./studioBlendModes";
+import { parseStudioMaskPolygon } from "./studioMaskGeometry";
+import { studioGroupTree, removeStudioGroupMembers, GROUP_KIND, validateStudioGroupKeyframes } from "./studioGroups";
+import { validateSpatialCurve } from "./studioAutomation";
+import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
 
 export const compileStudioOverlaysForRender = (document, transportSnapshot = {}) =>
   projectStudioEditableStateToSnapshot(document, transportSnapshot).overlays
     .filter(layer => !layer.isCaption).map(layer => {
       assertStudioLayerBlendMode(layer);
+      if (layer.vectorShape !== undefined) {
+        if (layer.type !== 'image') fail('INVALID_VECTOR_LAYER', 'Vector artwork needs an ordinary image layer.');
+        validateStudioVectorShape(layer.vectorShape);
+      }
       return { ...layer, start_time: Number(layer.startTime ?? 0), duration: Number(layer.duration ?? 0) };
     });
 
@@ -37,6 +46,7 @@ export const compileStudioTimelineForRender = document => {
 
 const visualRenderState = document => {
   validateStudioProjectDocument(document);
+  (document.visualGraph.settings.motionKeyframes || []).forEach(validateSpatialCurve);
   if (document.compatibility?.visualStateVersion !== 1)
     fail("UNMIGRATED_VISUAL_STATE", "Reconcile the saved visual state before compiling its render.");
   return { ...JSON.parse(JSON.stringify(document.visualGraph.settings)),
@@ -70,23 +80,55 @@ export const compileStudioFinishForRender = document => {
 };
 
 const compileBaseTransform = layer => ({
+  ...(layer.textAnimator ? { text_progress: layer.textProgress ?? 100 } : {}),
   x: Number(layer.x ?? 50), y: Number(layer.y ?? 50), scale: Number(layer.scale ?? 1),
   rotation: Number(layer.rotation ?? 0), opacity: Number(layer.opacity ?? 1),
   crop_x: Number(layer.cropX ?? 0), crop_y: Number(layer.cropY ?? 0),
+  ...(layer.vectorShape ? { stroke_start: layer.strokeStart ?? 0, stroke_end: layer.strokeEnd ?? 100,
+    stroke_offset: layer.strokeOffset ?? 0 } : {}),
 });
 
 export const compileStudioCompositionForRender = document => {
   const state = visualRenderState(document);
+  const compounds = document.editGraph?.settings?.compoundClips || [];
+  validateStudioGroupKeyframes(compounds, state.motionKeyframes);
+  if (compounds.some(group => group.kind === GROUP_KIND) && !Array.isArray(state.compositionOrder))
+    fail("MISSING_GROUP_LAYER_ORDER", "Graphic groups need an explicit canonical layer order.");
+  const disabledIds = state.threeDScenes.filter(scene => scene.enabled === false).map(scene => scene.id);
+  const order = state.compositionOrder?.filter(id => !disabledIds.includes(id));
+  // Validate the saved hierarchy first. Disabled 3D retains its editable parent;
+  // only the render projection removes that leaf and any resulting empty group.
+  if (Array.isArray(state.compositionOrder)) {
+    studioGroupTree(compounds, state.compositionOrder);
+  }
+  const groups = studioGroupTree(removeStudioGroupMembers(compounds, disabledIds), order || []).groups;
   assertStudioMainBlendMode(state.mainTransform);
   state.overlays.filter(overlay => !overlay.isCaption).forEach(assertStudioLayerBlendMode);
   for (const layer of [state.mainTransform, ...state.overlays]) {
+    validateStudioTextAnimation(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id));
+    validateStudioVectorTrim(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id));
     if (layer?.mask?.enabled && (layer.id === "main-video" || layer.type === "video" || layer.bRollPlaceholder || (layer.bRollMode === "fullscreen" && layer.type === "text")))
       fail("UNSUPPORTED_GEOMETRIC_VIDEO_MASK", "Geometric masks currently export on image and ordinary title layers. Use the reviewed subject-mask workflow for source video.");
+    if (layer?.mask?.enabled && layer.mask.shape === "polygon") {
+      try { parseStudioMaskPolygon(layer.mask.path || undefined); }
+      catch (error) { fail("INVALID_GEOMETRIC_MASK_PATH", `Mask polygon path: ${error.message}`); }
+    }
   }
   return { version: 1, coordinate_space: "canvas_percent", preview_timebase: "output_timeline_seconds",
+    ...(order ? { order } : {}),
+    ...(groups.length ? { groups: groups.map(group => {
+      const keys = (state.motionKeyframes || []).filter(key => key.targetId === group.id);
+      return { ...JSON.parse(JSON.stringify(group)), ...(keys.length ? { motion_keyframes: keys.map(key => ({
+        id: key.id, property: key.property, time: key.time, value: key.value, easing: key.easing || 'linear',
+        ...(key.curve ? { curve: [...key.curve] } : {}),
+        ...(key.spatialCurve ? { spatialCurve: [...key.spatialCurve] } : {}),
+      })) } : {}) };
+    }) } : {}),
     layers: [state.mainTransform || { id: "main-video", type: "video" },
       ...state.overlays.filter(overlay => !overlay.isCaption)].map(layer => ({
       id: layer.id, name: layer.name || layer.text || "Visual layer", type: layer.type || "visual",
+      ...(layer.vectorShape ? {vector_shape: JSON.parse(JSON.stringify(validateStudioVectorShape(layer.vectorShape)))} : {}),
+      ...(layer.textAnimator ? { text_animator: JSON.parse(JSON.stringify(layer.textAnimator)) } : {}),
       blend_mode: layer.blendMode || "normal",
       base_transform: compileBaseTransform(layer), anchor_x: Number(layer.anchorX ?? 50),
       anchor_y: Number(layer.anchorY ?? 50), effects: {
@@ -103,7 +145,8 @@ export const compileStudioCompositionForRender = document => {
       motion_keyframes: (state.motionKeyframes || []).filter(key => String(key.targetId) === String(layer.id))
         .map(key => ({ id: key.id, property: key.property, time: Number(key.time || 0),
           value: Number(key.value || 0), easing: key.easing || "ease_in_out",
-          ...(key.curve ? { curve: key.curve.map(Number) } : {}) })),
+          ...(key.curve ? { curve: key.curve.map(Number) } : {}),
+          ...(key.spatialCurve ? { spatialCurve: [...key.spatialCurve] } : {}) })),
     })),
   };
 };

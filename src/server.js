@@ -3635,10 +3635,12 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
             cleanupTempUploads,
             cleanupExpiredSourceUploads,
             cleanupExpiredMulticamRenders,
+            cleanupPublishedVideos,
           } = require("./services/storageCleanupService");
           await cleanupTempUploads();
           await cleanupExpiredSourceUploads();
           await cleanupExpiredMulticamRenders();
+          await cleanupPublishedVideos();
 
           try {
             const {

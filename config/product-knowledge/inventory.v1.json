@@ -611,7 +611,7 @@
     {
       "feature_id": "publishing.analytics",
       "path": "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
-      "anchor": "import React, { useState, useEffect, useCallback } from \"react\";",
+      "anchor": "const AnalyticsPanel = () => {",
       "required": true
     },
     {
@@ -673,6 +673,60 @@
       "path": "src/routes/assistantRoutes.js",
       "anchor": "router",
       "required": false
+    },
+    {
+      "feature_id": "studio.keyframes",
+      "path": "frontend/src/components/StudioMotionPathEditor.js",
+      "anchor": "Curve path",
+      "required": true
+    },
+    {
+      "feature_id": "studio.vector_artwork",
+      "path": "frontend/src/components/StudioVectorShapePanel.js",
+      "anchor": "StudioVectorShapePanel",
+      "required": true
+    },
+    {
+      "feature_id": "studio.text_choreography",
+      "path": "frontend/src/components/StudioTextAnimatorPanel.js",
+      "anchor": "StudioTextAnimatorPanel",
+      "required": true
+    },
+    {
+      "feature_id": "studio.logo_design",
+      "path": "frontend/src/components/StudioLogoDesignPanel.js",
+      "anchor": "StudioLogoDesignPanel",
+      "required": true
+    },
+    {
+      "feature_id": "studio.logo_design",
+      "path": "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
+      "anchor": "startLogoCanvas",
+      "required": true
+    },
+    {
+      "feature_id": "creative.showroom",
+      "path": "frontend/src/components/landing/StudioWelcomePage.js",
+      "anchor": "STUDIO_STORY",
+      "required": true
+    },
+    {
+      "feature_id": "creative.showroom",
+      "path": "frontend/src/components/landing/StudioWelcomePage.js",
+      "anchor": "function StudioReel",
+      "required": true
+    },
+    {
+      "feature_id": "studio.timeline",
+      "path": "frontend/src/Docs.js",
+      "anchor": "documentationLink",
+      "required": true
+    },
+    {
+      "feature_id": "creative.showroom",
+      "path": "frontend/src/components/public/PublicFooter.js",
+      "anchor": "FOOTER_GROUPS",
+      "required": true
     }
   ]
 }

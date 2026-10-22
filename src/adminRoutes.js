@@ -498,6 +498,20 @@ router.post(
   }
 );
 
+// An audited upload allowance changes capacity without rewriting a subscription.
+router.put("/users/:id/upload-allowance", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { setUploadAllowance } = require("./services/uploadAllowance");
+    const allowance = await setUploadAllowance(db, {
+      userId: req.params.id, adminId: req.userId || req.user.uid,
+      monthlyLimit: req.body.monthlyLimit, reason: req.body.reason,
+    });
+    res.json({ success: true, allowance });
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.status ? error.message : "Could not save upload allowance" });
+  }
+});
+
 // Admin upgrade user subscription (set plan)
 router.post("/users/:id/upgrade", authMiddleware, adminOnly, async (req, res) => {
   try {

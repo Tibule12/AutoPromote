@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 
 import numpy as np
+import pytest
 from PIL import Image, ImageDraw
 
 from python_media_worker.studio_layer_motion import (
@@ -13,7 +14,109 @@ from python_media_worker.studio_layer_motion import (
     layer_pose,
     _render_pose,
     render_image_layer_motion,
+    render_video_layer_motion,
 )
+
+
+def test_still_holds_reuse_one_raster_without_changing_encoded_pixels(tmp_path, monkeypatch):
+    from python_media_worker import studio_layer_motion as motion
+    source, output = tmp_path / "art.png", tmp_path / "holds.mov"
+    Image.new("RGBA", (18, 12), "#55e6ef").save(source)
+    overlay = {"type": "image", "start_time": 0, "duration": 1,
+               "width": 50, "height": 40, "frameShape": "edge"}
+    layer = {"base_transform": {"x": 30, "y": 50, "scale": 1, "opacity": .8},
+             "effects": {"glow": {"enabled": True, "radius": 2, "intensity": .3}},
+             "motion_keyframes": [{"property": "x", "time": 0, "value": 30},
+                 {"property": "x", "time": .5, "value": 70, "easing": "hold"}]}
+    calls = []
+    original = motion._render_pose
+    def observe(*args, **kwargs):
+        calls.append(args[3].copy())
+        return original(*args, **kwargs)
+    monkeypatch.setattr(motion, "_render_pose", observe)
+    render_image_layer_motion(source, output, overlay, layer, 64, 48, 1, [], fps=8)
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
+                                   "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    actual = np.frombuffer(raw, np.uint8).reshape(8, 48, 64, 4)
+    asset = Image.open(source).convert("RGBA")
+    for index, frame in enumerate(actual):
+        expected = original(asset, overlay, layer, layer_pose(layer, overlay, index / 8), (64, 48))
+        np.testing.assert_array_equal(frame, np.asarray(expected))
+    assert len(calls) == 2, "Each distinct held pose is rasterized once"
+
+
+def test_changing_decoded_frames_never_reuse_still_raster(tmp_path, monkeypatch):
+    from python_media_worker import studio_layer_motion as motion
+    calls = []
+    original = motion._render_pose
+    def observe(*args, **kwargs):
+        calls.append(1)
+        return original(*args, **kwargs)
+    monkeypatch.setattr(motion, "_render_pose", observe)
+    output = tmp_path / "changing.mov"
+    render_image_layer_motion(None, output,
+        {"type": "video", "start_time": 0, "duration": .5, "width": 100,
+         "height": 100, "frameShape": "edge"}, {}, 32, 32, .5, [], fps=4,
+        frame_source=lambda index: Image.new("RGBA", (16, 16), "red" if index == 0 else "blue"))
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
+                                  "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    frames = np.frombuffer(raw, np.uint8).reshape(2, 32, 32, 4)
+    np.testing.assert_array_equal(frames[0, 16, 16], [255, 0, 0, 255])
+    np.testing.assert_array_equal(frames[1, 16, 16], [0, 0, 255, 255])
+    assert len(calls) == 2
+
+
+def test_moving_video_uses_canonical_position_scale_opacity_and_changing_source_frames(tmp_path):
+    source, output = tmp_path / "moving.mov", tmp_path / "motion.mov"
+    subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y",
+        "-f", "lavfi", "-i", "color=c=red:s=16x16:r=10:d=0.3",
+        "-f", "lavfi", "-i", "color=c=blue:s=16x16:r=10:d=0.3",
+        "-filter_complex", "[0:v][1:v]concat=n=2:v=1:a=0[v]", "-map", "[v]",
+        "-c:v", "qtrle", str(source)], check=True)
+    original = source.read_bytes()
+    overlay = {"type": "video", "start_time": 0, "duration": .6,
+        "width": 40, "height": 40, "frameShape": "edge", "mediaFit": "contain"}
+    layer = {"motion_keyframes": [
+        {"property": prop, "time": time, "value": value, "easing": "linear"}
+        for prop, pairs in [("x", [(0, 25), (.4, 75)]),
+                            ("scale", [(0, 1), (.4, .5)]),
+                            ("opacity", [(0, 1), (.3, 1), (.5, 0)])]
+        for time, value in pairs]}
+    receipt = render_video_layer_motion(source, output, overlay, layer, 160, 100, .6, [], fps=10)
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
+        "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    frames = np.frombuffer(raw, np.uint8).reshape(-1, 100, 160, 4)
+    assert len(frames) == 6 and receipt["duration"] == .6
+    first, later = frames[0, ..., 3] > 20, frames[3, ..., 3] > 20
+    assert np.where(later)[1].mean() > np.where(first)[1].mean() + 45
+    assert later.sum() < first.sum() * .6
+    assert frames[0, ..., 0][first].mean() > 200
+    assert frames[3, ..., 2][later].mean() > 200, "Video must keep changing, not animate a frozen poster"
+    assert frames[-1, ..., 3].max() == 0, "Canonical opacity must reveal the underlying timeline"
+    assert source.read_bytes() == original
+
+
+def test_video_layer_maps_its_cue_and_pose_to_the_retained_speed_clock(tmp_path):
+    source, output = tmp_path / "prepared.mov", tmp_path / "motion.mov"
+    subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "lavfi", "-i",
+        "color=c=white:s=16x16:r=10:d=0.3", "-c:v", "qtrle", str(source)], check=True)
+    receipt = render_video_layer_motion(source, output,
+        {"type": "video", "start_time": .5, "duration": .5, "width": 20, "height": 20},
+        {"motion_keyframes": [{"property": "opacity", "time": .5, "value": .5}]},
+        80, 80, .75, [{"start_time": 0, "end_time": 1.5, "rate": 2}], fps=10)
+    assert receipt["start_time"] == .25 and receipt["duration"] == .25
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
+        "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    assert np.frombuffer(raw, np.uint8).reshape(-1, 80, 80, 4)[..., 3].max() == 128
+
+
+def test_video_layer_refuses_a_prepared_source_that_ends_far_before_the_clip(tmp_path):
+    source, output = tmp_path / "short.mov", tmp_path / "motion.mov"
+    subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "lavfi", "-i",
+        "color=c=white:s=16x16:r=10:d=0.2", "-c:v", "qtrle", str(source)], check=True)
+    with pytest.raises(RuntimeError, match="ended before"):
+        render_video_layer_motion(source, output,
+            {"type": "video", "start_time": 0, "duration": 1}, {}, 80, 80, 1, [], fps=10)
 
 
 def test_geometric_masks_use_layer_box_and_native_shape_precedence():
@@ -36,6 +139,17 @@ def test_soft_mask_feathers_only_alpha_and_inversion_is_its_exact_complement():
     assert sharper[50, 10] > soft[50, 10], "Sigma scales with programme/layer geometry"
 
 
+def test_rectangle_zero_radius_preserves_square_corners_and_inverse_coverage():
+    settings = {"enabled": True, "shape": "rectangle", "radius": 0}
+    square = np.asarray(layer_clip_mask((100, 100), settings))
+    assert square[0, 0] == 255 and square[-1, -1] == 255
+    rounded = np.asarray(layer_clip_mask((100, 100), {**settings, "radius": 6}))
+    assert rounded[0, 0] <= 1  # antialiasing may retain one alpha code value
+    inverse = np.asarray(layer_clip_mask((100, 100), {**settings, "feather": 8, "inverted": True}))
+    soft = np.asarray(layer_clip_mask((100, 100), {**settings, "feather": 8}))
+    assert np.all(soft.astype(int) + inverse.astype(int) == 255)
+
+
 def test_inverted_feathered_image_renders_a_hole_and_keeps_native_corner_rounding():
     overlay = {"type": "image", "width": 100, "height": 100, "mediaFit": "stretch"}
     layer = {"effects": {"mask": {"enabled": True, "shape": "ellipse", "inverted": True, "feather": 10}}}
@@ -43,6 +157,45 @@ def test_inverted_feathered_image_renders_a_hole_and_keeps_native_corner_roundin
     assert frame[50, 50, 3] == 0
     assert frame[5, 50, 3] > 0 and frame[0, 0, 3] == 0
     assert np.all(frame[frame[..., 3] > 0, :3] == (255, 0, 255)), "Feather changes alpha rather than smearing artwork"
+
+
+def test_blurred_transparent_artwork_preserves_color_at_partial_alpha():
+    # CSS blur filters premultiplied color. Filtering straight RGBA multiplies
+    # edge color by coverage twice when it is composited over the footage.
+    asset = Image.new("RGBA", (100, 100))
+    ImageDraw.Draw(asset).rectangle((25, 25, 74, 74), fill="magenta")
+    overlay = {"type": "image", "width": 100, "height": 100,
+               "mediaFit": "stretch", "frameShape": "edge"}
+    layer = {"effects": {"blur": 12}}
+    frame = np.asarray(_render_pose(asset, overlay, layer, layer_pose(layer, overlay, 0), (100, 100)))
+    edge = (frame[..., 3] >= 32) & (frame[..., 3] <= 224)
+    assert edge.sum() > 100
+    assert np.all(frame[edge, :3] == (255, 0, 255)), "Transparent pixels must not add a dark fringe"
+    on_white = Image.new("RGBA", (100, 100), "white")
+    on_white.alpha_composite(Image.fromarray(frame))
+    assert np.all(np.asarray(on_white)[edge][:, [0, 2]] == 255)
+
+
+@pytest.mark.parametrize("effects", [
+    {"blur": 12},
+    {"shadow": {"enabled": True, "x": 20, "y": 12, "blur": 8, "opacity": .8}},
+    {"glow": {"enabled": True, "radius": 16, "intensity": .7}},
+    {"blur": 8, "shadow": {"enabled": True, "x": 20, "y": 12, "blur": 8, "opacity": .8},
+     "glow": {"enabled": True, "radius": 16, "intensity": .7}},
+])
+def test_image_effects_keep_the_same_coverage_when_delivery_resolution_doubles(effects):
+    asset = Image.new("RGBA", (100, 100))
+    ImageDraw.Draw(asset).rectangle((25, 25, 74, 74), fill="magenta")
+    overlay = {"type": "image", "width": 40, "height": 40,
+               "mediaFit": "stretch", "frameShape": "edge"}
+    layer = {"effects": effects}
+    pose = layer_pose(layer, overlay, 0)
+    standard = _render_pose(asset, overlay, layer, pose, (720, 720))
+    doubled = _render_pose(asset, overlay, layer, pose, (1440, 1440)).resize((720, 720), Image.Resampling.LANCZOS)
+    a = np.asarray(standard.getchannel("A"), dtype=float) / 255
+    b = np.asarray(doubled.getchannel("A"), dtype=float) / 255
+    edge = (a > .05) & (a < .95)
+    assert np.sqrt(np.mean((a[edge] - b[edge]) ** 2)) < .02
 
 
 def test_crop_interpolates_canonical_camel_case_keys_on_edit_clock():
@@ -91,9 +244,19 @@ def test_title_masks_use_layout_box_excluding_shadow_asset_padding(tmp_path):
     geometry = render_title_asset({"text": "MASK", "bg": "#ff00ff", "color": "#ff00ff", "shadow": "none"}, source, 720, 720)
     asset = Image.open(source).convert("RGBA")
     clip_box = geometry["clipBox"]
-    content_width = round(asset.width * clip_box["width"])
-    content_height = round(asset.height * clip_box["height"])
-    assert asset.width > content_width and asset.height > content_height
+    raster_width = round(asset.width * clip_box["width"])
+    raster_height = round(asset.height * clip_box["height"])
+    assert asset.width > raster_width and asset.height > raster_height
+    # The title asset is supersampled. Expected output bounds use its declared
+    # programme-space dimensions, not its higher-density PNG pixel dimensions.
+    content_width = round(720 * geometry["width"] / 100 * clip_box["width"])
+    content_height = round(720 * geometry["height"] / 100 * clip_box["height"])
+    # Probe the declared layout box, rather than assuming four glyphs or their
+    # text background fill its entire width. Keep the actual asset padding and
+    # the same one-pixel mask/anchor assertions below.
+    left, top = round(asset.width * clip_box["x"]), round(asset.height * clip_box["y"])
+    ImageDraw.Draw(asset).rectangle((left, top, left + raster_width - 1, top + raster_height - 1),
+                                   fill=(255, 0, 255, 255))
     overlay = {**geometry, "type": "text", "mediaFit": "stretch"}
     layer = {"anchor_x": geometry["anchorX"], "anchor_y": geometry["anchorY"],
              "clip_box": clip_box, "base_transform": {"x": 50, "y": 50, "crop_x": 25}}

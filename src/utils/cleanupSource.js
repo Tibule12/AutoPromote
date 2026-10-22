@@ -191,6 +191,19 @@ async function cleanupSourceFile(fileUrl, options = {}) {
     return { status: "skipped_content_lookup_failed", error: error.message };
   }
 
+  if (referencedContent?.data) {
+    const owner = referencedContent.data.user_id || referencedContent.data.userId || referencedContent.data.uid;
+    if (owner) {
+      try {
+        const billing = await admin.firestore().collection("user_billing").doc(owner).get();
+        if (billing.data()?.storageRetention?.publishedVideoHours === 24)
+          return { status: "skipped_published_retention_managed", contentId };
+      } catch (error) {
+        return { status: "skipped_retention_lookup_failed", contentId };
+      }
+    }
+  }
+
   if (shouldKeepReferencedSource(fileUrl, referencedContent?.data)) {
     console.log(
       `[Cleanup] Keeping source for content ${contentId || "unknown"} because it is still the only user-facing media URL.`

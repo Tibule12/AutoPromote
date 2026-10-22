@@ -231,20 +231,15 @@ describe("ViralClipStudio timeline sequencing", () => {
   };
 
   const readyCutawaySource = (duration, pausePreview = true) => {
-    const video = screen.getByTestId("studio-after-video");
+    const video = screen.getByTestId('studio-after-video');
     Object.defineProperties(video, {
       duration: { configurable: true, value: duration },
       readyState: { configurable: true, value: 4 },
       currentSrc: { configurable: true, get: () => video.src },
     });
-    let paused = video.paused;
-    Object.defineProperty(video, "paused", { configurable: true, get: () => paused });
-    video.play = jest.fn(() => { if (paused) { paused = false; video.dispatchEvent(new Event("play")); } return Promise.resolve(); });
-    video.pause = jest.fn(() => { if (!paused) { paused = true; video.dispatchEvent(new Event("pause")); } });
     fireEvent.loadedMetadata(video);
     fireEvent.loadedData(video);
-    fireEvent.seeked(video);
-    const pause = screen.queryByRole("button", { name: "Pause comparison", exact: true });
+    const pause = screen.queryByRole('button', { name: 'Pause comparison', exact: true });
     if (pausePreview && pause) fireEvent.click(pause);
     return video;
   };
@@ -285,6 +280,45 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(layer).toBeTruthy();
     expect(layer.style.filter).toContain('drop-shadow(0px 0px 0px');
     expect(layer.style.filter).toContain('drop-shadow(0 0 0px');
+  });
+
+  test.each(['image', 'video'])('canonical %s opacity and transform keys cannot be replaced by legacy entrance animation', async type => {
+    const source = { id: 'range', start: 2, end: 8, duration: 6, sourceDuration: 12 };
+    const artwork = { id: 'artwork', type, src: `https://example.com/artwork.${type === 'image' ? 'png' : 'mp4'}`,
+      startTime: 0, duration: 6, x: 50, y: 50, width: 30, height: 30,
+      animation: { enter: 'zoom', enterDuration: .35 } };
+    mountNativePreview({ initialSavedProject: { id: 'keyed-artwork', name: 'Keyed artwork', snapshot: {
+      orderedClips: [source], selectedClipId: 'range',
+      timeline: [{ ...source, sourceClipId: 'range', startRequest: 2, endRequest: 8, url: 'https://example.com/source.mp4' }],
+      overlays: [artwork], addHook: false,
+      motionKeyframes: [{ id: 'alpha', targetId: 'artwork', property: 'opacity', time: 0, value: .4 },
+        { id: 'rotation', targetId: 'artwork', property: 'rotation', time: 0, value: 15 }],
+    } } });
+    const media = type === 'image' ? await screen.findByAltText('Overlay')
+      : await screen.findByTestId('broll-preview-artwork');
+    const layer = media.closest('.draggable-overlay');
+    expect(layer).not.toHaveClass('broll-anim-zoom');
+    expect(layer).toHaveStyle({ opacity: '0.4', animation: 'none', transition: 'none' });
+    expect(layer.style.getPropertyValue('--title-rotation')).toBe('15deg');
+  });
+
+  test('paused scrubbing seeks the matching video overlay to its programme clock', async () => {
+    const source = { id: 'range', start: 2, end: 8, duration: 6, sourceDuration: 12 };
+    mountNativePreview({ initialSavedProject: { id: 'scrub-result', name: 'Scrub result', snapshot: {
+      orderedClips: [source], selectedClipId: 'range',
+      timeline: [{ ...source, sourceClipId: 'range', startRequest: 2, endRequest: 8,
+        url: 'https://example.com/source.mp4' }], addHook: false,
+      overlays: [{ id: 'result', type: 'video', src: 'https://example.com/result.mp4',
+        startTime: 0, duration: 6, sourceDuration: 12, sourceStartTime: .5,
+        x: 50, y: 50, width: 100, height: 90 }],
+    } } });
+    const overlay = await screen.findByTestId('broll-preview-result');
+    Object.defineProperty(overlay, 'duration', { configurable: true, value: 12 });
+    fireEvent.change(screen.getByLabelText('Edited output position'), { target: { value: '2.3' } });
+    await waitFor(() => expect(overlay.currentTime).toBeCloseTo(2.8, 3));
+    fireEvent.change(screen.getByLabelText('Edited output position'), { target: { value: '2.4' } });
+    await waitFor(() => expect(overlay.currentTime).toBeCloseTo(2.9, 3));
+    expect(overlay.paused).toBe(true);
   });
 
   test("metadata reload preserves the selected trim and paused editing frame", () => {
@@ -1035,6 +1069,41 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(media).toHaveAttribute("aria-controls", screen.getByRole("tabpanel", { name: "Media" }).id);
   });
 
+  test("replacing the entire sequence removes unrelated footage while preserving timed graphics and sound atomically", async () => {
+    global.fetch.mockResolvedValue({ok:true,json:async()=>({url:'https://example.com/owned.mp4',generation:'1'})});
+    const first={id:'people',name:'Headphones people',start:0,end:4,duration:4,url:'https://example.com/people.mp4',storagePath:'studio/sources/test-user/people.mp4'};
+    const canvas={id:'canvas',name:'Ink canvas',url:'https://example.com/ink.mp4',storagePath:'studio/sources/test-user/ink.mp4',duration:30,status:'ready',mediaType:'video'};
+    const snapshot={orderedClips:[first],selectedClipId:first.id,timeline:[{...first,sourceClipId:first.id,startRequest:0,endRequest:4},{...first,id:'people2',sourceClipId:first.id,startRequest:4,endRequest:8}],
+      projectMedia:[{...first,status:'ready'},canvas],reframeAspect:'16:9',previewSpeed:1,addHook:false,silenceRemoval:false,
+      overlays:[{id:'word',name:'LOOP',type:'text',text:'LOOP',clipId:'people',startTime:2,duration:4,strokeWidth:3,strokeColor:'#ff5436'}],
+      motionKeyframes:[{id:'source-key',targetId:'main-video',property:'scale',time:1,value:1.1},{id:'title-key',targetId:'word',property:'x',time:2,value:50}],
+      addMusic:true,musicTrack:{id:'music',name:'Score',url:'https://example.com/score.wav',sourceStoragePath:'uploads/audios/test-user/score.wav',volume:.8},
+      captionSegments:[{id:'old-caption',start:0,end:1,text:'Old footage words'}]};
+    const saveSpy=jest.spyOn(studioProjectStore,'saveViralStudioProject').mockImplementation(async project=>({...project,updatedAt:Date.now()}));
+    try {
+      render(<ViralClipStudio videoUrl={first.url} clips={[first]} initialSavedProject={{id:'replace-sequence',name:'Motion only',snapshot}} onSave={jest.fn()} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Motion only');
+      fireEvent.click(screen.getByTestId('studio-save-project'));await waitFor(()=>expect(saveSpy).toHaveBeenCalled());
+      const before=saveSpy.mock.calls.at(-1)[0].snapshot;
+      fireEvent.click(screen.getByRole('button',{name:'Preview Ink canvas',hidden:true}));
+      expect(screen.getByRole('button',{name:'Replace entire sequence',hidden:true})).not.toBeDisabled();
+      fireEvent.click(screen.getByRole('button',{name:'Replace entire sequence',hidden:true}));
+      expect(screen.getByText(/Sequence replaced by/)).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(()=>expect(saveSpy.mock.calls.at(-1)[0].snapshot.timeline).toHaveLength(1));
+      const after=saveSpy.mock.calls.at(-1)[0].snapshot;
+      expect(after.timeline[0]).toMatchObject({name:'Ink canvas',startRequest:0,endRequest:8,duration:8});
+      expect(after.orderedClips).toHaveLength(1);expect(after.projectMedia.map(item=>item.name)).toEqual(['Ink canvas']);
+      expect(after.motionKeyframes).toEqual([snapshot.motionKeyframes[1]]);expect(after.musicTrack).toEqual(before.musicTrack);
+      expect(after.overlays[0]).toMatchObject({text:'LOOP',startTime:2,duration:4,clipId:after.timeline[0].id,strokeWidth:3,strokeColor:'#ff5436'});
+      expect(after.captionSegments).toEqual([]);
+      fireEvent.click(screen.getByTestId('studio-undo-button'));fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(()=>expect(saveSpy.mock.calls.at(-1)[0].snapshot.timeline).toEqual(before.timeline));
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.motionKeyframes).toEqual(before.motionKeyframes);
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.projectMedia).toEqual(before.projectMedia);
+    }finally{saveSpy.mockRestore();}
+  });
+
   test("batch media stays ordered in the library until explicitly placed, with isolated failures", async () => {
     const previousCreateUrl = URL.createObjectURL;
     const previousRevokeUrl = URL.revokeObjectURL;
@@ -1096,7 +1165,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       programme.currentTime = 4;
       fireEvent.timeUpdate(programme);
       fireEvent.click(within(library).getByRole("button", { name: "Add as B-roll" }));
-      const brollClip = screen.getByRole("button", { name: "B-roll: Scene 13.mp4, 4.0 to 7.0 seconds, full-screen cutaway" });
+      const brollClip = screen.getByRole("button", { name: "Select Scene 13.mp4 layer clip" }).closest(".pro-group-clip");
       expect(parseFloat(brollClip.style.left)).toBeCloseTo(100 / 3, 2);
       expect(within(library).getByText("Used as B-roll")).toBeInTheDocument();
       fireEvent.click(within(library).getByRole("button", { name: "Add to sequence" }));
@@ -1938,6 +2007,12 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId('studio-after-video').src).toContain('source.mp4');
     fireEvent.click(screen.getByRole('button',{name:'Show Finished Video',exact:true}));
     expect(screen.getByTestId('studio-after-video').src).toContain('rendered.mp4?access=renewed');
+    fireEvent.click(within(screen.getByRole('navigation',{name:'Creative tools'})).getByRole('button',{name:'Motion',exact:true}));
+    fireEvent.click(screen.getByRole('button',{name:'Transform keyframes',exact:true}));
+    fireEvent.change(within(screen.getByTestId('clip-studio-inspector')).getByLabelText('X'),{target:{value:'37'}});
+    expect(screen.getByTestId('studio-after-video').src).toContain('source.mp4');
+    fireEvent.click(within(screen.getByRole('navigation',{name:'Creative tools'})).getByRole('button',{name:'Export',exact:true}));
+    expect(screen.getByRole('button',{name:'Download Rendered Clip'})).toBeEnabled();
   });
 
   test("removes a marked middle range and exports retained segments with a join style", async () => {
@@ -3057,6 +3132,119 @@ describe("ViralClipStudio timeline sequencing", () => {
     })]);
   });
 
+  test("composition timeline moves keyed titles as one undo step and respects the actual owning track", async () => {
+    const source = { id: 'source', start: 0, end: 8, duration: 8 };
+    const snapshot = { orderedClips: [source], selectedClipId: 'source',
+      timeline: [{ ...source, id: 'main', sourceClipId: 'source', url: 'https://example.com/source.mp4', startRequest: 0, endRequest: 8 }],
+      reframeAspect: '16:9', smartCrop: false, autoCaptions: false, addHook: false,
+      trackStates: { broll: { locked: true }, graphics: { locked: false } },
+      overlays: [{ id: 'word', name: 'BREAK', type: 'text', text: 'BREAK', startTime: 1, duration: 3, x: 50, y: 50 }],
+      motionKeyframes: [{ id: 'word-x', targetId: 'word', property: 'x', time: 1.5, value: 50 }] };
+    const saveSpy = jest.spyOn(studioProjectStore, 'saveViralStudioProject').mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[source]}
+        initialSavedProject={{ id: 'keyed-timeline', name: 'Keyed timeline', snapshot }} onSave={jest.fn()} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Keyed timeline');
+      fireEvent.click(screen.getByTestId('studio-save-project')); await waitFor(() => expect(saveSpy).toHaveBeenCalled());
+      const before = saveSpy.mock.calls.at(-1)[0].snapshot;
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Select BREAK layer clip' }), { key: 'ArrowRight', shiftKey: true });
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays[0].startTime).toBeGreaterThan(1));
+      const moved = saveSpy.mock.calls.at(-1)[0].snapshot;
+      expect(moved.motionKeyframes[0].time - 1.5).toBeCloseTo(moved.overlays[0].startTime - 1, 5);
+      fireEvent.click(screen.getByTestId('studio-undo-button')); fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays).toEqual(before.overlays));
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.motionKeyframes).toEqual(before.motionKeyframes);
+      fireEvent.click(screen.getByRole('button', { name: 'Expand BREAK keyframes' }));
+      const x = screen.getByLabelText('BREAK x value'); fireEvent.focus(x); fireEvent.change(x, { target: { value: '70' } }); fireEvent.blur(x);
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.motionKeyframes.some(key => key.targetId === 'word' && key.property === 'x' && key.value === 70)).toBe(true));
+      fireEvent.click(screen.getByTestId('studio-undo-button'));
+      fireEvent.click(screen.getByRole('button', { name: 'Sequence tracks' }));
+      fireEvent.click(within(screen.getByTestId('pro-track-row-graphics')).getByRole('button', { name: 'Lock track', hidden: true }));
+      fireEvent.click(screen.getByRole('button', { name: 'Composition layers' }));
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Select BREAK layer clip' }), { key: 'ArrowRight' });
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays).toEqual(before.overlays);
+    } finally { saveSpy.mockRestore(); }
+  });
+
+  test("imported choreography has atomic history and reaches the ordinary export graph", async () => {
+    const snapshot = { orderedClips: [{ id: 'source', start: 0, end: 8, duration: 8 }], selectedClipId: 'source',
+      timeline: [{ id: 'main', sourceClipId: 'source', url: 'https://example.com/source.mp4', startRequest: 0, endRequest: 8, duration: 8 }],
+      reframeAspect: '16:9', smartCrop: false, autoCaptions: false, motionScenes: [], threeDScenes: [], overlays: [] };
+    const input = { format: 'autopromote-graphics', version: 1, name: 'Choreography', width: 1280, height: 720, duration: 8,
+      layers: [{ id: 'word', name: 'BREAK', type: 'text', text: 'BREAK', startTime: 0, duration: 8, x: 50, y: 50, scale: 3,
+        rotation: 0, opacity: 1, width: 90, fontWeight: 900, textAlign: 'center', color: '#ff5436',
+        keys: [{ property: 'x', time: 0, value: 10, easing: 'linear' }, { property: 'x', time: 1, value: 50, easing: 'ease_out' }] }], groups: [] };
+    const file = new File([JSON.stringify(input)], 'motion.json', { type: 'application/json' });
+    Object.defineProperty(file, 'text', { value: async () => JSON.stringify(input) });
+    const onSave = jest.fn(async () => ({}));
+    const saveSpy = jest.spyOn(studioProjectStore, 'saveViralStudioProject').mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={snapshot.orderedClips}
+        initialSavedProject={{ id: 'graphics-import', name: 'Graphics import', snapshot }} onSave={onSave} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Graphics import');
+      fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' })).getByRole('button', { name: 'Graphics', exact: true }));
+      fireEvent.change(screen.getByLabelText('Graphics composition file'), { target: { files: [file] } });
+      await waitFor(() => expect(within(screen.getByTestId('studio-graphics-import')).getByRole('status', { hidden: true })).toHaveTextContent('Choreography imported.'), { timeout: 3000 });
+      fireEvent.click(screen.getByTestId('studio-save-project')); await waitFor(() => expect(saveSpy).toHaveBeenCalled());
+      const saved = saveSpy.mock.calls.at(-1)[0].snapshot; expect(saved.overlays[0].text).toBe('BREAK'); expect(saved.motionKeyframes).toHaveLength(2);
+      fireEvent.click(screen.getByTestId('studio-undo-button')); fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays).toHaveLength(0));
+      fireEvent.click(screen.getByTestId('studio-redo-button')); await clickRenderFinalClip(); await waitFor(() => expect(onSave).toHaveBeenCalled());
+      const layer = onSave.mock.calls[0][2].compositionPlan.layers.find(layer => layer.id === saved.overlays[0].id);
+      expect(layer.motion_keyframes.map(key => key.value)).toEqual([10, 50]);
+    } finally { saveSpy.mockRestore(); }
+  });
+
+  test("kinetic typography builds ordinary title layers with atomic history and the same export graph", async () => {
+    const snapshot = {
+      orderedClips: [{ id: 'source', start: 0, end: 8, duration: 8 }], selectedClipId: 'source',
+      timeline: [{ id: 'main', sourceClipId: 'source', url: 'https://example.com/source.mp4', startRequest: 0, endRequest: 8, duration: 8 }],
+      reframeAspect: '16:9', smartCrop: false, autoCaptions: false, motionScenes: [], threeDScenes: [], activeOverlayId: 'type-source',
+      overlays: [{ id: 'type-source', type: 'text', text: 'MAKE EVERY WORD MOVE', x: 50, y: 50,
+        width: 90, scale: 1, startTime: 0, duration: 4, bg: 'transparent', fontFamily: 'Inter', opacity: 1 }],
+    };
+    const originalFonts = Object.getOwnPropertyDescriptor(document, 'fonts');
+    Object.defineProperty(document, 'fonts', { configurable: true, value: { load: jest.fn(async () => []) } });
+    const originalCanvas = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = () => ({ clearRect() {}, drawImage() {}, measureText: text => ({ width: text.length * 18 }) });
+    const saveSpy = jest.spyOn(studioProjectStore, 'saveViralStudioProject').mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    const onSave = jest.fn(async () => ({}));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={snapshot.orderedClips}
+        initialSavedProject={{ id: 'kinetic-editor', name: 'Kinetic editor', snapshot }} onSave={onSave} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Kinetic editor');
+      fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' })).getByRole('button', { name: 'Graphics', exact: true }));
+      fireEvent.change(screen.getByLabelText('Title text', { exact: true }), { target: { value: 'MAKE EVERY\nWORD MOVE' } });
+      expect(screen.getByLabelText('Title text', { exact: true })).toHaveValue('MAKE EVERY\nWORD MOVE');
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Build editable text motion', exact: true })); });
+      await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+      await screen.findByText(/4 editable words created/, {}, { timeout: 3000 });
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy).toHaveBeenCalled());
+      const saved = saveSpy.mock.calls.at(-1)[0].snapshot;
+      expect(saved.overlays.map(layer => layer.text)).toEqual(['MAKE', 'EVERY', 'WORD', 'MOVE']);
+      expect(saved.overlays[0].y).toBeLessThan(saved.overlays[2].y);
+      expect(saved.motionKeyframes).toHaveLength(64); expect(saved.compoundClips).toHaveLength(1);
+      fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes', exact: true }));
+      expect(screen.getByRole('button', { name: 'Expand MAKE · 1 keyframes', exact: true })).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('studio-undo-button'));
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays).toHaveLength(1));
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.overlays[0].id).toBe('type-source');
+      fireEvent.click(screen.getByTestId('studio-redo-button'));
+      await clickRenderFinalClip(); await waitFor(() => expect(onSave).toHaveBeenCalled());
+      const plan = onSave.mock.calls[0][2].compositionPlan;
+      expect(plan.layers.filter(layer => saved.overlays.some(word => word.id === layer.id))).toHaveLength(4);
+      expect(plan.groups[0].layerIds).toEqual(saved.compoundClips[0].layerIds);
+    } finally {
+      saveSpy.mockRestore(); HTMLCanvasElement.prototype.getContext = originalCanvas;
+      if (originalFonts) Object.defineProperty(document, 'fonts', originalFonts); else delete document.fonts;
+    }
+  });
+
   test("fullscreen inserts respect the saved title stack and native layer reordering reaches export", async () => {
     const projectId = "saved-layer-stack";
     const snapshot = {
@@ -3793,6 +3981,8 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(previewShell.querySelector(".overlay-controls")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "After" }));
+    const pauseForHandles = screen.queryByRole('button', { name: 'Pause comparison', exact: true });
+    if (pauseForHandles) fireEvent.click(pauseForHandles);
     expect(previewShell.querySelector(".draggable-overlay.active")).toBeInTheDocument();
     expect(previewShell.querySelector(".overlay-controls")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "W+" }));
@@ -4444,6 +4634,8 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const inspector = screen.getByTestId("clip-studio-inspector");
     fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.change(within(inspector).getByLabelText("Speech language"), {target:{value:"za-mixed"}});
+    expect(global.fetch).not.toHaveBeenCalled();
     fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
 
     await waitFor(() => {
@@ -4458,7 +4650,30 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(JSON.parse(request.body)).toEqual({
       storage_path: "temp/multicam-ingest/test-user/full-podcast.mp4",
       translate_to_english: false,
+      source_language: "za-mixed",
     });
+  });
+
+  test.each(["timed", "quick"])("keeps wording edited while a caption regeneration is pending: %s", async mode => {
+    const result = text => ({ok:true,json:async()=>({segments:[{start:0,end:2,text,speaker:"speaker_1",language:"en"}]})});
+    let complete;
+    global.fetch.mockResolvedValueOnce(result("Original spoken line"))
+      .mockImplementationOnce(() => new Promise(resolve => { complete = resolve; }));
+    mountNativePreview({videoUrl:"https://example.com/source.mp4",
+      sourceStoragePath:"studio/sources/test-user/source.mp4",
+      clips:[{id:"source-a",start:0,end:12,duration:12}]});
+    const inspector=screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab",{name:/Captions/i}));
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+    const line=await within(inspector).findByRole("textbox",{name:"Caption 1 text"});
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+    await waitFor(()=>expect(complete).toBeDefined());
+    const edited=mode === "quick" ? within(inspector).getByRole("textbox",{name:"Caption copy"}) : line;
+    fireEvent.change(edited,{target:{value:"My reviewed wording"}});
+    await act(async()=>complete(result("Late automatic result")));
+    await waitFor(()=>expect(within(inspector).getByRole("alert")).toHaveTextContent("Your edits were kept"));
+    expect(edited).toHaveValue("My reviewed wording");
+    expect(line).toHaveValue(mode === "quick" ? "Original spoken line" : "My reviewed wording");
   });
 
   test("shows an actionable error for the uploaded WhatsApp video and allows a retry", async () => {
@@ -4819,10 +5034,9 @@ describe("ViralClipStudio timeline sequencing", () => {
         ),
       });
 
-    // Export checks the source audio after the queued caption/stock responses.
     global.fetch.mockResolvedValue({ ok: true,
-      json: jest.fn(() => Promise.resolve({ has_audio: true, silence_segments: [{ start: 0, end: 2 }, { start: 6, end: 12 }] })) });
-
+      json: jest.fn(() => Promise.resolve({ has_audio: true,
+        silence_segments: [{ start: 0, end: 2 }, { start: 6, end: 12 }] })) });
     render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
@@ -4832,6 +5046,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         onStatusChange={jest.fn()}
       />
     );
+    readyCutawaySource(12);
 
     readyCutawaySource(12);
     const inspector = screen.getByTestId("clip-studio-inspector");
@@ -5473,19 +5688,23 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.change(within(inspector).getByLabelText("Y"), { target: { value: "42" } });
     fireEvent.click(within(inspector).getByRole("button", { name: /Add transform keyframe/i }));
 
-    const afterVideo = screen.getByTestId("studio-after-video");
-    Object.defineProperty(afterVideo, "currentTime", {
-      configurable: true,
-      writable: true,
-      value: 4,
-    });
-    fireEvent.timeUpdate(afterVideo);
+    fireEvent.change(screen.getByLabelText("Edited output position"), { target: { value: "4" } });
     fireEvent.change(within(inspector).getByLabelText("X"), { target: { value: "72" } });
     fireEvent.change(within(inspector).getByLabelText("Y"), { target: { value: "61" } });
     fireEvent.click(within(inspector).getByRole("button", { name: /Add transform keyframe/i }));
 
     expect(within(inspector).getAllByText("Transform pose")).toHaveLength(2);
     expect(screen.getByTestId("studio-motion-path").querySelector("polyline")).toBeInTheDocument();
+
+    fireEvent.change(within(inspector).getByLabelText("Transform pose at 0.00 seconds easing"), {
+      target: { value: "bezier" },
+    });
+    fireEvent.change(within(inspector).getByLabelText("Transform pose at 0.00 seconds Bezier in handle"), {
+      target: { value: "0.3" },
+    });
+    fireEvent.change(within(inspector).getByLabelText("Transform pose at 0.00 seconds Bezier out handle"), {
+      target: { value: "0.8" },
+    });
 
     await clickRenderFinalClip();
     await waitFor(() => expect(onSave).toHaveBeenCalled());
@@ -5499,7 +5718,8 @@ describe("ViralClipStudio timeline sequencing", () => {
             // Animated property edits update the playhead key, preserving the base pose.
             base_transform: expect.objectContaining({ x: 35, y: 42 }),
             motion_keyframes: expect.arrayContaining([
-              expect.objectContaining({ property: "x", time: 0, value: 35 }),
+              expect.objectContaining({ property: "x", time: 0, value: 35, easing: "bezier", curve: [0.33, 0.3, 0.67, 0.8] }),
+              expect.objectContaining({ property: "y", time: 0, value: 42, easing: "bezier", curve: [0.33, 0.3, 0.67, 0.8] }),
               expect.objectContaining({ property: "x", time: 4, value: 72 }),
             ]),
           }),
@@ -5624,6 +5844,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect.objectContaining({ startTime: 3, tone: "impact" }),
     ]));
     commandSpy.mockRestore();
+    fireEvent.click(screen.getByRole("button", { name: "Sequence tracks", exact: true }));
     expect(screen.getByTestId("pro-motion-clip-1")).toHaveAttribute("title", expect.stringContaining("3.00s"));
     expect(within(inspector).getByText("4.00s")).toBeInTheDocument();
     fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Motion", exact: true }));

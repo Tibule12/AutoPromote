@@ -136,6 +136,8 @@ const FEATURE_PRICES = {
   processing_fee_percent: 0.0,
 };
 
+const { effectiveUploadLimit } = require("./uploadAllowance");
+
 function buildTesterTier(baseTier) {
   return {
     ...baseTier,
@@ -279,7 +281,9 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
   const tierId = await resolveEffectiveTierId(userId, billingData, userData);
   const baseTier = TIERS[tierId.toUpperCase()] || TIERS.FREE;
   const testerAccess = getActiveTesterAccess(userData);
-  const tier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const selectedTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const tier = { ...selectedTier,
+    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData) };
 
   try {
     const normalizedStatus = String(
@@ -331,7 +335,9 @@ async function calculateCreatorCharge(userId, intent, _featuresSelected = []) {
   const userTierId = await resolveEffectiveTierId(userId, billingData, userData);
   const baseTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
   const testerAccess = getActiveTesterAccess(userData);
-  const userTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const selectedTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
+  const userTier = { ...selectedTier,
+    monthly_upload_cap: effectiveUploadLimit(selectedTier.monthly_upload_cap, billingData) };
 
   // 2. Check Upload Caps (for Organic/Commercial)
   const used = billingData.uploads_this_month || 0;

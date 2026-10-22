@@ -1,5 +1,6 @@
 import React from "react";
 import "./LogoutConfirmDialog.css";
+import AutoPromoteLogo from './AutoPromoteLogo';
 
 const getInitials = user => {
   const source = user?.name || user?.displayName || user?.email || "AP";
@@ -32,8 +33,7 @@ const LogoutConfirmDialog = ({ user, isWorking = false, onCancel, onConfirm }) =
       >
         <header className="logout-dialog__header">
           <a href="/" className="logout-dialog__brand" aria-label="AutoPromote home">
-            <span aria-hidden="true">▶</span>
-            <strong>AutoPromote</strong>
+            <AutoPromoteLogo compact />
           </a>
           <button
             type="button"

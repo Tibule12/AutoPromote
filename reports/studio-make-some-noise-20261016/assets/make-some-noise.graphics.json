@@ -1,0 +1,3443 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "MAKE SOME NOISE \u2014 kinetic poster",
+  "width": 1280,
+  "height": 720,
+  "duration": 12,
+  "layers": [
+    {
+      "id": "00 \u00b7 Acid paper",
+      "name": "00 \u00b7 Acid paper",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#dfff00\"/></svg>",
+      "startTime": 0,
+      "duration": 12,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    },
+    {
+      "id": "02 \u00b7 Blue paper",
+      "name": "02 \u00b7 Blue paper",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#1729de\"/></svg>",
+      "startTime": 3,
+      "duration": 3,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    },
+    {
+      "id": "04 \u00b7 Blue paper",
+      "name": "04 \u00b7 Blue paper",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#1729de\"/></svg>",
+      "startTime": 9,
+      "duration": 3,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    },
+    {
+      "id": "01 \u00b7 MAKE 1 / M",
+      "name": "01 \u00b7 MAKE 1 / M",
+      "type": "text",
+      "text": "M",
+      "startTime": 0.0,
+      "duration": 3.0,
+      "x": 35.3720703125,
+      "y": 50,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101115",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0.0,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.65,
+          "value": 35.3720703125,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.0,
+          "value": 35.3720703125,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 0.0,
+          "value": 92,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.65,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.6,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.0,
+          "value": 47,
+          "easing": "ease_in"
+        },
+        {
+          "property": "rotation",
+          "time": 0.0,
+          "value": -140,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 2.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 3.0,
+          "value": -8,
+          "easing": "ease_in"
+        },
+        {
+          "property": "scale",
+          "time": 0.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 0.4,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 0.7,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.5,
+          "value": 4.8,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 1.65,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.85,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "01 \u00b7 MAKE 2 / A",
+      "name": "01 \u00b7 MAKE 2 / A",
+      "type": "text",
+      "text": "A",
+      "startTime": 0.12,
+      "duration": 2.88,
+      "x": 47.193359375,
+      "y": 50,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101115",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0.12,
+          "value": 85,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.69,
+          "value": 47.193359375,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.0,
+          "value": 47.193359375,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 0.12,
+          "value": 8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.69,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.6,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.0,
+          "value": 47,
+          "easing": "ease_in"
+        },
+        {
+          "property": "rotation",
+          "time": 0.12,
+          "value": 110,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.69,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 2.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 3.0,
+          "value": -8,
+          "easing": "ease_in"
+        },
+        {
+          "property": "scale",
+          "time": 0.12,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 0.46,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 0.76,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.59,
+          "value": 4.8,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 1.74,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.94,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "01 \u00b7 MAKE 3 / K",
+      "name": "01 \u00b7 MAKE 3 / K",
+      "type": "text",
+      "text": "K",
+      "startTime": 0.24,
+      "duration": 2.76,
+      "x": 57.6845703125,
+      "y": 50,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101115",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0.24,
+          "value": 20,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.73,
+          "value": 57.6845703125,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.0,
+          "value": 57.6845703125,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 0.24,
+          "value": 84,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.73,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.6,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.0,
+          "value": 47,
+          "easing": "ease_in"
+        },
+        {
+          "property": "rotation",
+          "time": 0.24,
+          "value": -90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.73,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 2.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 3.0,
+          "value": -8,
+          "easing": "ease_in"
+        },
+        {
+          "property": "scale",
+          "time": 0.24,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 0.52,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 0.82,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.68,
+          "value": 4.8,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 1.83,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 2.03,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "01 \u00b7 MAKE 4 / E",
+      "name": "01 \u00b7 MAKE 4 / E",
+      "type": "text",
+      "text": "E",
+      "startTime": 0.36,
+      "duration": 2.64,
+      "x": 66.9453125,
+      "y": 50,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101115",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0.36,
+          "value": 88,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 0.77,
+          "value": 66.9453125,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.0,
+          "value": 66.9453125,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 0.36,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 0.77,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 2.6,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.0,
+          "value": 47,
+          "easing": "ease_in"
+        },
+        {
+          "property": "rotation",
+          "time": 0.36,
+          "value": 140,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 0.77,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 2.5,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 3.0,
+          "value": -8,
+          "easing": "ease_in"
+        },
+        {
+          "property": "scale",
+          "time": 0.36,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 0.58,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 0.88,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.77,
+          "value": 4.8,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 1.92,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 2.12,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "01 \u00b7 A LITTLE COURAGE.",
+      "name": "01 \u00b7 A LITTLE COURAGE.",
+      "type": "text",
+      "text": "A LITTLE COURAGE.",
+      "startTime": 0.75,
+      "duration": 2.05,
+      "x": 50,
+      "y": 17,
+      "scale": 0.65,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#101115",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0.75,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 1.0,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 2.6,
+          "value": 1,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 2.8,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "02 \u00b7 SOME outline 2",
+      "name": "02 \u00b7 SOME outline 2",
+      "type": "text",
+      "text": "SOME",
+      "startTime": 3,
+      "duration": 3.0,
+      "x": 50,
+      "y": 80,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 0.3,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#1729de",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.0,
+          "value": 38,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 4.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.0,
+          "value": 62,
+          "easing": "ease_in"
+        }
+      ],
+      "strokeWidth": 1.5,
+      "strokeColor": "#dfff00"
+    },
+    {
+      "id": "02 \u00b7 SOME outline 1",
+      "name": "02 \u00b7 SOME outline 1",
+      "type": "text",
+      "text": "SOME",
+      "startTime": 3,
+      "duration": 3.0,
+      "x": 50,
+      "y": 20,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 0.3,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#1729de",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.0,
+          "value": 62,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 4.1,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.0,
+          "value": 38,
+          "easing": "ease_in"
+        }
+      ],
+      "strokeWidth": 1.5,
+      "strokeColor": "#dfff00"
+    },
+    {
+      "id": "02 \u00b7 SOME 1 / S",
+      "name": "02 \u00b7 SOME 1 / S",
+      "type": "text",
+      "text": "S",
+      "startTime": 3.0,
+      "duration": 3.0,
+      "x": 34.173828125,
+      "y": 50,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#dfff00",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.0,
+          "value": 46.173828125,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.55,
+          "value": 34.173828125,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.0,
+          "value": 34.173828125,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.0,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3.55,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.5,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.0,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 3.0,
+          "value": -90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 3.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.3,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.6,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "02 \u00b7 SOME 2 / O",
+      "name": "02 \u00b7 SOME 2 / O",
+      "type": "text",
+      "text": "O",
+      "startTime": 3.1,
+      "duration": 2.9,
+      "x": 43.90625,
+      "y": 50,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#dfff00",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.1,
+          "value": 31.90625,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.65,
+          "value": 43.90625,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.0,
+          "value": 43.90625,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.1,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3.65,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.5,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.0,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 3.1,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 3.1,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.4,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.7,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "02 \u00b7 SOME 3 / M",
+      "name": "02 \u00b7 SOME 3 / M",
+      "type": "text",
+      "text": "M",
+      "startTime": 3.2,
+      "duration": 2.8,
+      "x": 55.595703125,
+      "y": 50,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#dfff00",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.2,
+          "value": 67.595703125,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.75,
+          "value": 55.595703125,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.0,
+          "value": 55.595703125,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.2,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3.75,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.5,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.0,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 3.2,
+          "value": -90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 3.2,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.5,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.8,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "02 \u00b7 SOME 4 / E",
+      "name": "02 \u00b7 SOME 4 / E",
+      "type": "text",
+      "text": "E",
+      "startTime": 3.3,
+      "duration": 2.7,
+      "x": 66.1865234375,
+      "y": 50,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#dfff00",
+      "keys": [
+        {
+          "property": "x",
+          "time": 3.3,
+          "value": 54.1865234375,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.85,
+          "value": 66.1865234375,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.0,
+          "value": 66.1865234375,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 3.3,
+          "value": 18,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3.85,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.5,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 6.0,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 3.3,
+          "value": 90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 3.85,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 3.3,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.6,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.9,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 NOISE 1 / N",
+      "name": "03 \u00b7 NOISE 1 / N",
+      "type": "text",
+      "text": "N",
+      "startTime": 6.0,
+      "duration": 3.0,
+      "x": 34.1650390625,
+      "y": 45,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101115",
+      "keys": [
+        {
+          "property": "y",
+          "time": 6.0,
+          "value": 8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 6.5,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.0,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 7.2,
+          "value": 37,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.45,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 8.5,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9.0,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 6.0,
+          "value": -110,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 7.2,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.45,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.35,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.6,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 NOISE 2 / O",
+      "name": "03 \u00b7 NOISE 2 / O",
+      "type": "text",
+      "text": "O",
+      "startTime": 6.08,
+      "duration": 2.92,
+      "x": 44.5947265625,
+      "y": 45,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#1729de",
+      "keys": [
+        {
+          "property": "y",
+          "time": 6.08,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 6.58,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.1,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 7.3,
+          "value": 37,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.55,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 8.5,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9.0,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 6.08,
+          "value": 110,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.58,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.1,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 7.3,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.08,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.43,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.68,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 NOISE 3 / I",
+      "name": "03 \u00b7 NOISE 3 / I",
+      "type": "text",
+      "text": "I",
+      "startTime": 6.16,
+      "duration": 2.84,
+      "x": 51.7958984375,
+      "y": 45,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101115",
+      "keys": [
+        {
+          "property": "y",
+          "time": 6.16,
+          "value": 8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 6.66,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.2,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 7.4,
+          "value": 37,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.65,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 8.5,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9.0,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 6.16,
+          "value": -110,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.66,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.2,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 7.4,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.16,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.51,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.76,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 NOISE 4 / S",
+      "name": "03 \u00b7 NOISE 4 / S",
+      "type": "text",
+      "text": "S",
+      "startTime": 6.24,
+      "duration": 2.76,
+      "x": 58.2587890625,
+      "y": 45,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#1729de",
+      "keys": [
+        {
+          "property": "y",
+          "time": 6.24,
+          "value": 82,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 6.74,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.3,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 7.5,
+          "value": 37,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.75,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 8.5,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9.0,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 6.24,
+          "value": 110,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.74,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.3,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 7.5,
+          "value": 12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.24,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.59,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.84,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 NOISE 5 / E",
+      "name": "03 \u00b7 NOISE 5 / E",
+      "type": "text",
+      "text": "E",
+      "startTime": 6.32,
+      "duration": 2.68,
+      "x": 66.892578125,
+      "y": 45,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#101115",
+      "keys": [
+        {
+          "property": "y",
+          "time": 6.32,
+          "value": 8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 6.82,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.4,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 7.6,
+          "value": 37,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.85,
+          "value": 45,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 8.5,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "y",
+          "time": 9.0,
+          "value": 45,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 6.32,
+          "value": -110,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 6.82,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.4,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 7.6,
+          "value": -12,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 7.85,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.32,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.67,
+          "value": 5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.92,
+          "value": 4.8,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 4.8,
+          "easing": "hold"
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 Meter 1",
+      "name": "03 \u00b7 Meter 1",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"160\"><rect width=\"40\" height=\"160\" rx=\"20\" fill=\"#1729de\"/></svg>",
+      "startTime": 6,
+      "duration": 3,
+      "x": 43,
+      "y": 77,
+      "width": 1.1,
+      "height": 8,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.75,
+          "value": 0.35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.15,
+          "value": 1.35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.7,
+          "value": 0.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.15,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.7,
+          "value": 0.35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 Meter 2",
+      "name": "03 \u00b7 Meter 2",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"160\"><rect width=\"40\" height=\"160\" rx=\"20\" fill=\"#1729de\"/></svg>",
+      "startTime": 6,
+      "duration": 3,
+      "x": 50,
+      "y": 77,
+      "width": 1.1,
+      "height": 8,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.33,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.75,
+          "value": 0.35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.21,
+          "value": 1.35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.7,
+          "value": 0.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.2,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.7,
+          "value": 0.35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 Meter 3",
+      "name": "03 \u00b7 Meter 3",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"160\"><rect width=\"40\" height=\"160\" rx=\"20\" fill=\"#1729de\"/></svg>",
+      "startTime": 6,
+      "duration": 3,
+      "x": 57,
+      "y": 77,
+      "width": 1.1,
+      "height": 8,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.41,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.75,
+          "value": 0.35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.27,
+          "value": 1.35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.7,
+          "value": 0.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.7,
+          "value": 0.35,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 LET THEM HEAR YOU.",
+      "name": "03 \u00b7 LET THEM HEAR YOU.",
+      "type": "text",
+      "text": "LET THEM HEAR YOU.",
+      "startTime": 6.6,
+      "duration": 2.2,
+      "x": 50,
+      "y": 92,
+      "scale": 0.6,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#101115",
+      "keys": []
+    },
+    {
+      "id": "04 \u00b7 MAKE",
+      "name": "04 \u00b7 MAKE",
+      "type": "text",
+      "text": "MAKE",
+      "startTime": 9.0,
+      "duration": 3.0,
+      "x": 50,
+      "y": 28,
+      "scale": 3.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#fffdf4",
+      "keys": [
+        {
+          "property": "x",
+          "time": 9.0,
+          "value": 85,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9.6,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 12.0,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 9.0,
+          "value": 20,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 12.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 9.0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 9.15,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "04 \u00b7 SOME",
+      "name": "04 \u00b7 SOME",
+      "type": "text",
+      "text": "SOME",
+      "startTime": 9.16,
+      "duration": 2.84,
+      "x": 50,
+      "y": 48,
+      "scale": 3.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#fffdf4",
+      "keys": [
+        {
+          "property": "x",
+          "time": 9.16,
+          "value": 15,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9.76,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 12.0,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 9.16,
+          "value": -20,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9.76,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 12.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 9.16,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 9.31,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "04 \u00b7 NOISE.",
+      "name": "04 \u00b7 NOISE.",
+      "type": "text",
+      "text": "NOISE.",
+      "startTime": 9.32,
+      "duration": 2.68,
+      "x": 50,
+      "y": 71,
+      "scale": 4.8,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 900,
+      "textAlign": "center",
+      "color": "#dfff00",
+      "keys": [
+        {
+          "property": "x",
+          "time": 9.32,
+          "value": 85,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 9.92,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 12.0,
+          "value": 50,
+          "easing": "hold"
+        },
+        {
+          "property": "rotation",
+          "time": 9.32,
+          "value": 20,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 9.92,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 12.0,
+          "value": 0,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 9.32,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 9.47,
+          "value": 1,
+          "easing": "linear"
+        }
+      ]
+    },
+    {
+      "id": "04 \u00b7 YOUR VOICE. YOUR RULES.",
+      "name": "04 \u00b7 YOUR VOICE. YOUR RULES.",
+      "type": "text",
+      "text": "YOUR VOICE. YOUR RULES.",
+      "startTime": 10,
+      "duration": 2.0,
+      "x": 50,
+      "y": 94,
+      "scale": 0.55,
+      "rotation": 0,
+      "opacity": 1,
+      "width": 95,
+      "fontWeight": 600,
+      "textAlign": "center",
+      "color": "#fffdf4",
+      "keys": []
+    },
+    {
+      "id": "04 \u00b7 Sound burst",
+      "name": "04 \u00b7 Sound burst",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"200\"><line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"55\" stroke=\"#dfff00\" stroke-width=\"6\" transform=\"rotate(0 100 100)\"/><line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"55\" stroke=\"#dfff00\" stroke-width=\"6\" transform=\"rotate(45 100 100)\"/><line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"55\" stroke=\"#dfff00\" stroke-width=\"6\" transform=\"rotate(90 100 100)\"/><line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"55\" stroke=\"#dfff00\" stroke-width=\"6\" transform=\"rotate(135 100 100)\"/><line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"55\" stroke=\"#dfff00\" stroke-width=\"6\" transform=\"rotate(180 100 100)\"/><line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"55\" stroke=\"#dfff00\" stroke-width=\"6\" transform=\"rotate(225 100 100)\"/><line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"55\" stroke=\"#dfff00\" stroke-width=\"6\" transform=\"rotate(270 100 100)\"/><line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"55\" stroke=\"#dfff00\" stroke-width=\"6\" transform=\"rotate(315 100 100)\"/></svg>",
+      "startTime": 9,
+      "duration": 1.5999999999999996,
+      "x": 84,
+      "y": 30,
+      "width": 10,
+      "height": 18,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 0.1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 9.5,
+          "value": 1.2,
+          "easing": "bezier",
+          "curve": [
+            0.18,
+            1.25,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 10.1,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 10.6,
+          "value": 0.1,
+          "easing": "ease_in"
+        },
+        {
+          "property": "rotation",
+          "time": 9.0,
+          "value": -90,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "rotation",
+          "time": 10.6,
+          "value": 45,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 9.0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 9.2,
+          "value": 1,
+          "easing": "linear"
+        },
+        {
+          "property": "opacity",
+          "time": 10.2,
+          "value": 1,
+          "easing": "hold"
+        },
+        {
+          "property": "opacity",
+          "time": 10.6,
+          "value": 0,
+          "easing": "linear"
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": "01 \u00b7 MAKE / assemble",
+      "name": "01 \u00b7 MAKE / assemble",
+      "layerIds": [
+        "01 \u00b7 MAKE 1 / M",
+        "01 \u00b7 MAKE 2 / A",
+        "01 \u00b7 MAKE 3 / K",
+        "01 \u00b7 MAKE 4 / E"
+      ],
+      "startTime": 0,
+      "duration": 3,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0.0,
+          "value": 1.6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 2.5,
+          "value": 1.6,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 3.0,
+          "value": 1.6640000000000001,
+          "easing": "ease_in"
+        }
+      ]
+    },
+    {
+      "id": "02 \u00b7 SOME / countertype",
+      "name": "02 \u00b7 SOME / countertype",
+      "layerIds": [
+        "02 \u00b7 SOME outline 2",
+        "02 \u00b7 SOME outline 1",
+        "02 \u00b7 SOME 1 / S",
+        "02 \u00b7 SOME 2 / O",
+        "02 \u00b7 SOME 3 / M",
+        "02 \u00b7 SOME 4 / E"
+      ],
+      "startTime": 3,
+      "duration": 3,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 3.0,
+          "value": 1.6,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 5.5,
+          "value": 1.6,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 1.6640000000000001,
+          "easing": "ease_in"
+        }
+      ]
+    },
+    {
+      "id": "03 \u00b7 NOISE / travelling accent",
+      "name": "03 \u00b7 NOISE / travelling accent",
+      "layerIds": [
+        "03 \u00b7 NOISE 1 / N",
+        "03 \u00b7 NOISE 2 / O",
+        "03 \u00b7 NOISE 3 / I",
+        "03 \u00b7 NOISE 4 / S",
+        "03 \u00b7 NOISE 5 / E"
+      ],
+      "startTime": 6,
+      "duration": 3,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 6.0,
+          "value": 1.5,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.5,
+          "value": 1.5,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 1.56,
+          "easing": "ease_in"
+        }
+      ]
+    },
+    {
+      "id": "04 \u00b7 MAKE SOME NOISE / resolve",
+      "name": "04 \u00b7 MAKE SOME NOISE / resolve",
+      "layerIds": [
+        "04 \u00b7 MAKE",
+        "04 \u00b7 SOME",
+        "04 \u00b7 NOISE."
+      ],
+      "startTime": 9,
+      "duration": 3,
+      "keys": [
+        {
+          "property": "scale",
+          "time": 9.0,
+          "value": 1.15,
+          "easing": "bezier",
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 11.5,
+          "value": 1.15,
+          "easing": "hold"
+        },
+        {
+          "property": "scale",
+          "time": 12.0,
+          "value": 1.196,
+          "easing": "ease_in"
+        }
+      ]
+    }
+  ]
+}

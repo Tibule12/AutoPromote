@@ -1,0 +1,343 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-14T16:11:42.450086Z",
+  "clientDate": "2026-10-14",
+  "branch": "agent/studio-professional-continuation-v2",
+  "capabilityImproved": "Static group-local masks and whole-group/child blend semantics on the existing canonical animated hierarchy and compositor",
+  "changedImplementationFiles": [
+    "frontend/src/components/StudioAdvancedInspectors.js",
+    "frontend/src/components/StudioGroupInspector.js",
+    "frontend/src/components/StudioGroupPreview.js",
+    "frontend/src/components/StudioMaskPathEditor.js",
+    "frontend/src/components/ViralClipStudio.js",
+    "frontend/src/components/studioGroups.js",
+    "frontend/src/components/studioRenderCompiler.js",
+    "python_media_worker/main_media_server.py",
+    "python_media_worker/studio_composition.py"
+  ],
+  "implementationSha256": {
+    "frontend/src/components/StudioAdvancedInspectors.js": "fd022a275c0fcd112bca122f10acc8fffd6e7153a15314fd779480b1d2d3df3f",
+    "frontend/src/components/StudioGroupInspector.js": "5c4e7379d7681d894b0a6cce597512b746854c1062773e9a2f1cd09200a9757d",
+    "frontend/src/components/StudioGroupPreview.js": "f9a622a939818962653216ff2ac6f3d036d661683808c8e2a7473a419684e7dc",
+    "frontend/src/components/StudioMaskPathEditor.js": "9121c1894e7e9da67bb499e9d6e4e77aa59924cfd0f9e5900397757f77d8f5a7",
+    "frontend/src/components/ViralClipStudio.js": "b2eb5c17d454b3bfb00adfe08c9a29afc60fb79e31293b397f118a97f8361e82",
+    "frontend/src/components/studioGroups.js": "1856c1e2979206e62291b34812e01d743e6ec0a0945167f6918f67c190ab6667",
+    "frontend/src/components/studioRenderCompiler.js": "17d894463a21de393e52bbb5f08c1c32d27f8bff83da4229ebfa6d1ecd13aa8d",
+    "python_media_worker/main_media_server.py": "560901871d767268e37f70f5c6e3de5a70cb1845d7a820cc61ce21273753f9ac",
+    "python_media_worker/studio_composition.py": "69404974424d5d32cd4029c6906f6068988b89ffa078bdb10ee6064cafd98d26"
+  },
+  "nativeCases": [
+    {
+      "projectId": "viral-project-303fcc6a-0ff2-42ce-990a-7d578b7bfa0c",
+      "canonicalHash": "43e7e57dd0c7c7530ca489ed3fae4dba9ae27d21e883abf0e08c001bd5d1f5dc",
+      "order": [
+        "motion-12aaa46c-a688-4ddb-8732-0aecf836ccfb",
+        "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5",
+        "motion-f4872948-174a-4517-97b9-2f3059478e6f",
+        "title-ea0da8e1-7c17-4428-9840-6e1df42224d5"
+      ],
+      "groups": [
+        {
+          "id": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "name": "Group 1",
+          "kind": "graphic_group",
+          "layerIds": [
+            "motion-12aaa46c-a688-4ddb-8732-0aecf836ccfb",
+            "overlay-f5e11635-b705-40ff-8a22-429a97ffcca5"
+          ],
+          "transform": {
+            "x": -8,
+            "y": 5,
+            "scale": 0.85,
+            "rotation": -12,
+            "opacity": 0.8
+          },
+          "blendMode": "multiply",
+          "mask": {
+            "enabled": true,
+            "shape": "polygon",
+            "path": "polygon(0% 0%, 75% 0%, 75% 100%, 0% 100%)",
+            "feather": 4
+          }
+        },
+        {
+          "id": "group-dd5ad063-d781-4a0b-8c2e-74c04e012a8e",
+          "name": "Group 2",
+          "kind": "graphic_group",
+          "layerIds": [
+            "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+            "motion-f4872948-174a-4517-97b9-2f3059478e6f"
+          ],
+          "transform": {
+            "x": 12,
+            "y": -4,
+            "scale": 1.1,
+            "rotation": 18,
+            "opacity": 0.9
+          },
+          "blendMode": "screen",
+          "mask": {
+            "enabled": true,
+            "radius": 12
+          }
+        }
+      ],
+      "masterKeys": [
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-da687470-8db7-4583-b9f7-847d84d5ef59",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "x",
+          "value": -8,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-7ae86484-a8f4-477b-af6b-8cf26da52369",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "y",
+          "value": 5,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-730cb585-fa5f-407c-8af7-fa463db30af4",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "scale",
+          "value": 0.85,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-77b8e651-32a2-4645-8ee7-6eb3e92c8337",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "rotation",
+          "value": -12,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-32b9dd58-a984-4dd6-9126-ead89ecb29ad",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "opacity",
+          "value": 0.8,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-cfc85f3a-11ac-4d25-aa58-ef420bbfc86f",
+          "targetId": "group-dd5ad063-d781-4a0b-8c2e-74c04e012a8e",
+          "property": "y",
+          "value": -4,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-98808de2-eb7f-4528-b854-8a50394cfefa",
+          "targetId": "group-dd5ad063-d781-4a0b-8c2e-74c04e012a8e",
+          "property": "rotation",
+          "value": 18,
+          "time": 0
+        },
+        {
+          "easing": "ease_in_out",
+          "id": "motion-key-6d6160c4-318d-4612-bb99-ea114ca9d3aa",
+          "targetId": "group-dd5ad063-d781-4a0b-8c2e-74c04e012a8e",
+          "property": "opacity",
+          "value": 0.9,
+          "time": 0
+        },
+        {
+          "easing": "bezier",
+          "id": "motion-key-8d0bad4a-0d1d-4833-baff-a2ea9a5aaa50",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "x",
+          "value": 0,
+          "curve": [
+            0.2,
+            0,
+            0.8,
+            1
+          ],
+          "time": 2
+        },
+        {
+          "easing": "linear",
+          "id": "motion-key-ae5326df-909e-476b-8382-43535c4b9ea4",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "y",
+          "value": -1,
+          "time": 2
+        },
+        {
+          "easing": "linear",
+          "id": "motion-key-544ef2fb-f0ad-499f-aa42-6f362c8e6917",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "scale",
+          "value": 0.9,
+          "time": 2
+        },
+        {
+          "easing": "linear",
+          "id": "motion-key-07bf01d7-252b-4f10-8ea7-aebec0546bfc",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "rotation",
+          "value": 4,
+          "time": 2
+        },
+        {
+          "easing": "linear",
+          "id": "motion-key-c0087946-139d-4244-92b1-7ab33bd0043b",
+          "targetId": "group-4ab92c26-1b04-4964-8881-2f3b124a2042",
+          "property": "opacity",
+          "value": 0.95,
+          "time": 2
+        },
+        {
+          "easing": "linear",
+          "id": "motion-key-361f66b1-8691-44ec-9011-54452d71ae17",
+          "targetId": "group-dd5ad063-d781-4a0b-8c2e-74c04e012a8e",
+          "property": "y",
+          "value": 4,
+          "time": 2
+        },
+        {
+          "easing": "linear",
+          "id": "motion-key-fc92c471-6bc4-4755-bd70-8c5e5cd8e5ef",
+          "targetId": "group-dd5ad063-d781-4a0b-8c2e-74c04e012a8e",
+          "property": "rotation",
+          "value": 5,
+          "time": 2
+        },
+        {
+          "easing": "linear",
+          "id": "motion-key-7bced01f-96cf-40d5-bf8d-f4480f20e188",
+          "targetId": "group-dd5ad063-d781-4a0b-8c2e-74c04e012a8e",
+          "property": "opacity",
+          "value": 0.75,
+          "time": 2
+        }
+      ],
+      "allKeysPreserved": true,
+      "posesPreserved": true,
+      "polygonDraftValidation": true,
+      "inversionUndoRedo": true,
+      "maskResetUndo": true,
+      "graphicsLock": true,
+      "saveColdReopen": true,
+      "gpuJobs": 0,
+      "noMocks": true,
+      "variant": "composite",
+      "outputSha256": "3493a4e0d7f5be7e6166be76344f7ee7b3cb19527ec1322e14090e23c8e148be",
+      "studioRecordingSha256": "cd517d0fe63965c1aa73aa7513f09b1062180e4aa5ed0ea05f594d7e6feb5c39",
+      "movie": "reports/studio-professional-group-composite-20261014/proof/composite/final.mp4",
+      "studioRecording": "reports/studio-professional-group-composite-20261014/proof/composite/edited-in-studio.mp4",
+      "completePlayback": {
+        "duration": 3,
+        "time": 3,
+        "ended": true,
+        "width": 720,
+        "height": 1280,
+        "playbackRate": 1,
+        "decodedFrames": 78
+      },
+      "screencastFrames": 76,
+      "timelineVisible": true
+    }
+  ],
+  "pairQualification": {
+    "comparisons": [
+      {
+        "variant": "composite",
+        "time": 0.5,
+        "nativePixels": 37389,
+        "finalPixels": 37182,
+        "visibleImageIou": 0.9914276558243871,
+        "boundaryP95Pixels": 1.0,
+        "interiorRgbRmse": 2.39016583040977,
+        "interiorPixels": 32680,
+        "passed": true
+      },
+      {
+        "variant": "composite",
+        "time": 1,
+        "nativePixels": 38480,
+        "finalPixels": 38312,
+        "visibleImageIou": 0.9908742092709738,
+        "boundaryP95Pixels": 1.0,
+        "interiorRgbRmse": 2.317463330091537,
+        "interiorPixels": 33706,
+        "passed": true
+      },
+      {
+        "variant": "composite",
+        "time": 1.5,
+        "nativePixels": 29433,
+        "finalPixels": 29210,
+        "visibleImageIou": 0.989246947082768,
+        "boundaryP95Pixels": 1.0,
+        "interiorRgbRmse": 3.2268460992634505,
+        "interiorPixels": 25176,
+        "passed": true
+      },
+      {
+        "variant": "composite",
+        "time": 2.5,
+        "nativePixels": 26686,
+        "finalPixels": 26502,
+        "visibleImageIou": 0.9886338144021536,
+        "boundaryP95Pixels": 1.0,
+        "interiorRgbRmse": 1.765363094770293,
+        "interiorPixels": 22631,
+        "passed": true
+      }
+    ],
+    "boundaryP95TolerancePixels": 2,
+    "visibleImageIouMinimum": 0.95,
+    "interiorRgbRmseTolerance": 4,
+    "interiorMarginPixels": 6,
+    "passed": true,
+    "gpuJobs": 0,
+    "scope": "Masked/blended magenta artwork interiors use the existing S02 RGB RMSE 4.0 limit and a six-pixel boundary margin declared before color measurement. Four declared exact paused samples of one native image/two-motion stack with 16 nested group keys, eight animated channels and a custom X curve. The visible magenta classifier R>140,G<90,B>140 and existing 2px/0.95 limits are retained from the static group proof, declared before measurement. Original artwork geometry/occlusion and bounded masked/blended image-interior color only, no fitted spatial/time alignment. Full glyph/mask-alpha/raster/live sound/owned3D, broader curves/retiming/stacks and continuous parity remain unqualified."
+  },
+  "unchangedDecodedAudio": {
+    "originalMovie": "reports/studio-professional-group-keyframes-20261014/proof/animated/final.mp4",
+    "movie": "reports/studio-professional-group-composite-20261014/proof/composite/final.mp4",
+    "decodedPcmSha256": "4985b9651374884d8302f0c8fe0100bbdbf6ae4b94d8937f465774108af43738",
+    "pcmBytes": 288768,
+    "unchanged": true,
+    "gpuJobs": 0,
+    "scope": "Exact decoded PCM identity for this unchanged source tone only; no live sound or human listening qualification."
+  },
+  "focusedFrontendCasesPassed": 91,
+  "compositorAndMotionCasesPassed": 131,
+  "compositorAndMotionSubtestsPassed": 6,
+  "legacyAudioMotionWorkerCasesPassed": 21,
+  "legacyAudioMotionWorkerSubtestsPassed": 255,
+  "focusedDistinctCasesPassed": 243,
+  "subtestsPassed": 261,
+  "strictAppBuild": "PASS",
+  "nativeCpuExports": 1,
+  "gpuJobs": 0,
+  "paidGpuRuntimeSeconds": 0,
+  "paidGpuCost": 0,
+  "ownedLocalQaStopped": true,
+  "wholePreviewFinalParityQualified": false,
+  "fullStudioSuiteQualified": false,
+  "readinessPromoted": false,
+  "retainedFailures": [
+    "Initial frontend assertion still expected the retired membership/static-only error; assertion updated without relaxing validation.",
+    "First native edit harness used the wrong Graphics lock locator and timed out after successful mask edits; failure screenshot/JSON and saved checkpoints retained. Correct normal track row locator then passes with no export resubmission."
+  ],
+  "remainingBlockers": [
+    "Editable group anchor and group clip/occurrence ownership/timing remain unimplemented.",
+    "Mask path/radius/feather/inversion and blend mode are static decisions; their animation and broader feather/inversion/overlap/media combinations remain unqualified.",
+    "All eight non-Normal modes pass actual FFmpeg transparent/partial/opaque backdrop fixtures; native proof covers nested Multiply and root Screen only, not every mode/media/stack.",
+    "Actual video/owned 3D/deeper/larger groups, broader grouped drag/deletion, native retiming, continuous/cold picture, full glyph/mask-alpha/effect/raster and live sound/human listening remain unqualified.",
+    "Worker Bézier expressions use the existing 32-sample approximation; broad curve equivalence remains unqualified.",
+    "Earlier S02 ellipse 1.5s RGB RMSE 4.26944 still exceeds the unchanged 4.0 limit.",
+    "Completed-export recovery after diagnostic duplication from the earlier static-group session remains unqualified; this session normal cold recovery passes."
+  ],
+  "nextImplementationSlice": "S03 group clip/occurrence ownership and timing through the canonical hierarchy; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open",
+  "productKnowledgeCasesPassed": 17
+}
