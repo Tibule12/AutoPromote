@@ -11508,5 +11508,36 @@
       "S03",
       "S04"
     ]
+  },
+  "mediaWorkerDeliveryClock20261022": {
+    "scope": "Correct AAC-padding-derived programme length in actual candidate render",
+    "evidenceRef": "reports/media-worker-delivery-clock-20261022/README.md",
+    "failedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/39714971272",
+    "before": {
+      "requestedSeconds": 2,
+      "incorrectTargetSeconds": 2.042993,
+      "pictureSeconds": 2,
+      "containerSeconds": 2.043,
+      "frames": 48,
+      "fps": 24,
+      "gate": "failed"
+    },
+    "afterLocal": {
+      "targetSeconds": 2,
+      "pictureSeconds": 2,
+      "audioSeconds": 2,
+      "containerSeconds": 2,
+      "frames": 48,
+      "fps": 24,
+      "gate": "passed"
+    },
+    "source": "Pinned deployment source and actual shared render handler; local source-copy and output-upload boundary isolation",
+    "pictureToleranceUnchanged": true,
+    "audioProofUnchanged": true,
+    "blackGateUnchanged": true,
+    "nativeStudioQualification": false,
+    "readinessPromotion": false,
+    "cloudPromotion": "Pending repaired workflow execution",
+    "nextSharedTask": "Retain S02 full picture/sound, S03 ownership and S04 depth"
   }
 }
