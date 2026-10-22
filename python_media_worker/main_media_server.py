@@ -32562,8 +32562,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         # 2.75. Apply the Studio speed plan before captions and overlays so
         # transcription, caption timing, B-roll, and audio share one final clock.
-        pre_speed_duration = get_media_duration(working_path) or max(
-            0.0, float(request.end_time) - float(request.start_time)
+        # An intermediate MP4 can retain an AAC packet beyond the last picture
+        # after a stream-copy trim. That container padding is not programme time:
+        # feeding it into the speed map lengthens the mix past the authored cut.
+        pre_speed_duration = (
+            sum(float(segment.end_time) - float(segment.start_time)
+                for segment in normalized_segments)
+            if normalized_segments
+            else max(0.0, float(request.end_time) - float(request.start_time))
         )
         speed_plan = normalize_speed_plan(
             pre_speed_duration,
