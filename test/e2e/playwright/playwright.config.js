@@ -5,6 +5,7 @@ const { devices } = require("@playwright/test");
 module.exports = {
   testDir: "./",
   timeout: 3 * 60 * 1000,
+  globalTimeout: process.env.CI ? 20 * 60 * 1000 : undefined,
   use: {
     headless: process.env.PW_HEADFUL !== "1",
     channel: process.env.PW_CHANNEL || undefined,
@@ -27,9 +28,9 @@ module.exports = {
     ignoreHTTPSErrors: true,
   },
   reporter: [
-    ["list"],
+    [process.env.CI ? "line" : "list"],
     ["junit", { outputFile: "test-results/junit.xml" }],
-    ["html", { outputFolder: "test-results/html-report" }],
+    ["html", { outputFolder: "test-results/html-report", open: "never" }],
   ],
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 };

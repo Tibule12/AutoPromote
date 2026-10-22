@@ -8085,7 +8085,8 @@ const ViralClipStudio = ({
     if (smartCrop || reframeModeCuts.length) {
       const framingMode = mode === "cover" ? "speaker_track" : "off";
       setSmartCrop(true);
-      setSmartCropMode(framingMode);
+      // Keep the last enabled mode so Enable Auto Reframe can restore it.
+      if (framingMode !== "off") setSmartCropMode(framingMode);
       recordReframeModeAtPlayhead(framingMode);
     }
     setComparisonMode("after");
@@ -22333,7 +22334,9 @@ const ViralClipStudio = ({
                       checked={effectiveSmartCrop}
                       onChange={event => {
                         const enabled = event.target.checked;
-                        recordReframeModeAtPlayhead(enabled ? smartCropMode : "off");
+                        const mode = smartCropMode === "off" ? "speaker_track" : smartCropMode;
+                        if (enabled) setSmartCropMode(mode);
+                        recordReframeModeAtPlayhead(enabled ? mode : "off");
                         setSmartCrop(enabled);
                         setComparisonMode("after");
                         setStudioActionMessage(

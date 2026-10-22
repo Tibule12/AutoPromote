@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Verify View options actual fit/crop export decisions, seek state and fractional paused-frame shortcut correction.",
-  "reviewed_at": "2026-10-22T17:20:25.688Z",
+  "reason": "Repair Playwright resumable-source fixtures and bounded CI lifecycle; restore Auto Reframe after Fit full.",
+  "reviewed_at": "2026-10-22T17:40:14.575Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "480eeb7a42444c5af43247f2b82be14684986009b5e8d62e76e9d99737bb4990"
+      "sha256": "2715d65c4c1915295085c30244496cf6e2cfcf2da051df9b86e6a05845c11685"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "204a83d7fe9cc06e09e862156b211233d73df05ca609995025febd41958c1c06"
+      "sha256": "f783128023f2d4900378b6efa26cf93ce02d07576cf390961388adc3e07600a2"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "40668f81509fb118f9feaef007c11e961936fd8b250ca6ca44a205aa130a62dd"
+      "sha256": "6c72aad2c1ed52974a5909f77bb733760c4a7464cc060802b2087f8be35607e9"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

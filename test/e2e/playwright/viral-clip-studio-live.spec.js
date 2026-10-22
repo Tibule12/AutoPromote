@@ -216,6 +216,7 @@ const assertMediaHasAudio = mediaPath => {
 const installAppRoutes = async (page, sourcePath = liveSourcePath) => {
   const sourceBody = fs.readFileSync(sourcePath);
   const state = {
+    sourceUpload: { started: false, bytes: 0, completed: false },
     captionTranslationRequests: [],
     faceTrackingRequests: 0,
     faceTrackingResult: { tracks: { top: { coverage: .8, keyframes: [{ time: 0, x: 34, y: 47 }, { time: 8, x: 35, y: 47 }] },
@@ -265,6 +266,50 @@ const installAppRoutes = async (page, sourcePath = liveSourcePath) => {
       })
     )
   );
+  // Studio source ownership uses the resumable contract even for small files.
+  // Exercise its probe/chunks/completion instead of calling the live API while
+  // every test waits for an editor button that cannot appear after a failed upload.
+  await page.route("**/api/media/multicam/uploads/start", route => {
+    const request = route.request().postDataJSON();
+    expect(request.purpose).toBe("studio_source");
+    expect(request.sizeBytes).toBe(sourceBody.length);
+    state.sourceUpload = { started: true, bytes: 0, completed: false };
+    return route.fulfill(json({
+      success: true,
+      uploadUrl: `${getBase()}/e2e-studio-source-upload`,
+      storagePath: "e2e/live-studio-source.mp4",
+      downloadToken: "fixture-upload-token",
+      chunkSizeBytes: 256 * 1024,
+    }));
+  });
+  await page.route("**/e2e-studio-source-upload", route => {
+    const request = route.request();
+    const range = request.headers()["content-range"] || "";
+    if (/^bytes \*\//.test(range)) {
+      return route.fulfill({ status: 308, body: "", headers: state.sourceUpload.bytes
+        ? { Range: `bytes=0-${state.sourceUpload.bytes - 1}` } : {} });
+    }
+    const match = /^bytes (\d+)-(\d+)\/(\d+)$/.exec(range);
+    expect(match).not.toBeNull();
+    const [, start, end, total] = match.map(Number);
+    expect(start).toBe(state.sourceUpload.bytes);
+    expect(total).toBe(sourceBody.length);
+    expect(request.postDataBuffer()).toEqual(sourceBody.subarray(start, end + 1));
+    state.sourceUpload.bytes = end + 1;
+    return route.fulfill({ status: state.sourceUpload.bytes === sourceBody.length ? 200 : 308,
+      body: "", headers: { Range: `bytes=0-${end}` } });
+  });
+  await page.route("**/api/media/multicam/uploads/complete", route => {
+    expect(state.sourceUpload.started).toBe(true);
+    expect(state.sourceUpload.bytes).toBe(sourceBody.length);
+    expect(route.request().postDataJSON()).toMatchObject({
+      storagePath: "e2e/live-studio-source.mp4", sizeBytes: sourceBody.length,
+    });
+    state.sourceUpload.completed = true;
+    return route.fulfill(json({ success: true, ok: true,
+      url: `${getBase()}/live-studio-source.mp4`,
+      storagePath: "e2e/live-studio-source.mp4", size: sourceBody.length }));
+  });
   await page.route("**/api/media/track-studio-faces", async route => {
     state.faceTrackingRequests += 1;
     await route.fulfill(json(state.faceTrackingResult));
@@ -1536,6 +1581,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
     }
   };
   const captureLiveProof = async proofPath => {
+    console.log(`[Studio workflow] ${path.basename(proofPath)}`);
     await pausePreview(page);
     await page.waitForTimeout(220);
     await page.screenshot({ path: proofPath, fullPage: false });
@@ -2869,6 +2915,7 @@ test("records the complete frontend-first creator feature tour without rendering
     else await page.waitForTimeout(hold);
   };
   const showSection = async id => {
+    console.log(`[Studio tour] ${id} (${Math.round((Date.now() - recordingEpoch) / 1000)}s)`);
     const button = workbench.getByTestId(`creator-section-${id}`);
     await button.scrollIntoViewIfNeeded();
     await button.click();
