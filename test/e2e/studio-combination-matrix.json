@@ -5056,11 +5056,11 @@
       "studioRegressionsRetested": 10,
       "cleanRootInstallation": "passed, including postinstall guards"
     },
-    "ciAndBrowserQualification": "Ten previous Studio unit regressions pass across focused reruns; the final branch CI run must verify the full suite. Browser evidence includes native transport, audio, captions, imported logo key values and real source framing.",
+    "ciAndBrowserQualification": "Full emulator and Playwright workflows passed for production source1fbda085; d5caaf65 changes only the RSA regression key to2048bits and passes security tests and CodeQL. Final evidence commit changes documentation only.",
     "nativeStudioQualification": false,
     "readinessPromotion": false,
     "remainingSharedBlockers": "Retain S02 continuous live picture/sound parity, S03 ownership and S04 depth; source/mock/CPU evidence is not native creative qualification",
-    "nextTask": "Complete alert reanalysis and CI/browser verification, then continue the ordered shared Studio backlog",
+    "nextTask": "Continue shared S02 continuous live picture/sound, S03 ownership and S04 depth; product qualification gaps and readiness classifications remain unchanged.",
     "branchSecurityReanalysis": {
       "pullRequest": 493,
       "codeql": "passed",
@@ -5077,6 +5077,29 @@
       ],
       "mitigation": "Version-bound, idempotent postinstall guards with valid-input and exploit regressions; scanner versions stay visible",
       "tooling": "basic-ftp6.2.3; bounded OpenTelemetry1.30.1 header decoding"
+    },
+    "fullCiEvidence": {
+      "sourceCommit": "1fbda08506e6985092e8a9e56e0eb3042f0440fa",
+      "emulator": {
+        "run": "https://github.com/Tibule12/AutoPromote/actions/runs/39722011081",
+        "passed": 1484,
+        "skipped": 5,
+        "suitesPassed": 258,
+        "suitesSkipped": 4,
+        "seconds": 663.235
+      },
+      "playwright": {
+        "run": "https://github.com/Tibule12/AutoPromote/actions/runs/39722011102",
+        "passed": 30,
+        "skipped": 17
+      },
+      "finalCodeql": {
+        "run": "https://github.com/Tibule12/AutoPromote/actions/runs/39722583379",
+        "result": "passed",
+        "openBranchFindings": 0
+      },
+      "localAvailableMediaBrowserChecks": 12,
+      "newPaidGpuOrModelExecutions": 0
     }
   }
 }

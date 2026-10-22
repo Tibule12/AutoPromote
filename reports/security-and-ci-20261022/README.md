@@ -44,3 +44,12 @@ Three dependency exploit/positive checks and four HTTP worker regressions pass. 
 A fresh standard `npm ci` (1350packages,28s) runs the guard hook successfully. Its copied normal security command passes all7positive/exploit/HTTP tests. The canonical guard ships inside the Functions package so its production install does not need the parent repository. Root/frontend/mobile use that same implementation. Scanner versions remain unchanged for node-forge/braces; no forged patched version or alert dismissal is used.
 
 All10previous local Studio unit failures pass across targeted reruns. Correct the fixtures to acknowledge native decoder readiness/play/pause, address the actual compact timeline and saved-project disclosure, and model the declared speech interval2–6s with real silence on either side. No speech coverage gate is removed. The multi-action podcast integration keeps its assertions and a bounded60s timeout. Use the actual Studio transport for Motion Sculpture; direct `video.play()` incorrectly bypassed the preview intent controller.
+
+## Full branch qualification
+
+- [Emulator run39722011081](https://github.com/Tibule12/AutoPromote/actions/runs/39722011081):1484passed,5existing skips,258passed suites/4skipped suites,663.235s. The runner exits0after recording all1489cases; it does not repeat the suite.
+- [Playwright run39722011102](https://github.com/Tibule12/AutoPromote/actions/runs/39722011102):30passed/17existing skips. All12local media-dependent Studio checks also pass across the retained targeted runs.
+- Both full workflows verify production source`1fbda085`. The only change in`d5caaf65` strengthens the RSA regression key from1024to2048bits; its seven security tests and [CodeQL run39722583379](https://github.com/Tibule12/AutoPromote/actions/runs/39722583379) pass, with zero open PR-ref findings. The temporary test-key finding1188 is fixed, not dismissed.
+- Backend tests, main CI/integration tests, optimized frontend verification, both emulator smoke workflows, Semgrep, Studio authority validation and secret checks pass. The following evidence-only commit changes these records and no production or test implementation.
+
+Main deployment continues through the existing immutable worker image, real render/health checks and production traffic gate. The prior verified duration fix remains recorded above. Native Studio/creative/readiness qualification is unchanged; next shared work remains S02, S03 and S04.
