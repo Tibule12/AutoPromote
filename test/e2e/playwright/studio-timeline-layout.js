@@ -66,6 +66,17 @@ async function clickStudioControl(page, control, options) {
     .last();
   if ((await menu.count()) && !(await menu.evaluate(node => node.open)))
     await menu.locator(":scope > summary").click();
+  if ((await menu.count()) && await menu.evaluate(node => node.classList.contains("studio-view-options"))) {
+    const blocked = await menu.evaluate(node => [...node.querySelectorAll("button:not([disabled])")]
+      .flatMap(button => {
+        const r = button.getBoundingClientRect();
+        const target = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        return button.contains(target) ? [] : [{
+          button: button.textContent.trim(), blocker: target?.className || target?.tagName || "outside viewport",
+        }];
+      }));
+    assert.deepEqual(blocked, [], "View options buttons must receive normal pointer clicks");
+  }
   await control.click(options);
 }
 

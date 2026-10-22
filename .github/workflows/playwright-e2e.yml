@@ -8,9 +8,14 @@ on:
   schedule:
     - cron: "0 5 * * *" # daily smoke tests at 05:00 UTC
 
+concurrency:
+  group: playwright-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   playwright-e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -36,12 +41,23 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - name: Install deps
+        timeout-minutes: 5
         run: npm ci
       - name: Install live-media test prerequisites
+        timeout-minutes: 5
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes ffmpeg
-          ffmpeg -version | head -n 1
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update
+            sudo env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=60 -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install --yes --no-install-recommends ffmpeg
+          fi
+          ffmpeg -version
+          ffprobe -version
+      - name: Install frontend dependencies
+        timeout-minutes: 5
+        run: npm ci --prefix frontend
+      - name: Build frontend
+        timeout-minutes: 5
+        run: npm run build --prefix frontend
       - name: Check for FIREBASE Admin service account (cloud vs emulator)
         id: check_firebase_secret
         shell: bash
@@ -54,7 +70,8 @@ jobs:
             echo "No Firebase service account secret found. Will run E2E tests using the Firebase emulator.";
           fi
       - name: Prepare playwright browsers
-        run: npx playwright install --with-deps
+        timeout-minutes: 5
+        run: npx playwright install --with-deps chromium
       - name: Upload test reporters directory (pre-clean)
         run: rm -rf test-results || true
       - name: Cloud seed Firestore (if cloud mode)
@@ -63,21 +80,25 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/test/e2e/tmp/service-account.json
         run: |
           # Ensure service account exists and is written
-          node ./scripts/write-service-account.js || true
+          node ./scripts/write-service-account.js
           node ./scripts/seed-autopilot-cloud.js
       - name: Run Playwright E2E (cloud)
         if: steps.check_firebase_secret.outputs.run-tests == 'cloud'
+        timeout-minutes: 20
         env:
+          NODE_ENV: test
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/test/e2e/tmp/service-account.json
-        run: npm run test:e2e:playwright
+        run: npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1
       - name: Run Playwright E2E (emulator)
         if: steps.check_firebase_secret.outputs.run-tests == 'emulator'
+        timeout-minutes: 20
         env:
+          NODE_ENV: test
           FIRESTORE_EMULATOR_HOST: localhost:8080
           GCLOUD_PROJECT: autopromote-cc6d3
         run: |
           # Use firebase emulators:exec to ensure the emulator environment variables are set for the child process
-          npx firebase emulators:exec --only firestore --project autopromote-cc6d3 "node ./scripts/seed-autopilot-emulator.js && npm run test:e2e:playwright:emulator"
+          npx firebase emulators:exec --only firestore --project autopromote-cc6d3 "node ./scripts/seed-autopilot-emulator.js && npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1"
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4

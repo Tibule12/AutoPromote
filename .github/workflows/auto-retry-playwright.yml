@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: write
+      contents: read
+      pull-requests: read
     steps:
       - name: Auto-rerun Playwright on failure
         uses: actions/github-script@v6
@@ -28,6 +30,36 @@ jobs:
             }
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            // A completed old run must never restart after its branch advanced
+            // or its PR merged. It would spend time testing superseded code.
+            if (run.event === 'pull_request') {
+              const number = run.pull_requests?.[0]?.number;
+              if (!number) return;
+              const { data: pull } = await github.rest.pulls.get({ owner, repo, pull_number: number });
+              if (pull.state !== 'open' || pull.head.sha !== run.head_sha) {
+                core.info('Pull request is closed or has a newer commit; skipping rerun.');
+                return;
+              }
+            } else {
+              const { data: branch } = await github.rest.repos.getBranch({ owner, repo, branch: run.head_branch });
+              if (branch.commit.sha !== run.head_sha) {
+                core.info('Branch has a newer commit; skipping rerun.');
+                return;
+              }
+            }
+            const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+              owner, repo, run_id: run.id, filter: 'latest', per_page: 100,
+            });
+            const failedSteps = jobs.jobs.flatMap(job => job.steps || [])
+              .filter(step => step.conclusion === 'failure');
+            const retryableSetup = new Set([
+              'Install deps', 'Install frontend dependencies',
+              'Install live-media test prerequisites', 'Prepare playwright browsers',
+            ]);
+            if (!failedSteps.length || failedSteps.some(step => !retryableSetup.has(step.name))) {
+              core.info('Test/build failure requires a fix; automatic rerun is limited to transient dependency setup.');
+              return;
+            }
             core.info(`Re-running workflow run ${run.id} for ${owner}/${repo}`);
             // Use generic request to avoid REST method mismatch in octokit versions
             await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun', { owner, repo, run_id: run.id });

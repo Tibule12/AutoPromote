@@ -1393,6 +1393,11 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId("preview-fit-full")).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByTestId("reframe-aspect-4-5")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("auto-reframe-toggle")).not.toBeChecked();
+    fireEvent.click(screen.getByTestId("auto-reframe-toggle"));
+    expect(screen.getByTestId("auto-reframe-toggle")).toBeChecked();
+    expect(screen.getByTestId("preview-fill-canvas")).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByTestId("preview-fit-full"));
     video.currentTime = 6 + 2 / 30;
     fireEvent.timeUpdate(video);
     fireEvent.click(screen.getByTestId("preview-fill-canvas"));

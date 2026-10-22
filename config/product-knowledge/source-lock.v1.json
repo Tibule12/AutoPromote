@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "reviewer": "Codex",
-  "reason": "Verify View options actual fit/crop export decisions, seek state and fractional paused-frame shortcut correction.",
-  "reviewed_at": "2026-10-22T17:20:25.688Z",
+  "reviewer": "Codex source review",
+  "reason": "Review Studio View options viewport positioning on open, resize and scroll; preserve output framing and existing readiness.",
+  "reviewed_at": "2026-10-22T18:26:11.440Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -103,7 +103,7 @@
     },
     {
       "path": "frontend/src/components/StudioControls.css",
-      "sha256": "c76a0214d2b0df2140a3b6cb4107fe4af2b6d9ad2c498cd2952cd1aad096db31"
+      "sha256": "3dcaa440a47c866c8b6460e3a053c21e41daf2881045211ab7de328b4b21dbcc"
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "480eeb7a42444c5af43247f2b82be14684986009b5e8d62e76e9d99737bb4990"
+      "sha256": "2715d65c4c1915295085c30244496cf6e2cfcf2da051df9b86e6a05845c11685"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "204a83d7fe9cc06e09e862156b211233d73df05ca609995025febd41958c1c06"
+      "sha256": "62359196a3a531f097644cab7e68003f63f44892aa1307a04790989f12ef2fb0"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "40668f81509fb118f9feaef007c11e961936fd8b250ca6ca44a205aa130a62dd"
+      "sha256": "d933524491ae7900249c82c5373569d23805d1150841e9a6e0a901f5ba143498"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
