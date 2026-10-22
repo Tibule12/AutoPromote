@@ -346,11 +346,11 @@ function toPositiveFiniteNumber(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
-async function getPromotionQuotaSnapshot(userId, tierId, testerAccess = null) {
+async function getPromotionQuotaSnapshot(userId, tierId, testerAccess = null, billingData = {}) {
   const plan = getPlan(tierId);
   const platformPostQuotaRaw =
     billingService && typeof billingService.getPlatformPostMonthlyQuota === "function"
-      ? billingService.getPlatformPostMonthlyQuota(tierId, plan, testerAccess)
+      ? billingService.getPlatformPostMonthlyQuota(tierId, plan, testerAccess, billingData)
       : 0;
   const normalizedQuota =
     toPositiveFiniteNumber(platformPostQuotaRaw) ||
@@ -394,11 +394,11 @@ async function evaluateUploadReadiness(userId, options = {}) {
     ? "queued_new_upload"
     : "publish_now";
 
-  const [{ tierId, tier, testerAccess }, usageStats] = await Promise.all([
+  const [{ tierId, tier, testerAccess, billingData }, usageStats] = await Promise.all([
     billingService.getEffectiveTierSnapshot(userId),
     getUserUsageStats(userId),
   ]);
-  const promotionQuota = await getPromotionQuotaSnapshot(userId, tierId, testerAccess);
+  const promotionQuota = await getPromotionQuotaSnapshot(userId, tierId, testerAccess, billingData);
 
   const base = {
     allowed: true,

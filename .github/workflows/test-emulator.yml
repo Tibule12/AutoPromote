@@ -29,6 +29,13 @@ jobs:
         with:
           node-version: "22.22.0"
 
+      - name: Setup Python for CPU media tests
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: python_media_worker/requirements-ci.txt
+
       - name: Install dependencies
         run: |
           echo "Running npm ci; if it fails due to lockfile mismatch, fall back to npm install"
@@ -39,9 +46,20 @@ jobs:
           echo "Installing frontend devDependencies"
           npm ci --prefix frontend || (echo "frontend npm ci failed — falling back to npm install" && npm install --prefix frontend)
 
+      - name: Install and verify CPU preview runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+          ffmpeg -version
+          ffprobe -version
+          python -m pip install --requirement python_media_worker/requirements-ci.txt
+          PYTHONPATH=python_media_worker python -c "import numpy, PIL, studio_voice_bus_preview; print('CPU preview imports ready: NumPy', numpy.__version__, 'Pillow', PIL.__version__)"
+
       - name: Run emulator-backed unit tests
+        timeout-minutes: 20
         env:
           CI: true
+          STUDIO_AUDIO_PREVIEW_PYTHON: python
         run: npm run test:emulator
 
       - name: Note about lockfile
