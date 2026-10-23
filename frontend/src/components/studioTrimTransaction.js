@@ -138,10 +138,20 @@ export const rippleStudioSnapshotLinkedTimeline = (
       if (group.kind === GROUP_KIND && !activeGroups.has(group.id)) replacements.set(group.id, []);
     }
   }
-  for (const field of ["motionKeyframes", "speedKeyframes", "finishKeyframes"]) {
+  if (Array.isArray(snapshot.speedKeyframes)) {
+    // Use canonical speed identities here as well as in the command executor;
+    // unrelated layer/key allocation cannot change this global bus's result.
+    next.speedKeyframes = rippleProgrammeSpeedKeys(snapshot.speedKeyframes.filter(key => key.property === "speed")
+      .map(key => ({ ...(key.id !== undefined ? { id: String(key.id) } : {}),
+        atProgrammeTick: secondsToTicks(Number(key.time || 0)), rate: Number(key.value ?? key.rate ?? 1),
+        easing: key.easing || "linear", ...(key.curve !== undefined ? { curve: key.curve } : {}),
+      })), { fromTick, toTick }, idempotencyKey).map(({ atProgrammeTick, rate, ...key }) => ({
+      ...key, property: "speed", time: ticksToSeconds(atProgrammeTick), value: rate,
+    }));
+  }
+  for (const field of ["motionKeyframes", "finishKeyframes"]) {
     if (!Array.isArray(snapshot[field])) continue;
-    next[field] = field === "speedKeyframes" ? retimeKeys(snapshot[field]) :
-      rippleStudioAutomation(snapshot[field].filter(key => field !== "motionKeyframes" || !splitRanges.has(key.targetId)), from, to, nextId);
+    next[field] = rippleStudioAutomation(snapshot[field].filter(key => field !== "motionKeyframes" || !splitRanges.has(key.targetId)), from, to, nextId);
     if (field === "motionKeyframes") next[field] = next[field].filter(key => !splitRanges.has(key.targetId)).flatMap(key => {
       const targets = replacements.get(key.targetId);
       return targets ? targets.map(targetId => targetId === key.targetId ? key : {
@@ -185,14 +195,22 @@ export const rippleStudioSnapshotLinkedTimeline = (
   return next;
 };
 
-export const rippleProgrammeSpeedKeys = (keys, { fromTick, toTick }) => {
+export const rippleProgrammeSpeedKeys = (keys, { fromTick, toTick }, idempotencyKey) => {
   if (!(toTick > fromTick)) return keys;
-  const removed = toTick - fromTick;
-  return keys
-    .filter(key => key.atProgrammeTick < fromTick || key.atProgrammeTick >= toTick)
-    .map(key =>
-      key.atProgrammeTick >= toTick
-        ? { ...key, atProgrammeTick: key.atProgrammeTick - removed }
-        : key
-    );
+  const ids = new Set(keys.map(key => key.id));
+  let sequence = 0;
+  const createId = () => {
+    let id;
+    do { id = `retained-speed:${idempotencyKey}:${fromTick}:${toTick}:${++sequence}`; } while (ids.has(id));
+    ids.add(id); return id;
+  };
+  // A cut removes part of the curve, not the speed of the surviving footage.
+  // Reuse the same cropped arrival curves and one-tick joins as other buses.
+  const automation = keys.map(({ atProgrammeTick, rate, ...key }) => ({
+    ...key, property: "speed", time: ticksToSeconds(atProgrammeTick), value: rate,
+  }));
+  return rippleStudioAutomation(automation, ticksToSeconds(fromTick), ticksToSeconds(toTick), createId)
+    .map(({ time, value, property, ...key }) => ({
+      ...key, atProgrammeTick: secondsToTicks(time), rate: value,
+    }));
 };

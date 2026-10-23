@@ -6383,6 +6383,7 @@ const ViralClipStudio = ({
     programmeSpeedKeys: speedKeyframes.filter(key => key.property === "speed").map(key => ({
       atProgrammeTick: secondsToTicks(Number(key.time || 0)),
       rate: Number(key.value ?? key.rate ?? 1), easing: key.easing || "linear",
+      ...(key.curve !== undefined ? { curve: key.curve } : {}),
     })),
   }), [timeline, previewSpeed, speedKeyframes]);
   soundEffectGainTimeMapRef.current = previewOutputTimeMap;

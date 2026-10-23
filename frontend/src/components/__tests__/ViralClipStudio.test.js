@@ -919,6 +919,33 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(Number(slider.max)).toBe(map.at(-1).outputRange.endTick / 90000);
   });
 
+  test("native split/trim retains the next speed across a deleted point and exact Undo/Redo", () => {
+    const { video } = mountNativePreview();
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' }))
+      .getByRole('button', { name: 'Pacing', exact: true }));
+    for (const [programme, speed] of [[0, 1], [1, 2], [3, .5]]) {
+      video.currentTime = programme + 2; fireEvent.timeUpdate(video);
+      fireEvent.change(screen.getByRole('slider', { name: /Fine speed/ }), { target: { value: String(speed) } });
+      fireEvent.click(screen.getByRole('button', { name: /Add .* point at/ }));
+      fireEvent.change(screen.getAllByLabelText('Speed point easing').at(-1), { target: { value: 'hold' } });
+    }
+    fireEvent.change(screen.getByRole('slider', { name: /Fine speed/ }), { target: { value: '1' } });
+    video.currentTime = 2.5; fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByTestId('pro-quick-split'));
+    fireEvent.click(screen.getByTestId('pro-video-clip-2'), { detail: 0 });
+    let active = readyCutawaySource(12);
+    active.currentTime = 4; fireEvent.timeUpdate(active);
+    fireEvent.click(screen.getByTestId('pro-quick-trim-start'));
+    active = readyCutawaySource(12);
+    active.currentTime = 4.1; fireEvent.seeking(active);
+    expect(active.playbackRate).toBe(2);
+    expect(Number(screen.getByRole('slider', { name: 'Edited output position' }).max)).toBe(7);
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    expect(Number(screen.getByRole('slider', { name: 'Edited output position' }).max)).toBe(8);
+    fireEvent.click(screen.getByTestId('studio-redo-button'));
+    expect(Number(screen.getByRole('slider', { name: 'Edited output position' }).max)).toBe(7);
+  });
+
   test.each(['off', 'speech'])("retimed music retains its tempo and seeks through the canonical output clock: %s", async duckMode => {
     const previousContext = window.AudioContext;
     const previousRaf = window.requestAnimationFrame;

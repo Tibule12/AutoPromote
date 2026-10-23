@@ -198,3 +198,7 @@ reports/studio-background-captions-20261021/*
 # Private native speech fade proof, media and isolated builds.
 reports/studio-voice-fade-phase-20261023/*
 !reports/studio-voice-fade-phase-20261023/README.md
+
+# Private retained-speed projects, recordings, authenticated receipts and local QA.
+reports/studio-retained-speed-20261023/*
+!reports/studio-retained-speed-20261023/README.md

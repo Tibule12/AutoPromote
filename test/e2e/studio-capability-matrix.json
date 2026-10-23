@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-21T19:28:46.375062Z",
+  "updatedAt": "2026-10-23T14:43:24.001300Z",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -15557,5 +15557,47 @@
     },
     "completedCpuExports": 2,
     "publishingWrites": 0
+  },
+  "retainedSpeedCurves20261023": {
+    "date": "2026-10-23",
+    "evidence": "reports/studio-retained-speed-20261023/README.md",
+    "scope": "Retained speed curves/canonical preview, history and recovery; bounded speech decoding/sample clocks and fractional-cut source-frame coverage.",
+    "readinessPromotion": false,
+    "paidJobs": 0,
+    "publishingWrites": 0,
+    "tests": {
+      "frontendHelpers": 86,
+      "studioComponent": 1,
+      "server": 35,
+      "workerUnittest": 21,
+      "workerPicturePytest": 12,
+      "workerPictureSubtests": 2,
+      "knowledge": 17
+    },
+    "nativeFlow": "PASS: ordinary Pacing controls, repeated source, linked split/trim, exact Undo/Redo, cold reopen, six decoder rates, full live preview, corrected CPU export/download/full decode, complete matching Studio playback and independent backup restore.",
+    "previewMixerPcm": {
+      "sampleFrames": 553811,
+      "scalarSamples": 1107622,
+      "sampleRate": 48000,
+      "maxAbsoluteError": 0.0,
+      "absoluteTolerance": 4e-05,
+      "exactSourceHash": true,
+      "actualNativeExportDecisions": true,
+      "passed": true
+    },
+    "finalVideoFrames": 277,
+    "finalVideoSeconds": 11.541667,
+    "finalMovieSha256": "8e0f3c5681551e6aaceef5dd9a317c6be6372a76cf2b4dd4d9571b200206bc0c",
+    "screenCaptureFps": 19.72,
+    "completedNativeCpuExports": 2,
+    "firstExport": "276 frames; rejected by unchanged 277-frame gate, preserved.",
+    "correctedExport": "277 frames; unchanged frame and sound decode gates pass.",
+    "offlineDiagnosticRenders": 1,
+    "remaining": [
+      "Whole live mixed sound/picture, strict colour/edge/latency and human listening qualification",
+      "19.72 fps screen capture does not qualify smoothness for the 24 fps movie",
+      "Broader S04 motion/glyph depth",
+      "S03 occurrence/group ownership"
+    ]
   }
 }

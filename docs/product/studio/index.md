@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.46 • 2026-10-23
+Development documentation • product 1.2.0 • knowledge 1.0.47 • 2026-10-23
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -779,8 +779,10 @@ Builds a bounded piecewise speed plan and maps programme clocks, audio and capti
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open an owned video in Studio and choose Pacing.
+2. Set Fine speed, seek to the intended moment and add a speed point. Choose the arrival easing for each point.
+3. Split or trim source footage through the timeline. Surviving footage retains its speed curve on each side of the cut, including custom curve handles.
+4. Use Undo/Redo and save/reopen to check the edit, then review the normal exported movie with its matching timeline.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -789,6 +791,7 @@ Builds a bounded piecewise speed plan and maps programme clocks, audio and capti
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Speed curves use the shared bounded sampled plan. Broad retiming, transitions, live mixed sound and preview/export picture agreement remain partial.
 
 **Common errors**
 

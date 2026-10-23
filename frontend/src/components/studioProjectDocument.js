@@ -337,6 +337,7 @@ export const projectStudioLinkedTimingToSnapshot = document => {
       time: ticksToSeconds(key.atProgrammeTick),
       value: key.rate,
       easing: key.easing,
+      ...(key.curve !== undefined ? { curve: [...key.curve] } : {}),
     })),
   };
   for (const layer of document.layers || []) {
@@ -583,6 +584,7 @@ export const buildStudioOutputTimeMap = ({
       time: ticksToSeconds(key.atProgrammeTick),
       value: key.rate,
       easing: key.easing || "linear",
+      ...(key.curve !== undefined ? { curve: key.curve } : {}),
     })),
     duration: ticksToSeconds(durationTick),
     fallback: fallbackSpeed,
@@ -698,11 +700,12 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       rate: Number(key.value ?? key.rate ?? 1),
     }))
     .filter(key => key.property === "speed" && Number.isFinite(key.rate))
-    .map(({ id, atProgrammeTick, rate, easing }) => ({
+    .map(({ id, atProgrammeTick, rate, easing, curve }) => ({
       ...(id !== undefined ? { id: String(id) } : {}),
       atProgrammeTick,
       rate,
       easing: easing || "linear",
+      ...(curve !== undefined ? { curve: Array.isArray(curve) ? [...curve] : curve } : {}),
     }));
   const fallbackSpeed = Number(snapshot.previewSpeed ?? 1);
   if (!Number.isFinite(fallbackSpeed) || fallbackSpeed <= 0) {
@@ -1049,6 +1052,10 @@ export const validateStudioProjectDocument = document => {
   });
   if (!Number.isFinite(document.fallbackSpeed) || document.fallbackSpeed <= 0)
     fail("INVALID_SPEED", "Invalid fallback speed.");
+  if (!Array.isArray(document.programmeSpeedKeys) || document.programmeSpeedKeys.some(key =>
+    key.curve !== undefined && (!Array.isArray(key.curve) || key.curve.length !== 4 || key.curve.some((value, index) =>
+      typeof value !== "number" || !Number.isFinite(value) || value < (index % 2 ? -2 : 0) || value > (index % 2 ? 2 : 1)))))
+    fail("INVALID_SPEED", "Speed curves need four valid time/value handles.");
   if (new Set(document.assets.map(asset => asset.assetId)).size !== document.assets.length)
     fail("DUPLICATE_ASSET", "Asset IDs must be unique.");
   const ids = new Set();

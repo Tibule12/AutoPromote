@@ -286,11 +286,12 @@ test("linked end trim removes cut media and gives later preview and worker cues 
   const timelineSegments = compileStudioTimelineForRender(document);
   expect(timelineSegments).toEqual(expected.timeline);
   expect(assertStudioExportTimelineMatchesDocument(document, timelineSegments)).toBe(true);
-  expect(trimmed.speedKeyframes.map(({ id, time, value }) => ({ id, time, value }))).toEqual(
+  expect(trimmed.speedKeyframes.filter(key => expected.speedKeys.some(authored => authored.id === key.id))
+    .map(({ id, time, value }) => ({ id, time, value }))).toEqual(
     expected.speedKeys
   );
   expect(document.programmeSpeedKeys.map(key => ticksToSeconds(key.atProgrammeTick))).toEqual(
-    expected.speedKeys.map(key => key.time)
+    trimmed.speedKeyframes.map(key => key.time)
   );
   const speedSegments = buildSpeedSegmentsFromKeyframes({
     keyframes: trimmed.speedKeyframes,

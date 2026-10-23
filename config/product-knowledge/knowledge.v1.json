@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.46",
+  "knowledge_version": "1.0.47",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-23",
@@ -1644,13 +1644,16 @@
         "studio.speed.rate"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open an owned video in Studio and choose Pacing.",
+        "Set Fine speed, seek to the intended moment and add a speed point. Choose the arrival easing for each point.",
+        "Split or trim source footage through the timeline. Surviving footage retains its speed curve on each side of the cut, including custom curve handles.",
+        "Use Undo/Redo and save/reopen to check the edit, then review the normal exported movie with its matching timeline."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Speed curves use the shared bounded sampled plan. Broad retiming, transitions, live mixed sound and preview/export picture agreement remain partial."
       ],
       "common_errors": [
         {
@@ -1668,13 +1671,23 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-23",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
         {
           "path": "frontend/src/components/studioCreatorRecipes.js",
-          "anchor": "buildCreatorMotionRecipe",
+          "anchor": "buildSpeedSegmentsFromKeyframes",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioTrimTransaction.js",
+          "anchor": "rippleProgrammeSpeedKeys",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioProjectDocument.js",
+          "anchor": "buildStudioOutputTimeMap",
           "kind": "IMPLEMENTATION"
         },
         {

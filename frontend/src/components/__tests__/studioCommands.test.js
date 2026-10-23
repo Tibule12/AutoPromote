@@ -517,7 +517,11 @@ test("end trim removes its tail and ripples later cues without changing source c
   });
   expect(trimmed.snapshot.timeline.map(clip => clip.endRequest)).toEqual([6, 10]);
   expect(trimmed.snapshot.soundEffects[0].startTime).toBe(8);
-  expect(trimmed.snapshot.speedKeyframes.map(key => key.time)).toEqual([0, 8]);
+  for (const time of [0, 2, 5.9, 6, 6.1, 7.99, 8, 12, 15.9]) {
+    expect(interpolateAutomationValue({ keyframes: trimmed.snapshot.speedKeyframes, property: "speed", time }))
+      .toBeCloseTo(interpolateAutomationValue({ keyframes: snapshot.speedKeyframes, property: "speed",
+        time: time < 6 ? time : time + 4 }), 4);
+  }
   expect(trimmed.snapshot.captionSegments).toEqual(snapshot.captionSegments);
   expect(trimmed.document.clipOccurrences[1].programmeRange.startTick).toBe(secondsToTicks(6));
   expect(trimmed.document.outputTimeMap.at(-1).programmeRange.endTick).toBe(secondsToTicks(16));

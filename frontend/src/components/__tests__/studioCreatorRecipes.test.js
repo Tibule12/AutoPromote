@@ -116,6 +116,15 @@ describe("durable creator recipes", () => {
       expect(segment.startTime).toBe(segments[index].endTime));
   });
 
+  test("a one-tick retained hold samples inside its half-open interval", () => {
+    const tick = 1 / 90000;
+    expect(buildSpeedSegmentsFromKeyframes({ duration: 1, keyframes: [
+      { property: "speed", time: 0, value: 2, easing: "linear" },
+      { property: "speed", time: tick, value: 1, easing: "hold" },
+    ] }).map(({ startTime, endTime, rate }) => ({ startTime, endTime, rate })))
+      .toEqual([{ startTime: 0, endTime: tick, rate: 2 }, { startTime: tick, endTime: 1, rate: 1 }]);
+  });
+
   test("merges constant speed runs even with many redundant keys", () => {
     const keyframes = Array.from({ length: 300 }, (_, index) => ({
       property: "speed", time: index * 10, value: 1.5, easing: "linear",
