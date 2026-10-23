@@ -12,7 +12,8 @@ export function studioVoiceBusRequest({ projectId, takes, outputTimeMap, automat
     voices: voices.map(take => ({ id: take.id, storagePath: take.sourceStoragePath || take.storagePath,
       sourceContentHash: take.contentHash, startTime: Number(take.startTime || 0),
       duration: Number(take.duration), trimStart: Number(take.trimStart || 0), volume: Number(take.volume ?? 1),
-      fadeIn: Number(take.fadeIn || 0), fadeOut: Number(take.fadeOut || 0) })),
+      fadeIn: Number(take.fadeIn || 0), fadeOut: Number(take.fadeOut || 0),
+      ...(take.fadeDuration !== undefined ? { fadeOffset: take.fadeOffset, fadeDuration: take.fadeDuration } : {}) })),
     speedPlan: outputTimeMap.map(row => ({ start_time: row.programmeRange.startTick/90000,
       end_time: row.programmeRange.endTick/90000, rate: row.rateNumerator/row.rateDenominator })),
     automation: automation.map(key => ({ property: 'volume', time: Number(key.time), value: Number(key.value),
@@ -30,15 +31,23 @@ export async function loadStudioVoiceBus({ input, context, apiBase, getToken, si
   const token = await getToken();
   if (!token) throw new Error('Sign in to prepare recorded speech.');
   let response, result;
-  for (let attempt=0; attempt<3; attempt++) {
+  const waits = [250, 500, 1000, 1500, 2000];
+  for (let attempt=0; attempt<=waits.length; attempt++) {
     response = await fetch(`${apiBase}/api/media/studio-assets/voice-bus-preview`, {
       method: 'POST', signal, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(input),
     });
     result = await response.json();
-    if (response.status !== 429 || attempt === 2) break;
-    await new Promise(resolve => setTimeout(resolve, 500));
-    if (signal.aborted) throw new DOMException('Speech preparation cancelled', 'AbortError');
+    if (response.status !== 429 || result.code !== 'STUDIO_VOICE_PREVIEW_BUSY' || attempt === waits.length) break;
+    // Rapid edits abort the preceding decode. Give its owned slot a bounded
+    // release window, without retrying entitlement or rate-limit failures.
+    await new Promise((resolve, reject) => {
+      const abort = () => { clearTimeout(timer); signal?.removeEventListener('abort', abort);
+        reject(new DOMException('Speech preparation cancelled', 'AbortError')); };
+      const timer = setTimeout(() => { signal?.removeEventListener('abort', abort); resolve(); }, waits[attempt]);
+      signal?.addEventListener('abort', abort, { once: true });
+      if (signal?.aborted) abort();
+    });
   }
   if (!response.ok) throw new Error(result.message || 'Recorded-speech preview is unavailable.');
   if (result.version !== 1 || result.projectId !== input.projectId || result.sampleRate !== 48000 ||

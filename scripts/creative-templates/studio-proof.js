@@ -109,7 +109,7 @@ async function render(page, name) {
   const pause = page.getByRole('button', { name: 'Pause comparison', exact: true });
   if (await pause.isVisible()) await pause.click();
   const record = await save(page, name), events = [];
-  const startedAt = new Date().toISOString(); let submittedJobId, terminal;
+  const startedAt = new Date().toISOString(); let submittedJobId, terminal, statusRequest;
   const done = new Promise(resolve => { terminal = resolve; });
   page.on('response', async response => {
     const url = new URL(response.url());
@@ -121,7 +121,10 @@ async function render(page, name) {
         submittedJobId = data.jobId || data.job_id;
         if (!response.ok()) terminal({ status: 'failed', error: data.message || data.code });
         else if (submittedJobId && ['completed', 'failed'].includes(data.status)) terminal(data);
-      } else if (submittedJobId && url.pathname.endsWith(`/${submittedJobId}`) && ['completed', 'failed'].includes(data.status)) terminal(data);
+      } else if (submittedJobId && url.pathname.endsWith(`/${submittedJobId}`)) {
+        statusRequest = { url: response.url(), headers: { authorization: response.request().headers().authorization } };
+        if (['completed', 'failed'].includes(data.status)) terminal(data);
+      }
     }
   });
   page.on('request', request => {
@@ -162,6 +165,18 @@ async function render(page, name) {
     throw error;
   } finally { clearTimeout(renderTimeout); }
   assert.equal(result.status, 'completed', result.error || 'Render failed');
+  // A worker can publish completion before the API finishes transferring and
+  // attesting the durable object. Read that same owned job, never resubmit it.
+  for (let attempt = 0; statusRequest && !result.result?.outputSha256 &&
+      !result.result?.output_sha256 && attempt < 5; attempt++) {
+    await page.waitForTimeout(1000);
+    const response = await page.request.get(statusRequest.url, { headers: statusRequest.headers });
+    assert(response.ok(), 'Owned completed-job verification failed');
+    result = await response.json();
+    assert.equal(result.status, 'completed', result.error || 'Completed render changed state');
+    events.push({ path: new URL(statusRequest.url).pathname, status: response.status(),
+      jobStatus: result.status, integrityRecheck: true });
+  }
   // Export materializes newly imported local audio into owned Storage media.
   // Preserve both observations rather than binding the film to pre-upload refs.
   const materializedRecord = await save(page, name);
@@ -169,7 +184,7 @@ async function render(page, name) {
   fs.mkdirSync(path.join(folder, name), { recursive: true });
   fs.writeFileSync(path.join(folder, name, 'native-render-completed.json'), JSON.stringify({
     startedAt, completedAt: new Date().toISOString(), submittedJobId, events,
-    serverOutputSha256: result.result?.outputSha256,
+    serverOutputSha256: result.result?.outputSha256 || result.result?.output_sha256,
     projectId: record.id, projectHash: hash(materializedRecord.snapshot.studioDocument),
     projectHashBeforeMediaUpload: hash(record.snapshot.studioDocument),
     templateRef: record.snapshot.creativeTemplateInstance?.templateRef || null }, null, 2));
@@ -232,7 +247,9 @@ async function downloadCompleted(page, name, record, result, metadata) {
     // still require the exact count and the existing one-frame duration bound.
     height, fps, frames: Math.round(duration * fps) });
   const outputSha256 = hash(fs.readFileSync(output));
-  const serverOutputSha256 = result.result?.outputSha256;
+  // Worker progress can expose its completed receipt before the API commits
+  // the normalized result. Both contracts attest the same downloaded bytes.
+  const serverOutputSha256 = result.result?.outputSha256 || result.result?.output_sha256;
   assert.equal(outputSha256, serverOutputSha256, 'Downloaded bytes differ from the owned completed job');
   const receipt = { startedAt, finishedAt: new Date().toISOString(), projectId: record.id,
     projectHash: hash(record.snapshot.studioDocument), templateRef: record.snapshot.creativeTemplateInstance?.templateRef || null,

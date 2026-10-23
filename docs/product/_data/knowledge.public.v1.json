@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.45",
+  "knowledge_version": "1.0.46",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-21",
+  "updated_at": "2026-10-23",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -1168,11 +1168,15 @@
       "optional_capabilities": [],
       "controls": [
         "studio.voiceover.volume",
-        "studio.voiceover.duration"
+        "studio.voiceover.duration",
+        "studio.voiceover.fade_in",
+        "studio.voiceover.fade_out"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open Studio → Sound and import an owned voice-over recording or record a take.",
+        "Set its start, source in, length, volume and Fade in / Fade out.",
+        "Linked source trims preserve the surviving speech samples and their original fades. Changing a take’s fade, source in or length starts a new envelope; moving or muting retains it.",
+        "Review playback, save and reopen the project, then export through the normal owned render flow."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
@@ -1188,7 +1192,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-23",
       "product_version": "1.2.0"
     },
     {
@@ -11922,6 +11926,72 @@
       ],
       "updated_at": "2026-10-21",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.fade_in",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take fade in",
+      "status": "PARTIAL",
+      "meaning": "Sets the recorded take fade in in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial."
+      ],
+      "updated_at": "2026-10-23",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.fade_out",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take fade out",
+      "status": "PARTIAL",
+      "meaning": "Sets the recorded take fade out in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial."
+      ],
+      "updated_at": "2026-10-23",
+      "product_version": "1.2.0"
     }
   ],
   "tasks": [
@@ -15073,6 +15143,16 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.background_decontaminate"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.fade_in"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.fade_out"
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex source review",
-  "reason": "Review Studio View options viewport positioning on open, resize and scroll; preserve output framing and existing readiness.",
-  "reviewed_at": "2026-10-22T18:26:11.440Z",
-  "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
+  "reason": "Retained linked speech fades and ordinary take fade controls; native history/cold recovery, CPU final, sample-identical mixer and rapid-cancellation checks; readiness remains partial",
+  "reviewed_at": "2026-10-23T03:42:32.793Z",
+  "catalog_sha256": "8f0af9e9f64d13961f50e3cb40ac2d8ddf486b22755f95afef13adebb4f3bb5e",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "2715d65c4c1915295085c30244496cf6e2cfcf2da051df9b86e6a05845c11685"
+      "sha256": "802f2b3e4119ee1f551e58147dbe58b310405d05203b674bcf1cc6f7de1e4bd4"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -315,7 +315,7 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "895c84b4e5c9efcfa70ac79a810a8233efcf78f86ee9442e9987b2a3af77eb47"
+      "sha256": "d2e6d2a78be2d4a6c2b21e4e35b8c314cbe30f38d63d5c623bc5d6fde2eb8bf4"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
@@ -343,7 +343,7 @@
     },
     {
       "path": "frontend/src/components/studioVoiceover.js",
-      "sha256": "8c97560358757a6c97efa75e9db570b7c00ae3cc0183e2dd3dc3413f8e082f4b"
+      "sha256": "5cab4eac96e489574a5f8cd4e1817a641dc0e5cb5e93e84ebb7ce83acd15108f"
     },
     {
       "path": "frontend/src/components/threeD/studio3DModel.js",
@@ -395,7 +395,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "5bf45a1335f81d796fd5c4ccc939839d818a69b04956493dd3e619e5080f5b79"
+      "sha256": "b6451c52c7a2d705588d9bd887037124fbf0be5b7a8ba78b67e99fa76efff92d"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "62359196a3a531f097644cab7e68003f63f44892aa1307a04790989f12ef2fb0"
+      "sha256": "346e796451bf9aabade4dc9405a8e3017be975d75effc4be62d242dfd815da59"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "d933524491ae7900249c82c5373569d23805d1150841e9a6e0a901f5ba143498"
+      "sha256": "f24c8d70336765362ab969e80574942e06b92f078eb90e8038f31024d3760ca8"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

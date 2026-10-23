@@ -10718,11 +10718,18 @@ const ViralClipStudio = ({
   const updateVoiceoverTake = (id, changes) => setVoiceovers(current => current.map(take => {
     if (take.id !== id) return take;
     const next = { ...take, ...changes };
+    // Explicitly editing the take's source/length starts a new authored range.
+    // Moving, muting, renaming and changing gain keep a retained cut's fades.
+    if (["trimStart", "duration", "fadeIn", "fadeOut"].some(field => field in changes)) {
+      delete next.fadeOffset; delete next.fadeDuration;
+    }
     const sourceDuration = Number(take.sourceDuration || Number(take.trimStart || 0) + take.duration);
     next.startTime = clampNumber(next.startTime, 0, Math.max(0, liveTimelineDuration - .05), 0);
     next.trimStart = clampNumber(next.trimStart, 0, Math.max(0, sourceDuration - .05), 0);
     next.duration = clampNumber(next.duration, .05, Math.max(.05, sourceDuration - next.trimStart), .05);
     next.volume = voiceoverGain(next.volume);
+    next.fadeIn = clampNumber(next.fadeIn, 0, 5, 0);
+    next.fadeOut = clampNumber(next.fadeOut, 0, 5, 0);
     return next;
   }));
 
@@ -26163,6 +26170,10 @@ const ViralClipStudio = ({
                           value={take.trimStart || 0} onChange={event => updateVoiceoverTake(take.id, { trimStart: Number(event.target.value) })} /></label>
                         <label>Length (s)<input type="number" min="0.05" step="0.1" aria-label={`Length for ${take.name}`}
                           value={Number(take.duration.toFixed(2))} onChange={event => updateVoiceoverTake(take.id, { duration: Number(event.target.value) })} /></label>
+                        <label>Fade in (s)<input type="number" min="0" max="5" step="0.1" aria-label={`Fade in for ${take.name}`}
+                          value={take.fadeIn || 0} onChange={event => updateVoiceoverTake(take.id, { fadeIn: Number(event.target.value) })} /></label>
+                        <label>Fade out (s)<input type="number" min="0" max="5" step="0.1" aria-label={`Fade out for ${take.name}`}
+                          value={take.fadeOut || 0} onChange={event => updateVoiceoverTake(take.id, { fadeOut: Number(event.target.value) })} /></label>
                       </div>
                       <label>Volume {Math.round(voiceoverGain(take.volume) * 100)}%
                         <input type="range" min="0" max="1" step="0.01" aria-label={`Volume for ${take.name}`}

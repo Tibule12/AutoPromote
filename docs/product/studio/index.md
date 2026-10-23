@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.46 • 2026-10-23
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -853,8 +853,10 @@ Records or imports owned voice takes, places them on the timeline and edits cue 
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → Sound and import an owned voice-over recording or record a take.
+2. Set its start, source in, length, volume and Fade in / Fade out.
+3. Linked source trims preserve the surviving speech samples and their original fades. Changing a take’s fade, source in or length starts a new envelope; moving or muting retains it.
+4. Review playback, save and reopen the project, then export through the normal owned render flow.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -868,7 +870,7 @@ Records or imports owned voice takes, places them on the timeline and edits cue 
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Voice take volume](../control-reference/index.md#studio-voiceover-volume), [Voice take duration](../control-reference/index.md#studio-voiceover-duration)
+**Controls:** [Voice take volume](../control-reference/index.md#studio-voiceover-volume), [Voice take duration](../control-reference/index.md#studio-voiceover-duration), [Voice take fade in](../control-reference/index.md#studio-voiceover-fade_in), [Voice take fade out](../control-reference/index.md#studio-voiceover-fade_out)
 
 **Guides:** No task guide in V1.
 

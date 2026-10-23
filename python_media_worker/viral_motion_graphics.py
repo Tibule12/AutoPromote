@@ -96,6 +96,13 @@ def validate_design(motion_graphics=None, sound_effects=None):
                                       ("trimStart", 0, 86400, 0), ("volume", 0, 1, .8),
                                       ("fadeIn", 0, 15, 0), ("fadeOut", 0, 15, 0)):
             e[key] = bound(e.get(key), low, high, default)
+        if e.get("fadeOffset") is not None or e.get("fadeDuration") is not None:
+            offset, length = e.get("fadeOffset"), e.get("fadeDuration")
+            if (e.get("kind") != "voiceover" or type(offset) not in (int, float)
+                    or type(length) not in (int, float) or not math.isfinite(offset)
+                    or not math.isfinite(length) or offset < 0 or not .05 <= length <= 7200
+                    or offset + e["duration"] > length + 1/90000):
+                raise ValueError("Invalid retained voice-over fade range")
         normalized_effects.append(e)
     return [normalize_motion(s) for s in scenes if s.get("enabled") is not False], normalized_effects
 
@@ -513,10 +520,16 @@ def prepare_voiceover_samples(effect, source, speed_plan):
     if not ranges:
         return np.empty(0, dtype=np.float32), 0
     chain = [f"[0:a]atrim=start={effect['trimStart']}:duration={effect['duration']},asetpts=PTS-STARTPTS"]
+    fade_offset = effect.get("fadeOffset") or 0
+    fade_duration = effect.get("fadeDuration") or effect["duration"]
+    if fade_offset:
+        chain[0] += f"+{fade_offset}/TB"
     if effect["fadeIn"] > 0:
         chain[0] += f",afade=t=in:d={effect['fadeIn']}"
     if effect["fadeOut"] > 0:
-        chain[0] += f",afade=t=out:st={max(0, effect['duration']-effect['fadeOut'])}:d={effect['fadeOut']}"
+        chain[0] += f",afade=t=out:st={max(0, fade_duration-effect['fadeOut'])}:d={effect['fadeOut']}"
+    if fade_offset:
+        chain[0] += ",asetpts=PTS-STARTPTS"
     chain[0] += f",asplit={len(ranges)}" + "".join(f"[vo{i}]" for i in range(len(ranges)))
     for index, (first, last, rate) in enumerate(ranges):
         tempos = []

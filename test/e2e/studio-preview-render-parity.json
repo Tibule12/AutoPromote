@@ -8355,5 +8355,37 @@
       "S04",
       "S03"
     ]
+  },
+  "linkedSpeechFadePhase20261023": {
+    "date": "2026-10-23",
+    "evidence": "reports/studio-voice-fade-phase-20261023/README.md",
+    "scope": "Retained speech fade phase across linked timeline cuts, ordinary voice fade controls, canonical recovery and preview/final consumers; no whole picture/sound qualification.",
+    "readinessPromotion": false,
+    "paidJobs": 0,
+    "nextSharedTasks": [
+      "S02",
+      "S04",
+      "S03"
+    ],
+    "nativeFlow": "PASS: ordinary import/fade controls, leading and middle linked cuts, exact Undo/Redo and cold backup restore; complete six-second CPU export, download and matching Studio timeline playback.",
+    "previewMixerPcm": {
+      "sampleFrames": 288000,
+      "scalarSamples": 576000,
+      "sampleRate": 48000,
+      "maxAbsoluteError": 0,
+      "absoluteTolerance": 4e-05,
+      "passed": true
+    },
+    "rapidCancellation": "PASS: four native gain changes; superseded Storage read leaves API alive, latest owned preview returns 200 after two explicit busy responses, exact cold reopen; zero new render jobs.",
+    "aacGate": "4/6 windows pass; two relative-error failures in near silence retained at original thresholds. No whole sound/listening qualification.",
+    "tests": {
+      "frontendHelpers": 48,
+      "studioComponent": 1,
+      "server": 19,
+      "worker": 20,
+      "knowledge": 17
+    },
+    "completedCpuExports": 2,
+    "publishingWrites": 0
   }
 }

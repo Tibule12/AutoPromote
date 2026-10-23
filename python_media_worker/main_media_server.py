@@ -31056,6 +31056,8 @@ class ViralSoundEffect(BaseModel):
     volume: float = 0.8
     fadeIn: float = 0.02
     fadeOut: float = 0.12
+    fadeOffset: Optional[float] = None
+    fadeDuration: Optional[float] = None
     enabled: bool = True
 
 class HookFocusPoint(BaseModel):

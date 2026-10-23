@@ -194,3 +194,7 @@ reports/studio-background-captions-20261021/*
 
 # Reviewed native welcome release media must ship with the frontend.
 !frontend/public/welcome/2026-10-21/*
+
+# Private native speech fade proof, media and isolated builds.
+reports/studio-voice-fade-phase-20261023/*
+!reports/studio-voice-fade-phase-20261023/README.md

@@ -3176,6 +3176,38 @@ describe("ViralClipStudio timeline sequencing", () => {
     })]);
   });
 
+  test("voice fade controls retain cut phase on gain edits and author a new envelope only on source or fade edits", async () => {
+    const source = { id: 'source', start: 0, end: 6, duration: 6 };
+    const snapshot = { orderedClips: [source], selectedClipId: 'source',
+      timeline: [{ ...source, id: 'main', sourceClipId: 'source', url: 'https://example.com/source.mp4', startRequest: 0, endRequest: 6 }],
+      reframeAspect: '16:9', smartCrop: false, autoCaptions: false,
+      voiceovers: [{ id: 'voice', name: 'Retained speech', url: 'https://example.com/voice.wav',
+        startTime: 0, trimStart: 2, duration: 4, sourceDuration: 8, volume: .7,
+        fadeIn: 2, fadeOut: 2, fadeOffset: 2, fadeDuration: 8 }] };
+    const saveSpy = jest.spyOn(studioProjectStore, 'saveViralStudioProject').mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[source]}
+        initialSavedProject={{ id: 'voice-fade-controls', name: 'Retained voice fades', snapshot }} onSave={jest.fn()} onCancel={jest.fn()} />);
+      await screen.findByDisplayValue('Retained voice fades');
+      fireEvent.click(within(screen.getByTestId('clip-studio-inspector')).getByRole('tab', { name: /Sound/i }));
+      expect(screen.getByLabelText('Fade in for Retained speech')).toHaveValue(2);
+      fireEvent.change(screen.getByLabelText('Volume for Retained speech'), { target: { value: '.5' } });
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.voiceovers[0]).toMatchObject({
+        volume: .5, fadeOffset: 2, fadeDuration: 8,
+      }));
+      fireEvent.change(screen.getByLabelText('Fade in for Retained speech'), { target: { value: '1.2' } });
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.voiceovers[0].fadeIn).toBe(1.2));
+      expect(saveSpy.mock.calls.at(-1)[0].snapshot.voiceovers[0]).not.toHaveProperty('fadeOffset');
+      fireEvent.click(screen.getByTestId('studio-undo-button'));
+      fireEvent.click(screen.getByTestId('studio-save-project'));
+      await waitFor(() => expect(saveSpy.mock.calls.at(-1)[0].snapshot.voiceovers[0]).toMatchObject({
+        fadeIn: 2, fadeOffset: 2, fadeDuration: 8,
+      }));
+    } finally { saveSpy.mockRestore(); }
+  });
+
   test("composition timeline moves keyed titles as one undo step and respects the actual owning track", async () => {
     const source = { id: 'source', start: 0, end: 8, duration: 8 };
     const snapshot = { orderedClips: [source], selectedClipId: 'source',

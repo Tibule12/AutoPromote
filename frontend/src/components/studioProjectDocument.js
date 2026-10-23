@@ -145,7 +145,7 @@ const cloneParameters = (item, fields) => JSON.parse(JSON.stringify(Object.fromE
 const AUDIO_CUE_PARAMETER_FIELDS = [
   "enabled", "builtIn", "kind", "tone", "name", "label", "sourceClipId",
   "sourceStoragePath", "storagePath", "contentHash", "sha256", "volume",
-  "muted", "fadeIn", "fadeOut", "pan", "audioMode", "rate", "pitchPreserved",
+  "muted", "fadeIn", "fadeOut", "fadeOffset", "fadeDuration", "pan", "audioMode", "rate", "pitchPreserved",
 ];
 const cueParameterFields = collection => collection === "adjustmentLayers"
   ? ["enabled", "name", "label", "preset", "opacity", "finishFx", "effects", "intensity"]

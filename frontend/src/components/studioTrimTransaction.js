@@ -97,12 +97,12 @@ export const rippleStudioSnapshotLinkedTimeline = (
   };
   const replacements = new Map();
   const splitRanges = new Map();
-  const retimeItems = (items, cut = rippleTimedItems) => {
+  const retimeItems = (items, cut = rippleTimedItems, options) => {
     // Canonical layers are paint-ordered; legacy collections can be in intake
     // order. Allocate continuation IDs by identity, then keep each view's order.
     const ordered = [...items].sort((a, b) => String(a.id) < String(b.id) ? -1 : String(a.id) > String(b.id) ? 1 : 0);
     const byId = new Map(ordered.map(item => {
-      const pieces = cut([item], from, to, nextId);
+      const pieces = cut([item], from, to, nextId, options);
       replacements.set(item.id, pieces.map(piece => piece.id));
       if (cut === rippleTimedItems && Number(item.startTime) < to && Number(item.startTime) + Number(item.duration) > from) {
         splitRanges.set(item.id, pieces.map(piece => ({ id: piece.id,
@@ -118,7 +118,8 @@ export const rippleStudioSnapshotLinkedTimeline = (
     rippleTimelineKeys(keys, from, to, { preserveRightState, markCut });
   const next = { ...snapshot };
   for (const field of ["overlays", "soundEffects", "voiceovers", "adjustmentLayers"]) {
-    if (Array.isArray(snapshot[field])) next[field] = retimeItems(snapshot[field]);
+    if (Array.isArray(snapshot[field])) next[field] = retimeItems(snapshot[field], rippleTimedItems,
+      { preserveVoiceFade: field === "voiceovers" });
   }
   if (Array.isArray(snapshot.motionScenes))
     next.motionScenes = retimeItems(snapshot.motionScenes, cutMotion);

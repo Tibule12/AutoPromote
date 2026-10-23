@@ -1,4 +1,4 @@
-import { studioVoiceBusRequest, scheduleStudioPreparedDuck } from '../studioPreparedVoiceBus';
+import { studioVoiceBusRequest, scheduleStudioPreparedDuck, loadStudioVoiceBus } from '../studioPreparedVoiceBus';
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import StudioVoiceoverPreview from '../StudioVoiceoverPreview';
@@ -6,6 +6,36 @@ const take = { id: 'voice', ownerUid: 'owner', sourceStoragePath: 'owned/take.wa
   sourceDuration: 8, startTime: 1, trimStart: .25, duration: 2, volume: .7, fadeIn: .1, fadeOut: .2 };
 const map = [{ programmeRange: { startTick: 0, endTick: 360000 }, outputRange: { startTick: 0, endTick: 180000 },
   rateNumerator: 2, rateDenominator: 1 }];
+
+test('rapid-edit busy retries are bounded and never repeat rate-limit failures', async () => {
+  jest.useFakeTimers(); const before = global.fetch;
+  try {
+    global.fetch = jest.fn().mockResolvedValue({ status: 429, ok: false,
+      json: async () => ({ code: 'STUDIO_VOICE_PREVIEW_BUSY', message: 'busy' }) });
+    const run = loadStudioVoiceBus({ input: { projectId: 'phase' }, apiBase: '', getToken: async () => 'token' });
+    const checked = expect(run).rejects.toThrow('busy');
+    for (const delay of [250, 500, 1000, 1500, 2000]) { for (let i=0;i<8;i++) await Promise.resolve(); jest.advanceTimersByTime(delay); }
+    await checked;
+    expect(global.fetch).toHaveBeenCalledTimes(6);
+    global.fetch.mockReset().mockResolvedValue({ status: 429, ok: false,
+      json: async () => ({ code: 'RATE_LIMITED', message: 'rate limited' }) });
+    await expect(loadStudioVoiceBus({ input: {}, apiBase: '', getToken: async () => 'token' })).rejects.toThrow('rate limited');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  } finally { global.fetch = before; jest.useRealTimers(); }
+});
+
+test('superseding an edit cancels its retry timer before any further request', async () => {
+  jest.useFakeTimers(); const before = global.fetch, controller = new AbortController();
+  try {
+    global.fetch = jest.fn().mockResolvedValue({ status: 429, ok: false,
+      json: async () => ({ code: 'STUDIO_VOICE_PREVIEW_BUSY' }) });
+    const run = loadStudioVoiceBus({ input: {}, apiBase: '', getToken: async () => 'token', signal: controller.signal });
+    const checked = expect(run).rejects.toMatchObject({ name: 'AbortError' });
+    for (let i=0;i<8;i++) await Promise.resolve(); controller.abort(); await checked;
+    jest.runAllTimers(); expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(jest.getTimerCount()).toBe(0);
+  } finally { global.fetch = before; jest.useRealTimers(); }
+});
 test('retimed requests retain owned trims and curves and ignore access-only URL renewal', () => {
   const options = { projectId: 'project', takes: [take], outputTimeMap: map,
     automation: [{ time: 1, value: 50, easing: 'bezier', curve: [.1, 0, .2, 1] }],

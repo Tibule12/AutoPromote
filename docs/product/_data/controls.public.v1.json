@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.45",
+  "knowledge_version": "1.0.46",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -6906,6 +6906,72 @@
         "This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified."
       ],
       "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.fade_in",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take fade in",
+      "status": "PARTIAL",
+      "meaning": "Sets the recorded take fade in in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial."
+      ],
+      "updated_at": "2026-10-23",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.fade_out",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take fade out",
+      "status": "PARTIAL",
+      "meaning": "Sets the recorded take fade out in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial."
+      ],
+      "updated_at": "2026-10-23",
       "product_version": "1.2.0"
     }
   ]
