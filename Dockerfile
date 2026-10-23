@@ -25,6 +25,9 @@ COPY . .
 
 # Build frontend static assets (React)
 # Installs frontend deps, builds, then cleans up to save space.
+# Render supplies this build argument; local builds must pass the commit SHA.
+# The postbuild asset verifier cannot read Git metadata inside the image.
+ARG RENDER_GIT_COMMIT
 RUN npm --prefix frontend ci && npm --prefix frontend run build && rm -rf frontend/node_modules
 
 # Create non-root user
