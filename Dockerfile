@@ -1,5 +1,5 @@
-# Use Node.js 20 Alpine for smaller image size (Updated for Firebase/Undici requirements)
-FROM node:20-alpine
+# Match the frontend's Node.js >=22.22.0 requirement and frontend CI runtime.
+FROM node:22-alpine
 
 # Install system dependencies (FFmpeg for media processing)
 RUN apk add --no-cache ffmpeg
@@ -10,10 +10,12 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# The root postinstall entry point must exist before npm evaluates lifecycle
-# scripts. Disable its Render-only frontend build here because the complete
-# frontend source is copied and built explicitly below.
+# Copy the root postinstall scripts and their shared security implementation
+# before npm evaluates lifecycle scripts. Disable the Render-only frontend build
+# here because the complete frontend source is copied and built explicitly below.
 COPY scripts/build-frontend-on-render.js ./scripts/build-frontend-on-render.js
+COPY scripts/patch-security-dependencies.js ./scripts/patch-security-dependencies.js
+COPY autopromote-functions/security-dependency-guards.js ./autopromote-functions/security-dependency-guards.js
 
 # Install dependencies
 RUN RENDER=false RENDER_SERVICE_ID= npm ci --omit=dev
@@ -23,6 +25,9 @@ COPY . .
 
 # Build frontend static assets (React)
 # Installs frontend deps, builds, then cleans up to save space.
+# Render supplies this build argument; local builds must pass the commit SHA.
+# The postbuild asset verifier cannot read Git metadata inside the image.
+ARG RENDER_GIT_COMMIT
 RUN npm --prefix frontend ci && npm --prefix frontend run build && rm -rf frontend/node_modules
 
 # Create non-root user
