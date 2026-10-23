@@ -50,6 +50,14 @@ width; this does not alter the Studio movie or its edit decisions.
   three real signed-in help questions pass, with zero browser errors. Saved
   login bytes remain unchanged.
 
+The first branch CI run passed Playwright and the other executed build/security/
+backend checks, but its emulator workflow spent more than nine minutes in CPU
+dependency setup before Jest started. That setup now has a five-minute deadline,
+bounded package-network retries, wheel-only pinned Python dependencies, and no
+unnecessary recommended GPU/desktop packages. Existing usable FFmpeg binaries are
+verified and reused. The emulator-backed unit command and its twenty-minute test
+deadline remain unchanged. This is setup hardening, not a skipped test gate.
+
 The ordinary signed-in native flow also passes: three source occurrences,
 Pacing points, linked split/trim through a ramp, exact Undo/Redo, exact cold
 reopen, six decoder rates matching the canonical map, and complete live playback.
