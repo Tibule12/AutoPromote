@@ -8745,7 +8745,11 @@ def build_studio_sequence_video_filters(normalize_filter, fps, source_framing=Fa
     # Framing keys are evaluated on the delivery clock, after resetting a
     # trimmed source's first timestamp. Resampling an already-cropped 30fps
     # source chooses a different pan position for a 24fps output frame.
-    clock = [f"fps={float(fps):g}", "setpts=PTS-STARTPTS"]
+    # Fractional input seeks can leave the last decoded picture shorter than
+    # one delivery interval. Preserve that picture's source-frame coverage
+    # before CFR conversion; the caller's exact -t still bounds the cut. An
+    # earlier missing-picture tail cannot be concealed by this one-frame pad.
+    clock = ["tpad=stop_mode=clone:stop=1", f"fps={float(fps):g}", "setpts=PTS-STARTPTS"]
     return clock + [normalize_filter] if source_framing else [normalize_filter] + clock
 
 
@@ -31056,6 +31060,8 @@ class ViralSoundEffect(BaseModel):
     volume: float = 0.8
     fadeIn: float = 0.02
     fadeOut: float = 0.12
+    fadeOffset: Optional[float] = None
+    fadeDuration: Optional[float] = None
     enabled: bool = True
 
 class HookFocusPoint(BaseModel):

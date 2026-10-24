@@ -96,6 +96,13 @@ def validate_design(motion_graphics=None, sound_effects=None):
                                       ("trimStart", 0, 86400, 0), ("volume", 0, 1, .8),
                                       ("fadeIn", 0, 15, 0), ("fadeOut", 0, 15, 0)):
             e[key] = bound(e.get(key), low, high, default)
+        if e.get("fadeOffset") is not None or e.get("fadeDuration") is not None:
+            offset, length = e.get("fadeOffset"), e.get("fadeDuration")
+            if (e.get("kind") != "voiceover" or type(offset) not in (int, float)
+                    or type(length) not in (int, float) or not math.isfinite(offset)
+                    or not math.isfinite(length) or offset < 0 or not .05 <= length <= 7200
+                    or offset + e["duration"] > length + 1/90000):
+                raise ValueError("Invalid retained voice-over fade range")
         normalized_effects.append(e)
     return [normalize_motion(s) for s in scenes if s.get("enabled") is not False], normalized_effects
 
@@ -512,15 +519,36 @@ def prepare_voiceover_samples(effect, source, speed_plan):
               for p in speed_plan if p["end_time"] > start and p["start_time"] < end]
     if not ranges:
         return np.empty(0, dtype=np.float32), 0
-    chain = [f"[0:a]atrim=start={effect['trimStart']}:duration={effect['duration']},asetpts=PTS-STARTPTS"]
+    # Quantize cumulative output boundaries, rather than rounding every piece
+    # independently. Dense ramps and cut joins must not accumulate sample drift.
+    output_seconds, previous_sample, sampled_ranges = 0.0, 0, []
+    for first, last, rate in ranges:
+        output_seconds += (last-first)/rate
+        end_sample = round(output_seconds * SAMPLE_RATE)
+        if end_sample > previous_sample:
+            sampled_ranges.append((first, last, rate, end_sample-previous_sample))
+        previous_sample = end_sample
+    if not sampled_ranges:
+        return np.empty(0, dtype=np.float32), map_timeline_time(speed_plan, ranges[0][0])
+    # FFmpeg duration options reject scientific notation. Retained curve joins
+    # can be one media tick long, shorter than one output audio sample.
+    chain = [f"[0:a]atrim=start={effect['trimStart']:.9f}:duration={effect['duration']:.9f},asetpts=PTS-STARTPTS"]
+    fade_offset = effect.get("fadeOffset") or 0
+    fade_duration = effect.get("fadeDuration") or effect["duration"]
+    if fade_offset:
+        chain[0] += f"+{fade_offset:.9f}/TB"
     if effect["fadeIn"] > 0:
-        chain[0] += f",afade=t=in:d={effect['fadeIn']}"
+        chain[0] += f",afade=t=in:d={effect['fadeIn']:.9f}"
     if effect["fadeOut"] > 0:
-        chain[0] += f",afade=t=out:st={max(0, effect['duration']-effect['fadeOut'])}:d={effect['fadeOut']}"
-    chain[0] += f",asplit={len(ranges)}" + "".join(f"[vo{i}]" for i in range(len(ranges)))
-    for index, (first, last, rate) in enumerate(ranges):
+        chain[0] += f",afade=t=out:st={max(0, fade_duration-effect['fadeOut']):.9f}:d={effect['fadeOut']:.9f}"
+    if fade_offset:
+        chain[0] += ",asetpts=PTS-STARTPTS"
+    chain[0] += f",aresample={SAMPLE_RATE},asplit={len(sampled_ranges)}" + "".join(f"[vo{i}]" for i in range(len(sampled_ranges)))
+    for index, (first, last, rate, sample_count) in enumerate(sampled_ranges):
         tempos = []
-        remaining = rate
+        # A sub-sample join has no measurable pitch. WSOLA rejects a one-sample
+        # input; retain its sample and let the finite output length place it.
+        remaining = rate if (last-first) * SAMPLE_RATE > 1 else 1
         while remaining < .5:
             tempos.append("atempo=0.5"); remaining /= .5
         while remaining > 2:
@@ -529,10 +557,15 @@ def prepare_voiceover_samples(effect, source, speed_plan):
         # rate must retain the exact trimmed recording and its sample phase.
         if abs(remaining - 1) > 1e-9:
             tempos.append(f"atempo={remaining}")
-        chain.append(f"[vo{index}]atrim=start={first-start}:end={last-start},asetpts=PTS-STARTPTS,"
+        # WSOLA also needs look-ahead for very short retained ranges. Read real
+        # following speech where available, then finite silence at the cue end;
+        # trim the stretched result back to this interval's exact sample count.
+        context = .2 if tempos and last-first < .1 else 0
+        chain.append(f"[vo{index}]atrim=start={first-start:.9f}:end={last-start+context:.9f},asetpts=PTS-STARTPTS,"
+                     + (f"apad=pad_len={round(context*SAMPLE_RATE)}," if context else "")
                      + (",".join(tempos) + "," if tempos else "")
-                     + f"apad,atrim=duration={(last-first)/rate}[vot{index}]")
-    chain.append("".join(f"[vot{i}]" for i in range(len(ranges))) + f"concat=n={len(ranges)}:v=0:a=1[out]")
+                     + f"apad=whole_len={sample_count},atrim=end_sample={sample_count}[vot{index}]")
+    chain.append("".join(f"[vot{i}]" for i in range(len(sampled_ranges))) + f"concat=n={len(sampled_ranges)}:v=0:a=1[out]")
     raw = run(["ffmpeg", "-v", "error", "-nostdin", "-i", str(source), "-filter_complex", ";".join(chain),
                "-map", "[out]", "-ac", "1", "-ar", str(SAMPLE_RATE), "-f", "f32le", "pipe:1"])
     return np.frombuffer(raw, dtype="<f4"), map_timeline_time(speed_plan, ranges[0][0])

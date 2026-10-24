@@ -59,11 +59,41 @@ test('changed source bytes and oversized objects fail before a preview can be re
   stores.resolveOwnedStudioMediaSource.mockResolvedValue({ contentType: 'audio/wav', size: 9*1024*1024, generation: '2' });
   await expect(getOwnedVoiceBusPreview({ ownerUid: 'owner', input: input() })).rejects.toMatchObject({ statusCode: 422 });
 });
+
+test('retained fade clocks are bounded, complete and part of prepared speech identity', async () => {
+  const { validateVoiceBusRequest } = require('../services/studioVoiceBusPreviewService');
+  const request = input();
+  request.voices[0] = { ...request.voices[0], fadeOffset: 1, fadeDuration: 4 };
+  expect(validateVoiceBusRequest(request)).toBe(request);
+  const original = await getOwnedVoiceBusPreview({ ownerUid: 'owner', input: input() });
+  const retained = await getOwnedVoiceBusPreview({ ownerUid: 'owner', input: request });
+  expect(retained.parametersHash).not.toBe(original.parametersHash);
+  for (const phase of [{ fadeOffset: 1 }, { fadeDuration: 4 }, { fadeOffset: -1, fadeDuration: 4 },
+    { fadeOffset: 4, fadeDuration: 4 }, { fadeOffset: 0, fadeDuration: 7201 }]) {
+    expect(() => validateVoiceBusRequest({ ...input(), voices: [{ ...input().voices[0], ...phase }] })).toThrow();
+  }
+});
 test('a cancelled request releases its owner slot and kills its decoder process group', async () => {
   const controller = new AbortController(); controller.abort();
   await expect(getOwnedVoiceBusPreview({ ownerUid: 'owner', input: input(), signal: controller.signal }))
     .rejects.toMatchObject({ statusCode: 499 });
   await expect(renderVoiceBusPreview(folder, input(), controller.signal)).rejects.toMatchObject({ statusCode: 499 });
+  expect((await getOwnedVoiceBusPreview({ ownerUid: 'owner', input: input() })).sampleCount).toBe(96000);
+});
+
+test('cancelling while Storage awaits its response does not destroy its uninitialized internal pipeline', async () => {
+  const { PassThrough } = require('node:stream');
+  const stream = new PassThrough(), controller = new AbortController();
+  let started;
+  const reading = new Promise(resolve => { started = resolve; });
+  stores.getStudioSourceBucket.mockReturnValueOnce({ file: () => ({ createReadStream: () => { started(); return stream; } }) });
+  const pending = getOwnedVoiceBusPreview({ ownerUid: 'owner',
+    input: { ...input(), projectId: 'pending-storage-cancel' }, signal: controller.signal });
+  const checked = expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+  await reading; controller.abort();
+  expect(stream.destroyed).toBe(false);
+  stream.end(bytes); await checked;
+  expect(stream.destroyed).toBe(true);
   expect((await getOwnedVoiceBusPreview({ ownerUid: 'owner', input: input() })).sampleCount).toBe(96000);
 });
 test('an owned object cannot smuggle a playlist or external file reference into the decoder', async () => {

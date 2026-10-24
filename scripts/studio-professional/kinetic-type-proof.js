@@ -38,7 +38,7 @@ async function recording(page) {
     const concat = path.join(frames, 'frames.ffconcat'); fs.writeFileSync(concat, 'ffconcat version 1.0\n' + images.map((f, i) => `file '${f.file}'\nduration ${Math.max(.001, (images[i + 1]?.time ?? f.time + .1) - f.time)}\n`).join('') + `file '${images.at(-1).file}'\n`);
     const movie = path.join(folder, 'editing-in-studio.mp4');
     if (fs.existsSync(movie)) fs.renameSync(movie, movie.replace('.mp4', `-${Date.now()}.mp4`));
-    execFileSync('ffmpeg', ['-v', 'error', '-y', '-safe', '0', '-i', concat, '-vf', 'fps=24', '-c:v', 'libx264', '-preset', 'fast', '-crf', '24', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', movie]);
+    execFileSync('ffmpeg', ['-v', 'error', '-y', '-safe', '0', '-i', concat, '-vf', 'fps=24,pad=ceil(iw/2)*2:ceil(ih/2)*2', '-c:v', 'libx264', '-preset', 'fast', '-crf', '24', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', movie]);
     const keep = new Set([images[0].file, images[Math.floor(images.length / 2)].file, images.at(-1).file]);
     for (const item of images) if (!keep.has(item.file)) fs.unlinkSync(item.file); fs.unlinkSync(concat);
     fs.writeFileSync(path.join(folder, 'editing-recording.json'), JSON.stringify({ seconds: images.at(-1).time - images[0].time, frames: images.length, rawBytes: bytes, nativeControlsOnly: true, setupExcluded: true, audio: 'Silent native editing capture' }, null, 2));

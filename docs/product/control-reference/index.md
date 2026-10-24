@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.48 • 2026-10-24
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -206,6 +206,8 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.captions.source_language | Speech language | enum | auto, en, af, za-mixed, xh, zu, st, tn, ts, nr, ve | none | "auto" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.composite.background_edge_radius | Edge detail width | number | 0 … 8 | source pixels | 3 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.background_decontaminate | Remove old background colour | number | 0 … 1 | strength | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.voiceover.fade_in | Voice take fade in | number | 0 … 5 | seconds | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.voiceover.fade_out | Voice take fade out | number | 0 … 5 | seconds | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 
 <a id="studio-transform-x"></a>
 
@@ -866,6 +868,7 @@ Changes the selected audio bus gain over programme time; 100% means unity.
 Applies to: ordinary layers. Requires: studio.audio_automation.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Source gain keys take precedence over the legacy master-podcast curve. Boost preview requires browser audio processing; whole mixed-sound parity remains unqualified.
 
 <a id="studio-audio-automation_source"></a>
 
@@ -878,6 +881,7 @@ Selects which programme audio bus the volume keys affect.
 Applies to: ordinary layers. Requires: studio.audio_automation.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Source gain keys take precedence over the legacy master-podcast curve. Boost preview requires browser audio processing; whole mixed-sound parity remains unqualified.
 
 <a id="studio-audio-ducking"></a>
 
@@ -2712,3 +2716,27 @@ Recovers photographed foreground edge colour using the final mask, including pro
 Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
 
 - This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified.
+
+<a id="studio-voiceover-fade_in"></a>
+
+## Voice take fade in
+
+ID: `studio.voiceover.fade_in` • **PARTIAL**
+
+Sets the recorded take fade in in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.
+
+Applies to: video. Requires: studio.voiceover.
+
+- Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial.
+
+<a id="studio-voiceover-fade_out"></a>
+
+## Voice take fade out
+
+ID: `studio.voiceover.fade_out` • **PARTIAL**
+
+Sets the recorded take fade out in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.
+
+Applies to: video. Requires: studio.voiceover.
+
+- Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial.

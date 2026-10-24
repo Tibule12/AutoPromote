@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "reviewer": "Codex source review",
-  "reason": "Review Studio View options viewport positioning on open, resize and scroll; preserve output framing and existing readiness.",
-  "reviewed_at": "2026-10-22T18:26:11.440Z",
-  "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
+  "reviewer": "Codex",
+  "reason": "Final source review includes native finished-monitor recovery/full playback, source/master live PCM, B-roll inspector regression and explicit remaining Studio precision limits.",
+  "reviewed_at": "2026-10-24T08:05:47.740Z",
+  "catalog_sha256": "8274c84b3ff871ef5db1e2890b8ef24a5a6ae22774d08fc4a6ef9ca282197e27",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "18759c8154d0d92abf072351e50921cbacc70e57e67088b56b3c1257b851c90d"
+      "sha256": "1d97fa1d8259571492abce8db388da338a72335c6ecb3d17c927f8cfbe1a388b"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -195,7 +195,11 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "2715d65c4c1915295085c30244496cf6e2cfcf2da051df9b86e6a05845c11685"
+      "sha256": "090cee507d3f394cb5d8af156ab6628e07d3a8372182725181900460a986570a"
+    },
+    {
+      "path": "frontend/src/components/audio/audioRemixPreview.js",
+      "sha256": "18ab5cedfc4bcf7b30a09ae41cc7219142669f1eb00876020b83393e604437c9"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -239,11 +243,11 @@
     },
     {
       "path": "frontend/src/components/studioCommands.js",
-      "sha256": "f0e33918ebaede43f496fe9ee2e5d5a4fc19d64ca0079ad0d8a7272ceaba89df"
+      "sha256": "12bb96cf91a081eb454d392f9aed2069b0824158e4c912e0f1547b68bc828be1"
     },
     {
       "path": "frontend/src/components/studioCreatorRecipes.js",
-      "sha256": "f138569830f8c200004642f1e70fe220425c628fb3c67b6ef6cdf72eb3737411"
+      "sha256": "2b4af60280c282515496dd70a073cdbda43f16fe76c8867d38aff8a973247d4e"
     },
     {
       "path": "frontend/src/components/studioDirectorEvidenceProposals.js",
@@ -315,7 +319,7 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "895c84b4e5c9efcfa70ac79a810a8233efcf78f86ee9442e9987b2a3af77eb47"
+      "sha256": "1e6cc4fa8ed343f00e0f503a25f8a8e6c63f9dac07b7c16c4fa06c34273b21b1"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
@@ -338,12 +342,16 @@
       "sha256": "7e54ffd8595722290792b69452c11a8b7f09ee6cebdf3a6a18525f7b735c1b61"
     },
     {
+      "path": "frontend/src/components/studioTrimTransaction.js",
+      "sha256": "738afe9bf33c8983b619645fdb8b5383d706690e8fdb7ba9ac7b955d5697b8af"
+    },
+    {
       "path": "frontend/src/components/studioVectorShape.js",
       "sha256": "3cfa8a327f3a3c72dfba6c97032d3dfea630202c4aab5db47cdd5fb767f2654b"
     },
     {
       "path": "frontend/src/components/studioVoiceover.js",
-      "sha256": "8c97560358757a6c97efa75e9db570b7c00ae3cc0183e2dd3dc3413f8e082f4b"
+      "sha256": "5cab4eac96e489574a5f8cd4e1817a641dc0e5cb5e93e84ebb7ce83acd15108f"
     },
     {
       "path": "frontend/src/components/threeD/studio3DModel.js",
@@ -395,7 +403,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "5bf45a1335f81d796fd5c4ccc939839d818a69b04956493dd3e619e5080f5b79"
+      "sha256": "9e4d097e9b3fafea67c7066a192ec376d22eca1be0bc5bf2a558142710c31694"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -448,6 +456,10 @@
     {
       "path": "reports/studio-logo-design-20261018/control-contract.md",
       "sha256": "669d2f2a2cd780b80c5d598004d3bb8f5e0e827fa94518ac53157a20831e41a1"
+    },
+    {
+      "path": "reports/studio-preview-gain-20261024/README.md",
+      "sha256": "de7fc9ce2b81767f1b8be04cec79168566c525785da1b3d77890e252c30b9605"
     },
     {
       "path": "reports/studio-professional-group-workflow-20261014/README.md",
@@ -647,11 +659,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "62359196a3a531f097644cab7e68003f63f44892aa1307a04790989f12ef2fb0"
+      "sha256": "711e0697540922965e4228cfdef34e6993e6400689dba78afb5b59608534f764"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "d933524491ae7900249c82c5373569d23805d1150841e9a6e0a901f5ba143498"
+      "sha256": "fe8a6275918ca758f041a6a76f159c1e53dd3a258002f927844e4b2200bf5f99"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

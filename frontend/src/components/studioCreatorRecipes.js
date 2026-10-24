@@ -136,7 +136,7 @@ export const buildSpeedSegmentsFromKeyframes = ({
           interpolateAutomationValue({
             keyframes: keys,
             property: "speed",
-            time: ticksToSeconds(Math.round((leftTick + rightTick) / 2)),
+            time: ticksToSeconds(Math.min(rightTick - 1, Math.round((leftTick + rightTick) / 2))),
             fallback,
           })
         )

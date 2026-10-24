@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.48 • 2026-10-24
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -779,8 +779,10 @@ Builds a bounded piecewise speed plan and maps programme clocks, audio and capti
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open an owned video in Studio and choose Pacing.
+2. Set Fine speed, seek to the intended moment and add a speed point. Choose the arrival easing for each point.
+3. Split or trim source footage through the timeline. Surviving footage retains its speed curve on each side of the cut, including custom curve handles.
+4. Use Undo/Redo and save/reopen to check the edit, then review the normal exported movie with its matching timeline.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -789,6 +791,7 @@ Builds a bounded piecewise speed plan and maps programme clocks, audio and capti
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Speed curves use the shared bounded sampled plan. Broad retiming, transitions, live mixed sound and preview/export picture agreement remain partial.
 
 **Common errors**
 
@@ -853,8 +856,10 @@ Records or imports owned voice takes, places them on the timeline and edits cue 
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → Sound and import an owned voice-over recording or record a take.
+2. Set its start, source in, length, volume and Fade in / Fade out.
+3. Linked source trims preserve the surviving speech samples and their original fades. Changing a take’s fade, source in or length starts a new envelope; moving or muting retains it.
+4. Review playback, save and reopen the project, then export through the normal owned render flow.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -868,7 +873,7 @@ Records or imports owned voice takes, places them on the timeline and edits cue 
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Voice take volume](../control-reference/index.md#studio-voiceover-volume), [Voice take duration](../control-reference/index.md#studio-voiceover-duration)
+**Controls:** [Voice take volume](../control-reference/index.md#studio-voiceover-volume), [Voice take duration](../control-reference/index.md#studio-voiceover-duration), [Voice take fade in](../control-reference/index.md#studio-voiceover-fade_in), [Voice take fade out](../control-reference/index.md#studio-voiceover-fade_out)
 
 **Guides:** No task guide in V1.
 
@@ -1009,13 +1014,14 @@ Edits source-bus volume keys and interpolation alongside native cue gain. Retain
 2. Review the result and its limitations before saving or exporting.
 3. Dense gain curves preserve their sampled values and programme-to-output timing using bounded FFmpeg expression nesting; gain keys do not require removing easing to export.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Source, master-podcast, music, B-roll and SFX gain boosts use browser audio processing above 100%. Source automation takes precedence over the master-podcast fallback. J-cut/L-cut dialogue overlaps follow original-track gain, mute and solo controls. B-roll gain automation persists when switching inspectors. Finished-video monitoring plays the already mixed movie with monitor volume/mute only; Live Edit restores the authored buses. Full mixed-sound comparison remains unqualified.
 
 **Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Volume above 100% requires browser audio processing. If unavailable, the preview reports its 100% limit; export retains the authored gain.
 
 **Common errors**
 

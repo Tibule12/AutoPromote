@@ -13,8 +13,8 @@ const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const canonical = value => JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item)
   ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
 const number = (v, low, high) => typeof v === 'number' && Number.isFinite(v) && v >= low && v <= high;
-const fields = (value, names) => value && typeof value === 'object' && !Array.isArray(value) &&
-  Object.keys(value).every(key => names.includes(key)) && names.every(key => Object.hasOwn(value, key));
+const fields = (value, names, optional = []) => value && typeof value === 'object' && !Array.isArray(value) &&
+  Object.keys(value).every(key => names.includes(key) || optional.includes(key)) && names.every(key => Object.hasOwn(value, key));
 
 function validateVoiceBusRequest(input) {
   const invalid = () => { throw sourceError(422, 'STUDIO_VOICE_PREVIEW_INVALID', 'Recorded-speech preview parameters are invalid'); };
@@ -35,12 +35,15 @@ function validateVoiceBusRequest(input) {
   if (outputDuration > 90) invalid();
   const ids = new Set();
   for (const take of input.voices) {
-    if (!fields(take, ['id', 'storagePath', 'sourceContentHash', 'startTime', 'duration', 'trimStart', 'volume', 'fadeIn', 'fadeOut']) ||
+    if (!fields(take, ['id', 'storagePath', 'sourceContentHash', 'startTime', 'duration', 'trimStart', 'volume', 'fadeIn', 'fadeOut'], ['fadeOffset', 'fadeDuration']) ||
         typeof take.id !== 'string' || !take.id.length || take.id.length > 160 || ids.has(take.id) ||
         typeof take.storagePath !== 'string' || take.storagePath.length > 1024 || !/^[a-f0-9]{64}$/.test(take.sourceContentHash || '') ||
         !number(take.startTime, 0, end) || !number(take.duration, .05, 60) ||
         !number(take.trimStart, 0, 60) || take.trimStart+take.duration > 60 ||
         !number(take.volume, 0, 1) || !number(take.fadeIn, 0, 5) || !number(take.fadeOut, 0, 5)) invalid();
+    if ((take.fadeOffset !== undefined || take.fadeDuration !== undefined) &&
+        (!number(take.fadeOffset, 0, 7200) || !number(take.fadeDuration, .05, 7200) ||
+          take.fadeOffset + take.duration > take.fadeDuration + 1/90000)) invalid();
     ids.add(take.id);
   }
   for (const key of input.automation) {
@@ -104,8 +107,21 @@ async function getOwnedVoiceBusPreview({ ownerUid, input, signal }) {
     for (let i=0; i<owned.length; i++) {
       const o = owned[i], file = path.join(folder, `source-${i}`);
       const object = getStudioSourceBucket(o.kind).file(o.storagePath, { generation: o.generation });
-      await pipeline(object.createReadStream({ validation: 'crc32c', decompress: false }),
-        createWriteStream(file, { mode: 0o600 }), { signal: AbortSignal.any([signal || new AbortController().signal, AbortSignal.timeout(15000)]) });
+      const sourceStream = object.createReadStream({ validation: 'crc32c', decompress: false });
+      const readSignal = AbortSignal.any([signal || new AbortController().signal, AbortSignal.timeout(15000)]);
+      let reading = false;
+      const abortRead = () => {
+        // Storage installs its internal pipeline after the HTTP response. An
+        // earlier destroy can make its late response reject outside our route.
+        // The first readable event confirms that pipeline is attached. Retain
+        // the owner slot while awaiting it; never start another decode here.
+        if (reading) sourceStream.destroy(Object.assign(new Error('Speech source read cancelled'), { name: 'AbortError' }));
+      };
+      const ready = () => { reading = true; if (readSignal.aborted) abortRead(); };
+      sourceStream.once('readable', ready);
+      readSignal.addEventListener('abort', abortRead, { once: true });
+      try { await pipeline(sourceStream, createWriteStream(file, { mode: 0o600 })); }
+      finally { sourceStream.removeListener('readable', ready); readSignal.removeEventListener('abort', abortRead); }
       const bytes = await fs.readFile(file);
       if (bytes.length !== o.size || digest(bytes) !== input.voices[i].sourceContentHash)
         throw sourceError(409, 'STUDIO_VOICE_PREVIEW_SOURCE_CHANGED', 'A recording no longer matches this edit');

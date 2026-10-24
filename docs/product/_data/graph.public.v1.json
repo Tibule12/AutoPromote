@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.45",
+  "knowledge_version": "1.0.48",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1510,6 +1510,16 @@
     },
     {
       "id": "studio.composite.background_decontaminate",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.voiceover.fade_in",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.voiceover.fade_out",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -3794,6 +3804,16 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.background_decontaminate"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.fade_in"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.fade_out"
     }
   ]
 }

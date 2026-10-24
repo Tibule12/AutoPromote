@@ -357,7 +357,7 @@ const applyOne = (document, operation, idempotencyKey) => {
       );
     }
     linkedSnapshot = rippleStudioSnapshotLinkedTimeline(linkedSnapshot, gap, idempotencyKey);
-    programmeSpeedKeys = rippleProgrammeSpeedKeys(programmeSpeedKeys, gap);
+    programmeSpeedKeys = rippleProgrammeSpeedKeys(programmeSpeedKeys, gap, idempotencyKey);
   }
   const layers = [
     ...buildStudioLayersFromSnapshot(linkedSnapshot),
