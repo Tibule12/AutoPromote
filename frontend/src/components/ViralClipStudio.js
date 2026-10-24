@@ -206,6 +206,7 @@ import {
   normalizeAudioRemix,
 } from "./audio/audioRemixModel";
 import {
+  applyStudioMediaGain,
   ensureAudioRemixPreview,
   subscribeAudioRemixMeter,
   unlockAudioRemixContext,
@@ -6838,7 +6839,7 @@ const ViralClipStudio = ({
       }
       try {
         audio.currentTime = clampAudioControl(effect.trimStart, 0, audio.duration || 36000, 0);
-        audio.volume = clampAudioControl(effect.volume, 0, 1, 0.8);
+        applyPreviewMediaGain(audio, clampAudioControl(effect.volume, 0, 1, 0.8));
         safePlayMediaElement(audio);
       } catch (error) {
         console.log("Sound effect preview skipped", error);
@@ -7063,19 +7064,54 @@ const ViralClipStudio = ({
     return Number(activeClip?.audioTrimOffsetEnd || 0) > 0.04;
   }, [timeline, activeTimelineIndex]);
 
+  function applyPreviewMediaGain(media, gain) {
+    if (!applyStudioMediaGain(media, gain)) {
+      setStudioActionMessage("Browser audio processing is unavailable; this preview is limited to 100% volume.");
+    }
+  }
+
+  function originalPreviewAudioMix(time) {
+    if (renderedOutputUrl) {
+      // The finished movie already contains the authored buses and processing.
+      return { muted: previewMuted,
+        gain: previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1) };
+    }
+    const activeBRoll = overlays.filter(overlay => {
+      const start = Number(overlay.startTime ?? overlay.start_time);
+      return Number.isFinite(start) && time >= start && time < start + getOverlayAudibleDuration(overlay);
+    });
+    const anyMuteMain = activeBRoll.some(overlay => overlay.muteMainAudio);
+    const anyDucking = activeBRoll.some(overlay => overlay.audioDucking && overlay.useOverlayAudio);
+    const duckingStrength = activeBRoll.reduce((maximum, overlay) =>
+      Math.max(maximum, overlay.audioDuckingStrength || 0.35), 0);
+    const extractedEnabled = extractedAudio?.enabled !== false && extractedAudio?.url;
+    const extractedMode = normalizeAudioMode(extractedAudio?.mode);
+    const muted = previewMuted || muteOriginalAudio || anyMuteMain ||
+      !isStudioAudioTrackAudible(trackStates, "originalAudio") ||
+      (extractedEnabled && extractedMode === "replace");
+    const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+    const duckGain = anyDucking
+      ? clampAudioControl(1 - duckingStrength, 0.05, 1, 0.55)
+      : extractedEnabled && extractedMode === "duck_original"
+        ? 1 - clampAudioControl(extractedAudio?.duckingStrength, 0.15, 0.95, 0.45) : 1;
+    // Match the final mixer: explicit source keys take precedence over the
+    // legacy master-podcast curve when both buses exist in a saved project.
+    const keys = audioKeyframes.originalAudio?.length
+      ? audioKeyframes.originalAudio : audioKeyframes.masterPodcast;
+    const automation = interpolateAutomationValue({ keyframes: keys,
+      property: "volume", time, fallback: 100 }) / 100;
+    return { muted: !!muted, gain: muted ? 0 : baseGain * duckGain * automation };
+  }
+
   // J-Cut & L-Cut Live Preview Audio Synchronization
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !timeline.length) return;
+    if (!video || !timeline.length || renderedOutputUrl) {
+      timelineAudioPoolRef.current.forEach(audio => audio.pause());
+      return;
+    }
 
     const syncSplitAudioPlayback = () => {
-      if (video.paused) {
-        timelineAudioPoolRef.current.forEach(audio => {
-          if (!audio.paused) audio.pause();
-        });
-        return;
-      }
-
       const globalTime = getPreviewTimelineTime(video.currentTime || 0);
       const splitSequence = buildAudioSplitSequence(timeline);
       const activeProxies = calculateAudioProxyState(globalTime, splitSequence, activeTimelineIndex);
@@ -7092,14 +7128,21 @@ const ViralClipStudio = ({
         if (!audio) {
           audio = document.createElement("audio");
           audio.preload = "auto";
+          audio.crossOrigin = "anonymous";
           applySafeMediaSource(audio, proxy.url);
           timelineAudioPoolRef.current.set(proxy.id, audio);
         }
         if (Math.abs(audio.currentTime - proxy.sourceSeekTime) > 0.15) {
           audio.currentTime = proxy.sourceSeekTime;
         }
-        audio.volume = proxy.volume;
-        if (audio.paused) {
+        const mix = originalPreviewAudioMix(globalTime);
+        audio.muted = mix.muted;
+        applyPreviewMediaGain(audio, mix.gain * proxy.volume);
+        audio.playbackRate = video.playbackRate || 1;
+        audio.preservesPitch = true;
+        if (video.paused) {
+          audio.pause();
+        } else if (audio.paused) {
           safePlayMediaElement(audio);
         }
       });
@@ -7109,18 +7152,25 @@ const ViralClipStudio = ({
     videoEl.addEventListener("timeupdate", syncSplitAudioPlayback);
     videoEl.addEventListener("pause", syncSplitAudioPlayback);
     videoEl.addEventListener("seeking", syncSplitAudioPlayback);
+    videoEl.addEventListener("seeked", syncSplitAudioPlayback);
+    videoEl.addEventListener("play", syncSplitAudioPlayback);
+    videoEl.addEventListener("ratechange", syncSplitAudioPlayback);
+    syncSplitAudioPlayback();
 
     return () => {
       videoEl.removeEventListener("timeupdate", syncSplitAudioPlayback);
       videoEl.removeEventListener("pause", syncSplitAudioPlayback);
       videoEl.removeEventListener("seeking", syncSplitAudioPlayback);
-      timelineAudioPoolRef.current.forEach(audio => {
-        try {
-          audio.pause();
-        } catch (_) {}
-      });
+      videoEl.removeEventListener("seeked", syncSplitAudioPlayback);
+      videoEl.removeEventListener("play", syncSplitAudioPlayback);
+      videoEl.removeEventListener("ratechange", syncSplitAudioPlayback);
     };
-  }, [timeline, activeTimelineIndex]);
+  }, [timeline, activeTimelineIndex, previewMuted, previewVolume, muteOriginalAudio,
+    extractedAudio, overlays, trackStates, audioKeyframes.originalAudio, audioKeyframes.masterPodcast,
+    renderedOutputUrl]);
+  useEffect(() => () => {
+    timelineAudioPoolRef.current.forEach(audio => audio.pause());
+  }, []);
   const effectiveSmartCropMode = resolveReframeModeAtTime(
     reframeModeCuts,
     previewTimelineTime,
@@ -14537,6 +14587,11 @@ const ViralClipStudio = ({
     const audio = audioRef.current;
     if (!audio) return;
 
+    if (renderedOutputUrl) {
+      audio.pause();
+      return;
+    }
+
     if (!extractedAudio?.url) {
       audio.pause();
       audio.removeAttribute("src");
@@ -14555,10 +14610,10 @@ const ViralClipStudio = ({
           time: getPreviewTimelineTime(video.currentTime || 0),
           fallback: 100,
         }) / 100;
-      audio.volume =
+      applyPreviewMediaGain(audio,
         clampAudioControl(extractedAudio.volume, 0, 1, 0.7) *
         previewGain *
-        masterAutomationGain;
+        masterAutomationGain);
       audio.playbackRate = video.playbackRate || 1;
       // The original-audio mixer below owns the programme gain and mute.
       // Synchronizing extracted audio must not override its track controls.
@@ -14627,6 +14682,7 @@ const ViralClipStudio = ({
     previewMuted,
     previewVolume,
     audioKeyframes.masterPodcast,
+    renderedOutputUrl,
   ]);
 
   // ── B-Roll overlay audio ducking ──
@@ -14634,60 +14690,9 @@ const ViralClipStudio = ({
     const video = videoRef.current;
     if (!video) return;
 
-    // Find active B-roll overlays at current time
-    const activeBRoll = overlays.filter(o => {
-      if (o.startTime === undefined || o.duration === undefined) return false;
-      const audibleDuration = getOverlayAudibleDuration(o);
-      return (
-        previewTimelineTime >= Number(o.startTime) &&
-        previewTimelineTime < Number(o.startTime) + audibleDuration
-      );
-    });
-
-    const anyMuteMain = activeBRoll.some(o => o.muteMainAudio);
-    const anyDucking = activeBRoll.some(o => o.audioDucking && o.useOverlayAudio);
-    const duckingStrength = activeBRoll.reduce(
-      (max, o) => Math.max(max, o.audioDuckingStrength || 0.35),
-      0
-    );
-
-    const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
-    const extractedMode = normalizeAudioMode(extractedAudio?.mode);
-    const extractedDuckingStrength = clampAudioControl(
-      extractedAudio?.duckingStrength,
-      0.15,
-      0.95,
-      0.45
-    );
-    const baseMuted =
-      previewMuted ||
-      muteOriginalAudio ||
-      !isStudioAudioTrackAudible(trackStates, "originalAudio") ||
-      (extractedAudio?.enabled !== false && extractedAudio?.url && extractedMode === "replace");
-    const restoredBaseGain =
-      extractedAudio?.enabled !== false && extractedAudio?.url && extractedMode === "duck_original"
-        ? clampAudioControl(1 - extractedDuckingStrength, 0.05, 1, 0.55) * baseGain
-        : baseGain;
-    const originalAutomationGain =
-      interpolateAutomationValue({
-        keyframes: audioKeyframes.originalAudio,
-        property: "volume",
-        time: previewTimelineTime,
-        fallback: 100,
-      }) / 100;
-
-    const applyAudio = (muted, vol) => {
-      if (video.muted !== muted) video.muted = muted;
-      if (Math.abs(video.volume - vol) > 0.005) video.volume = vol;
-    };
-
-    if (anyMuteMain) {
-      applyAudio(true, 0);
-    } else if (anyDucking) {
-      applyAudio(!!baseMuted, clampAudioControl(1 - duckingStrength, 0.05, 1, 0.55) * baseGain * originalAutomationGain);
-    } else {
-      applyAudio(!!baseMuted, baseMuted ? 0 : restoredBaseGain * originalAutomationGain);
-    }
+    const mix = originalPreviewAudioMix(previewTimelineTime);
+    if (video.muted !== mix.muted) video.muted = mix.muted;
+    applyPreviewMediaGain(video, mix.gain);
   }, [
     previewTimelineTime,
     overlays,
@@ -14696,12 +14701,19 @@ const ViralClipStudio = ({
     muteOriginalAudio,
     extractedAudio,
     audioKeyframes.originalAudio,
+    audioKeyframes.masterPodcast,
     trackStates,
+    renderedOutputUrl,
   ]);
 
   useEffect(() => {
     const sourceVideo = videoRef.current;
     if (!sourceVideo) return undefined;
+
+    if (renderedOutputUrl) {
+      overlayMediaRefsRef.current.forEach(media => media.pause());
+      return undefined;
+    }
 
     const syncOverlayMedia = () => {
       // Paused accurate-frame sampling can leave the source decoder at its old
@@ -14771,9 +14783,9 @@ const ViralClipStudio = ({
           }
         }
 
-        overlayVideo.volume =
+        applyPreviewMediaGain(overlayVideo,
           clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7) * brollAutomationGain *
-          clampAudioControl(previewVolume, 0, 1, 1) * microFade;
+          clampAudioControl(previewVolume, 0, 1, 1) * microFade);
 
         if (
           Number.isFinite(targetTime) &&
@@ -14821,6 +14833,7 @@ const ViralClipStudio = ({
     audioKeyframes.broll,
     previewVolume,
     trackStates,
+    renderedOutputUrl,
   ]);
 
   useEffect(
@@ -15228,13 +15241,10 @@ const ViralClipStudio = ({
       music.muted = false;
       music.defaultMuted = false;
       music.loop = musicTrack?.loop !== false;
-      // HTML media volume is limited to unity. The decoded-buffer GainNode
-      // retains the full automation gain; its fallback element must not throw
-      // when a valid 0–200% automation key raises the combined gain above one.
-      music.volume = clampAudioControl(
+      applyPreviewMediaGain(music,
         clampAudioControl(musicTrack?.volume ?? musicVolume, 0, 0.6, 0.15) *
         previewGain *
-        fadeGain * automationGain * constantMusicDuckGain(musicTrack), 0, 1, 0);
+        fadeGain * automationGain * constantMusicDuckGain(musicTrack));
       music.playbackRate = 1;
       music.preservesPitch = true;
 
@@ -15485,11 +15495,11 @@ const ViralClipStudio = ({
 
         if (!audio || !effect.url) return;
         const targetTime = Number(effect.trimStart || 0) + elapsed;
-        audio.volume =
+        applyPreviewMediaGain(audio,
           clampAudioControl(effect.volume, 0, 1, 0.8) *
           previewGain *
           fadeGain *
-          sfxAutomationGain;
+          sfxAutomationGain);
         audio.playbackRate = video.playbackRate || 1;
         // Export resamples SFX against programme time; recorded voiceover
         // uses pitch-preserving time stretch instead.
@@ -15588,11 +15598,11 @@ const ViralClipStudio = ({
           time: previewTimelineTime,
           fallback: 100,
         }) / 100;
-      music.volume = clampAudioControl(
+      applyPreviewMediaGain(music,
         clampAudioControl(musicTrack?.volume ?? musicVolume, 0, 0.6, 0.15) *
         baseGain *
         fadeGain *
-        automationGain * constantMusicDuckGain(musicTrack), 0, 1, 0);
+        automationGain * constantMusicDuckGain(musicTrack));
       return;
     }
 
@@ -15642,7 +15652,7 @@ const ViralClipStudio = ({
       // automation and the output-clock fade, even when no speech is present.
       const targetDuckGain = 1 - speechEnergy * duckingStrength;
       const smoothedDuckGain = lastDuckGain + (targetDuckGain - lastDuckGain) * 0.08;
-      music.volume = clampAudioControl(maxMusicVol * fadeGain * automationGain * smoothedDuckGain, 0, 0.6, 0);
+      applyPreviewMediaGain(music, maxMusicVol * fadeGain * automationGain * smoothedDuckGain);
       if (musicPreviewSourceRef.current && musicPreviewDuckGainNodeRef.current) {
         // Keep the scheduled sample-clock fade independent of frame-driven
         // speech attenuation. Updating one parameter must not cancel the other.
@@ -17192,7 +17202,7 @@ const ViralClipStudio = ({
       }
       selectedMedia.muted = false;
       selectedMedia.defaultMuted = false;
-      selectedMedia.volume = clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7);
+      applyPreviewMediaGain(selectedMedia, clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7));
       const didPlay = await safePlayMediaElement(selectedMedia);
       if (!didPlay) {
         setSoloPreviewOverlayId(null);
@@ -17276,10 +17286,10 @@ const ViralClipStudio = ({
       musicTrack?.fadeOut
     );
     music.loop = musicTrack?.loop !== false;
-    music.volume =
+    applyPreviewMediaGain(music,
       clampAudioControl(musicTrack?.volume ?? musicVolume, 0, 0.6, 0.15) *
       clampAudioControl(previewVolume, 0, 1, 1) *
-      fadeGain;
+      fadeGain);
 
     const musicDuration = Number(music.duration || 0);
     const targetTime =
@@ -19803,13 +19813,8 @@ const ViralClipStudio = ({
                                     applySafeMediaSource(element, safeOverlaySrc);
                                     if (element) {
                                       overlayMediaRefsRef.current.set(String(overlay.id), element);
-                                      element.volume =
-                                        clampAudioControl(
-                                          overlay.overlayAudioVolume,
-                                          0,
-                                          1,
-                                          0.7
-                                        ) * clampAudioControl(previewVolume, 0, 1, 1);
+                                      // syncOverlayMedia owns the automated gain. This ref
+                                      // also runs for unrelated inspector renders.
                                     } else {
                                       overlayMediaRefsRef.current.delete(String(overlay.id));
                                     }

@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.47 • 2026-10-23
+Development documentation • product 1.2.0 • knowledge 1.0.48 • 2026-10-24
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -1014,13 +1014,14 @@ Edits source-bus volume keys and interpolation alongside native cue gain. Retain
 2. Review the result and its limitations before saving or exporting.
 3. Dense gain curves preserve their sampled values and programme-to-output timing using bounded FFmpeg expression nesting; gain keys do not require removing easing to export.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Source, master-podcast, music, B-roll and SFX gain boosts use browser audio processing above 100%. Source automation takes precedence over the master-podcast fallback. J-cut/L-cut dialogue overlaps follow original-track gain, mute and solo controls. B-roll gain automation persists when switching inspectors. Finished-video monitoring plays the already mixed movie with monitor volume/mute only; Live Edit restores the authored buses. Full mixed-sound comparison remains unqualified.
 
 **Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Volume above 100% requires browser audio processing. If unavailable, the preview reports its 100% limit; export retains the authored gain.
 
 **Common errors**
 

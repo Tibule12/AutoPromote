@@ -11,6 +11,7 @@ import * as studioDirectorEvidenceProposals from "../studioDirectorEvidencePropo
 import * as studioAnalysisJobClient from "../studioAnalysisJobClient";
 import * as studioProjectStore from "../viralStudioProjectStore";
 import { secondsToTicks } from "../studioTime";
+import { gainTestContext } from "./fixtures/studioAudioGraph";
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
   trackClipWorkflowEvent: jest.fn(() => Promise.resolve(true)),
@@ -679,7 +680,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(video.currentTime).toBe(5);
   });
 
-  test("background extraction sync respects original-track mute, solo and automation after reopening", async () => {
+  test.each(["originalAudio", "masterPodcast"])("background extraction sync respects original-track mute, solo and %s automation after reopening", async bus => {
     const snapshot = {
       orderedClips: [{ id: "audio", start: 0, end: 12, duration: 12 }],
       selectedClipId: "audio",
@@ -702,7 +703,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       },
       trackStates: { originalAudio: { muted: true } },
       audioKeyframes: {
-        originalAudio: [
+        [bus]: [
           { id: "volume", time: 0, property: "volume", value: 40 },
         ],
       },
@@ -750,6 +751,172 @@ describe("ViralClipStudio timeline sequencing", () => {
     } finally {
       list.mockRestore();
     }
+  });
+
+  test.each(["originalAudio", "masterPodcast"])("native %s volume boosts survive edits, history and seek without invalid HTML volume", async bus => {
+    const previousContext = window.AudioContext;
+    const context = gainTestContext();
+    window.AudioContext = jest.fn(() => context);
+    let editor;
+    try {
+      editor = mountNativePreview();
+      const { video } = editor;
+      fireEvent.click(within(screen.getByTestId("clip-studio-inspector")).getByRole("tab", { name: /Sound/i }));
+      fireEvent.change(screen.getByLabelText("Automation source"), { target: { value: bus } });
+      fireEvent.click(screen.getByRole("button", { name: /Add volume keyframe at/i }));
+      const slider = () => screen.getByLabelText(new RegExp(`^${bus} volume at`));
+      fireEvent.change(slider(), { target: { value: "200" } });
+      expect(video.volume).toBe(1);
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBe(2);
+      fireEvent.change(slider(), { target: { value: "150" } });
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBe(1.5);
+      fireEvent.click(screen.getByTestId("studio-undo-button"));
+      await waitFor(() => expect(video.__audioRemixGraph.trackGain.gain.value).toBe(2));
+      fireEvent.click(screen.getByTestId("studio-redo-button"));
+      await waitFor(() => expect(video.__audioRemixGraph.trackGain.gain.value).toBe(1.5));
+      fireEvent.seeked(video);
+      fireEvent.rateChange(video);
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBe(1.5);
+      fireEvent.change(slider(), { target: { value: "25" } });
+      expect(video.volume).toBe(1);
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBe(.25);
+      expect(context.createMediaElementSource).toHaveBeenCalledTimes(1);
+    } finally { editor?.unmount(); window.AudioContext = previousContext; }
+  });
+
+  test("B-roll gain automation survives unrelated inspector renders", async () => {
+    const previousContext = window.AudioContext;
+    window.AudioContext = jest.fn(() => gainTestContext());
+    const snapshot = {
+      orderedClips: [{ id: "range", start: 0, end: 12, duration: 12 }],
+      selectedClipId: "range",
+      timeline: [{ id: "main", url: "https://example.com/source.mp4", duration: 12,
+        startRequest: 0, endRequest: 12 }],
+      overlays: [{ id: "cutaway", type: "video", name: "Cutaway",
+        src: "https://example.com/cutaway.mp4", bRollMode: "pip", clipId: "main",
+        startTime: 0, duration: 12, sourceDuration: 12, useOverlayAudio: true,
+        overlayAudioVolume: .7 }],
+      audioKeyframes: { broll: [{ id: "gain", time: 0, property: "volume", value: 200 }] },
+    };
+    let editor;
+    try {
+      editor = mountNativePreview({ clips: snapshot.orderedClips,
+        initialSavedProject: { id: "broll-gain", name: "B-roll gain", snapshot } });
+      await waitFor(() => expect(screen.getByLabelText("Project name")).toHaveValue("B-roll gain"));
+      fireEvent.loadedMetadata(editor.video);
+      fireEvent.loadedData(editor.video);
+      editor.video.currentTime = 5;
+      fireEvent.seeked(editor.video);
+      fireEvent.timeUpdate(editor.video);
+      const cutaway = screen.getByTestId("broll-preview-cutaway");
+      expect(cutaway.volume).toBe(1);
+      expect(cutaway.__audioRemixGraph.trackGain.gain.value).toBeCloseTo(1.4);
+      const tools = within(screen.getByRole("navigation", { name: "Creative tools" }));
+      fireEvent.click(tools.getByRole("button", { name: "Pacing", exact: true }));
+      expect(cutaway.__audioRemixGraph.trackGain.gain.value).toBeCloseTo(1.4);
+      fireEvent.click(tools.getByRole("button", { name: "Motion", exact: true }));
+      expect(cutaway.__audioRemixGraph.trackGain.gain.value).toBeCloseTo(1.4);
+    } finally { editor?.unmount(); window.AudioContext = previousContext; }
+  });
+
+  test("finished video plays its baked mix once and live-edit monitoring restores its buses", async () => {
+    const previousContext = window.AudioContext;
+    window.AudioContext = jest.fn(() => gainTestContext());
+    const snapshot = {
+      orderedClips: [{ id: "a", start: 0, end: 6, duration: 6 },
+        { id: "b", start: 6, end: 12, duration: 6 }], selectedClipId: "a",
+      timeline: [{ id: "a", url: "https://example.com/source.mp4", duration: 6, startRequest: 0, endRequest: 6 },
+        { id: "b", url: "https://example.com/incoming.mp4", duration: 6, startRequest: 6, endRequest: 12,
+          audioTrimOffsetStart: -.8 }],
+      overlays: [],
+      extractedAudio: { url: "https://example.com/background.mp3", mode: "mix", enabled: true,
+        duration: 12, volume: .7 },
+      audioKeyframes: { originalAudio: [{ id: "gain", time: 0, property: "volume", value: 200 }] },
+    };
+    let editor;
+    try {
+      editor = mountNativePreview({ clips: snapshot.orderedClips,
+        initialSavedProject: { id: "finished-mix", name: "Finished mix", snapshot } });
+      const { video } = editor;
+      await waitFor(() => expect(screen.getByLabelText("Project name")).toHaveValue("Finished mix"));
+      fireEvent.loadedMetadata(video);
+      fireEvent.loadedData(video);
+      video.currentTime = 5.5;
+      fireEvent.seeked(video);
+      fireEvent.timeUpdate(video);
+      await act(async () => { await video.play(); });
+      const audio = document.createElement.mock.results.map(result => result.value)
+        .filter(element => element?.tagName === "AUDIO");
+      const proxy = audio.find(element => element.src === "https://example.com/incoming.mp4");
+      const background = audio.find(element => element.src === "https://example.com/background.mp3");
+      expect(proxy.play).toHaveBeenCalled();
+      expect(background.play).toHaveBeenCalled();
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBe(2);
+      proxy.play.mockClear(); background.play.mockClear();
+      editor.rerender(<ViralClipStudio {...editor.props}
+        renderedOutput={{ url: "https://example.com/finished-mix.mp4" }} />);
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBe(1);
+      expect(proxy.pause).toHaveBeenCalled();
+      expect(background.pause).toHaveBeenCalled();
+      fireEvent.play(video);
+      fireEvent.timeUpdate(video);
+      expect(proxy.play).not.toHaveBeenCalled();
+      expect(background.play).not.toHaveBeenCalled();
+      const sourceTrack = screen.getByTestId("pro-track-row-originalAudio");
+      fireEvent.click(within(sourceTrack).getByRole("button", { name: "Mute track" }));
+      expect(video.muted).toBe(false);
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBe(1);
+      fireEvent.change(screen.getByLabelText("Preview master volume"), { target: { value: "25" } });
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBe(.25);
+      fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" }))
+        .getByRole("button", { name: "Export", exact: true }));
+      fireEvent.click(screen.getByRole("button", { name: "Show Live Edit", exact: true }));
+      expect(video.muted).toBe(true);
+      fireEvent.click(within(sourceTrack).getByRole("button", { name: "Unmute track" }));
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBe(.5);
+    } finally { editor?.unmount(); window.AudioContext = previousContext; }
+  });
+
+  test("J-cut source audio obeys the original bus gain, mute, solo and playback rate", async () => {
+    const snapshot = {
+      orderedClips: [{ id: "a", start: 0, end: 6, duration: 6 },
+        { id: "b", start: 6, end: 12, duration: 6 }], selectedClipId: "a",
+      timeline: [{ id: "a", url: "https://example.com/source.mp4", duration: 6, startRequest: 0, endRequest: 6 },
+        { id: "b", url: "https://example.com/incoming.mp4", duration: 6, startRequest: 6, endRequest: 12,
+          audioTrimOffsetStart: -.8 }],
+      overlays: [], audioKeyframes: { originalAudio: [{ id: "gain", time: 0, property: "volume", value: 40 }] },
+    };
+    const { video } = mountNativePreview({ clips: snapshot.orderedClips,
+      initialSavedProject: { id: "j-cut", name: "J-cut", snapshot } });
+    await waitFor(() => expect(screen.getByLabelText("Project name")).toHaveValue("J-cut"));
+    fireEvent.loadedMetadata(video);
+    fireEvent.loadedData(video);
+    video.currentTime = 5.5;
+    fireEvent.seeked(video);
+    fireEvent.timeUpdate(video);
+    await act(async () => { await video.play(); });
+    const proxy = document.createElement.mock.results.map(result => result.value)
+      .find(element => element?.tagName === "AUDIO" && element.src === "https://example.com/incoming.mp4" && element.play.mock.calls.length);
+    expect(proxy).toBeDefined();
+    expect(proxy.volume).toBeCloseTo(.4);
+    expect(proxy.muted).toBe(false);
+    const original = screen.getByTestId("pro-track-row-originalAudio");
+    fireEvent.click(within(original).getByRole("button", { name: "Mute track" }));
+    expect(proxy.muted).toBe(true);
+    fireEvent.click(within(original).getByRole("button", { name: "Unmute track" }));
+    expect(proxy.muted).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Show empty tracks" }));
+    const solo = within(screen.getByTestId("pro-track-row-music")).getByRole("button", { name: "Solo track" });
+    fireEvent.click(solo);
+    expect(proxy.muted).toBe(true);
+    fireEvent.click(solo);
+    expect(proxy.muted).toBe(false);
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Pacing", exact: true }));
+    fireEvent.change(screen.getByRole("slider", { name: /Fine speed/ }), { target: { value: "0.5" } });
+    fireEvent.rateChange(video);
+    expect(proxy.playbackRate).toBe(.5);
+    video.pause();
+    expect(proxy.pause).toHaveBeenCalled();
   });
 
   test("trimmed multi-source export preserves programme times for titles and B-roll", async () => {

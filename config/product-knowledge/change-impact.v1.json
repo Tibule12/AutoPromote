@@ -1107,6 +1107,20 @@
         "reports/footer-pages-20261021/README.md"
       ],
       "reason": "Knowledge 1.0.43 source-review of the current footer pages and public reader of the canonical generated documentation. This changes navigation and explanation, not Studio readiness, a qualified public showroom, account entitlements or model availability."
+    },
+    {
+      "feature_id": "studio.audio_automation",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/audio/audioRemixPreview.js"
+      ],
+      "reason": "Knowledge 1.0.48 source review: native media boosts use a post-effects gain node instead of invalid HTML volume, original source keys override the master fallback as in export, dialogue wings follow original-track controls, inspector changes retain B-roll gain automation, and finished-video monitoring bypasses authored source gain and additional sources. Existing readiness and broader mixed-picture/sound limitations are retained."
     }
   ]
 }

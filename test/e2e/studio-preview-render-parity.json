@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-23T14:43:24.011613Z",
+  "updatedAt": "2026-10-24T07:40:56.641916Z",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -845,7 +845,7 @@
   ],
   "continuity": {
     "nextHighestPriorityTaskId": "S02",
-    "lastSessionKind": "NATIVE_RESTAURANT_FILM",
+    "lastSessionKind": "Native media gain and dialogue-overlap preview precision",
     "lastSessionRealCapabilityRuns": 2,
     "lastSessionGpuJobsStarted": 0,
     "exactBlockersSource": "reports/studio-restaurant-film-20261020/checkpoint.json",
@@ -855,7 +855,7 @@
       "result": "VALID",
       "capabilityQualification": "Targeted tests and actual native films/timelines qualify bounded slices. Full live picture/audio, ordinary-account runtime, product and creative/public gates remain open."
     },
-    "lastSessionEvidence": "reports/studio-restaurant-film-20261020/README.md",
+    "lastSessionEvidence": "reports/studio-preview-gain-20261024/README.md",
     "lastSessionAutomatedChecks": {
       "nativeSourceCuts": 20,
       "uniqueSourceFiles": 3,
@@ -898,7 +898,7 @@
       "freshNormalOwnerSignInVerified": true,
       "privateSessionRecoveryCasesPassed": 3
     },
-    "nextSlice": "Owner review of THE LAST TOUCH. Continue shared S02 whole picture/audio/colour/edge/low-alpha and CPU latency alongside S04 motion/vector depth, then S03 ownership. Preserve the boxing film, chosen identity, source projects and prior publishing receipts.",
+    "nextSlice": "Continue shared S02 whole mixed picture/processed sound and decoded-frame versus UI clock precision, then retained typography colour/edge/low-alpha and CPU latency alongside S04 depth and S03 occurrence/group ownership. Preserve native gain evidence, all prior films/projects/identity/publishing and timers; owner stopped the release, so no main merge/deployment.",
     "gpuWindowEvidence": "reports/studio-canonical-completion-20261008/gpu-window.json",
     "latestPairedEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/receipt.json",
     "latestTitleMeasurementEvidence": "reports/studio-canonical-completion-20261008/paired-flow-r17/title-geometry-retest.json",
@@ -8429,5 +8429,66 @@
       "Broader S04 motion/glyph depth",
       "S03 occurrence/group ownership"
     ]
+  },
+  "previewBusGain20261024": {
+    "date": "2026-10-24",
+    "evidence": "reports/studio-preview-gain-20261024/README.md",
+    "scope": "Native 0\u2013200% media gain after remix, original/master precedence, dialogue-wing gain/mute/solo/rate, exact history/recovery and one CPU final; component regression for B-roll gain surviving inspector changes. Finished/live monitoring bypasses baked source gain and additional preview sources.",
+    "readinessPromotion": false,
+    "paidJobs": 0,
+    "publishingWrites": 0,
+    "mainMerge": false,
+    "productionDeployment": false,
+    "tests": {
+      "distinctFrontendPassedAcrossRuns": 167,
+      "uninterruptedWideRunPassed": false,
+      "wideRunPassed": 137,
+      "wideRunFailed": 28,
+      "isolatedAffectedPassed": 28,
+      "finalFocusedPassed": 11,
+      "cpuWorkerPassed": 16
+    },
+    "nativeFlow": {
+      "projectId": "viral-project-1d7f370e-92ab-425d-b765-26120f7e8c72",
+      "canonicalHash": "e207b0fbd1df1cb3cb40b02cc98ae67502788d75ead70e771c966d09d0faf102",
+      "normalSignIn": true,
+      "ordinaryControls": true,
+      "exactHistory": true,
+      "exactColdRecovery": true,
+      "independentExactRestore": true,
+      "completedNativeCpuExports": 1,
+      "fullMatchingStudioPlayback": true,
+      "sourceGain": 1.5,
+      "masterFallbackGain": 2,
+      "dialogueLeadSeconds": 0.8,
+      "dialogueTrailSeconds": 0.8
+    },
+    "liveBrowserPcm": {
+      "scope": "Post-effects gain on the sampled native source graph; not whole preview/final mix parity.",
+      "windows": 41,
+      "nonSilentWindows": 12,
+      "samplesPerWindow": 1024,
+      "maximumAbsoluteError": 5.960464477539063e-08,
+      "tolerance": 4e-05
+    },
+    "finalVideoFrames": 192,
+    "finalVideoSeconds": 8,
+    "finalMovieSha256": "13bd964ffd5ef831bdc1802b11d09fff9b545bf01306d216dbd763d1ad3f48d0",
+    "remaining": [
+      "Whole mixed picture/processed sound and human listening qualification",
+      "Coarse UI clock at sequence loops and capture smoothness",
+      "Earlier strict typography colour/edge and low-alpha failures",
+      "CPU latency, broader motion/glyph depth and occurrence/group ownership"
+    ],
+    "finishedMonitor": {
+      "normalBackupAndOwnedExportReceipt": true,
+      "sameCanonicalDocumentAndMovie": true,
+      "finishedGain": 1,
+      "monitorGain": 0.25,
+      "liveSourceAndMonitorGain": 0.375,
+      "fullMatchingPlayback": true,
+      "additionalRenders": 0,
+      "evidence": "reports/studio-preview-gain-20261024/proof/monitor-native/receipt.json"
+    }
   }
 }

@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.47 • 2026-10-23
+Development documentation • product 1.2.0 • knowledge 1.0.48 • 2026-10-24
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -868,6 +868,7 @@ Changes the selected audio bus gain over programme time; 100% means unity.
 Applies to: ordinary layers. Requires: studio.audio_automation.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Source gain keys take precedence over the legacy master-podcast curve. Boost preview requires browser audio processing; whole mixed-sound parity remains unqualified.
 
 <a id="studio-audio-automation_source"></a>
 
@@ -880,6 +881,7 @@ Selects which programme audio bus the volume keys affect.
 Applies to: ordinary layers. Requires: studio.audio_automation.
 
 - Scope is the listed feature; do not transfer this range or support claim to another inspector.
+- Source gain keys take precedence over the legacy master-podcast curve. Boost preview requires browser audio processing; whole mixed-sound parity remains unqualified.
 
 <a id="studio-audio-ducking"></a>
 
