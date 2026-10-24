@@ -691,3 +691,48 @@ def test_kept_object_colour_applies_once_in_both_cleanup_positions(source_cache,
     assert np.array_equal(np.asarray(result),np.asarray(alpha))
     assert foreground.getpixel((90,30))==ImageEnhance.Color(frame).enhance(.5).getpixel((90,30))
     assert foreground.getpixel((120,30))==frame.getpixel((120,30))
+
+
+def test_final_alpha_refines_late_equipment_and_never_restores_excluded_room(source_cache):
+    _,_,cache=source_cache
+    fine={"id":"final-edge","type":"foreground_refine","start":0,"end":1,
+        "edge_radius":3,"decontaminate":1,"choke":0,"feather":0,
+        "recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,"saturation_min":1,
+        "detail_box":[0,0,0,0],"dark_max":0,"clear_box":[0,0,0,0],
+        "reject_hue":0,"reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    rod={"id":"late-rod","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[12/128,10/72],[21/128,10/72],[21/128,65/72],[12/128,65/72]],
+        "feather":0,"after_refine":True}
+    exclusion={**fine,"id":"room-exclusion","edge_radius":0,"decontaminate":0,
+        "after_holdout":True,"after_refine":True,"clear_box":[12/128,40/72,22/128,45/72]}
+    effects=[fine,rod,exclusion];command=plan(cache);command["effects"]=effects
+    pixels=np.full((72,128,3),(220,160,130),np.uint8)
+    pixels[:,64:]=(30,40,50);pixels[10:66,15:19]=(30,40,50)
+    _,alpha=VfxFrameRenderer(command,cache)._prepare_foreground(
+        Image.fromarray(pixels),Image.fromarray(cache.frame(1)),effects,128,72)
+    values=np.asarray(alpha)
+    assert values[30,13]<32, "The photographed old-room strip on a late holdout must be matted away"
+    assert values[30,16]==255, "Preserve the real microphone core"
+    assert np.all(values[40:45,12:22]==0), "Final alpha must never expand into an explicit exclusion"
+    assert np.all(values[:,80:]==255), "The person interior must remain opaque"
+
+
+@pytest.mark.parametrize("rod_width",[1,2,3])
+def test_final_edge_solve_preserves_narrow_medial_cores_and_separate_gaps(source_cache,rod_width):
+    _,_,cache=source_cache
+    fine={"id":"final-edge","type":"foreground_refine","start":0,"end":1,
+        "edge_radius":3,"decontaminate":0,"choke":0,"feather":0,
+        "recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,"saturation_min":1,
+        "detail_box":[0,0,0,0],"dark_max":0,"clear_box":[0,0,0,0],
+        "reject_hue":0,"reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    values=cache.frame(1).copy();values[10:60,15:15+rod_width]=255;values[10:60,25:25+rod_width]=255
+    values[30,40:50]=255  # Detached room speck, unlike the continuous cables.
+    pixels=np.full((72,128,3),(200,180,150),np.uint8);pixels[values>0]=(25,35,45)
+    command=plan(cache);command['effects']=[fine]
+    _,alpha=VfxFrameRenderer(command,cache)._prepare_foreground(
+        Image.fromarray(pixels),Image.fromarray(values),[fine],128,72)
+    result=np.asarray(alpha)
+    assert result[30,15+rod_width//2]==255
+    assert result[30,25+rod_width//2]==255
+    assert result[30,20]==0, "Narrow supports cannot be fused by refinement"
+    assert np.all(result[30,40:50]==0), "Remove a detached ten-pixel room fragment"

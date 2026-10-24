@@ -8345,5 +8345,72 @@
       "arbitrary footage and mixed-language accuracy qualification",
       "whole predictive picture/sound parity and public qualification"
     ]
+  },
+  "fringeCpuCorrection20261024": {
+    "status": "CPU_FINAL_MASK_EDGE_CORRECTION_THREE_NATIVE_REVIEW_DELIVERIES",
+    "evidence": "reports/studio-fringe-cpu-20261024/README.md",
+    "ownerRejectedPriorFringe": true,
+    "changes": [
+      "edge solve follows completed late object and exclusion geometry",
+      "subpixel polygon coverage and final source-colour recovery",
+      "narrow cable cores survive without fusing adjacent gaps",
+      "bounded detached old-room fragments removed",
+      "native guest shirt interior preserved beneath microphone bars"
+    ],
+    "edgeWidth": 3,
+    "sourceMasksUnchanged": true,
+    "newModelJobs": 0,
+    "gpuJobs": 0,
+    "nativeFrames": 298,
+    "nativeSize": [
+      1920,
+      1080
+    ],
+    "deliveries": [
+      {
+        "theme": "warm-library",
+        "canonicalHash": "eed6b179f1feaa9a1480c5741def74f265f3fc08381ae84fcc7a0ccd931aeefc",
+        "movieSha256": "b12ae8f2207864bcaf8c6aa9f073df2128aef5edb22f954e0811689c7676f18b",
+        "timelineSha256": "dd7f4a11284a2385c0dcf296236a3d6564f850eb927a7669672baf42de80fbd1",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "midnight-studio",
+        "canonicalHash": "e89b2de30232bcf1e645cfaabcea704b6ed92aeece72cff674cde15aefd9d24e",
+        "movieSha256": "42e02e434f6c9fb3ce34be39731a898d649b1c67da830afa42c688a7e713347f",
+        "timelineSha256": "53a73ebf5f9bde31045cc54e40216cff6cef2ec18cdcee46b25b72e2416b1e06",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "daylight-loft",
+        "canonicalHash": "7c630ea674cb976a55af3619e99f829c7c4bd91bd451d47ae8383160af25e4e9",
+        "movieSha256": "c7f6240c48d7d98ed14cbfec3d31751aa105ac3d2be479171dfdcfcf710e2667",
+        "timelineSha256": "d5736f27f6bc775e5acbd9c5c0d64f392e82343eeb356a881d9d55ff5d147a46",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      }
+    ],
+    "preexistingProjectsRetained": 51,
+    "otherCanonicalDocumentsUnchanged": 50,
+    "protectedFilesUnchanged": 35,
+    "savedLoginRetained": true,
+    "decodedAudioMatchesPrior": true,
+    "rendererCacheTestsPassed": 57,
+    "readinessPromoted": false,
+    "creativeApproval": false,
+    "humanSoundApproval": false,
+    "remaining": [
+      "owner review of these exact movies",
+      "arbitrary-source and long-video matting qualification",
+      "full predictive picture/sound and human listening qualification"
+    ]
   }
 }

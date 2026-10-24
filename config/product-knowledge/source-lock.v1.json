@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "codex",
-  "reason": "Reviewed original podcast repairs, three native movies/full timelines, caption source isolation and native guides. Matrix changes preserve existing entries/readiness and their original encoding.",
-  "reviewed_at": "2026-10-22T22:33:18.849Z",
+  "reason": "Reviewed CPU-only completed-mask fringe repair,57 renderer/cache cases, native guest shirt preservation and three renewed full movie/timeline deliveries.51 projects,50 other documents and35 protected files preserved; broad readiness and creative approval unchanged.",
+  "reviewed_at": "2026-10-24T08:23:02.875Z",
   "catalog_sha256": "fc506749fd6949b372ccca9a077bc9e7f51e739fe7eb91d9e67b36ea6ae77742",
   "sources": [
     {
@@ -427,7 +427,7 @@
     },
     {
       "path": "python_media_worker/studio_vfx_plan.py",
-      "sha256": "b8987029816ad1bb48913fe0717cec8b960ce26e0b59d270fc0364ef99792cb5"
+      "sha256": "e811d47722e44c8b7151d9e57b04adbb52c568112abaf85366c42d50dffc20e0"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "d89f44556144b6a2e00f8de24a0e56e9daa5ddd28190a38bb410ca8df8145e05"
+      "sha256": "f312dfea761c9dced3294c6c74ee9a20fd59b8f250ac4d95f13c2b10e6f0825d"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "b46eaf86f7309a846ee400214142ace27388e4b7ebe1ccd9b4e4805f89e2cabe"
+      "sha256": "4df80fe19b897b77232eaa3533b99381e06ad63d5fc8ac449bacdc58d135346c"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

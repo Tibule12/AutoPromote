@@ -248,6 +248,22 @@ class VfxFrameRenderer:
                     self.assets[effect["id"]] = image.convert("RGBA")
 
     def _prepare_foreground(self, frame, alpha, active, width, height):
+        edge_radius=max((effect.get("edge_radius",0) for effect in active
+                         if effect["type"]=="foreground_refine"),default=0)
+        exclusion_limit=np.ones((height,width),dtype=np.float32)
+
+        def path_mask(polygons):
+            # Coverage, rather than an integer stair-step, for authored detail
+            # when the user enables edge refinement. Legacy radius-zero edits
+            # keep their original geometry and learned alpha.
+            scale=4 if edge_radius else 1
+            mask=Image.new("L",(width*scale,height*scale))
+            draw=ImageDraw.Draw(mask)
+            for polygon in polygons:
+                draw.polygon([(round(x*width*scale),round(y*height*scale)) for x,y in polygon],fill=255)
+            if scale>1:mask=mask.resize((width,height),Image.Resampling.BOX)
+            return mask
+
         def refine_alpha(alpha, effect):
             if effect["choke"]:alpha=alpha.filter(ImageFilter.MinFilter(2*effect["choke"]+1))
             values=np.array(alpha,dtype=np.float32)/255
@@ -261,12 +277,13 @@ class VfxFrameRenderer:
             def hue_distance(target):
                 distance=np.abs(hue-target)
                 return np.minimum(distance,360-distance)
-            values[region(effect["clear_box"])]=0
+            cleared=region(effect["clear_box"])
+            values[cleared]=0;exclusion_limit[cleared]=0
             if effect.get("clear_paths"):
-                garbage=Image.new("L",(width,height))
-                for points in effect["clear_paths"]:
-                    ImageDraw.Draw(garbage).polygon([(round(x*width),round(y*height)) for x,y in points],fill=255)
-                values[np.asarray(garbage)>0]=0
+                garbage=path_mask(effect["clear_paths"])
+                remaining=1-np.asarray(garbage,dtype=np.float32)/255
+                values*=remaining
+                np.minimum(exclusion_limit,remaining,out=exclusion_limit)
             selection=np.ones((height,width),dtype=bool)
             if "detail_polygon" in effect:
                 drawn=Image.new("L",(width,height))
@@ -288,6 +305,7 @@ class VfxFrameRenderer:
                 exterior=exterior[exterior!=0]
                 spill &= np.isin(labels,exterior)
             values[spill]=0
+            exclusion_limit[spill]=0
             if effect["feather"]:
                 # An edge-aware feather follows source detail rather than
                 # smearing opaque old-room pixels into the replacement set.
@@ -320,10 +338,7 @@ class VfxFrameRenderer:
             # They are deterministic manual geometry, never inferred tracking.
             # Apply before choke/spill cleanup so old-screen pixels along the
             # authored edge cannot be reintroduced after refinement.
-            holdout=Image.new("L",(width,height))
-            ImageDraw.Draw(holdout).polygon([(round(x*width),round(y*height)) for x,y in effect["corners"]],fill=255)
-            for points in effect.get("paths",[]):
-                ImageDraw.Draw(holdout).polygon([(round(x*width),round(y*height)) for x,y in points],fill=255)
+            holdout=path_mask([effect["corners"],*effect.get("paths",[])])
             if effect["feather"]:holdout=holdout.filter(ImageFilter.GaussianBlur(effect["feather"]))
             if not baked_holdout(effect):
                 alpha=Image.fromarray(np.maximum(np.asarray(alpha),np.asarray(holdout)))
@@ -332,47 +347,19 @@ class VfxFrameRenderer:
                 alpha=refine_alpha(alpha,effect)
         foreground = frame
         for effect in active:
-            if effect["type"] != "foreground_refine" or not (effect.get("edge_radius", 0) or effect.get("decontaminate",0)):continue
-            # Deterministic, source-guided alpha estimation, not another AI
-            # segmentation result. The immutable model artifact stays intact.
-            # Only a bounded band is unknown; interiors/exteriors are exact.
-            import cv2
-            from pymatting import estimate_alpha_cf, estimate_foreground_ml
-            from pymatting.preconditioner.ichol import ichol
-            radius=effect.get("edge_radius",0)
-            opaque=(np.asarray(alpha)>=128).astype(np.uint8)
-            kernel=cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*radius+1,)*2)
-            inside=cv2.erode(opaque,kernel)>0 if radius else np.asarray(alpha)==255
-            outside=cv2.dilate(opaque,kernel)==0 if radius else np.asarray(alpha)==0
-            if not inside.any() or not outside.any():raise ValueError("Fine alpha needs both foreground and background seeds")
-            trimap=np.full(opaque.shape,.5,dtype=np.float64)
-            trimap[inside]=1;trimap[outside]=0
-            pixels=np.asarray(frame,dtype=np.float64)/255
-            # A model-refined soft alpha can retain its opacity while only its
-            # photographed edge colour is decontaminated. Radius zero requests
-            # this deterministic colour operation, never another matting model.
-            values=estimate_alpha_cf(pixels,trimap,laplacian_kwargs={"epsilon":1e-6},
-                preconditioner=lambda matrix:ichol(matrix,shifts=[.01,.1,.5,1,10,100,1000,10000,100000]),
-                cg_kwargs={"rtol":1e-6,"maxiter":500}) if radius else np.asarray(alpha,dtype=np.float64)/255
-            if not np.isfinite(values).all():raise ValueError("Fine alpha produced nonfinite values")
-            values=np.clip(values,0,1);values[inside]=1;values[outside]=0
-            alpha=Image.fromarray(np.rint(values*255).astype(np.uint8))
-        for effect in active:
             if effect["type"]=="foreground_refine" and effect.get("after_refine",False) and not effect.get("after_holdout",False):
                 alpha=refine_alpha(alpha,effect)
         for effect in active:
             if effect["type"] != "foreground_holdout" or not effect.get("after_refine",False):continue
             # Explicit manual protection for real detail thinner than the matte
             # solver's unknown band. Legacy holdouts retain their prior order.
-            holdout=Image.new("L",(width,height))
-            ImageDraw.Draw(holdout).polygon([(round(x*width),round(y*height)) for x,y in effect["corners"]],fill=255)
-            for points in effect.get("paths",[]):
-                ImageDraw.Draw(holdout).polygon([(round(x*width),round(y*height)) for x,y in points],fill=255)
+            holdout=path_mask([effect["corners"],*effect.get("paths",[])])
             if effect["feather"]:holdout=holdout.filter(ImageFilter.GaussianBlur(effect["feather"]))
             # Preserve the original learned detail through earlier colour
             # exclusions, while never restoring a solid authored boundary.
             protection=np.minimum(learned_alpha,np.asarray(holdout)) if baked_holdout(effect) else np.asarray(holdout)
             alpha=Image.fromarray(np.maximum(np.asarray(alpha),protection))
+            np.maximum(exclusion_limit,protection.astype(np.float32)/255,out=exclusion_limit)
             foreground=Image.composite(frame,foreground,holdout)
         for effect in active:
             if effect["type"]=="foreground_refine" and effect.get("after_holdout",False):
@@ -388,6 +375,52 @@ class VfxFrameRenderer:
                     removed=Image.fromarray(np.maximum(np.asarray(removed),np.asarray(
                         removed.filter(ImageFilter.GaussianBlur(effect["feather"])))))
                 alpha=Image.fromarray(np.maximum(0,values-np.asarray(removed,dtype=np.int16)).astype(np.uint8))
+        if edge_radius:
+            # Solve the *completed* inclusion decision, after late holdouts and
+            # exclusions. Solving earlier leaves those edges hard and lets a
+            # subsequent holdout bring photographed room colour back.
+            import cv2
+            from pymatting import estimate_alpha_cf
+            from pymatting.preconditioner.ichol import ichol
+            original=np.asarray(alpha,dtype=np.float64)/255
+            opaque=(original>=.5).astype(np.uint8)
+            distance=cv2.distanceTransform(opaque,cv2.DIST_L2,5)
+            inside=distance>edge_radius
+            # A uniform erosion loses the complete foreground seed in narrow
+            # microphone rods/cables. Keep their medial cores without filling
+            # the space between neighbouring rods.
+            ridges=(distance>=cv2.dilate(distance,np.ones((3,3),np.uint8))-1e-6)&(distance>=1)
+            inside|=ridges
+            kernel=cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*edge_radius+1,)*2)
+            outside=(cv2.dilate(opaque,kernel)==0)|(exclusion_limit==0)
+            inside&=~outside
+            if not inside.any() or not outside.any():raise ValueError("Fine alpha needs both foreground and background seeds")
+            trimap=np.full(opaque.shape,.5,dtype=np.float64)
+            trimap[inside]=1;trimap[outside]=0
+            pixels=np.asarray(frame,dtype=np.float64)/255
+            values=estimate_alpha_cf(pixels,trimap,laplacian_kwargs={"epsilon":1e-6},
+                preconditioner=lambda matrix:ichol(matrix,shifts=[.01,.1,.5,1,10,100,1000,10000,100000]),
+                cg_kwargs={"rtol":1e-6,"maxiter":500})
+            if not np.isfinite(values).all():raise ValueError("Fine alpha produced nonfinite values")
+            # Explicit room exclusions are authoritative. The model boundary
+            # can still recover real subpixel coverage on either side; capping
+            # everything to its binary mask clips hair and contaminates RGB.
+            values=np.minimum(np.clip(values,0,1),exclusion_limit)
+            values[inside]=1;values[outside]=0
+            # Antialias the remaining inward edge, including exclusion cuts.
+            # Opaque interiors and narrow cores remain exact. Explicitly
+            # excluded background remains zero after the coverage operation.
+            coverage=cv2.GaussianBlur(values,(0,0),.65)
+            boundary=cv2.erode((values>=.999).astype(np.uint8),np.ones((3,3),np.uint8))==0
+            values[boundary&~inside]=np.minimum(values,coverage)[boundary&~inside]
+            values=np.minimum(values,exclusion_limit)
+            # Source/mask compression can leave detached single-pixel room
+            # fragments. A bounded edge-width area removes those islands,
+            # while even a one-pixel-wide continuous cable remains intact.
+            count,labels,stats,_=cv2.connectedComponentsWithStats((values>.01).astype(np.uint8),connectivity=8)
+            tiny=np.flatnonzero(stats[1:,cv2.CC_STAT_AREA]<=max(16,edge_radius**2))+1
+            if len(tiny):values[np.isin(labels,tiny)]=0
+            alpha=Image.fromarray(np.rint(values*255).astype(np.uint8))
         for effect in active:
             if effect["type"]!="foreground_refine" or not effect.get("decontaminate",0):continue
             # Every alpha correction, including protected-object restoration
@@ -406,10 +439,7 @@ class VfxFrameRenderer:
         # foreground, never by mixing contaminated source RGB into soft edges.
         for effect in active:
             if effect["type"] != "foreground_holdout" or effect.get("saturation",1)==1:continue
-            holdout=Image.new("L",(width,height))
-            draw=ImageDraw.Draw(holdout)
-            for points in [effect["corners"],*effect.get("paths",[])]:
-                draw.polygon([(round(x*width),round(y*height)) for x,y in points],fill=255)
+            holdout=path_mask([effect["corners"],*effect.get("paths",[])])
             if effect["feather"]:holdout=holdout.filter(ImageFilter.GaussianBlur(effect["feather"]))
             foreground=Image.composite(ImageEnhance.Color(foreground).enhance(effect["saturation"]),foreground,holdout)
         for effect in active:
