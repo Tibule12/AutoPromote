@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "reviewer": "codex",
-  "reason": "Reviewed CPU-only completed-mask fringe repair,57 renderer/cache cases, native guest shirt preservation and three renewed full movie/timeline deliveries.51 projects,50 other documents and35 protected files preserved; broad readiness and creative approval unchanged.",
-  "reviewed_at": "2026-10-24T08:23:02.875Z",
+  "reviewer": "Codex",
+  "reason": "Reviewed width-adapted matte refinement, native source-fitted rig and support-gap edits, and exact private delivery evidence; no public capability, readiness or creative promotion.",
+  "reviewed_at": "2026-10-24T10:30:40.969Z",
   "catalog_sha256": "fc506749fd6949b372ccca9a077bc9e7f51e739fe7eb91d9e67b36ea6ae77742",
   "sources": [
     {
@@ -427,7 +427,7 @@
     },
     {
       "path": "python_media_worker/studio_vfx_plan.py",
-      "sha256": "e811d47722e44c8b7151d9e57b04adbb52c568112abaf85366c42d50dffc20e0"
+      "sha256": "2bcc03519bf61833bf792afdba556b4f885ebbff235f55b2cd307f17798c6d7c"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "f312dfea761c9dced3294c6c74ee9a20fd59b8f250ac4d95f13c2b10e6f0825d"
+      "sha256": "bb01ccba3c9e7a12cdbbb1f19e4109860d0c1a6e1d400dd86de7c55e64bf2ee1"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "4df80fe19b897b77232eaa3533b99381e06ad63d5fc8ac449bacdc58d135346c"
+      "sha256": "8d6375e434f50c19f92dbbbc7a977606b30db924b3050d53c7ff4ff468026163"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

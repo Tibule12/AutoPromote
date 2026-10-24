@@ -39,6 +39,26 @@ def plan(cache):
             "effects": [{"id": "text", "type": "text_behind", "start": 0, "end": 1, "text": "STORIES", "x": 50, "y": 50, "font_size": 30, "color": "#ffffff"}]}
 
 
+@pytest.mark.parametrize('rod_width',[8,14])
+def test_wide_person_edge_refinement_keeps_textured_equipment_opaque(source_cache,rod_width):
+    _,_,cache=source_cache
+    edge={"id":"wide-edge","type":"foreground_refine","start":0,"end":1,
+        "edge_radius":8,"decontaminate":0,"choke":0,"feather":0,
+        "recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,"saturation_min":1,
+        "detail_box":[0,0,0,0],"dark_max":0,"clear_box":[0,0,0,0],
+        "reject_hue":0,"reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    command=plan(cache);command['effects']=[edge]
+    alpha=np.zeros((72,128),np.uint8);alpha[4:68,15:15+rod_width]=255
+    alpha[:,80:]=255  # Wide person and narrow equipment share one edge control.
+    pixels=np.full((72,128,3),190,np.uint8);pixels[alpha>0]=25
+    pixels[4:68,18:20]=185  # Real bright metal close to the old room's colour.
+    renderer=VfxFrameRenderer(command,cache)
+    _,result=renderer._prepare_foreground(Image.fromarray(pixels),Image.fromarray(alpha),[edge],128,72)
+    values=np.asarray(result)
+    assert np.all(values[20:52,18:20]==255), 'Retain photographed metal highlights inside a narrow support'
+    assert np.all(values[20:52,40:60]==0), 'Keep the surrounding background and inter-object gap clear'
+
+
 def test_text_changes_background_while_subject_pixels_remain_exact(source_cache):
     _, _, cache = source_cache
     frame = Image.new("RGB", (128, 72), "navy")

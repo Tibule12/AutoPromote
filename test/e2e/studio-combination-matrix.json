@@ -9021,5 +9021,67 @@
       "arbitrary-source and long-video matting qualification",
       "full predictive picture/sound and human listening qualification"
     ]
+  },
+  "podcastRealismFinish20261024": {
+    "status": "PRIVATE_NATIVE_EDGE_AND_ROOM_CORRECTION_OWNER_REVIEW",
+    "evidence": "reports/studio-realism-finish-20261024/README.md",
+    "ownerRejectedEarlierSameDayMovies": true,
+    "changes": [
+      "width-adapted equipment core within wide person-edge refinement",
+      "native source-fitted support preservation and exclusions",
+      "guest left-support gap cleared of old plant after a rejected first review",
+      "guest interior protection retained",
+      "native depth/brightness/colour integration"
+    ],
+    "edgeWidth": 8,
+    "sourceMasksUnchanged": true,
+    "gpuJobs": 0,
+    "newModelJobs": 0,
+    "rendererCacheTestsPassed": 59,
+    "deliveries": [
+      {
+        "theme": "warm-library",
+        "canonicalHash": "b2c964d967173781978f4cdef736ae687458c49f5c31c210836bdc45504531b2",
+        "movieSha256": "acc1dcaa4193f7b2ea14757f3b2aca4c806bd7a3331aa0447956b4ce2c5da9ef",
+        "timelineSha256": "70e9f4aeec2ba9307236f097af7da6b545432e88d9b339c7dd892c9d96e8697b",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "midnight-studio",
+        "canonicalHash": "af7a820b0a108b6e1651dd0da11d607e215586aa058cc18dd389621b2e2b2871",
+        "movieSha256": "fc149be9aa76ec91c01348ad926f7501ddf7c899f4c75397bddddb0fd347d972",
+        "timelineSha256": "ef2e7f75de558f62c23890da6b76c5f8b4df745f146f244bb0b8cd9546e1f585",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "daylight-loft",
+        "canonicalHash": "45d58e83e5ea7af66a8228cc69c86fa54852377076db9632dcfa8f233134d409",
+        "movieSha256": "ad465984ea509e1330118a159f07bea04ffdf1a8d4c3f2a8d28fe329c4c15563",
+        "timelineSha256": "e14f709ba7709e5cce1d5ffd438553022854614827f1f0304b427ae99cc83dcb",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      }
+    ],
+    "preexistingProjectsRetained": 51,
+    "otherCanonicalDocumentsUnchanged": 50,
+    "protectedFilesUnchanged": 41,
+    "savedLoginRetained": true,
+    "decodedAudioMatchesPrior": true,
+    "readinessPromoted": false,
+    "creativeApproval": false,
+    "humanSoundApproval": false,
+    "remaining": [
+      "founder creative review of exact new movies",
+      "arbitrary-source/long-video matting qualification",
+      "source lighting/compression and full predictive picture/sound qualification"
+    ]
   }
 }

@@ -188,3 +188,7 @@ reports/studio-podcast-caption-finish-20261022/*
 # Private CPU fringe repair evidence.
 reports/studio-fringe-cpu-20261024/*
 !reports/studio-fringe-cpu-20261024/README.md
+
+# Private source-bound realism correction evidence.
+reports/studio-realism-finish-20261024/*
+!reports/studio-realism-finish-20261024/README.md

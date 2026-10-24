@@ -385,7 +385,18 @@ class VfxFrameRenderer:
             original=np.asarray(alpha,dtype=np.float64)/255
             opaque=(original>=.5).astype(np.uint8)
             distance=cv2.distanceTransform(opaque,cv2.DIST_L2,5)
-            inside=distance>edge_radius
+            # A person-sized band must not consume a thin support's complete
+            # cross-section. Estimate the local half-width within four bands:
+            # broad silhouettes retain the requested radius; narrow equipment
+            # keeps its textured interior. Keep at least three uncertain pixels
+            # to reject old-room colour in approximate manual outlines; thinner
+            # cables retain the medial seeds below.
+            # Otherwise bright real metal, unlike its dark centre, can be
+            # mistaken for the photographed room by the colour alpha solve.
+            neighbourhood=(8*edge_radius+1,)*2
+            half_width=cv2.dilate(distance,np.ones(neighbourhood,np.uint8))
+            local_radius=np.minimum(edge_radius,np.maximum(3,half_width*.4))
+            inside=distance>local_radius
             # A uniform erosion loses the complete foreground seed in narrow
             # microphone rods/cables. Keep their medial cores without filling
             # the space between neighbouring rods.
