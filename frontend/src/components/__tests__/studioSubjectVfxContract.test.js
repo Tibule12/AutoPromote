@@ -67,6 +67,25 @@ test("opaque source repairs remain editable in canonical state and invalidate th
   expect(()=>validateSubjectVfxScene(value)).toThrow(/source detail repairs/);
 });
 
+test("local edge regions survive canonical recovery and invalidate the previous preview",()=>{
+  const value=scene();value.effects=[{id:'fine',type:'foreground_refine',start:0,end:6,
+    edge_radius:4,decontaminate:1,choke:0,feather:0,recover_box:[0,0,0,0],recover_hue:0,
+    hue_tolerance:0,saturation_min:1,detail_box:[0,0,0,0],dark_max:0,clear_box:[0,0,0,0],
+    reject_hue:0,reject_tolerance:0,reject_saturation:1,reject_value:1}];
+  const previous=reviewed(JSON.parse(JSON.stringify(value)));
+  previous.preview.receipt={pixel_sha256:'old-pixels'};
+  const region=[[.7,.6],[.9,.6],[.9,.95],[.7,.95]];
+  value.effects[0].edge_polygon=region;
+  expect(resolveSubjectVfxProgrammePreview([{...previous,scene:value}],"source-a",3)).toBeNull();
+  const document=adaptStudioSnapshotToDocument({snapshot:{orderedClips:[{id:"source-a",start:0,end:12}],
+    timeline:[{id:"clip",sourceClipId:"source-a",startRequest:2,endRequest:8}],subjectVfxScenes:[reviewed(value)]},projectId:"local-edge"});
+  expect(projectStudioLinkedTimingToSnapshot(document).subjectVfxScenes[0].scene.effects[0].edge_polygon).toEqual(region);
+  for(const change of [{edge_radius:0},{edge_polygon:[]},{edge_polygon:[[0,0],[.1,.1],[.2,.2]]}]){
+    const bad=JSON.parse(JSON.stringify(value));Object.assign(bad.effects[0],change);
+    expect(()=>validateSubjectVfxScene(bad)).toThrow();
+  }
+});
+
 test("thin-detail preservation is explicit, boolean and changes the preview revision", () => {
   const value=scene();value.effects=[{id:"stem",type:"foreground_holdout",start:0,end:6,
     corners:[[.3,.3],[.31,.3],[.31,.6],[.3,.6]],feather:0}];

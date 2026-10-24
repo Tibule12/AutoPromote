@@ -1,5 +1,7 @@
 # Podcast fine-alpha and source-detail correction — 24 October 2026
 
+**Owner rejected these three movies for appearance.** Their files remain preserved. Continue with [the subsequent native contact and local-edge correction](../studio-podcast-contact-cleanup-20261024/README.md).
+
 The previous podcast movies remain rejected and preserved. This follow-up uses the actual signed-in Studio project, source-bound CPU fine mattes, editable native repairs and the common renderer. Three new movies and their complete matching Studio timeline recordings are retained privately below. Technical checks do not establish founder creative acceptance.
 
 The retained host and guest masks were SAM2.1 object segmentation, without fine-alpha refinement. Both now have source-conditioned CPU ViTMatte derivatives created and imported through Studio. The original masks remain immutable; source, owner, range and dependency validation stayed enforced. The finished compositions retain the saved fine alpha at Edge detail width 0 and recover old-background edge colour afterward.

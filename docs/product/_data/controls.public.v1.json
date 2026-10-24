@@ -6943,6 +6943,42 @@
       ],
       "updated_at": "2026-10-24",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.edge_refinement_region",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge refinement region points",
+      "status": "PARTIAL",
+      "meaning": "Limits the CPU edge solve to an authored source-frame region. Colour rejection becomes a soft boundary guide inside it; explicit removal paths and boxes remain excluded. Alpha outside the region is unchanged.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 64,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Set Edge detail width above zero first. Use 3–64 points forming a nonempty region; clear the field to refine the entire frame.",
+        "This manual region stays fixed in the source frame. Inspect the complete moving shot; it is not automatic tracking or object reconstruction.",
+        "The latest podcast correction remains under review. Broader footage and creative acceptance remain unqualified."
+      ],
+      "updated_at": "2026-10-24",
+      "product_version": "1.2.0"
     }
   ]
 }

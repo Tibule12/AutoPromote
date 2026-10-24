@@ -116,7 +116,7 @@ def validate_plan(plan, cache):
         if kind == "background_replace" and "reveal_seconds" in effect:base.add("reveal_seconds")
         if kind == "background_replace":base.update(key for key in ("surface_corners","asset_crop") if key in effect)
         if kind == "foreground_refine":
-            base.update(key for key in ("edge_radius", "decontaminate", "detail_polygon", "blue_spill", "after_refine", "after_holdout", "reject_connected") if key in effect)
+            base.update(key for key in ("edge_radius", "decontaminate", "detail_polygon", "edge_polygon", "blue_spill", "after_refine", "after_holdout", "reject_connected") if key in effect)
         if kind not in FIELDS or set(effect) != base | FIELDS[kind] or not isinstance(effect["id"], str) or not 1 <= len(effect["id"]) <= 64 or effect["id"] in ids:
             raise ValueError("Unsupported effect, duplicate ID or unknown command fields")
         ids.add(effect["id"])
@@ -171,14 +171,17 @@ def validate_plan(plan, cache):
             if "after_refine" in effect and (type(effect["after_refine"]) is not bool or effect["after_refine"] and (effect.get("edge_radius",0)>0 or effect.get("decontaminate",0)>0)):
                 raise ValueError("Post-matting colour cleanup cannot run another alpha solver")
             if "blue_spill" in effect:bounded(effect["blue_spill"],0,1)
-            if "detail_polygon" in effect:
-                points=effect["detail_polygon"]
+            for polygon_key in ("detail_polygon", "edge_polygon"):
+                if polygon_key not in effect:continue
+                points=effect[polygon_key]
                 if not isinstance(points,list) or not 3<=len(points)<=64:raise ValueError("Detail region needs 3–64 points")
                 for point in points:
                     if not isinstance(point,list) or len(point)!=2:raise ValueError("Invalid detail region point")
                     for value in point:bounded(value,0,1)
                 area=sum(p[0]*points[(i+1)%len(points)][1]-points[(i+1)%len(points)][0]*p[1] for i,p in enumerate(points))
                 if abs(area)<.000001:raise ValueError("Detail region must have nonzero area")
+            if "edge_polygon" in effect and not effect.get("edge_radius",0):
+                raise ValueError("A local edge region needs a positive edge radius")
             if "edge_radius" in effect:
                 bounded(effect["edge_radius"],0,8)
                 if type(effect["edge_radius"]) is not int:raise ValueError("Edge radius uses whole source pixels")
@@ -288,6 +291,9 @@ class VfxFrameRenderer:
         precise_paths=bool(edge_radius) or any(effect.get("source_patches") for effect in active
                                              if effect["type"]=="foreground_holdout")
         exclusion_limit=np.ones((height,width),dtype=np.float32)
+        authored_limit=np.ones((height,width),dtype=np.float32)
+        local_edges=next((effect["edge_polygon"] for effect in active
+                          if effect["type"]=="foreground_refine" and effect.get("edge_polygon")),None)
 
         def path_mask(polygons):
             # Coverage, rather than an integer stair-step, for authored detail
@@ -315,12 +321,13 @@ class VfxFrameRenderer:
                 distance=np.abs(hue-target)
                 return np.minimum(distance,360-distance)
             cleared=region(effect["clear_box"])
-            values[cleared]=0;exclusion_limit[cleared]=0
+            values[cleared]=0;exclusion_limit[cleared]=0;authored_limit[cleared]=0
             if effect.get("clear_paths"):
                 garbage=path_mask(effect["clear_paths"])
                 remaining=1-np.asarray(garbage,dtype=np.float32)/255
                 values*=remaining
                 np.minimum(exclusion_limit,remaining,out=exclusion_limit)
+                np.minimum(authored_limit,remaining,out=authored_limit)
             selection=np.ones((height,width),dtype=bool)
             if "detail_polygon" in effect:
                 drawn=Image.new("L",(width,height))
@@ -397,6 +404,7 @@ class VfxFrameRenderer:
             protection=np.minimum(learned_alpha,np.asarray(holdout)) if baked_holdout(effect) else np.asarray(holdout)
             alpha=Image.fromarray(np.maximum(np.asarray(alpha),protection))
             np.maximum(exclusion_limit,protection.astype(np.float32)/255,out=exclusion_limit)
+            np.maximum(authored_limit,protection.astype(np.float32)/255,out=authored_limit)
             foreground=Image.composite(frame,foreground,holdout)
         for effect in active:
             if effect["type"]=="foreground_refine" and effect.get("after_holdout",False):
@@ -420,6 +428,16 @@ class VfxFrameRenderer:
             from pymatting import estimate_alpha_cf
             from pymatting.preconditioner.ichol import ichol
             original=np.asarray(alpha,dtype=np.float64)/255
+            region=np.asarray(path_mask([local_edges]),dtype=np.float64)/255 if local_edges else None
+            if local_edges:
+                # Fade inward at the selected region boundary so a correction
+                # cannot leave a seam where it rejoins the untouched matte.
+                inset=cv2.distanceTransform((region>0).astype(np.uint8),cv2.DIST_L2,5)
+                region*=np.clip(inset/max(1,2*edge_radius),0,1)
+            # An explicit local solve can soften colour-threshold decisions in
+            # its unknown band. Hand-authored removal paths/boxes stay binding.
+            # Without the option, retain every legacy inclusion decision.
+            limits=np.where(region>0,authored_limit,exclusion_limit) if local_edges else exclusion_limit
             opaque=(original>=.5).astype(np.uint8)
             distance=cv2.distanceTransform(opaque,cv2.DIST_L2,5)
             # A person-sized band must not consume a thin support's complete
@@ -438,13 +456,21 @@ class VfxFrameRenderer:
             # microphone rods/cables. Keep their medial cores without filling
             # the space between neighbouring rods.
             ridges=(distance>=cv2.dilate(distance,np.ones((3,3),np.uint8))-1e-6)&(distance>=1)
+            if local_edges:
+                # A one-pixel tip on a stepped broad silhouette is not a thin
+                # cable. Seeding it opaque pins the coarse staircase in place.
+                ridges &= half_width <= 2*edge_radius
             inside|=ridges
             kernel=cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*edge_radius+1,)*2)
-            outside=(cv2.dilate(opaque,kernel)==0)|(exclusion_limit==0)
+            outside=(cv2.dilate(opaque,kernel)==0)|(limits==0)
             inside&=~outside
             if not inside.any() or not outside.any():raise ValueError("Fine alpha needs both foreground and background seeds")
             trimap=np.full(opaque.shape,.5,dtype=np.float64)
             trimap[inside]=1;trimap[outside]=0
+            if local_edges:
+                # Keep unrelated photographed equipment out of the solve and
+                # preserve its original subpixel alpha in the final merge.
+                trimap[region==0]=opaque[region==0]
             pixels=np.asarray(frame,dtype=np.float64)/255
             values=estimate_alpha_cf(pixels,trimap,laplacian_kwargs={"epsilon":1e-6},
                 preconditioner=lambda matrix:ichol(matrix,shifts=[.01,.1,.5,1,10,100,1000,10000,100000]),
@@ -453,7 +479,7 @@ class VfxFrameRenderer:
             # Explicit room exclusions are authoritative. The model boundary
             # can still recover real subpixel coverage on either side; capping
             # everything to its binary mask clips hair and contaminates RGB.
-            values=np.minimum(np.clip(values,0,1),exclusion_limit)
+            values=np.minimum(np.clip(values,0,1),limits)
             values[inside]=1;values[outside]=0
             # Antialias the remaining inward edge, including exclusion cuts.
             # Opaque interiors and narrow cores remain exact. Explicitly
@@ -461,13 +487,14 @@ class VfxFrameRenderer:
             coverage=cv2.GaussianBlur(values,(0,0),.65)
             boundary=cv2.erode((values>=.999).astype(np.uint8),np.ones((3,3),np.uint8))==0
             values[boundary&~inside]=np.minimum(values,coverage)[boundary&~inside]
-            values=np.minimum(values,exclusion_limit)
+            values=np.minimum(values,limits)
             # Source/mask compression can leave detached single-pixel room
             # fragments. A bounded edge-width area removes those islands,
             # while even a one-pixel-wide continuous cable remains intact.
             count,labels,stats,_=cv2.connectedComponentsWithStats((values>.01).astype(np.uint8),connectivity=8)
             tiny=np.flatnonzero(stats[1:,cv2.CC_STAT_AREA]<=max(16,edge_radius**2))+1
             if len(tiny):values[np.isin(labels,tiny)]=0
+            if local_edges:values=original*(1-region)+values*region
             alpha=Image.fromarray(np.rint(values*255).astype(np.uint8))
         for effect in active:
             if effect["type"]!="foreground_refine" or not effect.get("decontaminate",0):continue

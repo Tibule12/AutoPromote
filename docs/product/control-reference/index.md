@@ -207,6 +207,7 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.composite.background_edge_radius | Edge detail width | number | 0 … 8 | source pixels | 3 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.background_decontaminate | Remove old background colour | number | 0 … 1 | strength | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.source_detail_repair | Repair opaque detail from source | array | 0 … 16 | normalized source-frame corners; feather and end blending in source pixels | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.edge_refinement_region | Edge refinement region points | array | 0 … 64 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -2727,3 +2728,17 @@ Applies to: owned video with a source-bound subject mask. Requires: studio.compo
 - Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.
 - The copy uses this frame’s cleaned source colour. It does not reconstruct the hidden original, detect objects or track motion automatically. Review every moving pose and the exported result.
 - New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality.
+
+<a id="studio-composite-edge_refinement_region"></a>
+
+## Edge refinement region points
+
+ID: `studio.composite.edge_refinement_region` • **PARTIAL**
+
+Limits the CPU edge solve to an authored source-frame region. Colour rejection becomes a soft boundary guide inside it; explicit removal paths and boxes remain excluded. Alpha outside the region is unchanged.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Set Edge detail width above zero first. Use 3–64 points forming a nonempty region; clear the field to refine the entire frame.
+- This manual region stays fixed in the source frame. Inspect the complete moving shot; it is not automatic tracking or object reconstruction.
+- The latest podcast correction remains under review. Broader footage and creative acceptance remain unqualified.

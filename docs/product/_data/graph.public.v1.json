@@ -1519,6 +1519,11 @@
       "status": "PARTIAL"
     },
     {
+      "id": "studio.composite.edge_refinement_region",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
       "id": "task.image_cinematic",
       "kind": "task",
       "status": "PARTIAL"
@@ -3804,6 +3809,11 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.source_detail_repair"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.edge_refinement_region"
     }
   ]
 }

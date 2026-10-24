@@ -824,6 +824,20 @@ export default function StudioSubjectVfxPanel({
                   }} />
               </label>}
               {effect.type === "foreground_refine" && <label>
+                Edge refinement region points
+                <small>Limit edge refinement to this source-frame region. Set Edge detail width above zero first. Colour cleanup becomes a soft edge guide here; explicit removal paths stay excluded.</small>
+                <textarea aria-label="Edge refinement region points" key={JSON.stringify(effect.edge_polygon || [])}
+                  defaultValue={JSON.stringify(effect.edge_polygon || [])}
+                  onBlur={event => {
+                    try {
+                      const points=JSON.parse(event.target.value),next={...effect};
+                      if(Array.isArray(points) && !points.length) delete next.edge_polygon; else next.edge_polygon=points;
+                      const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                      validateSubjectVfxScene(scene);update(scene);
+                    } catch { setMessage("Set a positive Edge detail width and use 3–64 source-frame points, or [] to refine the whole frame."); }
+                  }} />
+              </label>}
+              {effect.type === "foreground_refine" && <label>
                 Detail region points
                 <textarea aria-label="Detail region points" key={JSON.stringify(effect.detail_polygon || [])}
                   defaultValue={JSON.stringify(effect.detail_polygon || [])}
@@ -852,7 +866,7 @@ export default function StudioSubjectVfxPanel({
                   }} />
               </label>}
               {Object.entries(effect.type === "foreground_refine" ? { edge_radius: 0, decontaminate: 0, blue_spill: 0, after_refine: false, after_holdout: false, reject_connected: false, ...effect } : effect.type === "foreground_holdout" ? { after_refine: false, saturation: 1, ...effect } : effect)
-                .filter(([key]) => !["id", "type", "asset_sha256", "detail_polygon", "paths", "clear_paths", "source_patches"].includes(key))
+                .filter(([key]) => !["id", "type", "asset_sha256", "detail_polygon", "edge_polygon", "paths", "clear_paths", "source_patches"].includes(key))
                 .map(([key, value]) => (
                   <label key={key}>
                     {key === "asset_id" ? "Background media" : key === "after_holdout" ? "Clean protected object edges" : key === "reject_connected" ? "Limit colour cleanup to background edges" : key === "after_refine" ? effect.type === "foreground_refine" ? "Apply colour cleanup after matting" : "Keep thin detail through cleanup" : key.replaceAll("_", " ")}

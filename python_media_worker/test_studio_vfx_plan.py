@@ -146,6 +146,34 @@ def test_wide_person_edge_refinement_keeps_textured_equipment_opaque(source_cach
     assert np.all(values[20:52,40:60]==0), 'Keep the surrounding background and inter-object gap clear'
 
 
+def test_local_edge_solve_softens_colour_steps_without_changing_equipment_or_explicit_removal(source_cache):
+    _,_,cache=source_cache
+    fine={"id":"local-edge","type":"foreground_refine","start":0,"end":1,
+        "edge_radius":4,"edge_polygon":[[.42,0],[.7,0],[.7,1],[.42,1]],
+        "decontaminate":0,"choke":0,"feather":0,"recover_box":[0,0,0,0],
+        "recover_hue":0,"hue_tolerance":0,"saturation_min":1,"detail_box":[0,0,0,0],
+        "dark_max":0,"clear_box":[.5,.5,.55,.6],"reject_hue":0,
+        "reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    command=plan(cache);command['effects']=[fine]
+    pixels=np.full((72,128,3),(210,170,100),np.uint8)
+    # A photographed clothing edge moves independently of the coarse mask.
+    for boundary in [63,65]:
+        values=cache.frame(1).copy();values[8:64,18:21]=173
+        pixels[:,boundary:]=(35,45,65)
+        pixels[8:64,18:21]=(160,155,150)
+        renderer=VfxFrameRenderer(command,cache)
+        _,alpha=renderer._prepare_foreground(Image.fromarray(pixels),Image.fromarray(values),[fine],128,72)
+        result=np.asarray(alpha)
+        assert np.array_equal(result[:,:50],values[:,:50]), 'Unrelated narrow equipment keeps its exact original alpha'
+        assert np.all(result[36:43,64:70]==0), 'An explicit source removal stays excluded inside the local solve'
+        assert result[15,boundary+3]>250 and result[15,boundary-3]<5
+    for polygon in [[],[[0,0],[1,1]],[[0,0],[1.1,0],[1,1]],[[0,0],[.1,.1],[.2,.2]]]:
+        bad=copy.deepcopy(command);bad['effects'][0]['edge_polygon']=polygon
+        with pytest.raises(ValueError):validate_plan(bad,cache)
+    bad=copy.deepcopy(command);bad['effects'][0]['edge_radius']=0
+    with pytest.raises(ValueError,match='positive edge radius'):validate_plan(bad,cache)
+
+
 def test_text_changes_background_while_subject_pixels_remain_exact(source_cache):
     _, _, cache = source_cache
     frame = Image.new("RGB", (128, 72), "navy")

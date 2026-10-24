@@ -113,7 +113,7 @@ function validateSubjectVfxScene(scene) {
   for (const effect of scene.effects) {
     const fields = EFFECT_FIELDS[effect?.type] && [...EFFECT_FIELDS[effect.type],
       ...(effect.type === "background_replace" && Object.prototype.hasOwnProperty.call(effect, "reveal_seconds") ? ["reveal_seconds"] : []),
-      ...(effect.type === "foreground_refine" ? ["edge_radius", "decontaminate", "detail_polygon", "blue_spill", "clear_paths", "after_refine", "after_holdout", "reject_connected"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)) : [])];
+      ...(effect.type === "foreground_refine" ? ["edge_radius", "decontaminate", "detail_polygon", "edge_polygon", "blue_spill", "clear_paths", "after_refine", "after_holdout", "reject_connected"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)) : [])];
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "after_refine")) fields.push("after_refine");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "paths")) fields.push("paths");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "saturation")) fields.push("saturation");
@@ -184,13 +184,16 @@ function validateSubjectVfxScene(scene) {
       if (Object.prototype.hasOwnProperty.call(effect,"after_refine") &&
           (typeof effect.after_refine!=="boolean" || (effect.after_refine && (effect.edge_radius>0 || effect.decontaminate>0))))
         fail("Use a boolean post-matting colour cleanup without another alpha solver.");
-      if (Object.prototype.hasOwnProperty.call(effect, "detail_polygon")) {
-        const points = effect.detail_polygon;
+      for (const polygonKey of ["detail_polygon", "edge_polygon"]) {
+        if (!Object.prototype.hasOwnProperty.call(effect, polygonKey)) continue;
+        const points = effect[polygonKey];
         if (!Array.isArray(points) || points.length < 3 || points.length > 64 ||
             !points.every(point => Array.isArray(point) && point.length === 2 && point.every(value => bounded(value, 0, 1))) ||
             Math.abs(points.reduce((area, point, i) => { const next = points[(i + 1) % points.length]; return area + point[0] * next[1] - next[0] * point[1]; }, 0)) < .000001)
           fail("Choose 3–64 distinct source-frame points for the detail region.");
       }
+      if (Object.prototype.hasOwnProperty.call(effect,"edge_polygon") && !(effect.edge_radius>0))
+        fail("A local edge region needs a positive edge radius.");
       if (Object.prototype.hasOwnProperty.call(effect, "edge_radius") && !Number.isInteger(effect.edge_radius))
         fail("Edge radius uses whole source pixels.");
       if (!Number.isInteger(effect.choke)) fail("Matte choke uses whole source pixels.");
