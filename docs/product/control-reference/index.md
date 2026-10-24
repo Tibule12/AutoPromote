@@ -206,6 +206,7 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.captions.source_language | Speech language | enum | auto, en, af, za-mixed, xh, zu, st, tn, ts, nr, ve | none | "auto" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.composite.background_edge_radius | Edge detail width | number | 0 … 8 | source pixels | 3 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.background_decontaminate | Remove old background colour | number | 0 … 1 | strength | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.composite.source_detail_repair | Repair opaque detail from source | array | 0 … 16 | normalized source-frame corners; feather and end blending in source pixels | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -2712,3 +2713,17 @@ Recovers photographed foreground edge colour using the final mask, including pro
 Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
 
 - This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified.
+
+<a id="studio-composite-source_detail_repair"></a>
+
+## Repair opaque detail from source
+
+ID: `studio.composite.source_detail_repair` • **PARTIAL**
+
+Manually copies a clean opaque detail from the same source frame onto an authored target after matte cleanup. Optional cleanup and protection retain the intended outline and crossing accessories.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.
+- The copy uses this frame’s cleaned source colour. It does not reconstruct the hidden original, detect objects or track motion automatically. Review every moving pose and the exported result.
+- New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality.

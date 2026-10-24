@@ -39,6 +39,93 @@ def plan(cache):
             "effects": [{"id": "text", "type": "text_behind", "start": 0, "end": 1, "text": "STORIES", "x": 50, "y": 50, "font_size": 30, "color": "#ffffff"}]}
 
 
+def test_source_detail_repair_restores_an_occluded_object_after_exclusions(source_cache):
+    _,_,cache=source_cache
+    hold={"id":"rig","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],"feather":0,
+        "source_patches":[{"source":[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+            "target":[[.15,.2],[.2,.2],[.2,.8],[.15,.8]],"feather":.4,"end_blend":3}]}
+    command=plan(cache);command['effects']=[hold]
+    renderer=VfxFrameRenderer(command,cache)
+    pixels=np.full((72,128,3),[190,40,20],np.uint8);pixels[8:60,88:100]=[30,40,50]
+    # Final alpha has no target pixels: the plant and its old matte are gone.
+    alpha=Image.new('L',(128,72))
+    clean,result=renderer._prepare_foreground(Image.fromarray(pixels),alpha,[hold],128,72)
+    values=np.asarray(result);rgb=np.asarray(clean)
+    assert values[32,22]==255 and np.all(rgb[32,22]==[30,40,50])
+    assert values[32,10]==0 and values[32,35]==0, 'No repair or old-room pixels outside the authored support'
+    assert 0<values[15,22]<255, 'Blend at the photographed end instead of leaving a hard seam'
+    changed=pixels.copy();changed[8:60,88:100]=[45,55,65]
+    second,_=renderer._prepare_foreground(Image.fromarray(changed),alpha,[hold],128,72)
+    assert np.all(np.asarray(second)[32,22]==[45,55,65]), 'Sample this frame, never reuse the first photographed pose'
+
+
+def test_source_detail_repair_uses_authored_equipment_saturation_and_does_not_move_people(source_cache):
+    _,_,cache=source_cache
+    hold={"id":"rig","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],"feather":0,"saturation":0,
+        "source_patches":[{"source":[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+            "target":[[.15,.2],[.2,.2],[.22,.8],[.17,.8]],"feather":.5,"end_blend":0}]}
+    command=plan(cache);command['effects']=[hold]
+    renderer=VfxFrameRenderer(command,cache);frame=Image.new('RGB',(128,72),(20,40,90))
+    initial=Image.fromarray(cache.frame(0));clean,result=renderer._prepare_foreground(frame,initial,[hold],128,72)
+    assert len(set(np.asarray(clean)[32,23]))==1, 'Do not reintroduce removed coloured lighting on the neutral rig'
+    assert np.array_equal(np.asarray(result)[:,110:],np.asarray(initial)[:,110:])
+    assert np.array_equal(np.asarray(clean)[:,110:],np.asarray(frame)[:,110:])
+
+
+def test_source_detail_repair_clears_damaged_edges_but_retains_an_accessory_crossing_in_front(source_cache):
+    _,_,cache=source_cache
+    patch={'source':[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],'target':[[.15,.2],[.2,.2],[.2,.8],[.15,.8]],
+        'feather':0,'end_blend':0,'clear_box':[.1,.2,.3,.8],
+        'protect_paths':[[[.1,.45],[.3,.45],[.3,.55],[.1,.55]]]}
+    hold={'id':'repair','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],'feather':0,'source_patches':[patch]}
+    command=plan(cache);command['effects']=[hold];renderer=VfxFrameRenderer(command,cache)
+    alpha=np.full((72,128),255,np.uint8);pixels=np.full((72,128,3),[150,70,20],np.uint8)
+    pixels[8:60,88:100]=[20,25,30];pixels[32:40,12:40]=[220,200,170]
+    clean,result=renderer._prepare_foreground(Image.fromarray(pixels),Image.fromarray(alpha),[hold],128,72)
+    assert np.asarray(result)[20,15]==0, 'Remove the old jagged object outside the copied rod'
+    assert np.asarray(result)[20,22]==255 and np.all(np.asarray(clean)[20,22]==[20,25,30])
+    assert np.asarray(result)[36,22]==255 and np.all(np.asarray(clean)[36,22]==[220,200,170]), 'Retain the photographed accessory in front'
+
+
+def test_source_detail_repair_keeps_subpixel_authored_edges_without_resolving_a_fine_matte(source_cache):
+    _,_,cache=source_cache
+    hold={'id':'repair','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[35.25/128,.2],[41.25/128,.2],[41.25/128,.7],[35.25/128,.7]],'feather':0,
+        'source_patches':[{'source':[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+            'target':[[.1,.8],[.2,.8],[.2,.95],[.1,.95]],'feather':0,'end_blend':0}]}
+    command=plan(cache);command['effects']=[hold];renderer=VfxFrameRenderer(command,cache)
+    _,alpha=renderer._prepare_foreground(Image.new('RGB',(128,72),(25,35,45)),Image.new('L',(128,72)),[hold],128,72)
+    values=np.asarray(alpha)
+    assert 0<values[30,35]<255, 'Fine-alpha workflows at edge radius zero still need subpixel manual cleanup geometry'
+    assert values[30,36]==255 and values[30,34]==0
+
+
+def test_source_repair_sample_outside_original_holdout_receives_its_equipment_colour_treatment(source_cache):
+    _,_,cache=source_cache
+    hold={'id':'repair','type':'foreground_holdout','start':0,'end':1,'saturation':0,
+        'corners':[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],'feather':0,
+        'source_patches':[{'source':[[.3,.2],[.35,.2],[.35,.4],[.3,.4]],
+            'target':[[.1,.2],[.2,.2],[.2,.8],[.1,.8]],'feather':0,'end_blend':0}]}
+    command=plan(cache);command['effects']=[hold];renderer=VfxFrameRenderer(command,cache)
+    clean,_=renderer._prepare_foreground(Image.new('RGB',(128,72),(20,40,90)),Image.new('L',(128,72)),[hold],128,72)
+    assert len(set(np.asarray(clean)[32,20]))==1, 'Newly restored real metal outside the original selection must stay neutral'
+
+
+@pytest.mark.parametrize('bad',[
+    [],[{'source':[[0,0],[1,0],[1,1],[0,1]],'target':[[0,0],[1,1],[1,0],[0,1]],'feather':0,'end_blend':0}],
+    [{'source':[[0,0],[1,0],[1,1],[0,1]],'target':[[0,0],[.2,0],[.2,.2],[0,.2]],'feather':0,'end_blend':33}],
+    [{'source':[[0,0],[1.1,0],[1,1],[0,1]],'target':[[0,0],[.2,0],[.2,.2],[0,.2]],'feather':0,'end_blend':0}],
+])
+def test_source_detail_repair_rejects_unbounded_or_degenerate_commands(source_cache,bad):
+    _,_,cache=source_cache;command=plan(cache)
+    command['effects']=[{'id':'bad','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],'feather':0,'source_patches':bad}]
+    with pytest.raises(ValueError):validate_plan(command,cache)
+
+
 @pytest.mark.parametrize('rod_width',[8,14])
 def test_wide_person_edge_refinement_keeps_textured_equipment_opaque(source_cache,rod_width):
     _,_,cache=source_cache

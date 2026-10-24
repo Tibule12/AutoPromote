@@ -1255,7 +1255,8 @@
         "studio.group_clip.in",
         "studio.group_clip.out",
         "studio.composite.background_edge_radius",
-        "studio.composite.background_decontaminate"
+        "studio.composite.background_decontaminate",
+        "studio.composite.source_detail_repair"
       ],
       "workflow": [
         "Open Studio → Composite and add effects to the selected owned video clip.",
@@ -1265,7 +1266,8 @@
         "Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.",
         "At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.",
         "For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.",
-        "After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot."
+        "After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.",
+        "If removing an overlapping object exposes damaged rigid equipment, a Foreground holdout offers Repair opaque detail from source. Choose clean source and target quadrilaterals, feather and end blending; optional clear_box removes the damaged outline and protect_paths retains accessories crossing in front. These are manual fixed source-frame coordinates. Render and inspect the entire moving shot after editing."
       ],
       "preview_behavior": "Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.",
       "render_behavior": "The shared compiler carries group mask/blend decisions and transform keys into the existing CPU compositor. The ordinary geometric matte rasterizer clips assembled local child alpha before transform/opacity; registered request-owned matte scratch is cleaned after the render. RGB blend color weights the blend result by backdrop alpha, preserving foreground color over transparent isolated parents. Group and child blending share the existing leaf compositor and inverse programme clock. Static/Normal paths retain previous pixels. Source/source-VFX/generated-caption stages remain separate; inspect the exact final movie.",
@@ -1275,8 +1277,9 @@
         "This dated development snapshot does not establish professional or production readiness.",
         "Background replacement is optional. Uploads accept PNG, JPEG or WebP up to 32 MB; a scene supports at most twelve effect layers.",
         "A new video requires its own source-bound mask and available authorized model execution. A saved mask from another video cannot be transferred. An unavailable model service prevents creating a new mask.",
-        "The retained podcast example uses manual source-specific object contours and still has rejected fringes. Those corrections do not prove clean automatic replacement for other users’ footage.",
-        "Optional object holdouts and removal paths are advanced manual normalized source-frame geometry. They do not automatically identify furniture or microphones or track a hand-drawn shape through motion."
+        "Previous podcast examples were rejected for visible fringes. The latest native correction uses source-bound CPU fine alpha and manual source-detail repairs. These source-specific contours do not prove clean automatic replacement for other users’ footage; founder creative review and broader qualification remain separate.",
+        "Optional object holdouts and removal paths are advanced manual normalized source-frame geometry. They do not automatically identify furniture or microphones or track a hand-drawn shape through motion.",
+        "Opaque source-detail repair copies existing cleaned pixels from the same frame. It does not infer the hidden original object, automatically track geometry or repair an unselected object. A clean photographed sample is required; moving or articulated objects need separate timed corrections."
       ],
       "common_errors": [
         {
@@ -1294,7 +1297,7 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-10-14",
+      "updated_at": "2026-10-24",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -17263,6 +17266,61 @@
           "kind": "IMPLEMENTATION"
         }
       ]
+    },
+    {
+      "control_id": "studio.composite.source_detail_repair",
+      "label": "Repair opaque detail from source",
+      "meaning": "Manually copies a clean opaque detail from the same source frame onto an authored target after matte cleanup. Optional cleanup and protection retain the intended outline and crossing accessories.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "source_patches",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 16,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame corners; feather and end blending in source pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.",
+        "The copy uses this frame’s cleaned source colour. It does not reconstruct the hidden original, detect objects or track motion automatically. Review every moving pose and the exported result.",
+        "New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-24",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Repair opaque detail from source",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioSubjectVfxContract.js",
+          "anchor": "source_patches",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_vfx_plan.py",
+          "anchor": "source_patches",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
     }
   ],
   "tasks": [
@@ -20832,6 +20890,11 @@
     {
       "type": "editable_with",
       "to": "studio.composite.background_decontaminate",
+      "from": "studio.compositing"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.composite.source_detail_repair",
       "from": "studio.compositing"
     }
   ],

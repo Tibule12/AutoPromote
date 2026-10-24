@@ -66,6 +66,41 @@ def validate_plan(plan, cache):
         if kind == "foreground_holdout" and "after_refine" in effect:
             base.add("after_refine")
             if type(effect["after_refine"]) is not bool:raise ValueError("Holdout cleanup preservation must be boolean")
+        if kind == "foreground_holdout" and "source_patches" in effect:
+            base.add("source_patches")
+            patches=effect["source_patches"]
+            if not isinstance(patches,list) or not 1<=len(patches)<=16:
+                raise ValueError("Use 1–16 source detail repairs")
+            import cv2
+            for patch in patches:
+                if not isinstance(patch,dict) or not {"source","target","feather","end_blend"}<=set(patch) or set(patch)-{"source","target","feather","end_blend","clear_box","protect_paths"}:
+                    raise ValueError("Source detail repairs need source and target corners, feather and end blend")
+                bounded(patch["feather"],0,3);bounded(patch["end_blend"],0,32)
+                for key in ("source","target"):
+                    points=patch[key]
+                    if not isinstance(points,list) or len(points)!=4:
+                        raise ValueError("Source detail repair needs four corners")
+                    for point in points:
+                        if not isinstance(point,list) or len(point)!=2:raise ValueError("Invalid source detail repair corner")
+                        for value in point:bounded(value,0,1)
+                    polygon=np.array(points,dtype=np.float32)
+                    if not cv2.isContourConvex(polygon.reshape(-1,1,2)) or abs(cv2.contourArea(polygon))<.000001:
+                        raise ValueError("Source detail repair corners must form a convex nonempty quadrilateral")
+                if "clear_box" in patch:
+                    box=patch["clear_box"]
+                    if not isinstance(box,list) or len(box)!=4:raise ValueError("Invalid source repair cleanup box")
+                    for value in box:bounded(value,0,1)
+                    if box[0]>=box[2] or box[1]>=box[3]:raise ValueError("Empty source repair cleanup box")
+                if "protect_paths" in patch:
+                    paths=patch["protect_paths"]
+                    if not isinstance(paths,list) or not 1<=len(paths)<=16:raise ValueError("Use 1–16 source repair protection paths")
+                    for points in paths:
+                        if not isinstance(points,list) or not 3<=len(points)<=64:raise ValueError("Invalid source repair protection path")
+                        for point in points:
+                            if not isinstance(point,list) or len(point)!=2:raise ValueError("Invalid source repair protection point")
+                            for value in point:bounded(value,0,1)
+                        area=sum(p[0]*points[(i+1)%len(points)][1]-points[(i+1)%len(points)][0]*p[1]for i,p in enumerate(points))
+                        if abs(area)<.000001:raise ValueError("Empty source repair protection path")
         for field in (["paths"] if kind=="foreground_holdout" else ["clear_paths"] if kind=="foreground_refine" else []):
             if field not in effect:continue
             base.add(field)
@@ -250,13 +285,15 @@ class VfxFrameRenderer:
     def _prepare_foreground(self, frame, alpha, active, width, height):
         edge_radius=max((effect.get("edge_radius",0) for effect in active
                          if effect["type"]=="foreground_refine"),default=0)
+        precise_paths=bool(edge_radius) or any(effect.get("source_patches") for effect in active
+                                             if effect["type"]=="foreground_holdout")
         exclusion_limit=np.ones((height,width),dtype=np.float32)
 
         def path_mask(polygons):
             # Coverage, rather than an integer stair-step, for authored detail
             # when the user enables edge refinement. Legacy radius-zero edits
             # keep their original geometry and learned alpha.
-            scale=4 if edge_radius else 1
+            scale=4 if precise_paths else 1
             mask=Image.new("L",(width*scale,height*scale))
             draw=ImageDraw.Draw(mask)
             for polygon in polygons:
@@ -465,6 +502,80 @@ class VfxFrameRenderer:
             excess=np.maximum(0,pixels[:,:,2]-np.minimum(pixels[:,:,0],pixels[:,:,1]))
             pixels[:,:,2]-=excess*(np.asarray(selection)/255)*effect["blue_spill"]
             foreground=Image.fromarray(np.rint(pixels).astype(np.uint8))
+        # Optional manual repair for an opaque object hidden by something the
+        # editor removes (for example, leaves crossing a rigid microphone rod).
+        # Matting cannot recover those unphotographed pixels. Copy an explicitly
+        # chosen clean part of this SAME source frame, after matte cleanup, into
+        # the authored target. No model, external asset, implicit tracking or
+        # previous-frame output is involved. Legacy edits take no new path.
+        repairs=[effect for effect in active if effect["type"]=="foreground_holdout" and effect.get("source_patches")]
+        if repairs:
+            import cv2
+            def protection(patch):
+                mask=Image.new("L",(width*4,height*4))
+                draw=ImageDraw.Draw(mask)
+                for points in patch.get("protect_paths",[]):
+                    draw.polygon([(round(x*width*4),round(y*height*4))for x,y in points],fill=255)
+                return mask.resize((width,height),Image.Resampling.BOX)
+            # Clear all authored cleanup regions before copying any detail, so
+            # adjacent repairs do not erase one another. Explicit protection
+            # retains a photographed accessory crossing in front of the rod.
+            values=np.array(alpha,dtype=np.float64)
+            for effect in repairs:
+                for patch in effect["source_patches"]:
+                    if "clear_box" not in patch:continue
+                    l,t,r,b=patch["clear_box"]
+                    l,r=round(l*width),round(r*width);t,b=round(t*height),round(b*height)
+                    keep=np.asarray(protection(patch),dtype=np.float64)/255
+                    values[t:b,l:r]*=keep[t:b,l:r]
+            alpha=Image.fromarray(np.rint(values).astype(np.uint8))
+            rgba=foreground.convert("RGBA");rgba.putalpha(alpha)
+            # Reuse this frame's cleaned source colour, including all authored
+            # equipment saturation/spill treatment. Copying raw photographed
+            # RGB here would bring the old purple lighting back at the seam.
+            for effect in repairs:
+                sampled=foreground
+                if effect.get("saturation",1)!=1:
+                    # Existing holdout pixels already received this treatment.
+                    # A newly sampled region outside that holdout needs it too,
+                    # without applying the saturation twice inside the holdout.
+                    treated=ImageEnhance.Color(foreground).enhance(effect["saturation"])
+                    included=path_mask([effect["corners"],*effect.get("paths",[])])
+                    if effect["feather"]:included=included.filter(ImageFilter.GaussianBlur(effect["feather"]))
+                    sampled=Image.composite(foreground,treated,included)
+                sample=np.asarray(sampled)
+                for patch in effect["source_patches"]:
+                    source=np.float32(patch["source"])*[width,height]
+                    target=np.float32(patch["target"])*[width,height]
+                    padding=math.ceil(patch["feather"]*4)+2
+                    left,top=np.maximum(0,np.floor(target.min(axis=0)).astype(int)-padding)
+                    right,bottom=np.minimum([width,height],np.ceil(target.max(axis=0)).astype(int)+padding+1)
+                    size=(int(right-left),int(bottom-top));local=np.float32(target-[left,top])
+                    matrix=cv2.getPerspectiveTransform(np.float32(source),local)
+                    copied=cv2.warpPerspective(sample,matrix,size,flags=cv2.INTER_LINEAR,borderMode=cv2.BORDER_REPLICATE)
+                    coverage=Image.new("L",(size[0]*4,size[1]*4))
+                    ImageDraw.Draw(coverage).polygon([(round(float(x)*4),round(float(y)*4))for x,y in local],fill=255)
+                    coverage=coverage.resize(size,Image.Resampling.BOX)
+                    if patch["feather"]:coverage=coverage.filter(ImageFilter.GaussianBlur(patch["feather"]))
+                    if patch["end_blend"]:
+                        # Blend into the two ends of the target in its own
+                        # perspective coordinates, also for angled supports.
+                        inverse=cv2.getPerspectiveTransform(local,np.float32([[0,0],[1,0],[1,1],[0,1]]))
+                        y,x=np.indices((size[1],size[0]),dtype=np.float64)
+                        denominator=inverse[2,0]*x+inverse[2,1]*y+inverse[2,2]
+                        v=np.divide(inverse[1,0]*x+inverse[1,1]*y+inverse[1,2],denominator,
+                            out=np.full(x.shape,np.inf),where=np.abs(denominator)>1e-12)
+                        length=(np.linalg.norm(target[3]-target[0])+np.linalg.norm(target[2]-target[1]))/2
+                        ramp=np.minimum(np.clip(v*length/patch["end_blend"],0,1),
+                            np.clip((1-v)*length/patch["end_blend"],0,1))
+                        coverage=Image.fromarray(np.rint(np.asarray(coverage)*ramp).astype(np.uint8))
+                    if patch.get("protect_paths"):
+                        keep=np.asarray(protection(patch).crop((int(left),int(top),int(right),int(bottom))),dtype=np.float64)/255
+                        coverage=Image.fromarray(np.rint(np.asarray(coverage)*(1-keep)).astype(np.uint8))
+                    layer=Image.fromarray(copied).convert("RGBA");layer.putalpha(coverage)
+                    bounds=(int(left),int(top),int(right),int(bottom))
+                    rgba.paste(Image.alpha_composite(rgba.crop(bounds),layer),(int(left),int(top)))
+            foreground=rgba.convert("RGB");alpha=rgba.getchannel("A")
         return foreground, alpha
 
     def render(self, frame, index):

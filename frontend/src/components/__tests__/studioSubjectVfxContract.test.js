@@ -49,6 +49,24 @@ const timeline = [
   { source_clip_id: "source-a", start_time: 5, end_time: 8 },
 ];
 
+test("opaque source repairs remain editable in canonical state and invalidate the previous preview",()=>{
+  const value=scene();value.effects=[{id:"rig",type:"foreground_holdout",start:0,end:6,
+    corners:[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],feather:0}];
+  const old=reviewed(JSON.parse(JSON.stringify(value)));old.preview.receipt={pixel_sha256:"old-pixels"};
+  const repair={source:[[.1,.1],[.2,.1],[.2,.2],[.1,.2]],target:[[.4,.2],[.42,.2],[.44,.8],[.42,.8]],feather:.6,end_blend:8};
+  value.effects[0].source_patches=[repair];
+  expect(resolveSubjectVfxProgrammePreview([{...old,scene:value}],"source-a",3)).toBeNull();
+  const document=adaptStudioSnapshotToDocument({snapshot:{orderedClips:[{id:"source-a",start:0,end:12}],
+    timeline:[{id:"clip",sourceClipId:"source-a",startRequest:2,endRequest:8}],subjectVfxScenes:[reviewed(value)]},projectId:"repair"});
+  expect(projectStudioLinkedTimingToSnapshot(document).subjectVfxScenes[0].scene.effects[0].source_patches).toEqual([repair]);
+  for(const change of [{feather:4},{end_blend:33},{source:[[0,0],[1,1],[1,0],[0,1]]},{target:[[0,0],[.1,.1],[.2,.2],[.3,.3]]},{extra:true}]){
+    const bad=JSON.parse(JSON.stringify(value));Object.assign(bad.effects[0].source_patches[0],change);
+    expect(()=>validateSubjectVfxScene(bad)).toThrow(/source detail repairs/);
+  }
+  value.effects[0].source_patches=Array.from({length:17},()=>repair);
+  expect(()=>validateSubjectVfxScene(value)).toThrow(/source detail repairs/);
+});
+
 test("thin-detail preservation is explicit, boolean and changes the preview revision", () => {
   const value=scene();value.effects=[{id:"stem",type:"foreground_holdout",start:0,end:6,
     corners:[[.3,.3],[.31,.3],[.31,.6],[.3,.6]],feather:0}];

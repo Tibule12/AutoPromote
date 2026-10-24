@@ -192,3 +192,6 @@ reports/studio-fringe-cpu-20261024/*
 # Private source-bound realism correction evidence.
 reports/studio-realism-finish-20261024/*
 !reports/studio-realism-finish-20261024/README.md
+
+reports/studio-source-detail-repair-20261024/*
+!reports/studio-source-detail-repair-20261024/README.md

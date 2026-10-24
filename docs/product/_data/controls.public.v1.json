@@ -6907,6 +6907,42 @@
       ],
       "updated_at": "2026-10-21",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.source_detail_repair",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Repair opaque detail from source",
+      "status": "PARTIAL",
+      "meaning": "Manually copies a clean opaque detail from the same source frame onto an authored target after matte cleanup. Optional cleanup and protection retain the intended outline and crossing accessories.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 16,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame corners; feather and end blending in source pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.",
+        "The copy uses this frame’s cleaned source colour. It does not reconstruct the hidden original, detect objects or track motion automatically. Review every moving pose and the exported result.",
+        "New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality."
+      ],
+      "updated_at": "2026-10-24",
+      "product_version": "1.2.0"
     }
   ]
 }

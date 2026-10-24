@@ -67,6 +67,10 @@ const boundedJsonTree = root => {
     .filter(layer => layer?.type === "subject_vfx")
     .flatMap(layer => [layer.parameters?.preview?.revision, layer.parameters?.pending?.revision])
     .filter(value => typeof value === "string"));
+  const subjectSelections = (Array.isArray(root?.layers) ? root.layers : [])
+    .filter(layer => layer?.type === "subject_vfx" && typeof layer.parameters?.maskJob?.selectionJson === "string")
+    .map(layer => ({ value: layer.parameters.maskJob.selectionJson, scene: layer.parameters.scene,
+      finished:layer.parameters.maskJob.finished===true,ref:layer.parameters.modelArtifactRef }));
   const lut = root?.visualGraph?.settings?.advancedColor?.lutData;
   const lutPath = "visualGraph.settings.advancedColor.lutData.data";
   const completeLut = plain(lut) && Number.isInteger(lut.size) && lut.size >= 2 && lut.size <= 65 &&
@@ -80,6 +84,36 @@ const boundedJsonTree = root => {
     if (value === null || typeof value === "boolean") return true;
     if (typeof value === "string") {
       if (value.length <= 16_384) return true;
+      // A native fine-matting request serializes bounded source-specific
+      // holdout groups inside its saved selection. Keep the ordinary text
+      // limit; accept this exact field only after validating its source,
+      // selection schema and decoded tree against the same global limits.
+      if (path === "layers[].parameters.maskJob.selectionJson" && value.length <= 48 * 1024) {
+        try {
+          const selection=JSON.parse(value);
+          const match=subjectSelections.find(item=>item.value===value && item.scene &&
+            same(selection.sourceId,item.scene.sourceId) && same(selection.sourceStoragePath,item.scene.sourceStoragePath) &&
+            same(selection.sourceRange,item.scene.sourceRange) && (same(selection.prompt,item.scene.prompt) ||
+              item.finished && validModelArtifactReference(item.ref) && item.ref.capability==='segment_subject' &&
+              item.ref.sourceAssetId===item.scene.sourceId));
+          if (!match || !allowedKeys(selection,["sourceId","sourceStoragePath","sourceRange","prompt","box"],["components","refinement"]) ||
+              stableStringify(selection)!==value) return false;
+          // Imported model scenes may use their normalized mask prompt. The
+          // finished request keeps its original selection for recovery/history.
+          subjectVfxRevision({...match.scene,prompt:selection.prompt});
+          const parameters={subjectId:match.scene.id,initialBox:selection.box,
+            points:selection.prompt.points.map((position,i)=>({position,label:selection.prompt.labels[i]})),
+            shotPrompts:selection.prompt.shotPrompts.map(shot=>({frameIndex:Math.round(shot.time*24),box:selection.box,
+              points:shot.points.map((position,i)=>({position,label:shot.labels[i]}))})),
+            ...(selection.components?{components:selection.components}:{}),...(selection.refinement?{refinement:selection.refinement}:{})};
+          const sourceRange={space:"source",startTick:Math.round(selection.sourceRange.start*90000),endTick:Math.round(selection.sourceRange.end*90000)};
+          require("../modelRuntime/contract").request({schemaVersion:1,requestId:"saved-mask-selection-validation",
+            projectId:root.projectId,projectRevision:root.revision,sourceAssetId:selection.sourceId,
+            sourceSha256:"a".repeat(64),sourceStoragePath:selection.sourceStoragePath,sourceRange,
+            capability:"segment_subject",dependencyHashes:selection.refinement?[selection.refinement.maskArtifactHash]:[],parameters});
+          return visit(selection,depth+1,`${path}.selection`);
+        } catch (_) { return false; }
+      }
       // Native subject revisions serialize the complete editable scene, including
       // detailed paths. Validate that scene instead of treating it as free text.
       // All ordinary strings and the document/node/depth limits stay bounded.

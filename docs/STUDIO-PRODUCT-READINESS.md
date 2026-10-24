@@ -1,3 +1,7 @@
+<!-- podcast-source-detail-repair-20261024 -->
+24 October podcast continuation: [new source-bound CPU fine-alpha movies and matching native timelines](../reports/studio-source-detail-repair-20261024/README.md) retain three 1080p/298-frame outputs, both immutable parent masks, saved login/all 51 projects and 47 protected source/prior-delivery files. Editable source-detail repairs restore microphone hardware; source-colour exclusions remove the observed old-room remnants. Detailed saved mask import/recovery is repaired under strict source/schema/tree/byte bounds. 68 renderer/cache, 10 canonical, 16 revision and 17 knowledge cases pass; original decoded sound matches. No GPU, paid generation, publication, deployment/main merge or readiness/creative/human-sound promotion. Broader footage and shared S02/S04/S03 remain.
+<!-- /podcast-source-detail-repair-20261024 -->
+
 # Studio product readiness
 
 <!-- podcast-realism-finish-20261024 -->

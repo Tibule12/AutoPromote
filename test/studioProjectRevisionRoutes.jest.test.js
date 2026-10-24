@@ -365,6 +365,40 @@ test("detailed native subject revisions register without permitting oversized ar
   }
 });
 
+test("fine-matte saved selections register with bounded paths while ordinary strings and source binding stay strict",async()=>{
+  const {stable}=require('../frontend/src/components/studioSubjectVfxContract');
+  const scene={version:1,id:'fine-mask',sourceId:'asset-1',sourceStoragePath:'studio/sources/owner/source.mp4',
+    sourceRange:{start:0,end:6},prompt:{points:[[.5,.5]],labels:[1],shotPrompts:[]},
+    effects:[{id:'title',type:'text_behind',start:0,end:6,text:'Fine detail',x:50,y:50,font_size:30,color:'#ffffff'}]};
+  const paths=Array.from({length:12},(_,i)=>Array.from({length:64},(_,j)=>
+    [.2+i*.02+Math.cos(j*Math.PI/32)*.005,.5+Math.sin(j*Math.PI/32)*.005]));
+  const selection={sourceId:scene.sourceId,sourceStoragePath:scene.sourceStoragePath,sourceRange:scene.sourceRange,
+    prompt:scene.prompt,box:[.1,.1,.9,.9],refinement:{maskArtifactHash:'a'.repeat(64),radius:10,holdouts:[],
+      holdoutGroups:[{id:'equipment',start:0,end:6,corners:[[.1,.1],[.2,.1],[.2,.2],[.1,.2]],paths,feather:.5}]}};
+  const value=document();value.layers=[{layerId:scene.id,type:'subject_vfx',parameters:{scene,maskJob:{selectionJson:stable(selection)}}}];
+  expect(value.layers[0].parameters.maskJob.selectionJson.length).toBeGreaterThan(16_384);
+  expect((await post({document:value})).status).toBe(201);
+  const imported=clone(value),parameters=imported.layers[0].parameters;
+  parameters.scene.prompt.points=[[.45,.45]];
+  parameters.maskJob.finished=true;
+  parameters.modelArtifactRef={kind:'model_capability',schemaVersion:1,artifactHash:'b'.repeat(64),
+    sourceAssetId:'asset-1',sourceContentHash:'c'.repeat(64),capability:'segment_subject',
+    sourceRange:{space:'source',startTick:0,endTick:540000}};
+  expect(()=>validateStudioProjectRevisionDocument(imported)).not.toThrow();
+  parameters.maskJob.finished=false;
+  expect(()=>validateStudioProjectRevisionDocument(imported)).toThrow('STUDIO_PROJECT_REVISION_INVALID');
+  for(const change of [
+    d=>{d.audioGraph.arbitrary=d.layers[0].parameters.maskJob.selectionJson;},
+    d=>{d.layers[0].parameters.maskJob.selectionJson='x'.repeat(20_000);},
+    d=>{const s=clone(selection);s.sourceId='other-source';d.layers[0].parameters.maskJob.selectionJson=stable(s);},
+    d=>{const s=clone(selection);s.refinement.holdoutGroups[0].paths[0].push([.5,.5]);d.layers[0].parameters.maskJob.selectionJson=stable(s);},
+    d=>{const s=clone(selection);s.refinement.holdoutGroups[0].end=7;d.layers[0].parameters.maskJob.selectionJson=stable(s);},
+    d=>{d.layers[0].parameters.maskJob.selectionJson+=' ';},
+  ]){
+    const bad=clone(value);change(bad);expect(()=>validateStudioProjectRevisionDocument(bad)).toThrow('STUDIO_PROJECT_REVISION_INVALID');
+  }
+});
+
 test("transaction failure publishes neither project head nor revision", async () => {
   firestore.runTransaction = async work => {
     await work({

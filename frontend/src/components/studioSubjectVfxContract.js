@@ -117,6 +117,7 @@ function validateSubjectVfxScene(scene) {
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "after_refine")) fields.push("after_refine");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "paths")) fields.push("paths");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "saturation")) fields.push("saturation");
+    if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "source_patches")) fields.push("source_patches");
     if (effect?.type === "background_replace") fields.push(...["surface_corners", "asset_crop"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)));
     if (
       !fields ||
@@ -204,6 +205,29 @@ function validateSubjectVfxScene(scene) {
       fail("Choose four source-frame corners for the foreground holdout.");
     if (effect.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "after_refine") && typeof effect.after_refine !== "boolean")
       fail("Choose whether to keep the thin detail through cleanup.");
+    if (effect.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect,"source_patches")) {
+      const quad = points => {
+        if (!Array.isArray(points) || points.length!==4 || !points.every(point=>Array.isArray(point) &&
+            point.length===2 && point.every(value=>bounded(value,0,1)))) return false;
+        const crosses=points.map((a,i)=>{const b=points[(i+1)%4],c=points[(i+2)%4];return (b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]);});
+        const area=Math.abs(points.reduce((sum,a,i)=>{const b=points[(i+1)%4];return sum+a[0]*b[1]-b[0]*a[1];},0))/2;
+        return area>=.000001 && (crosses.every(value=>value>0) || crosses.every(value=>value<0));
+      };
+      const validRepair=patch=>{
+        if (!patch || typeof patch!=="object" || Array.isArray(patch) ||
+            !keys(patch,["source","target","feather","end_blend",...["clear_box","protect_paths"].filter(key=>Object.prototype.hasOwnProperty.call(patch,key))]) ||
+            !quad(patch.source) || !quad(patch.target) || !bounded(patch.feather,0,3) || !bounded(patch.end_blend,0,32)) return false;
+        if (Object.prototype.hasOwnProperty.call(patch,"clear_box") && (!Array.isArray(patch.clear_box) || patch.clear_box.length!==4 ||
+            !patch.clear_box.every(value=>bounded(value,0,1)) || patch.clear_box[0]>=patch.clear_box[2] || patch.clear_box[1]>=patch.clear_box[3])) return false;
+        if (Object.prototype.hasOwnProperty.call(patch,"protect_paths") && (!Array.isArray(patch.protect_paths) || patch.protect_paths.length<1 ||
+            patch.protect_paths.length>16 || !patch.protect_paths.every(points=>Array.isArray(points) && points.length>=3 && points.length<=64 &&
+              points.every(point=>Array.isArray(point) && point.length===2 && point.every(value=>bounded(value,0,1))) &&
+              Math.abs(points.reduce((sum,a,i)=>{const b=points[(i+1)%points.length];return sum+a[0]*b[1]-b[0]*a[1];},0))>=.000001))) return false;
+        return true;
+      };
+      if (!Array.isArray(effect.source_patches) || effect.source_patches.length<1 || effect.source_patches.length>16 || !effect.source_patches.every(validRepair))
+        fail("Use 1–16 source detail repairs with convex source/target corners, feather 0–3 and end blend 0–32 pixels.");
+    }
     for (const field of effect.type === "foreground_holdout" ? ["paths"] : effect.type === "foreground_refine" ? ["clear_paths"] : [])
       if (Object.prototype.hasOwnProperty.call(effect, field) &&
         (!Array.isArray(effect[field]) || effect[field].length < 1 || effect[field].length > 32 ||
