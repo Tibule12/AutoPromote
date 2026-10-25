@@ -1,3 +1,7 @@
+<!-- background-finish-rejected-20261025 -->
+The owner rejects the latest five-video delivery for visual quality. Successful exports, passing tests and the foreground-colour fix do not establish finished background replacement. Full-resolution reinspection finds patched microphone supports and pale/fringed guest/chair boundaries. Preserve every delivered movie and source. Visual correction remains active, using CPU only through native Studio; no creative/readiness promotion.
+<!-- /background-finish-rejected-20261025 -->
+
 # Background replacement: foreground colour fix and fresh-source qualification — 25 October 2026
 
 The shared renderer now calculates foreground contrast from the final visible foreground, weighted by soft alpha. Removed room pixels previously set the contrast pivot: changing only those discarded pixels changed retained foreground values by up to 46 levels in the reproduced regression. The same change now produces zero foreground difference. Empty masks are handled; fully opaque subjects retain the ordinary contrast operation. No alpha, source mask or unrelated editing implementation is changed by this colour fix.

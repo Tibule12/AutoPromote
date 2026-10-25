@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed five exact native source-bound movie and timeline receipts, original-project/media preservation, final-alpha-weighted contrast regression, and bounded fresh CPU source scope; no owner or readiness promotion.",
-  "reviewed_at": "2026-10-25T11:52:32.782Z",
-  "catalog_sha256": "97464beb366b6802b45967c60bbcce8dca1fe8543731b52b25e1b9c42d63238a",
+  "reason": "Inspected all three renewed native films and matching Studio timelines; corrected replacement-image furniture diagnosis, retained original masks, verified 53 projects and 75 protected files, and preserved all broader readiness limits.",
+  "reviewed_at": "2026-10-25T23:54:38.759Z",
+  "catalog_sha256": "fa38a9e38438efffe01662e814ab6e805462d6366def0e780a1c58ee98f21d35",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "cb3b402791fee348a7c6ab2fd39591ffc733b7fd13da5331662a581daa3d1c82"
+      "sha256": "f79a61eb9070441ecbc951b0412adc7d5b8521cf0127b3b061fd1af7002a7e47"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "f2ee280ad94c5fd3c351dd75f479377403c7b6710a4c4d768d83d78a8c7481d3"
+      "sha256": "acccac44d9f408eefec43b2ef668efbf3fe357473ea77b0f9dc6bbc0907da13a"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

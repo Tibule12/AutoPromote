@@ -8708,7 +8708,7 @@
     ]
   },
   "backgroundFinish20261025": {
-    "status": "PRIVATE_NATIVE_BACKGROUND_COLOUR_AND_FRESH_SOURCE_QUALIFICATION_RETAINED",
+    "status": "OWNER_REJECTED_FOR_VISUAL_QUALITY_CORRECTION_ACTIVE",
     "evidence": "reports/studio-background-finish-20261025/README.md",
     "foregroundContrastUsesFinalAlpha": true,
     "discardedRoomRegression": {
@@ -8800,9 +8800,160 @@
     "humanSoundApproval": false,
     "readinessPromoted": false,
     "remaining": [
+      "Patched microphone supports and pale/fringed guest/chair edges remain visible; inspect and correct actual moving footage through Studio.",
       "Ordinary-account rollout/model availability and longer/multi-shot inputs.",
       "Original source motion blur/lighting, complete predictive picture/sound and founder creative/listening acceptance.",
       "Shared S02/S04/S03 remains separately qualified."
-    ]
+    ],
+    "ownerRejected": true,
+    "visualCompletion": false
+  },
+  "guestSourceSelection20261026": {
+    "status": "NATIVE_FRAMING_AND_EQUIPMENT_CORRECTION_PRIVATE_MOVIES_REVIEWED",
+    "evidence": "reports/studio-guest-selection-20261026/README.md",
+    "priorCompletionClaimWithdrawn": true,
+    "falseFurnitureConfirmedBySourceComparison": false,
+    "fullFrameEdgeAttemptRejectedBeforeFinalExport": true,
+    "nativeForegroundReselection": true,
+    "hostMaskAndCompletedPreviewRetained": true,
+    "originalProjectsRetained": 53,
+    "gpuJobs": 0,
+    "paidGeneration": false,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "creativeApproval": false,
+    "readinessPromoted": false,
+    "visualCompletion": false,
+    "next": [
+      "Preserve exact private movies, matching editable timelines, original masks, diagnostic history and all unrelated engineering.",
+      "Qualify broader/longer user footage and source lighting; these manually supported examples do not establish arbitrary-footage quality.",
+      "Continue separately tracked S02/S04/S03 without promoting creative or production readiness."
+    ],
+    "falseFurnitureContainedInReplacementImage": true,
+    "sourceAlphaAtExaminedBackgroundPoints": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "initialSelectionDiagnosisWithdrawn": true,
+    "nativeForegroundReselectionIsUnnecessaryDiagnostic": true,
+    "originalMaskRefsRestored": true,
+    "diagnosticMasksUsedInDeliveredMovies": false,
+    "cpuDiagnostic": {
+      "sam": "completed and archived",
+      "fine": "cancelled through native Studio and archived"
+    },
+    "otherCanonicalDocumentsUnchanged": 52,
+    "protectedFilesUnchanged": 75,
+    "savedLoginRetained": true,
+    "originalForegroundFramesReused": {
+      "cameraA": 208,
+      "cameraB": 90,
+      "cacheMisses": 0
+    },
+    "replacementImageCrop": {
+      "cameraA": [
+        0,
+        0,
+        1,
+        0.55
+      ],
+      "cameraB": [
+        0,
+        0,
+        1,
+        0.46
+      ]
+    },
+    "finalEdgeRegion": "full frame including equipment",
+    "edgeWidth": 4,
+    "originalProgrammeFramingRetained": true,
+    "deliveries": [
+      {
+        "theme": "daylight-loft",
+        "canonicalHash": "b20870f08767f555e7e92e5f282fd59a44788d07186afc400fefaf52a70b8c7b",
+        "movieSha256": "ea0dee359fc468c7f7b0a32f83bb88bbbd7db94df7fd046fdae9727d84dc0d7e",
+        "timelineSha256": "f03535c67c4de64e30456e75fe7b605d6330a6962d0d53de5b27f9b1156bd845",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true,
+        "originalMaskRefsAndOtherEffectsRetained": true,
+        "replacementCrop": {
+          "cameraA": [
+            0,
+            0,
+            1,
+            0.55
+          ],
+          "cameraB": [
+            0,
+            0,
+            1,
+            0.46
+          ]
+        },
+        "gpuCount": 0
+      },
+      {
+        "theme": "warm-library",
+        "canonicalHash": "ef5107a7dc47a0df1f51ce844ddbbb1407561cc88f50ac6c5ce9d4403877d35a",
+        "movieSha256": "dbe451ed541616ef0997a78c6f65f90191b4c6fb5c6c59f02490ef83a3ec511b",
+        "timelineSha256": "49479b4b09a1e5a1bc1f8cc9d1aa78f2bb50c19b106ce076685811b1e87be5fb",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true,
+        "originalMaskRefsAndOtherEffectsRetained": true,
+        "replacementCrop": {
+          "cameraA": [
+            0,
+            0,
+            1,
+            0.55
+          ],
+          "cameraB": [
+            0,
+            0,
+            1,
+            0.46
+          ]
+        },
+        "gpuCount": 0
+      },
+      {
+        "theme": "midnight-studio",
+        "canonicalHash": "e962a806349599e55f1106c36d9e98cd6da449290713446c93c139b2a470cd91",
+        "movieSha256": "0fe0ef0210c822fca9515cb7d18684ad69209aa6c45848d82047ffb5d9fa6300",
+        "timelineSha256": "1d1550144e7f9c5fb5fb9c6eb3ddf39b4d0fee336cc74a1911f7b538915b1d9d",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true,
+        "originalMaskRefsAndOtherEffectsRetained": true,
+        "replacementCrop": {
+          "cameraA": [
+            0,
+            0,
+            1,
+            0.55
+          ],
+          "cameraB": [
+            0,
+            0,
+            1,
+            0.46
+          ]
+        },
+        "gpuCount": 0
+      }
+    ],
+    "decodedSoundtrackUnchanged": true,
+    "rendererSourceUnchanged": true,
+    "frontendRebuilt": false,
+    "sourceLightingAndManualExampleLimitsRemain": true,
+    "humanSoundApproval": false
   }
 }
