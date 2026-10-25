@@ -8706,5 +8706,103 @@
       "Broader-source/long-video naturalness and original source lighting/compression; whole predictive picture/sound.",
       "Ordinary-account runtime/provider qualification and shared S02/S04/S03."
     ]
+  },
+  "backgroundFinish20261025": {
+    "status": "PRIVATE_NATIVE_BACKGROUND_COLOUR_AND_FRESH_SOURCE_QUALIFICATION_RETAINED",
+    "evidence": "reports/studio-background-finish-20261025/README.md",
+    "foregroundContrastUsesFinalAlpha": true,
+    "discardedRoomRegression": {
+      "previous": {
+        "maximumVisibleForegroundDifference": 46,
+        "changedForegroundChannels": 13824
+      },
+      "current": {
+        "maximumVisibleForegroundDifference": 0,
+        "changedForegroundChannels": 0
+      }
+    },
+    "rendererCacheTestsPassed": 73,
+    "isolatedKnowledgeTestsPassed": 17,
+    "podcastPreparedForegroundPixelsUnchanged": {
+      "hostFrames": 208,
+      "guestFrames": 90
+    },
+    "podcastMasterExports": [
+      {
+        "theme": "warm-library",
+        "canonicalHash": "9d84813c90f347c967dbdccae06d654e943fad83696c9bea67ffa4eb89c23d95",
+        "movieSha256": "06a80b05da96f1bddca488f221c7017feb72b98e7e4a11991719d5364c3bfbc0",
+        "timelineSha256": "7adaed032f247c191aa7dcf1b12f412c0cc9b4c6bfd5347ae757a83d03511aba",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "midnight-studio",
+        "canonicalHash": "e3c42cb649bb4730f3575bedaf3fd4be66eee617bbaf4fe0d6603a0ba610ca09",
+        "movieSha256": "d4bca1b9b1f4a2171aabebed1221550ddf9f5cf07880e9abc802ef9701a0628c",
+        "timelineSha256": "98e142870a39dfe11c4da7244cca1a1c6e7819e8a05497e190257b6cc8b2f191",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "daylight-loft",
+        "canonicalHash": "42d388f1dcf626872fb254b5d6a11280af2eae1a0c352a337850ff1e434a593c",
+        "movieSha256": "230836fce15896955375fa9af835ca66c9383f2d440c77d34ae7e07af0361c50",
+        "timelineSha256": "823e84ff39256e89b9eed443283de702faefce08b4e1696b819265eaac910b68",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      }
+    ],
+    "freshPeopleOnlySources": [
+      {
+        "source": "headphones-man",
+        "projectId": "viral-project-c49f1e31-82d7-499a-b7f1-45d94669418b",
+        "canonicalHash": "520882cb7044d08c0d671b351b287997a747dba0567259cf95a0cd5c180c255a",
+        "movieSha256": "4addb7aefa63500509984054c9f54923c0442b57b7bbd83ac72d09d426ae0e7e",
+        "timelineSha256": "8d772faff817f509d92e341b6dc8e967ed3927adc73d1a0c50cb1d260a1a6bfe",
+        "frames": 72,
+        "peopleOnly": true,
+        "manualRepairPaths": 0,
+        "ownFineMask": "b5d1f24d14f9b02990adefd90eae5cca639ae2c7674554c8bbbecc3833f1ae05",
+        "gpuJobs": 0
+      },
+      {
+        "source": "headphones-woman",
+        "projectId": "viral-project-1d56b6fe-0531-4e38-b10f-291a168bfa92",
+        "canonicalHash": "5968455e740751cc435f20b22281de61b79c4b350592e9f66afdede49ed2b47c",
+        "movieSha256": "273edeb28b8cd6a6b62361051b69fef3fe86f7d9b9db8466ed1ed88c870c9d32",
+        "timelineSha256": "b6395cc555cf084e4f37ba77d364fdeaf68663fd79571a183dd37a82989304ed",
+        "frames": 72,
+        "peopleOnly": true,
+        "manualRepairPaths": 0,
+        "ownFineMask": "38c0dceb3d07f97f2e079760f1149502d5610a9cff406a8d021d67df70f45bda",
+        "gpuJobs": 0
+      }
+    ],
+    "preexistingProjectsRetained": 51,
+    "otherCanonicalDocumentsUnchanged": 50,
+    "protectedFilesUnchanged": 65,
+    "savedLoginRetained": true,
+    "sourceMasksUnchangedForPodcast": true,
+    "freshCpuModelJobs": 4,
+    "gpuJobs": 0,
+    "paidGeneration": false,
+    "publishing": false,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "creativeApproval": false,
+    "humanSoundApproval": false,
+    "readinessPromoted": false,
+    "remaining": [
+      "Ordinary-account rollout/model availability and longer/multi-shot inputs.",
+      "Original source motion blur/lighting, complete predictive picture/sound and founder creative/listening acceptance.",
+      "Shared S02/S04/S03 remains separately qualified."
+    ]
   }
 }

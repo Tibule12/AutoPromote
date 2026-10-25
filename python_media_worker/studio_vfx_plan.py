@@ -730,7 +730,17 @@ class VfxFrameRenderer:
         for effect in active:
             if effect["type"] != "foreground_grade":continue
             foreground=ImageEnhance.Color(foreground).enhance(effect["saturation"])
-            foreground=ImageEnhance.Contrast(foreground).enhance(effect["contrast"])
+            if effect["contrast"] != 1:
+                # Discarded room pixels must not set the person's contrast
+                # pivot. Weight luminance by the final visible coverage,
+                # including soft hair and repaired/protected equipment.
+                weights=np.asarray(alpha,dtype=np.float64)
+                total=weights.sum()
+                if total:
+                    luminance=np.asarray(foreground.convert("L"),dtype=np.float64)
+                    mean=int(np.floor((luminance*weights).sum()/total+.5))
+                    foreground=Image.blend(Image.new("RGB",foreground.size,(mean,)*3),
+                        foreground,effect["contrast"])
             foreground=ImageEnhance.Brightness(foreground).enhance(2**effect["exposure"])
         subject = foreground.convert("RGBA")
         subject.putalpha(alpha)

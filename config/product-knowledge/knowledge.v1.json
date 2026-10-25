@@ -1282,7 +1282,8 @@
         "Previous podcast examples, including the contact-cleanup revision, were rejected for appearance. The current private revision uses source-bound fine alpha, manual source-detail repairs and whole-person edge regions. These source-specific contours do not prove clean automatic replacement for other users’ footage; founder creative review and broader qualification remain separate.",
         "Optional object holdouts and removal paths are advanced manual normalized source-frame geometry. They do not automatically identify furniture or microphones or track a hand-drawn shape through motion.",
         "Opaque source-detail repair copies existing cleaned pixels from the same frame. It does not infer the hidden original object, automatically track geometry or repair an unselected object. A clean photographed sample is required; moving or articulated objects need separate timed corrections.",
-        "Local edge regions use manual fixed source-frame coordinates. They do not track or reconstruct objects; hard authored removal paths still take priority. Previous podcast movies remain owner-rejected while this correction is reviewed."
+        "Local edge regions use manual fixed source-frame coordinates. They do not track or reconstruct objects; hard authored removal paths still take priority. Previous podcast movies remain owner-rejected while this correction is reviewed.",
+        "Foreground contrast uses the final visible foreground, including soft edge coverage. Removed background pixels do not set its brightness pivot. Use foreground exposure, saturation and contrast to match your chosen room, then inspect the moving preview and final movie."
       ],
       "common_errors": [
         {

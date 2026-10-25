@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageEnhance
 import pytest
 
 from python_media_worker.studio_subject_matte import CachedSubjectMatte, canonical_hash, sha256, mask_geometry
@@ -315,6 +315,40 @@ def test_background_wipe_reveals_real_set_in_order_and_foreground_grade_is_local
     assert np.array_equal(middle[36,100],[20,20,20])
     command['effects'][0]['reveal_seconds']=float('nan')
     with pytest.raises(ValueError):validate_plan(command,cache)
+
+
+@pytest.mark.parametrize('contrast',[.6,1.4])
+def test_foreground_contrast_ignores_discarded_room_pixels(source_cache,tmp_path,contrast):
+    _,_,cache=source_cache
+    plate=tmp_path/'room.png';Image.new('RGB',(128,72),(35,40,50)).save(plate)
+    command=plan(cache);command['effects']=[
+        {'id':'set','type':'background_replace','start':0,'end':1,
+         'asset_id':'room','asset_sha256':sha256(plate),'blur':0,'exposure':0,'saturation':1},
+        {'id':'person','type':'foreground_grade','start':0,'end':1,
+         'exposure':0,'saturation':1,'contrast':contrast}]
+    first=np.full((72,128,3),15,np.uint8);first[:,64:]=[90,120,150];first[36:,64:]=[150,160,170]
+    second=first.copy();second[:,:64]=245
+    a=np.asarray(VfxFrameRenderer(command,cache,lambda _:plate).render(Image.fromarray(first),0))
+    b=np.asarray(VfxFrameRenderer(command,cache,lambda _:plate).render(Image.fromarray(second),0))
+    assert np.array_equal(a,b), 'Changing fully removed room pixels must not relight the foreground'
+    # The pivot is the visible foreground mean, with the ordinary RGB contrast
+    # operation retained for fully opaque subjects.
+    expected=np.asarray(ImageEnhance.Contrast(Image.fromarray(first[:,64:])).enhance(contrast))
+    assert np.array_equal(a[:,64:],expected)
+
+
+def test_foreground_contrast_uses_fractional_coverage_and_handles_empty_matte(source_cache):
+    _,_,cache=source_cache
+    command=plan(cache);command['effects']=[{'id':'person','type':'foreground_grade',
+        'start':0,'end':1,'exposure':0,'saturation':1,'contrast':1.5}]
+    values=np.zeros((72,128),np.uint8);values[:,:32]=255;values[:,32:64]=128
+    pixels=np.full((72,128,3),250,np.uint8);pixels[:,:32]=60;pixels[:,32:64]=180
+    cache.frame=lambda _:values
+    rendered=np.asarray(VfxFrameRenderer(command,cache).render(Image.fromarray(pixels),0))
+    pivot=int(np.floor((60*255+180*128)/(255+128)+.5))
+    assert np.all(rendered[:,:32]==int(1.5*60-.5*pivot)), 'Soft coverage must contribute proportionally to the contrast pivot'
+    values[:]=0
+    assert np.array_equal(np.asarray(VfxFrameRenderer(command,cache).render(Image.fromarray(pixels),0)),pixels)
 
 
 def test_manual_holdout_preserves_thin_real_foreground_without_filling_surrounding_background(source_cache,tmp_path):

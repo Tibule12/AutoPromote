@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Reviewed 25 October native appearance receipts and exact preservation, actual fractional foreground over source-detail repair, scoped controls and documented quality limits. No readiness or owner approval promotion; preserve concurrent Studio work.",
-  "reviewed_at": "2026-10-25T06:30:12.581Z",
-  "catalog_sha256": "a40a5c34caa4c74d35de30c6247f29f712fb2d0153089afb457ea55aee784537",
+  "reason": "Reviewed five exact native source-bound movie and timeline receipts, original-project/media preservation, final-alpha-weighted contrast regression, and bounded fresh CPU source scope; no owner or readiness promotion.",
+  "reviewed_at": "2026-10-25T11:52:32.782Z",
+  "catalog_sha256": "97464beb366b6802b45967c60bbcce8dca1fe8543731b52b25e1b9c42d63238a",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -427,7 +427,7 @@
     },
     {
       "path": "python_media_worker/studio_vfx_plan.py",
-      "sha256": "331e787bafe48e5eb747ecaa4952c4a4c7423799a39c51b6f81f08cde6d377cb"
+      "sha256": "365c8d43dae07e4f61ca9b6029ccc9aee495e7997129529167a1da89019e9c8c"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "7e11e4b0207834b316b8dca600ba2da50ad2fbbfc38da0aa22b635e373a36648"
+      "sha256": "cb3b402791fee348a7c6ab2fd39591ffc733b7fd13da5331662a581daa3d1c82"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "299ce4ec4215ea6f372052b7028b4edc658273a237b1e1cc38dca0c90e312205"
+      "sha256": "f2ee280ad94c5fd3c351dd75f479377403c7b6710a4c4d768d83d78a8c7481d3"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
