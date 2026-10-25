@@ -1,5 +1,7 @@
 # Podcast contact and local-edge correction — 24 October 2026
 
+**Owner rejected these three movies for appearance.** They remain preserved. See [the subsequent whole-shot appearance correction](../studio-background-naturalness-20261025/README.md).
+
 The owner rejected the preceding three source-detail-repair movies for appearance. They remain intact. A fresh comparison with the original source shows two concrete defects: a microphone upright ended above the leaf that should occlude it, and threshold-based old-room colour cleanup left a hard stepped edge beside the partial guest's trousers.
 
 The actual signed-in Studio project now extends both affected upright repairs to the original leaf overlap, protecting that foreground leaf. **Edge refinement region points** bounds the existing CPU edge solve to the partial guest's clothing. Colour rejection supplies a soft boundary hint within the region; explicit removal paths/boxes remain excluded. Narrow ridge seeds no longer pin broad stair-step protrusions. A first complete preview was rejected before export: an older explicit removal contour still clipped the moving upper knee. That contour now leaves the local region available to the source-guided solve. The correction blends inward at its region boundary and preserves unrelated equipment alpha. The guest camera retains its exact fine mask and edge width zero. The remaining scene commands and both source-bound fine masks remain.

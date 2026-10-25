@@ -90,6 +90,25 @@ def test_source_detail_repair_clears_damaged_edges_but_retains_an_accessory_cros
     assert np.asarray(result)[36,22]==255 and np.all(np.asarray(clean)[36,22]==[220,200,170]), 'Retain the photographed accessory in front'
 
 
+def test_source_repair_runs_behind_actual_accessory_alpha_without_cutting_a_polygon_shaped_gap(source_cache):
+    _,_,cache=source_cache
+    patch={'source':[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+        'target':[[.15,.2],[.2,.2],[.2,.8],[.15,.8]],'feather':0,'end_blend':0,
+        'clear_box':[.1,.2,.3,.8], 'protect_paths':[[[.1,.3],[.3,.3],[.3,.7],[.1,.7]]]}
+    hold={'id':'repair','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[0,0],[.01,0],[.01,.01],[0,.01]],'feather':0,'source_patches':[patch]}
+    command=plan(cache);command['effects']=[hold];renderer=VfxFrameRenderer(command,cache)
+    alpha=np.zeros((72,128),np.uint8);alpha[32:40,12:40]=255;alpha[30:32,12:40]=128
+    pixels=np.full((72,128,3),[220,200,170],np.uint8);pixels[8:60,88:100]=[20,25,30]
+    rgb,result=renderer._prepare_foreground(Image.fromarray(pixels),Image.fromarray(alpha),[hold],128,72)
+    assert np.asarray(result)[25,22]==255, 'Transparent accessory padding must not chop the restored rod'
+    assert np.all(np.asarray(rgb)[25,22]==[20,25,30])
+    assert np.all(np.asarray(rgb)[36,22]==[220,200,170]), 'Opaque accessory remains in front'
+    assert np.asarray(result)[31,22]==255, 'Soft accessory edge covers an opaque repaired support'
+    assert np.max(np.abs(np.asarray(rgb)[31,22].astype(int)-np.array([120,113,100])))<=1, 'Fractional accessory alpha mixes foreground over the restored support'
+    assert np.asarray(result)[25,40]==0, 'The protection polygon cannot add foreground outside either actual object'
+
+
 def test_source_detail_repair_keeps_subpixel_authored_edges_without_resolving_a_fine_matte(source_cache):
     _,_,cache=source_cache
     hold={'id':'repair','type':'foreground_holdout','start':0,'end':1,

@@ -198,3 +198,6 @@ reports/studio-source-detail-repair-20261024/*
 
 reports/studio-podcast-contact-cleanup-20261024/*
 !reports/studio-podcast-contact-cleanup-20261024/README.md
+
+reports/studio-background-naturalness-20261025/*
+!reports/studio-background-naturalness-20261025/README.md

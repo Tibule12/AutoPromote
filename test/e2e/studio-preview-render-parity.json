@@ -8631,5 +8631,80 @@
       "Broader-source and long-video naturalness, original source lighting/compression and whole predictive picture/sound.",
       "Ordinary-account runtime/provider qualification and shared S02/S04/S03."
     ]
+  },
+  "podcastWholeShotNaturalness20261025": {
+    "status": "PRIVATE_NATIVE_WHOLE_SHOT_APPEARANCE_REVISION_RETAINED",
+    "evidence": "reports/studio-background-naturalness-20261025/README.md",
+    "previousThreeMoviesOwnerRejected": true,
+    "changes": [
+      "Source-repair protection composites actual fractional foreground over restored detail, preserving continuity through transparent padding.",
+      "Both native cameras use saved whole-person edge regions at width4; longer photographed host support samples.",
+      "Existing owned backdrops use native blur5/daylight,4/warm,3.2/midnight; other foreground controls, framing and sound retained."
+    ],
+    "previousImplementationRegressionReproduced": true,
+    "rendererCacheTestsPassed": 70,
+    "knowledgeTestsPassed": 18,
+    "sourceMasksUnchanged": true,
+    "nativeChanges": [
+      {
+        "camera": "host",
+        "edgeRadius": 4,
+        "regionPointCount": 10,
+        "sourcePatchCount": 4
+      },
+      {
+        "camera": "guest",
+        "edgeRadius": 4,
+        "regionPointCount": 4,
+        "sourcePatchCount": 11
+      }
+    ],
+    "deliveries": [
+      {
+        "theme": "warm-library",
+        "canonicalHash": "c38263738cf05588fe62be2ff4007d8356b74e31dd79054804a60766e196fcbb",
+        "movieSha256": "772991db4c5fcb8776716f79519993aff0f4462b5c614e897a86f97b52cf60aa",
+        "timelineSha256": "901e4abf261cfd1723c86a429d9f2b4252909ccdaeff2c5915e5b68f9a7d130c",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "midnight-studio",
+        "canonicalHash": "c8e703a8a526a7c54599c9ae924e88120636355ed7fa2e540d0f1de0a0757698",
+        "movieSha256": "54e85a9c281b0f4a53b947308a125ce92d8fe3f4070128c68d4cbfbbc560eb4a",
+        "timelineSha256": "c4eca52f7e535c73619d22478f59f10bde9f5559e8a2b707037b184bdfd1eda5",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      },
+      {
+        "theme": "daylight-loft",
+        "canonicalHash": "bfb2f4fc2cff28b6be394f9ccd566752d5316e08a01fbd6aeec9665cb13813dd",
+        "movieSha256": "c8ff249c614033872854c273e15aff8f5657c768826814c39b2258529dffcefc",
+        "timelineSha256": "dfd039fca714ba914d5a446a5b5034f968ca2b1370ee01ace08c6bb7ba637f94",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true
+      }
+    ],
+    "preexistingProjectsRetained": 51,
+    "otherCanonicalDocumentsUnchanged": 50,
+    "protectedFilesUnchanged": 59,
+    "savedLoginRetained": true,
+    "decodedAudioMatchesPrior": true,
+    "gpuJobs": 0,
+    "newModelJobs": 0,
+    "readinessPromoted": false,
+    "creativeApproval": false,
+    "humanSoundApproval": false,
+    "remaining": [
+      "Owner creative and human soundtrack review of these exact revised movies.",
+      "Broader-source/long-video naturalness and original source lighting/compression; whole predictive picture/sound.",
+      "Ordinary-account runtime/provider qualification and shared S02/S04/S03."
+    ]
   }
 }

@@ -596,12 +596,19 @@ class VfxFrameRenderer:
                         ramp=np.minimum(np.clip(v*length/patch["end_blend"],0,1),
                             np.clip((1-v)*length/patch["end_blend"],0,1))
                         coverage=Image.fromarray(np.rint(np.asarray(coverage)*ramp).astype(np.uint8))
-                    if patch.get("protect_paths"):
-                        keep=np.asarray(protection(patch).crop((int(left),int(top),int(right),int(bottom))),dtype=np.float64)/255
-                        coverage=Image.fromarray(np.rint(np.asarray(coverage)*(1-keep)).astype(np.uint8))
                     layer=Image.fromarray(copied).convert("RGBA");layer.putalpha(coverage)
                     bounds=(int(left),int(top),int(right),int(bottom))
-                    rgba.paste(Image.alpha_composite(rgba.crop(bounds),layer),(int(left),int(top)))
+                    existing=rgba.crop(bounds)
+                    combined=Image.alpha_composite(existing,layer)
+                    if patch.get("protect_paths"):
+                        # Protection describes which photographed foreground
+                        # stays in front, not an opaque hole in the repair.
+                        # Composite behind its actual fractional alpha so rods
+                        # remain continuous through transparent padding and
+                        # correctly pass underneath soft leaf/accessory edges.
+                        behind=Image.alpha_composite(layer,existing)
+                        combined=Image.composite(behind,combined,protection(patch).crop(bounds))
+                    rgba.paste(combined,(int(left),int(top)))
             foreground=rgba.convert("RGB");alpha=rgba.getchannel("A")
         return foreground, alpha
 
