@@ -1,0 +1,7 @@
+{
+  "httpStatus": 403,
+  "status": "PERMISSION_DENIED",
+  "reasons": [
+    "SERVICE_DISABLED"
+  ]
+}

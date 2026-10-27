@@ -1,0 +1,12 @@
+{
+  "finalizedAdRevenueMicros": 0,
+  "verifiedRewardCompletions": 0,
+  "adServingMicros": 0,
+  "spendableBps": 5000,
+  "microsPerCredit": 1000,
+  "freeMonthlyAllowance": 15,
+  "monthlyAdCap": 20,
+  "proposedRewardCredits": 1,
+  "activeFreeUsers": 1000,
+  "subsidyBudgetMicros": 15000000
+}

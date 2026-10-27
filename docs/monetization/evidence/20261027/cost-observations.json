@@ -1,0 +1,329 @@
+{
+  "capturedAtUtc": "2026-10-27T13:32:16.851390+00:00",
+  "project": "autopromote-cc6d3",
+  "windowStartUtc": "2026-10-20T13:32:16.851390+00:00",
+  "windowEndUtc": "2026-10-27T13:32:16.851390+00:00",
+  "methods": [
+    "GET"
+  ],
+  "operationsOrProviderChargesStarted": false,
+  "requests": {
+    "billingProject": {
+      "httpStatus": 403,
+      "unverified": true
+    },
+    "bigqueryDatasets": {
+      "httpStatus": 200
+    },
+    "mediaService": {
+      "httpStatus": 200
+    },
+    "jobs": {
+      "httpStatus": 200
+    },
+    "billableInstanceSecondsDescriptor": {
+      "httpStatus": 200
+    },
+    "billableInstanceSeconds": {
+      "httpStatus": 200
+    },
+    "allocatedCpuTimeDescriptor": {
+      "httpStatus": 200
+    },
+    "allocatedCpuTime": {
+      "httpStatus": 200
+    },
+    "allocatedMemoryTimeDescriptor": {
+      "httpStatus": 200
+    },
+    "allocatedMemoryTime": {
+      "httpStatus": 200
+    },
+    "requestsDescriptor": {
+      "httpStatus": 200
+    },
+    "requests": {
+      "httpStatus": 200
+    },
+    "gpuJobBillableSecondsDescriptor": {
+      "httpStatus": 200
+    },
+    "gpuJobBillableSeconds": {
+      "httpStatus": 200
+    },
+    "retainedStorageBytesDescriptor": {
+      "httpStatus": 200
+    },
+    "retainedStorageBytes": {
+      "httpStatus": 200
+    },
+    "storageBucket": {
+      "httpStatus": 200
+    }
+  },
+  "metrics": {
+    "billableInstanceSeconds": {
+      "available": true,
+      "unit": "s",
+      "kind": "DELTA",
+      "series": 5,
+      "points": 6,
+      "sumObserved": 285.96249110762045,
+      "truncated": false
+    },
+    "allocatedCpuTime": {
+      "available": true,
+      "unit": "s{CPU}",
+      "kind": "DELTA",
+      "series": 5,
+      "points": 6,
+      "sumObserved": 2028.0127816494225,
+      "truncated": false
+    },
+    "allocatedMemoryTime": {
+      "available": true,
+      "unit": "GiBy.s",
+      "kind": "DELTA",
+      "series": 5,
+      "points": 6,
+      "sumObserved": 1037.2,
+      "truncated": false
+    },
+    "requests": {
+      "available": true,
+      "unit": "1",
+      "kind": "DELTA",
+      "series": 6,
+      "points": 7,
+      "sumObserved": 16.0,
+      "truncated": false
+    },
+    "gpuJobBillableSeconds": {
+      "available": true,
+      "unit": "s",
+      "kind": "DELTA",
+      "series": 0,
+      "points": 0,
+      "sumObserved": 0,
+      "truncated": false
+    },
+    "retainedStorageBytes": {
+      "available": true,
+      "unit": "By",
+      "kind": "GAUGE",
+      "series": 1,
+      "points": 7,
+      "truncated": false,
+      "sumOfLatestClassBytes": 8403004361.0
+    }
+  },
+  "limits": [
+    "Infrastructure telemetry is not an invoice or per-operation attribution.",
+    "No BigQuery query, export enablement, cloud job, provider payment or production document write was performed."
+  ],
+  "existingBigqueryDatasets": [],
+  "datasetsTruncated": false,
+  "mediaService": {
+    "latestReadyRevision": "projects/autopromote-cc6d3/locations/us-central1/services/media-worker-v1/revisions/media-worker-v1-00121-vup",
+    "uri": "https://media-worker-v1-jddzncgt2a-uc.a.run.app",
+    "shape": {
+      "scaling": {
+        "maxInstanceCount": 3
+      },
+      "timeout": "3600s",
+      "maxInstanceRequestConcurrency": 1,
+      "containers": [
+        {
+          "limits": {
+            "cpu": "4",
+            "memory": "4Gi"
+          },
+          "cpuIdle": true,
+          "startupCpuBoost": true
+        }
+      ]
+    }
+  },
+  "jobResourceShapes": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-tracking-cpu",
+      "timeout": "120s",
+      "maxRetries": 0,
+      "nodeSelector": null,
+      "gpuZonalRedundancyDisabled": null,
+      "containers": [
+        {
+          "limits": {
+            "cpu": "2",
+            "memory": "2Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-video",
+      "timeout": "3300s",
+      "maxRetries": 0,
+      "nodeSelector": {
+        "accelerator": "nvidia-rtx-pro-6000"
+      },
+      "gpuZonalRedundancyDisabled": true,
+      "containers": [
+        {
+          "limits": {
+            "cpu": "20",
+            "nvidia.com/gpu": "1",
+            "memory": "80Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-segmentation",
+      "timeout": "600s",
+      "maxRetries": 0,
+      "nodeSelector": {
+        "accelerator": "nvidia-rtx-pro-6000"
+      },
+      "gpuZonalRedundancyDisabled": true,
+      "containers": [
+        {
+          "limits": {
+            "cpu": "20",
+            "nvidia.com/gpu": "1",
+            "memory": "80Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-vision",
+      "timeout": "600s",
+      "maxRetries": 0,
+      "nodeSelector": {
+        "accelerator": "nvidia-rtx-pro-6000"
+      },
+      "gpuZonalRedundancyDisabled": true,
+      "containers": [
+        {
+          "limits": {
+            "cpu": "20",
+            "nvidia.com/gpu": "1",
+            "memory": "80Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/viral-studio-rtx-qualification",
+      "timeout": "300s",
+      "maxRetries": 0,
+      "nodeSelector": {
+        "accelerator": "nvidia-rtx-pro-6000"
+      },
+      "gpuZonalRedundancyDisabled": true,
+      "containers": [
+        {
+          "limits": {
+            "cpu": "20",
+            "nvidia.com/gpu": "1",
+            "memory": "80Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/cam-combiner-render-fast-job",
+      "timeout": "14400s",
+      "maxRetries": 0,
+      "nodeSelector": null,
+      "gpuZonalRedundancyDisabled": null,
+      "containers": [
+        {
+          "limits": {
+            "cpu": "8",
+            "memory": "12Gi"
+          }
+        }
+      ]
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/cam-combiner-render-job",
+      "timeout": "14400s",
+      "maxRetries": 0,
+      "nodeSelector": null,
+      "gpuZonalRedundancyDisabled": null,
+      "containers": [
+        {
+          "limits": {
+            "cpu": "8",
+            "memory": "12Gi"
+          }
+        }
+      ]
+    }
+  ],
+  "jobsTruncated": false,
+  "storageBucket": {
+    "name": "autopromote-cc6d3.firebasestorage.app",
+    "location": "US-CENTRAL1",
+    "storageClass": "REGIONAL",
+    "lifecycle": {
+      "rule": [
+        {
+          "action": {
+            "type": "Delete"
+          },
+          "condition": {
+            "age": 1,
+            "matchesPrefix": [
+              "temp_uploads/",
+              "temp_sources/",
+              "temp_scans/",
+              "temp/multicam/",
+              "temp/multicam-checkpoints/",
+              "temp/multicam-clean-sync/",
+              "temp/multicam-clean-sync-audio/"
+            ]
+          }
+        },
+        {
+          "action": {
+            "type": "Delete"
+          },
+          "condition": {
+            "daysSinceCustomTime": 3,
+            "matchesPrefix": [
+              "temp/multicam-ingest/"
+            ]
+          }
+        },
+        {
+          "action": {
+            "type": "Delete"
+          },
+          "condition": {
+            "age": 7,
+            "matchesPrefix": [
+              "processed/multicam_",
+              "processed/thumbnails/multicam_",
+              "processed/manifests/multicam_"
+            ]
+          }
+        },
+        {
+          "action": {
+            "type": "Delete"
+          },
+          "condition": {
+            "age": 30,
+            "matchesPrefix": [
+              "edited_videos/"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "billingEnabled": null
+}

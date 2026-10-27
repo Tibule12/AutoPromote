@@ -1,0 +1,28 @@
+{
+  "capturedAtUtc": "2026-10-27T13:56:49.756797+00:00",
+  "method": "GET",
+  "origins": [
+    {
+      "origin": "https://api.autopromote.org",
+      "httpStatus": 200,
+      "version": {
+        "ok": true,
+        "version": "1.2.0",
+        "commit": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+        "securityPolicy": "security-owner-bootstrap-20261027",
+        "generatedAt": "2026-10-27T13:56:50.306Z"
+      }
+    },
+    {
+      "origin": "https://autopromote.onrender.com",
+      "httpStatus": 200,
+      "version": {
+        "ok": true,
+        "version": "1.2.0",
+        "commit": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+        "securityPolicy": "security-owner-bootstrap-20261027",
+        "generatedAt": "2026-10-27T13:56:50.824Z"
+      }
+    }
+  ]
+}

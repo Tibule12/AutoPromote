@@ -1,0 +1,90 @@
+{
+  "verifiedAtUtc": "2026-10-27T13:56:49.754615+00:00",
+  "base": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+  "originalFoundationUnmodified": true,
+  "originalFoundationFilesChecked": 24,
+  "protectedSourceFiles": {
+    "firestore.rules": {
+      "sha256": "25436b8888989a527e0d9138ce31cf53ef1f300c95618e89166377d1e15cc996",
+      "identicalToBase": true
+    },
+    "storage.rules": {
+      "sha256": "b3ebe33fd6a4ec15263b24040c4ff75cf7cfdfb9fb47eeaad19dcfbf208a0679",
+      "identicalToBase": true
+    },
+    "src/authMiddleware.js": {
+      "sha256": "03044686cad64b539c5755cc961bde1a8271b828606723f5add7b33ba43f77c1",
+      "identicalToBase": true
+    },
+    "src/authRoutes.js": {
+      "sha256": "543408d47a87e9b903db9f105e356338daa90d79b63ec47ad76eb7ae2849b3bd",
+      "identicalToBase": true
+    },
+    "src/utils/authAuthority.js": {
+      "sha256": "a2e30a561463eb8923e9b353033ceea930869b9034d1ed04433932b79022b910",
+      "identicalToBase": true
+    },
+    "src/server.js": {
+      "sha256": "f63e6fac8a3193e08a1f1aab43ac9cb705d3ef1b6efab89603af8acc8551f668",
+      "identicalToBase": true
+    },
+    "src/userRoutes.js": {
+      "sha256": "78bf31a9458ab15c183565b235ce70ad5b0e765ed531af5d35194aa483c1be60",
+      "identicalToBase": true
+    },
+    "src/paymentsRoutes.js": {
+      "sha256": "189c123bc5c5ffce982375ef9183d7974f4c3862c2341f88cf5c0d85a63d5cd2",
+      "identicalToBase": true
+    },
+    "src/routes/paymentsExtendedRoutes.js": {
+      "sha256": "04d0775a38512d6a64c4b61654fba7902e0a99ea1ad8b7bee4cd36af57103722",
+      "identicalToBase": true
+    },
+    "src/routes/paypalSubscriptionRoutes.js": {
+      "sha256": "8fd77d988c3a2afef3c996480d4776b8242d452138c3dfaac8a0a9b51cc5688b",
+      "identicalToBase": true
+    },
+    "src/services/payments/fulfillmentService.js": {
+      "sha256": "ad8b5b757093a66b688c1b74c35a8b84300fd03622d7949bef336a3c8b32318e",
+      "identicalToBase": true
+    },
+    "src/services/billingService.js": {
+      "sha256": "fd9e519b10e3ea5f8e36c94794be153e4f2b02684fba774449657b782d032872",
+      "identicalToBase": true
+    },
+    "src/config/subscriptionPlans.js": {
+      "sha256": "7c1df339087a63ae8f24db34f0e587f32073d6e269c522a164f8ef2bdcdc8c69",
+      "identicalToBase": true
+    },
+    "src/contentRoutes.js": {
+      "sha256": "70475f2f4d74f8f5f04c9ceb58fae5c5b6ba6c75d68fc50de79e05c647d4829b",
+      "identicalToBase": true
+    },
+    "src/services/promotionTaskQueue.js": {
+      "sha256": "ac5dead737688d81502b5abe671bd579cf6799cc980bd8e9323675655347a375",
+      "identicalToBase": true
+    },
+    "src/mediaRoutes.js": {
+      "sha256": "ffd0579f286a0f56624afa4a66765286ef553aef74de5a04e6bcb3cebf5215f5",
+      "identicalToBase": true
+    },
+    "src/routes/clipRoutes.js": {
+      "sha256": "c5eae3172a1a936775ca87713daf24a6f00904de759d41fb2a200f0d752a4ca8",
+      "identicalToBase": true
+    },
+    ".github/workflows/playwright-e2e.yml": {
+      "sha256": "e65fbd84a6cb334548d0684161e7d47bd956b5e84fb8f7a97f4690da717ac9b4",
+      "identicalToBase": true
+    },
+    "frontend/public/index.html": {
+      "sha256": "23b679390b003ef069b67c9bb4fb3cb939b8c4c5f2685a442dac518d6d62cd46",
+      "identicalToBase": true
+    },
+    "package-lock.json": {
+      "sha256": "8f74db1230299607b9e351e7ecc298148d4197790787fad4e1ce3aefe0e21b73",
+      "identicalToBase": true
+    }
+  },
+  "productionDocumentsReadOrWritten": false,
+  "sourceCheckOnly": true
+}

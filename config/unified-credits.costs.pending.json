@@ -1,0 +1,6 @@
+{
+  "description": "No complete per-operation billing samples are available. Telemetry is stored separately and must not be relabelled as invoice attribution.",
+  "microsPerCredit": 1000,
+  "marginBps": 3000,
+  "samples": []
+}

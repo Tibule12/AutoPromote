@@ -1,0 +1,33 @@
+{
+  "testUnit": "/22639388115/rewarded_web_example",
+  "publisherInventoryUsed": false,
+  "creditsAwarded": 0,
+  "walletApiRequests": 0,
+  "states": [
+    "requesting",
+    "ready",
+    "showing",
+    "client_reward_event",
+    "video_complete_only",
+    "dismissed"
+  ],
+  "externalHosts": [
+    "976ccf87b5eeb297ec29a4c32088df4f.safeframe.googlesyndication.com",
+    "cm.g.doubleclick.net",
+    "csi.gstatic.com",
+    "ep1.adtrafficquality.google",
+    "ep2.adtrafficquality.google",
+    "googleads.g.doubleclick.net",
+    "imasdk.googleapis.com",
+    "pagead2.googlesyndication.com",
+    "pubads.g.doubleclick.net",
+    "redirector.gvt1.com",
+    "securepubads.g.doubleclick.net",
+    "tpc.googlesyndication.com",
+    "www.google.com",
+    "www.gstatic.com"
+  ],
+  "advertisementDisplayed": true,
+  "observation": "Google test availability only; browser events do not authenticate a paid reward.",
+  "observedAtUtc": "2026-10-27T13:39:00.330Z"
+}

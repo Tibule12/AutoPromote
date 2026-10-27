@@ -1,0 +1,18 @@
+{
+  "publisherId": "ca-pub-4802692424152812",
+  "siteOwnership": "verified-owner-reported",
+  "siteReview": "pending-owner-reported",
+  "liveAdvertisingEnabled": false,
+  "requirements": {
+    "googleSiteAndAccountApproved": false,
+    "adManagerNetworkAndEligibleDemandVerified": false,
+    "signedGptWebCompletionProtocolVerified": false,
+    "consentAndLiveOriginHeadersReviewed": false,
+    "completeOperationCostEvidenceReviewed": false,
+    "commercialAllowancesAndRewardApproved": false,
+    "legacyBalancesAndAllWritersReconciled": false,
+    "paymentSubscriptionAndWorkerAdaptersVerified": false,
+    "workerIamCeilingsAndRecoveryVerified": false,
+    "controlledProductionRolloutExplicitlyApproved": false
+  }
+}

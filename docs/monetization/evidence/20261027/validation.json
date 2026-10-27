@@ -1,0 +1,110 @@
+{
+  "capturedAtUtc": "2026-10-27T13:58:59.794082+00:00",
+  "emulator": {
+    "project": "demo-autopromote-credits",
+    "freshEphemeralLoopback": true,
+    "tests": 59,
+    "suites": 9,
+    "passed": 59,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "previewBrowser": {
+    "passed": true,
+    "headless": true,
+    "muted": true,
+    "widths": [
+      1280,
+      390
+    ],
+    "externalRequests": 0,
+    "zeroBalanceDraftSurvivedReload": true,
+    "paidWatchButtonHidden": true,
+    "realStudioProjectsTested": false
+  },
+  "googleSample": {
+    "testUnit": "/22639388115/rewarded_web_example",
+    "publisherInventoryUsed": false,
+    "creditsAwarded": 0,
+    "walletApiRequests": 0,
+    "states": [
+      "requesting",
+      "ready",
+      "showing",
+      "client_reward_event",
+      "video_complete_only",
+      "dismissed"
+    ],
+    "externalHosts": [
+      "976ccf87b5eeb297ec29a4c32088df4f.safeframe.googlesyndication.com",
+      "cm.g.doubleclick.net",
+      "csi.gstatic.com",
+      "ep1.adtrafficquality.google",
+      "ep2.adtrafficquality.google",
+      "googleads.g.doubleclick.net",
+      "imasdk.googleapis.com",
+      "pagead2.googlesyndication.com",
+      "pubads.g.doubleclick.net",
+      "redirector.gvt1.com",
+      "securepubads.g.doubleclick.net",
+      "tpc.googlesyndication.com",
+      "www.google.com",
+      "www.gstatic.com"
+    ],
+    "advertisementDisplayed": true,
+    "observation": "Google test availability only; browser events do not authenticate a paid reward.",
+    "observedAtUtc": "2026-10-27T13:39:00.330Z"
+  },
+  "costObserverUnittest": {
+    "passed": 1,
+    "failed": 0,
+    "network": "mocked",
+    "credentials": "fixture-only"
+  },
+  "syntax": {
+    "status": "passed",
+    "files": [
+      "sandbox/credits/app.js",
+      "sandbox/credits/google-test-controller.js",
+      "sandbox/credits/google-test-page.js",
+      "scripts/credits-browser-check.cjs",
+      "scripts/credits-economics.cjs",
+      "scripts/credits-google-browser-check.cjs",
+      "scripts/credits-google-test.cjs",
+      "scripts/credits-readiness.cjs",
+      "scripts/credits-sandbox.cjs",
+      "scripts/test-unified-credits.cjs",
+      "src/routes/unifiedCreditsSandboxRoutes.js",
+      "src/services/unifiedCredits/admission.js",
+      "src/services/unifiedCredits/costEvidence.js",
+      "src/services/unifiedCredits/dispatch.js",
+      "src/services/unifiedCredits/economics.js",
+      "src/services/unifiedCredits/policy.js",
+      "src/services/unifiedCredits/rewardProof.js",
+      "src/services/unifiedCredits/runtime.js",
+      "src/services/unifiedCredits/wallet.js",
+      "test/unified-credits/continuation.test.cjs",
+      "test/unified-credits/foundation.test.cjs",
+      "test/unified-credits/google-controller.test.cjs"
+    ]
+  },
+  "lint": {
+    "targetedNoUndefNoUnusedVars": "passed",
+    "groups": [
+      "backend",
+      "browser",
+      "controller"
+    ],
+    "configuration": "legacy explicit rules; ESLINT_USE_FLAT_CONFIG=false"
+  },
+  "whitespace": "passed",
+  "productionAuthPaymentWorkerTestsRun": false,
+  "productionDataWrites": false,
+  "limitations": [
+    "Real worker/payment/subscription binding and migration remain unimplemented.",
+    "Google sample is not account approval, authenticated completion or paid revenue.",
+    "Preview notes recovery is not every real Studio project recovery flow.",
+    "No load, provider settlement or live-origin CMP/header qualification."
+  ]
+}

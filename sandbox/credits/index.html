@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AutoPromote · Credits preview</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <div class="preview">
+      Local preview · Ads and operations are simulated. No payments or cloud processing.
+    </div>
+    <main>
+      <header>
+        <a class="brand" href="/">AutoPromote<span>CREATE. PUBLISH. GROW.</span></a
+        ><label class="account"
+          >Preview account<select id="account">
+            <option value="demo-free">Starter</option>
+            <option value="demo-premium">Creator subscriber</option>
+          </select></label
+        >
+      </header>
+      <section class="intro">
+        <p class="eyebrow">YOUR WORK, YOUR PACE</p>
+        <h1>A little credit.<br />A lot of possibility.</h1>
+        <p>Watch an ad, earn credits, and use them across AutoPromote.</p>
+      </section>
+      <div class="grid">
+        <section class="card wallet" aria-labelledby="wallet-title">
+          <div class="card-top">
+            <h2 id="wallet-title">Your credits</h2>
+            <span id="plan" class="pill">Starter</span>
+          </div>
+          <p class="balance"><span id="balance">—</span><span>available credits</span></p>
+          <p id="renewal"></p>
+          <p id="reserved"></p>
+          <hr />
+          <h3>Make room for your next idea</h3>
+          <p id="reward-copy">Loading reward availability…</p>
+          <label
+            >Preview ad availability<select id="ad-availability">
+              <option value="available">Available (simulation)</option>
+              <option value="no_fill">No ad available</option>
+              <option value="unsupported">Unsupported device</option>
+              <option value="blocked">Ad blocker</option>
+              <option value="timeout">Connection timeout</option>
+            </select></label
+          >
+          <button id="watch" disabled>Watch test ad</button
+          ><button id="resume" class="secondary" hidden>Resume or dismiss test ad</button>
+          <p class="muted">
+            Your choice. Skip at any time. Ads never appear in your exported videos.
+          </p>
+          <a href="#plans">Explore subscription benefits →</a>
+        </section>
+        <section class="card" aria-labelledby="operation-title">
+          <h2 id="operation-title">Put your credits to work</h2>
+          <p>See the cost before you begin.</p>
+          <label
+            >Tool<select id="operation">
+              <option value="queue.dispatch">Queue · schedule dispatch</option>
+              <option value="publisher.publish">Publisher · publish</option>
+              <option value="studio.render">Studio · render</option>
+              <option value="clips.analyze">Find Viral Clips · analyse</option>
+              <option value="clips.render">Find Viral Clips · render clip</option>
+            </select></label
+          ><label id="units-label"
+            >Destinations<input id="units" type="number" min="1" value="1" step="1"
+          /></label>
+          <div class="price"><span>Operation cost</span><strong id="cost">—</strong></div>
+          <p id="affordability"></p>
+          <button id="run" disabled>Run test operation</button
+          ><button id="fail" class="secondary" disabled>Test a failed operation & refund</button>
+          <p class="muted">
+            No daily tool quota. Your balance determines what you can run. Resource limits keep
+            processing within budget.
+          </p>
+        </section>
+      </div>
+      <section class="card editor">
+        <div class="card-top">
+          <h2>Keep creating</h2>
+          <span class="pill">Always available</span>
+        </div>
+        <p>You can keep editing and saving when your credits run out.</p>
+        <label
+          >Project notes<textarea
+            id="notes"
+            rows="4"
+            placeholder="Your next great idea starts here…"
+          ></textarea></label
+        ><button class="secondary" id="save">Save notes on this device</button
+        ><span id="saved" role="status"></span>
+      </section>
+      <section class="card" id="plans">
+        <h2>More room to create</h2>
+        <p>
+          Subscribers receive more monthly credits and ad-free usage, alongside their plan benefits.
+        </p>
+        <p id="allowances"></p>
+        <p class="muted">This preview cannot create subscriptions or take payments.</p>
+        <p class="muted">
+          Allowances and rewards shown here are examples awaiting measured costs and approval.
+        </p>
+      </section>
+      <section class="card">
+        <h2>Credit activity</h2>
+        <dl id="activity"></dl>
+        <p class="muted">
+          Monthly allowances and ad rewards expire at renewal. Purchased credits are retained.
+          Wallet capacity is shown beside renewal details.
+        </p>
+      </section>
+      <p id="status" role="status" aria-live="polite"></p>
+    </main>
+    <dialog id="ad">
+      <p class="eyebrow">SIMULATED ADVERTISEMENT</p>
+      <h2 id="ad-title">Complete this test ad</h2>
+      <p>This local test does not request an advertisement or generate revenue.</p>
+      <div class="mock-creative">
+        A moment for your next idea.<span>AutoPromote preview creative</span>
+      </div>
+      <button id="complete">Complete test ad</button
+      ><button id="skip" class="secondary">Skip without a reward</button>
+    </dialog>
+  </body>
+</html>

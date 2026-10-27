@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Google rewarded test inventory · No wallet awards</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script defer src="/google-test-controller.js"></script>
+    <script defer src="/google-test-page.js"></script>
+  </head>
+  <body>
+    <main>
+      <section class="card">
+        <h1>Google rewarded-ad compatibility test</h1>
+        <p>Local test inventory only. No live AutoPromote ad unit, credits, payment or revenue.</p>
+        <p>
+          This page requests Google's official sample ad only after you opt in. Google and its
+          test-ad vendors may receive device/network information. Do not use real AutoPromote
+          account data here.
+        </p>
+        <label
+          ><input type="checkbox" id="test-consent" /> I choose to request Google test
+          inventory.</label
+        >
+        <button id="request-test">Request sample ad</button
+        ><button id="show-test" disabled>Show available sample ad</button>
+        <button id="dismiss-test" class="secondary">Dismiss</button>
+        <p id="google-status" role="status">Not requested. No external request has been made.</p>
+        <p>
+          No wallet is connected. A client reward event cannot prove a genuine paid advertisement.
+        </p>
+        <a href="/">Return to local credits preview</a>
+      </section>
+    </main>
+  </body>
+</html>

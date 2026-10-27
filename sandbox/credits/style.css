@@ -1,0 +1,264 @@
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: #eef0f7;
+  background: #0b1020;
+  color-scheme: dark;
+  line-height: 1.6;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+.preview {
+  background: #1d2847;
+  color: #c6d5f5;
+  text-align: center;
+  padding: 9px 16px;
+  font-size: 13px;
+}
+main {
+  max-width: 1050px;
+  margin: auto;
+  padding: 32px 24px 80px;
+}
+header,
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.brand {
+  color: #fff;
+  font-size: 24px;
+  letter-spacing: -1px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.brand span {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 2.2px;
+  color: #8c9ab9;
+}
+.account {
+  font-size: 12px;
+  max-width: 220px;
+}
+.intro {
+  padding: 42px 0 28px;
+  max-width: 660px;
+}
+h1 {
+  font-size: clamp(34px, 6vw, 56px);
+  line-height: 1.1;
+  letter-spacing: -2px;
+  margin: 12px 0 20px;
+}
+h2 {
+  font-size: 20px;
+  margin: 0 0 14px;
+}
+h3 {
+  font-size: 17px;
+}
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #acb4ff;
+}
+p {
+  color: #aab5ce;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.card {
+  padding: 28px;
+  border: 1px solid #29334b;
+  border-radius: 20px;
+  background: #121a2d;
+  margin-bottom: 20px;
+}
+.wallet {
+  background: linear-gradient(140deg, #1f2546, #131a2e);
+}
+.balance {
+  margin: 24px 0;
+}
+.balance > span:first-child {
+  font-size: 64px;
+  line-height: 1;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -2px;
+}
+.balance > span:last-child {
+  display: block;
+  font-size: 14px;
+  margin-top: 12px;
+}
+.pill {
+  border: 1px solid #4c527b;
+  border-radius: 20px;
+  color: #c5caff;
+  font-size: 11px;
+  white-space: nowrap;
+  padding: 4px 10px;
+}
+button {
+  display: block;
+  background: #a8a4ff;
+  color: #15132b;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 650;
+  padding: 12px 18px;
+  margin: 10px 0;
+  cursor: pointer;
+}
+button:hover {
+  filter: brightness(1.08);
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.secondary {
+  background: transparent;
+  border: 1px solid #465273;
+  color: #dce2f2;
+}
+.muted {
+  font-size: 12px;
+  color: #8b98b5;
+}
+a {
+  color: #b7b4ff;
+}
+label {
+  display: block;
+  font-size: 13px;
+  color: #bec8df;
+  margin: 16px 0;
+}
+input,
+select,
+textarea {
+  display: block;
+  background: #0c1325;
+  color: #eef0f7;
+  border: 1px solid #354261;
+  border-radius: 9px;
+  padding: 12px;
+  width: 100%;
+  margin-top: 6px;
+  font: inherit;
+}
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible {
+  outline: 2px solid #aaa6ff;
+  outline-offset: 3px;
+}
+hr {
+  border: 0;
+  border-top: 1px solid #34405b;
+  margin: 24px 0;
+}
+.price {
+  display: flex;
+  justify-content: space-between;
+  background: #1d2740;
+  padding: 16px;
+  border-radius: 10px;
+  margin-top: 22px;
+}
+.price strong {
+  color: #c6c3ff;
+}
+.editor button {
+  width: auto;
+}
+.editor #saved {
+  font-size: 13px;
+  color: #b7e8ca;
+}
+dl {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+dl div {
+  min-width: 90px;
+}
+dt {
+  font-size: 12px;
+  color: #91a0be;
+}
+dd {
+  margin: 4px 0;
+  font-size: 22px;
+}
+#status {
+  min-height: 24px;
+}
+dialog {
+  max-width: 440px;
+  background: #151f35;
+  color: #fff;
+  border: 1px solid #4c5a7e;
+  border-radius: 20px;
+  padding: 30px;
+}
+dialog::backdrop {
+  background: #030611d9;
+}
+.mock-creative {
+  padding: 45px 20px;
+  border-radius: 12px;
+  text-align: center;
+  background: linear-gradient(130deg, #38415f, #574b85);
+  font-size: 24px;
+  margin: 22px 0;
+}
+.mock-creative span {
+  display: block;
+  font-size: 11px;
+  margin-top: 18px;
+  color: #d0ccea;
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    padding: 22px;
+  }
+  main {
+    padding: 24px 16px;
+  }
+  .account {
+    max-width: 170px;
+  }
+  header {
+    align-items: flex-start;
+  }
+  .intro {
+    padding-top: 26px;
+  }
+  dl {
+    gap: 16px;
+  }
+}

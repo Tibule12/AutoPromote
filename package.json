@@ -4,6 +4,13 @@
   "main": "src/server.js",
   "version": "1.2.0",
   "scripts": {
+    "credits:readiness": "node scripts/credits-readiness.cjs",
+    "credits:google-test": "node scripts/credits-google-test.cjs",
+    "test:credits:google": "node scripts/credits-google-browser-check.cjs",
+    "test:credits": "node scripts/test-unified-credits.cjs",
+    "test:credits:browser": "node scripts/test-unified-credits.cjs --browser",
+    "credits:sandbox": "node scripts/credits-sandbox.cjs",
+    "credits:economics": "node scripts/credits-economics.cjs config/unified-credits.economics.example.json",
     "test:security:profile": "node scripts/test-profile-security.cjs",
     "preflight": "node ./scripts/preflight-critical-files.js && node ./scripts/check-encryption-env.js && node ./autopromote-functions/validate-imports.js",
     "preflight:local": "node ./scripts/preflight-critical-files.js && node ./autopromote-functions/validate-imports.js",

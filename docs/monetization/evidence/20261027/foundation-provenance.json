@@ -1,0 +1,33 @@
+{
+  "copiedAtUtc": "2026-10-27T13:16:28.683270+00:00",
+  "securityBase": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+  "sourceCheckout": "/home/tibule12/Projects/AutoPromte/AutoPromote",
+  "sameWalletAuthority": "credits_v2_wallets",
+  "sourceFiles": {
+    "src/services/unifiedCredits/runtime.js": "cdf222ce0a27f85c9f4ad3b547bc615aed3c93ffd94451ea03b9f7ae71901f88",
+    "src/services/unifiedCredits/policy.js": "f036924fba87b9972dc332e5d544d26e25036a58b3beeeef51120d19659e6725",
+    "src/services/unifiedCredits/wallet.js": "5b905fb358adfd38dfe5260f1ec092f0db76200e8d28a5be112bd6e370fa2e82",
+    "src/services/unifiedCredits/rewardProof.js": "e02e8c5b6bfd68f468711ef933f5594e33f7595f2261da342010cf619c8dbe11",
+    "src/services/unifiedCredits/economics.js": "97ee284492515421f374b0d1a30535727c4405442ee411b2426fbc911f166099",
+    "test/unified-credits/firestore.rules": "e046373b78a4cb7f287258bc57b0789da0561b1be88fb27aafa8f6b9c1baa69d",
+    "test/unified-credits/foundation.test.cjs": "7515b540b2eee1a55c501a703b072dd2ae02bee4d14be88605eedc9bafd90730",
+    "test/unified-credits/firebase.json": "12f2877253285699920b522a3e0ea830bf56a5c7e6aa5e26fb5720a3d3ef5800",
+    "sandbox/credits/app.js": "1b1edce75f32455e007bc509c9febaf7083046d0f3aaf2da40f2d2384f81eea9",
+    "sandbox/credits/style.css": "52ae1ccec6523bd833a642801d1da513bd2d43fc854028830001a4268bad79f1",
+    "sandbox/credits/index.html": "28d715dd96570404791289b5a417c692bf1919dfc0e9a38e0b9cc10c9b57a7a7",
+    "docs/monetization/GOOGLE_SETUP.md": "9541f0afb5d5a9f42e6183cd004ecb2fecc124ef8a81cf861c4c907cdd4924c9",
+    "docs/monetization/ECONOMICS.md": "889150d0978df3cbb5be058bf7ab10dbf2ece5b774f0ff407ec969ba0d5da523",
+    "docs/monetization/VALIDATION.md": "c087d6a2d59b9ab0bfc81a09a85d4cb63a7faf07065bb94e656210a79edcadbb",
+    "docs/monetization/CREDIT_MODEL_AND_ROLLOUT.md": "7d693db37732b03454690fde275a8544e8788940665dafdc750393c29f7b619b",
+    "docs/monetization/README.md": "f5e936a2e1449b3b7c911a0de5af3c913b58e07deabbd2e9dc8060530132f993",
+    "docs/monetization/RESEARCH_AND_AUDIT.md": "eedc942b3432b55164edce1d0c7640d5e2f8d0db2221f0201e94925c3ff37e07",
+    "src/routes/unifiedCreditsSandboxRoutes.js": "146ec3d76e639a42bf4cd62d3aca6923e6788adc1590543c6e1b83b8df9a4537",
+    "scripts/credits-sandbox.cjs": "c528204679e9580db4544151ea06303694f65fe8f50060fd8a61cb8023485c80",
+    "scripts/test-unified-credits.cjs": "1e30c9479109988c12e37f45416bbcf98d3a7f052aba5ee6a088bf6a71f18f3b",
+    "scripts/credits-browser-check.cjs": "0016520d5d4edc01ca00a5feb9e10543b030bf9b292240cc73c773ee12ed28b7",
+    "scripts/credits-economics.cjs": "1076f57be0202b1825ce93b6d817942d67b97b27a7c18b3a3940f75ac699cfd5",
+    "config/unified-credits.sandbox.example.json": "5ec3076a92b45180a1d9ecb4e0d803727038112f33bd9860e6917dcece3e8792",
+    "config/unified-credits.economics.example.json": "ca66ba61c49e25d84ad24a28b63dc31d30baf6f41123f39d89d1451198b7f912"
+  },
+  "originalCheckoutUnmodified": true
+}

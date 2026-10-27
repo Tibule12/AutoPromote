@@ -1,0 +1,12 @@
+{
+  "observationAvailable": false,
+  "spendableFinalizedRevenueMicros": 0,
+  "maxRevenueFundedRewardCredits": 0,
+  "proposedRewardRevenueFunded": false,
+  "baselineFreeLiabilityPerUserMicros": 15000,
+  "maximumLiabilityPerUserMicros": 35000,
+  "maximumMonthlyLiabilityMicros": 35000000,
+  "unfundedExposureMicros": 20000000,
+  "maxActiveUsersWithinFunding": 428,
+  "recommendation": "Keep live rewards disabled; fund any pilot explicitly as a subsidy."
+}

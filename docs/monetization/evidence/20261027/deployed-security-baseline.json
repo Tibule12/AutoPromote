@@ -1,0 +1,21 @@
+{
+  "capturedAtUtc": "2026-10-27T13:20:27.715359+00:00",
+  "methods": [
+    "GET"
+  ],
+  "rules": [
+    {
+      "release": "projects/autopromote-cc6d3/releases/cloud.firestore",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/26b2a18a-c068-46ab-b16a-f73c7caa0699",
+      "sha256": "25436b8888989a527e0d9138ce31cf53ef1f300c95618e89166377d1e15cc996",
+      "matchesSecurityRepair": true
+    },
+    {
+      "release": "projects/autopromote-cc6d3/releases/firebase.storage/autopromote-cc6d3.firebasestorage.app",
+      "ruleset": "projects/autopromote-cc6d3/rulesets/f9e3b66b-aa66-43eb-855d-5fdced75a979",
+      "sha256": "b3ebe33fd6a4ec15263b24040c4ff75cf7cfdfb9fb47eeaad19dcfbf208a0679",
+      "matchesSecurityRepair": true
+    }
+  ],
+  "productionDataChanges": false
+}
