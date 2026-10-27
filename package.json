@@ -87,7 +87,7 @@
     "ioredis": "^5.3.2",
     "joi": "^18.2.5",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.3.0",
+    "multer": "^2.5.0",
     "node-fetch": "^2.7.0",
     "nodemailer": "^10.0.9",
     "pexels": "^1.4.0",
