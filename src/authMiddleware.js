@@ -3,6 +3,11 @@ const crypto = require("crypto");
 const { tokenInfo } = require("./utils/logSanitizer");
 const diag = require("./diagnostics");
 const { withCache } = require("./utils/simpleCache");
+const {
+  isHostedRuntime,
+  hasAdminClaim,
+  authorityFromVerifiedIdentity,
+} = require("./utils/authAuthority");
 
 const AUTH_TOKEN_CACHE_TTL_MS = parseInt(process.env.AUTH_TOKEN_CACHE_TTL_MS || "15000", 10);
 
@@ -58,11 +63,7 @@ const authMiddleware = async (req, res, next) => {
     // E2E bypass: when Playwright sets the x-playwright-e2e header, treat the request as an admin test user
     // This keeps E2E tests deterministic and avoids hard 401s when using short/mocked tokens.
     // SECURITY: Only available in non-production environments
-    if (
-      process.env.NODE_ENV !== "production" &&
-      req.headers &&
-      req.headers["x-playwright-e2e"] === "1"
-    ) {
+    if (!isHostedRuntime() && req.headers && req.headers["x-playwright-e2e"] === "1") {
       req.userId = "adminUser";
       req.user = {
         uid: "adminUser",
@@ -84,7 +85,7 @@ const authMiddleware = async (req, res, next) => {
     // Allow integration test bypass with test tokens of the form 'test-token-for-{uid}'
     // SECURITY: Strictly gated to non-production environments only
     if (
-      process.env.NODE_ENV !== "production" &&
+      !isHostedRuntime() &&
       (process.env.NODE_ENV === "test" || process.env.NODE_ENV === "development") &&
       typeof token === "string" &&
       token.startsWith("test-token-for-")
@@ -107,10 +108,6 @@ const authMiddleware = async (req, res, next) => {
           requestContext.path
         );
       }
-      return next();
-    }
-    // If another upstream middleware already attached a user object, skip heavy work
-    if (req.user && req.user.uid) {
       return next();
     }
     const debugAuth = process.env.DEBUG_AUTH === "true";
@@ -179,7 +176,7 @@ const authMiddleware = async (req, res, next) => {
     let decodedToken;
     try {
       const verified = await withCache(getTokenCacheKey(token), AUTH_TOKEN_CACHE_TTL_MS, () =>
-        admin.auth().verifyIdToken(token)
+        admin.auth().verifyIdToken(token, true)
       );
       const { _cached, ...verifiedToken } = verified || {};
       decodedToken = verifiedToken;
@@ -247,8 +244,8 @@ const authMiddleware = async (req, res, next) => {
       );
 
     // Extract any custom claims (legacy allowances: admin or isAdmin)
-    const isAdminFromClaims = decodedToken.admin === true || decodedToken.isAdmin === true;
-    const roleFromClaims = isAdminFromClaims ? "admin" : decodedToken.role || "user";
+    const isAdminFromClaims = hasAdminClaim(decodedToken);
+    const roleFromClaims = authorityFromVerifiedIdentity(decodedToken).role;
 
     // Set the user ID on the request for later use
     req.userId = decodedToken.uid;
@@ -292,32 +289,14 @@ const authMiddleware = async (req, res, next) => {
             // But we must await or the cache holds 'null'. For safety, we block-create once.
             await db.collection("users").doc(decodedToken.uid).set(basicUserData);
             ud = basicUserData;
-          } else {
-            // Handle Role Sync (Admin Promotion/Demotion) inside the cache logic
-            // If data is stale, we update it.
-            let changed = false;
-            if (isAdminFromClaims && ud.role !== "admin") {
-              ud.role = "admin";
-              ud.isAdmin = true;
-              changed = true;
-            } else if (!isAdminFromClaims && !adminSn.exists && ud.role === "admin") {
-              ud.role = "user";
-              ud.isAdmin = false;
-              changed = true;
-            }
-            if (changed) {
-              await db.collection("users").doc(decodedToken.uid).update({
-                role: ud.role,
-                isAdmin: ud.isAdmin,
-                updatedAt: new Date().toISOString(),
-              });
-            }
           }
+          // Historical profile flags are retained as evidence. Effective authority
+          // is request-scoped; login must not promote/demote stored profiles.
 
           return {
             userData: ud,
             adminData: adminSn.exists ? adminSn.data() : null,
-            isAdminInCollection: adminSn.exists,
+            isAdminInCollection: adminSn.exists && isAdminFromClaims,
           };
         }
       );
@@ -326,11 +305,8 @@ const authMiddleware = async (req, res, next) => {
       if (isAdminInCollection) {
         if (debugAuth) console.log("User found in admins collection: uid=%s", decodedToken.uid);
         req.user = {
-          uid: decodedToken.uid,
-          email: decodedToken.email,
           ...adminData,
-          isAdmin: true,
-          role: "admin",
+          ...authorityFromVerifiedIdentity(decodedToken, true),
           fromCollection: "admins",
         };
         req.user.token = token;
@@ -340,9 +316,8 @@ const authMiddleware = async (req, res, next) => {
 
       // Attach full user data to request
       req.user = {
-        uid: decodedToken.uid,
-        email: decodedToken.email,
         ...userData,
+        ...authorityFromVerifiedIdentity(decodedToken, isAdminInCollection),
       };
       // Attach the raw token for request-scoped usage in HTML templates
       req.user.token = token;
@@ -367,10 +342,7 @@ const authMiddleware = async (req, res, next) => {
 
       // Even if Firestore fails, still allow the request to proceed with basic user info
       req.user = {
-        uid: decodedToken.uid,
-        email: decodedToken.email,
-        role: roleFromClaims,
-        isAdmin: isAdminFromClaims,
+        ...authorityFromVerifiedIdentity(decodedToken),
       };
       req.user.token = token;
 

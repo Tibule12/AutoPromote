@@ -1436,8 +1436,8 @@ try {
   } catch (e) {
     console.warn("aggregateStatusRoutes mount failed:", e.message);
   }
-  // Only mount admin test routes in non-production environments
-  if (process.env.NODE_ENV !== "production") {
+  // Hosted runtimes must never expose local administrator setup routes.
+  if (!require("./utils/authAuthority").isHostedRuntime()) {
     try {
       app.use("/api", adminTestRoutes);
     } catch (e) {
@@ -2179,6 +2179,7 @@ try {
       pkgVersion = require("../package.json").version;
     } catch (_) {}
     const commit =
+      process.env.RENDER_GIT_COMMIT ||
       process.env.GIT_COMMIT ||
       process.env.COMMIT_HASH ||
       process.env.VERCEL_GIT_COMMIT_SHA ||
@@ -2187,6 +2188,7 @@ try {
       ok: true,
       version: pkgVersion,
       commit,
+      securityPolicy: require("./config/trustedAdminPolicy.json").version,
       generatedAt: new Date().toISOString(),
     });
   });

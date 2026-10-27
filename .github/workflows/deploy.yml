@@ -26,6 +26,44 @@ jobs:
       - name: Install backend dependencies
         run: npm ci
 
+      - name: Setup isolated security-test runtime
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Cache local Firestore emulator
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: security-firestore-${{ hashFiles('package-lock.json') }}
+
+      - name: Install local Firestore emulator
+        run: npx firebase setup:emulators:firestore
+
+      - name: Verify authority and registration security in isolated emulator
+        run: npm run test:security:profile
+
+      - name: Verify existing payment, publishing and Studio workflows
+        env:
+          FIREBASE_ADMIN_BYPASS: "1"
+          CI_ROUTE_IMPORTS: "1"
+          OPENAI_LOGGING_ENABLED: "1"
+          ENABLE_BACKGROUND_JOBS: "false"
+          NODE_ENV: test
+        run: >-
+          npx jest --runInBand --selectProjects server --runTestsByPath
+          src/__tests__/server.hostedAdminRoutes.test.js
+          test/paypal-subscription.routes.test.js
+          test/payments.dev.mock.subscription.test.js
+          test/payments-routes.test.js
+          src/__tests__/billingService.entitlements.test.js
+          test/contentRoutes.schedulingBehavior.jest.test.js
+          test/contentSourceUpload.jest.test.js
+          test/promotionTaskQueue.hashing.jest.test.js
+          src/__tests__/mediaRoutes.studioSources.test.js
+          src/__tests__/mediaRoutes.viralBilling.test.js
+
       - name: Install frontend replay build dependencies
         run: npm --prefix frontend ci
 

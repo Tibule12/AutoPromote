@@ -1,0 +1,232 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null &&
+        request.auth.uid in ['bf04dPKELvVMivWoUyLsAVyw2sg2'];
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function editableProfileFields() {
+      // Financial, identity, entitlement and authority fields are server managed.
+      // New fields are denied until explicitly reviewed; deleting a field is a change.
+      return ['name', 'displayName', 'photoURL', 'avatarUrl', 'thumbnailUrl', 'bio',
+              'timezone', 'notifications', 'schedulingDefaults', 'defaultPlatforms',
+              'defaultFrequency', 'autoRepostEnabled', 'paypalEmail', 'updatedAt'];
+    }
+
+    function serverManagedContentFields() {
+      // Reward inputs and redemption markers must not be supplied or reset by clients.
+      return ['views', 'metrics', 'revenue', 'claimedBonuses', 'earnings'];
+    }
+
+    function isServiceAccount() {
+      return request.auth != null &&
+        request.auth.token.firebase != null &&
+        request.auth.token.firebase.sign_in_provider == 'service_account';
+    }
+
+    function isActiveWorkspaceMember(workspaceId) {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function canEditWorkspace(workspaceId) {
+      return isActiveWorkspaceMember(workspaceId) &&
+        get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)).data.role in ['owner', 'admin', 'editor'];
+    }
+
+    match /workspaces/{workspaceId} {
+      allow read: if isAdmin() || isServiceAccount() || isActiveWorkspaceMember(workspaceId);
+      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isAdmin() || isServiceAccount() ||
+        (isActiveWorkspaceMember(workspaceId) &&
+          get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)).data.role in ['owner', 'admin']);
+
+      match /members/{memberId} {
+        allow read: if isAdmin() || isServiceAccount() || isActiveWorkspaceMember(workspaceId);
+        allow write: if isAdmin() || isServiceAccount();
+      }
+
+      match /invites/{inviteId} {
+        allow read, write: if isAdmin() || isServiceAccount();
+      }
+    }
+
+    // Owners may edit profile preferences, never financial state or access controls.
+    match /users/{userId} {
+      allow read: if isAdmin() || isServiceAccount() || isOwner(userId);
+      allow create: if isOwner(userId) &&
+        request.resource.data.keys().hasOnly(editableProfileFields().concat(['createdAt'])) &&
+        (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt == request.time);
+      allow update: if isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(editableProfileFields());
+      // A profile delete would also delete protected financial and subscription fields.
+      allow delete: if isAdmin() || isServiceAccount();
+    }
+
+    // Users can read/write their own content
+    match /content/{contentId} {
+      allow create: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && (
+          (request.resource.data.keys().hasAny(['userId']) && request.resource.data.userId == request.auth.uid) ||
+          (request.resource.data.keys().hasAny(['user_id']) && request.resource.data.user_id == request.auth.uid) ||
+          (request.resource.data.keys().hasAny(['workspace_id']) && canEditWorkspace(request.resource.data.workspace_id))
+        ) && !request.resource.data.keys().hasAny(serverManagedContentFields()) &&
+          (!request.resource.data.keys().hasAny(['userId']) || request.resource.data.userId == request.auth.uid) &&
+          (!request.resource.data.keys().hasAny(['user_id']) || request.resource.data.user_id == request.auth.uid));
+
+      allow get, list, delete: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && resource != null && (
+          (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid) ||
+          (resource.data.keys().hasAny(['user_id']) && resource.data.user_id == request.auth.uid) ||
+          (resource.data.keys().hasAny(['workspace_id']) && isActiveWorkspaceMember(resource.data.workspace_id))
+        ));
+      allow update: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && resource != null &&
+         !request.resource.data.diff(resource.data).affectedKeys()
+           .hasAny(serverManagedContentFields().concat(['userId', 'user_id', 'workspace_id'])) && (
+          (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid) ||
+          (resource.data.keys().hasAny(['user_id']) && resource.data.user_id == request.auth.uid) ||
+          (resource.data.keys().hasAny(['workspace_id']) && isActiveWorkspaceMember(resource.data.workspace_id))
+        ));
+    }
+
+    match /promotion_schedules/{scheduleId} {
+      allow read: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && resource != null && (
+          resource.data.user_id == request.auth.uid ||
+          (resource.data.keys().hasAny(['workspace_id']) && isActiveWorkspaceMember(resource.data.workspace_id))
+        ));
+      allow create: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && (
+          request.resource.data.user_id == request.auth.uid ||
+          (request.resource.data.keys().hasAny(['workspace_id']) && canEditWorkspace(request.resource.data.workspace_id))
+        ));
+      allow update, delete: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && resource != null && (
+          resource.data.user_id == request.auth.uid ||
+          (resource.data.keys().hasAny(['workspace_id']) && canEditWorkspace(resource.data.workspace_id))
+        ));
+    }
+
+    // Only admins, service account, or backend can access analytics, promotions, activities
+    match /analytics/{docId} {
+      allow read, write: if isAdmin() || isServiceAccount();
+    }
+    match /promotions/{docId} {
+      allow read, write: if isAdmin() || isServiceAccount();
+    }
+    match /activities/{docId} {
+      allow read, write: if isAdmin() || isServiceAccount();
+    }
+
+    // Community posts - authenticated users can read all, create their own, and update their own
+    match /community_posts/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.authorId == request.auth.uid;
+      allow update: if request.auth != null &&
+        (resource.data.authorId == request.auth.uid ||
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['replies', 'likes', 'helpful', 'views']));
+      allow delete: if request.auth != null && resource.data.authorId == request.auth.uid;
+    }
+
+    // AI Clip analyses - users can read/write their own analyses
+    match /clip_analyses/{analysisId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Generated clips - users can read/write their own clips
+    match /generated_clips/{clipId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Chat conversations - users can read/write their own conversations
+    match /chat_conversations/{conversationId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Chat messages - users can read/write messages in their conversations
+    match /chat_messages/{messageId} {
+      allow read: if request.auth != null &&
+        exists(/databases/$(database)/documents/chat_conversations/$(resource.data.conversationId)) &&
+        get(/databases/$(database)/documents/chat_conversations/$(resource.data.conversationId)).data.userId == request.auth.uid;
+      allow create: if request.auth != null &&
+        exists(/databases/$(database)/documents/chat_conversations/$(request.resource.data.conversationId)) &&
+        get(/databases/$(database)/documents/chat_conversations/$(request.resource.data.conversationId)).data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/chat_conversations/$(resource.data.conversationId)) &&
+        get(/databases/$(database)/documents/chat_conversations/$(resource.data.conversationId)).data.userId == request.auth.uid;
+    }
+
+    // Ad billing/approval state is written by the existing backend API, not clients.
+    match /ads/{adId} {
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow write: if isAdmin() || isServiceAccount();
+    }
+
+    // Ad analytics - users can read their own, admins can read all
+    match /ad_analytics/{adId} {
+      allow read: if request.auth != null && (
+        get(/databases/$(database)/documents/ads/$(adId)).data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow write: if isAdmin() || isServiceAccount();
+    }
+
+    // Notifications - users can read/write their own
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Transactions - users can read their own (read-only usually)
+    match /transactions/{transactionId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Paid boost state is written only after the existing backend/payment checks.
+    match /paid_boosts/{boostId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin() || isServiceAccount();
+    }
+
+    // Model receipts/capacity are server-owned, including for founder clients.
+    // Firebase Admin uses IAM and bypasses client Security Rules.
+    match /studio_model_capability_jobs/{document=**} {
+      allow read, write: if false;
+    }
+    match /studio_model_capability_artifacts/{document=**} {
+      allow read, write: if false;
+    }
+    match /studio_model_capability_capacity/{document=**} {
+      allow read, write: if false;
+    }
+    match /studio_subject_vfx_jobs/{document=**} { allow read, write: if false; }
+    match /studio_subject_vfx_requests/{document=**} { allow read, write: if false; }
+    match /studio_subject_vfx_capacity/{document=**} { allow read, write: if false; }
+
+    // Rules are additive: explicitly exclude server model collections from
+    // this broad admin rule so a client cannot forge evidence or free capacity.
+    match /{collection}/{document=**} {
+      allow read, write: if !(collection in ['studio_model_capability_jobs',
+        'studio_model_capability_artifacts', 'studio_model_capability_capacity',
+        'studio_subject_vfx_jobs','studio_subject_vfx_requests','studio_subject_vfx_capacity'])
+        && (isAdmin() || isServiceAccount());
+    }
+  }
+}
