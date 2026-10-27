@@ -17,11 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      FIREBASE_ADMIN_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       FUNCTIONS_TOKEN_ENCRYPTION_KEY: ${{ secrets.FUNCTIONS_TOKEN_ENCRYPTION_KEY }}
       GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
-      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
       TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
       ENABLE_TEST_USAGE_NO_DB: "1"
       FIREBASE_ADMIN_BYPASS: "1"
@@ -58,47 +55,28 @@ jobs:
       - name: Build frontend
         timeout-minutes: 5
         run: npm run build --prefix frontend
-      - name: Check for FIREBASE Admin service account (cloud vs emulator)
-        id: check_firebase_secret
-        shell: bash
-        run: |
-          if [ -n "$FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64" ] || [ -n "$FIREBASE_ADMIN_SERVICE_ACCOUNT" ]; then
-            echo "run-tests=cloud" >> $GITHUB_OUTPUT
-            echo "Found Firebase service account secret. Will run E2E tests against cloud service account.";
-          else
-            echo "run-tests=emulator" >> $GITHUB_OUTPUT
-            echo "No Firebase service account secret found. Will run E2E tests using the Firebase emulator.";
-          fi
       - name: Prepare playwright browsers
         timeout-minutes: 5
         run: npx playwright install --with-deps chromium
       - name: Upload test reporters directory (pre-clean)
         run: rm -rf test-results || true
-      - name: Cloud seed Firestore (if cloud mode)
-        if: steps.check_firebase_secret.outputs.run-tests == 'cloud'
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/test/e2e/tmp/service-account.json
-        run: |
-          # Ensure service account exists and is written
-          node ./scripts/write-service-account.js
-          node ./scripts/seed-autopilot-cloud.js
-      - name: Run Playwright E2E (cloud)
-        if: steps.check_firebase_secret.outputs.run-tests == 'cloud'
+      - name: Setup isolated Firebase emulator runtime
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Run Playwright E2E against demo emulator only
         timeout-minutes: 20
         env:
           NODE_ENV: test
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/test/e2e/tmp/service-account.json
-        run: npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1
-      - name: Run Playwright E2E (emulator)
-        if: steps.check_firebase_secret.outputs.run-tests == 'emulator'
-        timeout-minutes: 20
-        env:
-          NODE_ENV: test
-          FIRESTORE_EMULATOR_HOST: localhost:8080
-          GCLOUD_PROJECT: autopromote-cc6d3
+          GCLOUD_PROJECT: demo-autopromote-e2e
+          FIREBASE_PROJECT_ID: demo-autopromote-e2e
+          GOOGLE_CLOUD_PROJECT: demo-autopromote-e2e
+          FIREBASE_ADMIN_SERVICE_ACCOUNT: ""
+          FIREBASE_ADMIN_SERVICE_ACCOUNT_BASE64: ""
+          GOOGLE_APPLICATION_CREDENTIALS: ""
         run: |
-          # Use firebase emulators:exec to ensure the emulator environment variables are set for the child process
-          npx firebase emulators:exec --only firestore --project autopromote-cc6d3 "node ./scripts/seed-autopilot-emulator.js && npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1"
+          npx firebase emulators:exec --only firestore --project demo-autopromote-e2e "node ./scripts/seed-autopilot-emulator.js && npx playwright test test/e2e/playwright --config=test/e2e/playwright/playwright.config.js --workers=1"
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -108,11 +86,6 @@ jobs:
             test-results/**
             playwright-report/**
             test/e2e/**/playwright-report/**
-      - name: Cleanup service account
-        if: always()
-        run: |
-          rm -f test/e2e/tmp/service-account.json || true
-          echo "Cleaned up test/e2e/tmp/service-account.json"
       - name: Run smoke tests (daily)
         if: github.event_name == 'schedule'
         run: |

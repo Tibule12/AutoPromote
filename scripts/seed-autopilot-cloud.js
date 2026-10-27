@@ -3,6 +3,11 @@
  * Seed required documents in Firestore for cloud runs using service account json.
  * Usage: Set GOOGLE_APPLICATION_CREDENTIALS or FIREBASE_ADMIN_SERVICE_ACCOUNT and run this script.
  */
+// CI must use disposable demo emulators; never let the presence of a secret
+// select a real cloud project for test-data writes.
+if (process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true") {
+  throw new Error("Cloud fixture seeding is disabled in CI; use a demo emulator");
+}
 const admin = require("firebase-admin");
 const fs = require("fs");
 const path = require("path");

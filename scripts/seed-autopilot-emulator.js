@@ -3,11 +3,19 @@
  * Seed a minimal set of documents into the Firestore emulator for autopilot smoke testing.
  * Usage: FIRESTORE_EMULATOR_HOST=localhost:8080 node scripts/seed-autopilot-emulator.js
  */
+// Fail before importing Admin if emulator discovery is missing or misconfigured.
+const seedProject = process.env.GCLOUD_PROJECT || "";
+const seedHost = process.env.FIRESTORE_EMULATOR_HOST || "";
+const seedPort = /^(?:127\.0\.0\.1|localhost):([0-9]{1,5})$/.exec(seedHost);
+if (!/^demo-[a-z0-9-]+$/.test(seedProject) || !seedPort ||
+    Number(seedPort[1]) < 1 || Number(seedPort[1]) > 65535) {
+  throw new Error("Autopilot fixtures require a local demo Firestore emulator");
+}
 const admin = require("firebase-admin");
 async function main() {
   // Initialize the admin SDK to use the emulator. If running with FIRESTORE_EMULATOR_HOST set, this will connect to the emulator.
   if (admin.apps.length === 0) {
-    admin.initializeApp({ projectId: process.env.GCLOUD_PROJECT || "autopromote-cc6d3" });
+    admin.initializeApp({ projectId: seedProject });
   }
   const db = admin.firestore();
   console.log(

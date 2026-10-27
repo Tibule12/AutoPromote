@@ -100,6 +100,7 @@ async function main() {
         "test/security/profile-security.test.cjs",
         "test/security/admin-authority-review.test.cjs",
         "test/security/functions-copy.test.cjs",
+        "test/security/seed-isolation.test.cjs",
       ],
       {
         cwd: path.resolve(__dirname, ".."),

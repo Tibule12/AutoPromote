@@ -5,8 +5,8 @@ const fetch = require("node-fetch");
 
 test("API payout request - create payout doc and update user pending earnings", async () => {
   test.skip(
-    !process.env.GOOGLE_APPLICATION_CREDENTIALS,
-    "Requires preconfigured Firestore credentials; this spec no longer creates temp service-account files."
+    !process.env.FIRESTORE_EMULATOR_HOST && !process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    "Requires a local Firestore emulator or explicitly configured test credentials."
   );
 
   const { db } = require("../../../src/firebaseAdmin");
@@ -126,7 +126,7 @@ test("API payout request - create payout doc and update user pending earnings", 
   } finally {
     // cleanup - attempt to remove seeded user and payout doc
     try {
-      if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      if (process.env.FIRESTORE_EMULATOR_HOST || process.env.GOOGLE_APPLICATION_CREDENTIALS) {
         const snap = await db.collection("payouts").where("userId", "==", uid).get();
         const batch = db.batch();
         snap.forEach(d => batch.delete(d.ref));
