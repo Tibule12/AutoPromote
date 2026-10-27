@@ -20,6 +20,7 @@ const {
 } = require("firebase/firestore");
 const { Firestore, FieldValue } = require("firebase-admin/firestore");
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const request = require("supertest");
 
 const PROJECT = "demo-autopromote-security";
@@ -532,11 +533,19 @@ const authRoutes = require("../../src/authRoutes");
 const userRoutes = require("../../src/userRoutes");
 const adminOnly = require("../../src/middlewares/adminOnly");
 const app = express();
+const fixtureAuthLimiter = rateLimit({
+  windowMs: 60000,
+  max: 1000,
+  legacyHeaders: false,
+  standardHeaders: true,
+});
 app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
-app.get("/identity", authMiddleware, (req, res) => res.json(req.user));
-app.get("/admin", authMiddleware, adminOnly, (req, res) => res.json({ ok: true }));
+app.get("/identity", fixtureAuthLimiter, authMiddleware, (req, res) => res.json(req.user));
+app.get("/admin", fixtureAuthLimiter, authMiddleware, adminOnly, (req, res) =>
+  res.json({ ok: true })
+);
 app.use("/real-admin", require("../../src/adminRoutes"));
 const ordinaryToken = "eyJ" + "x".repeat(150);
 const claimsToken = "eyJ" + "a".repeat(150);
@@ -662,7 +671,7 @@ describe("real authentication and registration handlers with isolated identity f
     globalThis.fetch = async url => {
       assert.match(
         url,
-        /^https:\/\/identitytoolkit.googleapis.com\/v1\/accounts:signInWithPassword/
+        /^https:\/\/identitytoolkit\.googleapis\.com\/v1\/accounts:signInWithPassword/
       );
       return { ok: true, json: async () => ({ idToken: ordinaryToken }) };
     };
