@@ -6,6 +6,7 @@ const { sendVerificationEmail, sendPasswordResetEmail } = require("./services/em
 const { strictLimiter } = require("./middleware/rateLimiter");
 const rateLimitBasic = require("./middlewares/rateLimitBasic");
 const authMiddleware = require("./authMiddleware");
+const { hasAdminClaim, authorityFromVerifiedIdentity } = require("./utils/authAuthority");
 
 const PASSWORD_RESET_WINDOW_MINUTES = 15;
 const SAFE_PASSWORD_RESET_RESPONSE = "If an account exists, a password reset email has been sent.";
@@ -72,7 +73,7 @@ const _verifyFirebaseToken = async (req, res, next) => {
       return res.status(401).json({ error: "No token provided" });
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await admin.auth().verifyIdToken(idToken, true);
     req.user = decodedToken;
     next();
   } catch (error) {
@@ -92,10 +93,10 @@ router.post("/register", async (req, res) => {
     let uid;
     if (idToken) {
       try {
-        const decoded = await admin.auth().verifyIdToken(idToken);
+        const decoded = await admin.auth().verifyIdToken(idToken, true);
         uid = decoded.uid;
       } catch (e) {
-        console.warn("Invalid idToken passed to /register", e.message);
+        return res.status(401).json({ error: "Invalid registration ID token" });
       }
     }
 
@@ -118,9 +119,9 @@ router.post("/register", async (req, res) => {
           displayName: name,
         });
       } catch (e) {
-        // If user already exists, fall back to fetching it.
+        // An email address and an arbitrary password do not prove account ownership.
         if (e.code === "auth/email-already-exists") {
-          userRecord = await admin.auth().getUserByEmail(email);
+          return res.status(409).json({ error: "Account already exists. Sign in to continue." });
         } else {
           throw e;
         }
@@ -128,42 +129,50 @@ router.post("/register", async (req, res) => {
       uid = userRecord.uid;
     }
 
-    // Update displayName / email if needed
+    // Identity email changes belong to the verified Firebase Auth flow.
+    if (idToken && email && normalizeEmail(email) !== normalizeEmail(userRecord.email)) {
+      return res
+        .status(400)
+        .json({ error: "Registration email must match the authenticated account" });
+    }
+    // A verified owner can update their display name without resetting account state.
     const updates = {};
     if (name && userRecord.displayName !== name) updates.displayName = name;
-    if (email && userRecord.email !== email) updates.email = email;
     if (Object.keys(updates).length) {
       userRecord = await admin.auth().updateUser(userRecord.uid, updates);
     }
 
-    // Set custom claims for role (preserve existing admin role)
+    // Registration never grants, replaces or removes custom claims.
     const existingClaims = userRecord.customClaims || {};
-    const finalRole = existingClaims.role === "admin" ? "admin" : "user";
-    await admin.auth().setCustomUserClaims(userRecord.uid, { role: finalRole });
+    const finalRole = hasAdminClaim({ ...existingClaims, uid: userRecord.uid }) ? "admin" : "user";
 
     // Store additional user data in Firestore
     const userDocRef = admin.firestore().collection("users").doc(userRecord.uid);
     const userSnap = await userDocRef.get();
-    const currentData = userSnap.exists ? userSnap.data() : {};
-    const docRole = currentData.role === "admin" ? "admin" : finalRole;
-    const docIsAdmin = currentData.role === "admin" ? true : false;
-    await userDocRef.set({
-      name,
-      email,
-      role: docRole,
-      isAdmin: docIsAdmin,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    await userDocRef.set(
+      {
+        name: name || userRecord.displayName || "",
+        email: userRecord.email,
+        ...(userSnap.exists
+          ? {}
+          : {
+              role: finalRole,
+              isAdmin: finalRole === "admin",
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            }),
+      },
+      { merge: true }
+    );
 
     // Generate a branded verification email. Delivery is reported truthfully so
     // the client can fall back to Firebase's mail service when needed.
     let verificationEmailSent = false;
     let verificationProvider = null;
     try {
-      const verifyLink = await admin.auth().generateEmailVerificationLink(email, {
+      const verifyLink = await admin.auth().generateEmailVerificationLink(userRecord.email, {
         url: getVerificationRedirectUrl(),
       });
-      const delivery = await sendVerificationEmail({ email, link: verifyLink });
+      const delivery = await sendVerificationEmail({ email: userRecord.email, link: verifyLink });
       verificationProvider = delivery?.provider || null;
       verificationEmailSent = delivery?.ok === true && verificationProvider !== "console";
       if (!verificationEmailSent) {
@@ -427,7 +436,7 @@ router.post("/login", async (req, res) => {
     if (idToken) {
       console.log("Verifying Firebase ID token...");
       // Verify the Firebase ID token
-      decodedToken = await admin.auth().verifyIdToken(idToken);
+      decodedToken = await admin.auth().verifyIdToken(idToken, true);
       console.log("Token verified for uid=%s", decodedToken.uid);
     } else if (email && password) {
       console.log("Using email/password authentication...");
@@ -459,7 +468,7 @@ router.post("/login", async (req, res) => {
           return res.status(401).json({ error: "Invalid email or password" });
         }
         // Password verified — now verify the returned idToken with Admin SDK
-        decodedToken = await admin.auth().verifyIdToken(authJson.idToken);
+        decodedToken = await admin.auth().verifyIdToken(authJson.idToken, true);
         console.log("Email/password auth verified for uid=%s", decodedToken.uid);
       } catch (error) {
         console.error("Email/password authentication failed:", error);
@@ -472,15 +481,15 @@ router.post("/login", async (req, res) => {
 
     // Variables to store user data
     let userData = null;
-    let role = "user";
-    let isAdmin = false;
+    let role = authorityFromVerifiedIdentity(decodedToken).role;
+    let isAdmin = hasAdminClaim(decodedToken);
     let fromCollection = "users";
 
     // Check admins collection first for admin logins
     try {
       console.log("Checking admins collection for user: uid=%s", decodedToken.uid);
       const adminDoc = await admin.firestore().collection("admins").doc(decodedToken.uid).get();
-      if (adminDoc.exists) {
+      if (adminDoc.exists && hasAdminClaim(decodedToken)) {
         userData = adminDoc.data();
         role = "admin";
         isAdmin = true;
@@ -504,9 +513,7 @@ router.post("/login", async (req, res) => {
             userData && userData.email,
             decodedToken.uid
           );
-          // Always use Firestore values for role and isAdmin if present
-          if (userData.role) role = userData.role;
-          if (typeof userData.isAdmin !== "undefined") isAdmin = userData.isAdmin;
+          // Profile fields are display data, never sources of authority or token claims.
         }
       }
     } catch (firestoreError) {
@@ -677,7 +684,7 @@ router.post("/admin-login", async (req, res) => {
     }
     console.log("Verifying Firebase ID token for admin login... (truncated token)");
     // Verify the Firebase ID token
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await admin.auth().verifyIdToken(idToken, true);
     console.log("Admin token verified for uid=%s", decodedToken.uid);
 
     // Variables to store user data
@@ -697,7 +704,7 @@ router.post("/admin-login", async (req, res) => {
       console.log("Admin email present in token=%s", !!decodedToken.email);
 
       // Check if user has admin claims in the token
-      if (decodedToken.admin === true || decodedToken.role === "admin") {
+      if (hasAdminClaim(decodedToken)) {
         console.log("User has admin claims in token");
 
         // Try to get admin data from admins collection if it exists
@@ -838,81 +845,27 @@ router.get("/verify", async (req, res) => {
     }
 
     // Verify the Firebase token
-    const decodedToken = await admin.auth().verifyIdToken(token);
+    const decodedToken = await admin.auth().verifyIdToken(token, true);
 
-    // Check if user has admin claims in token
-    if (decodedToken.admin === true || decodedToken.role === "admin") {
-      console.log("Token verification: User has admin claims");
-
-      // Try to get admin data from Firestore
-      try {
-        const adminDoc = await admin.firestore().collection("admins").doc(decodedToken.uid).get();
-        if (adminDoc.exists) {
-          const adminData = adminDoc.data();
-          return res.json({
-            valid: true,
-            user: {
-              uid: decodedToken.uid,
-              email: decodedToken.email,
-              name: adminData.name || decodedToken.name,
-              role: "admin",
-              isAdmin: true,
-              fromCollection: "admins",
-            },
-          });
-        }
-      } catch (firestoreError) {
-        console.log(
-          "Firestore error in token verification, using token claims:",
-          firestoreError.message
-        );
-      }
-
-      // Fall back to token claims
-      return res.json({
-        valid: true,
-        user: {
-          uid: decodedToken.uid,
-          email: decodedToken.email,
-          name: decodedToken.name || decodedToken.email.split("@")[0],
-          role: "admin",
-          isAdmin: true,
-          fromCollection: "token_claims",
-        },
-      });
-    }
-
-    // For regular users, try Firestore first
+    // Profiles provide display fields only. Verify authority independently for both
+    // claim-based admins and legacy server-managed admins collection members.
+    let profile = null;
+    let adminExists = false;
     try {
-      const userDoc = await admin.firestore().collection("users").doc(decodedToken.uid).get();
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        return res.json({
-          valid: true,
-          user: {
-            uid: decodedToken.uid,
-            email: decodedToken.email,
-            name: userData.name || decodedToken.name,
-            role: userData.role || "user",
-            isAdmin: userData.isAdmin === true || userData.role === "admin",
-            fromCollection: "users",
-          },
-        });
-      }
-    } catch (firestoreError) {
-      console.log("Firestore error for regular user, using token claims:", firestoreError.message);
+      const [userDoc, adminDoc] = await Promise.all([
+        admin.firestore().collection("users").doc(decodedToken.uid).get(),
+        admin.firestore().collection("admins").doc(decodedToken.uid).get(),
+      ]);
+      adminExists = adminDoc.exists;
+      profile = adminExists ? adminDoc.data() : userDoc.exists ? userDoc.data() : null;
+    } catch (_) {
+      // Database failure cannot promote a profile; verified claims still work.
     }
-
-    // Fall back to token claims for regular users
-    res.json({
+    return res.json({
       valid: true,
       user: {
-        uid: decodedToken.uid,
-        email: decodedToken.email,
-        name: decodedToken.name || decodedToken.email.split("@")[0],
-        role: "user",
-        isAdmin: false,
-        fromCollection: "token_claims",
+        name: profile?.name || decodedToken.name || decodedToken.email?.split("@")[0] || "",
+        ...authorityFromVerifiedIdentity(decodedToken, adminExists),
       },
     });
   } catch (error) {

@@ -40,19 +40,8 @@ const adminOnly = async (req, res, next) => {
       return next();
     }
 
-    // Double-check with Firebase Auth custom claims as fallback
-    try {
-      const userRecord = await auth.getUser(req.userId);
-      const customClaims = userRecord.customClaims || {};
-
-      if (customClaims.admin === true) {
-        // Don't log entire user or claims to avoid leaking sensitive details to logs
-        console.log("User has admin claim in Firebase Auth for uid:", req.userId || "unknown");
-        return next();
-      }
-    } catch (authError) {
-      console.error("Error checking Firebase Auth claims:", authError);
-    }
+    // Effective authority was verified against the trusted identity policy.
+    // Raw historical Auth claims must not bypass that policy.
 
     // If we get here, the user is not an admin
     // Log only the userId (avoid printing full user object which may contain sensitive fields)

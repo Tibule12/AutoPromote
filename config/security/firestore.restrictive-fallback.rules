@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Emergency partial-outage mode, only after explicit incident approval.
+    // All client reads/writes stop. Backend Admin SDK/IAM writes still bypass Rules.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

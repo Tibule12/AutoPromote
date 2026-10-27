@@ -3,7 +3,7 @@ const path = require("path");
 const fetch = require("node-fetch");
 const fs = require("fs");
 
-const hasDbAccess = !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
+const hasDbAccess = !!(process.env.FIRESTORE_EMULATOR_HOST || process.env.GOOGLE_APPLICATION_CREDENTIALS);
 const hasBrowserBinary = fs.existsSync(chromium.executablePath());
 
 test.skip(
