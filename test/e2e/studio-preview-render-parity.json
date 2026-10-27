@@ -8955,5 +8955,115 @@
     "frontendRebuilt": false,
     "sourceLightingAndManualExampleLimitsRemain": true,
     "humanSoundApproval": false
+  },
+  "backgroundContinuation20261027": {
+    "status": "NATIVE_FRAGMENT_CLEANUP_MOVIES_REVIEWED_PRIVATE",
+    "evidence": "reports/studio-background-continuation-20261027/README.md",
+    "previousEvidence": "reports/studio-guest-selection-20261026/README.md",
+    "ownerRejected": false,
+    "visualCompletion": false,
+    "gpuJobs": 0,
+    "paidGeneration": false,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "creativeApproval": false,
+    "readinessPromoted": false,
+    "next": "Preserve exact private movies/timelines and all earlier rejected files; qualify broader source footage and retain shared S02/S04/S03, source-lighting/manual-geometry and creative/listening limits.",
+    "previousDeliveryOwnerRejected": true,
+    "hostExplicitRemovalPathsAdded": 3,
+    "totalHostRemovalPaths": 21,
+    "allHostFramesChecked": 208,
+    "remainingAlphaInTargetedFragmentRegions": 0,
+    "nativeSourcePatchesAndOriginalMasksRetained": true,
+    "guestForegroundSceneUnchanged": true,
+    "deliveries": [
+      {
+        "theme": "daylight-loft",
+        "canonicalHash": "9677dff8872ffaa06047058012a322a20e3f45a499429e4dd2c6d3120c92952f",
+        "movieSha256": "485a308622c23802b717af34a77b6bf38c701055a2cd8794d53e49b1bf2eb3d9",
+        "timelineSha256": "b685e27cd6076cb281628a4c6fb3d8f223cc135eab9558a5617dfc49c6bbb3d6",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true,
+        "originalMaskRefsAndOtherEffectsRetained": true,
+        "replacementCrop": {
+          "cameraA": [
+            0,
+            0,
+            1,
+            0.55
+          ],
+          "cameraB": [
+            0,
+            0,
+            1,
+            0.46
+          ]
+        },
+        "gpuCount": 0
+      },
+      {
+        "theme": "warm-library",
+        "canonicalHash": "d8a8e0d7ab20f62d9d1dd59e96b2235a45f47a0993a47fba72508b8259933d02",
+        "movieSha256": "9fb6a5c1ae01dd81a89b1b77defb415b98624e3a7dfb1b271679e198d84dcbbb",
+        "timelineSha256": "2c49bc599f24d23fb3f8e29c3e364646ef9c33cd00fcfd0864c6db15f7eea2fd",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true,
+        "originalMaskRefsAndOtherEffectsRetained": true,
+        "replacementCrop": {
+          "cameraA": [
+            0,
+            0,
+            1,
+            0.55
+          ],
+          "cameraB": [
+            0,
+            0,
+            1,
+            0.46
+          ]
+        },
+        "gpuCount": 0
+      },
+      {
+        "theme": "midnight-studio",
+        "canonicalHash": "0f0e08cae8dcdc4f036f2fccc3d6ee8aa93df5dd5b0530ef0a91974a1957f156",
+        "movieSha256": "3731592a8b56d9c1ff70080165effb303e54c5e69ddf2945f2cb45ff11ed8835",
+        "timelineSha256": "30e83da45e0ee2597cf5d4a5b749d2c564eee2a73e1b295b12d408145d99860a",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true,
+        "originalMaskRefsAndOtherEffectsRetained": true,
+        "replacementCrop": {
+          "cameraA": [
+            0,
+            0,
+            1,
+            0.55
+          ],
+          "cameraB": [
+            0,
+            0,
+            1,
+            0.46
+          ]
+        },
+        "gpuCount": 0
+      }
+    ],
+    "originalProjectsRetained": 53,
+    "otherCanonicalDocumentsUnchanged": 52,
+    "protectedFilesUnchanged": 81,
+    "savedLoginRetained": true,
+    "decodedSoundtrackUnchanged": true,
+    "newModelJobs": 0,
+    "rendererSourceUnchanged": true,
+    "frontendRebuilt": false,
+    "humanSoundApproval": false
   }
 }

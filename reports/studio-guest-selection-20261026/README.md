@@ -1,3 +1,7 @@
+<!-- owner-rejected-backgrounds-20261027 -->
+27 October: the owner rejects these three background-framing movies as unfinished. Preserve them. Full-resolution source/alpha/composite inspection finds overlooked floating source plant/reed fragments beside the host microphone stands and above the cup. The [native correction is active](../studio-background-continuation-20261027/README.md); earlier export/test success is not visual completion.
+<!-- /owner-rejected-backgrounds-20261027 -->
+
 # Native background framing and microphone detail — 26 October 2026
 
 The preceding videos were rejected for appearance. Their successful exports and tests did not prove visually finished background replacement. They remain available and their completion claim stays withdrawn.

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Inspected all three renewed native films and matching Studio timelines; corrected replacement-image furniture diagnosis, retained original masks, verified 53 projects and 75 protected files, and preserved all broader readiness limits.",
-  "reviewed_at": "2026-10-25T23:54:38.759Z",
+  "reason": "Reviewed exact three renewed native background films and full matching Studio timelines, all208-frame source-fragment alpha comparison, 53 saved projects/81 protected files and unchanged source/edit identities; retain broader visual and readiness limits.",
+  "reviewed_at": "2026-10-27T04:08:01.065Z",
   "catalog_sha256": "fa38a9e38438efffe01662e814ab6e805462d6366def0e780a1c58ee98f21d35",
   "sources": [
     {
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "f79a61eb9070441ecbc951b0412adc7d5b8521cf0127b3b061fd1af7002a7e47"
+      "sha256": "291faab01029edfdb19a31ad77f31ab62715e9ba188b7fe4f4f344d0cf654507"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "acccac44d9f408eefec43b2ef668efbf3fe357473ea77b0f9dc6bbc0907da13a"
+      "sha256": "2b969361a2491a0942e4bd5b358c04d119584ffaaef9fec933037cf15ee527ff"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
