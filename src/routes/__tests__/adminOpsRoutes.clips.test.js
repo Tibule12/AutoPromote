@@ -1,5 +1,13 @@
-﻿const request = require("supertest");
+const request = require("supertest");
 const express = require("express");
+
+// These route unit tests provide identity fixtures; token verification is covered
+// by test/security/profile-security.test.cjs. Never rely on a production bypass.
+jest.mock("../../authMiddleware", () => (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error: "Authentication required" });
+  return next();
+});
+
 const bodyParser = require("body-parser");
 
 // Mock videoClippingService and youtubeService
