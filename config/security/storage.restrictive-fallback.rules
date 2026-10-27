@@ -1,0 +1,10 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Emergency partial-outage mode. Requires explicit production incident approval.
+    // Admin SDK/IAM, signed URLs, download tokens and public IAM access are separate.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

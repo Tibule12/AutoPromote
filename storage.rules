@@ -1,133 +1,67 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    function isAdmin() {
-      return request.auth != null &&
-        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    function canUpload(userId) {
+      return isOwner(userId) &&
+        (!firestore.exists(/databases/(default)/documents/users/$(userId)) ||
+         firestore.get(/databases/(default)/documents/users/$(userId)).data.get('uploadBlocked', false) != true);
+    }
+    function isTrustedAdmin() {
+      return request.auth != null && request.auth.uid in ['bf04dPKELvVMivWoUyLsAVyw2sg2'];
     }
 
-    function isServiceAccount() {
-      return request.auth != null &&
-        request.auth.token.firebase != null &&
-        request.auth.token.firebase.sign_in_provider == 'service_account';
+    // SDK uploads in current Publisher/sourceUpload use this UID-scoped layout.
+    // Historical flat uploads have no trustworthy path owner and stay API-only.
+    match /uploads/{mediaType}/{userId}/{allPaths=**} {
+      allow read: if isOwner(userId);
+      allow create, update: if mediaType in ['videos', 'images', 'audios'] &&
+        canUpload(userId) && request.resource.size < 500 * 1024 * 1024 &&
+        request.resource.metadata.ownerUid == userId;
+      allow delete: if isOwner(userId);
     }
-
-    function isBackend() {
-      // Backend calls must use a service account (authenticated), not unauthenticated requests
-      return request.auth != null &&
-        request.auth.token.firebase != null &&
-        request.auth.token.firebase.sign_in_provider == 'service_account';
-    }
-
-    function isServerStudioAnalysisPath() {
-      // request.path includes b/<bucket>/o before object segments. Check it
-      // for list requests, which have no resource metadata to inspect.
-      return (request.path[3] == 'temp' && request.path[4] == 'studio-analysis') ||
-        request.path[3] == 'temp_studio_vfx' ||
-        (request.path[3] == 'studio' && request.path[4] == 'analysis-results') ||
-        (request.path[3] == 'studio' && request.path[4] == 'model-runtime') ||
-        (request.path[3] == 'studio' && request.path[4] == 'sources' &&
-          request.path[6].matches('^model-[a-f0-9]{64}\\.mp4$')) ||
-        (resource != null && resource.name.matches('^(temp/studio-analysis|studio/(analysis-results|model-runtime))/.*')) ||
-        (request.resource != null && request.resource.name.matches('^(temp/studio-analysis|studio/(analysis-results|model-runtime))/.*'));
-    }
-
-    // These objects are written by Firebase Admin and read through the
-    // owner-scoped API. The catch-all rule below must exclude both prefixes.
-    match /temp/studio-analysis/{userId}/{allPaths=**} {
-      allow read, write: if false;
-    }
-
-    match /studio/analysis-results/{userId}/{allPaths=**} {
-      allow read, write: if false;
-    }
-    match /studio/model-runtime/{allPaths=**} {
-      allow read, write: if false;
-    }
-    match /temp_studio_vfx/{allPaths=**} {
-      allow read, write: if false;
-    }
-
-    // Allow users to upload to temp_sources (e.g. Clip Studio uploads)
-    match /temp_sources/{userId}/{allPaths=**} {
-      allow read: if request.auth != null; // Authenticated users only
-      allow write: if request.auth != null && request.auth.uid == userId
-        && request.resource.size < 500 * 1024 * 1024; // 500MB limit
-    }
-
-    // Short-lived Find Viral Clips uploads. The backend verifies owner metadata,
-    // creates a brief signed read URL for the worker, then deletes the source.
     match /temp_scans/{userId}/{allPaths=**} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId
-        && request.resource.metadata.ownerUid == userId
-        && request.resource.metadata.sourcePurpose == 'viral_scan'
-        && request.resource.size < 500 * 1024 * 1024;
+      allow read, delete: if isOwner(userId);
+      allow create, update: if canUpload(userId) &&
+        request.resource.size < 500 * 1024 * 1024 &&
+        request.resource.metadata.ownerUid == userId &&
+        request.resource.metadata.sourcePurpose == 'viral_scan';
+    }
+    match /temp_sources/{userId}/{allPaths=**} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if canUpload(userId) && request.resource.size < 500 * 1024 * 1024;
+    }
+    // Existing editor/thumbnail/memetic SDK paths previously used the 50 MiB fallback.
+    match /{prefix}/{userId}/{allPaths=**} {
+      allow read, delete: if prefix in ['temp_uploads', 'temp_analysis', 'thumbnails', 'memetic_seeds'] && isOwner(userId);
+      allow create, update: if prefix in ['temp_uploads', 'temp_analysis', 'thumbnails', 'memetic_seeds'] &&
+        canUpload(userId) && request.resource.size < 50 * 1024 * 1024;
+    }
+    // Preserve the existing owner-scoped Cam Combiner layouts and size behaviour.
+    match /temp/{purpose}/{userId}/{allPaths=**} {
+      allow read, delete: if purpose in ['multicam', 'multicam-clean-sync', 'multicam-clean-sync-audio', 'multicam-ingest'] && isOwner(userId);
+      allow create, update: if purpose in ['multicam', 'multicam-clean-sync', 'multicam-clean-sync-audio', 'multicam-ingest'] && canUpload(userId);
     }
 
-    // Allow users to upload multicam sources for background sync / server render (large files, no hard cap)
-    match /temp/multicam/{userId}/{allPaths=**} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    match /temp/multicam-clean-sync/{userId}/{allPaths=**} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    match /temp/multicam-clean-sync-audio/{userId}/{allPaths=**} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Original Cam Combiner media is uploaded once and automatically expires.
-    // The explicit rule avoids the 50MB fallback cap while preserving ownership.
-    match /temp/multicam-ingest/{userId}/{allPaths=**} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // UnifiedPublisher uploads to uploads/<mediaType>s/... and the frontend enforces a 500MB cap.
-    // Keep rules aligned so authenticated uploads do not fail with misleading permission errors.
-    match /uploads/{allPaths=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-        && request.resource.size < 500 * 1024 * 1024
-        && (!firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
-            || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.uploadBlocked != true);
-    }
-
-    // Allow all authenticated users to read and write files
-    match /{allPaths=**} {
-      allow read: if request.auth != null && !isServerStudioAnalysisPath();
-      allow write: if request.auth != null
-        && !isServerStudioAnalysisPath()
-        && request.resource.size < 50 * 1024 * 1024 // 50MB limit
-        // PREVENT UPLOAD IF QUOTA EXCEEDED
-        // Check if doc exists first to avoid error, then check property
-        && (!firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) 
-            || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.uploadBlocked != true);
-    }
-
-    // Allow public read access to published content
-    match /content/{userId}/published/{allPaths=**} {
-      allow read: if true;
-      allow write: if (request.auth != null && request.auth.uid == userId) || isBackend()
-        && request.resource.size < 50 * 1024 * 1024; // 50MB limit
-    }
-
-    // Allow users to read public assets
+    // Public assets remain readable; public shared writes require reviewed authority.
     match /public/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin() || isServiceAccount() || isBackend();
+      allow write: if isTrustedAdmin();
     }
-
-    // Allow backend to write landing pages and public to read them
+    match /content/{userId}/published/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if canUpload(userId) && request.resource.size < 50 * 1024 * 1024;
+      allow delete: if isOwner(userId);
+    }
     match /landing-pages/{allPaths=**} {
       allow read: if true;
-      allow write: if isBackend();
+    }
+    // All other objects, including Studio model/analysis receipts, are accessed
+    // through owner-checked backend APIs. Admin SDK uses IAM independently.
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }

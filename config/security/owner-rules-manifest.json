@@ -1,0 +1,9 @@
+{
+  "project": "autopromote-cc6d3",
+  "scope": "Rules only; publish only after verified repaired backend",
+  "sources": {
+    "config/security/firestore.owner-scoped.rules": "25436b8888989a527e0d9138ce31cf53ef1f300c95618e89166377d1e15cc996",
+    "config/security/storage.owner-scoped.rules": "b3ebe33fd6a4ec15263b24040c4ff75cf7cfdfb9fb47eeaad19dcfbf208a0679"
+  },
+  "validation": "84 profile/authority/packaging tests and 10 coordinated Firestore/Storage emulator tests passed"
+}

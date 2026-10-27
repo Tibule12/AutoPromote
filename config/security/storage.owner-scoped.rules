@@ -1,0 +1,67 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    function canUpload(userId) {
+      return isOwner(userId) &&
+        (!firestore.exists(/databases/(default)/documents/users/$(userId)) ||
+         firestore.get(/databases/(default)/documents/users/$(userId)).data.get('uploadBlocked', false) != true);
+    }
+    function isTrustedAdmin() {
+      return request.auth != null && request.auth.uid in ['bf04dPKELvVMivWoUyLsAVyw2sg2'];
+    }
+
+    // SDK uploads in current Publisher/sourceUpload use this UID-scoped layout.
+    // Historical flat uploads have no trustworthy path owner and stay API-only.
+    match /uploads/{mediaType}/{userId}/{allPaths=**} {
+      allow read: if isOwner(userId);
+      allow create, update: if mediaType in ['videos', 'images', 'audios'] &&
+        canUpload(userId) && request.resource.size < 500 * 1024 * 1024 &&
+        request.resource.metadata.ownerUid == userId;
+      allow delete: if isOwner(userId);
+    }
+    match /temp_scans/{userId}/{allPaths=**} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if canUpload(userId) &&
+        request.resource.size < 500 * 1024 * 1024 &&
+        request.resource.metadata.ownerUid == userId &&
+        request.resource.metadata.sourcePurpose == 'viral_scan';
+    }
+    match /temp_sources/{userId}/{allPaths=**} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if canUpload(userId) && request.resource.size < 500 * 1024 * 1024;
+    }
+    // Existing editor/thumbnail/memetic SDK paths previously used the 50 MiB fallback.
+    match /{prefix}/{userId}/{allPaths=**} {
+      allow read, delete: if prefix in ['temp_uploads', 'temp_analysis', 'thumbnails', 'memetic_seeds'] && isOwner(userId);
+      allow create, update: if prefix in ['temp_uploads', 'temp_analysis', 'thumbnails', 'memetic_seeds'] &&
+        canUpload(userId) && request.resource.size < 50 * 1024 * 1024;
+    }
+    // Preserve the existing owner-scoped Cam Combiner layouts and size behaviour.
+    match /temp/{purpose}/{userId}/{allPaths=**} {
+      allow read, delete: if purpose in ['multicam', 'multicam-clean-sync', 'multicam-clean-sync-audio', 'multicam-ingest'] && isOwner(userId);
+      allow create, update: if purpose in ['multicam', 'multicam-clean-sync', 'multicam-clean-sync-audio', 'multicam-ingest'] && canUpload(userId);
+    }
+
+    // Public assets remain readable; public shared writes require reviewed authority.
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isTrustedAdmin();
+    }
+    match /content/{userId}/published/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if canUpload(userId) && request.resource.size < 50 * 1024 * 1024;
+      allow delete: if isOwner(userId);
+    }
+    match /landing-pages/{allPaths=**} {
+      allow read: if true;
+    }
+    // All other objects, including Studio model/analysis receipts, are accessed
+    // through owner-checked backend APIs. Admin SDK uses IAM independently.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

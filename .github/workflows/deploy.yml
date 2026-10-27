@@ -41,8 +41,17 @@ jobs:
       - name: Install local Firestore emulator
         run: npx firebase setup:emulators:firestore
 
+      - name: Install local Storage emulator
+        run: npx firebase setup:emulators:storage
+
       - name: Verify authority and registration security in isolated emulator
         run: npm run test:security:profile
+
+      - name: Verify owner Storage access and restrictive containment
+        run: node scripts/security/test-containment.cjs
+
+      - name: Verify guarded Rules publication with fake APIs
+        run: python3 -m unittest discover -s test/security -p 'rules_publisher_test.py' -v
 
       - name: Verify existing payment, publishing and Studio workflows
         env:
