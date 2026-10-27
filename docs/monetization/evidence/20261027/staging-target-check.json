@@ -1,0 +1,8 @@
+{
+  "project": "autopromote-staging-2026",
+  "source": "historical GPU qualification report identifies this staging project",
+  "readOnlyCommand": "gcloud projects describe autopromote-staging-2026 --format=json(projectId,lifecycleState)",
+  "currentMetadataVerified": false,
+  "result": "No usable project metadata returned by the available CLI. Current target/access must be confirmed before a rollout.",
+  "deploymentOrConfigurationChange": false
+}

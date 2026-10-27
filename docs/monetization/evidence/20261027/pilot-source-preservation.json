@@ -1,0 +1,117 @@
+{
+  "capturedAtUtc": "2026-10-27T16:56:13.078133+00:00",
+  "productionBase": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+  "protectedFiles": {
+    "firestore.rules": {
+      "unchangedFromProductionBase": true,
+      "sha256": "25436b8888989a527e0d9138ce31cf53ef1f300c95618e89166377d1e15cc996"
+    },
+    "storage.rules": {
+      "unchangedFromProductionBase": true,
+      "sha256": "b3ebe33fd6a4ec15263b24040c4ff75cf7cfdfb9fb47eeaad19dcfbf208a0679"
+    },
+    "src/authMiddleware.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "03044686cad64b539c5755cc961bde1a8271b828606723f5add7b33ba43f77c1"
+    },
+    "src/authRoutes.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "543408d47a87e9b903db9f105e356338daa90d79b63ec47ad76eb7ae2849b3bd"
+    },
+    "src/utils/authAuthority.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "a2e30a561463eb8923e9b353033ceea930869b9034d1ed04433932b79022b910"
+    },
+    "src/server.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "f63e6fac8a3193e08a1f1aab43ac9cb705d3ef1b6efab89603af8acc8551f668"
+    },
+    "src/userRoutes.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "78bf31a9458ab15c183565b235ce70ad5b0e765ed531af5d35194aa483c1be60"
+    },
+    "src/paymentsRoutes.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "189c123bc5c5ffce982375ef9183d7974f4c3862c2341f88cf5c0d85a63d5cd2"
+    },
+    "src/routes/paymentsExtendedRoutes.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "04d0775a38512d6a64c4b61654fba7902e0a99ea1ad8b7bee4cd36af57103722"
+    },
+    "src/routes/paypalSubscriptionRoutes.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "8fd77d988c3a2afef3c996480d4776b8242d452138c3dfaac8a0a9b51cc5688b"
+    },
+    "src/services/payments/fulfillmentService.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "ad8b5b757093a66b688c1b74c35a8b84300fd03622d7949bef336a3c8b32318e"
+    },
+    "src/config/subscriptionPlans.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "7c1df339087a63ae8f24db34f0e587f32073d6e269c522a164f8ef2bdcdc8c69"
+    },
+    "src/services/cloudRunJobService.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "687cd9f2de1975b4432a729ede3530877b32ed1c712163c1450a154f4982090f"
+    },
+    "src/services/multicamCapacityService.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "b00ab270f1c993da7794f82dabb1cd56500ed130a1b339f94c4acd420472dbea"
+    },
+    "src/services/multicamUploadService.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "ab5325b1f7e74af4f731d76948501cb632c2527eb50f16bee5b89d0c6e369d0c"
+    },
+    "src/services/renderApprovalService.js": {
+      "unchangedFromProductionBase": true,
+      "sha256": "4a373468b0899e48490d7859556e9af5fed67077f000b88774c534daead02a34"
+    },
+    "python_media_worker/main_media_server.py": {
+      "unchangedFromProductionBase": true,
+      "sha256": "5bf45a1335f81d796fd5c4ccc939839d818a69b04956493dd3e619e5080f5b79"
+    },
+    "python_media_worker/viral_render_contract.py": {
+      "unchangedFromProductionBase": true,
+      "sha256": "fcefe9561cf6c68cdf87c120dc187d5a55d7195037090cb96184c75c7953b9a8"
+    },
+    "test/e2e/studio-preview-render-parity.json": {
+      "unchangedFromProductionBase": true,
+      "sha256": "d933524491ae7900249c82c5373569d23805d1150841e9a6e0a901f5ba143498"
+    },
+    "frontend/public/index.html": {
+      "unchangedFromProductionBase": true,
+      "sha256": "23b679390b003ef069b67c9bb4fb3cb939b8c4c5f2685a442dac518d6d62cd46"
+    },
+    ".github/workflows/playwright-e2e.yml": {
+      "unchangedFromProductionBase": true,
+      "sha256": "e65fbd84a6cb334548d0684161e7d47bd956b5e84fb8f7a97f4690da717ac9b4"
+    },
+    "package-lock.json": {
+      "unchangedFromProductionBase": true,
+      "sha256": "8f74db1230299607b9e351e7ecc298148d4197790787fad4e1ce3aefe0e21b73"
+    }
+  },
+  "formalCapabilityAndCombinationRecordsUnchanged": true,
+  "changedJavascriptSyntaxFiles": [
+    "scripts/credits-readiness.cjs",
+    "scripts/test-unified-credits.cjs",
+    "src/contentRoutes.js",
+    "src/creditSystem.js",
+    "src/mediaRoutes.js",
+    "src/middlewares/usageLimitMiddleware.js",
+    "src/routes/clipRoutes.js",
+    "src/routes/promotionTaskRoutes.js",
+    "src/services/billingService.js",
+    "src/services/promotionTaskQueue.js",
+    "src/services/unifiedCredits/admission.js",
+    "src/services/unifiedCredits/policy.js",
+    "src/services/unifiedCredits/wallet.js",
+    "src/services/videoClippingService.js",
+    "src/services/videoEditingService.js",
+    "test/unified-credits/foundation.test.cjs",
+    "src/services/unifiedCredits/application.js",
+    "test/unified-credits/application.integration.test.cjs"
+  ],
+  "targetedLint": "passed",
+  "productionMutationsPerformed": false
+}

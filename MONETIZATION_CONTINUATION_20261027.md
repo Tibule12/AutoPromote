@@ -1,3 +1,5 @@
+> Preserved checkpoint: the 59-test foundation is now local commit `51c3980e`. The [subsequent nonproduction application integration and pilot report](NONPRODUCTION_PILOT_20261027.md) supersedes the application-binding status below. Production remains unchanged.
+
 # AutoPromote rewarded ads and unified credits — continuation
 
 27 October 2026 · Branch `feat/rewarded-credits-continuation-20261027` · Local, uncommitted work based on production revision `593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca`.

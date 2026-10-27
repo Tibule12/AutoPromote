@@ -83,9 +83,14 @@ async function main() {
       [
         "--test",
         "--test-concurrency=1",
-        "test/unified-credits/foundation.test.cjs",
-        "test/unified-credits/continuation.test.cjs",
-        "test/unified-credits/google-controller.test.cjs",
+        ...(process.argv.includes("--application-only")
+          ? ["test/unified-credits/application.integration.test.cjs"]
+          : [
+              "test/unified-credits/foundation.test.cjs",
+              "test/unified-credits/continuation.test.cjs",
+              "test/unified-credits/google-controller.test.cjs",
+              "test/unified-credits/application.integration.test.cjs",
+            ]),
       ],
       {
         cwd: path.resolve(__dirname, ".."),

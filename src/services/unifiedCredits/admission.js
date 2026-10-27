@@ -62,7 +62,11 @@ function createAdmission({ db, service, now = Date.now }) {
       await db.collection("credits_v2_quotes").doc(quoteId).create(record);
       return record;
     },
-    async reserveApproved(uid, { quoteId, requestId, approvedCredits, pricingRevision }) {
+    async reserveApproved(
+      uid,
+      { quoteId, requestId, approvedCredits, pricingRevision },
+      validateSource = null
+    ) {
       assertSandbox(process.env, db);
       if (typeof quoteId !== "string" || !/^[a-f0-9-]{36}$/.test(quoteId)) fail("INVALID_QUOTE");
       const snap = await db.collection("credits_v2_quotes").doc(quoteId).get();
@@ -74,6 +78,7 @@ function createAdmission({ db, service, now = Date.now }) {
         fail("SOURCE_CHANGED", 409);
       if (approvedCredits !== q.credits || pricingRevision !== q.pricingRevision)
         fail("PRICE_CHANGED", 409);
+      if (validateSource) validateSource(q, data);
       // Remote workers must use the exact quoted hash/object generation and enforce
       // this ceiling. A URL or current object at the same path is not sufficient.
       return service.reserve(uid, {
@@ -90,6 +95,7 @@ function createAdmission({ db, service, now = Date.now }) {
           enforcedMaxSeconds: data.enforcedMaxSeconds,
           resourceClass: data.resourceClass,
           destinations: q.destinations.slice().sort(),
+          ...(data.workflowInput ? { workflowInput: data.workflowInput } : {}),
         },
       });
     },

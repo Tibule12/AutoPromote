@@ -1,0 +1,26 @@
+{
+  "status": "LOCAL_REVIEW_ONLY",
+  "productionEnabled": false,
+  "advertisingEnabled": false,
+  "rewardsDisabled": true,
+  "spendScope": "free-pilot-draft-20261027",
+  "lifetimeSpendMicros": 5000000,
+  "currency": "USD",
+  "fundingApproved": false,
+  "cohort": ["demo-pilot-alice", "demo-pilot-bob"],
+  "maximumCohort": 10,
+  "maxActiveGlobal": 1,
+  "maxActiveUser": 1,
+  "gpuEnabled": false,
+  "externalAiEnabled": false,
+  "camCombinerEnabled": false,
+  "maximumRetentionDays": 1,
+  "spendingEndsAt": 1793707200000,
+  "notes": [
+    "The $5 total is a proposed all-in funding ceiling, not authority to spend or launch cloud work.",
+    "The local wallet enforces total booked resource exposure across calendar months, including failed started work.",
+    "Example operation estimates are not calibrated cloud ceilings. The local limit cannot currently guarantee a $5 cloud invoice.",
+    "No production user IDs, balance migration, advertisements or new paid plan policy are configured.",
+    "Before a cloud pilot: measured complete costs, enforced worker and HTTP/storage limits, named project/cohort, secure outcome adapter and explicit rollout/funding approval."
+  ]
+}

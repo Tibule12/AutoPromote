@@ -1715,6 +1715,7 @@ router.post("/story-visuals/plan", async (req, res) => {
 // Body: { fileUrl: "...", options: { smartCrop: true, silenceRemoval: true, ... } }
 router.post(
   "/process",
+  require("./services/unifiedCredits/application").applicationCreditRoute("studio.render", () => admin.firestore()),
   requireTesterEditingFeature(req =>
     req.body?.options?.renderViral === true ? "clipRender" : "watermarkRemoval"
   ),
@@ -1870,6 +1871,8 @@ router.post(
     if (isViralClipRender) {
       try { await videoEditingService.assertRenderWorkerReady(); }
       catch (error) {
+        const localCreditContext = require("./services/unifiedCredits/application").getApplicationContext(userId);
+        if (localCreditContext) await localCreditContext.confirmNoDispatch();
         return res.status(error.statusCode || 503).json({ success: false,
           code: error.code || "STUDIO_RENDER_WORKER_UNAVAILABLE", message: error.message });
       }

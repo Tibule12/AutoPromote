@@ -1,0 +1,40 @@
+{
+  "collectedAtUtc": "2026-10-27T16:37:29.705382+00:00",
+  "observationDate": "2026-10-06",
+  "source": "retained real GPU qualification evidence; no new execution or API call",
+  "execution": "projects/autopromote-cc6d3/locations/us-central1/jobs/viral-studio-rtx-qualification/executions/viral-studio-rtx-qualification-n6wjc",
+  "executionStart": "2026-10-06T16:05:00.808201Z",
+  "executionCompleted": "2026-10-06T16:07:37.466514Z",
+  "succeededTasks": 1,
+  "failedTasks": 0,
+  "taskStart": "2026-10-06T16:06:13.917812Z",
+  "taskCompleted": "2026-10-06T16:06:36.080002Z",
+  "resourceLimits": {
+    "cpu": "20",
+    "nvidia.com/gpu": "1",
+    "memory": "80Gi"
+  },
+  "workload": "Two-second AutoPromote product-tour NVDEC to NVENC transcode",
+  "processWallSeconds": 8.7667,
+  "transcodeWallSeconds": 0.6431,
+  "inputBytes": 29533,
+  "outputBytes": 62029,
+  "observedBillableInstanceSeconds": 59.52536081790328,
+  "referenceMinimumBilledSeconds": 60,
+  "referenceComputeUsd": 0.0531132,
+  "actualInvoiceUsd": null,
+  "gpuFailureSamples": 0,
+  "limitations": [
+    "Not an invoice; reference USD excludes other services, taxes, discounts and adjustments.",
+    "One short NVDEC/NVENC qualification is not a GPU inference or complete Studio workload cost.",
+    "Job execution wall time, task duration, process duration and billable instance time are distinct.",
+    "Storage byte-time, egress, AI/publishing provider fees and late failures remain unattributed."
+  ],
+  "sourceHashes": {
+    "execution-v2-final.json": "5f368f22cdbbbc287acc8c358df5617d6a89a9077accaadc53c957275ec7edd4",
+    "tasks-final.json": "295d59ff5c2524b0ed0b8d943aad0db679bfafb8614909cf25527801e48a9227",
+    "gpu-receipt.json": "2dfbbe613051682f715e5f77a1ed319133ef7d0540bedfa59a12e3d9b3937137",
+    "billable-instance-time.json": "099a867590510eca67ad9f05e7e6fb238bd8532954dfe2e0c6c12badd6352afa",
+    "verification-summary.json": "d8d23707c96a46a81ae7719fc37ac67b6abe145d50af16da996558ba86f04254"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "status": "NOT_READY_FOR_PRODUCTION",
+  "liveAdvertisingEnabled": false,
+  "runtime": "local-emulator-only",
+  "pilot": {
+    "status": "LOCAL_REVIEW_ONLY",
+    "totalProposedBudgetMicros": 5000000,
+    "fundingApproved": false,
+    "liveAdsRequired": false,
+    "cloudInvoiceCapVerified": false,
+    "canonicalTransportQualification": "local-boundary-fixtures"
+  },
+  "blockers": [
+    "googleSiteAndAccountApproved",
+    "adManagerNetworkAndEligibleDemandVerified",
+    "signedGptWebCompletionProtocolVerified",
+    "consentAndLiveOriginHeadersReviewed",
+    "completeOperationCostEvidenceReviewed",
+    "commercialAllowancesAndRewardApproved",
+    "legacyBalancesAndAllWritersReconciled",
+    "paymentSubscriptionAndWorkerAdaptersVerified",
+    "workerIamCeilingsAndRecoveryVerified",
+    "controlledProductionRolloutExplicitlyApproved"
+  ],
+  "costReview": {
+    "operations": {
+      "queue.dispatch": {
+        "samples": 0,
+        "recommendedCredits": null,
+        "status": "NEEDS_MEASUREMENT"
+      },
+      "publisher.publish": {
+        "samples": 0,
+        "recommendedCredits": null,
+        "status": "NEEDS_MEASUREMENT"
+      },
+      "studio.render": {
+        "samples": 0,
+        "recommendedCredits": null,
+        "status": "NEEDS_MEASUREMENT"
+      },
+      "clips.analyze": {
+        "samples": 0,
+        "recommendedCredits": null,
+        "status": "NEEDS_MEASUREMENT"
+      },
+      "clips.render": {
+        "samples": 0,
+        "recommendedCredits": null,
+        "status": "NEEDS_MEASUREMENT"
+      }
+    },
+    "commerciallyApproved": false,
+    "recommendation": "Measured samples inform review; enforce worst-case worker ceilings and include failure/retry cost. No automatic production policy changes."
+  },
+  "productionRewardRecommendation": "No live credit offer until verification, funding and approval; this is not a final commercial reward rate."
+}

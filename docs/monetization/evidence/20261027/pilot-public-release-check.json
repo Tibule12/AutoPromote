@@ -1,0 +1,18 @@
+{
+  "checkedAtUtc": "2026-10-27T16:59:32.699618+00:00",
+  "method": "GET",
+  "origins": [
+    {
+      "origin": "https://api.autopromote.org",
+      "httpStatus": 200,
+      "commit": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+      "securityPolicy": "security-owner-bootstrap-20261027"
+    },
+    {
+      "origin": "https://autopromote.onrender.com",
+      "httpStatus": 200,
+      "commit": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+      "securityPolicy": "security-owner-bootstrap-20261027"
+    }
+  ]
+}

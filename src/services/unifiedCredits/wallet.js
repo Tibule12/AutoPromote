@@ -150,10 +150,25 @@ function createWalletService({ db, policy: input, verifier, now = Date.now }) {
       if (!snap.exists)
         tx.create(controlRef, {
           spendingEnabled: true,
-          rewardsEnabled: true,
+          rewardsEnabled: policy.rewardsDisabled !== true,
           issuanceEnabled: true,
           activeOperations: 0,
+          ...(policy.lifetimeSpendMicros !== undefined
+            ? {
+                spendScope: policy.spendScope,
+                lifetimeSpendMicros: policy.lifetimeSpendMicros,
+                lifetimeSpentMicros: 0,
+                lifetimeReservedMicros: 0,
+              }
+            : {}),
         });
+      else if (
+        (policy.lifetimeSpendMicros !== undefined ||
+          snap.data().lifetimeSpendMicros !== undefined) &&
+        (snap.data().spendScope !== policy.spendScope ||
+          snap.data().lifetimeSpendMicros !== policy.lifetimeSpendMicros)
+      )
+        fail("PILOT_BUDGET_SCOPE_CONFLICT", 409);
     });
   }
   async function enroll(uid, { tier = "free", openingBalance = 0 } = {}) {
@@ -285,7 +300,26 @@ function createWalletService({ db, policy: input, verifier, now = Date.now }) {
       }
       renew(tx, ctx);
       const { w, c, b, u } = ctx;
+      if (policy.spendingEndsAt !== undefined && now() >= policy.spendingEndsAt)
+        fail("PILOT_CLOSED", 503);
       if (!c.spendingEnabled) fail("SPENDING_PAUSED", 503);
+      if (c.lifetimeSpendMicros !== undefined && policy.lifetimeSpendMicros === undefined)
+        fail("PILOT_BUDGET_SCOPE_CONFLICT", 409);
+      if (policy.lifetimeSpendMicros !== undefined) {
+        if (
+          c.spendScope !== policy.spendScope ||
+          c.lifetimeSpendMicros !== policy.lifetimeSpendMicros
+        )
+          fail("PILOT_BUDGET_SCOPE_CONFLICT", 409);
+        if (
+          checkedAdd(
+            checkedAdd(c.lifetimeSpentMicros, c.lifetimeReservedMicros),
+            quote.maxCostMicros
+          ) > c.lifetimeSpendMicros
+        )
+          fail("PILOT_TOTAL_BUDGET_EXCEEDED", 429);
+        c.lifetimeReservedMicros = checkedAdd(c.lifetimeReservedMicros, quote.maxCostMicros);
+      }
       if (w.balance < quote.credits) fail("INSUFFICIENT_CREDITS", 402);
       if (
         c.activeOperations >= policy.maxActiveGlobal ||
@@ -343,6 +377,8 @@ function createWalletService({ db, policy: input, verifier, now = Date.now }) {
   }
   async function start(uid, operationId) {
     guard();
+    if (policy.spendingEndsAt !== undefined && now() >= policy.spendingEndsAt)
+      fail("PILOT_CLOSED", 503);
     identifier(operationId);
     return db.runTransaction(async tx => {
       const [os, cs, intent] = await tx.getAll(
@@ -431,6 +467,12 @@ function createWalletService({ db, policy: input, verifier, now = Date.now }) {
         b.spentMicros = checkedAdd(b.spentMicros, op.maxCostMicros);
         u.spentMicros = checkedAdd(u.spentMicros, op.maxCostMicros);
       }
+      if (c.lifetimeSpendMicros !== undefined) {
+        c.lifetimeReservedMicros -= op.maxCostMicros;
+        integer(c.lifetimeReservedMicros, "LIFETIME_RESERVATION");
+        if (op.state === "running")
+          c.lifetimeSpentMicros = checkedAdd(c.lifetimeSpentMicros, op.maxCostMicros);
+      }
       let releasedCredits = 0;
       let expiredCredits = 0;
       if (outcome === "succeeded") w.totals.consumed = checkedAdd(w.totals.consumed, op.credits);
@@ -477,6 +519,7 @@ function createWalletService({ db, policy: input, verifier, now = Date.now }) {
   }
   async function beginReward(uid) {
     guard();
+    if (policy.rewardsDisabled === true) fail("REWARDS_PAUSED", 503);
     const sessionId = crypto.randomUUID();
     return db.runTransaction(async tx => {
       const ctx = await context(tx, uid);

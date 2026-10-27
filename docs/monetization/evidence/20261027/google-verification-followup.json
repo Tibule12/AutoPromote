@@ -1,0 +1,21 @@
+{
+  "checkedAtUtc": "2026-10-27T16:56:12.016757+00:00",
+  "ownerConfirmed": {
+    "adManagerNetworkCreated": false,
+    "billingExportOrInvoiceAvailable": false
+  },
+  "officialSources": [
+    "https://support.google.com/admanager/answer/9116812?hl=en",
+    "https://developers.google.com/publisher-tag/reference#googletag.RewardedPayload",
+    "https://support.google.com/admanager/answer/3059042?hl=en",
+    "https://support.google.com/admanager/gethelp"
+  ],
+  "publicWebSignedProtocolVerified": false,
+  "webHelpSsvNavigationPresent": true,
+  "webHelpCallbackContractFound": false,
+  "supportContactResult": "redirects to Google sign-in; no authenticated network session/case available",
+  "supportCaseSubmitted": false,
+  "mailboxSearch": "Scoped read-only Google/AdSense/Ad Manager search over 30 days returned onboarding notices and no applicable verification answer. This does not establish that no correspondence exists elsewhere.",
+  "liveAdRequested": false,
+  "browserClaimsAcceptedAsProof": false
+}

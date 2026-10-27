@@ -47,6 +47,14 @@ function validatePolicy(input) {
     "rewardTtlSeconds",
   ])
     integer(policy[name], name, 1);
+  if (policy.lifetimeSpendMicros !== undefined) {
+    integer(policy.lifetimeSpendMicros, "LIFETIME_BUDGET", 1);
+    if (typeof policy.spendScope !== "string" || !/^[\w.-]{1,80}$/.test(policy.spendScope))
+      fail("INVALID_SPEND_SCOPE");
+  }
+  if (policy.rewardsDisabled !== undefined && typeof policy.rewardsDisabled !== "boolean")
+    fail("INVALID_REWARDS_SWITCH");
+  if (policy.spendingEndsAt !== undefined) integer(policy.spendingEndsAt, "PILOT_END", 1);
   policy.monthlyCredits =
     policy.monthlyCredits ||
     Object.fromEntries(

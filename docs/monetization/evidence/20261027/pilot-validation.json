@@ -1,0 +1,69 @@
+{
+  "verifiedAtUtc": "2026-10-27T17:03:42.437801+00:00",
+  "preservedFoundationCommit": "51c3980e3272ef9d205901db0bc68a830ebea8e9",
+  "combined": {
+    "tests": 69,
+    "suites": 10,
+    "passed": 69,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "newApplicationCases": 10,
+    "database": "fresh loopback demo-autopromote-credits emulator"
+  },
+  "browserPreview": {
+    "passed": true,
+    "headless": true,
+    "muted": true,
+    "widths": [
+      1280,
+      390
+    ],
+    "externalRequests": 0,
+    "scope": "mock credit preview; full signed-in application browser integration remains pending"
+  },
+  "existingRegressions": {
+    "suites": 5,
+    "tests": 21,
+    "passed": 21,
+    "providerAndAuthBoundaries": "mocked; no actual payment, revocation or provider request"
+  },
+  "targetedLint": "passed",
+  "changedJavascriptSyntax": "passed",
+  "pythonSyntax": "passed",
+  "whitespace": "passed",
+  "studioContractValidation": "passed; formal counts/parity unchanged",
+  "applicationBoundaries": {
+    "ordinaryRoutesAndBusinessServices": true,
+    "realFirestoreTransactions": true,
+    "auth": "controlled local identity fixture",
+    "media": "controlled loopback transport; Studio processVideo fixture",
+    "storage": "controlled local facade; no public ACL",
+    "publication": "ordinary task service test mode; no external platform post",
+    "workerReceipts": "explicit server-side local fixtures; never Google proof",
+    "network": "non-loopback connections blocked; metadata probes denied"
+  },
+  "pilotBudget": {
+    "lifetimeLimitTested": true,
+    "crossMonthAndConcurrentUsers": true,
+    "failedWorkRetainsSpend": true,
+    "expiryBlocksReservationAndStart": true,
+    "queuedCancellationAfterExpiry": true,
+    "draftProposedTotalUsd": 5,
+    "fundingApproved": false,
+    "cloudInvoiceCapVerified": false
+  },
+  "productionDataWrites": false,
+  "liveAdsRequested": false,
+  "pushMergeDeploy": false,
+  "remainingEngineering": [
+    "Normal application frontend quote/consent and trusted source registry wiring.",
+    "Real Auth/worker/Storage/provider bindings and immutable source/runtime enforcement.",
+    "Authenticated terminal outcome adapter, dispatch recovery and signed-in project recovery qualification."
+  ],
+  "remainingEvidence": [
+    "Invoice/export-linked operation costs and representative CPU/GPU late failures/retries.",
+    "Named isolated target/access and reviewed all-in cost envelope.",
+    "A Google account-supported GPT web completion protocol for any later ad track."
+  ]
+}

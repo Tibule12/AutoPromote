@@ -44,6 +44,12 @@ const shouldBypassEditingCredits = operation =>
  * Returns { monthlyRemaining, topUpBalance, totalAvailable, monthlyAllocation, monthKey }
  */
 const getCreditBreakdown = async userId => {
+  const local = require("./services/unifiedCredits/application").getApplicationContext(userId);
+  if (local) {
+    const a = await local.balance();
+    return { monthlyRemaining: a.balance, topUpBalance: 0, totalAvailable: a.balance,
+      monthlyAllocation: a.monthlyAllowance, monthKey: a.cycle, tier: a.tier, sharedWallet: true };
+  }
   const monthKey = new Date().toISOString().slice(0, 7);
   const [userSnap, creditLedgerSnap] = await Promise.all([
     db.collection("users").doc(userId).get(),
@@ -93,6 +99,12 @@ const getCreditBreakdown = async userId => {
  * Records a ledger entry for monthly tracking.
  */
 const deductCredits = async (userId, amount, operation = "unknown", metadata = {}) => {
+  const local = require("./services/unifiedCredits/application").getApplicationContext(userId);
+  if (local) {
+    if (/multicam|cam-combiner/i.test(operation)) throw new Error("Cam Combiner is excluded");
+    return { success: true, remaining: (await local.balance()).balance, amount: local.op.credits,
+      unifiedOperationId: local.op.operationId, deferredSettlement: true };
+  }
   if (Number(amount || 0) > 0 && shouldBypassEditingCredits(operation)) {
     console.log(
       `[credits] Local editing credit bypass active for ${operation}. User ${userId}, skipped ${amount} credits.`
@@ -259,6 +271,9 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
 };
 
 const refundCredits = async (userId, refund, operation = "refund", metadata = {}) => {
+  const local = require("./services/unifiedCredits/application").getApplicationContext(userId);
+  if (local) return { success: false, deferredSettlement: true,
+    unifiedOperationId: local.op.operationId, message: "Awaiting a trusted terminal job outcome" };
   const amount = Math.max(0, Number(refund?.deducted ?? refund?.amount ?? 0) || 0);
   const fromMonthly = Math.max(0, Number(refund?.fromMonthly || 0) || 0);
   const fromTopUp = Math.max(0, Number(refund?.fromTopUp || 0) || 0);

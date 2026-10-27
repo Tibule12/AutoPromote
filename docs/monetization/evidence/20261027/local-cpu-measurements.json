@@ -1,0 +1,61 @@
+{
+  "observedAtUtc": "2026-10-27T16:34:57.077907+00:00",
+  "environment": "local-workstation",
+  "syntheticMedia": true,
+  "cloudRequests": 0,
+  "gpuExecutions": 0,
+  "providerChargesStarted": false,
+  "canonicalHelpers": "python_media_worker/viral_render_contract.py",
+  "canonicalHelperSha256": "fcefe9561cf6c68cdf87c120dc187d5a55d7195037090cb96184c75c7953b9a8",
+  "observations": [
+    {
+      "operationId": "local-cpu-render-clock-smoke",
+      "scenario": "cpu-render-clock-smoke",
+      "outcome": "succeeded",
+      "wallSeconds": 0.2687764019938186,
+      "userCpuSeconds": 0.24728499999999998,
+      "systemCpuSeconds": 0.041378,
+      "peakRssKiB": 60776,
+      "outputBytes": 663511,
+      "exitCode": 0,
+      "invoiceCostMicros": null,
+      "cloudCostAttribution": "unavailable",
+      "durationSeconds": 3.0,
+      "sha256": "bba77f29e39e34c95f9ad61b2bc8b3b5f6a6a3482b52234d088fb495791cf50d"
+    },
+    {
+      "operationId": "local-cpu-clip-smoke",
+      "scenario": "cpu-clip-smoke",
+      "outcome": "succeeded",
+      "wallSeconds": 0.15462362702237442,
+      "userCpuSeconds": 0.128449,
+      "systemCpuSeconds": 0.046622,
+      "peakRssKiB": 77992,
+      "outputBytes": 215002,
+      "exitCode": 0,
+      "invoiceCostMicros": null,
+      "cloudCostAttribution": "unavailable",
+      "durationSeconds": 1.0,
+      "sha256": "bcf3b2b1d4b5856ea14db7ad53d86d9d8161584fee23e9b9bc24a49811070080"
+    },
+    {
+      "operationId": "local-cpu-render-invalid-encoder-failure",
+      "scenario": "cpu-render-invalid-encoder-failure",
+      "outcome": "failed",
+      "wallSeconds": 0.063368423958309,
+      "userCpuSeconds": 0.040014,
+      "systemCpuSeconds": 0.020007,
+      "peakRssKiB": 54232,
+      "outputBytes": 0,
+      "exitCode": 8,
+      "invoiceCostMicros": null,
+      "cloudCostAttribution": "unavailable"
+    }
+  ],
+  "limits": [
+    "Resource smoke measurements, not complete application/cloud cost samples.",
+    "GPU/AI inference, network, storage byte-time, Firestore, Tasks and provider fees are unmeasured.",
+    "The injected early failure does not represent a worst-case late render failure.",
+    "No credit price or cloud USD cost can be derived from these timings alone."
+  ]
+}

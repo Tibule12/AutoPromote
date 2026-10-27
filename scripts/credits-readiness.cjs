@@ -12,6 +12,9 @@ const costs = JSON.parse(
   )
 );
 const costReview = analyseCostEvidence(costs);
+const pilot = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, "../config/unified-credits.pilot.draft.json"), "utf8")
+);
 const blockers = Object.entries(config.requirements)
   .filter(([, value]) => value !== true)
   .map(([name]) => name);
@@ -21,6 +24,14 @@ console.log(
       status: blockers.length ? "NOT_READY_FOR_PRODUCTION" : "REQUIRES_SEPARATE_RUNTIME_REVIEW",
       liveAdvertisingEnabled: false,
       runtime: "local-emulator-only",
+      pilot: {
+        status: pilot.status,
+        totalProposedBudgetMicros: pilot.lifetimeSpendMicros,
+        fundingApproved: pilot.fundingApproved,
+        liveAdsRequired: false,
+        cloudInvoiceCapVerified: false,
+        canonicalTransportQualification: "local-boundary-fixtures",
+      },
       blockers,
       costReview,
       productionRewardRecommendation:

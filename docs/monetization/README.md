@@ -1,5 +1,7 @@
 # Rewarded ads and unified credits
 
+Current: [nonproduction application integration and pilot readiness](../../NONPRODUCTION_PILOT_20261027.md).
+
 Current branch: `feat/rewarded-credits-continuation-20261027`, based on the deployed
 security and ownership-verification release `593bbcdf`. Read the
 [27 October continuation report](../../MONETIZATION_CONTINUATION_20261027.md),

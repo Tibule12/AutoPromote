@@ -1,4 +1,29 @@
 {
+  "monetizationPilot20261027": {
+    "date": "2026-10-27",
+    "status": "LOCAL_API_FIXTURES_ONLY",
+    "report": "NONPRODUCTION_PILOT_20261027.md",
+    "ordinaryHandlers": [
+      "/api/media/process",
+      "/api/clips/analyze",
+      "/api/clips/generate",
+      "/api/content/upload",
+      "/api/promotion-tasks/platform/enqueue"
+    ],
+    "database": "fresh demo-autopromote-credits emulator",
+    "workerAuthStorageAndPublication": "controlled fixtures",
+    "productionChanges": false,
+    "rendererOrParityChanges": false,
+    "camCombinerChanged": false,
+    "readinessPromotion": false,
+    "remainingBlockers": [
+      "Real authenticated worker outcomes and immutable source/runtime enforcement.",
+      "Invoice-linked operation costs including realistic late failures and GPU workloads.",
+      "Signed-in browser project save/reopen and end-to-end provider qualification.",
+      "Named nonproduction rollout, funding and deployment approval."
+    ],
+    "nextTask": "Qualify real nonproduction Auth/source/worker/Storage bindings and measured cost ceilings; retain S02/S04/S03 product backlog."
+  },
   "schemaVersion": 1,
   "contractVersion": 1,
   "updatedAt": "2026-10-21T19:28:46.375062Z",

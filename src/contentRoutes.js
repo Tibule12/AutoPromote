@@ -718,6 +718,7 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
 router.post(
   "/upload",
   authMiddleware,
+  require("./services/unifiedCredits/application").applicationCreditRoute("publisher.publish", db),
   usageLimitMiddleware(),
 
   costControlMiddleware,
@@ -814,7 +815,7 @@ router.post(
       const detectedIntent = determineContentIntent(platform_options);
 
       if (!req.body.isDryRun) {
-        if (!shouldBypassUploadReadinessForTest(req)) {
+        if (!require("./services/unifiedCredits/application").getApplicationContext(userId) && !shouldBypassUploadReadinessForTest(req)) {
           const readiness = await evaluateUploadReadiness(userId, {
             target_platforms,
             scheduled_promotion_time,
@@ -1023,6 +1024,7 @@ router.post(
         // so the user gets a 200 OK immediately while the system works in the background.
         const distributionManager = require("./services/distributionManager");
         if (
+          !require("./services/unifiedCredits/application").getApplicationContext(userId) &&
           target_platforms &&
           target_platforms.length > 0 &&
           !hasAnyExplicitFutureSchedule(scheduled_promotion_time, platform_schedule_times)
@@ -1055,7 +1057,7 @@ router.post(
 
         // Track Usage (Increment upload counter)
         // Fire-and-forget to not block response
-        billingService
+        if (!require("./services/unifiedCredits/application").getApplicationContext(userId)) billingService
           .trackUploadUsage(userId)
           // Security Fix: Prevent externally-controlled format string vulnerability (CodeQL #960)
           // Move userId out of the first argument to console.error
@@ -1154,8 +1156,10 @@ router.post(
       };
 
       // Start the background processes (do not await)
-      backgroundOptimization();
-      trackUsage(userId).catch(e => {
+      const localCreditContext = require("./services/unifiedCredits/application").getApplicationContext(userId);
+      if (!localCreditContext) backgroundOptimization();
+      else await localCreditContext.bindJob("content", content.id);
+      if (!localCreditContext) trackUsage(userId).catch(e => {
         console.warn("[upload] Failed to track usage:", e && e.message ? e.message : e);
       });
 

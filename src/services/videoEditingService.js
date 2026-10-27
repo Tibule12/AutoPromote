@@ -134,6 +134,7 @@ const { v4: uuidv4 } = require("uuid");
 
 class VideoEditingService {
   async assertRenderWorkerReady() {
+    require("./unifiedCredits/application").assertApplicationTransport(MEDIA_WORKER_URL);
     try {
       const target = `${MEDIA_WORKER_URL}/health`;
       const config = await buildWorkerRequestConfig(target, { timeout: Math.max(10000,
@@ -223,6 +224,8 @@ class VideoEditingService {
    * Returns a jobId immediately for polling.
    */
   async startProcessingJob(videoUrl, options, userId, attempt = {}) {
+    require("./unifiedCredits/application").assertApplicationDatabase(db);
+    require("./unifiedCredits/application").assertApplicationTransport(MEDIA_WORKER_URL);
     const jobId = attempt.jobId || uuidv4();
     console.log(`[VideoEditing] Starting Async Job ${jobId} for User ${userId}`);
 
@@ -260,6 +263,8 @@ class VideoEditingService {
       }
 
       // Start background processing without awaiting
+      const localCreditContext = require("./unifiedCredits/application").getApplicationContext(userId);
+      if (localCreditContext) await localCreditContext.bindJob("video_edits", jobId);
       this.processJobBackground(jobId, videoUrl, options, userId).catch(err => {
         console.error(`[VideoEditing] Background Job ${jobId} Failed (uncaught):`, err);
       });

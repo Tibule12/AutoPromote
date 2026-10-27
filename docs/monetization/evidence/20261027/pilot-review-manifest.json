@@ -1,0 +1,335 @@
+{
+  "capturedAtUtc": "2026-10-27T17:05:44.868104+00:00",
+  "productionBase": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+  "preservedContinuation": "51c3980e3272ef9d205901db0bc68a830ebea8e9",
+  "branch": "feat/rewarded-credits-continuation-20261027",
+  "files": [
+    {
+      "path": "MONETIZATION_CONTINUATION_20261027.md",
+      "sha256": "b009e72ec11d8c3ab0e593a4c6e6e3b8552a6cdbc51ea0bec5cd10a396bd5d77"
+    },
+    {
+      "path": "NONPRODUCTION_PILOT_20261027.md",
+      "sha256": "a9a2deb9fd1b904449825950ea424839f2af4c6c516dbd3dbc354287f69eb113"
+    },
+    {
+      "path": "config/unified-credits.costs.pending.json",
+      "sha256": "e39eca9c452eee3d89c7625fd621706ee071e880863f6029172b3611154df10b"
+    },
+    {
+      "path": "config/unified-credits.economics.example.json",
+      "sha256": "ca66ba61c49e25d84ad24a28b63dc31d30baf6f41123f39d89d1451198b7f912"
+    },
+    {
+      "path": "config/unified-credits.pilot.draft.json",
+      "sha256": "515e22ebe13dc615ee75ca4c2dc93deb00ba6bc68561ad724cd7fbe27a5ad6ec"
+    },
+    {
+      "path": "config/unified-credits.rollout.pending.json",
+      "sha256": "d3a20911cbf90fbb46fc4c880dfeccee062aa20cdbcf1f8ee973a61c84bd8922"
+    },
+    {
+      "path": "config/unified-credits.sandbox.example.json",
+      "sha256": "5ec3076a92b45180a1d9ecb4e0d803727038112f33bd9860e6917dcece3e8792"
+    },
+    {
+      "path": "docs/STUDIO-PRODUCT-READINESS.md",
+      "sha256": "da5402286386825f310e0b6c41b27a177c17759ea1f3e9df1c30ef36bada7179"
+    },
+    {
+      "path": "docs/monetization/COST_MEASUREMENT_20261027.md",
+      "sha256": "80ef79cc9f1562e01079d2957194792a7eb430db464f0bfc976fe4339967bcb0"
+    },
+    {
+      "path": "docs/monetization/CREDIT_MODEL_AND_ROLLOUT.md",
+      "sha256": "2491aefd9f24384c02ca0ad9c23d93c0175b8ba3f13ba188797797b7d0c6d260"
+    },
+    {
+      "path": "docs/monetization/ECONOMICS.md",
+      "sha256": "0a67c50030633dd6088e47fc7c01cde3122a8fc7a7d7a6b70907dab081b5239f"
+    },
+    {
+      "path": "docs/monetization/GOOGLE_SETUP.md",
+      "sha256": "371881b7a8bf5e36df3df3e1753189c00dd7e37cc9176ff4bd8329ad3de8176c"
+    },
+    {
+      "path": "docs/monetization/GOOGLE_SETUP_20261027.md",
+      "sha256": "4c09f9928850966c9b49b172c961fb02966f54769ffffefdf89110fd4042e977"
+    },
+    {
+      "path": "docs/monetization/README.md",
+      "sha256": "cecaa40958f556a2588e29d06ea9309854c685aff816faebfceb1d78492fe657"
+    },
+    {
+      "path": "docs/monetization/RESEARCH_AND_AUDIT.md",
+      "sha256": "aed3be490a955df523c8bf50a02156d4f974843ac1fc6ed55fa6d0619d1ac330"
+    },
+    {
+      "path": "docs/monetization/VALIDATION.md",
+      "sha256": "c50b659d107272cd8b2c1265755f6de25dde102fe3359167be53696b3a0dd386"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/billing-read-limit.json",
+      "sha256": "7098ea53d81fd49ade157d2eab59a9e837af4519b5a76bec9ba9f34723f970e7"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/cost-observations.json",
+      "sha256": "dda61c4eaed8479cb19e4a35e6a05de1dce9b46031fc75506444374ceb65f718"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/deployed-security-baseline.json",
+      "sha256": "6947994c9a12cb238197f7d8edd7b6fa469953132cbba65cb5fdd0fc22ae27a4"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/foundation-provenance.json",
+      "sha256": "ba14a4bfabdfbdffbf713babace5ead63b6d7aa4389a0394630ebac6f2c13878"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/google-test-browser.json",
+      "sha256": "6b2e6e9ac2fcf28fcb9824effebe78f0d58b438266594516f296be951597d5f6"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/google-verification-followup.json",
+      "sha256": "eda29994539897e6fe6b7bf4adb1bb3922b8a3fd66851459cc24129ce1ae0194"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/historical-gpu-operation.json",
+      "sha256": "87ba2d22d7fff62977519f2791eebd79c742a84d944ab6351db9c4e3cbb150aa"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/hypothetical-economics.json",
+      "sha256": "ffcf51708c8d54a71b1e8904962806b3bca256e05107f7d0142e0670bde3f1dd"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/local-cpu-measurements.json",
+      "sha256": "41c8f669cddcc02b96c22bd063704f0b479193805613215e8ff1612776d205f6"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/pilot-public-release-check.json",
+      "sha256": "66b7e4edc2c9ed4fa3f17c845dc1e49dcb9436be2b6429ba44dc026f09433677"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/pilot-readiness.json",
+      "sha256": "a77f3d306741385e7b50f45b801870cfa311a02951e0c1ea3c8c53385de6584b"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/pilot-source-preservation.json",
+      "sha256": "adabb73d73908dbf3f22148a3d226e00182d5f9fd55c33e045d2a405c6c46e96"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/pilot-studio-contract.json",
+      "sha256": "e475615ce029a2759d213ab26187158181fb272c7c3ebcc4f05816622c842a61"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/pilot-validation.json",
+      "sha256": "17a5814f75fbb8c847e4967268aab50bd9c0b95c1d97011cfb8c280df1343192"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/public-api-baseline.json",
+      "sha256": "c0b145aa26e8c3023d175d81e046bec78af4c11b2de95a767e9af92185b31ae9"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/readiness.json",
+      "sha256": "65c755bb92c5f108111278ec8ed00116b50ec2edce7756d2cc21a49ee764f83c"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/source-manifest.json",
+      "sha256": "1e19fc2f17499db1737155f61cbfdde8159cd3aac9c49c247087031422d60810"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/source-preservation.json",
+      "sha256": "d8f5c3973450982682fcc01bfcb610b1ea3064d0191f51f34879610289f6150a"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/staging-target-check.json",
+      "sha256": "397ed574fae12302d9b37b6ceaa4ef1f9862832d0be597bd211d186b87e3ed85"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/validation.json",
+      "sha256": "197dfbd473b786ce16dae1347a071357489694023e9d6e63097fe4f56e9060f7"
+    },
+    {
+      "path": "package.json",
+      "sha256": "e28b754605bb180c4d4180b111e9bfc4bf7bd7246fd5aaa7c42cf6fae0fc2077"
+    },
+    {
+      "path": "sandbox/credits/app.js",
+      "sha256": "68ee57dd3844397e61e508b52b5cf030c7273aa14d113bb87755f3030e4fb9de"
+    },
+    {
+      "path": "sandbox/credits/google-test-controller.js",
+      "sha256": "1076b4f7047aa712202a23c79ea3cfe3f585eddea9de05107402c19e29ccb1f0"
+    },
+    {
+      "path": "sandbox/credits/google-test-page.js",
+      "sha256": "043287f5f78ffe6f249986a6779d3321e772271866a24595123a3947fc0009ae"
+    },
+    {
+      "path": "sandbox/credits/google-test.html",
+      "sha256": "db6573116438922da9eb035b7e37038844e638141bd7117378e4484f2a9ff0c0"
+    },
+    {
+      "path": "sandbox/credits/index.html",
+      "sha256": "42020d2cfb6fea92fdf1d4d093f5c36290b31f489b441a6114bdb7366e3baf73"
+    },
+    {
+      "path": "sandbox/credits/style.css",
+      "sha256": "52ae1ccec6523bd833a642801d1da513bd2d43fc854028830001a4268bad79f1"
+    },
+    {
+      "path": "scripts/credits-browser-check.cjs",
+      "sha256": "29a8cd88df9fffe80cccd534c5943ab15116f429810a703f84827ad24069b7e1"
+    },
+    {
+      "path": "scripts/credits-economics.cjs",
+      "sha256": "1076f57be0202b1825ce93b6d817942d67b97b27a7c18b3a3940f75ac699cfd5"
+    },
+    {
+      "path": "scripts/credits-google-browser-check.cjs",
+      "sha256": "244c83818c0665f59e729743abde620dd5281933e4519cb4ed1eb9957dd4f294"
+    },
+    {
+      "path": "scripts/credits-google-test.cjs",
+      "sha256": "df3ecd4cf70f423374b314e65db598185562f645d151f02c2d227741691c3740"
+    },
+    {
+      "path": "scripts/credits-readiness.cjs",
+      "sha256": "1890770becfc99cbae2b27912ac78dce9239e39bf3be9226dc3057e9215f51e0"
+    },
+    {
+      "path": "scripts/credits-sandbox.cjs",
+      "sha256": "c34e1a73509094b569256c196104e0d089a664cb9e8c21e1dec4f1519a896e7e"
+    },
+    {
+      "path": "scripts/monetization/measure-local-cpu.py",
+      "sha256": "d24a8a83ad0124d18cf001f023f2b73afd716c919c2a4453260c45774be63cda"
+    },
+    {
+      "path": "scripts/monetization/observe-costs.py",
+      "sha256": "77bc564bb3f6c14ec41243a6682ccca53cb2e9b7cabf73c0bf7e5d93b9961c1c"
+    },
+    {
+      "path": "scripts/test-unified-credits.cjs",
+      "sha256": "bd4bd6634c201637074110fec02145019a34bd2661f88654476b57bda1930038"
+    },
+    {
+      "path": "src/contentRoutes.js",
+      "sha256": "3559fcac29c27959b0b8a9a4da0eaa0e4cd5bd861c90492e1ba50069ae7d5b2c"
+    },
+    {
+      "path": "src/creditSystem.js",
+      "sha256": "fe331598043f5f4cee4fe9a40ef680e0108b52a63c33a6e5e18ffa7ce380b1c2"
+    },
+    {
+      "path": "src/mediaRoutes.js",
+      "sha256": "7c88fc1438b336115c5232a80f7354119d5bce5666c1ba681b3650f86da29c42"
+    },
+    {
+      "path": "src/middlewares/usageLimitMiddleware.js",
+      "sha256": "ad1851a3b10abd8aab4c95982aee4b48efc7191435ab7a7a426e3910ec6f1c42"
+    },
+    {
+      "path": "src/routes/clipRoutes.js",
+      "sha256": "6048e7da9b4b3b70fc34493e20f82169984deeac675bb24a7df094dc69fb7521"
+    },
+    {
+      "path": "src/routes/promotionTaskRoutes.js",
+      "sha256": "0fc6036521188221ae7ef2b2959256160218256fac906427f2147bae492dfa53"
+    },
+    {
+      "path": "src/routes/unifiedCreditsSandboxRoutes.js",
+      "sha256": "b584bb2fe3f800251a32a75f57282c042d554d3267cfbeff8262046ee7d462d4"
+    },
+    {
+      "path": "src/services/billingService.js",
+      "sha256": "8799da34c3ded579e64136c96cec3a6fd2589a3962be0fc824d87c9ffb6e2a04"
+    },
+    {
+      "path": "src/services/promotionTaskQueue.js",
+      "sha256": "7ec14333169bbcc30fd84499b7032c63c7f69c2f7b6171454ebfee8858d21cc9"
+    },
+    {
+      "path": "src/services/unifiedCredits/admission.js",
+      "sha256": "5503eb46c174f98d800b21895acd4e704b33de56e5c2a696293b3ab9ed3229c3"
+    },
+    {
+      "path": "src/services/unifiedCredits/application.js",
+      "sha256": "35db460a267909bb037a920f719636cb9851960c5f7a1078d138e60c11ee06e0"
+    },
+    {
+      "path": "src/services/unifiedCredits/costEvidence.js",
+      "sha256": "acc4d551625d920c5c0b2e8acc4428a2f000a5ff3fd796fd27db057bbae6a633"
+    },
+    {
+      "path": "src/services/unifiedCredits/dispatch.js",
+      "sha256": "c51b8273d2e96f664753300f238dc2229d484a26f98461b53a0a2ef1418c3dca"
+    },
+    {
+      "path": "src/services/unifiedCredits/economics.js",
+      "sha256": "97ee284492515421f374b0d1a30535727c4405442ee411b2426fbc911f166099"
+    },
+    {
+      "path": "src/services/unifiedCredits/policy.js",
+      "sha256": "13daffd354e4bdd93006e3d311901bdee53c335caa1433f8f5fa5a4c376ae55a"
+    },
+    {
+      "path": "src/services/unifiedCredits/rewardProof.js",
+      "sha256": "98ec070b109998258b2d86bf69427d5dd701ab39b54bebb62c21b53ac7e96192"
+    },
+    {
+      "path": "src/services/unifiedCredits/runtime.js",
+      "sha256": "2dbfca04828766baf63fb15d7ed0d4fcb7ccae3b17274bc160cc14acc670b4e3"
+    },
+    {
+      "path": "src/services/unifiedCredits/wallet.js",
+      "sha256": "09e2c9dbebe3339a371c947b2688a11d20b8bb7c31e913f3170aa0f1c9a96a40"
+    },
+    {
+      "path": "src/services/videoClippingService.js",
+      "sha256": "13283e457afd390f604a0bdfeb71a5b718220c39c4fdaf2cd4c08ec58845291a"
+    },
+    {
+      "path": "src/services/videoEditingService.js",
+      "sha256": "c1a432cdf9a178e1df4a0fed06e5723a33446e43b8d59d27171f46612a231578"
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "sha256": "539cc8eb8b474388714d2adbd14e2bd72cc6601ad944143f028515f74a42a2ff"
+    },
+    {
+      "path": "test/e2e/studio-combination-matrix.json",
+      "sha256": "8772829fc7492dab9ec6b179824d44621196e130b27b6c7fb47543cc3a774318"
+    },
+    {
+      "path": "test/unified-credits/application.integration.test.cjs",
+      "sha256": "dbb8037d848abc92c0087950717fb96302dc57db1948e9979af2f9507adb3ef0"
+    },
+    {
+      "path": "test/unified-credits/continuation.test.cjs",
+      "sha256": "919d11ea49d33af4362a669494c49cf4de1b56e819e1aa94eac51edc9546d625"
+    },
+    {
+      "path": "test/unified-credits/cost_observer_test.py",
+      "sha256": "653a33567a494ddde2e449c78957fc4b6852ac29e9ff253aa72855b9339dda97"
+    },
+    {
+      "path": "test/unified-credits/firebase.json",
+      "sha256": "12f2877253285699920b522a3e0ea830bf56a5c7e6aa5e26fb5720a3d3ef5800"
+    },
+    {
+      "path": "test/unified-credits/firestore.rules",
+      "sha256": "e046373b78a4cb7f287258bc57b0789da0561b1be88fb27aafa8f6b9c1baa69d"
+    },
+    {
+      "path": "test/unified-credits/foundation.test.cjs",
+      "sha256": "643ee38f127bb48a12d3ebecf164528bd6937d344f686785f981916e75f8492e"
+    },
+    {
+      "path": "test/unified-credits/google-controller.test.cjs",
+      "sha256": "13ad877432f777859444d364a94e1d8ee51cb096b808e3f4f8f86b4b6e648f2d"
+    }
+  ],
+  "snapshotSha256": "8c4376d4962f9ad204979484a02a18c5e1223b18991f0d87abfd7f964c60d37e",
+  "remoteActions": false,
+  "productionMutations": false
+}

@@ -1111,7 +1111,7 @@ async function monitorPromoSummaryJob(jobId) {
  * @desc Analyze video for clips (Deducts credits)
  * @access Private
  */
-router.post("/analyze", authMiddleware, async (req, res) => {
+router.post("/analyze", authMiddleware, require("../services/unifiedCredits/application").applicationCreditRoute("clips.analyze", db), async (req, res) => {
   const { videoUrl, contentId } = req.body;
   const userId = req.user.uid;
 
@@ -1161,7 +1161,7 @@ router.post("/analyze", authMiddleware, async (req, res) => {
  * @route POST /generate
  * @desc Generate (Render) a specific clip from analysis
  */
-router.post("/generate", authMiddleware, async (req, res) => {
+router.post("/generate", authMiddleware, require("../services/unifiedCredits/application").applicationCreditRoute("clips.render", db), async (req, res) => {
   const { analysisId, clipId, isMontage, montageSegments, options } = req.body;
   const userId = req.user.uid;
 

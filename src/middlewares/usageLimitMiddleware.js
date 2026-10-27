@@ -63,6 +63,7 @@ function usageLimitMiddleware(options = {}) {
   const limitType = options.limitType || "upload";
 
   return async (req, res, next) => {
+    if (require("../services/unifiedCredits/application").getApplicationContext(req.user?.uid)) return next();
     try {
       const userId = req.userId || req.user?.uid;
 

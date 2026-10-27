@@ -445,6 +445,7 @@ async function enqueuePlatformPostTask({
   skipIfDuplicate = true,
   forceRepost = false,
 }) {
+  require("./unifiedCredits/application").assertApplicationDatabase(db);
   console.log("[enqueue] called with", { contentId, uid, platform, reason, payload });
   // Fast-path for tests/CI: avoid heavy quota/content-count/duplicate checks and external API calls
   if (
@@ -620,6 +621,8 @@ async function enqueuePlatformPostTask({
         .digest("hex");
     } catch (_) {}
     await ref.set(baseTask);
+    const localCreditContext = require("./unifiedCredits/application").getApplicationContext(uid);
+    if (localCreditContext) await localCreditContext.bindJob("promotion_tasks", ref.id);
     return { id: ref.id, ...baseTask };
   }
   if (!contentId || !uid || !platform) throw new Error("contentId, uid, platform required");

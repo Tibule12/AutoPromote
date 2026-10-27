@@ -323,6 +323,8 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
  * Calculate the charge for a specific upload based on user tier and content intent
  */
 async function calculateCreatorCharge(userId, intent, _featuresSelected = []) {
+  if (require("./unifiedCredits/application").getApplicationContext(userId))
+    return { amount: 0, requiresPayment: false, sharedWallet: true };
   // 1. Get User Tier & Usage
   const userRef = db.collection("users").doc(userId);
   const userSnap = await userRef.get();

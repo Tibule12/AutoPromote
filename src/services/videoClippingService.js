@@ -140,6 +140,8 @@ class VideoClippingService {
    * @returns {Promise<string>} jobId
    */
   async startAnalysis(videoUrl, contentId, userId) {
+    require("./unifiedCredits/application").assertApplicationDatabase(getDb);
+    require("./unifiedCredits/application").assertApplicationTransport(MEDIA_WORKER_URL);
     const jobId = crypto.randomBytes(16).toString("hex");
     const db = getDb();
 
@@ -155,6 +157,8 @@ class VideoClippingService {
     });
 
     // Trigger background processing (Fire & Forget)
+    const localCreditContext = require("./unifiedCredits/application").getApplicationContext(userId);
+    if (localCreditContext) await localCreditContext.bindJob("clip_analyses", jobId);
     // We don't await this, allowing the API request to return immediately
     this.processAnalysisBackground(jobId, videoUrl, contentId, userId).catch(err => {
       console.error(`[VideoClipping] Background Job ${jobId} Failed:`, err);
@@ -345,6 +349,8 @@ class VideoClippingService {
     isMontage = false,
     montageSegments = []
   ) {
+    require("./unifiedCredits/application").assertApplicationDatabase(getDb);
+    require("./unifiedCredits/application").assertApplicationTransport(MEDIA_WORKER_URL);
     const fs = require("fs");
     console.log(
       `[VideoClipping] Rendering ${isMontage ? "Montage" : "Clip " + clipId} for user ${userId}`
@@ -427,8 +433,11 @@ class VideoClippingService {
 
       // Get Public URL (valid for long time or make public)
       const fileRef = bucket.file(destination);
-      await fileRef.makePublic();
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${destination}`;
+      const localCreditContext = require("./unifiedCredits/application").getApplicationContext(userId);
+      if (!localCreditContext) await fileRef.makePublic();
+      const publicUrl = localCreditContext
+        ? (await fileRef.getSignedUrl({ action: "read", expires: Date.now() + 300000 }))[0]
+        : `https://storage.googleapis.com/${bucket.name}/${destination}`;
 
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + GENERATED_CLIP_RETENTION_DAYS);
