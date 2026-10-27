@@ -1,6 +1,6 @@
 # Rewarded ads and unified credits
 
-Current: [nonproduction application integration and pilot readiness](../../NONPRODUCTION_PILOT_20261027.md).
+Current: [actual signed-in application workflows and pilot gates](../../APPLICATION_WORKFLOWS_20261027.md). The [69-test API checkpoint](../../NONPRODUCTION_PILOT_20261027.md) is retained as history.
 
 Current branch: `feat/rewarded-credits-continuation-20261027`, based on the deployed
 security and ownership-verification release `593bbcdf`. Read the

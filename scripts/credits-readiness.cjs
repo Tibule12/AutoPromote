@@ -30,7 +30,7 @@ console.log(
         fundingApproved: pilot.fundingApproved,
         liveAdsRequired: false,
         cloudInvoiceCapVerified: false,
-        canonicalTransportQualification: "local-boundary-fixtures",
+        canonicalTransportQualification: "actual-frontend-emulator-auth-storage-and-local-cpu; cloud/provider-unqualified",
       },
       blockers,
       costReview,

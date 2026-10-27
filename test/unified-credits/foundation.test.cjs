@@ -607,6 +607,8 @@ describe("Firestore client security rules", () => {
       "worker_executions",
       "application_steps",
       "application_receipts",
+      "application_results",
+      "worker_requests",
       "quotes",
       "inputs",
     ]) {

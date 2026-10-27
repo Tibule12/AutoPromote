@@ -1,3 +1,5 @@
+import { creditPilotEnabled } from "./creditPilot";
+
 const DEFAULT_CHUNK_SIZE = 16 * 1024 * 1024;
 const CHUNK_ALIGNMENT = 256 * 1024;
 
@@ -124,11 +126,15 @@ export async function uploadMulticamSourceResumable({
 
   try {
     const chunkSize = normalizeResumableChunkSize(session.chunkSizeBytes);
-    let committedBytes = await queryCommittedBytes({
-      uploadUrl: session.uploadUrl,
-      totalBytes: file.size,
-      signal,
-    }).catch(() => 0);
+    // The local Storage emulator finalizes an empty object for GCS offset probes.
+    // Send real bytes from zero there; normal production resumable recovery stays intact.
+    let committedBytes = creditPilotEnabled() && ["studio_source", "studio_project"].includes(purpose)
+      ? 0
+      : await queryCommittedBytes({
+          uploadUrl: session.uploadUrl,
+          totalBytes: file.size,
+          signal,
+        }).catch(() => 0);
 
     while (committedBytes < file.size) {
       const chunkStart = committedBytes;

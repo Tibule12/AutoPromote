@@ -274,7 +274,7 @@ function createWalletService({ db, policy: input, verifier, now = Date.now }) {
       sourceDescriptor !== null &&
       (typeof sourceDescriptor !== "object" ||
         Array.isArray(sourceDescriptor) ||
-        JSON.stringify(sourceDescriptor).length > 4096)
+        JSON.stringify(sourceDescriptor).length > 131072)
     )
       fail("INVALID_SOURCE_DESCRIPTOR");
     const sourceSnapshot =

@@ -1461,7 +1461,7 @@ router.get("/repost-activity", authMiddleware, async (req, res) => {
 });
 
 // POST /:contentId/promotion-schedules - Create a new promotion schedule
-router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) => {
+router.post("/:contentId/promotion-schedules", authMiddleware, require("./services/unifiedCredits/application").applicationCreditRoute("queue.dispatch", db), async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -1564,7 +1564,7 @@ router.post("/promotion-schedules/:id/pause", authMiddleware, async (req, res) =
 });
 
 // POST /promotion-schedules/:id/resume - Resume a promotion schedule
-router.post("/promotion-schedules/:id/resume", authMiddleware, async (req, res) => {
+router.post("/promotion-schedules/:id/resume", authMiddleware, require("./services/unifiedCredits/application").applicationCreditRoute("queue.dispatch", db), async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -1584,7 +1584,7 @@ router.post("/promotion-schedules/:id/resume", authMiddleware, async (req, res) 
 });
 
 // POST /promotion-schedules/:id/reschedule - Reschedule a promotion
-router.post("/promotion-schedules/:id/reschedule", authMiddleware, async (req, res) => {
+router.post("/promotion-schedules/:id/reschedule", authMiddleware, require("./services/unifiedCredits/application").applicationCreditRoute("queue.dispatch", db), async (req, res) => {
   try {
     const userId = req.userId || req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });

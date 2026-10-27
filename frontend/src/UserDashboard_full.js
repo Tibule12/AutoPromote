@@ -1,3 +1,4 @@
+import { creditFetch } from "./utils/creditPilot";
 // Canonical consolidated user dashboard
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
@@ -821,7 +822,7 @@ const UserDashboard = ({
   const doResume = useCallback(
     async id => {
       return withAuth(async token => {
-        const response = await fetch(API_ENDPOINTS.SCHEDULE_RESUME(id), {
+        const response = await creditFetch(API_ENDPOINTS.SCHEDULE_RESUME(id), {
           method: "POST",
           headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
         });
@@ -836,7 +837,7 @@ const UserDashboard = ({
   const doReschedule = useCallback(
     async (id, when, timezone) => {
       return withAuth(async token => {
-        const response = await fetch(API_ENDPOINTS.SCHEDULE_RESCHEDULE(id), {
+        const response = await creditFetch(API_ENDPOINTS.SCHEDULE_RESCHEDULE(id), {
           method: "POST",
           headers: withWorkspaceHeaders({
             Authorization: `Bearer ${token}`,
@@ -865,7 +866,7 @@ const UserDashboard = ({
               : API_ENDPOINTS.SCHEDULE_RESCHEDULE(id);
         const results = await Promise.allSettled(
           uniqueIds.map(async id => {
-            const response = await fetch(endpoint(id), {
+            const response = await creditFetch(endpoint(id), {
               method: "POST",
               headers: withWorkspaceHeaders({
                 Authorization: `Bearer ${token}`,

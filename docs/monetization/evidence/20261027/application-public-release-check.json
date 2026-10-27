@@ -1,0 +1,19 @@
+{
+  "observedAtUtc": "2026-10-27T19:53:20Z",
+  "method": "anonymous GET /api/version",
+  "observations": [
+    {
+      "origin": "https://api.autopromote.org",
+      "status": 200,
+      "commit": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+      "securityPolicy": "security-owner-bootstrap-20261027"
+    },
+    {
+      "origin": "https://autopromote.onrender.com",
+      "status": 200,
+      "commit": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+      "securityPolicy": "security-owner-bootstrap-20261027"
+    }
+  ],
+  "rulesDeployOrProductionWritePerformed": false
+}

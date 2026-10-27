@@ -1,0 +1,197 @@
+{
+  "recordedAtUtc": "2026-10-27T20:23:35.036492+00:00",
+  "parentLocalCommit": "e418367b792cf8513e51627a14c00b0870fcd025",
+  "snapshotSha256": "485e56d3732353bc4795f9fb6a8c1446cb723550561ab088e839cb466fa18dae",
+  "files": [
+    {
+      "path": "APPLICATION_WORKFLOWS_20261027.md",
+      "sha256": "edc6662375b92d1371700f5db4d5a14838ff568114f2a8c39f3ed492ef47eff1"
+    },
+    {
+      "path": "NONPRODUCTION_PILOT_20261027.md",
+      "sha256": "18d7e53d8568268ff2d4a4361799a2fb084fcdc5b9b9beed8525290e9db612c0"
+    },
+    {
+      "path": "docs/STUDIO-PRODUCT-READINESS.md",
+      "sha256": "4b0fdc7d13c9688593a4f641a6b6b0296c026f05d2ed4c38a885b47701e4a102"
+    },
+    {
+      "path": "docs/monetization/README.md",
+      "sha256": "e3c09195d80202a6c6592b81518bb5fe4ca72521e3329d430c22aa9d9daeb441"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/application-observation.json",
+      "sha256": "85a0d2dbd1303f25a636bc0447eb019e91cfc08d7c589a1787bfc75919062e2d"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/application-public-release-check.json",
+      "sha256": "6c6bdec1ed71dc648a30ac10ab5851fe55163e6604934cabc3eac33b2da1dd49"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/application-source-preservation.json",
+      "sha256": "433cb94f03d795a19642e23bd46636ff9bc696426512ed9842d0c5a9acada455"
+    },
+    {
+      "path": "docs/monetization/evidence/20261027/application-validation.json",
+      "sha256": "fc8d7fde60c4f4612abecb47e2bddc97fb86d6ec7eb3aa016060980c71bf3692"
+    },
+    {
+      "path": "frontend/src/App.js",
+      "sha256": "6ffe7d362e2f2f1877c757ff08d573cbfc3c3922b4cd49169d0374b0294c3e4b"
+    },
+    {
+      "path": "frontend/src/UserDashboardTabs/ClipStudioPanel.js",
+      "sha256": "6fd97cd96db78783c3250f34dd639283bec8587477dd12e9277aaee9956018f7"
+    },
+    {
+      "path": "frontend/src/UserDashboard_full.js",
+      "sha256": "141264f31d3de9ee6491b39abcd4fefcfaa792ed3e98779da87eb7787aa6c036"
+    },
+    {
+      "path": "frontend/src/components/CreditPilotPanel.css",
+      "sha256": "647bb6c6060b03d1655b09ca761f7decf5cc215f57fa6b45490a23c4b67efeda"
+    },
+    {
+      "path": "frontend/src/components/CreditPilotPanel.js",
+      "sha256": "9e2fe5a4bd7efe9b5bfc9f58c35c1498bcf5a2c12e53c312fa87342a070cf51e"
+    },
+    {
+      "path": "frontend/src/components/VideoEditor.js",
+      "sha256": "69447db95615bc5826a0eed173d534922fa77af33d91d654e02a1324ab9becda"
+    },
+    {
+      "path": "frontend/src/components/ViralScanner.js",
+      "sha256": "cbd0327d7f3c449096265dee43b14a5bcbef2b84ceec12fba34be836f8df8578"
+    },
+    {
+      "path": "frontend/src/features/publishing/UnifiedPublisher.js",
+      "sha256": "e7043d1c99b2d7c9a4650c47087e05a08da3018f478bf2191c03322305f9b1ef"
+    },
+    {
+      "path": "frontend/src/firebaseClient.js",
+      "sha256": "1090aa4fb6b71bbf3cdb12ff25e766669c8d20366296107a04025453b6bf14b3"
+    },
+    {
+      "path": "frontend/src/hooks/useSubscription.js",
+      "sha256": "8c09158aabb9c11dad424660b00ae929c9f14e666119e57560ab309d0e2e5cf9"
+    },
+    {
+      "path": "frontend/src/utils/creditPilot.js",
+      "sha256": "f7cc2c96f34bf9d803c550a0e72d5bacfd058772659dc01f1b96d56b459b9116"
+    },
+    {
+      "path": "frontend/src/utils/multicamResumableUpload.js",
+      "sha256": "4fedb3960f7df525e297de15236b86cf8a68a21928df574ff7839e07172b7160"
+    },
+    {
+      "path": "package.json",
+      "sha256": "34e4767c37bfff57d238d9cb07bd477239af5fa17540e58274d7a430dbe98c2a"
+    },
+    {
+      "path": "scripts/credits-readiness.cjs",
+      "sha256": "c19a330de97dc00b9fb0303aa68904483ed89535dc948fbd28a8661b6b7872f5"
+    },
+    {
+      "path": "scripts/monetization/application-browser.cjs",
+      "sha256": "449e222a78693b80ed21ea27cf693b9a094360e8c26259b1d3d4018aa1a69799"
+    },
+    {
+      "path": "scripts/monetization/application-demo-fixtures.cjs",
+      "sha256": "49d57dde894f286a61016a21ad97fb7678224b35c87d883a166ef62d44d52e29"
+    },
+    {
+      "path": "scripts/monetization/application-demo.cjs",
+      "sha256": "ba81121fcbf30baeacf3b37282c37aee3c65b77e5e53ce0a0a2246d2f023f70a"
+    },
+    {
+      "path": "scripts/monetization/application-host.cjs",
+      "sha256": "f2ffcc0869cdba5caa2af100ef5064321cb52dfd57739d53d7989f8172422150"
+    },
+    {
+      "path": "scripts/monetization/export-demo-evidence.cjs",
+      "sha256": "b47b60c3e0e44260276eff6902ca0261792b882b3cd36ae2406b99d5b46ac577"
+    },
+    {
+      "path": "scripts/monetization/local-worker-execution.py",
+      "sha256": "743cfca94f029907ea1a2c155e92a5d81304b591f5356993e2dc8c669590700b"
+    },
+    {
+      "path": "scripts/monetization/local-worker-provider.cjs",
+      "sha256": "c8a63849d78368f4fd3e3bd40348df2508ba2afa453698134852832f0c02236a"
+    },
+    {
+      "path": "scripts/monetization/restart-demo-api.cjs",
+      "sha256": "7172cd0d2e4719cdafdd631b354b88944d868b17d21b77612323ffbf46da8918"
+    },
+    {
+      "path": "scripts/test-unified-credits.cjs",
+      "sha256": "9646ec3508b1fe10a14c7ccaa169b4633b31ac5dd337ccf6a363a122e83b726a"
+    },
+    {
+      "path": "src/contentRoutes.js",
+      "sha256": "2dda55970be1fe15b5f16fa31cf2ba41cc263aa51527a5ef0ab09b8b4a6a77d1"
+    },
+    {
+      "path": "src/creditSystem.js",
+      "sha256": "f309a0938ed64a20c61c69b42070ea82a60e5ad0fa83e00b31848d159a330399"
+    },
+    {
+      "path": "src/mediaRoutes.js",
+      "sha256": "494efc3d9f9a02ed4723742f7e738f0ecdaae588b8ea32a4de22b8c57c792b4e"
+    },
+    {
+      "path": "src/services/unifiedCredits/application.js",
+      "sha256": "642781af6f66df16cadb9b61ac34ca1234e79fc9df38835d889ed07d6e667468"
+    },
+    {
+      "path": "src/services/unifiedCredits/sourceGateway.js",
+      "sha256": "602d2aabcbace4a50607e6212dd3a889698c6a9bc846c7566c27034a3baf6755"
+    },
+    {
+      "path": "src/services/unifiedCredits/wallet.js",
+      "sha256": "d5b3d85b935f77be23b39dd39676d7962c6caa635e0b8be4eeafafb1e79854b9"
+    },
+    {
+      "path": "src/services/unifiedCredits/workerTransport.js",
+      "sha256": "f864d36ea871c377a154f97759cb097cd869c96d419846b7e2bb22dba84caccb"
+    },
+    {
+      "path": "src/services/unifiedCredits/workerVerification.js",
+      "sha256": "5a7c3bb5b6f8dd4267f402d8ea9ddcd833762190326eea31ed9474335eebbdf1"
+    },
+    {
+      "path": "src/services/videoClippingService.js",
+      "sha256": "8a0704a1b22535f069e12c13188f4f2bac826a4782ebe9dfb87ca400461a16d1"
+    },
+    {
+      "path": "src/services/videoEditingService.js",
+      "sha256": "b90f65c203042810a24d75f7907a570623fe42bd0d7d8889c0dec8c6ccf38fa4"
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "sha256": "6983ddbc3ca24db0dd1771091823103176b013394098dd4a9008e8420b9dd5ed"
+    },
+    {
+      "path": "test/e2e/studio-combination-matrix.json",
+      "sha256": "3b7698cb0f59aa60d113797a96dd5af7efda671d4d63b37f7504d724334b9ee6"
+    },
+    {
+      "path": "test/unified-credits/application.integration.test.cjs",
+      "sha256": "04375bf5c0d36c75ac722a3a28d8ffe3ed95b51ca18fd8a4bc59f8d5b8d92773"
+    },
+    {
+      "path": "test/unified-credits/foundation.test.cjs",
+      "sha256": "90312130c3abed1071ed0c143e5209c737edf5ada88383abc189664e2f02e712"
+    },
+    {
+      "path": "test/unified-credits/frontend-admission.test.cjs",
+      "sha256": "72b9efff9806769749936618742216b88b852300057a2d1c68478d00d488a46e"
+    },
+    {
+      "path": "test/unified-credits/worker-verification.test.cjs",
+      "sha256": "26b4602cf130489b4e2132b0c594d5ff5dba9f2308d01829ddb029923f8e3ee1"
+    }
+  ],
+  "manifestExcludedFromOwnDigest": true,
+  "remoteActions": false
+}

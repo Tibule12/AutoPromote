@@ -1,3 +1,4 @@
+import { creditFetch } from "../utils/creditPilot";
 // ClipStudioPanel.js
 // AI Clip Generation Studio (Opus Clip style)
 // Analyze videos and generate viral short clips
@@ -350,7 +351,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
       const token = await getAuthToken();
       if (!token) throw new Error("Authentication token missing for analysis request");
 
-      const response = await fetch(`${API_BASE_URL}/api/clips/analyze`, {
+      const response = await creditFetch(`${API_BASE_URL}/api/clips/analyze`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -490,7 +491,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
         // Sort by start time? Or montage order (selection order)? Let's assume timeline order for now.
         .sort((a, b) => a.start - b.start);
 
-      const response = await fetch(`${API_BASE_URL}/api/clips/generate`, {
+      const response = await creditFetch(`${API_BASE_URL}/api/clips/generate`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -536,7 +537,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
       const token = await getAuthToken();
       if (!token) throw new Error("Authentication token missing for clip generation request");
       // Payload for single clip
-      const response = await fetch(`${API_BASE_URL}/api/clips/generate`, {
+      const response = await creditFetch(`${API_BASE_URL}/api/clips/generate`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

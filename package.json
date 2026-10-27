@@ -4,6 +4,7 @@
   "main": "src/server.js",
   "version": "1.2.0",
   "scripts": {
+    "credits:application-demo": "node scripts/monetization/application-demo.cjs",
     "test:credits:application": "node scripts/test-unified-credits.cjs --application-only",
     "credits:readiness": "node scripts/credits-readiness.cjs",
     "credits:google-test": "node scripts/credits-google-test.cjs",

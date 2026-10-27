@@ -271,9 +271,23 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
 };
 
 const refundCredits = async (userId, refund, operation = "refund", metadata = {}) => {
+  // Status/recovery reads run outside the original request's async context.
+  // A shared-wallet receipt must never enter a legacy balance writer.
+  if (refund?.deferredSettlement === true && refund?.unifiedOperationId)
+    return {
+      success: false,
+      deferredSettlement: true,
+      unifiedOperationId: refund.unifiedOperationId,
+      message: "Awaiting a trusted terminal job outcome",
+    };
   const local = require("./services/unifiedCredits/application").getApplicationContext(userId);
-  if (local) return { success: false, deferredSettlement: true,
-    unifiedOperationId: local.op.operationId, message: "Awaiting a trusted terminal job outcome" };
+  if (local)
+    return {
+      success: false,
+      deferredSettlement: true,
+      unifiedOperationId: local.op.operationId,
+      message: "Awaiting a trusted terminal job outcome",
+    };
   const amount = Math.max(0, Number(refund?.deducted ?? refund?.amount ?? 0) || 0);
   const fromMonthly = Math.max(0, Number(refund?.fromMonthly || 0) || 0);
   const fromTopUp = Math.max(0, Number(refund?.fromTopUp || 0) || 0);

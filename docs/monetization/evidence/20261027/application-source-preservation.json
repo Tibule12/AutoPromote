@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-10-27T20:12:11.720972+00:00",
+  "deployedBaseline": "593bbcdf86e7ca6e3acc16eac5b52b168f3a45ca",
+  "priorLocalCheckpoint": "e418367b792cf8513e51627a14c00b0870fcd025",
+  "source": [
+    {
+      "path": "firestore.rules",
+      "sha256": "25436b8888989a527e0d9138ce31cf53ef1f300c95618e89166377d1e15cc996",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "storage.rules",
+      "sha256": "b3ebe33fd6a4ec15263b24040c4ff75cf7cfdfb9fb47eeaad19dcfbf208a0679",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "src/authMiddleware.js",
+      "sha256": "03044686cad64b539c5755cc961bde1a8271b828606723f5add7b33ba43f77c1",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "src/authRoutes.js",
+      "sha256": "543408d47a87e9b903db9f105e356338daa90d79b63ec47ad76eb7ae2849b3bd",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "src/utils/authAuthority.js",
+      "sha256": "a2e30a561463eb8923e9b353033ceea930869b9034d1ed04433932b79022b910",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "src/config/subscriptionPlans.js",
+      "sha256": "7c1df339087a63ae8f24db34f0e587f32073d6e269c522a164f8ef2bdcdc8c69",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "src/paymentsRoutes.js",
+      "sha256": "189c123bc5c5ffce982375ef9183d7974f4c3862c2341f88cf5c0d85a63d5cd2",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "src/routes/paymentsExtendedRoutes.js",
+      "sha256": "04d0775a38512d6a64c4b61654fba7902e0a99ea1ad8b7bee4cd36af57103722",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "src/routes/paypalSubscriptionRoutes.js",
+      "sha256": "8fd77d988c3a2afef3c996480d4776b8242d452138c3dfaac8a0a9b51cc5688b",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "src/services/payments/fulfillmentService.js",
+      "sha256": "ad8b5b757093a66b688c1b74c35a8b84300fd03622d7949bef336a3c8b32318e",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "python_media_worker/main_media_server.py",
+      "sha256": "5bf45a1335f81d796fd5c4ccc939839d818a69b04956493dd3e619e5080f5b79",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "src/services/multicamCapacityService.js",
+      "sha256": "b00ab270f1c993da7794f82dabb1cd56500ed130a1b339f94c4acd420472dbea",
+      "matchesDeployedSourceBaseline": true
+    },
+    {
+      "path": "test/e2e/studio-preview-render-parity.json",
+      "sha256": "d933524491ae7900249c82c5373569d23805d1150841e9a6e0a901f5ba143498",
+      "matchesDeployedSourceBaseline": true
+    }
+  ],
+  "workflowsUnchangedFromCheckpoint": true,
+  "productionMutationPerformed": false
+}

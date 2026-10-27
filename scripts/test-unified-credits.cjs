@@ -90,6 +90,8 @@ async function main() {
               "test/unified-credits/continuation.test.cjs",
               "test/unified-credits/google-controller.test.cjs",
               "test/unified-credits/application.integration.test.cjs",
+              "test/unified-credits/worker-verification.test.cjs",
+              "test/unified-credits/frontend-admission.test.cjs",
             ]),
       ],
       {

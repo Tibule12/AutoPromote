@@ -1,28 +1,35 @@
 {
   "monetizationPilot20261027": {
     "date": "2026-10-27",
-    "status": "LOCAL_API_FIXTURES_ONLY",
-    "report": "NONPRODUCTION_PILOT_20261027.md",
+    "status": "ACTUAL_FRONTEND_LOCAL_CPU",
+    "report": "APPLICATION_WORKFLOWS_20261027.md",
     "ordinaryHandlers": [
       "/api/media/process",
       "/api/clips/analyze",
       "/api/clips/generate",
       "/api/content/upload",
-      "/api/promotion-tasks/platform/enqueue"
+      "/api/promotion-tasks/platform/enqueue",
+      "/api/media/analyze",
+      "/api/media/render-clip",
+      "/api/content/promotion-schedules/:id/resume"
     ],
     "database": "fresh demo-autopromote-credits emulator",
-    "workerAuthStorageAndPublication": "controlled fixtures",
+    "workerAuthStorageAndPublication": "Auth/Storage emulators; canonical CPU process; simulated publication",
     "productionChanges": false,
     "rendererOrParityChanges": false,
     "camCombinerChanged": false,
     "readinessPromotion": false,
     "remainingBlockers": [
-      "Real authenticated worker outcomes and immutable source/runtime enforcement.",
-      "Invoice-linked operation costs including realistic late failures and GPU workloads.",
-      "Signed-in browser project save/reopen and end-to-end provider qualification.",
-      "Named nonproduction rollout, funding and deployment approval."
+      "Real staging worker/IAM/artifact/dispatch qualification; uncertain supervisor outcomes retain holds.",
+      "Invoice-linked costs for representative successes/failures, storage, AI, publishing and GPU.",
+      "Named nonproduction project/cohort, funded ceiling and deployment/paid-work approval.",
+      "Production reconciliation/payment/subscriber adapters; Google web verification separately for ads."
     ],
-    "nextTask": "Qualify real nonproduction Auth/source/worker/Storage bindings and measured cost ceilings; retain S02/S04/S03 product backlog."
+    "nextTask": "Review actual local UI evidence; qualify a funded nonproduction CPU/cloud cost experiment after approval. Preserve S02/S04/S03 backlog.",
+    "signedInBrowserVerified": true,
+    "zeroCreditSaveReopenAndRestoreVerified": true,
+    "apiRestartAndLateFailureVerified": true,
+    "cloudProviderQualified": false
   },
   "schemaVersion": 1,
   "contractVersion": 1,

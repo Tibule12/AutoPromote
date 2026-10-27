@@ -1183,9 +1183,15 @@ class VideoEditingService {
       // A reviewed long-form Studio render may use the full 60-minute Cloud Run
       // window. Keep the Node request alive slightly longer so it cannot mark a
       // healthy worker job failed while that worker is still rendering.
-      const response = await axios.post(`${MEDIA_WORKER_URL}${endpoint}`, payload, {
-        timeout: endpoint === "/render-viral-clip" ? VIRAL_RENDER_WORKER_TIMEOUT_MS : 1800000,
-      });
+      const requestConfig =
+        await require("./unifiedCredits/workerTransport").applicationWorkerConfig(
+          `${MEDIA_WORKER_URL}${endpoint}`,
+          payload,
+          {
+            timeout: endpoint === "/render-viral-clip" ? VIRAL_RENDER_WORKER_TIMEOUT_MS : 1800000,
+          }
+        );
+      const response = await axios.post(`${MEDIA_WORKER_URL}${endpoint}`, payload, requestConfig);
 
       const result = response.data;
 
@@ -1289,8 +1295,13 @@ class VideoEditingService {
 
       // 4. Get Public URL
       const fileRef = bucket.file(destination);
-      await fileRef.makePublic();
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${destination}`;
+      const localCreditContext = require("./unifiedCredits/application").getApplicationContext(
+        userId
+      );
+      if (!localCreditContext) await fileRef.makePublic();
+      const publicUrl = localCreditContext
+        ? (await fileRef.getSignedUrl({ action: "read", expires: Date.now() + 300000 }))[0]
+        : `https://storage.googleapis.com/${bucket.name}/${destination}`;
 
       // 5. Cleanup Local File
       try {
@@ -1366,17 +1377,33 @@ class VideoEditingService {
     try {
       let response;
       try {
-        response = await axios.post(`${MEDIA_WORKER_URL}/analyze-clips`, payload, {
-          timeout: 600000,
-        });
+        response = await axios.post(
+          `${MEDIA_WORKER_URL}/analyze-clips`,
+          payload,
+          await require("./unifiedCredits/workerTransport").applicationWorkerConfig(
+            `${MEDIA_WORKER_URL}/analyze-clips`,
+            payload,
+            { timeout: 600000 }
+          )
+        );
       } catch (error) {
-        if (!shouldTryLocalWorker(error)) throw error;
+        if (
+          require("./unifiedCredits/application").getApplicationContext(userId)?.workerVerifier ||
+          !shouldTryLocalWorker(error)
+        )
+          throw error;
         console.warn(
           `[VideoAnalysis] Primary worker failed (${getWorkerErrorDetail(error)}). Retrying local worker.`
         );
-        response = await axios.post(`${LOCAL_MEDIA_WORKER_URL}/analyze-clips`, payload, {
-          timeout: 600000,
-        });
+        response = await axios.post(
+          `${LOCAL_MEDIA_WORKER_URL}/analyze-clips`,
+          payload,
+          await require("./unifiedCredits/workerTransport").applicationWorkerConfig(
+            `${LOCAL_MEDIA_WORKER_URL}/analyze-clips`,
+            payload,
+            { timeout: 600000 }
+          )
+        );
       }
 
       // Returns { status, job_id, scenes: [...] }
@@ -1418,15 +1445,20 @@ class VideoEditingService {
   async renderClip(videoUrl, startTime, endTime, userId) {
     console.log(`[VideoRender] Rendering clip for User: ${userId} (${startTime}-${endTime}s)`);
     try {
+      const clipPayload = {
+        video_url: videoUrl,
+        start_time: startTime,
+        end_time: endTime,
+        target_aspect_ratio: "9:16",
+      };
       const response = await axios.post(
         `${MEDIA_WORKER_URL}/render-clip`,
-        {
-          video_url: videoUrl,
-          start_time: startTime,
-          end_time: endTime,
-          target_aspect_ratio: "9:16",
-        },
-        { timeout: 300000 }
+        clipPayload,
+        await require("./unifiedCredits/workerTransport").applicationWorkerConfig(
+          `${MEDIA_WORKER_URL}/render-clip`,
+          clipPayload,
+          { timeout: 300000 }
+        )
       );
 
       const resultPath = response.data.output_path;

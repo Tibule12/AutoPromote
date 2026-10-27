@@ -55,6 +55,8 @@ import ForgotPasswordPage from "./ForgotPasswordPage";
 import ResetPasswordPage from "./ResetPasswordPage";
 import UserDashboard from "./UserDashboard_full";
 import ProductAssistance from "./components/ProductAssistance";
+import CreditPilotPanel from "./components/CreditPilotPanel";
+import { creditFetch } from "./utils/creditPilot";
 
 // Static Pages — lazy loaded for bundle splitting
 const About = lazy(() => import("./About"));
@@ -1424,7 +1426,7 @@ function App() {
         "token?",
         Boolean(token)
       );
-      const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
+      const res = await creditFetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: "POST",
         headers: withWorkspaceHeaders({
           Authorization: `Bearer ${token}`,
@@ -1628,6 +1630,7 @@ function App() {
 
   return (
     <div className="App">
+      <CreditPilotPanel />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Static Content Pages */}

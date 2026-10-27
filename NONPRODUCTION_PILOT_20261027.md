@@ -1,5 +1,7 @@
 # Shared-credit application integration and pilot readiness
 
+**Historical 69-test checkpoint.** The current continuation has 83 passing tests and an actual signed-in frontend demonstration. Read [actual application workflows and pilot gates](APPLICATION_WORKFLOWS_20261027.md). The API fixture limitations below describe the earlier checkpoint and do not replace that updated report.
+
 27 October 2026 · `feat/rewarded-credits-continuation-20261027`
 
 **The existing wallet is now connected to ordinary application handlers in isolated API tests. A cloud/free-user pilot remains blocked.** Media, Storage, Auth and publication boundaries in these tests are fixtures. No new credit authority, production balance migration, live advertisement, push, merge, deployment, session revocation or billing-setting change was performed. Cam Combiner is excluded.

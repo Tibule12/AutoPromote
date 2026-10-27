@@ -1,3 +1,4 @@
+import { creditFetch } from "../../utils/creditPilot";
 // UnifiedPublisher.js
 // The "Command Center" for cross-platform publishing.
 // Wraps existing platform forms and delegates upload to App.js
@@ -1127,15 +1128,33 @@ const UnifiedPublisher = ({
       };
 
       if (reuseOwnedContent) {
-        const response = await fetch(`${API_ENDPOINTS.MY_CONTENT.replace(/\/my-content$/, "")}/${encodeURIComponent(sourceAsset.sourceContentId)}/promotion-schedules`, {
-          method: "POST",
-          headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}`, "Content-Type": "application/json" }),
-          body: JSON.stringify({ time: scheduledTime, frequency, timezone: deliveryTimezone,
-            platforms, platformTimes: platformScheduleTimesForPayload, platformOptions: platformOptionsMap }),
-        });
+        const response = await creditFetch(
+          `${API_ENDPOINTS.MY_CONTENT.replace(/\/my-content$/, "")}/${encodeURIComponent(sourceAsset.sourceContentId)}/promotion-schedules`,
+          {
+            method: "POST",
+            headers: withWorkspaceHeaders({
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            }),
+            body: JSON.stringify({
+              time: scheduledTime,
+              frequency,
+              timezone: deliveryTimezone,
+              platforms,
+              platformTimes: platformScheduleTimesForPayload,
+              platformOptions: platformOptionsMap,
+            }),
+          }
+        );
         const result = await response.json();
-        if (!response.ok || !result.success) throw Object.assign(new Error(result.error || "Scheduling failed."), { code: result.code, context: result.context });
-        setFeedbackMessage(`${label} scheduled from your existing media. Check Queue for delivery status.`);
+        if (!response.ok || !result.success)
+          throw Object.assign(new Error(result.error || "Scheduling failed."), {
+            code: result.code,
+            context: result.context,
+          });
+        setFeedbackMessage(
+          `${label} scheduled from your existing media. Check Queue for delivery status.`
+        );
         toast.success("Existing media scheduled");
       } else if (onUpload) {
         const result = await onUpload(uploadParams);

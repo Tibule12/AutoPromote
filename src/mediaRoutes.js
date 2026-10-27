@@ -336,6 +336,20 @@ const viralRenderAttemptResponse = (jobId, data) => {
 };
 
 const getViralScanPreflight = async userId => {
+  const pilot = require("./services/unifiedCredits/application").getApplicationContext(userId);
+  if (pilot) {
+    const account = await pilot.balance();
+    return {
+      allowed: true,
+      requiredCredits: pilot.op.credits,
+      balance: account.balance,
+      planAllowed: true,
+      canAfford: true,
+      tier: account.tier,
+      planName: "Isolated credit pilot",
+      topUpsAllowed: false,
+    };
+  }
   const requiredCredits = CREDIT_COSTS.analyze || 8;
   const [breakdown, tierSnapshot] = await Promise.all([
     getCreditBreakdown(userId),
@@ -2080,7 +2094,8 @@ router.post("/multicam/uploads/start", async (req, res) => {
     const isStudioUpload = uploadPurpose === "studio_source" || uploadPurpose === "studio_project";
     const studioSourceAllowed =
       isStudioUpload &&
-      capabilities?.editing?.features?.viralClipStudio?.enabled;
+      (capabilities?.editing?.features?.viralClipStudio?.enabled ||
+        (process.env.UNIFIED_CREDITS_APPLICATION === "true" && req.app.locals.sharedCreditPilot?.allowsStudioSource(userId)));
     // Local Playwright sessions authenticate as a synthetic test user. Permit
     // that user to exercise the real Studio uploader without weakening plan
     // enforcement in production or enabling any other upload purpose.
@@ -3409,7 +3424,7 @@ router.get("/status/:jobId", async (req, res) => {
 });
 
 // Phase 2: Viral Clip Analysis
-router.post("/analyze", async (req, res) => {
+router.post("/analyze", require("./services/unifiedCredits/application").applicationCreditRoute("clips.analyze", () => admin.firestore()), async (req, res) => {
   const userId = req.user.uid;
   const {
     fileUrl,
@@ -3559,7 +3574,7 @@ router.post("/analyze", async (req, res) => {
 });
 
 // Phase 2: Render Specific Clip
-router.post("/render-clip", requireTesterEditingFeature("clipRender"), async (req, res) => {
+router.post("/render-clip", require("./services/unifiedCredits/application").applicationCreditRoute("clips.render", () => admin.firestore()), requireTesterEditingFeature("clipRender"), async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl, renderJobId = null, startTime, endTime } = req.body;
   const cost = CREDIT_COSTS["render-clip"] || 5;

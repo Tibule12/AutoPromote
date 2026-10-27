@@ -1,3 +1,4 @@
+import { creditFetch } from "../utils/creditPilot";
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -839,7 +840,7 @@ function VideoEditor({
       // 3. Call Node.js Backend
       console.log("Sending AI Request:", { fileUrl, options: effectiveOptions });
 
-      const response = await fetch(`${API_BASE_URL}/api/media/process`, {
+      const response = await creditFetch(`${API_BASE_URL}/api/media/process`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1408,7 +1409,7 @@ function VideoEditor({
       let response;
       for (let submissionAttempt = 0; submissionAttempt < 2; submissionAttempt += 1) {
         try {
-          response = await fetchWithRenderTimeout(
+          response = await creditFetch(
             `${API_BASE_URL}/api/media/process`,
             {
               method: "POST",
@@ -1527,6 +1528,7 @@ function VideoEditor({
                 },
               }),
             },
+            fetchWithRenderTimeout,
             {
               timeoutMs: RENDER_SUBMISSION_TIMEOUT_MS,
               timeoutMessage: "The render service did not acknowledge the job within 45 seconds.",

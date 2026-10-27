@@ -1,6 +1,7 @@
 import { useContext, useMemo } from "react";
 import AuthContext from "../contexts/AuthContext";
 import { isRuntimeE2EEnabled } from "../utils/mediaAuth";
+import { creditPilotEnabled } from "../utils/creditPilot";
 
 const FREE_FALLBACK = {
   planId: "free",
@@ -59,9 +60,10 @@ export const useSubscription = () => {
 
   const canUseFeature = feature =>
     Boolean(
+      (creditPilotEnabled() && ["findViralClips", "viralClipStudio"].includes(feature)) ||
       isRuntimeE2EEnabled() ||
-        normalized.editing?.features?.[feature]?.enabled ||
-        normalized.capabilities?.[feature]
+      normalized.editing?.features?.[feature]?.enabled ||
+      normalized.capabilities?.[feature]
     );
   const requiresUpgrade = feature => !canUseFeature(feature);
 

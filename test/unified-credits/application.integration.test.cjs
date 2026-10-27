@@ -402,6 +402,33 @@ describe("ordinary application routes with one nonproduction wallet", () => {
     assert.equal((await service.getAccount(uid)).balance, 15);
     assert.equal((await db.collection("credit_usage").get()).size, 1);
   });
+  it("never applies a shared-wallet receipt through a later legacy status refund", async () => {
+    const legacy = require("../../src/creditSystem");
+    const before = (await db.collection("users").doc(uid).get()).data();
+    const result = await legacy.refundCredits(
+      uid,
+      { amount: 50, deferredSettlement: true, unifiedOperationId: "a".repeat(64) },
+      "status-poll"
+    );
+    assert.equal(result.deferredSettlement, true);
+    assert.equal(result.success, false);
+    assert.deepEqual((await db.collection("users").doc(uid).get()).data(), before);
+    assert.equal((await db.collection("credit_refunds").get()).size, 0);
+    assert.equal((await service.getAccount(uid)).balance, 15);
+  });
+  it("disables fixture receipts when an execution verifier is configured", async () => {
+    const verified = createApplicationIntegration({
+      db,
+      service,
+      admission,
+      cohort: [uid],
+      workerVerifier: { provider: "local-process" },
+    });
+    await assert.rejects(
+      verified.confirmFixtureOutcome(uid, "a".repeat(64), "video_edits", "fake", "succeeded"),
+      error => error.code === "FIXTURE_RECEIPTS_DISABLED"
+    );
+  });
   it("refuses the integration in a production-marked runtime without changing the wallet", async () => {
     const body = { videoUrl: `${origin}/objects/source.mp4`, contentId: "source-content" };
     const q = await quote("clips.analyze", body);

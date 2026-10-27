@@ -61,7 +61,16 @@ function applicationCreditRoute(operation, applicationDatabase) {
   };
 }
 
-function createApplicationIntegration({ db, service, admission, cohort }) {
+function createApplicationIntegration({
+  db,
+  service,
+  admission,
+  cohort,
+  workerVerifier = null,
+  sourceGateway = null,
+  afterResponse = null,
+  recoverOutcome = null,
+}) {
   assertSandbox(process.env, db);
   if (!/^http:\/\/127\.0\.0\.1:[0-9]{1,5}$/.test(process.env.MEDIA_WORKER_URL || ""))
     fail("LOOPBACK_MEDIA_WORKER_REQUIRED");
@@ -78,6 +87,10 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
   const receipts = db.collection("credits_v2_application_receipts");
   const executionId = id => `application-${id}`;
   const api = {
+    allowsStudioSource(uid) {
+      assertSandbox(process.env, db);
+      return process.env.UNIFIED_CREDITS_APPLICATION === "true" && cohort.includes(uid);
+    },
     assertDatabase(candidate) {
       assertSandbox(process.env, candidate);
       if (candidate !== db) fail("APPLICATION_DATABASE_CONFLICT", 503);
@@ -95,6 +108,9 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
           "POST /api/clips/generate",
           "POST /api/promotion-tasks/platform/enqueue",
           "POST /api/credit-pilot/quote",
+          "POST /api/credit-pilot/prepare",
+          "POST /api/media/analyze",
+          "POST /api/media/render-clip",
           "GET /api/credit-pilot/account",
           "GET /api/content/my-content",
           "GET /api/clips/history",
@@ -103,7 +119,11 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
         if (
           !allowed.has(target) &&
           !/^GET \/api\/credit-pilot\/operations\/[a-f0-9]{64}$/.test(target) &&
-          !/^POST \/api\/credit-pilot\/reconcile\/[a-f0-9]{64}$/.test(target)
+          !/^POST \/api\/credit-pilot\/reconcile\/[a-f0-9]{64}$/.test(target) &&
+          !/^GET \/api\/media\/(?:status|viral-render-attempt)\/[^/]+$/.test(target) &&
+          !/^POST \/api\/content\/(?:promotion-schedules\/[^/]+\/(?:resume|reschedule|pause)|[^/]+\/promotion-schedules)$/.test(
+            target
+          )
         )
           fail("OUTSIDE_PILOT_SCOPE", 403);
         return next();
@@ -114,6 +134,7 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
     async enter(operation, req, res, next) {
       assertSandbox(process.env, db);
       const uid = req.user?.uid;
+      req.body = req.body || {};
       if (!cohort.includes(uid) || (req.userId && req.userId !== uid))
         fail("PILOT_COHORT_REQUIRED", 403);
       if (
@@ -124,7 +145,20 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
           "share_boost",
           "growth_guarantee",
           "monetization_settings",
-        ].some(k => req.body[k])
+        ].some(k =>
+          k === "bounty"
+            ? Number(req.body[k]?.amount || 0) > 0
+            : k === "monetization_settings"
+              ? Object.entries(req.body[k] || {}).some(
+                  ([field, value]) =>
+                    !(field === "niche" && value === "general") &&
+                    value !== false &&
+                    value !== "" &&
+                    value !== 0 &&
+                    value != null
+                )
+              : req.body[k]
+        )
       )
         fail("UNPRICED_PILOT_FEATURE", 400);
       let op,
@@ -133,6 +167,18 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
       if (continued) {
         if (operation !== "queue.dispatch") fail("INVALID_HANDOFF", 409);
         op = await service.getOperation(uid, continued);
+        const scheduleId = req.params.id;
+        const schedule = scheduleId
+          ? await db.collection("promotion_schedules").doc(scheduleId).get()
+          : null;
+        if (
+          schedule?.exists &&
+          owned(schedule.data(), uid) &&
+          schedule.data().creditOperationId === continued
+        ) {
+          if (op.state !== "running") fail("HANDOFF_ALREADY_SETTLED", 409);
+          return next(); // Time/pause changes reuse a previously funded delivery, never another charge.
+        }
         const prior = await steps
           .where("operationId", "==", continued)
           .where("operation", "==", "publisher.publish")
@@ -189,6 +235,21 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
       });
       if (previous) {
         if (previous.response) return res.status(previous.statusCode).json(previous.response);
+        if (workerVerifier && ["succeeded", "failed"].includes(op.state)) {
+          const result = await db
+            .collection("credits_v2_application_results")
+            .doc(op.operationId)
+            .get();
+          if (result.exists && result.data().userId === uid)
+            return res
+              .status(op.state === "succeeded" ? 200 : 500)
+              .json({
+                success: op.state === "succeeded",
+                ...result.data(),
+                creditOperationId: op.operationId,
+                alreadyProcessed: true,
+              });
+        }
         return res
           .status(202)
           .json({ operationId: op.operationId, state: "unknown", creditsHeld: true });
@@ -202,6 +263,9 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
         uid,
         op,
         service,
+        stage,
+        workerVerifier,
+        sourceGateway,
         async balance() {
           return service.getAccount(uid);
         },
@@ -216,6 +280,7 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
               "video_edits",
               "clip_analyses",
               "generated_clips",
+              "promotion_schedules",
             ].includes(collection) ||
             typeof id !== "string" ||
             !id ||
@@ -224,6 +289,8 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
             fail("INVALID_APPLICATION_JOB");
           const doc = await db.collection(collection).doc(id).get();
           if (!doc.exists || !owned(doc.data(), uid)) fail("APPLICATION_JOB_OWNER_CONFLICT", 403);
+          if (workerVerifier)
+            await doc.ref.set({ creditOperationId: op.operationId }, { merge: true });
           await db.runTransaction(async tx => {
             const snapshot = await tx.get(ref);
             const bindings = snapshot.data().bindings;
@@ -236,6 +303,7 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
       res.json = async body => {
         const response = { ...body, creditOperationId: op.operationId };
         try {
+          if (afterResponse && res.statusCode < 400) await afterResponse(ctx, operation, req, body);
           const syncSuccess =
             operation === "clips.render" &&
             res.statusCode < 400 &&
@@ -264,6 +332,7 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
     // is no HTTP endpoint, Google proof or deployable provider verifier here.
     async confirmFixtureOutcome(uid, operationId, collection, id, outcome) {
       assertSandbox(process.env, db);
+      if (workerVerifier) fail("FIXTURE_RECEIPTS_DISABLED", 403);
       if (!cohort.includes(uid) || !["succeeded", "failed"].includes(outcome))
         fail("INVALID_LOCAL_OUTCOME");
       const op = await service.getOperation(uid, operationId);
@@ -312,6 +381,16 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
       const records = snapshots.docs.map(doc => doc.data());
       if (!records.length || records.some(s => s.userId !== uid))
         fail("APPLICATION_STATE_CONFLICT", 503);
+      if (workerVerifier) {
+        const noDispatch = records.every(record => record.state === "no_dispatch");
+        const outcome = noDispatch
+          ? { state: "failed", noDispatch: true }
+          : await workerVerifier.verifyOperation(op);
+        if (!["succeeded", "failed"].includes(outcome.state))
+          return { state: outcome.state, creditsHeld: true };
+        if (recoverOutcome) await recoverOutcome(op, outcome, records);
+        return service.settle(uid, operationId, outcome.state, executionId(operationId));
+      }
       if (op.operation === "publisher.publish") {
         const handed = records.filter(s => s.operation === "queue.dispatch");
         if (handed.length !== op.sourceDescriptor.destinations.length)
@@ -392,7 +471,11 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
   const express = require("express");
   const rateLimit = require("express-rate-limit");
   const router = express.Router();
-  router.use(rateLimit({ windowMs: 60000, max: 60, standardHeaders: true, legacyHeaders: false }));
+  router.use(rateLimit({ windowMs: 60000, max: 240, standardHeaders: true, legacyHeaders: false }));
+  router.use(
+    ["/quote", "/prepare"],
+    rateLimit({ windowMs: 60000, max: 20, standardHeaders: true, legacyHeaders: false })
+  );
   router.use((req, res, next) => {
     try {
       assertSandbox(process.env, db);
@@ -408,9 +491,22 @@ function createApplicationIntegration({ db, service, admission, cohort }) {
       fail("INVALID_QUOTE_REQUEST");
     res.json(await admission.quote(req.user.uid, req.body));
   });
-  router.get("/operations/:id", async (req, res) =>
-    res.json(await service.getOperation(req.user.uid, req.params.id))
-  );
+  if (sourceGateway)
+    router.post("/prepare", async (req, res) =>
+      res.json(await sourceGateway.prepare(req.user.uid, req.body))
+    );
+  router.get("/operations/:id", async (req, res) => {
+    const op = await service.getOperation(req.user.uid, req.params.id);
+    const result = workerVerifier
+      ? await db.collection("credits_v2_application_results").doc(req.params.id).get()
+      : null;
+    res.json({
+      ...op,
+      ...(result?.exists && result.data().userId === req.user.uid
+        ? { workflowResult: result.data() }
+        : {}),
+    });
+  });
   router.post("/reconcile/:id", async (req, res) =>
     res.json(await api.reconcile(req.user.uid, req.params.id))
   );

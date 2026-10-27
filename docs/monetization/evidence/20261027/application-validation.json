@@ -1,0 +1,178 @@
+{
+  "verifiedAtUtc": "2026-10-27T20:18:11.185090+00:00",
+  "priorCheckpointTests": 69,
+  "combined": {
+    "tests": 83,
+    "suites": 11,
+    "passed": 83,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "runtime": "fresh real Firestore emulator; frontend transport/worker contracts use explicitly labelled test responses"
+  },
+  "targetedFinalAuthorityRerun": {
+    "tests": 12,
+    "passed": 12,
+    "failed": 0
+  },
+  "existingRegressions": {
+    "tests": 21,
+    "suites": 5,
+    "passed": 21,
+    "providerBoundaries": "mocked"
+  },
+  "costObserverTests": {
+    "tests": 1,
+    "passed": 1
+  },
+  "browser": {
+    "actualApp": true,
+    "headless": true,
+    "muted": true,
+    "viewport": [
+      1440,
+      960
+    ],
+    "auth": "normal Firebase SDK sign-in to real Auth emulator and existing backend token checks",
+    "storage": "actual SDK and emulator objects; local private URL adapter",
+    "renderer": "existing canonical Python worker on local CPU",
+    "externalPublication": "simulated local destination only",
+    "passed": [
+      "normal sign-in/upload/project save",
+      "quote cancellation before dispatch",
+      "actual CPU export, private output and download",
+      "Publisher/Queue settlement",
+      "API crash during execution; cold reopen/recovery without another dispatch",
+      "late terminated failure after canonical render; one refund",
+      "actual depletion of 15 test credits",
+      "native headline edit/save/backup/cold reopen at zero; denied dispatch",
+      "independent browser backup restore/save at zero",
+      "final supervisor real CPU render with existing strict output-transfer helper"
+    ],
+    "observed": [
+      "Find Viral Clips CPU analysis produced a visible timed highlight and settled; initial hidden-completion-selector assertion failed, preserved and corrected to visible Create clip action"
+    ],
+    "initialFailuresPreserved": true,
+    "anonymousEntryPointChecks": 8,
+    "anonymousWelcomeContentMatchesRetainedBuild": true,
+    "browserErrorsInEntryPointChecks": 0
+  },
+  "preservation": {
+    "productionChanged": false,
+    "paidCloudJobsStarted": false,
+    "liveAdsOrRewardCredits": false,
+    "legacyCreditUsageOrRefundDocuments": 0,
+    "incidentFollowupClosed": false,
+    "sevenProductionTestDocumentsModified": false
+  },
+  "financialEvidence": {
+    "localResourceSamples": true,
+    "testMedia": "generated three-second CPU fixture",
+    "cloudInvoiceCostsAvailable": false,
+    "priceRecommendationsFinalised": false,
+    "gpuExecutionStarted": false
+  },
+  "artifacts": [
+    {
+      "file": "studio-restart-final.mp4",
+      "sha256": "0ffd96e6d14d824c1010340d1ec396dd8613d96974ba25ca590c5cc54f4dde81",
+      "bytes": 748162,
+      "retainedPrivately": true
+    },
+    {
+      "file": "studio-final.mp4",
+      "sha256": "0ffd96e6d14d824c1010340d1ec396dd8613d96974ba25ca590c5cc54f4dde81",
+      "bytes": 748162,
+      "retainedPrivately": true
+    },
+    {
+      "file": "zero-project.autopromote.json",
+      "sha256": "92dfe60ce1fdecb09ffa124046d752b7e2ea9edb68450bc987686cafd568ae51",
+      "bytes": 29271,
+      "retainedPrivately": true
+    },
+    {
+      "file": "studio-zero-final.png",
+      "sha256": "86f60586dd05f75c04d433793852b450bd149e15cdb56b7c78bb42fcce99d8e1",
+      "bytes": 269353,
+      "retainedPrivately": true
+    },
+    {
+      "file": "restore-final.png",
+      "sha256": "1c3dff9992fc0e60c1ff2bce29b8eaf25c5f55a6585b28273d400481725c50dd",
+      "bytes": 299792,
+      "retainedPrivately": true
+    },
+    {
+      "file": "studio-failure-final.png",
+      "sha256": "d6501ac93db418ae40c877496db328e15ab506a998cd0e51b509fd25ae6fa91c",
+      "bytes": 303819,
+      "retainedPrivately": true
+    },
+    {
+      "file": "publisher-final.png",
+      "sha256": "b2ec664f619637f345a5b2a35e12bc99a85d5b4496894c6e92076d50c5c1d179",
+      "bytes": 366744,
+      "retainedPrivately": true
+    },
+    {
+      "file": "queue-final.png",
+      "sha256": "cfaed4b9e6c020a7904a703eb28ba989f96273e3979e3687f6394816e927c9f5",
+      "bytes": 349461,
+      "retainedPrivately": true
+    }
+  ],
+  "staticChecks": {
+    "newCodeLint": "passed",
+    "changedBackendJavaScriptSyntax": "passed",
+    "pythonSyntax": "passed",
+    "frontendBuild": "passed, separate temporary production-optimised demo build",
+    "studioContract": "passed; counts/parity/readiness unchanged",
+    "whitespace": "passed"
+  },
+  "anonymousEntryPointEvidence": "retained private entry-point-proof/verification.json; eight anonymous viewport checks, matching welcome content, zero page errors",
+  "newFrontendTransportCases": [
+    "pilot off preserves original transport",
+    "Cam Combiner/unpriced AI excluded",
+    "decline submits no work",
+    "zero balance offers no paid consent",
+    "operation identity persists before transmission",
+    "lost response reuses ID/consent",
+    "account switch cancels previous-user submission"
+  ],
+  "finalZeroQuoteCheck": {
+    "passed": true,
+    "balance": 0,
+    "quotedCredits": 2,
+    "canAfford": false,
+    "sourceOwnerGenerationBytesVerified": true,
+    "newWorkerDispatched": false
+  },
+  "retention": {
+    "privateEvidenceArchive": "actual-application-evidence-20261027T202049Z.tar.gz",
+    "archiveVerified": true,
+    "recordingsAndProjectSourcesRetained": true
+  },
+  "cleanFinalRuntimeQualification": {
+    "passed": true,
+    "freshOwnedEmulators": true,
+    "guardedLauncherStarted": true,
+    "actualSignInUploadQuoteConsentCpuPrivateOutputAndDownload": true,
+    "strictOutputTransferHelperUnchanged": true,
+    "supervisorSemanticResultAndArtifactChecksEnabled": true,
+    "artifactProbeCheckedByBackend": true,
+    "sourceQuoteUsesAuthoritativeRenewal": true,
+    "operationCount": 1,
+    "walletAfter": 13,
+    "outputBytes": 748162,
+    "outputSha256": "0ffd96e6d14d824c1010340d1ec396dd8613d96974ba25ca590c5cc54f4dde81",
+    "resource": {
+      "wallSeconds": 12.165798605012242,
+      "cpuSeconds": 24.898189999999996,
+      "peakRssKiB": 756256,
+      "providerChargesStarted": false,
+      "invoiceCostMicros": null
+    },
+    "invoiceCostMicros": null
+  }
+}

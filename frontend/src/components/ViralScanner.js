@@ -1,3 +1,4 @@
+import { creditFetch, creditPilotEnabled } from "../utils/creditPilot";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./ViralScanner.css";
 import { auth } from "../firebaseClient";
@@ -953,7 +954,7 @@ const ViralScanner = ({
         "AI analysis is running. Verified clip scores will appear only when it finishes."
       );
 
-      const response = await fetch(`${API_BASE_URL}/api/media/analyze`, {
+      const response = await creditFetch(`${API_BASE_URL}/api/media/analyze`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1430,7 +1431,13 @@ const ViralScanner = ({
               </button>
             </div>
             <p className="scanner-credit-shop-copy">
-              Find Viral Clips costs <strong>{CLIP_SCAN_CREDIT_COST} credits</strong> per scan.
+              {creditPilotEnabled() ? (
+                "Review the source-bound shared-credit quote before analysis."
+              ) : (
+                <>
+                  Find Viral Clips costs <strong>{CLIP_SCAN_CREDIT_COST} credits</strong> per scan.
+                </>
+              )}
               Rendering a chosen clip uses 5 credits.
             </p>
 
@@ -1688,7 +1695,7 @@ const ViralScanner = ({
                       >
                         {scanError ? "Try AI Scan Again" : "Start AI Scan"}{" "}
                         <span style={{ fontSize: "0.8em", opacity: 0.8, marginLeft: "5px" }}>
-                          ({CLIP_SCAN_CREDIT_COST} 💎)
+                          ({creditPilotEnabled() ? "review quote" : `${CLIP_SCAN_CREDIT_COST} 💎`})
                         </span>
                       </button>
                     </>

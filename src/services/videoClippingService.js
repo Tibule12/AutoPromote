@@ -4,6 +4,12 @@
 
 const axios = require("axios");
 const admin = require("firebase-admin"); // Direct admin for db/storage
+const postApplicationWorker = async (url, body, config = {}) =>
+  axios.post(
+    url,
+    body,
+    await require("./unifiedCredits/workerTransport").applicationWorkerConfig(url, body, config)
+  );
 
 // Lazy initialize db/storage to avoid load-time crashes if admin not initialized yet
 let db, bucket;
@@ -200,7 +206,7 @@ class VideoClippingService {
 
       // Call Python Worker
       // This can take 10+ minutes
-      const response = await axios.post(
+      const response = await postApplicationWorker(
         `${MEDIA_WORKER_URL}/analyze-clips`,
         {
           video_url: videoUrl,
@@ -264,14 +270,14 @@ class VideoClippingService {
         const status = await axios.get(`${MEDIA_WORKER_URL}/status`, { timeout: 2000 });
         if (status.data.status === "busy") {
           console.warn("Worker is busy! Attempting to force reset for user request...");
-          await axios.post(`${MEDIA_WORKER_URL}/reset`);
+          await postApplicationWorker(`${MEDIA_WORKER_URL}/reset`);
         }
       } catch (e) {
         /* ignore network error, let main call fail */
       }
 
       // 1. Call Python service to get clip suggestions (Phase 1: Scene Detection)
-      const response = await axios.post(
+      const response = await postApplicationWorker(
         `${MEDIA_WORKER_URL}/analyze-clips`,
         {
           video_url: videoUrl,
@@ -374,7 +380,7 @@ class VideoClippingService {
           throw new Error("Montage requires at least 2 segments");
 
         // Call Python Worker for Montage
-        response = await axios.post(
+        response = await postApplicationWorker(
           `${MEDIA_WORKER_URL}/render-montage`,
           {
             video_url: data.videoUrl,
@@ -398,7 +404,7 @@ class VideoClippingService {
         if (!clip) throw new Error("Clip ID not found in analysis");
 
         // 3. Call Python Worker
-        response = await axios.post(
+        response = await postApplicationWorker(
           `${MEDIA_WORKER_URL}/render-clip`,
           {
             video_url: data.videoUrl,
