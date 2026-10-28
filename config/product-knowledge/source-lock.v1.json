@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Bounded documentation impact review: owner rejects prior room outputs; measured background crop magnification and new native full-framing wall revision are recorded with professional qualification false. Only replacement asset/framing/treatment changed; source renderer/masks/foreground remain exact. Duplicate artifact scope and rolling-history limitations remain explicit.",
-  "reviewed_at": "2026-10-28T17:25:22.404Z",
+  "reason": "Record latest owner rejection and failed CPU diagnostics without changing readiness or claiming a product repair. Current renderer/frontend, masks, saved projects and source films remain unchanged; private recurrent-matting evaluations are not integrated.",
+  "reviewed_at": "2026-10-28T18:54:45.496Z",
   "catalog_sha256": "b4bd50ba347c4de4631aaa46cc9ef2e60e6de61984306ec7a0c531c741aa4e74",
   "sources": [
     {
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "49623032a2141b73e95651cfaf1a457e51a36cd8eb883ce1309579d09dc77a2b"
+      "sha256": "8cf4bbcaaffd9cb2d1ec18ed85ec86399fbc79fa429ee6208a12d99c2db627af"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "3ea575f4d7871f79cabd3fd62d3247dd233825fb9c779f79f01dafaf1fc5df5e"
+      "sha256": "d1b351e97d290de1cfd3937f9f9ac0dafaca997c1ac3330dc8747c07792b6366"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

@@ -9178,7 +9178,7 @@
     "latestDeliveryOwnerRejected": true
   },
   "backgroundWholeShotRejection20261028": {
-    "status": "PRIVATE_NATIVE_MATCHED_WALL_FRAMING_REVISION",
+    "status": "MATCHED_WALL_OWNER_REJECTED",
     "evidence": "reports/studio-background-whole-shot-20261028/README.md",
     "podcastMustQualifyBeforeAudition": true,
     "protectedSourceAndPriorFiles": 95,
@@ -9252,6 +9252,32 @@
     "duplicateModelArtifactScopeStillRejected": true,
     "exportRecoveredWithoutResubmission": true,
     "ownerCreativeApproval": false,
-    "professionalQualification": false
+    "professionalQualification": false,
+    "latestDeliveryOwnerRejected": true,
+    "next": "Inspect actual source-bound prepared foreground, cutout boundary/colour and equipment continuity before another native result."
+  },
+  "backgroundCutoutReview20261028": {
+    "status": "DIAGNOSTIC_CANDIDATES_REJECTED_FEATURE_UNFINISHED",
+    "evidence": "reports/studio-background-edge-review-20261028/README.md",
+    "protectedSourceAndPriorFiles": 97,
+    "visualCompletion": false,
+    "ownerCreativeApproval": false,
+    "gpuJobs": 0,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "diagnosticOnly": true,
+    "nativeProjectChanged": false,
+    "newFinalMovies": 0,
+    "rendererFrontendOrModelRegistryChanged": false,
+    "privateRvmCpuEvaluationFrames": 180,
+    "privateRvmCpuProviders": [
+      "CPUExecutionProvider"
+    ],
+    "newStudioModelJobs": 0,
+    "newGpuJobs": 0,
+    "sourceAndSavedLoginPreserved": true,
+    "projectRecordsRetained": 54,
+    "professionalQualification": false,
+    "next": "Solve the complete moving foreground and scene integration on the existing podcast; rejected candidates are not product improvements or delivered outputs."
   }
 }

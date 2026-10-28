@@ -1,5 +1,7 @@
 # Background replacement — whole-shot framing revision
 
+**Owner rejection:** This matched-wall result is also rejected. Reusing the same prepared foreground and changing the wall does not fix the remaining composite quality. [Active cutout review](../studio-background-edge-review-20261028/README.md).
+
 28 October 2026. Source branch `agent/studio-background-captions-20261022`.
 
 The owner rejects all three preceding room movies because the complete composite still resembles a virtual meeting background. Technical spring/edge corrections did not establish an acceptable professional result. Prove further work on the existing podcast before asking for an audition recording. No audition recording was supplied or processed.

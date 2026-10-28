@@ -1,0 +1,15 @@
+# Background replacement — rejected cutout candidates, 28 October
+
+**The requested professional result remains unfinished.** The owner also rejects the matched-wall movie. That edit changed only replacement framing/treatment and reused the existing foreground; it did not repair the remaining foreground/scene integration. Keep every earlier film and do not present it as qualified for an audition. No audition recording was requested or used in this continuation.
+
+This continuation inspects the exact exported source frames, prepared foreground/alpha and full-size hardware. Three CPU diagnostic approaches were compared without authoring them into Studio:
+
+- Existing source-conditioned edge solving at radii 1–3, and separate soft-confidence trimaps at radii 1–4, leave a jagged guest shoulder. These candidates were rejected rather than exported.
+- A local source-colour/alpha estimate and a flow-aligned soft-alpha experiment do not establish a convincing finished composite. Flow-aligned mask residuals are diagnostics, not ground-truth error or evidence that an experimental stabilizer works.
+- The official RVM MobileNetV3 FP32 ONNX model was evaluated locally on all 90 guest frames at downsample ratios 0.25 and 0.5. Recurrent state is carried through the clip. The two runs use only the CPUExecutionProvider and take about 31 and 66 seconds. The samples still show a soft person halo and incomplete microphone coverage. A human matting model alone cannot qualify the requested people-plus-equipment result. Neither run was applied to the saved project or product registry.
+
+RVM model provenance, exact source/model hashes, masks, sampled diagnostic pixels and receipts stay private. The official model is available for [ONNX CPU inference](https://github.com/PeterL1n/RobustVideoMatting) and uses [recurrent states between frames](https://github.com/PeterL1n/RobustVideoMatting/blob/master/documentation/inference.md). The model/repository is GPL-3.0; this evaluation does not add it to the application, distribute it or establish commercial licensing readiness. No model weights or diagnostic media are committed.
+
+No foreground, background or project changes were authored in this continuation. No new final movie or Studio timeline recording is delivered. The last rejected movie remains preserved. The source renderer, frontend, saved mask artifacts and existing services are unchanged. Saved login and all 54 current projects remain byte-identical at the saved-session level; all 97 protected source/prior film files remain hash-identical. CPU inference on the local 15MB evaluation model is distinct from the unchanged Studio model-job queue. No GPU, paid generation, publishing, production deployment, main merge or monetization work occurred.
+
+The unresolved work is an acceptable complete moving composite on the supplied podcast: stable natural person boundaries, complete selected equipment and believable integration with the chosen room. These rejected diagnostics do not solve it. Do not substitute another wall change, a passing export/test, a small still crop or a request for the audition recording for the required result.

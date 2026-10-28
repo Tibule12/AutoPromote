@@ -221,3 +221,7 @@ reports/studio-background-visual-review-20261027/*
 # Private whole-shot background review
 /reports/studio-background-whole-shot-20261028/*
 !/reports/studio-background-whole-shot-20261028/README.md
+
+# Private source-bound cutout review
+/reports/studio-background-edge-review-20261028/*
+!/reports/studio-background-edge-review-20261028/README.md
