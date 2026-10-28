@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "reviewer": "Codex source review",
-  "reason": "Review Studio View options viewport positioning on open, resize and scroll; preserve output framing and existing readiness.",
-  "reviewed_at": "2026-10-22T18:26:11.440Z",
+  "reviewer": "Codex",
+  "reason": "Review analytics/provider diagnostics and rejected daily publishing hold; no Studio capability, parity or readiness promotion.",
+  "reviewed_at": "2026-10-28T17:43:42.645Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -35,7 +35,7 @@
     },
     {
       "path": "frontend/src/App.js",
-      "sha256": "488290de94c0b068d90293797f50eeba2586a0b868ff1ee340b44e3ae6d1dfd0"
+      "sha256": "173832bd74e204e4d28b64ade9382c236247dda125e59e48d3605b345350a63d"
     },
     {
       "path": "frontend/src/Docs.js",
@@ -43,7 +43,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
-      "sha256": "9f7e80cd36bf690b634d2986bacb1aeb43c884a38c6f10395b4bffe249a038a2"
+      "sha256": "e92102de61dd616bf00dcb1f063094aab777c50ac38fbbbfacbf71f98240e3d7"
     },
     {
       "path": "frontend/src/UserDashboardTabs/FindViralClipsPanel.js",
@@ -63,7 +63,7 @@
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
-      "sha256": "65fa1b311de828757d486bf0a26ed4df845a90f73a9db25ede3ba7417aa7bb8c"
+      "sha256": "141264f31d3de9ee6491b39abcd4fefcfaa792ed3e98779da87eb7787aa6c036"
     },
     {
       "path": "frontend/src/WelcomePage.js",
@@ -191,7 +191,7 @@
     },
     {
       "path": "frontend/src/components/VideoEditor.js",
-      "sha256": "b24b63dd10d533b7d51e82c4f0847891a566b3639daf1fea55063b8a79b75dad"
+      "sha256": "69447db95615bc5826a0eed173d534922fa77af33d91d654e02a1324ab9becda"
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
@@ -367,7 +367,7 @@
     },
     {
       "path": "frontend/src/features/publishing/UnifiedPublisher.js",
-      "sha256": "678011af43f715d12af03af13f3bc975555f162c22ecd7ab5baff62c7ca4cd81"
+      "sha256": "980b5b5c0ec1539dfd97a84df3793bfb341a2ca22aba0add7d7881d53be7785d"
     },
     {
       "path": "frontend/src/features/publishing/utils/publishingUtils.js",
@@ -383,7 +383,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "6d1d0374495fe39f9e6f0d9a502b44d1b39267c628ee54ba9aa41014401f8ab6"
+      "sha256": "e3b9a5e7823c365866eea1dd5a2cd6e1a11a580e22f041f3bafdd70f6d4b9219"
     },
     {
       "path": "python_media_worker/assets/studio-text-metrics.v1.json",
@@ -491,11 +491,11 @@
     },
     {
       "path": "src/analyticsRoutes.js",
-      "sha256": "152b0e96593a8d93cbf694ddadbf0ee4aca907e2d52d89096fa94c94f537cce8"
+      "sha256": "88552760479babd89bc9a7846a4c10d21300d76baac8156cb397cc60e5c1eaa6"
     },
     {
       "path": "src/contentRoutes.js",
-      "sha256": "70475f2f4d74f8f5f04c9ceb58fae5c5b6ba6c75d68fc50de79e05c647d4829b"
+      "sha256": "2dda55970be1fe15b5f16fa31cf2ba41cc263aa51527a5ef0ab09b8b4a6a77d1"
     },
     {
       "path": "src/creativeTemplates/showcase.js",
@@ -547,7 +547,7 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "0400631a6a62e7097d19ac1e94eb0906e6e10ab9815c98058630ac0b4ccc0e09"
+      "sha256": "f63e6fac8a3193e08a1f1aab43ac9cb705d3ef1b6efab89603af8acc8551f668"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
@@ -555,7 +555,7 @@
     },
     {
       "path": "src/services/billingService.js",
-      "sha256": "fd9e519b10e3ea5f8e36c94794be153e4f2b02684fba774449657b782d032872"
+      "sha256": "8799da34c3ded579e64136c96cec3a6fd2589a3962be0fc824d87c9ffb6e2a04"
     },
     {
       "path": "src/services/contentFactoryProviders.js",
@@ -571,11 +571,11 @@
     },
     {
       "path": "src/services/linkedinService.js",
-      "sha256": "7a995bf04402a5f68311a4694b0349bc3b7fa1cce5f1bd9b85a5319fae63a561"
+      "sha256": "37e675e78f0f82e2b81b009cf4e4fad4d4f6b0254ad1decae1ceda8901cf32a3"
     },
     {
       "path": "src/services/ownedPlatformMetricsRefresh.js",
-      "sha256": "c979c580473cd37449992a6f45a2cd11e324b1616c9745844ed36f676b0ad861"
+      "sha256": "1fadcc799a88c303e679557db8764789b5907bad5e38263772526ad180f403f6"
     },
     {
       "path": "src/services/platformMetricValues.js",
@@ -591,7 +591,7 @@
     },
     {
       "path": "src/services/promotionTaskQueue.js",
-      "sha256": "ac5dead737688d81502b5abe671bd579cf6799cc980bd8e9323675655347a375"
+      "sha256": "7ec14333169bbcc30fd84499b7032c63c7f69c2f7b6171454ebfee8858d21cc9"
     },
     {
       "path": "src/services/publishedVideoRetention.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "62359196a3a531f097644cab7e68003f63f44892aa1307a04790989f12ef2fb0"
+      "sha256": "db5debff59068d918801cb63981a706fbb3d7a5a03f61dac2304d1a6ba15b541"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "d933524491ae7900249c82c5373569d23805d1150841e9a6e0a901f5ba143498"
+      "sha256": "73b0e137db6326da4fa1804c1a7789312a3a704424a4463ed0359d5ea79de82f"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

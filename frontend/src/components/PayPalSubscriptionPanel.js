@@ -1,3 +1,4 @@
+import { getRuntimeE2EToken, isRuntimeE2EEnabled } from "../utils/mediaAuth";
 // PayPalSubscriptionPanel.js
 // PayPal subscription management component
 
@@ -79,8 +80,8 @@ const PayPalSubscriptionPanel = ({
       }
     }
 
-    if (typeof window !== "undefined" && window.__E2E_BYPASS === true && window.__E2E_TEST_TOKEN) {
-      return window.__E2E_TEST_TOKEN;
+    if (typeof window !== "undefined" && isRuntimeE2EEnabled() && window.__E2E_TEST_TOKEN) {
+      return getRuntimeE2EToken();
     }
 
     return null;
@@ -103,7 +104,7 @@ const PayPalSubscriptionPanel = ({
   const fetchCurrentSubscription = async () => {
     try {
       const currentUser = getCurrentUser();
-      const isE2E = typeof window !== "undefined" && window.__E2E_BYPASS === true;
+      const isE2E = typeof window !== "undefined" && isRuntimeE2EEnabled();
       if (!currentUser && !isE2E && !authResolved) {
         return;
       }
@@ -194,7 +195,7 @@ const PayPalSubscriptionPanel = ({
     if (!subscriptionId) return false;
 
     const currentUser = getCurrentUser();
-    const isE2E = typeof window !== "undefined" && window.__E2E_BYPASS === true;
+    const isE2E = typeof window !== "undefined" && isRuntimeE2EEnabled();
     if (!currentUser && !isE2E) {
       toast.error("Please sign in to activate your subscription");
       return false;
@@ -241,7 +242,7 @@ const PayPalSubscriptionPanel = ({
     if (processing) return;
 
     const currentUser = getCurrentUser();
-    const isE2E = typeof window !== "undefined" && window.__E2E_BYPASS === true;
+    const isE2E = typeof window !== "undefined" && isRuntimeE2EEnabled();
     if (!currentUser && !isE2E) {
       toast.error("Please sign in to upgrade");
       return;

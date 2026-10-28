@@ -1,3 +1,4 @@
+import { getRuntimeE2EToken, isRuntimeE2EEnabled } from "../../utils/mediaAuth";
 import { creditFetch } from "../../utils/creditPilot";
 // UnifiedPublisher.js
 // The "Command Center" for cross-platform publishing.
@@ -568,10 +569,10 @@ const UnifiedPublisher = ({
     if (
       !token &&
       typeof window !== "undefined" &&
-      window.__E2E_BYPASS === true &&
+      isRuntimeE2EEnabled() &&
       window.__E2E_TEST_TOKEN
     ) {
-      token = window.__E2E_TEST_TOKEN;
+      token = getRuntimeE2EToken();
     }
 
     return token;

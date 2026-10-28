@@ -33,6 +33,7 @@ async function fetchFacebookPostMetrics(uid, externalId, pageId) {
       // map other fields if needed for computing score
       likes: stats.likes,
       comments: stats.comments,
+      issues: stats.issues || [],
     };
   } catch (e) {
     console.warn("[PlatformMetrics] Facebook fetch failed:", e.message);
@@ -71,7 +72,25 @@ async function fetchInstagramMediaMetrics(uid, mediaId) {
       { headers: { Authorization: `Bearer ${token}` }, timeout: 12000 });
     if (!res.ok) return null;
     const data = await safeJson(res);
-    return { like_count: numericMetric(data.like_count), comment_count: numericMetric(data.comments_count) };
+    const result = { like_count: numericMetric(data.like_count), comment_count: numericMetric(data.comments_count) };
+    try {
+    const insights = await fetch(`https://graph.facebook.com/v24.0/${encodeURIComponent(mediaId)}/insights?metric=views,reach`,
+      { headers: { Authorization: `Bearer ${token}` }, timeout: 12000 });
+    const insightData = await safeJson(insights);
+    if (insights.ok) {
+      const values = Object.fromEntries((insightData.data || []).map(row => [row.name,
+        row.total_value?.value ?? row.values?.at(-1)?.value]));
+      result.view_count = numericMetric(values.views);
+      result.reach = numericMetric(values.reach);
+    } else {
+      result.issues = [{ metric: "views", code: [10, 200].includes(insightData.error?.code)
+        ? "PERMISSION_DENIED" : "PROVIDER_REQUEST_FAILED",
+      message: insightData.error?.message || "Instagram insights request failed." }];
+    }
+    } catch {
+      result.issues = [{ metric: "views", code: "PROVIDER_REQUEST_FAILED", message: "Instagram insights could not be retrieved." }];
+    }
+    return result;
   } catch (_) { return null; }
 }
 
@@ -81,10 +100,12 @@ const { getPostStats: getLinkedInPostStats } = require("./linkedinService");
 const { getPostInfo: getRedditPostInfo } = require("./redditService");
 const { getTracksBatch } = require("./spotifyService");
 
-async function fetchTikTokMetrics(uid, externalId) {
-  if (!uid || !externalId) return null;
+async function fetchTikTokMetrics(uid, externalId, { publishId } = {}) {
+  if (!uid) return null;
   try {
-    const videos = await getVideoMetrics(uid, [externalId]);
+    const publicId = /^[0-9]{10,30}$/.test(String(externalId || "")) ? String(externalId) : null;
+    const reference = publishId || (String(externalId || "").startsWith("v_pub") ? externalId : null);
+    const videos = await getVideoMetrics(uid, publicId ? [publicId] : [], { publishId: reference });
     if (!videos || videos.length === 0) return null;
 
     const v = videos[0];
@@ -94,11 +115,20 @@ async function fetchTikTokMetrics(uid, externalId) {
       like_count: numericMetric(v.like_count),
       comment_count: numericMetric(v.comment_count),
       share_count: numericMetric(v.share_count),
+      publicVideoId: typeof v.id === "string" ? v.id : publicId,
     };
   } catch (e) {
     console.warn("[PlatformMetrics] TikTok fetch failed for %s: %s", externalId, e.message);
-    return null;
+    return {
+      publicVideoId: errorPublicVideoId(e),
+      collectionError: { code: e.code || "PROVIDER_REQUEST_FAILED", message: e.message.slice(0, 400) },
+    };
   }
+}
+
+function errorPublicVideoId(error) {
+  return typeof error?.publicVideoId === "string" && /^[0-9]{10,30}$/.test(error.publicVideoId)
+    ? error.publicVideoId : null;
 }
 
 async function fetchYouTubeMetrics(uid, externalId) {
@@ -130,7 +160,7 @@ async function fetchLinkedInMetrics(uid, externalId) {
     };
   } catch (e) {
     console.warn("[PlatformMetrics] LinkedIn fetch failed:", e.message);
-    return null;
+    return { collectionError: { code: e.code || "PROVIDER_REQUEST_FAILED", message: e.message.slice(0, 400) } };
   }
 }
 
@@ -170,7 +200,9 @@ async function fetchBatchMetrics(platform, items) {
     const results = {};
     for (const [uid, ids] of Object.entries(byUid)) {
       try {
-        const videos = await getVideoMetrics(uid, ids);
+        const videos = [];
+        for (let offset = 0; offset < ids.length; offset += 20)
+          videos.push(...await getVideoMetrics(uid, ids.slice(offset, offset + 20)));
         videos.forEach(v => {
           results[v.id] = {
             view_count: numericMetric(v.view_count),

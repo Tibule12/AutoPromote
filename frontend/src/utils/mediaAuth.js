@@ -1,9 +1,13 @@
 import { getAuth } from "firebase/auth";
+import { API_BASE_URL } from "../config";
+import { canUseLocalTestAuth } from "./localTestAuth";
+
+export const isLocalTestAuthEndpoint = () =>
+  typeof window !== "undefined" && canUseLocalTestAuth(API_BASE_URL, window.location);
 
 export const isRuntimeE2EEnabled = () => {
   if (typeof window === "undefined" || window.__E2E_BYPASS !== true) return false;
-  const hostname = String(window.location?.hostname || "").toLowerCase();
-  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  return isLocalTestAuthEndpoint();
 };
 
 export const getRuntimeE2EToken = () => {
@@ -20,8 +24,8 @@ export const getRuntimeE2EToken = () => {
 export const getMediaAuthToken = async (forceRefresh = false) => {
   // A runtime browser-test session must remain deterministic even if Firebase
   // restores an unrelated cached user in the persistent QA profile. This token
-  // is accepted only by the non-production API auth middleware and only on a
-  // local hostname, so it cannot replace a real user's token in production.
+  // is accepted only by the non-production API auth middleware. Both the page
+  // and API must use loopback hosts before any synthetic token is returned.
   const runtimeToken = getRuntimeE2EToken();
   if (runtimeToken) return runtimeToken;
   try {

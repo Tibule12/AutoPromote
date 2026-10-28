@@ -106,15 +106,19 @@ describe("analyticsRoutes /user", () => {
               }
 
               const filtered = list.filter(item => item[field] === value);
-              return {
-                limit() {
+              const query = (offset = 0) => ({
+                startAfter(cursor) {
+                  return query(filtered.findIndex(row => row.id === cursor.id) + 1);
+                },
+                limit(count) {
                   return {
                     async get() {
-                      return createSnapshot(filtered);
+                      return createSnapshot(filtered.slice(offset, offset + count));
                     },
                   };
                 },
-              };
+              });
+              return query();
             },
             doc(docId) {
               return {
@@ -183,9 +187,17 @@ describe("analyticsRoutes /user", () => {
     expect(body.totalClicks).toBeNull();
     expect(body.ctr).toBeNull();
     expect(body.performanceStatus).toBe("Platform statistics unavailable");
-    expect(body.measurement).toMatchObject({ status: "unavailable", postsWithMetrics: 0, postsWithoutMetrics: 1 });
+    expect(body.measurement).toMatchObject({
+      status: "unavailable",
+      postsWithMetrics: 0,
+      postsWithoutMetrics: 1,
+    });
     expect(body.platformBreakdown.instagram.views).toBeNull();
-    expect(body.topContent[0]).toMatchObject({ postId: "post-1", views: null, metricsAvailable: false });
+    expect(body.topContent[0]).toMatchObject({
+      postId: "post-1",
+      views: null,
+      metricsAvailable: false,
+    });
   });
 
   test("a genuine reported zero remains a measured zero", async () => {
@@ -208,7 +220,13 @@ describe("analyticsRoutes /user", () => {
     expect(body.topPlatform).toBe("N/A");
   });
   test("release filtering and refresh targets stay within owned published records", async () => {
-    collections.platform_posts.push({ ...collections.platform_posts[0], id: "post-new", contentId: "content-new", metrics: null, createdAt: createTimestamp(new Date()) });
+    collections.platform_posts.push({
+      ...collections.platform_posts[0],
+      id: "post-new",
+      contentId: "content-new",
+      metrics: null,
+      createdAt: createTimestamp(new Date()),
+    });
     const selected = await request(app).get("/api/analytics/user?range=7d&contentId=content-1");
     expect(selected.body.publishedPostCount).toBe(1);
     expect(selected.body.refreshTargets).toEqual([{ postId: "post-1", platform: "instagram" }]);
@@ -221,16 +239,63 @@ describe("analyticsRoutes /user", () => {
   });
 
   test("release filtering rejects document paths", async () => {
-    expect((await request(app).get("/api/analytics/user?contentId=foreign%2Fpost")).status).toBe(400);
+    expect((await request(app).get("/api/analytics/user?contentId=foreign%2Fpost")).status).toBe(
+      400
+    );
   });
 
   test("a measured zero ranks ahead of unavailable counts while refresh uses the newest post", async () => {
     collections.platform_posts[0].metrics = { views: 0 };
-    collections.platform_posts.push({ ...collections.platform_posts[0], id: "new-uncollected", metrics: null, createdAt: createTimestamp(new Date()) });
+    collections.platform_posts.push({
+      ...collections.platform_posts[0],
+      id: "new-uncollected",
+      metrics: null,
+      createdAt: createTimestamp(new Date()),
+    });
     const { body } = await request(app).get("/api/analytics/user?range=7d");
     expect(body.topContent[0].postId).toBe("post-1");
     expect(body.viralityTracker.views).toBe(0);
     expect(body.refreshTargets[0].postId).toBe("new-uncollected");
   });
 
+  test("loads owned posts beyond the first 400 records without including another owner", async () => {
+    const original = collections.platform_posts[0];
+    collections.platform_posts = Array.from({ length: 405 }, (_, index) => ({
+      ...original,
+      id: `post-${index}`,
+      userId: "test-user-id", // Same document discovered under two owner aliases.
+      metrics: { views: 1 },
+    }));
+    collections.platform_posts.push({
+      ...original,
+      id: "latest-youtube",
+      platform: "youtube",
+      metrics: { views: 25 },
+      createdAt: createTimestamp(new Date()),
+    });
+    collections.platform_posts.push({
+      ...original,
+      id: "foreign",
+      uid: "someone-else",
+      metrics: { views: 99999 },
+    });
+    const { statusCode, body } = await request(app).get("/api/analytics/user?range=7d");
+    expect(statusCode).toBe(200);
+    expect(body.publishedPostCount).toBe(406);
+    expect(body.totalViews).toBe(430);
+    expect(body.platformBreakdown.youtube.views).toBe(25);
+    expect(body.refreshTargets).toContainEqual({ postId: "latest-youtube", platform: "youtube" });
+  });
+
+  test("does not report a capped history as complete analytics", async () => {
+    const original = collections.platform_posts[0];
+    collections.platform_posts = Array.from({ length: 10001 }, (_, index) => ({
+      ...original,
+      id: `post-${index}`,
+    }));
+    const { statusCode, body } = await request(app).get("/api/analytics/user?range=all");
+    expect(statusCode).toBe(503);
+    expect(body.totalViews).toBeUndefined();
+    expect(body.error).toMatch(/could not be fully loaded/);
+  });
 });

@@ -1,3 +1,4 @@
+import { getRuntimeE2EToken, isRuntimeE2EEnabled } from "../utils/mediaAuth";
 import { creditFetch } from "../utils/creditPilot";
 // ClipStudioPanel.js
 // AI Clip Generation Studio (Opus Clip style)
@@ -89,8 +90,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     } catch (_) {
       // ignore and fall back to E2E token if present
     }
-    if (typeof window !== "undefined" && window.__E2E_BYPASS === true && window.__E2E_TEST_TOKEN) {
-      return window.__E2E_TEST_TOKEN;
+    if (typeof window !== "undefined" && isRuntimeE2EEnabled() && window.__E2E_TEST_TOKEN) {
+      return getRuntimeE2EToken();
     }
     return null;
   };

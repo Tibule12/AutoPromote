@@ -280,7 +280,7 @@ function generateAuthUrl({
   clientKey,
   redirectUri,
   state,
-  scope = "user.info.basic,video.upload,video.publish",
+  scope = "user.info.basic,video.upload,video.publish,video.list",
 }) {
   const params = new URLSearchParams({
     client_key: clientKey,
@@ -1811,13 +1811,26 @@ async function postToTikTok({ contentId, payload, reason, uid }) {
 /**
  * Fetch video metrics (views, likes, comments, shares)
  */
-async function getVideoMetrics(uid, videoIds) {
+async function getVideoMetrics(uid, videoIds, { publishId } = {}) {
   if (!fetchFn) throw new Error("Fetch not available");
   const accessToken = await getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid TikTok access token");
 
-  const ids = Array.isArray(videoIds) ? videoIds : [videoIds];
-  if (ids.length === 0) return [];
+  const ids = (Array.isArray(videoIds) ? videoIds : [videoIds]).filter(Boolean);
+  if (!ids.length && publishId) {
+    const { resolvePublicVideoId } = require("./tiktokAnalytics");
+    ids.push(await resolvePublicVideoId(publishId, async reference => {
+      const response = await safeFetch("https://open.tiktokapis.com/v2/post/publish/status/fetch/", fetchFn, {
+        fetchOptions: { method: "POST", headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ publish_id: reference }), signal: AbortSignal.timeout(12000) },
+        requireHttps: true, allowHosts: ["open.tiktokapis.com"],
+      });
+      const text = await response.text();
+      if (!response.ok) throw Object.assign(new Error("TikTok publication status request failed"), { status: response.status });
+      return text;
+    }));
+  }
+  if (ids.length === 0) throw Object.assign(new Error("No public TikTok video ID is available"), { code: "PUBLIC_VIDEO_ID_MISSING" });
 
   // TikTok V2 Video Query endpoint
   const url =
@@ -1835,6 +1848,7 @@ async function getVideoMetrics(uid, videoIds) {
           video_ids: ids,
         },
       }),
+      signal: AbortSignal.timeout(12000),
     },
     requireHttps: true,
     allowHosts: ["open.tiktokapis.com"],
@@ -1842,11 +1856,17 @@ async function getVideoMetrics(uid, videoIds) {
 
   if (!response.ok) {
     const txt = await response.text();
-    console.warn("[TikTok] Failed to fetch metrics:", txt);
-    return [];
+    let error; try { error = JSON.parse(txt).error; } catch (_) {}
+    throw Object.assign(new Error(error?.message || "TikTok statistics request failed"), {
+      code: error?.code || "PROVIDER_REQUEST_FAILED", status: response.status, publicVideoId: ids[0],
+    });
   }
 
   const json = await response.json();
+  if (json.error?.code && json.error.code !== "ok")
+    throw Object.assign(new Error(json.error.message || "TikTok statistics request failed"), {
+      code: json.error.code, publicVideoId: ids[0],
+    });
   return json.data?.videos || []; // Returns array of video objects with metrics
 }
 

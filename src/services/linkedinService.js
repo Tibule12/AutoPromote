@@ -677,7 +677,7 @@ async function getPostStats({ uid, shareId }) {
   if (!accessToken) throw new Error("No valid LinkedIn access token");
 
   // LinkedIn uses a different endpoint for analytics
-  const url = `https://api.linkedin.com/v2/socialActions/${encodeURIComponent(shareId)}/(likes,comments)`;
+  const url = `https://api.linkedin.com/rest/socialMetadata/${encodeURIComponent(shareId)}`;
 
   const response = await safeFetch(url, fetchFn, {
     fetchOptions: {
@@ -685,6 +685,7 @@ async function getPostStats({ uid, shareId }) {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "X-Restli-Protocol-Version": "2.0.0",
+        "LinkedIn-Version": process.env.LINKEDIN_ANALYTICS_VERSION || "202610",
       },
     },
     requireHttps: true,
@@ -692,15 +693,20 @@ async function getPostStats({ uid, shareId }) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch LinkedIn post stats");
+    const error = await response.json().catch(() => ({}));
+    throw Object.assign(new Error(error.message || "Failed to fetch LinkedIn post statistics"), {
+      code: response.status === 403 ? "PERMISSION_DENIED" : "PROVIDER_REQUEST_FAILED",
+      status: response.status,
+    });
   }
 
   const data = await response.json();
 
   return {
     shareId,
-    likes: data.likes?.paging?.total || 0,
-    comments: data.comments?.paging?.total || 0,
+    likes: Object.values(data.reactionSummaries || {}).length
+      ? Object.values(data.reactionSummaries).reduce((sum, reaction) => sum + (reaction.count || 0), 0) : null,
+    comments: typeof data.commentSummary?.count === "number" ? data.commentSummary.count : null,
     fetchedAt: new Date().toISOString(),
   };
 }

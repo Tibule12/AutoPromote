@@ -35,6 +35,8 @@ const REQUESTED_SCOPES = [
   "pages_manage_metadata",
   "instagram_basic",
   "instagram_content_publish",
+  "read_insights",
+  "instagram_manage_insights",
 ];
 
 router.get("/health", (req, res) => {

@@ -57,6 +57,7 @@ import UserDashboard from "./UserDashboard_full";
 import ProductAssistance from "./components/ProductAssistance";
 import CreditPilotPanel from "./components/CreditPilotPanel";
 import { creditFetch } from "./utils/creditPilot";
+import { isLocalTestAuthEndpoint, isRuntimeE2EEnabled, getRuntimeE2EToken } from "./utils/mediaAuth";
 
 // Static Pages — lazy loaded for bundle splitting
 const About = lazy(() => import("./About"));
@@ -268,12 +269,13 @@ function App() {
   }, [showLogin, showRegister, showAdminLogin, showMfaModal, showTermsModal, showLogoutConfirm]);
 
   // E2E test auth bypass: when true, skip firebase auth and set test user
-  const E2E_AUTH_BYPASS = process.env.REACT_APP_E2E_AUTH_BYPASS === "true";
+  const E2E_AUTH_BYPASS =
+    process.env.REACT_APP_E2E_AUTH_BYPASS === "true" && isLocalTestAuthEndpoint();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async firebaseUser => {
       if (!firebaseUser) {
         // If E2E bypass is active, do not clear localStorage or reset user
-        if (typeof window !== "undefined" && window.__E2E_BYPASS === true) {
+        if (isRuntimeE2EEnabled()) {
           return; // keep the E2E bypass user
         }
         setUser(null);
@@ -367,10 +369,10 @@ function App() {
   // eslint-disable-next-line
   useEffect(() => {
     try {
-      if (typeof window !== "undefined" && window.__E2E_BYPASS === true) {
+      if (isRuntimeE2EEnabled()) {
         (async () => {
           try {
-            const testToken = window.__E2E_TEST_TOKEN || "e2e-test-token";
+            const testToken = getRuntimeE2EToken() || "e2e-test-token";
             // Prefer an existing user object in localStorage (tests may set an admin user there).
             let testUser = null;
             try {
@@ -1184,7 +1186,7 @@ function App() {
       if (
         !token &&
         typeof window !== "undefined" &&
-        window.__E2E_BYPASS === true &&
+        isRuntimeE2EEnabled() &&
         window.__E2E_TEST_TOKEN
       )
         token = window.__E2E_TEST_TOKEN;

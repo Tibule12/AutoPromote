@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-28",
+  "baseCommit": "1dc3203703218aed2ab23b627186485280d03147",
+  "backendRegressionTests": {
+    "passed": 62,
+    "suites": 10,
+    "failed": 0
+  },
+  "providerAndCronNodeTests": {
+    "passed": 8,
+    "failed": 0
+  },
+  "localAuthFrontendTests": {
+    "passed": 8,
+    "failed": 0
+  },
+  "strictReactBuild": "passed; isolated output; 19 welcome assets verified",
+  "docker": "Node22 Alpine dependency-install phase passed; complete production image and Render cron run not verified",
+  "ordinaryApp": "Earlier normal signed-in Analytics sync and cold Queue hold checks passed; subsequent fresh saved-session retry showed anonymous welcome, so final pagination is separately verified via bounded owner reads and regression tests. No session was overwritten or minted.",
+  "pausedSchedules": 5,
+  "newPlatformPosts": 0,
+  "newVideoRenders": 0,
+  "newPaidJobs": 0,
+  "studioReadinessCounts": {
+    "FUNCTIONAL": 17,
+    "PARTIAL": 9,
+    "BROKEN": 1,
+    "UNIMPLEMENTED": 2,
+    "PRO-READY": 0,
+    "PRODUCTION-READY": 0
+  },
+  "syntaxLintWhitespace": "passed",
+  "knowledgeBuildAndCheck": "passed; existing undocumented-surface warnings retained",
+  "liveOwnerHistoryPagination": {
+    "at": "2026-10-28T17:45:41.328Z",
+    "ownerScoped": true,
+    "uniquePosts": 460,
+    "pages": {
+      "userId": {
+        "count": 0,
+        "batches": 1
+      },
+      "ownerId": {
+        "count": 0,
+        "batches": 1
+      },
+      "creatorId": {
+        "count": 0,
+        "batches": 1
+      },
+      "user_id": {
+        "count": 0,
+        "batches": 1
+      },
+      "uid": {
+        "count": 460,
+        "batches": 2
+      }
+    }
+  }
+}

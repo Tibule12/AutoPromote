@@ -33,25 +33,37 @@ function getOwnerId(record) {
   );
 }
 
-async function fetchOwnedCollectionDocs(collectionName, uid, ownerFields, limit = 200) {
+async function fetchOwnedCollectionDocs(collectionName, uid, ownerFields, pageSize = 200) {
   const seen = new Set();
   const docs = [];
 
   await Promise.all(
     ownerFields.map(async field => {
       try {
-        const snapshot = await db
+        const baseQuery = db
           .collection(collectionName)
-          .where(field, "==", uid)
-          .limit(limit)
-          .get();
-        snapshot.forEach(doc => {
-          if (seen.has(doc.id)) return;
-          seen.add(doc.id);
-          docs.push({ id: doc.id, ...doc.data() });
-        });
+          .where(field, "==", uid);
+        let cursor = null;
+        let readCount = 0;
+        while (true) {
+          const query = cursor ? baseQuery.startAfter(cursor) : baseQuery;
+          const snapshot = await query.limit(pageSize).get();
+          readCount += snapshot.size;
+          // Bound reads without presenting an arbitrary prefix as complete analytics.
+          if (readCount > 10000) {
+            throw new Error("Owned analytics history exceeds the supported read window");
+          }
+          snapshot.forEach(doc => {
+            if (seen.has(doc.id)) return;
+            seen.add(doc.id);
+            docs.push({ id: doc.id, ...doc.data() });
+          });
+          if (snapshot.size < pageSize) break;
+          cursor = snapshot.docs[snapshot.docs.length - 1];
+        }
       } catch (error) {
         console.warn(`[Analytics] Failed ${collectionName} lookup on ${field}:`, error.message);
+        throw Object.assign(new Error("Published post history could not be fully loaded. Retry analytics."), { status: 503 });
       }
     })
   );
@@ -425,6 +437,8 @@ router.get("/user", authMiddleware, async (req, res) => {
         title: resolvedTitle,
         metricsAvailable: hasMetrics,
         metricsCollectionStatus: post.metricsCollectionStatus || (hasMetrics ? "collected" : "not_collected"),
+        metricsCollectionMessage: post.metricsCollectionMessage || null,
+        metricsCollectionIssues: post.metricsCollectionIssues || [],
         lastMetricsAttemptAt: parseDateValue(post.lastMetricsCheck)?.toISOString() || null,
         views,
         impressions,
@@ -575,7 +589,7 @@ router.get("/user", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Error getting user analytics:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(error.status === 503 ? 503 : 500).json({ error: error.status === 503 ? error.message : "Internal server error" });
   }
 });
 

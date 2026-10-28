@@ -1,4 +1,15 @@
 {
+  "analyticsQualityReview20261028": {
+    "date": "2026-10-28",
+    "report": "reports/analytics-diagnosis-20261028/README.md",
+    "ownerCreativeStatus": "REJECTED_20261028_TEXT_AND_SHAPE_BATCH",
+    "remainingSchedulesPaused": 5,
+    "pauseVerifiedThrough": "ordinary signed-in Queue and cold reload",
+    "alreadyPublishedLinkedIn": "urn:li:ugcPost:7521258578125537280",
+    "rendererOrParityChanges": false,
+    "readinessPromotion": false,
+    "nextWork": "Preserve rejection/holds; retain shared S02/S04/S03 blockers."
+  },
   "schemaVersion": 1,
   "contractVersion": 1,
   "updatedAt": "2026-10-21T18:04:30.284Z",

@@ -32,7 +32,7 @@ async function refreshOwnedPlatformMetrics(uid, postIds) {
     if (!claimed) return { postId: doc.id, platform: row.platform, status: "cooldown" };
     const fetchers = {
       youtube: () => metrics.fetchYouTubeMetrics(uid, row.externalId),
-      tiktok: () => metrics.fetchTikTokMetrics(uid, row.externalId),
+      tiktok: () => metrics.fetchTikTokMetrics(uid, row.externalId, { publishId: row.rawOutcome?.publishId }),
       instagram: () => metrics.fetchInstagramMediaMetrics(uid, row.externalId),
       facebook: () => metrics.fetchFacebookPostMetrics(uid, row.externalId, row.rawOutcome?.pageId || row.pageId),
       linkedin: () => metrics.fetchLinkedInMetrics(uid, row.externalId),
@@ -40,17 +40,23 @@ async function refreshOwnedPlatformMetrics(uid, postIds) {
     };
     let timer;
     try {
-      const raw = row.externalId && fetchers[row.platform] ? await Promise.race([
+      const raw = (row.externalId || (row.platform === "tiktok" && row.rawOutcome?.publishId)) && fetchers[row.platform] ? await Promise.race([
         fetchers[row.platform](),
-        new Promise(resolve => { timer = setTimeout(() => resolve(null), 15000); }),
+        new Promise(resolve => { timer = setTimeout(() => resolve({ collectionError: {
+          code: "PROVIDER_TIMEOUT", message: "The platform statistics request timed out. Existing measurements are preserved; retry later.",
+        } }), 30000); }),
       ]) : null;
       const normalized = normalizeMetrics(raw);
       const available = Object.values(normalized).some(value => value !== null);
       const finished = new Date().toISOString();
       const update = { lastMetricsCheck: finished,
-        metricsCollectionStatus: available ? "collected" : "unavailable",
-        metricsCollectionMessage: available ? null : "Statistics unavailable. Check connection permissions and platform support.",
+        metricsCollectionStatus: available ? (raw?.issues?.length ? "partial" : "collected") : "unavailable",
+        metricsCollectionMessage: available ? null : raw?.collectionError?.message || "Statistics unavailable. Check connection permissions and platform support.",
+        metricsCollectionCode: available ? null : raw?.collectionError?.code || "METRICS_UNAVAILABLE",
+        metricsCollectionIssues: raw?.issues || [],
         next_check_at: new Date(Date.now() + 15 * 60 * 1000).toISOString() };
+      if (row.platform === "tiktok" && /^[0-9]{10,30}$/.test(raw?.publicVideoId || ""))
+        update.externalId = raw.publicVideoId;
       if (available) Object.assign(update, { metrics: raw, lastMetricsSuccessAt: finished,
         analytics_snapshots: [...(row.analytics_snapshots || []), { timestamp: finished, ...normalized }].slice(-20) });
       await doc.ref.set(update, { merge: true });

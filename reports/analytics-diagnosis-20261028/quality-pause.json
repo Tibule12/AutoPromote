@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-28T17:31:05.273Z",
+  "normalSignedInUI": true,
+  "coldQueueVerified": true,
+  "paused": [
+    {
+      "id": "DXojMkzP9V6CtIiQfcfH",
+      "platform": "reddit",
+      "isActive": false,
+      "status": "pending",
+      "startTime": "2026-10-28T20:00:00.000Z"
+    },
+    {
+      "id": "O0jBCmaGAkAiKEpGkkIK",
+      "platform": "youtube",
+      "isActive": false,
+      "status": "pending",
+      "startTime": "2026-10-28T19:15:00.000Z"
+    },
+    {
+      "id": "zA41mNnsZNnRrftBBgqw",
+      "platform": "tiktok",
+      "isActive": false,
+      "status": "pending",
+      "startTime": "2026-10-28T19:00:00.000Z"
+    },
+    {
+      "id": "4eEquTtUYXaySfrXDzZQ",
+      "platform": "facebook",
+      "isActive": false,
+      "status": "pending",
+      "startTime": "2026-10-28T18:45:00.000Z"
+    },
+    {
+      "id": "Abb930a4t4mC1y8DBmOv",
+      "platform": "instagram",
+      "isActive": false,
+      "status": "pending",
+      "startTime": "2026-10-28T18:30:00.000Z"
+    }
+  ]
+}

@@ -177,7 +177,7 @@ const AnalyticsPanel = () => {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Statistics refresh failed.");
       const counts = (result.results || []).reduce((all, row) => ({ ...all, [row.status]: (all[row.status] || 0) + 1 }), {});
-      setMetricsSyncMessage(`${counts.collected || 0} posts updated; ${counts.unavailable || 0} unavailable; ${counts.failed || 0} failed; ${counts.cooldown || 0} checked recently.`);
+      setMetricsSyncMessage(`${counts.collected || 0} posts updated; ${counts.partial || 0} partially updated; ${counts.unavailable || 0} unavailable; ${counts.failed || 0} failed; ${counts.cooldown || 0} checked recently.`);
       await loadAnalytics();
     } catch (error) { setMetricsSyncMessage(error.message); }
     finally { setSyncingMetrics(false); }
@@ -1383,6 +1383,13 @@ const AnalyticsPanel = () => {
                   <span>👁 {metricLabel(item.views)}</span>
                   <span>🖱 {metricLabel(item.clicks)}</span>
                 </div>
+                {(item.metricsCollectionMessage || item.metricsCollectionIssues?.length > 0) && (
+                  <p role="status" style={{ color: "#fbbf24", margin: "0.5rem 0 0", fontSize: "0.875rem" }}>
+                    {item.metricsCollectionIssues?.some(issue => issue.code === "PERMISSION_DENIED")
+                      ? "Some statistics need analytics permission. Review this platform in Connections and reconnect after access is enabled."
+                      : item.metricsCollectionMessage || "Some platform statistics could not be retrieved."}
+                  </p>
+                )}
               </div>
             ))}
           </div>

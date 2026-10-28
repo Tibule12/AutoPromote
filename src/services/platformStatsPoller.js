@@ -93,7 +93,7 @@ async function fetchMetricsForPost(doc) {
   const data = doc.data();
   const platform = data.platform;
   const externalId = data.externalId;
-  if (!externalId) return null;
+  if (!externalId && platform !== "tiktok") return null;
   try {
     switch (platform) {
       case "facebook":
@@ -109,7 +109,7 @@ async function fetchMetricsForPost(doc) {
       case "instagram":
         return await fetchInstagramMediaMetrics(data.uid, externalId);
       case "tiktok":
-        return await fetchTikTokMetrics(data.uid, externalId);
+        return await fetchTikTokMetrics(data.uid, externalId, { publishId: data.rawOutcome?.publishId });
       case "youtube":
         return await fetchYouTubeMetrics(data.uid, externalId);
       case "linkedin":
@@ -239,6 +239,9 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5 } = {}) {
         lastMetricsCheck: admin.firestore.FieldValue.serverTimestamp(),
         next_check_at: nextScheduledCheck,
       };
+      if (d.platform === "tiktok" && /^[0-9]{10,30}$/.test(metrics?.publicVideoId || ""))
+        baseUpdate.externalId = metrics.publicVideoId;
+      baseUpdate.metricsCollectionIssues = metrics?.issues || [];
 
       if (metrics && Object.values(normalizeMetrics(metrics)).some(value => value !== null)) {
         const normalizedScore = computeNormalizedScore(d.platform, metrics);
@@ -252,7 +255,9 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5 } = {}) {
         const update = {
           ...baseUpdate,
           metrics,
-          metricsCollectionStatus: "collected",
+          metricsCollectionStatus: metrics.issues?.length ? "partial" : "collected",
+          metricsCollectionMessage: null,
+          metricsCollectionCode: null,
           lastMetricsSuccessAt: new Date().toISOString(),
           normalizedScore,
           analytics_snapshots: mergedSnapshots,
@@ -457,7 +462,8 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5 } = {}) {
         // to avoid hot-looping the same document.
         try {
           await doc.ref.set({ ...baseUpdate, metricsCollectionStatus: "unavailable",
-            metricsCollectionMessage: "Statistics unavailable. Check connection permissions and platform support." }, { merge: true });
+            metricsCollectionMessage: metrics?.collectionError?.message || "Statistics unavailable. Check connection permissions and platform support.",
+            metricsCollectionCode: metrics?.collectionError?.code || "METRICS_UNAVAILABLE" }, { merge: true });
           processed++;
         } catch (_) {}
       }
