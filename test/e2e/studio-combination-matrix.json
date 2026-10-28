@@ -1,4 +1,13 @@
 {
+  "playwrightLoopbackRepair20261028": {
+    "date": "2026-10-28",
+    "report": "reports/playwright-loopback-repair-20261028/README.md",
+    "scope": "CI loopback API build and explicit legacy admin entry alias",
+    "productionAuthRelaxed": false,
+    "rendererOrParityChanges": false,
+    "readinessPromotion": false,
+    "nextWork": "Retain rejected film holds and shared S02/S04/S03 blockers."
+  },
   "analyticsQualityReview20261028": {
     "date": "2026-10-28",
     "report": "reports/analytics-diagnosis-20261028/README.md",

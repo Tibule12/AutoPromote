@@ -1,0 +1,65 @@
+{
+  "runId": 40739320789,
+  "commit": "f3a43e4d311171a931a1b7b09bbee886f17bce8b",
+  "failed": 14,
+  "passed": 16,
+  "skipped": 17,
+  "failures": [
+    {
+      "name": "viral-clip-studio-live.spec.js >> proves new motion studio editing, linked audio, timeline seeking and local persistence",
+      "failure": "Error: expect(locator).toBeVisible() failed"
+    },
+    {
+      "name": "clip-studio.spec.js >> Find Viral Clips uses the redesigned dashboard workflow",
+      "failure": "Error: expect(locator).toHaveCount(expected) failed"
+    },
+    {
+      "name": "viral-clip-studio-live.spec.js >> records playable voice-over, edits takes, restores audio after reload and sends it to export",
+      "failure": "Error: expect(locator).toBeVisible() failed"
+    },
+    {
+      "name": "viral-clip-studio-live.spec.js >> records the complete frontend-first creator feature tour without rendering",
+      "failure": "Error: expect(locator).toBeVisible() failed"
+    },
+    {
+      "name": "admin-payouts.spec.js >> admin payouts list and process single payout",
+      "failure": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded."
+    },
+    {
+      "name": "viral-clip-studio-live.spec.js >> records the focused Motion workflow and verifies its export payload",
+      "failure": "Error: expect(locator).toBeVisible() failed"
+    },
+    {
+      "name": "viral-clip-studio-live.spec.js >> keeps every creative caption style and free placement inside the real programme frame",
+      "failure": "Error: expect(locator).toBeVisible() failed"
+    },
+    {
+      "name": "viral-clip-studio-live.spec.js >> designs an AutoPromote 3D logo and verifies HQ preview transport and export payload",
+      "failure": "Error: expect(locator).toBeVisible() failed"
+    },
+    {
+      "name": "paypal.spec.js >> activation flow after approval updates subscription state",
+      "failure": "TimeoutError: page.waitForFunction: Timeout 60000ms exceeded."
+    },
+    {
+      "name": "platform-cards.spec.js >> Per-platform card: TikTok blocks upload when posting cap reached",
+      "failure": "Error: Publish/Upload dashboard tab not found"
+    },
+    {
+      "name": "viral-clip-studio-live.spec.js >> keeps comparison monitors fitted and transport usable at every output aspect",
+      "failure": "Error: expect(locator).toBeVisible() failed"
+    },
+    {
+      "name": "viral-clip-studio-live.spec.js >> records imported logo layer design and verifies preview-to-export keyframe parity",
+      "failure": "Error: expect(locator).toBeVisible() failed"
+    },
+    {
+      "name": "viral-clip-studio-live.spec.js >> runs the production Viral Clip Studio feature workflow with real playable media",
+      "failure": "Error: expect(locator).toBeVisible() failed"
+    },
+    {
+      "name": "paypal.spec.js >> upgrade flow opens PayPal and handles cancel return",
+      "failure": "TimeoutError: page.waitForFunction: Timeout 60000ms exceeded."
+    }
+  ]
+}

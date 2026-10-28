@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review normal owner workspace entry and explicit admin navigation; backend UID authority and Studio readiness remain unchanged.",
-  "reviewed_at": "2026-10-28T18:11:54.579Z",
+  "reason": "Review CI loopback fixture build, legacy explicit admin alias and unchanged production auth/readiness boundaries.",
+  "reviewed_at": "2026-10-28T18:19:31.064Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "db5debff59068d918801cb63981a706fbb3d7a5a03f61dac2304d1a6ba15b541"
+      "sha256": "2023ac386877e7de00407b0a4e2f2701133332622b90b24647181b97b00a6493"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "73b0e137db6326da4fa1804c1a7789312a3a704424a4463ed0359d5ea79de82f"
+      "sha256": "6932bbf31df248b3ecd9a92f5f2a3dee9912f173d88e3d94f88b26a72629cc71"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

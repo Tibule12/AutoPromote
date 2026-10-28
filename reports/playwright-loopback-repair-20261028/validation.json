@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-28",
+  "originalFailedRun": "https://github.com/Tibule12/AutoPromote/actions/runs/40739320789",
+  "originalFailedCommit": "f3a43e4d311171a931a1b7b09bbee886f17bce8b",
+  "localPlaywright": {
+    "passed": 33,
+    "failed": 0,
+    "skipped": 14,
+    "durationMinutes": 9.6,
+    "previouslyFailedCasesPassed": 14,
+    "optionalMediaChecksAdditionalToCI": 3,
+    "project": "demo-autopromote-e2e",
+    "freshOwnedEmulator": true,
+    "productionCredentialsExcluded": true,
+    "backendProviderBoundaries": "fixtures",
+    "apiOrigin": "http://127.0.0.1:5132"
+  },
+  "ciBuildAPIOrigin": "http://127.0.0.1:5000",
+  "frontendAuthorityAndLocalAuthTests": {
+    "passed": 22,
+    "failed": 0
+  },
+  "authorityReviewRegressions": {
+    "passed": 4,
+    "failed": 0
+  },
+  "strictReactBuild": "passed; 19 immutable welcome assets verified",
+  "remoteCheck": "https://github.com/Tibule12/AutoPromote/actions/workflows/playwright-e2e.yml",
+  "productionSyntheticAuthAllowed": false,
+  "rendererOrParityChanges": false,
+  "testsRemovedOrNewlySkipped": 0,
+  "readinessPromotion": false,
+  "ownerWorkspaceDeploymentObserved": "29f0b9c1755e34124faa93c7a605c6872e7805db on both public site origins and API"
+}

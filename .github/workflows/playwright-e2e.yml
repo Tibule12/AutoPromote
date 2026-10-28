@@ -54,6 +54,10 @@ jobs:
         run: npm ci --prefix frontend
       - name: Build frontend
         timeout-minutes: 5
+        env:
+          # Synthetic browser identities require both the page and API to be
+          # loopback. This fixture build must not target production services.
+          REACT_APP_API_URL: http://127.0.0.1:5000
         run: npm run build --prefix frontend
       - name: Prepare playwright browsers
         timeout-minutes: 5

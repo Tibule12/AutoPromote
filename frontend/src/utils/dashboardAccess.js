@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from "../config";
 export const isAdminUser = user => user?.role === "admin" || user?.isAdmin === true;
 
 export const isAdminDashboardPath = (pathname = "/") =>
-  ["/admin-dashboard", "/admin-login"].includes(pathname.replace(/\/$/, ""));
+  ["/admin", "/admin-dashboard", "/admin-login"].includes(pathname.replace(/\/$/, ""));
 
 export const shouldShowAdminDashboard = (user, pathname) =>
   isAdminUser(user) && isAdminDashboardPath(pathname);

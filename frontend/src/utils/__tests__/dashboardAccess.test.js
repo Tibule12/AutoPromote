@@ -12,7 +12,7 @@ test.each(["/", "/dashboard", "/?from=login"])(
   }
 );
 
-test.each(["/admin-dashboard", "/admin-dashboard/", "/admin-login"])(
+test.each(["/admin", "/admin-dashboard", "/admin-dashboard/", "/admin-login"])(
   "an owner may explicitly enter %s",
   pathname => {
     expect(shouldShowAdminDashboard(admin, pathname)).toBe(true);
