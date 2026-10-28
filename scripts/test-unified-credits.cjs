@@ -92,6 +92,7 @@ async function main() {
               "test/unified-credits/application.integration.test.cjs",
               "test/unified-credits/worker-verification.test.cjs",
               "test/unified-credits/frontend-admission.test.cjs",
+              "test/unified-credits/http-boundaries.test.cjs",
             ]),
       ],
       {

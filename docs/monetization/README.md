@@ -2,6 +2,9 @@
 
 Current: [actual signed-in application workflows and pilot gates](../../APPLICATION_WORKFLOWS_20261027.md). The [69-test API checkpoint](../../NONPRODUCTION_PILOT_20261027.md) is retained as history.
 
+28 October: [local repair for CodeQL alerts #1193–#1203](CODEQL_REPAIR_20261028.md),
+with 88 passing isolated tests and before/after CodeQL evidence. Publication is pending.
+
 Current branch: `feat/rewarded-credits-continuation-20261027`, based on the deployed
 security and ownership-verification release `593bbcdf`. Read the
 [27 October continuation report](../../MONETIZATION_CONTINUATION_20261027.md),
