@@ -35,13 +35,32 @@ it("packages the repaired authority helper and application sources without stale
       "userController.js",
       "userRoutes.js",
       "utils/authAuthority.js",
+      // Application routes now import these guarded helpers even when the
+      // emulator-only credit integration is disabled. Packaging must retain them.
+      "services/unifiedCredits/application.js",
+      "services/unifiedCredits/runtime.js",
+      "services/unifiedCredits/workerTransport.js",
     ]) {
       assert.deepEqual(
         fs.readFileSync(path.join(scratch, "autopromote-functions/_server/src", file)),
         fs.readFileSync(path.join(root, "src", file))
       );
     }
-    assert.equal(fs.existsSync(path.join(scratch, "src/services/unifiedCredits")), false);
+    const { assertSandbox } = require(
+      path.join(scratch, "autopromote-functions/_server/src/services/unifiedCredits/runtime.js")
+    );
+    const demo = {
+      UNIFIED_CREDITS_SANDBOX: "true",
+      UNIFIED_CREDITS_PROJECT_ID: "demo-autopromote-credits",
+      FIRESTORE_EMULATOR_HOST: "127.0.0.1:8188",
+    };
+    for (const hosted of [
+      { NODE_ENV: "production" },
+      { K_SERVICE: "functions" },
+      { RENDER: "true" },
+    ])
+      assert.throws(() => assertSandbox({ ...demo, ...hosted }), { code: "SANDBOX_ONLY" });
+    assert.equal(fs.existsSync(path.join(scratch, "src/services/unifiedCredits/runtime.js")), true);
   } finally {
     fs.rmSync(scratch, { recursive: true, force: true });
   }

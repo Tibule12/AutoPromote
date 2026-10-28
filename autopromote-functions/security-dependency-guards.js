@@ -7,9 +7,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 const marker = "AUTOPROMOTE_SECURITY_GUARD_20261022";
 
-function replaceOnce(file, before, after) {
+function replaceOnce(file, before, after, patchMarker = marker) {
   const source = fs.readFileSync(file, "utf8");
-  if (source.includes(marker)) return;
+  if (source.includes(patchMarker)) return;
   if (!source.includes(before)) throw new Error(`Security patch no longer matches ${file}`);
   fs.writeFileSync(file, source.replace(before, after));
 }
@@ -22,6 +22,24 @@ function patchSecurityDependencies(projectDir = process.cwd()) {
     if (!relative.startsWith("node_modules/")) continue;
     const folder = path.join(projectDir, relative);
     if (!fs.existsSync(folder)) continue;
+    if (relative.endsWith("node_modules/deepmerge") && metadata.version === "4.3.1") {
+      // GHSA-gcqx-w48m-w2h4 has no upstream release. Filter both source and
+      // target keys, including nested merges and null-prototype targets.
+      const deepmergeMarker = "AUTOPROMOTE_DEEPMERGE_GUARD_20261028";
+      for (const entry of ["index.js", "dist/cjs.js", "dist/umd.js"]) {
+        const file = path.join(folder, entry);
+        if (!fs.existsSync(file)) continue;
+        replaceOnce(
+          file,
+          "return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))",
+          `// ${deepmergeMarker}: never invoke the destination's __proto__ setter.
+return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target)).filter(function(key) {
+  return key !== '__proto__'
+})`,
+          deepmergeMarker
+        );
+      }
+    }
     if (relative.endsWith("node_modules/node-forge") && metadata.version === "1.4.0") {
       replaceOnce(
         path.join(folder, "lib/rsa.js"),

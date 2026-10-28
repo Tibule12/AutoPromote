@@ -21,7 +21,7 @@
     "react": "19.0.0",
     "react-native": "0.79.6",
     "react-native-webview": "13.16.1",
-    "undici": "^7.29.1"
+    "undici": "^7.30.1"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7"
@@ -44,10 +44,10 @@
     "js-yaml": "4.3.2",
     "browserslist": "4.28.7",
     "baseline-browser-mapping": "2.11.0",
-    "node-forge": "1.4.0",
+    "node-forge": "1.4.2",
     "tar": "^7.5.22",
     "@expo/cli": {
-      "undici": "6.28.1"
+      "undici": "6.29.1"
     },
     "uuid": "^14.0.0",
     "ws": "8.21.0",
@@ -95,12 +95,16 @@
     "compression": "1.8.2",
     "proxy-addr": "2.0.8",
     "@grpc/grpc-js": "1.14.5",
-    "fast-uri": "3.1.8",
+    "fast-uri": "3.1.9",
     "source-map-js": "1.2.2",
     "launch-editor": "2.14.2",
     "@fastify/busboy": "3.2.2",
     "@modelcontextprotocol/sdk": "1.32.0",
-    "ip-address": "10.7.1",
-    "re2": "1.26.1"
+    "ip-address": "10.7.4",
+    "re2": "1.26.1",
+    "body-parser@1": "^1.20.9",
+    "body-parser@2": "^2.4.0",
+    "undici@6": "^6.29.1",
+    "undici@7": "^7.30.1"
   }
 }

@@ -1,0 +1,486 @@
+{
+  "date": "2026-10-28",
+  "baseCommit": "1e9855af24611414c4f5a561b16caa91c47d1ddd",
+  "originalOpenAlerts": 53,
+  "upgradedOutsideAffectedRange": 49,
+  "backportedPendingUpstreamRelease": 4,
+  "alerts": [
+    {
+      "alert": 874,
+      "ghsa": "GHSA-gcqx-w48m-w2h4",
+      "manifest": "package-lock.json",
+      "package": "deepmerge",
+      "versions": ["4.3.1"],
+      "range": ">= 4.2.0  <= 4.3.1",
+      "status": "BACKPORTED_PENDING_UPSTREAM_RELEASE"
+    },
+    {
+      "alert": 873,
+      "ghsa": "GHSA-4w7w-5xrc-9h26",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 872,
+      "ghsa": "GHSA-2m5v-pch6-74hx",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 871,
+      "ghsa": "GHSA-2m5v-pch6-74hx",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 4.0.0  < 6.29.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 870,
+      "ghsa": "GHSA-qrxm-fqhp-jwvm",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 869,
+      "ghsa": "GHSA-qrxm-fqhp-jwvm",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 4.2.1  < 6.29.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 868,
+      "ghsa": "GHSA-9fm3-97px-rjf6",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 867,
+      "ghsa": "GHSA-9fm3-97px-rjf6",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 5.15.0  < 6.29.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 866,
+      "ghsa": "GHSA-55wc-3pg8-jfw6",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 7.15.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 865,
+      "ghsa": "GHSA-6pq8-jhm2-2vcw",
+      "manifest": "package-lock.json",
+      "package": "qs",
+      "versions": ["6.16.2"],
+      "range": ">= 6.7.0  <= 6.16.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 864,
+      "ghsa": "GHSA-gcqx-w48m-w2h4",
+      "manifest": "frontend/package-lock.json",
+      "package": "deepmerge",
+      "versions": ["4.3.1"],
+      "range": ">= 4.2.0  <= 4.3.1",
+      "status": "BACKPORTED_PENDING_UPSTREAM_RELEASE"
+    },
+    {
+      "alert": 863,
+      "ghsa": "GHSA-6pq8-jhm2-2vcw",
+      "manifest": "frontend/package-lock.json",
+      "package": "qs",
+      "versions": ["6.16.2"],
+      "range": ">= 6.7.0  <= 6.16.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 862,
+      "ghsa": "GHSA-gcqx-w48m-w2h4",
+      "manifest": "autopromote-functions/package-lock.json",
+      "package": "deepmerge",
+      "versions": ["4.3.1"],
+      "range": ">= 4.2.0  <= 4.3.1",
+      "status": "BACKPORTED_PENDING_UPSTREAM_RELEASE"
+    },
+    {
+      "alert": 861,
+      "ghsa": "GHSA-6pq8-jhm2-2vcw",
+      "manifest": "autopromote-functions/package-lock.json",
+      "package": "qs",
+      "versions": ["6.16.2"],
+      "range": ">= 6.7.0  <= 6.16.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 860,
+      "ghsa": "GHSA-gcqx-w48m-w2h4",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "deepmerge",
+      "versions": ["4.3.1"],
+      "range": ">= 4.2.0  <= 4.3.1",
+      "status": "BACKPORTED_PENDING_UPSTREAM_RELEASE"
+    },
+    {
+      "alert": 859,
+      "ghsa": "GHSA-4w7w-5xrc-9h26",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 858,
+      "ghsa": "GHSA-2m5v-pch6-74hx",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 857,
+      "ghsa": "GHSA-2m5v-pch6-74hx",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 4.0.0  < 6.29.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 856,
+      "ghsa": "GHSA-qrxm-fqhp-jwvm",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 855,
+      "ghsa": "GHSA-qrxm-fqhp-jwvm",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 4.2.1  < 6.29.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 854,
+      "ghsa": "GHSA-9fm3-97px-rjf6",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 853,
+      "ghsa": "GHSA-9fm3-97px-rjf6",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 5.15.0  < 6.29.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 852,
+      "ghsa": "GHSA-55wc-3pg8-jfw6",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 7.15.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 851,
+      "ghsa": "GHSA-xjj6-f33q-929c",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 7.18.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 850,
+      "ghsa": "GHSA-xjj6-f33q-929c",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 6.23.0  < 6.29.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 849,
+      "ghsa": "GHSA-4qv8-2p9j-2685",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 847,
+      "ghsa": "GHSA-f72v-6w45-q472",
+      "manifest": "package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "6.29.1", "7.30.1"],
+      "range": ">= 7.15.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 846,
+      "ghsa": "GHSA-q7qp-rjg7-q26m",
+      "manifest": "package-lock.json",
+      "package": "multer",
+      "versions": ["2.5.0"],
+      "range": ">= 2.0.0  < 2.5.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 845,
+      "ghsa": "GHSA-8c8m-p3m8-cjg8",
+      "manifest": "package-lock.json",
+      "package": "nodemailer",
+      "versions": ["10.2.1"],
+      "range": ">= 3.0.0  < 10.1.4",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 844,
+      "ghsa": "GHSA-m943-m63m-w62w",
+      "manifest": "package-lock.json",
+      "package": "nodemailer",
+      "versions": ["10.2.1"],
+      "range": ">= 3.0.0  < 10.1.4",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 843,
+      "ghsa": "GHSA-85x2-q946-cp5h",
+      "manifest": "package-lock.json",
+      "package": "nodemailer",
+      "versions": ["10.2.1"],
+      "range": ">= 3.0.0  < 10.1.4",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 842,
+      "ghsa": "GHSA-w74x-v6f9-j3xg",
+      "manifest": "package-lock.json",
+      "package": "fast-uri",
+      "versions": ["3.1.9"],
+      "range": ">= 3.0.0  < 3.1.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 841,
+      "ghsa": "GHSA-xhq7-xmqj-769h",
+      "manifest": "package-lock.json",
+      "package": "fast-uri",
+      "versions": ["3.1.9"],
+      "range": ">= 3.0.0  < 3.1.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 840,
+      "ghsa": "GHSA-wjr9-j795-jxcr",
+      "manifest": "package-lock.json",
+      "package": "fast-uri",
+      "versions": ["3.1.9"],
+      "range": ">= 3.1.3  < 3.1.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 839,
+      "ghsa": "GHSA-333x-w4r6-6crp",
+      "manifest": "package-lock.json",
+      "package": "fast-uri",
+      "versions": ["3.1.9"],
+      "range": ">= 3.0.0  < 3.1.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 837,
+      "ghsa": "GHSA-27r3-jxmh-p828",
+      "manifest": "package-lock.json",
+      "package": "body-parser",
+      "versions": ["2.4.0", "1.20.9", "1.20.9"],
+      "range": ">= 2.0.0  < 2.4.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 834,
+      "ghsa": "GHSA-m5mm-p8h7-m29v",
+      "manifest": "frontend/package-lock.json",
+      "package": "serialize-javascript",
+      "versions": ["7.1.4"],
+      "range": "< 7.1.3",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 833,
+      "ghsa": "GHSA-q7qp-rjg7-q26m",
+      "manifest": "frontend/package-lock.json",
+      "package": "multer",
+      "versions": ["2.5.0"],
+      "range": ">= 2.0.0  < 2.5.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 832,
+      "ghsa": "GHSA-w74x-v6f9-j3xg",
+      "manifest": "frontend/package-lock.json",
+      "package": "fast-uri",
+      "versions": ["3.1.9"],
+      "range": ">= 3.0.0  < 3.1.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 831,
+      "ghsa": "GHSA-xhq7-xmqj-769h",
+      "manifest": "frontend/package-lock.json",
+      "package": "fast-uri",
+      "versions": ["3.1.9"],
+      "range": ">= 3.0.0  < 3.1.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 830,
+      "ghsa": "GHSA-wjr9-j795-jxcr",
+      "manifest": "frontend/package-lock.json",
+      "package": "fast-uri",
+      "versions": ["3.1.9"],
+      "range": ">= 3.1.3  < 3.1.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 829,
+      "ghsa": "GHSA-333x-w4r6-6crp",
+      "manifest": "frontend/package-lock.json",
+      "package": "fast-uri",
+      "versions": ["3.1.9"],
+      "range": ">= 3.0.0  < 3.1.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 828,
+      "ghsa": "GHSA-27r3-jxmh-p828",
+      "manifest": "frontend/package-lock.json",
+      "package": "body-parser",
+      "versions": ["1.20.9"],
+      "range": "< 1.20.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 827,
+      "ghsa": "GHSA-q7qp-rjg7-q26m",
+      "manifest": "autopromote-functions/package-lock.json",
+      "package": "multer",
+      "versions": ["2.5.0"],
+      "range": ">= 2.0.0  < 2.5.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 826,
+      "ghsa": "GHSA-27r3-jxmh-p828",
+      "manifest": "autopromote-functions/package-lock.json",
+      "package": "body-parser",
+      "versions": ["1.20.9"],
+      "range": "< 1.20.9",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 825,
+      "ghsa": "GHSA-xjj6-f33q-929c",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 7.18.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 824,
+      "ghsa": "GHSA-xjj6-f33q-929c",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 6.23.0  < 6.29.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 823,
+      "ghsa": "GHSA-4qv8-2p9j-2685",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 7.0.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 822,
+      "ghsa": "GHSA-4qv8-2p9j-2685",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 6.5.0  < 6.29.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 821,
+      "ghsa": "GHSA-f72v-6w45-q472",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "undici",
+      "versions": ["6.29.1", "7.30.1"],
+      "range": ">= 7.15.0  < 7.30.1",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 751,
+      "ghsa": "GHSA-86w9-cpqp-85rv",
+      "manifest": "package-lock.json",
+      "package": "node-forge",
+      "versions": ["1.4.2"],
+      "range": "<= 1.4.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 720,
+      "ghsa": "GHSA-86w9-cpqp-85rv",
+      "manifest": "autopromote-functions/package-lock.json",
+      "package": "node-forge",
+      "versions": ["1.4.2"],
+      "range": "<= 1.4.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    },
+    {
+      "alert": 713,
+      "ghsa": "GHSA-86w9-cpqp-85rv",
+      "manifest": "TodoApp/package-lock.json",
+      "package": "node-forge",
+      "versions": ["1.4.2"],
+      "range": "<= 1.4.0",
+      "status": "OUTSIDE_AFFECTED_RANGE"
+    }
+  ]
+}

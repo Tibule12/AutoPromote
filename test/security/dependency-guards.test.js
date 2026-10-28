@@ -5,6 +5,43 @@ const { patchSecurityDependencies } = require("../../scripts/patch-security-depe
 patchSecurityDependencies();
 patchSecurityDependencies(); // Installation must be idempotent.
 
+test("deepmerge rejects source/target prototype poisoning in all published entry points", () => {
+  const path = require("node:path");
+  const fs = require("node:fs");
+  const folder = path.dirname(require.resolve("deepmerge/package.json"));
+  const payload = JSON.parse('{"__proto__":{"isAdmin":true},"safe":{"value":1}}');
+  const pollutedTarget = JSON.parse('{"__proto__":{"isAdmin":true},"title":"video"}');
+  for (const entry of ["dist/cjs.js", "dist/umd.js"]) {
+    assert.ok(fs.existsSync(path.join(folder, entry)), `Missing runtime entry ${entry}`);
+    const merge = require(path.join(folder, entry));
+    for (const target of [Object.create(null), {}, null, 0, pollutedTarget]) {
+      const result = merge(target, payload);
+      assert.equal(Object.getPrototypeOf(result), Object.prototype, entry);
+      assert.equal(result.isAdmin, undefined, entry);
+      assert.equal(Object.hasOwn(result, "__proto__"), false, entry);
+      assert.deepEqual(result.safe, { value: 1 });
+    }
+    const nested = merge({ session: null }, { session: payload });
+    assert.equal(nested.session.isAdmin, undefined, entry);
+    assert.equal(Object.getPrototypeOf(nested.session), Object.prototype, entry);
+    assert.equal(merge(pollutedTarget, {}).isAdmin, undefined, entry);
+    assert.equal(merge.all([Object.create(null), payload]).isAdmin, undefined, entry);
+    const symbol = Symbol("kept");
+    const ordinary = merge(
+      { list: [1], nested: { first: true } },
+      {
+        list: [2],
+        nested: { second: true },
+        [symbol]: "yes",
+      }
+    );
+    assert.deepEqual(ordinary.list, [1, 2]);
+    assert.deepEqual(ordinary.nested, { first: true, second: true });
+    assert.equal(ordinary[symbol], "yes");
+    assert.equal(Object.prototype.isAdmin, undefined);
+  }
+});
+
 test("RSA verification accepts a real signature and rejects extra nested DigestAlgorithm elements", () => {
   const forge = require("node-forge");
   const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
