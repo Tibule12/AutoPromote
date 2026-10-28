@@ -2,6 +2,8 @@
 
 27 October 2026 · `feat/rewarded-credits-continuation-20261027`
 
+28 October follow-up: [local HTTP/path hardening for CodeQL alerts #1193–#1203](docs/monetization/CODEQL_REPAIR_20261028.md), with 88 passing tests. The original demonstration evidence below is preserved.
+
 **The existing wallet now supports the actual signed-in application in isolation. A cloud or production pilot is not ready.** This continues checkpoint `e418367b` (69 tests) and foundation `51c3980e`; no second wallet was built. No push, merge, deployment, paid cloud workload, production record change, balance migration, subscription change or advertisement occurred. Cam Combiner remains excluded.
 
 ## Complete workflows verified

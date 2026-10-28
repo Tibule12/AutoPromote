@@ -1,5 +1,6 @@
 // Separate opt-in Google sample page. Never imports Firebase or a wallet.
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const path = require("path");
 const { isHostedRuntime } = require("../src/utils/authAuthority");
 function createGoogleTestApp() {
@@ -7,6 +8,7 @@ function createGoogleTestApp() {
     throw new Error("Explicit local Google test inventory only");
   const app = express();
   app.disable("x-powered-by");
+  app.use(rateLimit({ windowMs: 60000, max: 120, standardHeaders: true, legacyHeaders: false }));
   app.use((req, res, next) => {
     if (process.env.GOOGLE_REWARDED_TEST_ONLY !== "true" || isHostedRuntime())
       return res.sendStatus(503);

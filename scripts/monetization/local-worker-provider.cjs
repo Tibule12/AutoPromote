@@ -1,5 +1,6 @@
 // Owns actual local CPU processes independently of the API. Never invokes cloud jobs.
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -13,6 +14,7 @@ const { assertSandbox } = require("../../src/services/unifiedCredits/runtime");
 async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) {
   assertSandbox(env);
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+  const executionRoot = fs.realpathSync(directory);
   const privateFile = path.join(directory, "signing-key.pem");
   if (!fs.existsSync(privateFile)) {
     const pair = crypto.generateKeyPairSync("ed25519");
@@ -45,6 +47,9 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
     return true;
   }
   const app = express();
+  // Bound every route, including unauthenticated health and capability downloads.
+  // This process binds only to loopback and does not trust forwarded client IPs.
+  app.use(rateLimit({ windowMs: 60000, max: 240, standardHeaders: true, legacyHeaders: false }));
   app.use(express.json({ limit: "512kb" }));
   app.get(["/health", "/status"], (_req, res) =>
     res.json({
@@ -55,11 +60,18 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
   );
   const artifactMac = value => crypto.createHmac("sha256", token).update(value).digest("base64url");
   app.get("/local-output/:id.mp4", (req, res) => {
-    const [id, expires, cap] = req.params.id.split(".");
+    const match = /^([a-f0-9]{64})\.([0-9]{13})\.([A-Za-z0-9_-]{43})$/.exec(req.params.id);
+    if (!match || match[0] !== req.params.id) return res.sendStatus(400);
+    const [, id, expires, cap] = match;
     const value = `${id}:${expires}`;
-    if (!expires || Number(expires) < Date.now() || cap !== artifactMac(value))
+    if (
+      Number(expires) <= Date.now() ||
+      !crypto.timingSafeEqual(Buffer.from(cap), Buffer.from(artifactMac(value)))
+    )
       return res.sendStatus(403);
-    const artifact = path.join(folder(id), "artifact.mp4");
+    const dir = folder(id);
+    const artifact = fs.realpathSync(path.join(dir, "artifact.mp4"));
+    if (!artifact.startsWith(dir + path.sep)) return res.sendStatus(403);
     return res.sendFile(artifact);
   });
   app.use((req, res, next) => {
@@ -67,13 +79,28 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
     next();
   });
   function folder(id) {
-    if (!/^[a-f0-9]{64}$/.test(id)) throw new Error("Invalid execution ID");
-    return path.join(directory, id);
+    if (typeof id !== "string" || id.length !== 64 || !/^[a-f0-9]{64}$/.test(id))
+      throw Object.assign(new Error("Invalid execution ID"), { status: 400 });
+    const candidate = path.resolve(executionRoot, id);
+    if (!candidate.startsWith(executionRoot + path.sep))
+      throw Object.assign(new Error("Execution path outside scratch directory"), { status: 403 });
+    if (fs.existsSync(candidate)) {
+      const entry = fs.lstatSync(candidate);
+      if (!entry.isDirectory() || entry.isSymbolicLink())
+        throw Object.assign(new Error("Execution directory must be private"), { status: 403 });
+    }
+    return candidate;
   }
   function read(id) {
     const dir = folder(id);
     const receipt = path.join(dir, "receipt.json");
-    if (fs.existsSync(receipt)) return JSON.parse(fs.readFileSync(receipt));
+    if (fs.existsSync(receipt)) {
+      // Never follow a replaced receipt to a file outside this execution.
+      const actual = fs.realpathSync(receipt);
+      if (!actual.startsWith(dir + path.sep))
+        throw Object.assign(new Error("Receipt outside execution directory"), { status: 403 });
+      return JSON.parse(fs.readFileSync(actual));
+    }
     return { state: running.has(id) ? "running" : "unknown", creditsHeld: true };
   }
   app.get("/executions/:id", (req, res) => res.json(read(req.params.id)));
@@ -138,6 +165,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
   }
   app.post(
     ["/render-viral-clip", "/render-clip", "/analyze-clips", "/process", "/dispatch"],
+    rateLimit({ windowMs: 60000, max: 20, standardHeaders: true, legacyHeaders: false }),
     async (req, res, next) => {
       try {
         const expected = JSON.parse(Buffer.from(req.get("X-Credits-Execution") || "", "base64url"));
@@ -252,7 +280,9 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
       }
     }
   );
-  app.use((error, _req, res, _next) => res.status(500).json({ error: error.message }));
+  app.use((error, _req, res, _next) =>
+    res.status(error.status || (error.code === "ENOENT" ? 404 : 500)).json({ error: error.message })
+  );
   const server = app.listen(0, "127.0.0.1");
   await new Promise(resolve => server.once("listening", resolve));
   const workerOrigin = `http://127.0.0.1:${server.address().port}`;

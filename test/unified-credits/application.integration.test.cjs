@@ -17,6 +17,7 @@ const {
   getApplicationContext,
 } = require("../../src/services/unifiedCredits/application");
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const request = require("supertest");
 const db = createSandboxDatabase();
 const uid = "demo-pilot-alice";
@@ -92,6 +93,7 @@ function post(url, body, q, requestId = crypto.randomUUID()) {
 
 before(async () => {
   const api = express();
+  api.use(rateLimit({ windowMs: 60000, max: 1000, standardHeaders: true, legacyHeaders: false }));
   api.use(express.json());
   api.get("/status", (_req, res) => res.json({ status: "ready" }));
   api.get("/health", (_req, res) => res.json({ status: "ok", worker_state: { status: "idle" } }));
@@ -189,6 +191,7 @@ before(async () => {
     return { success: true, url: `${origin}/objects/render.mp4` };
   };
   app = express();
+  app.use(rateLimit({ windowMs: 60000, max: 1000, standardHeaders: true, legacyHeaders: false }));
   app.use(express.json());
   app.use(require("../../src/authMiddleware"));
   app.use((req, res, next) => app.locals.sharedCreditPilot.requestGuard(req, res, next));

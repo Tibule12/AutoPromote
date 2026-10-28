@@ -1,0 +1,351 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-28",
+  "status": "LOCAL_REPAIR_VERIFIED_NOT_PUBLISHED",
+  "baseCommit": "1e9855af24611414c4f5a561b16caa91c47d1ddd",
+  "github": {
+    "analysisId": 2042162402,
+    "commit": "71f9cabb050776f5ddc9fe15c157a3523ae7ce25",
+    "affectedFilesMatchLocalBase": true,
+    "alerts": [
+      {
+        "number": 1193,
+        "stateObserved": "open",
+        "rule": "js/path-injection",
+        "path": "scripts/monetization/local-worker-provider.cjs",
+        "region": {
+          "startLine": 63,
+          "startColumn": 25,
+          "endColumn": 33
+        },
+        "message": "This path depends on a [user-provided value](1)."
+      },
+      {
+        "number": 1194,
+        "stateObserved": "open",
+        "rule": "js/path-injection",
+        "path": "scripts/monetization/local-worker-provider.cjs",
+        "region": {
+          "startLine": 76,
+          "startColumn": 23,
+          "endColumn": 30
+        },
+        "message": "This path depends on a [user-provided value](1)."
+      },
+      {
+        "number": 1195,
+        "stateObserved": "open",
+        "rule": "js/path-injection",
+        "path": "scripts/monetization/local-worker-provider.cjs",
+        "region": {
+          "startLine": 76,
+          "startColumn": 67,
+          "endColumn": 74
+        },
+        "message": "This path depends on a [user-provided value](1)."
+      },
+      {
+        "number": 1196,
+        "stateObserved": "open",
+        "rule": "js/missing-rate-limiting",
+        "path": "scripts/credits-google-test.cjs",
+        "region": {
+          "startLine": 23,
+          "startColumn": 16,
+          "endColumn": 85
+        },
+        "message": "This route handler performs [a file system access](1), but is not rate-limited."
+      },
+      {
+        "number": 1197,
+        "stateObserved": "open",
+        "rule": "js/missing-rate-limiting",
+        "path": "scripts/credits-google-test.cjs",
+        "region": {
+          "startLine": 25,
+          "startColumn": 25,
+          "endColumn": 80
+        },
+        "message": "This route handler performs [a file system access](1), but is not rate-limited."
+      },
+      {
+        "number": 1198,
+        "stateObserved": "open",
+        "rule": "js/missing-rate-limiting",
+        "path": "scripts/monetization/application-host.cjs",
+        "region": {
+          "startLine": 296,
+          "startColumn": 17,
+          "endColumn": 21
+        },
+        "message": "This route handler performs [authorization](1), but is not rate-limited.\nThis route handler performs [authorization](2), but is not rate-limited.\nThis route handler performs [authorization](3), but is not rate-limited.\nThis route handler performs [authorization](4), but is not rate-limited.\nThis route handler performs [authorization](5), but is not rate-limited.\nThis route handler performs [authorization](6), but is not rate-limited.\nThis route handler performs [authorization](7), but is not rate-limited."
+      },
+      {
+        "number": 1199,
+        "stateObserved": "open",
+        "rule": "js/missing-rate-limiting",
+        "path": "scripts/monetization/application-host.cjs",
+        "region": {
+          "startLine": 378,
+          "startColumn": 21,
+          "endColumn": 87
+        },
+        "message": "This route handler performs [a file system access](1), but is not rate-limited."
+      },
+      {
+        "number": 1200,
+        "stateObserved": "open",
+        "rule": "js/missing-rate-limiting",
+        "path": "scripts/monetization/local-worker-provider.cjs",
+        "region": {
+          "startLine": 57,
+          "startColumn": 36,
+          "endLine": 64,
+          "endColumn": 4
+        },
+        "message": "This route handler performs [a file system access](1), but is not rate-limited."
+      },
+      {
+        "number": 1201,
+        "stateObserved": "open",
+        "rule": "js/missing-rate-limiting",
+        "path": "scripts/monetization/local-worker-provider.cjs",
+        "region": {
+          "startLine": 141,
+          "startColumn": 5,
+          "endLine": 253,
+          "endColumn": 6
+        },
+        "message": "This route handler performs [a file system access](1), but is not rate-limited.\nThis route handler performs [a file system access](2), but is not rate-limited.\nThis route handler performs [a file system access](3), but is not rate-limited.\nThis route handler performs [a file system access](4), but is not rate-limited.\nThis route handler performs [a file system access](5), but is not rate-limited.\nThis route handler performs [a file system access](6), but is not rate-limited.\nThis route handler performs [a file system access](7), but is not rate-limited.\nThis route handler performs [a file system access](8), but is not rate-limited.\nThis route handler performs [a file system access](9), but is not rate-limited.\nThis route handler performs [a file system access](10), but is not rate-limited.\nThis route handler performs [a file system access](11), but is not rate-limited.\nThis route handler performs [a system command](12), but is not rate-limited.\nThis route handler performs [a file system access](13), but is not rate-limited.\nThis route handler performs [a file system access](14), but is not rate-limited.\nThis route handler performs [a file system access](15), but is not rate-limited."
+      },
+      {
+        "number": 1202,
+        "stateObserved": "open",
+        "rule": "js/missing-rate-limiting",
+        "path": "test/unified-credits/application.integration.test.cjs",
+        "region": {
+          "startLine": 105,
+          "startColumn": 77,
+          "endLine": 110,
+          "endColumn": 4
+        },
+        "message": "This route handler performs [a file system access](1), but is not rate-limited."
+      },
+      {
+        "number": 1203,
+        "stateObserved": "open",
+        "rule": "js/missing-rate-limiting",
+        "path": "test/unified-credits/application.integration.test.cjs",
+        "region": {
+          "startLine": 193,
+          "startColumn": 11,
+          "endColumn": 46
+        },
+        "message": "This route handler performs [authorization](1), but is not rate-limited.\nThis route handler performs [authorization](2), but is not rate-limited.\nThis route handler performs [authorization](3), but is not rate-limited.\nThis route handler performs [authorization](4), but is not rate-limited.\nThis route handler performs [authorization](5), but is not rate-limited.\nThis route handler performs [authorization](6), but is not rate-limited.\nThis route handler performs [authorization](7), but is not rate-limited."
+      }
+    ]
+  },
+  "codeql": {
+    "cliVersion": "2.27.3",
+    "queryPack": "codeql/javascript-queries@2.4.8",
+    "scope": "Four affected files plus recursive relative JavaScript imports; not a full repository scan",
+    "sourceFiles": 183,
+    "queryIds": [
+      "js/path-injection",
+      "js/missing-rate-limiting"
+    ],
+    "before": {
+      "totalInImportClosure": 74,
+      "affectedFiles": [
+        {
+          "rule": "js/path-injection",
+          "path": "scripts/monetization/local-worker-provider.cjs",
+          "region": {
+            "startLine": 63,
+            "startColumn": 25,
+            "endColumn": 33
+          },
+          "message": "This path depends on a [user-provided value](1)."
+        },
+        {
+          "rule": "js/path-injection",
+          "path": "scripts/monetization/local-worker-provider.cjs",
+          "region": {
+            "startLine": 76,
+            "startColumn": 23,
+            "endColumn": 30
+          },
+          "message": "This path depends on a [user-provided value](1)."
+        },
+        {
+          "rule": "js/path-injection",
+          "path": "scripts/monetization/local-worker-provider.cjs",
+          "region": {
+            "startLine": 76,
+            "startColumn": 67,
+            "endColumn": 74
+          },
+          "message": "This path depends on a [user-provided value](1)."
+        },
+        {
+          "rule": "js/missing-rate-limiting",
+          "path": "scripts/credits-google-test.cjs",
+          "region": {
+            "startLine": 23,
+            "startColumn": 16,
+            "endColumn": 85
+          },
+          "message": "This route handler performs [a file system access](1), but is not rate-limited."
+        },
+        {
+          "rule": "js/missing-rate-limiting",
+          "path": "scripts/credits-google-test.cjs",
+          "region": {
+            "startLine": 25,
+            "startColumn": 25,
+            "endColumn": 80
+          },
+          "message": "This route handler performs [a file system access](1), but is not rate-limited."
+        },
+        {
+          "rule": "js/missing-rate-limiting",
+          "path": "scripts/monetization/local-worker-provider.cjs",
+          "region": {
+            "startLine": 57,
+            "startColumn": 36,
+            "endLine": 64,
+            "endColumn": 4
+          },
+          "message": "This route handler performs [a file system access](1), but is not rate-limited."
+        },
+        {
+          "rule": "js/missing-rate-limiting",
+          "path": "scripts/monetization/local-worker-provider.cjs",
+          "region": {
+            "startLine": 141,
+            "startColumn": 5,
+            "endLine": 253,
+            "endColumn": 6
+          },
+          "message": "This route handler performs [a file system access](1), but is not rate-limited.\nThis route handler performs [a file system access](2), but is not rate-limited.\nThis route handler performs [a file system access](3), but is not rate-limited.\nThis route handler performs [a file system access](4), but is not rate-limited.\nThis route handler performs [a file system access](5), but is not rate-limited.\nThis route handler performs [a file system access](6), but is not rate-limited.\nThis route handler performs [a file system access](7), but is not rate-limited.\nThis route handler performs [a file system access](8), but is not rate-limited.\nThis route handler performs [a file system access](9), but is not rate-limited.\nThis route handler performs [a file system access](10), but is not rate-limited.\nThis route handler performs [a file system access](11), but is not rate-limited.\nThis route handler performs [a system command](12), but is not rate-limited.\nThis route handler performs [a file system access](13), but is not rate-limited.\nThis route handler performs [a file system access](14), but is not rate-limited.\nThis route handler performs [a file system access](15), but is not rate-limited."
+        },
+        {
+          "rule": "js/missing-rate-limiting",
+          "path": "scripts/monetization/application-host.cjs",
+          "region": {
+            "startLine": 296,
+            "startColumn": 17,
+            "endColumn": 21
+          },
+          "message": "This route handler performs [authorization](1), but is not rate-limited.\nThis route handler performs [authorization](2), but is not rate-limited.\nThis route handler performs [authorization](3), but is not rate-limited.\nThis route handler performs [authorization](4), but is not rate-limited.\nThis route handler performs [authorization](5), but is not rate-limited.\nThis route handler performs [authorization](6), but is not rate-limited.\nThis route handler performs [authorization](7), but is not rate-limited."
+        },
+        {
+          "rule": "js/missing-rate-limiting",
+          "path": "scripts/monetization/application-host.cjs",
+          "region": {
+            "startLine": 378,
+            "startColumn": 21,
+            "endColumn": 87
+          },
+          "message": "This route handler performs [a file system access](1), but is not rate-limited."
+        },
+        {
+          "rule": "js/missing-rate-limiting",
+          "path": "test/unified-credits/application.integration.test.cjs",
+          "region": {
+            "startLine": 105,
+            "startColumn": 77,
+            "endLine": 110,
+            "endColumn": 4
+          },
+          "message": "This route handler performs [a file system access](1), but is not rate-limited."
+        },
+        {
+          "rule": "js/missing-rate-limiting",
+          "path": "test/unified-credits/application.integration.test.cjs",
+          "region": {
+            "startLine": 193,
+            "startColumn": 11,
+            "endColumn": 46
+          },
+          "message": "This route handler performs [authorization](1), but is not rate-limited.\nThis route handler performs [authorization](2), but is not rate-limited.\nThis route handler performs [authorization](3), but is not rate-limited.\nThis route handler performs [authorization](4), but is not rate-limited.\nThis route handler performs [authorization](5), but is not rate-limited.\nThis route handler performs [authorization](6), but is not rate-limited.\nThis route handler performs [authorization](7), but is not rate-limited."
+        }
+      ]
+    },
+    "after": {
+      "totalInImportClosure": 0,
+      "affectedFiles": []
+    },
+    "beforeSarifSha256": "272fa2db3de865a5011b1ae0bc6df53fe743a51a4071e1f05238df4efc3b33c3",
+    "afterSarifSha256": "74b9a48e1f84d352def8b96f85d06839f9a0e3bce25409c5564f706f4976f57d",
+    "sourceListSha256": "59b1cdf5b44d8a9e4e74f80f515283622b70fc8b09fd2c2172e74bf0b07a501d"
+  },
+  "tests": {
+    "passed": 88,
+    "suites": 12,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "newHttpBoundaryTests": 5,
+    "fullSuiteLogSha256": "1e06c050ba992ef246b2cd65b4fbb4cd91f6a73fd6c575e54957db43055f4e79",
+    "httpLogSha256": "9019136e3543970f7d7a44aaf15fc8be4fc5503d790ca850e61e2d67787f2c97",
+    "actualHost": {
+      "project": "demo-autopromote-credits",
+      "origin": "http://127.0.0.1:42915",
+      "hostGlobalMax": 1200,
+      "windowMs": 60000,
+      "blocked": {
+        "/": {
+          "status": 429,
+          "retryAfter": "31"
+        },
+        "/studio": {
+          "status": 429,
+          "retryAfter": "31"
+        },
+        "/api/credit-pilot/object/not-a-capability": {
+          "status": 429,
+          "retryAfter": "31"
+        }
+      },
+      "cloudRequests": 0,
+      "workerExecutions": 0,
+      "productionWrites": 0
+    },
+    "eslint": "passed",
+    "syntax": "passed",
+    "diffCheck": "passed"
+  },
+  "sourceSha256": {
+    "scripts/credits-google-test.cjs": "93b7a2e7443e534d0dcfa4148206338ede00bf09b2f9912da87a6d6478d63448",
+    "scripts/monetization/application-host.cjs": "b3358383d80b78c53fdd12e66f83bc1d881d1612d665fc5c548ab0b14013e4cd",
+    "scripts/monetization/local-worker-provider.cjs": "58a82325a64db2468ac654decfef0dd0deb0451fa3a64a55d1f9cbfff0e1dcab",
+    "scripts/test-unified-credits.cjs": "d543d68560bbbeafe6abdc90e483e576b7dfa2527b280f081b7c4f4b943b3136",
+    "test/unified-credits/application.integration.test.cjs": "094ea86e351ecc6be2b02e8a799538293dc8d99188603830439648b9bdc9a80a",
+    "test/unified-credits/http-boundaries.test.cjs": "b6bb7053347f6fba71b3350111998b204a3665a7bd34e88a844dac7b52c516ce"
+  },
+  "preservedSourceSha256": {
+    "firestore.rules": "25436b8888989a527e0d9138ce31cf53ef1f300c95618e89166377d1e15cc996",
+    "storage.rules": "b3ebe33fd6a4ec15263b24040c4ff75cf7cfdfb9fb47eeaad19dcfbf208a0679",
+    "src/authMiddleware.js": "03044686cad64b539c5755cc961bde1a8271b828606723f5add7b33ba43f77c1",
+    "src/utils/authAuthority.js": "a2e30a561463eb8923e9b353033ceea930869b9034d1ed04433932b79022b910",
+    "src/paymentsRoutes.js": "189c123bc5c5ffce982375ef9183d7974f4c3862c2341f88cf5c0d85a63d5cd2",
+    "src/routes/paypalSubscriptionRoutes.js": "8fd77d988c3a2afef3c996480d4776b8242d452138c3dfaac8a0a9b51cc5688b",
+    "src/config/subscriptionPlans.js": "7c1df339087a63ae8f24db34f0e587f32073d6e269c522a164f8ef2bdcdc8c69",
+    "src/services/unifiedCredits/wallet.js": "d5b3d85b935f77be23b39dd39676d7962c6caa635e0b8be4eeafafb1e79854b9",
+    "python_media_worker/main_media_server.py": "5bf45a1335f81d796fd5c4ccc939839d818a69b04956493dd3e619e5080f5b79"
+  },
+  "productionChanged": false,
+  "cloudRequests": 0,
+  "paidWorkloadsStarted": 0,
+  "googleAdsRequested": 0,
+  "remoteWorkflowStarted": false,
+  "alertDismissalPerformed": false,
+  "limitations": [
+    "No GitHub upload or full repository scan; open alert status unchanged.",
+    "Local per-process limits do not qualify a production distributed limiter.",
+    "Filesystem fixtures are not evidence of a real provider execution.",
+    "The application host exercised HTTP limits using a retained frontend build, without another Studio browser/render run."
+  ],
+  "workflowYamlUnchanged": true
+}

@@ -276,8 +276,12 @@ const integration = createApplicationIntegration({
   recoverOutcome,
 });
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const app = express();
 app.locals.sharedCreditPilot = integration;
+// Apply before Auth, signed object reads, static files and SPA fallback. Credit
+// admission keeps its additional tighter per-operation limits.
+app.use(rateLimit({ windowMs: 60000, max: 1200, standardHeaders: true, legacyHeaders: false }));
 app.use(express.json({ limit: "1mb" }));
 app.use((req, res, next) => {
   if (req.get("Origin") && req.get("Origin") !== config.origin) return res.sendStatus(403);
