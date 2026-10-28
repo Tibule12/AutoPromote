@@ -1,0 +1,23 @@
+# Background replacement — whole-shot framing revision
+
+28 October 2026. Source branch `agent/studio-background-captions-20261022`.
+
+The owner rejects all three preceding room movies because the complete composite still resembles a virtual meeting background. Technical spring/edge corrections did not establish an acceptable professional result. Prove further work on the existing podcast before asking for an audition recording. No audition recording was supplied or processed.
+
+The whole-shot comparison identifies an additional composition error: cropping the upper room to remove replacement chairs, then filling the original canvas, enlarged the camera A plate **1.8156×** and camera B plate **2.1721×**. That enlarged the architecture differently behind the two people. These are measured image/crop/canvas ratios, not a universal explanation for every visible defect.
+
+The new native revision uses the already owned camera-matched warm-wall pair at full framing, without the surface crop. Native background treatment is blur 1.4px, exposure −0.06 and saturation 0.72. The original foreground grade, masks, all 15 source-detail repairs, furniture/contact, earlier fragment removals, all other effects, captions, sound and programme scale 1.1 remain exact. No renderer/frontend implementation or build changed in this continuation.
+
+[Native Master 1080p movie](matched-wall/final.mp4) · [Complete matching Studio recording](matched-wall/edited-in-studio.mp4)
+
+Actual media lives in `AutoPromote-model-runtime-v1/reports/studio-background-whole-shot-20261028`. The report copies in review/integration refer to that runtime evidence. Open [the existing local review entry](http://localhost:5000/background-review/) and the saved UNMUTED native1080 project to inspect/edit this revision through normal Composite controls.
+
+Both native source-bound camera previews decode completely, with all 298 exact foreground frames reused and zero cache misses/model/GPU runs. Nineteen whole-frame moving poses were inspected across the pair, after ten exact foreground samples were compared against the original source and on white/grey/black diagnostic backgrounds. The full Master 1080p/24fps movie has 298 frames, unchanged original decoded PCM, no detected black frames, and a matching saved canonical document/render receipt. Cold reopen, complete actual Studio playback and all seven visible editable timeline lanes pass; both movie/recording fully decode. Screen capture cadence remains separate from movie playback smoothness. Tests do not grant owner creative or professional approval.
+
+The first normal Duplicate attempt is retained but its new project identity cannot reuse the source project's bound masks: the revision registration correctly rejects it with 400 before dispatch. That restriction was preserved. The completed edit uses the original project and its own masks. The failed duplicate remains saved; no model or renderer ran for it. This exposes a separate duplicate-with-bound-model-artifacts limitation and does not qualify that flow.
+
+The first export browser observation timed out waiting for acknowledgement. The exact original render attempt nevertheless completed. Normal saved-render recovery downloaded it and recorded the matching full timeline, with no further submission or re-render. The failed observer and exact recovery/request evidence remain private.
+
+All 53 baseline projects remain, other 52 original canonical documents are unchanged, and the retained failed duplicate brings the total to 54. Saved login/account identity, all 95 protected source/prior movie files, original masks and stock originals remain. The previous full project and session are retained in private backups. Studio keeps only twelve rolling native checkpoints; the original before-this-continuation snapshot has rotated out of that rolling list, so do not claim it remains in native history. The full backup and every prior film remain available. To maintain the 5 GiB reserve, only 298 verified regenerable PNG cache entries for two completed rejected jobs from an older renderer were released; source/matte files, current prepared frames and all prior movies were retained. The exact cleanup manifest is private.
+
+This is a further composition revision of one short supplied podcast. Previous room movies remain owner-rejected. The original lighting/compression, fixed manual paths, broader/longer footage and professional/owner creative acceptance remain unqualified. No audition readiness, public/PRO/production readiness, GPU, paid generation, publishing, production deployment, main merge or monetization work is claimed.

@@ -2758,4 +2758,4 @@ Applies to: owned video with a source-bound subject mask. Requires: studio.compo
 - Advanced manual geometry: 1–32 polygons with 3–64 points each, within source coordinates 0–1; [] removes the optional regions.
 - Only the existing object saturation treatment applies. These paths never enlarge the inclusion matte or change the source mask.
 - The regions stay fixed in source coordinates. They do not detect or track an object and do not prove clean replacement on arbitrary footage.
-- Three short podcast room examples pass native preview/export/reopen checks. Fixed paths and these examples do not qualify arbitrary/longer footage or establish owner creative approval.
+- The three short room examples pass technical preview/export/reopen checks but remain owner-rejected for whole-shot realism. Colour-only paths fix a selection/colour separation defect; they do not establish a convincing professional background. Fixed geometry and these examples do not qualify arbitrary/longer footage.

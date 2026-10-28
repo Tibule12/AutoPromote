@@ -1,5 +1,7 @@
 # Background replacement: colour cleanup without restoring the old room
 
+**Owner rejection, 28 October:** All three movies below are rejected for whole-shot realism. The virtual-background appearance remains; the technical correction is not a professional finished result. [Current review](../studio-background-whole-shot-20261028/README.md).
+
 28 October 2026. The preceding movies remain owner-rejected and are preserved. The first soft-alpha correction is also rejected: extending an inclusion path to neutralise the microphone spring filled nearby gaps with old-room pixels, producing a grey wedge.
 
 Source branch: `agent/studio-background-captions-20261022`. The integration worktree receives this continuity record only.

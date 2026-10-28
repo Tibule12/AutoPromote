@@ -217,3 +217,7 @@ reports/studio-background-visual-review-20261027/*
 # Private native background colour-path evidence
 /reports/studio-background-colour-paths-20261027/*
 !/reports/studio-background-colour-paths-20261027/README.md
+
+# Private whole-shot background review
+/reports/studio-background-whole-shot-20261028/*
+!/reports/studio-background-whole-shot-20261028/README.md

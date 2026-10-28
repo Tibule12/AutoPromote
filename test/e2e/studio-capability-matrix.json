@@ -16237,7 +16237,7 @@
     "humanSoundApproval": false
   },
   "backgroundSoftAlpha20261027": {
-    "status": "NATIVE_COLOUR_ONLY_PATH_CORRECTION_REVIEWED_PRIVATE",
+    "status": "OWNER_REJECTED_WHOLE_SHOT_REALISM",
     "evidence": "reports/studio-background-colour-paths-20261027/README.md",
     "previousDeliveryOwnerRejected": true,
     "fullFrameSolveCausesRoughPersonBoundary": true,
@@ -16252,9 +16252,9 @@
     "visualCompletion": false,
     "creativeApproval": false,
     "readinessPromoted": false,
-    "next": "Preserve all new/earlier native films, timelines, source masks and projects. Review further owner feedback against actual full-size moving footage; qualify other/longer sources separately.",
+    "next": "Fix and inspect the supplied podcast as a complete shot before requesting an audition recording.",
     "colourOnlyPathFix": "Shared colour-only paths preserve alpha and exact baked holdout geometry. Native moving review completed for three room movies.",
-    "remainingBlocker": "Fixed manual source geometry, original lighting/compression, longer/other footage and owner creative/listening acceptance remain unqualified.",
+    "remainingBlocker": "Complete composite still looks like a virtual meeting background. Camera/light/colour/contact and moving-boundary realism remain unfinished.",
     "deliveries": [
       {
         "theme": "daylight-loft",
@@ -16344,6 +16344,84 @@
     "frontendRebuilt": true,
     "primaryBuildFilesUnchanged": 147,
     "localReviewEntry": "http://localhost:5000/background-review/",
-    "humanSoundApproval": false
+    "humanSoundApproval": false,
+    "latestDeliveryOwnerRejected": true
+  },
+  "backgroundWholeShotRejection20261028": {
+    "status": "PRIVATE_NATIVE_MATCHED_WALL_FRAMING_REVISION",
+    "evidence": "reports/studio-background-whole-shot-20261028/README.md",
+    "podcastMustQualifyBeforeAudition": true,
+    "protectedSourceAndPriorFiles": 95,
+    "visualCompletion": false,
+    "creativeApproval": false,
+    "gpuJobs": 0,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "delivery": {
+      "theme": "matched-wall",
+      "projectId": "viral-project-22f0e2ba-14fd-4309-a097-f1adef3b0abd",
+      "canonicalHash": "f1781ab3d46a46088e2e0bfac57c421bce962d5103dedfd9e7eaa33616dfb9e1",
+      "movieSha256": "f64790da1e50c547f943e93ce29b0de5a75445c5698d63d25bb316bec994e4a0",
+      "timelineSha256": "db71bbf403b7444fc1dc42c644e523f36892199a748240259a273ba2c6b9ac97",
+      "rows": [
+        {
+          "id": "pro-track-row-video",
+          "top": 701,
+          "bottom": 781
+        },
+        {
+          "id": "pro-track-row-adjustment",
+          "top": 781,
+          "bottom": 835
+        },
+        {
+          "id": "pro-track-row-graphics",
+          "top": 835,
+          "bottom": 889
+        },
+        {
+          "id": "pro-track-row-motion",
+          "top": 889,
+          "bottom": 943
+        },
+        {
+          "id": "pro-track-row-originalAudio",
+          "top": 943,
+          "bottom": 997
+        },
+        {
+          "id": "pro-track-row-music",
+          "top": 997,
+          "bottom": 1051
+        },
+        {
+          "id": "pro-track-row-sfx",
+          "top": 1051,
+          "bottom": 1105
+        }
+      ],
+      "completeNativePlayback": true,
+      "recoveredOriginalAttemptWithoutResubmission": true,
+      "headless": true,
+      "muted": true,
+      "paidGpu": false,
+      "ownerCreativeApproval": false
+    },
+    "originalProjectsRetained": 53,
+    "otherCanonicalDocumentsUnchanged": 52,
+    "totalProjectsRetained": 54,
+    "exactPreparedForegroundFramesReused": 298,
+    "foregroundCacheMisses": 0,
+    "decodedSoundtrackUnchanged": true,
+    "savedLoginRetained": true,
+    "rendererSourceUnchanged": true,
+    "frontendRebuilt": false,
+    "originalFullProjectAndSessionBackupRetained": true,
+    "originalRevisionInRollingNativeHistory": false,
+    "nativeRollingCheckpointLimit": 12,
+    "duplicateModelArtifactScopeStillRejected": true,
+    "exportRecoveredWithoutResubmission": true,
+    "ownerCreativeApproval": false,
+    "professionalQualification": false
   }
 }

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Bounded documentation impact review of colour-only holdout regions, unchanged source selection, three privately reviewed native room movies and normal local review entry. Original masks/repairs/login/audio retained. No global creative, PRO, production or unrelated-feature qualification.",
-  "reviewed_at": "2026-10-28T03:27:29.881Z",
-  "catalog_sha256": "73849adbf08d059f951c19e841de648b4fa3f06f186a4c46086a34e772361d98",
+  "reason": "Bounded documentation impact review: owner rejects prior room outputs; measured background crop magnification and new native full-framing wall revision are recorded with professional qualification false. Only replacement asset/framing/treatment changed; source renderer/masks/foreground remain exact. Duplicate artifact scope and rolling-history limitations remain explicit.",
+  "reviewed_at": "2026-10-28T17:25:22.404Z",
+  "catalog_sha256": "b4bd50ba347c4de4631aaa46cc9ef2e60e6de61984306ec7a0c531c741aa4e74",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "4c670c13935ccaede261899f4e3fee9be8c505fa7d5056089769c8a2000a41cb"
+      "sha256": "49623032a2141b73e95651cfaf1a457e51a36cd8eb883ce1309579d09dc77a2b"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "67545912ea2373690bad742ed08a2dd684890eaad8734175b2b579ed69d812f6"
+      "sha256": "3ea575f4d7871f79cabd3fd62d3247dd233825fb9c779f79f01dafaf1fc5df5e"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
