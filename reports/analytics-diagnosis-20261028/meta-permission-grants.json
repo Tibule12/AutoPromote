@@ -1,0 +1,80 @@
+{
+  "at": "2026-10-28T17:48:39.281Z",
+  "appId": "1403342434818994",
+  "screenshotAppIdMatches": true,
+  "tokens": [
+    {
+      "kind": "user",
+      "debugStatus": 200,
+      "appId": "1403342434818994",
+      "valid": true,
+      "grantedScopes": [
+        "pages_show_list",
+        "instagram_basic",
+        "instagram_content_publish",
+        "pages_read_engagement",
+        "pages_manage_metadata",
+        "pages_manage_posts",
+        "public_profile"
+      ],
+      "missingAnalyticsScopes": [
+        "read_insights",
+        "instagram_manage_insights"
+      ]
+    },
+    {
+      "kind": "page",
+      "debugStatus": 200,
+      "appId": "1403342434818994",
+      "valid": true,
+      "grantedScopes": [
+        "pages_show_list",
+        "instagram_basic",
+        "instagram_content_publish",
+        "pages_read_engagement",
+        "pages_manage_metadata",
+        "pages_manage_posts",
+        "public_profile"
+      ],
+      "missingAnalyticsScopes": [
+        "read_insights",
+        "instagram_manage_insights"
+      ]
+    }
+  ],
+  "userPermissionsStatus": 200,
+  "userPermissionGrants": [
+    {
+      "permission": "instagram_basic",
+      "status": "granted"
+    },
+    {
+      "permission": "instagram_content_publish",
+      "status": "granted"
+    },
+    {
+      "permission": "pages_manage_metadata",
+      "status": "granted"
+    },
+    {
+      "permission": "pages_manage_posts",
+      "status": "granted"
+    },
+    {
+      "permission": "pages_read_engagement",
+      "status": "granted"
+    },
+    {
+      "permission": "pages_show_list",
+      "status": "granted"
+    },
+    {
+      "permission": "public_profile",
+      "status": "granted"
+    }
+  ],
+  "readOnly": true,
+  "tokenValuesRetained": false,
+  "appSettingsChanged": false,
+  "reconnectionPerformed": false
+}

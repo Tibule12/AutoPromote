@@ -23,6 +23,8 @@ The backend runs locally on `127.0.0.1:5128`, with ordinary Firebase authenticat
 | LinkedIn | Old endpoint returned 404. Correct REST endpoint returned 403, `partnerApiSocialMetadata.GET.20261001` access denied. | Restricted member/organization reading access must be available to this app and token. |
 | Reddit | Score/comments available; no video view count supplied. | Do not label score as views or likes. |
 
+Follow-up after the owner supplied Meta screenshots: read-only `/debug_token` checks for both saved user and Page tokens returned valid tokens for the exact screenshot app `1403342434818994`. Both had Page reading/publishing and Instagram basic/publishing grants, but neither had `read_insights` or `instagram_manage_insights`. `/me/permissions` independently confirmed that grant list. See `meta-permission-grants.json`; it contains no tokens. The screenshots confirm several advanced permissions but do not establish these two analytics grants.
+
 The Meta OAuth request now includes analytics scopes; existing grants and app approval are not changed by source edits. No account setting or support request was submitted. API availability and permission on an individual token are separate facts.
 
 Official contracts: [TikTok query, scope and twenty-ID limit](https://developers.tiktok.com/docs/en/tiktok-api-v2-video-query); [LinkedIn REST social metadata and restricted read permissions](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/social-metadata-api?view=li-lms-2026-01). Meta's specific permission refusals above were observed directly; its documentation fetch was rate-limited during this review.

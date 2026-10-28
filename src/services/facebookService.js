@@ -1,6 +1,5 @@
 // facebookService.js - Facebook Graph API OAuth and page posting
 const { db } = require("../firebaseAdmin");
-const { numericMetric } = require("./platformMetricValues");
 const { safeFetch } = require("../utils/ssrfGuard");
 
 let fetchFn = global.fetch;
