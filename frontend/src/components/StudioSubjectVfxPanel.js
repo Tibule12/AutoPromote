@@ -810,6 +810,20 @@ export default function StudioSubjectVfxPanel({
                   }} />
               </label>}
               {effect.type === "foreground_holdout" && <label>
+                Colour treatment paths
+                <small>Apply this object's saturation treatment inside these regions without keeping any additional background pixels.</small>
+                <textarea aria-label="Colour treatment paths" key={JSON.stringify(effect.color_paths || [])}
+                  defaultValue={JSON.stringify(effect.color_paths || [])}
+                  onBlur={event => {
+                    try {
+                      const paths=JSON.parse(event.target.value),next={...effect};
+                      if(Array.isArray(paths)&&!paths.length)delete next.color_paths;else next.color_paths=paths;
+                      const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                      validateSubjectVfxScene(scene);update(scene);
+                    } catch { setMessage("Use 1–32 colour treatment paths with 3–64 source-frame points each, or [] to remove them."); }
+                  }} />
+              </label>}
+              {effect.type === "foreground_holdout" && <label>
                 Repair opaque detail from source
                 <small>Copy a clean part of this source frame over a damaged object. Coordinates stay fixed; use separate timed repairs for moving objects.</small>
                 <textarea aria-label="Repair opaque detail from source" key={JSON.stringify(effect.source_patches || [])}
@@ -866,7 +880,7 @@ export default function StudioSubjectVfxPanel({
                   }} />
               </label>}
               {Object.entries(effect.type === "foreground_refine" ? { edge_radius: 0, decontaminate: 0, blue_spill: 0, after_refine: false, after_holdout: false, reject_connected: false, ...effect } : effect.type === "foreground_holdout" ? { after_refine: false, saturation: 1, ...effect } : effect)
-                .filter(([key]) => !["id", "type", "asset_sha256", "detail_polygon", "edge_polygon", "paths", "clear_paths", "source_patches"].includes(key))
+                .filter(([key]) => !["id", "type", "asset_sha256", "detail_polygon", "edge_polygon", "paths", "color_paths", "clear_paths", "source_patches"].includes(key))
                 .map(([key, value]) => (
                   <label key={key}>
                     {key === "asset_id" ? "Background media" : key === "after_holdout" ? "Clean protected object edges" : key === "reject_connected" ? "Limit colour cleanup to background edges" : key === "after_refine" ? effect.type === "foreground_refine" ? "Apply colour cleanup after matting" : "Keep thin detail through cleanup" : key.replaceAll("_", " ")}

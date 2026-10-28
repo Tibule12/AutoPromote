@@ -49,6 +49,20 @@ const timeline = [
   { source_clip_id: "source-a", start_time: 5, end_time: 8 },
 ];
 
+test('colour-only regions survive canonical save and invalidate an old reviewed preview',()=>{
+  const value=scene();value.effects=[{id:'equipment',type:'foreground_holdout',start:0,end:6,
+    corners:[[0,0],[.1,0],[.1,.1],[0,.1]],feather:0,saturation:0}];
+  const previous=subjectVfxRevision(value);
+  value.effects[0].color_paths=[[[.4,.2],[.6,.2],[.6,.8],[.4,.8]]];
+  expect(validateSubjectVfxScene(value)).toEqual(value);
+  expect(subjectVfxRevision(value)).not.toBe(previous);
+  const snapshot={orderedClips:[{id:'source-a',start:0,end:12}],timeline:[{id:'clip',sourceClipId:'source-a',startRequest:2,endRequest:8}],subjectVfxScenes:[reviewed(value)]};
+  const document=adaptStudioSnapshotToDocument({snapshot,projectId:'colour-project'});
+  expect(projectStudioLinkedTimingToSnapshot(document).subjectVfxScenes[0].scene.effects[0].color_paths).toEqual(value.effects[0].color_paths);
+  value.effects[0].color_paths=[[[0,0],[2,0],[1,1]]];
+  expect(()=>validateSubjectVfxScene(value)).toThrow();
+});
+
 test("opaque source repairs remain editable in canonical state and invalidate the previous preview",()=>{
   const value=scene();value.effects=[{id:"rig",type:"foreground_holdout",start:0,end:6,
     corners:[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],feather:0}];

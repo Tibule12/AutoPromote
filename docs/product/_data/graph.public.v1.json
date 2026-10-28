@@ -1524,6 +1524,11 @@
       "status": "PARTIAL"
     },
     {
+      "id": "studio.composite.colour_treatment_paths",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
       "id": "task.image_cinematic",
       "kind": "task",
       "status": "PARTIAL"
@@ -3814,6 +3819,11 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.edge_refinement_region"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.colour_treatment_paths"
     }
   ]
 }

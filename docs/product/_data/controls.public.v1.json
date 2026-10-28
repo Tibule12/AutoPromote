@@ -6980,6 +6980,43 @@
       ],
       "updated_at": "2026-10-24",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.colour_treatment_paths",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Colour treatment paths",
+      "status": "PARTIAL",
+      "meaning": "Apply the foreground holdout saturation to an additional region while keeping the existing cutout alpha. Use this to neutralise source lighting on retained equipment without restoring the old room.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 32,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: 1–32 polygons with 3–64 points each, within source coordinates 0–1; [] removes the optional regions.",
+        "Only the existing object saturation treatment applies. These paths never enlarge the inclusion matte or change the source mask.",
+        "The regions stay fixed in source coordinates. They do not detect or track an object and do not prove clean replacement on arbitrary footage.",
+        "Three short podcast room examples pass native preview/export/reopen checks. Fixed paths and these examples do not qualify arbitrary/longer footage or establish owner creative approval."
+      ],
+      "updated_at": "2026-10-28",
+      "product_version": "1.2.0"
     }
   ]
 }

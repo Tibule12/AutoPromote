@@ -817,6 +817,34 @@ def test_refined_authored_paths_do_not_restore_rough_old_room_edges(source_cache
     assert np.asarray(edited)[30,43]>200, "A subsequent authored path change still applies"
 
 
+def test_colour_paths_do_not_reintroduce_background_or_invalidate_refined_holdouts(source_cache):
+    _,_,cache=source_cache
+    holdout={"id":"equipment","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],"feather":0,"saturation":0}
+    cache.manifest["refinement"]={"holdoutGroups":[{key:holdout.get(key,[] if key=="paths"else 0)
+        for key in ("id","start","end","corners","paths","feather")}]}
+    alpha=np.zeros((72,128),np.uint8);alpha[20:50,60:63]=128;alpha[20:50,63:66]=255
+    pixels=np.full((72,128,3),[160,70,40],np.uint8)
+    frame=Image.fromarray(pixels);matte=Image.fromarray(alpha)
+    treatment={**holdout,"color_paths":[[[.4,.1],[.6,.1],[.6,.9],[.4,.9]]]}
+    command=plan(cache);command['effects']=[treatment]
+    clean,result=VfxFrameRenderer(command,cache)._prepare_foreground(frame,matte,[treatment],128,72)
+    assert np.array_equal(np.asarray(result),alpha), 'Colour cannot add room pixels or harden a soft edge'
+    assert len(set(np.asarray(clean)[30,61]))==1, 'Apply the requested neutral colour on retained soft detail'
+    assert np.array_equal(np.asarray(clean)[30,100],pixels[30,100]), 'Keep colour outside the treatment unchanged'
+    legacy=plan(cache);legacy['effects']=[holdout]
+    _,before=VfxFrameRenderer(legacy,cache)._prepare_foreground(frame,matte,[holdout],128,72)
+    assert np.array_equal(np.asarray(before),np.asarray(result)), 'Colour paths retain the original baked mask provenance'
+
+
+@pytest.mark.parametrize('paths',[[],[[[0,0],[1,1]]],[[[0,0],[2,0],[1,1]]]])
+def test_colour_paths_require_bounded_nonempty_geometry(source_cache,paths):
+    _,_,cache=source_cache
+    command=plan(cache);command['effects']=[{'id':'colour','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[0,0],[.1,0],[.1,.1],[0,.1]],'feather':0,'color_paths':paths}]
+    with pytest.raises(ValueError):VfxFrameRenderer(command,cache)
+
+
 def test_foreground_cache_binds_refined_holdout_provenance(source_cache, tmp_path, monkeypatch):
     _,_,cache=source_cache
     monkeypatch.setenv("STUDIO_VFX_FOREGROUND_CACHE_DIR",str(tmp_path/"foreground"))

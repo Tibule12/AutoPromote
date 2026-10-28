@@ -1,3 +1,7 @@
+<!-- owner-rejected-visuals-20261027 -->
+The owner rejects this delivery too. The fragment cleanup did not establish clean background replacement. Reinspection finds rough guest neck boundaries and lost microphone-spring detail. Actual source/matte/cleanup diagnosis continues in [the visual review](../studio-background-visual-review-20261027/README.md); preserve every movie and existing edit.
+<!-- /owner-rejected-visuals-20261027 -->
+
 # Native removal of overlooked background fragments — 27 October 2026
 
 The owner rejects the26October framing delivery as unfinished. Those three movies and full matching Studio recordings remain preserved. Reinspection of the actual source, prepared transparency and composite finds old plant/reed fragments beside the host microphone supports and above the cup. These photographed fragments survived the earlier cleanup; they are separate from the replacement-image chairs corrected on26October.

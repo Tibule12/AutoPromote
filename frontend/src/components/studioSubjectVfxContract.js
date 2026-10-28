@@ -116,6 +116,7 @@ function validateSubjectVfxScene(scene) {
       ...(effect.type === "foreground_refine" ? ["edge_radius", "decontaminate", "detail_polygon", "edge_polygon", "blue_spill", "clear_paths", "after_refine", "after_holdout", "reject_connected"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)) : [])];
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "after_refine")) fields.push("after_refine");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "paths")) fields.push("paths");
+    if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "color_paths")) fields.push("color_paths");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "saturation")) fields.push("saturation");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "source_patches")) fields.push("source_patches");
     if (effect?.type === "background_replace") fields.push(...["surface_corners", "asset_crop"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)));
@@ -231,7 +232,7 @@ function validateSubjectVfxScene(scene) {
       if (!Array.isArray(effect.source_patches) || effect.source_patches.length<1 || effect.source_patches.length>16 || !effect.source_patches.every(validRepair))
         fail("Use 1–16 source detail repairs with convex source/target corners, feather 0–3 and end blend 0–32 pixels.");
     }
-    for (const field of effect.type === "foreground_holdout" ? ["paths"] : effect.type === "foreground_refine" ? ["clear_paths"] : [])
+    for (const field of effect.type === "foreground_holdout" ? ["paths", "color_paths"] : effect.type === "foreground_refine" ? ["clear_paths"] : [])
       if (Object.prototype.hasOwnProperty.call(effect, field) &&
         (!Array.isArray(effect[field]) || effect[field].length < 1 || effect[field].length > 32 ||
          !effect[field].every(points => Array.isArray(points) && points.length >= 3 && points.length <= 64 &&

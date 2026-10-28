@@ -9674,5 +9674,115 @@
     "rendererSourceUnchanged": true,
     "frontendRebuilt": false,
     "humanSoundApproval": false
+  },
+  "backgroundSoftAlpha20261027": {
+    "status": "NATIVE_COLOUR_ONLY_PATH_CORRECTION_REVIEWED_PRIVATE",
+    "evidence": "reports/studio-background-colour-paths-20261027/README.md",
+    "previousDeliveryOwnerRejected": true,
+    "fullFrameSolveCausesRoughPersonBoundary": true,
+    "roomRemovalPathsCutIntoSpring": true,
+    "originalMasksAndSourcePatchesRetained": true,
+    "nativeControlsOnly": true,
+    "newModelJobs": 0,
+    "gpuJobs": 0,
+    "paidGeneration": false,
+    "mainMerge": false,
+    "productionDeployment": false,
+    "visualCompletion": false,
+    "creativeApproval": false,
+    "readinessPromoted": false,
+    "next": "Preserve all new/earlier native films, timelines, source masks and projects. Review further owner feedback against actual full-size moving footage; qualify other/longer sources separately.",
+    "colourOnlyPathFix": "Shared colour-only paths preserve alpha and exact baked holdout geometry. Native moving review completed for three room movies.",
+    "remainingBlocker": "Fixed manual source geometry, original lighting/compression, longer/other footage and owner creative/listening acceptance remain unqualified.",
+    "deliveries": [
+      {
+        "theme": "daylight-loft",
+        "canonicalHash": "e55e9e715c0f883504b8adbb33c87c8baa1ee0668733294c7fc9110a39ce28f0",
+        "movieSha256": "23f071d8754aa4a753cbc0fc37783a92fc4d5e6151e02022c617843658543ca0",
+        "timelineSha256": "617a58312b601d40e734ca42557a7f6b0f49ead67acf08ab867723699319b8e2",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true,
+        "originalMaskRefsAndOtherEffectsRetained": true,
+        "replacementCrop": {
+          "cameraA": [
+            0,
+            0,
+            1,
+            0.55
+          ],
+          "cameraB": [
+            0,
+            0,
+            1,
+            0.46
+          ]
+        },
+        "gpuCount": 0
+      },
+      {
+        "theme": "warm-library",
+        "canonicalHash": "eecc63ad795fb7b3d5389b1bccc13a46459e72eac05eb5dbc3a22e50da3e8245",
+        "movieSha256": "444ca969ea8b5adfa6fdce4c6fed81249ccf77b33208ad4f0b3d7e47fe4fea30",
+        "timelineSha256": "b6d3667886755391da074277b94bfafece4cb3c126ad7a1de01a29ac9cdcac4f",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true,
+        "originalMaskRefsAndOtherEffectsRetained": true,
+        "replacementCrop": {
+          "cameraA": [
+            0,
+            0,
+            1,
+            0.55
+          ],
+          "cameraB": [
+            0,
+            0,
+            1,
+            0.46
+          ]
+        },
+        "gpuCount": 0
+      },
+      {
+        "theme": "midnight-studio",
+        "canonicalHash": "1669910c8d51c60abfb8dc426defb9e2cde1744f6c07ce2d978be24ce34f2e77",
+        "movieSha256": "99b57e77b8dfab3b19b067a5ce916f69993aa54d1f9d57b1a6cad23f4e28babe",
+        "timelineSha256": "6385b507ef49a10a3a535c6631687abedfa66f94e389434e9002e3fa12035809",
+        "frames": 298,
+        "audioPcmSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+        "sevenTimelineLanesVisible": true,
+        "completeNativePlayback": true,
+        "originalMaskRefsAndOtherEffectsRetained": true,
+        "replacementCrop": {
+          "cameraA": [
+            0,
+            0,
+            1,
+            0.55
+          ],
+          "cameraB": [
+            0,
+            0,
+            1,
+            0.46
+          ]
+        },
+        "gpuCount": 0
+      }
+    ],
+    "originalProjectsRetained": 53,
+    "otherCanonicalDocumentsUnchanged": 52,
+    "protectedFilesUnchanged": 89,
+    "savedLoginRetained": true,
+    "decodedSoundtrackUnchanged": true,
+    "sharedImplementationChange": true,
+    "frontendRebuilt": true,
+    "primaryBuildFilesUnchanged": 147,
+    "localReviewEntry": "http://localhost:5000/background-review/",
+    "humanSoundApproval": false
   }
 }

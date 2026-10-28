@@ -208,6 +208,7 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.composite.background_decontaminate | Remove old background colour | number | 0 … 1 | strength | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.source_detail_repair | Repair opaque detail from source | array | 0 … 16 | normalized source-frame corners; feather and end blending in source pixels | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 | studio.composite.edge_refinement_region | Edge refinement region points | array | 0 … 64 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.colour_treatment_paths | Colour treatment paths | array | 0 … 32 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -2743,3 +2744,18 @@ Applies to: owned video with a source-bound subject mask. Requires: studio.compo
 - Set Edge detail width above zero first. Use 3–64 points forming a nonempty region; clear the field to refine the entire frame.
 - This manual region stays fixed in the source frame. Inspect the complete moving shot; it is not automatic tracking or object reconstruction.
 - The latest podcast correction remains under review. Broader footage and creative acceptance remain unqualified.
+
+<a id="studio-composite-colour_treatment_paths"></a>
+
+## Colour treatment paths
+
+ID: `studio.composite.colour_treatment_paths` • **PARTIAL**
+
+Apply the foreground holdout saturation to an additional region while keeping the existing cutout alpha. Use this to neutralise source lighting on retained equipment without restoring the old room.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Advanced manual geometry: 1–32 polygons with 3–64 points each, within source coordinates 0–1; [] removes the optional regions.
+- Only the existing object saturation treatment applies. These paths never enlarge the inclusion matte or change the source mask.
+- The regions stay fixed in source coordinates. They do not detect or track an object and do not prove clean replacement on arbitrary footage.
+- Three short podcast room examples pass native preview/export/reopen checks. Fixed paths and these examples do not qualify arbitrary/longer footage or establish owner creative approval.

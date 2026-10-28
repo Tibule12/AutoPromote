@@ -210,3 +210,10 @@ reports/studio-guest-selection-20261026/*
 
 reports/studio-background-continuation-20261027/*
 !reports/studio-background-continuation-20261027/README.md
+
+reports/studio-background-visual-review-20261027/*
+!reports/studio-background-visual-review-20261027/README.md
+
+# Private native background colour-path evidence
+/reports/studio-background-colour-paths-20261027/*
+!/reports/studio-background-colour-paths-20261027/README.md

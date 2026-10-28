@@ -1257,7 +1257,8 @@
         "studio.composite.background_edge_radius",
         "studio.composite.background_decontaminate",
         "studio.composite.source_detail_repair",
-        "studio.composite.edge_refinement_region"
+        "studio.composite.edge_refinement_region",
+        "studio.composite.colour_treatment_paths"
       ],
       "workflow": [
         "Open Studio → Composite and add effects to the selected owned video clip.",
@@ -1283,7 +1284,8 @@
         "Optional object holdouts and removal paths are advanced manual normalized source-frame geometry. They do not automatically identify furniture or microphones or track a hand-drawn shape through motion.",
         "Opaque source-detail repair copies existing cleaned pixels from the same frame. It does not infer the hidden original object, automatically track geometry or repair an unselected object. A clean photographed sample is required; moving or articulated objects need separate timed corrections.",
         "Local edge regions use manual fixed source-frame coordinates. They do not track or reconstruct objects; hard authored removal paths still take priority. Previous podcast movies remain owner-rejected while this correction is reviewed.",
-        "Foreground contrast uses the final visible foreground, including soft edge coverage. Removed background pixels do not set its brightness pivot. Use foreground exposure, saturation and contrast to match your chosen room, then inspect the moving preview and final movie."
+        "Foreground contrast uses the final visible foreground, including soft edge coverage. Removed background pixels do not set its brightness pivot. Use foreground exposure, saturation and contrast to match your chosen room, then inspect the moving preview and final movie.",
+        "Colour treatment paths apply the selected object saturation to additional fixed source-frame regions without retaining extra pixels. They do not change the cutout, restore missing objects or track motion. To keep or remove an object, edit its foreground selection; review the moving preview and final movie."
       ],
       "common_errors": [
         {
@@ -17381,6 +17383,62 @@
           "kind": "IMPLEMENTATION"
         }
       ]
+    },
+    {
+      "control_id": "studio.composite.colour_treatment_paths",
+      "label": "Colour treatment paths",
+      "meaning": "Apply the foreground holdout saturation to an additional region while keeping the existing cutout alpha. Use this to neutralise source lighting on retained equipment without restoring the old room.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "color_paths",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 32,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: 1–32 polygons with 3–64 points each, within source coordinates 0–1; [] removes the optional regions.",
+        "Only the existing object saturation treatment applies. These paths never enlarge the inclusion matte or change the source mask.",
+        "The regions stay fixed in source coordinates. They do not detect or track an object and do not prove clean replacement on arbitrary footage.",
+        "Three short podcast room examples pass native preview/export/reopen checks. Fixed paths and these examples do not qualify arbitrary/longer footage or establish owner creative approval."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-28",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Colour treatment paths",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioSubjectVfxContract.js",
+          "anchor": "color_paths",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_vfx_plan.py",
+          "anchor": "color_paths",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
     }
   ],
   "tasks": [
@@ -20961,6 +21019,11 @@
       "type": "editable_with",
       "from": "studio.compositing",
       "to": "studio.composite.edge_refinement_region"
+    },
+    {
+      "type": "editable_with",
+      "from": "studio.compositing",
+      "to": "studio.composite.colour_treatment_paths"
     }
   ],
   "template_bindings": [

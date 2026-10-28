@@ -101,7 +101,7 @@ def validate_plan(plan, cache):
                             for value in point:bounded(value,0,1)
                         area=sum(p[0]*points[(i+1)%len(points)][1]-points[(i+1)%len(points)][0]*p[1]for i,p in enumerate(points))
                         if abs(area)<.000001:raise ValueError("Empty source repair protection path")
-        for field in (["paths"] if kind=="foreground_holdout" else ["clear_paths"] if kind=="foreground_refine" else []):
+        for field in (["paths", "color_paths"] if kind=="foreground_holdout" else ["clear_paths"] if kind=="foreground_refine" else []):
             if field not in effect:continue
             base.add(field)
             maximum=32
@@ -514,7 +514,10 @@ class VfxFrameRenderer:
         # foreground, never by mixing contaminated source RGB into soft edges.
         for effect in active:
             if effect["type"] != "foreground_holdout" or effect.get("saturation",1)==1:continue
-            holdout=path_mask([effect["corners"],*effect.get("paths",[])])
+            # Colour treatment must not enlarge the inclusion matte. Keeping
+            # these paths separate also retains the exact saved-mask holdout
+            # provenance instead of restoring an opaque old-room polygon.
+            holdout=path_mask([effect["corners"],*effect.get("paths",[]),*effect.get("color_paths",[])])
             if effect["feather"]:holdout=holdout.filter(ImageFilter.GaussianBlur(effect["feather"]))
             foreground=Image.composite(ImageEnhance.Color(foreground).enhance(effect["saturation"]),foreground,holdout)
         for effect in active:
@@ -567,7 +570,7 @@ class VfxFrameRenderer:
                     # A newly sampled region outside that holdout needs it too,
                     # without applying the saturation twice inside the holdout.
                     treated=ImageEnhance.Color(foreground).enhance(effect["saturation"])
-                    included=path_mask([effect["corners"],*effect.get("paths",[])])
+                    included=path_mask([effect["corners"],*effect.get("paths",[]),*effect.get("color_paths",[])])
                     if effect["feather"]:included=included.filter(ImageFilter.GaussianBlur(effect["feather"]))
                     sampled=Image.composite(foreground,treated,included)
                 sample=np.asarray(sampled)
