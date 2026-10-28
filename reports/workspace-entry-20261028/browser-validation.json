@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-28T18:09:59.067Z",
+  "errors": [],
+  "adminRequests": 1,
+  "verifyStatus": 200,
+  "serverVerifiedOwner": true,
+  "ordinaryWorkspaceVisible": true,
+  "adminRequestsBeforeChoice": 0,
+  "coldWorkspaceVisible": true,
+  "explicitAdminPath": "#/admin-dashboard",
+  "explicitAdminVisible": true,
+  "returnToWorkspace": true,
+  "finalPath": "#/"
+}

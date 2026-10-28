@@ -1,7 +1,7 @@
 // Trigger CI/CD: minor change for deployment
 /* eslint-disable no-console, no-unused-vars */
 import React, { useState, useEffect, lazy, Suspense } from "react";
-import { Routes, Route, useNavigate } from "react-router";
+import { Routes, Route, useNavigate, useLocation } from "react-router";
 import DojoPage from "./DojoPage";
 import "./App.css";
 import { auth, db } from "./firebaseClient";
@@ -58,6 +58,7 @@ import ProductAssistance from "./components/ProductAssistance";
 import CreditPilotPanel from "./components/CreditPilotPanel";
 import { creditFetch } from "./utils/creditPilot";
 import { isLocalTestAuthEndpoint, isRuntimeE2EEnabled, getRuntimeE2EToken } from "./utils/mediaAuth";
+import { getVerifiedSessionUser, isAdminDashboardPath, shouldShowAdminDashboard } from "./utils/dashboardAccess";
 
 // Static Pages — lazy loaded for bundle splitting
 const About = lazy(() => import("./About"));
@@ -244,13 +245,8 @@ function App() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [pendingLogin, setPendingLogin] = useState(null); // { userData, token }
   const navigate = useNavigate();
-  const [routePathState, setRoutePathState] = useState(
-    typeof window !== "undefined"
-      ? window.location.hash
-        ? window.location.hash.replace(/^#/, "")
-        : window.location.pathname
-      : "/"
-  );
+  const { pathname } = useLocation();
+  const showAdminDashboard = shouldShowAdminDashboard(user, pathname);
 
   // Lock page scrolling only while an auth/verification modal is actually
   // visible. Deriving this directly avoids a stale modal-open class surviving
@@ -289,36 +285,28 @@ function App() {
       }
       try {
         const token = await firebaseUser.getIdToken(true);
-        const idTokenResult = await firebaseUser.getIdTokenResult(true);
-        const hasAdminClaim =
-          idTokenResult.claims.admin === true || idTokenResult.claims.role === "admin";
-        if (!firebaseUser.emailVerified && !hasAdminClaim) {
+        const userData = await getVerifiedSessionUser(firebaseUser, token);
+        if (auth.currentUser?.uid !== firebaseUser.uid) return;
+        if (!firebaseUser.emailVerified && !userData.isAdmin) {
           setUser(null);
           setIsAdmin(false);
           localStorage.removeItem("user");
           return;
         }
-        const userData = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          name: firebaseUser.displayName,
-          // Keep tokens in memory via Firebase auth.currentUser.getIdToken()
-          isAdmin: hasAdminClaim,
-          role: hasAdminClaim ? "admin" : "user",
-        };
         // Before allowing the app to enter the dashboard, ensure terms are accepted.
         const ok = await ensureTermsAccepted(token, userData, "authState");
         if (!ok) {
           // Block login UI transition until the user accepts. Keep user null for now.
           return;
         }
+        if (auth.currentUser?.uid !== firebaseUser.uid) return;
         // Proceed to set user and prefetch content once terms are satisfied.
         setUser({ ...userData, token }); // keep token in memory in React state only
         try {
           if (Sentry && typeof Sentry.setUser === "function")
             Sentry.setUser({ id: userData.uid, username: userData.email, email: userData.email });
         } catch (_) {}
-        setIsAdmin(hasAdminClaim);
+        setIsAdmin(userData.isAdmin);
         const safeUserForStorage = { ...userData };
         localStorage.setItem("user", JSON.stringify(safeUserForStorage));
         // User signed in (UID suppressed in logs)
@@ -847,7 +835,7 @@ function App() {
         return;
       }
       const forceAdmin = userData.role === "admin" || userData.isAdmin === true;
-      // Always preserve admin status, never downgrade
+      // Use the current verified login; never carry privileges from a prior session.
       const updatedUserData = {
         ...userData,
         role: forceAdmin ? "admin" : userData.role,
@@ -856,20 +844,14 @@ function App() {
       // Persist only non-sensitive metadata. Remove token before storing.
       const { token: _token, ...safeUpdated } = updatedUserData;
       localStorage.setItem("user", JSON.stringify(safeUpdated));
-      setUser(prev => {
-        if (prev && (prev.role === "admin" || prev.isAdmin === true)) {
-          return { ...prev, ...updatedUserData, role: "admin", isAdmin: true };
-        }
-        return updatedUserData;
-      });
+      setUser(updatedUserData);
       setIsAdmin(forceAdmin);
       setShowLogin(false);
       // ...existing code... (Firestore update logic removed)
-      if (forceAdmin) {
-        await fetchAnalytics();
+      if (forceAdmin && isAdminDashboardPath(pathname)) {
         navigate("/admin-dashboard");
       } else {
-        await fetchUserContent();
+        await fetchUserContent(userData.token);
         navigate("/");
       }
     } catch (error) {
@@ -940,6 +922,10 @@ function App() {
         return {
           ...current,
           ...profile,
+          uid: current.uid,
+          email: current.email,
+          role: current.role,
+          isAdmin: current.isAdmin,
           user: {
             ...(current.user || {}),
             ...(profile.user || {}),
@@ -953,10 +939,16 @@ function App() {
   };
 
   useEffect(() => {
-    if (!user || user.role === "admin" || user.isAdmin === true) return;
+    if (!user || showAdminDashboard) return;
     loadUserDefaults().catch(() => {});
     loadSubscriptionProfile().catch(() => {});
-  }, [user?.uid, user?.role, user?.isAdmin]);
+  }, [user?.uid, user?.role, user?.isAdmin, showAdminDashboard]);
+
+  useEffect(() => {
+    if (showAdminDashboard) fetchAnalytics();
+    // Fetch only after verified state has selected an explicit admin entry.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAdminDashboard, user?.uid]);
 
   // Save user defaults (timezone, default platforms, frequency, paypalEmail)
   const saveUserDefaults = async ({
@@ -1613,20 +1605,6 @@ function App() {
     }
   };
 
-  // If the URL includes a direct pricing route, render pricing panel
-  useEffect(() => {
-    const onHashChange = () =>
-      setRoutePathState(
-        window.location.hash ? window.location.hash.replace(/^#/, "") : window.location.pathname
-      );
-    window.addEventListener("hashchange", onHashChange);
-    window.addEventListener("popstate", onHashChange);
-    return () => {
-      window.removeEventListener("hashchange", onHashChange);
-      window.removeEventListener("popstate", onHashChange);
-    };
-  }, []);
-
   // No manual hash/routing logic needed with react-router-dom
   // Existing logic for routes replaced by <Routes> block below
 
@@ -1778,13 +1756,19 @@ function App() {
                       </div>
                     )}
                   </>
-                ) : user && (user.role === "admin" || user.isAdmin === true) ? (
-                  // Render admin dashboard for admin users
-                  <AdminDashboard
-                    analytics={analytics}
-                    user={user}
-                    onLogout={() => setShowLogoutConfirm(true)}
-                  />
+                ) : showAdminDashboard ? (
+                  <>
+                    <div style={{ padding: "12px 24px" }}>
+                      <button type="button" onClick={() => navigate("/")}>
+                        Open workspace
+                      </button>
+                    </div>
+                    <AdminDashboard
+                      analytics={analytics}
+                      user={user}
+                      onLogout={() => setShowLogoutConfirm(true)}
+                    />
+                  </>
                 ) : (
                   // Render full user dashboard for normal users
                   <UserDashboard
@@ -1807,6 +1791,7 @@ function App() {
                       setActiveWorkspaceId(workspace?.id || null);
                       await fetchUserContent();
                     }}
+                    onOpenAdminDashboard={() => navigate("/admin-dashboard")}
                   />
                 )}
                 {showLogoutConfirm && user && (

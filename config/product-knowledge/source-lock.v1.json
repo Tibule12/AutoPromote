@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review analytics/provider diagnostics and rejected daily publishing hold; no Studio capability, parity or readiness promotion.",
-  "reviewed_at": "2026-10-28T17:43:42.645Z",
+  "reason": "Review normal owner workspace entry and explicit admin navigation; backend UID authority and Studio readiness remain unchanged.",
+  "reviewed_at": "2026-10-28T18:11:54.579Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -35,7 +35,7 @@
     },
     {
       "path": "frontend/src/App.js",
-      "sha256": "173832bd74e204e4d28b64ade9382c236247dda125e59e48d3605b345350a63d"
+      "sha256": "5dee09db6613e61cfcb761aedace34a7ca0727af94863048394d65d8a9c7be86"
     },
     {
       "path": "frontend/src/Docs.js",
@@ -63,7 +63,7 @@
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
-      "sha256": "141264f31d3de9ee6491b39abcd4fefcfaa792ed3e98779da87eb7787aa6c036"
+      "sha256": "755bc9d370b3005e65053ca647421093fab5c4986e9d72b12b8c7f14e5353ae2"
     },
     {
       "path": "frontend/src/WelcomePage.js",

@@ -358,6 +358,7 @@ const UserDashboard = ({
   onScheduleScopeChanged,
   onLoadMoreSchedules,
   onWorkspaceChanged,
+  onOpenAdminDashboard,
 }) => {
   const hasPendingWorkspaceInvite =
     typeof window !== "undefined" && new URLSearchParams(window.location.search).has("invite");
@@ -1525,6 +1526,13 @@ const UserDashboard = ({
               <section className="dashboard-nav-group">
                 <p>Administration</p>
                 <ul>
+                  {onOpenAdminDashboard && (
+                    <DashboardNavItem
+                      item={{ id: "admin-dashboard", label: "Admin dashboard", icon: "audit" }}
+                      activeTab={activeTab}
+                      onNavigate={onOpenAdminDashboard}
+                    />
+                  )}
                   <DashboardNavItem
                     item={{ id: "admin-audit", label: "Admin Audit", icon: "audit" }}
                     activeTab={activeTab}
