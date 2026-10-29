@@ -9279,5 +9279,22 @@
     "projectRecordsRetained": 54,
     "professionalQualification": false,
     "next": "Solve the complete moving foreground and scene integration on the existing podcast; rejected candidates are not product improvements or delivered outputs."
+  },
+  "backgroundSourceEdgeEvaluation20261029": {
+    "status": "CPU_DIAGNOSTIC_ONLY_FEATURE_UNFINISHED",
+    "evidence": "reports/studio-background-source-edge-20261029/README.md",
+    "sourceProfileCandidatesRejected": 4,
+    "cpuModelSampleFrames": 6,
+    "nativeProjectChanged": false,
+    "rendererFrontendOrRegistryChanged": false,
+    "newFinalMovies": 0,
+    "sourceAndSavedLoginPreserved": true,
+    "projectRecordsRetained": 54,
+    "protectedSourceAndPriorFiles": 97,
+    "gpuJobs": 0,
+    "professionalQualification": false,
+    "ownerCreativeApproval": false,
+    "visualCompletion": false,
+    "next": "Natural moving person boundaries, complete selected equipment and believable room integration on the supplied podcast through Studio. No missing user input."
   }
 }

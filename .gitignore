@@ -225,3 +225,7 @@ reports/studio-background-visual-review-20261027/*
 # Private source-bound cutout review
 /reports/studio-background-edge-review-20261028/*
 !/reports/studio-background-edge-review-20261028/README.md
+
+# Private background source-edge diagnostics
+/reports/studio-background-source-edge-20261029/*
+!/reports/studio-background-source-edge-20261029/README.md

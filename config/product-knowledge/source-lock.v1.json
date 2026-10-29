@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Record latest owner rejection and failed CPU diagnostics without changing readiness or claiming a product repair. Current renderer/frontend, masks, saved projects and source films remain unchanged; private recurrent-matting evaluations are not integrated.",
-  "reviewed_at": "2026-10-28T18:54:45.496Z",
+  "reason": "Record CPU source-edge diagnostics and six pinned BiRefNet lite sample evaluations without promoting creative or product readiness. No model, renderer, frontend, native project, source film or saved login changed; the existing podcast remains the acceptance case and requires no new user input.",
+  "reviewed_at": "2026-10-29T15:31:44.814Z",
   "catalog_sha256": "b4bd50ba347c4de4631aaa46cc9ef2e60e6de61984306ec7a0c531c741aa4e74",
   "sources": [
     {
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "8cf4bbcaaffd9cb2d1ec18ed85ec86399fbc79fa429ee6208a12d99c2db627af"
+      "sha256": "ea3f8379e2d223cb61d08195778af970d50deb8431fdf23d5c2a5bde3d1ccbc8"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "d1b351e97d290de1cfd3937f9f9ac0dafaca997c1ac3330dc8747c07792b6366"
+      "sha256": "ab3bc060762bff937cd5e957b26aaca8ba6e4c7da6b9e3e367de908f79164608"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
