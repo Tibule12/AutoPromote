@@ -1,0 +1,247 @@
+{
+  "date": "2026-10-29",
+  "status": "PREPARED_LOCAL_NOT_PUBLISHED",
+  "baseCommit": "3885295a4cbbb72c8b8e2865f9883879dc4e1a52",
+  "branch": "fix/public-footer-pages-20261029",
+  "liveSiteAtReview": "https://autopromote.org",
+  "live404FooterDestinations": 16,
+  "footerDestinationsReviewed": 18,
+  "browser": {
+    "responsiveChecks": 40,
+    "direct200": 18,
+    "distinctPageBodies": 18,
+    "realGuides": 8,
+    "noJavaScriptPages": 17,
+    "errors": [],
+    "blockedSdkLoggerPosts": [
+      {
+        "method": "POST",
+        "path": "/xoplatform/logger/api/logger"
+      },
+      {
+        "method": "POST",
+        "path": "/xoplatform/logger/api/logger"
+      }
+    ],
+    "mockedResponses": false,
+    "injectedSessions": false,
+    "contactMessageSent": false
+  },
+  "publicPlanReadThrough": {
+    "source": "https://api.autopromote.org/api/paypal-subscriptions/plans",
+    "status": 200,
+    "sha256": "67a898d42fd8c4ee7618bd159f006972c2f72f8bf253ae2a373cf8a846236114",
+    "plans": [
+      {
+        "id": "free",
+        "name": "Starter",
+        "price": 0,
+        "monthlyCredits": 15
+      },
+      {
+        "id": "premium",
+        "name": "Creator",
+        "price": 14.99,
+        "monthlyCredits": 150
+      },
+      {
+        "id": "pro",
+        "name": "Studio",
+        "price": 34.99,
+        "monthlyCredits": 500
+      },
+      {
+        "id": "enterprise",
+        "name": "Agency",
+        "price": 99.99,
+        "monthlyCredits": 2000
+      }
+    ],
+    "method": "GET",
+    "responseMock": false
+  },
+  "unchangedPaymentFunctions": {
+    "functions": [
+      "resolveApi",
+      "normalizeSuggestedPlanId",
+      "getCurrentUser",
+      "getAuthToken",
+      "fetchPlans",
+      "fetchCurrentSubscription",
+      "fetchUsage",
+      "activateSubscription",
+      "handleLegacySubscribe",
+      "handleCancelSubscription",
+      "loadPayPalSdk",
+      "loadTopUpPaypalSdk",
+      "getFeatureIcon",
+      "getFeatureLabel",
+      "renderFeatureValue",
+      "getPlanEditingSummary",
+      "renderUsageBar",
+      "renderRemainingText"
+    ],
+    "unchanged": true
+  },
+  "preservation": {
+    "base": "3885295a4cbbb72c8b8e2865f9883879dc4e1a52",
+    "files": [
+      {
+        "path": "firestore.rules",
+        "sha256": "25436b8888989a527e0d9138ce31cf53ef1f300c95618e89166377d1e15cc996"
+      },
+      {
+        "path": "storage.rules",
+        "sha256": "b3ebe33fd6a4ec15263b24040c4ff75cf7cfdfb9fb47eeaad19dcfbf208a0679"
+      },
+      {
+        "path": "src/authMiddleware.js",
+        "sha256": "03044686cad64b539c5755cc961bde1a8271b828606723f5add7b33ba43f77c1"
+      },
+      {
+        "path": "src/utils/authAuthority.js",
+        "sha256": "a2e30a561463eb8923e9b353033ceea930869b9034d1ed04433932b79022b910"
+      },
+      {
+        "path": "src/paymentsRoutes.js",
+        "sha256": "189c123bc5c5ffce982375ef9183d7974f4c3862c2341f88cf5c0d85a63d5cd2"
+      },
+      {
+        "path": "src/routes/paypalSubscriptionRoutes.js",
+        "sha256": "8fd77d988c3a2afef3c996480d4776b8242d452138c3dfaac8a0a9b51cc5688b"
+      },
+      {
+        "path": "src/config/subscriptionPlans.js",
+        "sha256": "7c1df339087a63ae8f24db34f0e587f32073d6e269c522a164f8ef2bdcdc8c69"
+      },
+      {
+        "path": "frontend/src/Privacy.js",
+        "sha256": "54d55207e19e52a735ac909f2f891596e94f7b1a9dac1d37594bf972f9cad0bd"
+      },
+      {
+        "path": "frontend/src/Terms.js",
+        "sha256": "50c39d6cd9917d76e370ef9ce48cedcb4c938d77a6dbcd472fad7e611dc57bf8"
+      },
+      {
+        "path": "frontend/public/privacy/index.html",
+        "sha256": "16284a7759381f2fc57333d5d1a7e2f7c9f80e941fc9417a025eb74e91b6dd10"
+      },
+      {
+        "path": "frontend/public/terms/index.html",
+        "sha256": "06d7dcebef83918e96f93e7b5967db234184ee56688738d37bd237e7f11f1d93"
+      },
+      {
+        "path": "frontend/src/WelcomePage.js",
+        "sha256": "28291f8d3cde5279f5fe026d8fd20aa727212e628bd9b7e6020c48479c889aec"
+      },
+      {
+        "path": "frontend/src/Support.js",
+        "sha256": "c45e5669125ab727b50a949e350c9e9461e8003eb95e5199229f03fc0a390970"
+      },
+      {
+        "path": "frontend/src/components/PayPalSubscriptionPanel.css",
+        "sha256": "15d906e2392df0a1fce6c5f9ccf520103f8055800cc3288027ed4eeea8a5fdc2"
+      }
+    ],
+    "backendModified": false
+  },
+  "checks": {
+    "frontendTests": 25,
+    "frontendSuites": 3,
+    "backendRegressions": 21,
+    "backendSuites": 5,
+    "productionBuild": "passed",
+    "targetedEslint": "passed",
+    "javascriptSyntax": "passed",
+    "formatting": "passed",
+    "whitespace": "passed",
+    "welcomeAssetVerification": 19
+  },
+  "sourceSha256": {
+    "frontend/package.json": "8ca5a2686b764156a6b5fa82820e0388ff7f60d5f76b892978e68996eee31840",
+    "frontend/scripts/build-public-pages.js": "4cbf51bd1115a7ea75a8c1debaf020f38255aa2c915d25e617722ea1b6e5d099",
+    "frontend/scripts/public-pages-entry.js": "f1839fb544914e2480c9507af81f42ab32ea10889bad126d6ac6dc01755e9b33",
+    "frontend/src/About.js": "6459437bba7615b96428659c1a7015eaac6e8fba9e0c7bb1b916616cb5d719c9",
+    "frontend/src/Blog.js": "edbe2f9bd06551875865819448a6d62b7b4592013263a01c41f61e8fbcdbeddf",
+    "frontend/src/Changelog.js": "85bdadf04006c2bca1a75017c83c707acd7fd59bdf53ec9129926955ab0cf092",
+    "frontend/src/Contact.js": "953f99193542f828b26657e70df1eb21e36d3cbad6f9b712ab37c590af0907a7",
+    "frontend/src/HelpCenter.js": "f231487098a0a66b00b00a615401a297f1976d130e7c464f5d6d06bc232921a6",
+    "frontend/src/Pricing.js": "6cb5578334d46a75f08061ea03deaa6ec7fa71ed7a00f984b8b90202f8e795b6",
+    "frontend/src/__tests__/CompanyPages.test.js": "50ffe7f4eda245b10aac09c7315d8e182c4de4885b8b5b9da65ef0ac634df2d0",
+    "frontend/src/components/PayPalSubscriptionPanel.js": "1048fe4decf9eab6e4ed30e624b6ac62b31d27a563e9406df02a4ab8be25d3a3",
+    "frontend/src/components/public/CompanyPages.css": "625a90af2be29023efbae47fb753a2543b4003507d94e8b4cef8f18897e26b17",
+    "frontend/src/components/public/InformationPage.js": "0a6bc35e20b96340358bea04eb8a52e1176a32f70414900777967bb7340b150b",
+    "frontend/src/components/public/PublicFooter.js": "e25b8e58e79bfe205bf2e560d33ea6d086ab886ccd93dbcb749f4561b24760ad",
+    "frontend/src/components/public/PublicPage.css": "84f5a6fa273698950a771dbf69daa2650de06afca7b7974451e49d2154bcad29",
+    "frontend/src/components/public/PublicPage.js": "621b1b93e6625a92b79f0a3c8a9d0f7a2dda44628af13b29858cf8bc71fa9bc4",
+    "frontend/src/index.js": "01af876768fa322ba02f1a3c6a2943c4dc2c49ed3abe27fb1309b0671ed624b5",
+    "frontend/src/publicPageContent.js": "c04a44cede0132e710e30f509dc8c8726a1e2a40864ffca24d3c6ccb3777c2d1",
+    "frontend/src/utils/publicEntryRoute.js": "ea359960977719d95b0af009c7a8b1196ddcaa748b3d770271e5f98abc3f16b7",
+    "scripts/creative-templates/review-footer-release.js": "e97a1384622c0c15d5e77c759775c5f1df222adbe1c1032821cd960802e09211"
+  },
+  "evidenceSha256": {
+    "README.md": "17925ad329a3597e1fa310999ec218657875e816badc5671ab35d4097ed68339",
+    "browser/about-1440.png": "386152c0b2a30d1e3dcb02af9a3fcb473eb5547f9900be1e73119cb67473087d",
+    "browser/about-390.png": "17ecb0842a88c05417cbfa750f2817344d28852df118931b83391bffbe01af1f",
+    "browser/accessibility-1440.png": "509a7e1dc40bae66754cb8d143e441aae6d1d56792c7e475b1ade0d5ba124e57",
+    "browser/accessibility-390.png": "b7548f0caa2e27c150b14ef572476063666129486185b8b36cfad8f6a1fe1fbb",
+    "browser/api-docs-1440.png": "9a70c7cd99b1dbe00c0551bdacc943949cb8f05fc404bc4a82eece2570814f62",
+    "browser/api-docs-390.png": "170a269a520db7145be7ad7af8a7232fa9bb605e9d70f5ac6ac8dce282a4c5d1",
+    "browser/blog-1440.png": "fd52a3def3de0593e536cbafcb900836db38839746c6792d31622396e9ee40e4",
+    "browser/blog-390.png": "ba61fea24a44ec03a6479fa56120569d3426171e2caa129c98bc8ca5362d606a",
+    "browser/careers-1440.png": "fbe48843b1d8f313303d1785639f04746b1649f20b69f91c952b41bafad87bc6",
+    "browser/careers-390.png": "c0aa67f8210c90d293a96c2d3c60a181c1f389feac7a777afb27053183d6e315",
+    "browser/changelog-1440.png": "d5e807da6f5b4bbd8152a159ffbd3149e22bfd85f7ec51d16ef19e5cd52cbf3e",
+    "browser/changelog-390.png": "52fb9943eb280f3395870267e4ed0f6336fce8665284fe3acccc60d7c7a49d26",
+    "browser/contact-1440.png": "9a3dafa5a67030b7f9f1122149b059d218c1a3e94f6509911f491567d5c81b64",
+    "browser/contact-390.png": "f69c247bcf699852a8e076dd420c7bc9823e9a220147138bf8b98e15eea6c53a",
+    "browser/contact-no-javascript.png": "4540796e2e255c68bb1235af35dbcadd957eec071021bc1f8edcd4080bf29027",
+    "browser/cookies-1440.png": "04fa89f0b976ff40d1f0c777c1e178e9e2ccb5c51a5cdba1b40d6fc0d52b9aa4",
+    "browser/cookies-390-last-column.png": "9a79dd91f921c8d14bce18f5b90ccd5e25970bc0b28f0733ed54352eb71a52ce",
+    "browser/cookies-390.png": "4c0007500daa0ce5344b2979ad2aaf1de5f23b8dfd690df0560e19ab6693f135",
+    "browser/docs-1440.png": "cd3265b979b351e73a788bfa1b4963a2522bc9d1292bb20b8937632f984e847b",
+    "browser/docs-390.png": "ca16a9cb6a6b2bb31941b19399bfd7d2ce94bd65adcc0ff99d2ecfe8ec314488",
+    "browser/features-1440.png": "5bd3f26cbe8513bd663c9279680fec78163c0761a8300c2a04751e9311f981ed",
+    "browser/features-390.png": "f40d8fa9da5b232eacd8bd6e5c650b09650e7fbe3a19a6cf961944ec4ff0f2e2",
+    "browser/help-1440.png": "75c911fcefe5c34e4819d4e95820e4524fe46bdb45256dde936bb7a18dad09d8",
+    "browser/help-390.png": "1b27b6aa3fccaa2a7b71541cdcc22a7c8348b82c633421971c25f164a3b1f9f5",
+    "browser/integrations-1440.png": "3f1988ac6f6c02c43c7104fb907f35b2f40d28e905865822dd435aa672b0988e",
+    "browser/integrations-390.png": "7eb5a288820dadcd8ba056c03b8f2142f6d2ac5bdb124610793420b6a23c260c",
+    "browser/metrics-1440.png": "9bc411038bba2501bd95011cee9f432b4b53ede1625a9d635c1a5f04a40937f7",
+    "browser/metrics-390-last-column.png": "cec649588e685b59de4f4dcfad7627a2610780fb97a39343840961c80b72a9de",
+    "browser/metrics-390.png": "9e72eaaa3afc8bfe3f2a64c1c30168dd0ada6cffd00fed8eb774855d3c1c77bf",
+    "browser/partners-1440.png": "d1d9252c1af9485d27d524b8bae3afb50854a99c88bb0665a74ada62a3376d96",
+    "browser/partners-390.png": "e5324a81004465265ff11f0088e626c35cbad40c4d71df8f5d2d20152b717368",
+    "browser/pricing-1440.png": "1430d23864b178e9bedee46fc98777d98a3220cccc0bebcff6b2c81968947eb3",
+    "browser/pricing-390.png": "5625cfd98008a4234ef0645acceb957b2ec96306b2936b3e8a932bb6369fc20c",
+    "browser/privacy-1440.png": "148813f2916b269b369f1fe2c79f46f49e1fefc44cbdaa59fce1f2f4e1bc1732",
+    "browser/privacy-390.png": "12004977c848200f765853af49394638ca25fea8d15ce3919de334a2b025d630",
+    "browser/security-1440.png": "6b313415fee039aac7903b6a28e25b1c95d53f218d41acf3dcd20904cbba60fd",
+    "browser/security-390.png": "0655f8b1bd915b295ccb1808a5d149c74f03ef1bd0c57f731483399a8217154f",
+    "browser/terms-1440.png": "c082d753733aa35ae0c54d102e35efdc50d2534bccf49f505dfdc00d15fa588f",
+    "browser/terms-390.png": "9e67129c86e1455b72f1de593938e9934814217ea25af846ae72e3476585d230",
+    "browser/verification.json": "235c9f46cdecf3773ad0c6a74993b9027d00499ec34d927d4e272155dc379794",
+    "live-content-before.json": "22dc702cc053b2e611788edf5bcc6cc83f55a5eab0cc14997a732d0eb91266e4",
+    "live-direct-before.json": "f70e16363a61859527450248e7b4bd2b742d2e15119c8896a32d399fcf96d63b",
+    "logs/billing-regressions.log": "f8cf5f41bfce83c434cdb26369c14c2ffee4d15fd73292dbc7a72f95e427d673",
+    "logs/browser.log": "f802656d8bef6827dfdb105796c8f55280495c84baadd33581c6357a15d4e52d",
+    "logs/build.log": "bec46f21fe78ab9a87a673064401136f0ee85c36fca589fa392b50a8577e78f6",
+    "logs/frontend-tests.log": "fcb3ea95d509ff2136a8876a0d71e66c5399cc46c421aa61ee89da136f790ccd",
+    "logs/lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "productionMutations": false,
+  "pushed": false,
+  "merged": false,
+  "deployed": false,
+  "advertisementsEnabled": false,
+  "billingOrSubscriptionPricesChanged": false,
+  "limitations": [
+    "Existing Terms and Privacy remain labelled drafts; no legal text rewritten.",
+    "Pricing and account support require their existing JavaScript/API services; no checkout was attempted.",
+    "Email preparation was verified, not inbox delivery.",
+    "No new authenticated Studio/project or live payment/provider end-to-end qualification is claimed.",
+    "The local build stamp identifies the base; file hashes identify the prepared source."
+  ],
+  "previewOrigin": "http://127.0.0.1:46301",
+  "localBuild": "/tmp/autopromote-footer-review-20261029/build-reviewed-final"
+}

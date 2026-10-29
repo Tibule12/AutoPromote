@@ -1,0 +1,164 @@
+[
+  {
+    "route": "/about",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/about",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/accessibility",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/accessibility",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/api-docs",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/api-docs",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/blog",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/blog",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/careers",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/careers",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/changelog",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/changelog",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/contact",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/contact",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/cookies",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/cookies",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/docs",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/docs",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/features",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/features",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/help",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/help",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/integrations",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/integrations",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/metrics",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/metrics",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/partners",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/partners",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/pricing",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/pricing",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/privacy",
+    "status": 200,
+    "finalUrl": "https://autopromote.org/privacy",
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 11017,
+    "sha256": "16284a7759381f2fc57333d5d1a7e2f7c9f80e941fc9417a025eb74e91b6dd10",
+    "excerpt": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta"
+  },
+  {
+    "route": "/security",
+    "status": 404,
+    "finalUrl": "https://autopromote.org/security",
+    "contentType": "text/plain; charset=utf-8",
+    "bytes": 10,
+    "sha256": "7515bf959b73b956ceb967351c7e299cbb3668a53d35f9c770eb72e00d93ced6",
+    "excerpt": "Not Found\n"
+  },
+  {
+    "route": "/terms",
+    "status": 200,
+    "finalUrl": "https://autopromote.org/terms",
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 6792,
+    "sha256": "06d7dcebef83918e96f93e7b5967db234184ee56688738d37bd237e7f11f1d93",
+    "excerpt": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta"
+  }
+]

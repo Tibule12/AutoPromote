@@ -1,0 +1,631 @@
+{
+  "date": "2026-10-29",
+  "base": "http://127.0.0.1:46301",
+  "actualCompiledApp": true,
+  "headless": true,
+  "muted": true,
+  "responseMocks": false,
+  "footerDestinations": 18,
+  "distinctPageBodies": 18,
+  "checks": [
+    {
+      "label": "Features",
+      "href": "#/features",
+      "width": 1440,
+      "contentSha256": "a8be02c81404c4c92ad6862b153ceb01acddefc210e2fb984f46d5cd6280f626",
+      "title": "AutoPromote features",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Features",
+      "href": "#/features",
+      "width": 390,
+      "contentSha256": "a8be02c81404c4c92ad6862b153ceb01acddefc210e2fb984f46d5cd6280f626",
+      "title": "AutoPromote features",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Integrations",
+      "href": "#/integrations",
+      "width": 1440,
+      "contentSha256": "f69c4d6417694863dc31a9ac18f767bb88a05333862e5331782f2fa8d28d4ad0",
+      "title": "Platform integrations",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Integrations",
+      "href": "#/integrations",
+      "width": 390,
+      "contentSha256": "f69c4d6417694863dc31a9ac18f767bb88a05333862e5331782f2fa8d28d4ad0",
+      "title": "Platform integrations",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Analytics",
+      "href": "#/metrics",
+      "width": 1440,
+      "contentSha256": "7119301fec71982342b3702798a8ff589a7623f03ff70b6ae94b8681cc46d013",
+      "title": "Analytics and publishing status",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Analytics",
+      "href": "#/metrics",
+      "width": 390,
+      "contentSha256": "7119301fec71982342b3702798a8ff589a7623f03ff70b6ae94b8681cc46d013",
+      "title": "Analytics and publishing status",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Pricing",
+      "href": "#/pricing",
+      "width": 1440,
+      "contentSha256": "95975d31ca5c78ba10e5c0f170dd9023546fea2dcf0b30cb1d7063cf180f2e23",
+      "title": "Plans and pricing",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Pricing",
+      "href": "#/pricing",
+      "width": 390,
+      "contentSha256": "95975d31ca5c78ba10e5c0f170dd9023546fea2dcf0b30cb1d7063cf180f2e23",
+      "title": "Plans and pricing",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Changelog",
+      "href": "#/changelog",
+      "width": 1440,
+      "contentSha256": "41175254873a1dbf2e672f1e9d4010b355798febb8f86e24bb97150467e10e13",
+      "title": "Product updates",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Changelog",
+      "href": "#/changelog",
+      "width": 390,
+      "contentSha256": "41175254873a1dbf2e672f1e9d4010b355798febb8f86e24bb97150467e10e13",
+      "title": "Product updates",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Documentation",
+      "href": "#/docs",
+      "width": 1440,
+      "contentSha256": "e184097bbd26315ab4e5ba057ac58cf06e518e5a248977db26cbe70496a61d26",
+      "title": "A clearer path from edit to release.",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Documentation",
+      "href": "#/docs",
+      "width": 390,
+      "contentSha256": "e184097bbd26315ab4e5ba057ac58cf06e518e5a248977db26cbe70496a61d26",
+      "title": "A clearer path from edit to release.",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Help Center",
+      "href": "#/help",
+      "width": 1440,
+      "contentSha256": "2004b89b733fb9715af87d542f5586b0c1c0d83565fad30e96009e1aa504c22c",
+      "title": "Help Center",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Help Center",
+      "href": "#/help",
+      "width": 390,
+      "contentSha256": "2004b89b733fb9715af87d542f5586b0c1c0d83565fad30e96009e1aa504c22c",
+      "title": "Help Center",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Blog",
+      "href": "#/blog",
+      "width": 1440,
+      "contentSha256": "5f1e2332aea6c6803bd453a2a60af395571e6498b96918dd129f896e95f95550",
+      "title": "AutoPromote blog",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Blog",
+      "href": "#/blog",
+      "width": 390,
+      "contentSha256": "5f1e2332aea6c6803bd453a2a60af395571e6498b96918dd129f896e95f95550",
+      "title": "AutoPromote blog",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "API Access",
+      "href": "#/api-docs",
+      "width": 1440,
+      "contentSha256": "af8ce1d1c3ab1c7d4d6659a3fc57c0cfb542328cb4e214d44730f808b8624654",
+      "title": "API access",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "API Access",
+      "href": "#/api-docs",
+      "width": 390,
+      "contentSha256": "af8ce1d1c3ab1c7d4d6659a3fc57c0cfb542328cb4e214d44730f808b8624654",
+      "title": "API access",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "About Us",
+      "href": "#/about",
+      "width": 1440,
+      "contentSha256": "3ef01cd003cbb681525e1b00015cb054685cb0c5dee992b5f27fe70188b11c9f",
+      "title": "About AutoPromote",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "About Us",
+      "href": "#/about",
+      "width": 390,
+      "contentSha256": "3ef01cd003cbb681525e1b00015cb054685cb0c5dee992b5f27fe70188b11c9f",
+      "title": "About AutoPromote",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Contact",
+      "href": "#/contact",
+      "width": 1440,
+      "contentSha256": "2571b6863651df452e311ba564ea47f4af3feb7911266d9b63f4436ac9308d21",
+      "title": "Contact AutoPromote",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Contact",
+      "href": "#/contact",
+      "width": 390,
+      "contentSha256": "2571b6863651df452e311ba564ea47f4af3feb7911266d9b63f4436ac9308d21",
+      "title": "Contact AutoPromote",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Careers",
+      "href": "#/careers",
+      "width": 1440,
+      "contentSha256": "c608be311be1809c779119c166e44568ba66366b9f14693dda36bac21f703982",
+      "title": "Careers at AutoPromote",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Careers",
+      "href": "#/careers",
+      "width": 390,
+      "contentSha256": "c608be311be1809c779119c166e44568ba66366b9f14693dda36bac21f703982",
+      "title": "Careers at AutoPromote",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Partners",
+      "href": "#/partners",
+      "width": 1440,
+      "contentSha256": "49ed9e8a2bdd8c3d769a5be071aabce403633b18d002ac511ec2b2f7d174b022",
+      "title": "Partner with AutoPromote",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Partners",
+      "href": "#/partners",
+      "width": 390,
+      "contentSha256": "49ed9e8a2bdd8c3d769a5be071aabce403633b18d002ac511ec2b2f7d174b022",
+      "title": "Partner with AutoPromote",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Privacy Policy",
+      "href": "#/privacy",
+      "width": 1440,
+      "contentSha256": "b2c6598f9d02927c90240c5de3295d228ff8373706698dc6e778498952a0525b",
+      "title": "Privacy Policy",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Privacy Policy",
+      "href": "#/privacy",
+      "width": 390,
+      "contentSha256": "b2c6598f9d02927c90240c5de3295d228ff8373706698dc6e778498952a0525b",
+      "title": "Privacy Policy",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Terms of Service",
+      "href": "#/terms",
+      "width": 1440,
+      "contentSha256": "ff85a119c41be983c8fe38f664ef3764d9927c8f6049a478cc72ee508bfdc2bd",
+      "title": "Terms of Service",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Terms of Service",
+      "href": "#/terms",
+      "width": 390,
+      "contentSha256": "ff85a119c41be983c8fe38f664ef3764d9927c8f6049a478cc72ee508bfdc2bd",
+      "title": "Terms of Service",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Cookie Policy",
+      "href": "#/cookies",
+      "width": 1440,
+      "contentSha256": "8b26ddf72a2560a7e97283817a0b8b761ea64c98f192d70360f257706c172398",
+      "title": "Cookies and browser storage",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Cookie Policy",
+      "href": "#/cookies",
+      "width": 390,
+      "contentSha256": "8b26ddf72a2560a7e97283817a0b8b761ea64c98f192d70360f257706c172398",
+      "title": "Cookies and browser storage",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Security",
+      "href": "#/security",
+      "width": 1440,
+      "contentSha256": "49e7b867cfa5a788db5f5d768efb786b825677f323d054ddad55181e40db7d2d",
+      "title": "Security and reporting an issue",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Security",
+      "href": "#/security",
+      "width": 390,
+      "contentSha256": "49e7b867cfa5a788db5f5d768efb786b825677f323d054ddad55181e40db7d2d",
+      "title": "Security and reporting an issue",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Accessibility",
+      "href": "#/accessibility",
+      "width": 1440,
+      "contentSha256": "06036ac21cf791c6f9b6673a027e1288ba8e76923446461f8fcaa97d25d1f519",
+      "title": "Accessibility",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "label": "Accessibility",
+      "href": "#/accessibility",
+      "width": 390,
+      "contentSha256": "06036ac21cf791c6f9b6673a027e1288ba8e76923446461f8fcaa97d25d1f519",
+      "title": "Accessibility",
+      "h1s": 1,
+      "overflow": false,
+      "missingImages": []
+    },
+    {
+      "route": "/",
+      "width": 360,
+      "welcome": true,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "welcome": true,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "width": 1200,
+      "welcome": true,
+      "overflow": false
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "welcome": true,
+      "overflow": false
+    }
+  ],
+  "direct": [
+    {
+      "route": "/features",
+      "status": 200,
+      "title": "AutoPromote features"
+    },
+    {
+      "route": "/integrations",
+      "status": 200,
+      "title": "Platform integrations"
+    },
+    {
+      "route": "/metrics",
+      "status": 200,
+      "title": "Analytics and publishing status"
+    },
+    {
+      "route": "/pricing",
+      "status": 200,
+      "title": "Plans and pricing"
+    },
+    {
+      "route": "/changelog",
+      "status": 200,
+      "title": "Product updates"
+    },
+    {
+      "route": "/docs",
+      "status": 200,
+      "title": "A clearer path from edit to release."
+    },
+    {
+      "route": "/help",
+      "status": 200,
+      "title": "Help Center"
+    },
+    {
+      "route": "/blog",
+      "status": 200,
+      "title": "AutoPromote blog"
+    },
+    {
+      "route": "/api-docs",
+      "status": 200,
+      "title": "API access"
+    },
+    {
+      "route": "/about",
+      "status": 200,
+      "title": "About AutoPromote"
+    },
+    {
+      "route": "/contact",
+      "status": 200,
+      "title": "Contact AutoPromote"
+    },
+    {
+      "route": "/careers",
+      "status": 200,
+      "title": "Careers at AutoPromote"
+    },
+    {
+      "route": "/partners",
+      "status": 200,
+      "title": "Partner with AutoPromote"
+    },
+    {
+      "route": "/privacy",
+      "status": 200,
+      "title": "Privacy Policy for AutoPromote"
+    },
+    {
+      "route": "/terms",
+      "status": 200,
+      "title": "Terms of Service for AutoPromote"
+    },
+    {
+      "route": "/cookies",
+      "status": 200,
+      "title": "Cookies and browser storage"
+    },
+    {
+      "route": "/security",
+      "status": 200,
+      "title": "Security and reporting an issue"
+    },
+    {
+      "route": "/accessibility",
+      "status": 200,
+      "title": "Accessibility"
+    }
+  ],
+  "guides": [
+    {
+      "topic": "getting-started",
+      "characters": 1094,
+      "title": "Start with an owned editable project"
+    },
+    {
+      "topic": "studio",
+      "characters": 109721,
+      "title": "Studio"
+    },
+    {
+      "topic": "motion",
+      "characters": 12640,
+      "title": "Motion / Transform Keyframes"
+    },
+    {
+      "topic": "audio",
+      "characters": 11447,
+      "title": "Audio editing and sound design"
+    },
+    {
+      "topic": "publishing",
+      "characters": 10987,
+      "title": "Publishing"
+    },
+    {
+      "topic": "templates",
+      "characters": 10211,
+      "title": "Templates"
+    },
+    {
+      "topic": "troubleshooting",
+      "characters": 12469,
+      "title": "Troubleshooting"
+    },
+    {
+      "topic": "controls",
+      "characters": 118157,
+      "title": "Source-qualified controls"
+    }
+  ],
+  "staticPages": [
+    {
+      "route": "/features",
+      "status": 200,
+      "title": "AutoPromote features"
+    },
+    {
+      "route": "/integrations",
+      "status": 200,
+      "title": "Platform integrations"
+    },
+    {
+      "route": "/metrics",
+      "status": 200,
+      "title": "Analytics and publishing status"
+    },
+    {
+      "route": "/changelog",
+      "status": 200,
+      "title": "Product updates"
+    },
+    {
+      "route": "/docs",
+      "status": 200,
+      "title": "A clearer path from edit to release."
+    },
+    {
+      "route": "/help",
+      "status": 200,
+      "title": "Help Center"
+    },
+    {
+      "route": "/blog",
+      "status": 200,
+      "title": "AutoPromote blog"
+    },
+    {
+      "route": "/api-docs",
+      "status": 200,
+      "title": "API access"
+    },
+    {
+      "route": "/about",
+      "status": 200,
+      "title": "About AutoPromote"
+    },
+    {
+      "route": "/contact",
+      "status": 200,
+      "title": "Contact AutoPromote"
+    },
+    {
+      "route": "/careers",
+      "status": 200,
+      "title": "Careers at AutoPromote"
+    },
+    {
+      "route": "/partners",
+      "status": 200,
+      "title": "Partner with AutoPromote"
+    },
+    {
+      "route": "/privacy",
+      "status": 200,
+      "title": "Privacy Policy for AutoPromote"
+    },
+    {
+      "route": "/terms",
+      "status": 200,
+      "title": "Terms of Service for AutoPromote"
+    },
+    {
+      "route": "/cookies",
+      "status": 200,
+      "title": "Cookies and browser storage"
+    },
+    {
+      "route": "/security",
+      "status": 200,
+      "title": "Security and reporting an issue"
+    },
+    {
+      "route": "/accessibility",
+      "status": 200,
+      "title": "Accessibility"
+    }
+  ],
+  "contactEmailPreparedNotSent": true,
+  "keyboardSkip": true,
+  "normalSignInForm": true,
+  "blockedWrites": [
+    {
+      "method": "POST",
+      "path": "/xoplatform/logger/api/logger"
+    },
+    {
+      "method": "POST",
+      "path": "/xoplatform/logger/api/logger"
+    }
+  ],
+  "browserErrors": []
+}

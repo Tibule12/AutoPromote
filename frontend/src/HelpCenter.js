@@ -6,7 +6,7 @@ export default function HelpCenter() {
   return (
     <PublicPage
       eyebrow="HELP / FIND YOUR NEXT STEP"
-      title="Where did the workflow get stuck?"
+      title="Help Center"
       intro="Start with the task you’re trying to complete. The right guide is usually more useful than another guess."
     >
       <div className="public-grid">

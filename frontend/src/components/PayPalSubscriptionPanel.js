@@ -39,6 +39,7 @@ const PAYPAL_TOPUP_SCRIPT_ID = "paypal-sdk-topups";
 
 const PayPalSubscriptionPanel = ({
   compact = false,
+  showPlanComparison = false,
   highlightPlanId = null,
   onUpgradeSuccess,
   onClose,
@@ -926,14 +927,14 @@ const PayPalSubscriptionPanel = ({
         </div>
       )}
 
-      {!compact && (
+      {!compact && (!showPlanComparison || Boolean(authUser)) && (
         <div className="paypal-sdk-notice neutral">
           {paypalConfig?.currency ? `Billing currency: ${paypalConfig.currency}. ` : ""}
           Subscription activation happens immediately after PayPal approval.
         </div>
       )}
 
-      {!compact && (
+      {!compact && (!showPlanComparison || Boolean(authUser)) && (
         <section className="billing-overview-grid">
           <div className="current-subscription-card">
             {currentSubscription ? (
@@ -1086,7 +1087,7 @@ const PayPalSubscriptionPanel = ({
 
       <details
         className={`billing-plan-options${compact ? " is-compact" : ""}`}
-        open={compact ? true : undefined}
+        open={compact || showPlanComparison ? true : undefined}
       >
         <summary>
           <span>
@@ -1101,6 +1102,7 @@ const PayPalSubscriptionPanel = ({
             {plans.map(plan => {
               const normalizedPlanId = normalizeSuggestedPlanId(plan.id);
               const isCurrent =
+                (!showPlanComparison || Boolean(authUser)) &&
                 normalizedPlanId === normalizeSuggestedPlanId(currentSubscription?.planId);
               const isSuggested =
                 normalizedHighlightPlanId && normalizedPlanId === normalizedHighlightPlanId;
@@ -1282,10 +1284,6 @@ const PayPalSubscriptionPanel = ({
           )}
 
           <div className="secure-payment-badge">
-            <img
-              src="https://www.paypalobjects.com/webstatic/mktg/logo/PP_AcceptanceMarkTray_150x40.png"
-              alt="PayPal"
-            />
             <p>Secure subscription billing powered by PayPal</p>
           </div>
 
