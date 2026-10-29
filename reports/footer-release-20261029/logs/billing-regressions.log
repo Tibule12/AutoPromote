@@ -1,0 +1,41 @@
+Running one project: server
+jest-haste-map: Haste module naming collision: autopromote-server
+  The following files share their name; please adjust your hasteImpl:
+    * <rootDir>/package.json
+    * <rootDir>/autopromote-functions/_server/package.json
+
+  console.debug
+    [entitlement] uid=user-1 status=active expiry=none billingTier=premium userTier=premium effectiveTier=premium
+
+      at debug (src/services/billingService.js:304:13)
+
+  console.debug
+    [entitlement] uid=user-1 status=active expiry=none billingTier=premium userTier=premium effectiveTier=premium
+
+      at debug (src/services/billingService.js:304:13)
+
+  console.debug
+    [entitlement] uid=user-1 status=active expiry=none billingTier=free userTier=free effectiveTier=free
+
+      at debug (src/services/billingService.js:304:13)
+
+  console.debug
+    [entitlement] uid=user-1 status=external_missing expiry=none billingTier=premium userTier=premium effectiveTier=free
+
+      at debug (src/services/billingService.js:304:13)
+
+  console.debug
+    [entitlement] uid=tester-1 status=inactive expiry=none billingTier=free userTier=free effectiveTier=pro
+
+      at debug (src/services/billingService.js:304:13)
+
+  console.debug
+    [entitlement] uid=tester-1 status=inactive expiry=none billingTier=free userTier=free effectiveTier=free
+
+      at debug (src/services/billingService.js:304:13)
+
+Test Suites: 5 passed, 5 total
+Tests:       21 passed, 21 total
+Snapshots:   0 total
+Time:        12.795 s
+Ran all test suites within paths "src/__tests__/server.hostedAdminRoutes.test.js", "test/paypal-subscription.routes.test.js", "test/payments.dev.mock.subscription.test.js", "test/payments-routes.test.js", "src/__tests__/billingService.entitlements.test.js".

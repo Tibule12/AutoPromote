@@ -1,0 +1,1 @@
+{"result":"PASS","footerDestinations":18,"responsiveChecks":40,"directUrls":18,"realGuides":8,"readableWithoutJavaScript":17,"blockedWrites":[{"method":"POST","path":"/xoplatform/logger/api/logger"},{"method":"POST","path":"/xoplatform/logger/api/logger"}],"browserErrors":[]}
