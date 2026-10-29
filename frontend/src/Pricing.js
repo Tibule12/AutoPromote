@@ -52,7 +52,7 @@ const Pricing = () => {
   return (
     <PublicPage
       eyebrow="PLANS / CHOOSE YOUR WORKFLOW"
-      title="Room for your next creation."
+      title="Plans and pricing"
       intro="Compare the current editing access, publishing allowance and compute credits on each plan."
     >
       <div>
@@ -163,7 +163,7 @@ const Pricing = () => {
           </div>
         </div>
         <div style={{ maxWidth: 840 }}>
-          <PayPalSubscriptionPanel />
+          <PayPalSubscriptionPanel showPlanComparison />
         </div>
       </div>
     </PublicPage>

@@ -3,7 +3,7 @@
 export const publicPages = {
   features: {
     eyebrow: "PRODUCT / CREATE → RELEASE → LEARN",
-    title: "Make the edit. Own the release.",
+    title: "AutoPromote features",
     intro:
       "Turn your footage into a finished story, give each platform its own version, and keep the next release moving from one workspace.",
     cards: [
@@ -55,7 +55,7 @@ export const publicPages = {
   },
   integrations: {
     eyebrow: "DESTINATIONS / SIX DIFFERENT CONVERSATIONS",
-    title: "One workspace. Each platform’s own post.",
+    title: "Platform integrations",
     intro:
       "Create for the people on the other side of the screen. Connect your accounts, adapt the post, then choose when each destination gets its version.",
     cards: [
@@ -113,7 +113,34 @@ export const publicPages = {
   },
   metrics: {
     eyebrow: "ANALYTICS / LEARN FROM THE RELEASE",
-    title: "See what happened after Publish.",
+    title: "Analytics and publishing status",
+    layout: "prose",
+    table: {
+      title: "Read the right signal",
+      headings: ["Signal", "What it tells you", "What to check"],
+      rows: [
+        [
+          "Publication status",
+          "Where a destination is in the release process.",
+          "Scheduled, processing, failed and published are different states.",
+        ],
+        [
+          "Views and impressions",
+          "The counts returned by a connected platform.",
+          "Check the platform definition, reporting period and refresh time.",
+        ],
+        [
+          "Reactions and engagement",
+          "The interactions the platform makes available.",
+          "Not every destination exposes the same metrics.",
+        ],
+        [
+          "Unavailable data",
+          "A metric has not been returned or is not supported.",
+          "Treat it as unavailable, rather than as a measured zero.",
+        ],
+      ],
+    },
     intro:
       "Put publication state and available platform performance together, so your next creative decision has something real behind it.",
     cards: [
@@ -143,77 +170,11 @@ export const publicPages = {
       },
     ],
   },
-  about: {
-    eyebrow: "ABOUT / MORE TIME FOR THE WORK",
-    title: "Publishing should leave room for creating.",
-    intro:
-      "A strong edit is only part of the job. Creators also have to prepare each post, move between accounts, remember release times and make sense of the response.",
-    cards: [
-      {
-        title: "Make the work yours",
-        copy: "Studio brings footage, sound, typography and motion into an editable timeline. Keep control of the decisions that make the story feel like you.",
-        to: "/features",
-        link: "Meet the tools",
-      },
-      {
-        title: "Give it a thoughtful release",
-        copy: "Publisher and the schedule connect the finished media to individual destinations, with each platform’s copy and timing visible.",
-        to: "/integrations",
-        link: "See the publishing flow",
-      },
-      {
-        title: "Learn from what happened",
-        copy: "Publication records and available analytics help you follow the release. They are evidence to work with, rather than a promise that an algorithm will reward every post.",
-        to: "/metrics",
-        link: "Understand the feedback",
-      },
-    ],
-    sections: [
-      {
-        title: "Built around the complete creator workflow.",
-        copy: "AutoPromote brings making, publishing and reviewing into one place. The aim is practical: spend less of your day repeating the same publishing steps, and more of it making work people want to watch.",
-        to: "/contact",
-        link: "Tell us what you’re making",
-      },
-    ],
-  },
-  contact: {
-    eyebrow: "CONTACT / START A CONVERSATION",
-    title: "Tell us what you’re working on.",
-    intro:
-      "A product question, a blocked release or an idea for working together? Give us the context and we’ll have a clearer place to start.",
-    cards: [
-      {
-        title: "Product and account help",
-        copy: "Include the page involved, what you expected, what happened and the approximate time. For a publishing issue, include the destination and post or task reference if available.",
-        email: "AutoPromote support",
-        action: "Email support",
-      },
-      {
-        title: "Plans and collaboration",
-        copy: "Tell us about your content, the destinations you use and the workflow you want to improve. For collaboration, include a useful example or portfolio.",
-        email: "AutoPromote collaboration",
-        action: "Start a conversation",
-      },
-      {
-        title: "Privacy and security",
-        copy: "Use this contact for privacy requests or a private security report. Share the affected page and a description; keep passwords, access tokens and payment details out of your message.",
-        email: "AutoPromote privacy or security",
-        action: "Send a private inquiry",
-      },
-    ],
-    sections: [
-      {
-        title: "One direct contact.",
-        copy: "You can reach AutoPromote at thulani@autopromote.org. Signed-in users can also check their plan’s support options and existing tickets.",
-        to: "/support",
-        link: "Open support",
-      },
-    ],
-  },
   careers: {
     eyebrow: "CAREERS / BUILD WITH CREATORS",
-    title: "Care about the details behind a great tool?",
+    title: "Careers at AutoPromote",
+    layout: "prose",
+    note: "No specific vacancies are listed on this page. You can send an expression of interest; role availability and working arrangements need to be confirmed directly.",
     intro:
       "Thoughtful editing tools, dependable publishing and clear product design take people who care about how the whole workflow feels.",
     cards: [
@@ -235,29 +196,30 @@ export const publicPages = {
   },
   partners: {
     eyebrow: "COLLABORATION / MAKE SOMETHING USEFUL",
-    title: "Bring a workflow worth building together.",
+    title: "Partner with AutoPromote",
+    layout: "brief",
     intro:
       "We’re interested in the ways creators, educators and teams can make editing and publishing easier to understand and use.",
     cards: [
       {
         title: "Creators and educators",
         copy: "Have a practical tutorial, a demonstration or a story about making better content? Tell us the audience, the idea and what viewers will learn.",
-        email: "Creator collaboration",
-        action: "Share your idea",
       },
       {
         title: "Teams and communities",
         copy: "Show us where your team loses time between editing and publication. A concrete workflow gives us a useful conversation to start with.",
-        email: "Team collaboration",
-        action: "Discuss your workflow",
       },
       {
         title: "Technology and integration",
         copy: "Describe the systems you want to connect and the result you need. Integration access, scope and any commercial terms need to be agreed directly.",
-        email: "Integration collaboration",
-        action: "Discuss an integration",
       },
     ],
+    contact: {
+      title: "Send a collaboration proposal",
+      copy: "Include who you work with, a link to your work, the proposed outcome and the scope you have in mind. All proposals reach thulani@autopromote.org.",
+      subject: "AutoPromote partnership proposal",
+      label: "Email your proposal",
+    },
     sections: [
       {
         title: "Clear arrangements, agreed directly.",
@@ -267,7 +229,9 @@ export const publicPages = {
   },
   api: {
     eyebrow: "DEVELOPERS / CONNECT YOUR WORKFLOW",
-    title: "Have something you want to connect?",
+    title: "API access",
+    layout: "prose",
+    note: "API access is arranged directly. This page does not publish an endpoint reference or offer self-service API keys. Contact us before building an integration.",
     intro:
       "Tell us what your application needs to do before building against an endpoint. Authentication, supported operations and access should be confirmed for your integration.",
     cards: [
@@ -293,7 +257,8 @@ export const publicPages = {
   },
   security: {
     eyebrow: "TRUST / PROTECT THE WORK",
-    title: "Keep control of your account and content.",
+    title: "Security and reporting an issue",
+    layout: "prose",
     intro:
       "Practical account security starts with the people and platforms you authorize, and with the way you share your work.",
     cards: [
@@ -325,7 +290,8 @@ export const publicPages = {
   },
   accessibility: {
     eyebrow: "ACCESSIBILITY / MAKE THE WORKFLOW CLEARER",
-    title: "Good tools should be easier to use.",
+    title: "Accessibility",
+    layout: "prose",
     intro:
       "Readable controls, clear focus and useful alternatives matter. We want to hear when an interaction gets in your way.",
     cards: [
@@ -355,7 +321,29 @@ export const publicPages = {
   },
   cookies: {
     eyebrow: "PRIVACY / YOUR BROWSER STORAGE",
-    title: "What your browser remembers.",
+    title: "Cookies and browser storage",
+    layout: "prose",
+    table: {
+      title: "What is stored and why",
+      headings: ["Purpose", "What it supports", "Your control"],
+      rows: [
+        [
+          "Authentication",
+          "Your signed-in session, using Firebase Authentication.",
+          "Sign out, or review your browser’s site-data settings.",
+        ],
+        [
+          "Studio projects",
+          "Editable project copies saved in this browser.",
+          "Back up your projects before clearing local site data.",
+        ],
+        [
+          "Preferences",
+          "Settings remembered on this device.",
+          "Update them in the app or clear them through browser settings.",
+        ],
+      ],
+    },
     intro:
       "AutoPromote uses browser storage as well as cookies and similar technologies. They serve different purposes, from keeping you signed in to retaining an editable project on your device.",
     cards: [

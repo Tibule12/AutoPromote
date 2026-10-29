@@ -8,13 +8,11 @@ import "./App.css";
 import App from "./App";
 import { ToastProvider } from "./components/ToastProvider";
 import { AuthProvider } from "./contexts/AuthContext";
+import { publicEntryRoute } from "./utils/publicEntryRoute";
 
-if (typeof window !== "undefined" && !window.location.hash) {
-  const routePath = window.location.pathname || "/";
-  if (routePath === "/reset-password" || routePath === "/forgot-password") {
-    const hashTarget = `#${routePath}${window.location.search || ""}`;
-    window.history.replaceState(null, "", `${window.location.origin}/${hashTarget}`);
-  }
+if (typeof window !== "undefined") {
+  const target = publicEntryRoute(window.location);
+  if (target) window.history.replaceState(null, "", target);
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

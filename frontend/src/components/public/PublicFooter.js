@@ -21,7 +21,7 @@ export const FOOTER_GROUPS = [
       ["Documentation", "/docs"],
       ["Help Center", "/help"],
       ["Blog", "/blog"],
-      ["API Reference", "/api-docs"],
+      ["API Access", "/api-docs"],
     ],
   ],
   [

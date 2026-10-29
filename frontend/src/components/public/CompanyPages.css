@@ -1,0 +1,211 @@
+.public-site-about .public-hero,
+.public-site-contact .public-hero {
+  padding-top: 56px;
+  padding-bottom: 32px;
+}
+.public-site-about .public-hero h1,
+.public-site-contact .public-hero h1 {
+  font-size: clamp(36px, 4.5vw, 62px);
+}
+.about-story {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 70px;
+  padding: 12px 0 48px;
+}
+.about-story h2,
+.about-principles h2 {
+  font-size: clamp(27px, 3vw, 38px);
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  margin: 0;
+}
+.company-prose p,
+.company-connect p,
+.contact-details p,
+.contact-compose p,
+.about-principles dd {
+  color: var(--public-muted);
+  font-size: 16px;
+  line-height: 1.8;
+}
+.company-prose p:first-child {
+  margin-top: 0;
+}
+.company-prose p + p {
+  margin-top: 16px;
+}
+.about-principles {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 70px;
+  padding: 38px 0;
+  border-top: 1px solid #dcddd7;
+}
+.about-principles dl {
+  margin: 0;
+}
+.about-principles dl > div {
+  padding-bottom: 22px;
+}
+.about-principles dt {
+  font-size: 19px;
+  font-weight: 600;
+}
+.about-principles dd {
+  margin: 8px 0 0;
+}
+.company-connect {
+  background: #eeebf7;
+  border-left: 3px solid var(--public-accent);
+  padding: 28px 32px;
+  margin-bottom: 36px;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  justify-content: space-between;
+}
+.company-connect h2 {
+  font-size: 23px;
+  margin: 0;
+}
+.company-connect p {
+  margin-bottom: 0;
+}
+.company-connect .public-button {
+  flex-shrink: 0;
+}
+.contact-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 70px;
+  align-items: start;
+  padding: 5px 0 48px;
+}
+.contact-details h2 {
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  margin: 14px 0;
+}
+.contact-details .public-eyebrow {
+  color: var(--public-accent);
+  font-size: 11px;
+}
+.contact-details > p {
+  margin-top: 16px;
+}
+.public-site .contact-email {
+  display: inline-block;
+  font-size: clamp(18px, 2vw, 23px);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.contact-checklist {
+  padding-top: 16px;
+}
+.contact-checklist h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.contact-checklist ul {
+  padding-left: 20px;
+  color: var(--public-muted);
+  font-size: 15px;
+  line-height: 1.8;
+}
+.contact-checklist li + li {
+  margin-top: 8px;
+}
+.contact-details .contact-private {
+  font-size: 14px;
+  border-left: 2px solid #c9c0e7;
+  padding-left: 16px;
+}
+.contact-help {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 28px;
+  font-size: 14px;
+}
+.contact-compose {
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #e1e1d9;
+  border-radius: 12px;
+}
+.contact-compose h2 {
+  font-size: 24px;
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+.contact-compose p {
+  font-size: 14px;
+}
+.contact-compose form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 0;
+  max-width: none;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+}
+.contact-compose label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--public-ink);
+}
+.contact-compose :is(input, select, textarea) {
+  width: 100%;
+  padding: 12px;
+  background: #fff;
+  color: var(--public-ink);
+  border: 1px solid #bfc0ca;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+.contact-compose textarea {
+  resize: vertical;
+}
+.contact-compose form button {
+  align-self: flex-start;
+}
+.contact-draft {
+  border-top: 1px solid #dcddd7;
+  margin-top: 24px;
+  padding-top: 10px;
+}
+.contact-compose .contact-email-help {
+  font-size: 13px;
+  margin-bottom: 0;
+}
+@media (max-width: 800px) {
+  .about-story,
+  .about-principles,
+  .contact-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .company-connect {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 600px) {
+  .public-site-about .public-hero,
+  .public-site-contact .public-hero {
+    padding-top: 36px;
+  }
+  .contact-compose,
+  .company-connect {
+    padding: 24px 20px;
+  }
+}

@@ -13,7 +13,7 @@ export default function Blog() {
       title={
         slug
           ? post?.title || "That article could not be found."
-          : "Better work. More thoughtful releases."
+          : "AutoPromote blog"
       }
       intro={
         slug

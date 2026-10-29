@@ -23,7 +23,7 @@ export default function Changelog() {
   return (
     <PublicPage
       eyebrow="PRODUCT NOTES / DEVELOPMENT UPDATES"
-      title="The details keep moving forward."
+      title="Product updates"
       intro="Recent work on editing, publishing and the documentation around them. Check the running app and guides for availability in your account."
     >
       <div className="public-prose">

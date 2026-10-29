@@ -1,0 +1,74 @@
+
+> autopromote-frontend@1.0.0 build
+> react-scripts build
+
+(node:1700460) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Creating an optimized production build...
+Compiled successfully.
+
+File sizes after gzip:
+
+  1.1 MB     build-reviewed-final/static/js/main.b2ca7bf9.js
+  163.54 kB  build-reviewed-final/static/css/main.4b95b6f3.css
+  148.64 kB  build-reviewed-final/static/js/325.03d00921.chunk.js
+  98.7 kB    build-reviewed-final/static/js/890.8228a4b2.chunk.js
+  34.58 kB   build-reviewed-final/static/js/726.f527e170.chunk.js
+  25.43 kB   build-reviewed-final/static/js/815.b9f67b30.chunk.js
+  24.12 kB   build-reviewed-final/static/js/753.1f76c86d.chunk.js
+  13.05 kB   build-reviewed-final/static/js/718.5ceb491d.chunk.js
+  6.94 kB    build-reviewed-final/static/js/583.43e2551a.chunk.js
+  6.43 kB    build-reviewed-final/static/js/200.90e6cfbf.chunk.js
+  5.34 kB    build-reviewed-final/static/css/200.06ff7cc6.chunk.css
+  3.76 kB    build-reviewed-final/static/js/860.841ecf95.chunk.js
+  3.41 kB    build-reviewed-final/static/js/774.17606c8c.chunk.js
+  3.31 kB    build-reviewed-final/static/js/656.e9eb39a1.chunk.js
+  3.29 kB    build-reviewed-final/static/js/533.a231588a.chunk.js
+  2.99 kB    build-reviewed-final/static/js/262.8369d177.chunk.js
+  2.92 kB    build-reviewed-final/static/js/369.3abdc8c1.chunk.js
+  2.86 kB    build-reviewed-final/static/js/914.27a304f9.chunk.js
+  2.48 kB    build-reviewed-final/static/js/495.136c7531.chunk.js
+  2.26 kB    build-reviewed-final/static/js/785.9eb89b61.chunk.js
+  2.11 kB    build-reviewed-final/static/js/983.f0c4541a.chunk.js
+  2.01 kB    build-reviewed-final/static/js/940.636673e9.chunk.js
+  1.88 kB    build-reviewed-final/static/js/54.12cf01b3.chunk.js
+  1.76 kB    build-reviewed-final/static/js/87.d8be3788.chunk.js
+  1.27 kB    build-reviewed-final/static/css/533.38024f67.chunk.css
+  1.05 kB    build-reviewed-final/static/css/785.3a8c1373.chunk.css
+  1.05 kB    build-reviewed-final/static/css/940.3a8c1373.chunk.css
+  1 kB       build-reviewed-final/static/js/260.fe11b702.chunk.js
+  694 B      build-reviewed-final/static/css/54.324ffe7d.chunk.css
+  208 B      build-reviewed-final/static/css/753.3ad99012.chunk.css
+  205 B      build-reviewed-final/static/js/409.57fe6f36.chunk.js
+  203 B      build-reviewed-final/static/js/522.b3fe487a.chunk.js
+  202 B      build-reviewed-final/static/js/967.c80c7450.chunk.js
+  201 B      build-reviewed-final/static/js/360.4169b701.chunk.js
+  200 B      build-reviewed-final/static/js/986.c3191fcb.chunk.js
+  200 B      build-reviewed-final/static/js/350.2dc91dd5.chunk.js
+  199 B      build-reviewed-final/static/js/134.001126fd.chunk.js
+  199 B      build-reviewed-final/static/js/482.ad26f6c9.chunk.js
+  197 B      build-reviewed-final/static/js/846.4ab5331a.chunk.js
+
+The bundle size is significantly larger than recommended.
+Consider reducing it with code splitting: https://goo.gl/9VhYWB
+You can also analyze the project dependencies: https://goo.gl/LeUzfb
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The ../../../../../../tmp/autopromote-footer-review-20261029/build-reviewed-final folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s ../../../../../../tmp/autopromote-footer-review-20261029/build-reviewed-final
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+
+
+> autopromote-frontend@1.0.0 postbuild
+> node scripts/verify-welcome-assets.js && node scripts/build-public-pages.js
+
+Verified 19 versioned welcome assets; release 3885295a.
+Built 39 public entry pages from the actual components; existing policies preserved. Pricing, support and guide details retain their normal client-side services.

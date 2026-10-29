@@ -146,7 +146,7 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "git add docs && git commit -m \"Update docs for GitHub Pages\" && git push",
-    "postbuild": "node scripts/verify-welcome-assets.js"
+    "postbuild": "node scripts/verify-welcome-assets.js && node scripts/build-public-pages.js"
   },
   "browserslist": {
     "production": [

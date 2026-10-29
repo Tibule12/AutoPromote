@@ -26,7 +26,15 @@ export function PageCard({ title, children, to, link = "Read the guide", platfor
   );
 }
 
-export default function PublicPage({ eyebrow, title, intro, children, wide = false }) {
+export default function PublicPage({
+  eyebrow,
+  title,
+  intro,
+  children,
+  wide = false,
+  pageType = "",
+  next = false,
+}) {
   useEffect(() => {
     const previous = document.title;
     document.title = `${title} | AutoPromote`;
@@ -37,7 +45,9 @@ export default function PublicPage({ eyebrow, title, intro, children, wide = fal
     };
   }, [title]);
   return (
-    <div className={`public-site${wide ? " public-site-wide" : ""}`}>
+    <div
+      className={`public-site${wide ? " public-site-wide" : ""}${pageType ? ` public-site-${pageType}` : ""}`}
+    >
       <a
         className="public-skip"
         href="#public-main"
@@ -73,15 +83,17 @@ export default function PublicPage({ eyebrow, title, intro, children, wide = fal
           </div>
         </header>
         <div className="public-body">{children}</div>
-        <aside className="public-next">
-          <div>
-            <p className="public-eyebrow">FROM AN IDEA TO ITS NEXT AUDIENCE</p>
-            <h2>See where your work can go.</h2>
-          </div>
-          <Link className="public-button" to="/">
-            Explore AutoPromote <span aria-hidden="true">↗</span>
-          </Link>
-        </aside>
+        {next && (
+          <aside className="public-next">
+            <div>
+              <p className="public-eyebrow">FROM AN IDEA TO ITS NEXT AUDIENCE</p>
+              <h2>See where your work can go.</h2>
+            </div>
+            <Link className="public-button" to="/">
+              Explore AutoPromote <span aria-hidden="true">↗</span>
+            </Link>
+          </aside>
+        )}
       </main>
       <PublicFooter />
     </div>

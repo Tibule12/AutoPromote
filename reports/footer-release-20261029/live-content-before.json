@@ -1,0 +1,588 @@
+{
+  "pages": [
+    {
+      "text": "PRODUCT / CREATE → RELEASE → LEARN\n\nMake the edit. Own the release.\n\nTurn your footage into a finished story, give each platform its own version, and keep the next release moving from one workspace.\n\n01\nAn edit you can keep editing\n\nTrim footage, arrange video and graphics, adjust sound, and work with layers and keyframes in Studio. Save the project, return to its timeline, and export the result.\n\nExplore Studio\n↗\n02\nWords and logos with movement\n\nBuild titles and logo artwork, animate individual pieces and shape their timing. Motion, Graphics and the timeline work on the same editable project.\n\nSee motion controls\n↗\n03\nSound that belongs to the picture\n\nPlace music and effects on the programme clock. Adjust cue timing, levels and fades, then check the complete export with sound.\n\nShape the sound\n↗\n04\nA post for each destination\n\nChoose connected platforms in Publisher and adapt each title, caption, media and audience setting. A LinkedIn post and a TikTok video can have different copy and release times.\n\nSee the destinations\n↗\n05\nA schedule you can inspect\n\nChoose the date, time and timezone for each destination. See the queue and release calendar, inspect individual posts, and change upcoming releases through the available controls.\n\nPlan a release\n↗\n06\nFeedback you can work with\n\nFollow publication status and the performance numbers returned by each connected platform. Use the available evidence to decide what to try next.\n\nUnderstand the numbers\n↗\nChoose the tools that fit your work.\n\nEditing access, connected accounts, uploads, distribution and compute credits depend on your plan. Check the current plan cards and the cost shown before starting a processing job.\n\nCompare plans ↗\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/features",
+      "title": "Make the edit. Own the release.",
+      "gridCards": 6,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Explore Studio ↗",
+          "href": "#/docs/studio"
+        },
+        {
+          "text": "See motion controls ↗",
+          "href": "#/docs/motion"
+        },
+        {
+          "text": "Shape the sound ↗",
+          "href": "#/docs/audio"
+        },
+        {
+          "text": "See the destinations ↗",
+          "href": "#/integrations"
+        },
+        {
+          "text": "Plan a release ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Understand the numbers ↗",
+          "href": "#/metrics"
+        },
+        {
+          "text": "Compare plans ↗",
+          "href": "#/pricing"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "DESTINATIONS / SIX DIFFERENT CONVERSATIONS\n\nOne workspace. Each platform’s own post.\n\nCreate for the people on the other side of the screen. Connect your accounts, adapt the post, then choose when each destination gets its version.\n\nYouTube\n\nGive your video a clear title and description, choose the available upload options, and schedule the channel release.\n\nPlan your upload\n↗\nTikTok\n\nPrepare a vertical edit, write the caption for its audience, and review the creator, privacy and consent options shown before publishing.\n\nPrepare the post\n↗\nInstagram\n\nPackage the visual result for your connected account, review the supported media format and give the caption its own voice.\n\nPrepare the post\n↗\nFacebook\n\nChoose the connected destination, pair the video with a useful introduction, and give the post its own release time.\n\nPlan the release\n↗\nLinkedIn\n\nExplain the useful result, workflow or lesson behind the video. Inspect the connected identity and the available publishing options.\n\nPrepare the post\n↗\nReddit\n\nChoose an eligible community or profile destination and check its posting rules. Review the title, media and publication state after submission.\n\nReview the workflow\n↗\nCheck the connection before the countdown.\n\nIntegration depth varies by platform and account. Connections and Publisher show the options available to your account; permissions, token expiry and provider processing can affect a release. Other integrations are available only where your workspace exposes them. A submitted upload is separate from a confirmed published post.\n\nConnection and publishing help ↗\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/integrations",
+      "title": "One workspace. Each platform’s own post.",
+      "gridCards": 6,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Plan your upload ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Prepare the post ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Prepare the post ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Plan the release ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Prepare the post ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Review the workflow ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Connection and publishing help ↗",
+          "href": "#/help"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "ANALYTICS / LEARN FROM THE RELEASE\n\nSee what happened after Publish.\n\nPut publication state and available platform performance together, so your next creative decision has something real behind it.\n\n01\nStart with the actual post\n\nInspect the release and its destinations. A scheduled post, an upload being processed and a published video represent different stages of the journey.\n\nUnderstand post states\n↗\n02\nKeep the numbers meaningful\n\nViews, impressions, reactions and other metrics mean different things across platforms. A measured zero stays zero; a number the provider has not returned is unavailable.\n\nGet analytics help\n↗\n03\nCompare, then make the next edit\n\nLook at the available results for each destination and allow for reporting delays. Use those observations to revise the opening, pacing or packaging of your next video.\n\nReturn to the edit\n↗\nKnow what the dashboard can tell you.\n\nMetric availability and refresh timing depend on the platform, permissions and your plan. The dashboard does not guarantee reach, revenue attribution or audience growth. Check the source and reporting period before comparing posts.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/metrics",
+      "title": "See what happened after Publish.",
+      "gridCards": 3,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Understand post states ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Get analytics help ↗",
+          "href": "#/help"
+        },
+        {
+          "text": "Return to the edit ↗",
+          "href": "#/docs/studio"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "PLANS / CHOOSE YOUR WORKFLOW\n\nRoom for your next creation.\n\nCompare the current editing access, publishing allowance and compute credits on each plan.\n\nPricing\nBack\n\nPlans are based on publishing volume, connected platform limits, editing access, and monthly credits. Drafting and planning can stay lightweight, while heavier server renders use credits so you always know what costs compute before you run it.\n\nStarter Is Limited\n\nStarter includes 15 monthly credits, 3 uploads, and 1 connected platform. Multi-camera editing and the premium creative suite start on paid plans.\n\nPaid Plans Include Credits\n\nPaid plans include the monthly credits and limits shown on each plan card below. Higher tiers add more credits, platform connections, uploads, seats, analytics, and support.\n\nRenders Spend Credits\n\nDrafting scenes and shot lists can stay lightweight, but server renders, AI video previews, clip analysis, clean-audio sync, and MP4 exports spend credits.\n\nCommon Credit Costs\nIdea-to-Video preview: 5 credits\nIdea-to-Video full render: starts at 25 credits\nFind Viral Clips: 8 credits\nFinal clip render: 5 credits\nVideo processing: 10 credits\nClean-audio sync: 18 credits\nCam Combiner server MP4: 150 credits\nPlans For Cross-Platform Publishing\n\nPaid plans are billed as monthly PayPal subscriptions. Choose a plan, subscribe inside the app, and keep your workflow moving.\n\nSubscription activation happens immediately after PayPal approval.\nCURRENT PLAN\nFree Plan\nActive\n▤\nPAYMENT METHOD\nPayPal secure checkout\n\nAutoPromote does not store your card details. PayPal manages approval, renewal, and cancellation securely.\n\nCurrency\nUSD\nActivation\nAfter PayPal approval\nCompare plans or change your subscription\nOpen the complete plan comparison and secure checkout.\nView plans\n\nSecure subscription billing powered by PayPal\n\nBy subscribing, you agree to our Terms of Service and Privacy Policy. Subscriptions auto-renew monthly through PayPal. You may cancel at any time to stop future renewals. Cancellations take effect at the end of the current billing period. For billing support or refund inquiries, please contact thulani@autopromote.org.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/pricing",
+      "title": "Room for your next creation.",
+      "gridCards": 0,
+      "buttons": [
+        {
+          "text": "Back",
+          "disabled": false
+        }
+      ],
+      "mailtos": [
+        {
+          "text": "thulani@autopromote.org",
+          "href": "mailto:thulani@autopromote.org"
+        }
+      ],
+      "links": [
+        {
+          "text": "Terms of Service",
+          "href": "/terms"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy"
+        },
+        {
+          "text": "thulani@autopromote.org",
+          "href": "mailto:thulani@autopromote.org"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "PRODUCT NOTES / DEVELOPMENT UPDATES\n\nThe details keep moving forward.\n\nRecent work on editing, publishing and the documentation around them. Check the running app and guides for availability in your account.\n\n21 October 2026\n\nClearer controls. More useful guides.\n\nStudio inspector layouts keep Graphics and Sound controls inside the panel. Motion fields and sound cues are easier to read. The refreshed guides cover inspector navigation, keyframes, Logo Workshop and sound-cue editing.\n\n21 October 2026\n\nA clearer picture of a release.\n\nPublishing and analytics work distinguishes scheduled, processing and published states, preserves unavailable metrics separately from real zeroes, and keeps destination copy and timing visible.\n\n18 October 2026\n\nMore ways to build motion.\n\nStudio development adds editable vector artwork, stroke trim and offset, text choreography and Logo Workshop. These use ordinary layers and keys in the same project; capability-specific limits remain in the guides.\n\nThese are development updates, not a guarantee that every change is deployed to every account. Read the capability guides for scope and limitations.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/changelog",
+      "title": "The details keep moving forward.",
+      "gridCards": 0,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Read the capability guides",
+          "href": "#/docs"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "LEARN / PRODUCT DOCUMENTATION\n\nA clearer path from edit to release.\n\nStart with the workflow you need. These guides use the same product knowledge as AutoPromote’s help system.\n\nGetting started\n\nOpen an owned project and move through your first edit and export.\n\nOpen guide\n↗\nStudio and the timeline\n\nWork with footage, layers and groups. Find the inspector, save projects and download backups.\n\nOpen guide\n↗\nMotion and keyframes\n\nChoose a target layer, shape its pose and timing, and use value and velocity controls.\n\nOpen guide\n↗\nAudio and sound cues\n\nWork with speech, music, effects, cue timing and the finished mix.\n\nOpen guide\n↗\nPublishing and scheduling\n\nPrepare destination-specific posts, choose release times and follow publication status.\n\nOpen guide\n↗\nTemplates and starting points\n\nUnderstand editable template workflows and the availability of each capability.\n\nOpen guide\n↗\nTroubleshooting\n\nCheck ownership, processing state and the limitations relevant to your task.\n\nOpen guide\n↗\nControl reference\n\nLook up documented controls, supported values, keyframes and preview/export behaviour.\n\nOpen guide\n↗\nChoose a guide for the task, then check the available options in your account. Editing access, processing costs and connected-platform permissions can vary.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/docs",
+      "title": "A clearer path from edit to release.",
+      "gridCards": 8,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Open guide ↗",
+          "href": "#/docs/getting-started"
+        },
+        {
+          "text": "Open guide ↗",
+          "href": "#/docs/studio"
+        },
+        {
+          "text": "Open guide ↗",
+          "href": "#/docs/motion"
+        },
+        {
+          "text": "Open guide ↗",
+          "href": "#/docs/audio"
+        },
+        {
+          "text": "Open guide ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Open guide ↗",
+          "href": "#/docs/templates"
+        },
+        {
+          "text": "Open guide ↗",
+          "href": "#/docs/troubleshooting"
+        },
+        {
+          "text": "Open guide ↗",
+          "href": "#/docs/controls"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "HELP / FIND YOUR NEXT STEP\n\nWhere did the workflow get stuck?\n\nStart with the task you’re trying to complete. The right guide is usually more useful than another guess.\n\nStart a project\n\nImport owned footage, open the workspace and prepare the first version.\n\nRead the guide\n↗\nEdit in Studio\n\nFind layers, inspector controls, keyframes, sound and project backups.\n\nRead the guide\n↗\nConnect and publish\n\nReview destination options, reconnect an account and follow the release state.\n\nRead the guide\n↗\nUnderstand the numbers\n\nSeparate publication status from the performance data each platform returns.\n\nRead the guide\n↗\nPlans and billing\n\nCheck allowances, editing access and credits on the current plan cards.\n\nView current plans\n↗\nContact support\n\nCheck your plan’s support access and tracked tickets, or use email for a general inquiry.\n\nOpen support\n↗\nWhy is a submitted video still processing?\nWhy are some analytics missing?\nCan every destination have its own time and caption?\nWhat should I send with a support request?\nNeed a direct contact? Tell us about the issue or email thulani@autopromote.org.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/help",
+      "title": "Where did the workflow get stuck?",
+      "gridCards": 6,
+      "buttons": [],
+      "mailtos": [
+        {
+          "text": "thulani@autopromote.org",
+          "href": "mailto:thulani@autopromote.org"
+        }
+      ],
+      "links": [
+        {
+          "text": "Read the guide ↗",
+          "href": "#/docs/getting-started"
+        },
+        {
+          "text": "Read the guide ↗",
+          "href": "#/docs/studio"
+        },
+        {
+          "text": "Read the guide ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Read the guide ↗",
+          "href": "#/metrics"
+        },
+        {
+          "text": "View current plans ↗",
+          "href": "#/pricing"
+        },
+        {
+          "text": "Open support ↗",
+          "href": "#/support"
+        },
+        {
+          "text": "Tell us about the issue",
+          "href": "#/contact"
+        },
+        {
+          "text": "thulani@autopromote.org",
+          "href": "mailto:thulani@autopromote.org"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "NOTES / MAKING & RELEASING\n\nBetter work. More thoughtful releases.\n\nPractical notes on editing, packaging and learning from what you publish.\n\nOne edit can start six different conversations\n\n2026-10-21\n\nKeep the finished edit, then give each destination its own opening, copy and release time.\n\nRead article\n↗\nKeep the result. Keep the timeline.\n\n2026-10-21\n\nA finished movie is useful. The project that explains every decision is useful again tomorrow.\n\nRead article\n↗\nWelcome to AutoPromote\n\n2026-01-02\n\nAn earlier note from the AutoPromote team.\n\nRead article\n↗\nJanuary 2026 Release\n\n2026-01-02\n\nAn earlier note from the AutoPromote team.\n\nRead article\n↗\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/blog",
+      "title": "Better work. More thoughtful releases.",
+      "gridCards": 4,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Read article ↗",
+          "href": "#/blog/one-edit-six-posts"
+        },
+        {
+          "text": "Read article ↗",
+          "href": "#/blog/keep-the-edit-editable"
+        },
+        {
+          "text": "Read article ↗",
+          "href": "#/blog/welcome"
+        },
+        {
+          "text": "Read article ↗",
+          "href": "#/blog/release-2026-01"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "DEVELOPERS / CONNECT YOUR WORKFLOW\n\nHave something you want to connect?\n\nTell us what your application needs to do before building against an endpoint. Authentication, supported operations and access should be confirmed for your integration.\n\n01\nDescribe the outcome\n\nShare the systems involved, what should move between them, who authorizes access and the expected volume.\n\nDiscuss API access\n↗\n02\nUse the supported product flow\n\nThe web app uses authenticated services for media, projects and publishing. Internal app endpoints are not a promise of a stable public API or a self-service API-key programme.\n\nRead the product guides\n↗\n03\nKeep account access private\n\nDo not share a browser session or copy account tokens into a third-party tool. Agree the supported authentication and permissions for the integration first.\n\nReview account security\n↗\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/api-docs",
+      "title": "Have something you want to connect?",
+      "gridCards": 3,
+      "buttons": [],
+      "mailtos": [
+        {
+          "text": "Discuss API access ↗",
+          "href": "mailto:thulani@autopromote.org?subject=AutoPromote%20API%20integration"
+        }
+      ],
+      "links": [
+        {
+          "text": "Discuss API access ↗",
+          "href": "mailto:thulani@autopromote.org?subject=AutoPromote%20API%20integration"
+        },
+        {
+          "text": "Read the product guides ↗",
+          "href": "#/docs"
+        },
+        {
+          "text": "Review account security ↗",
+          "href": "#/security"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "ABOUT / MORE TIME FOR THE WORK\n\nPublishing should leave room for creating.\n\nA strong edit is only part of the job. Creators also have to prepare each post, move between accounts, remember release times and make sense of the response.\n\n01\nMake the work yours\n\nStudio brings footage, sound, typography and motion into an editable timeline. Keep control of the decisions that make the story feel like you.\n\nMeet the tools\n↗\n02\nGive it a thoughtful release\n\nPublisher and the schedule connect the finished media to individual destinations, with each platform’s copy and timing visible.\n\nSee the publishing flow\n↗\n03\nLearn from what happened\n\nPublication records and available analytics help you follow the release. They are evidence to work with, rather than a promise that an algorithm will reward every post.\n\nUnderstand the feedback\n↗\nBuilt around the complete creator workflow.\n\nAutoPromote brings making, publishing and reviewing into one place. The aim is practical: spend less of your day repeating the same publishing steps, and more of it making work people want to watch.\n\nTell us what you’re making ↗\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/about",
+      "title": "Publishing should leave room for creating.",
+      "gridCards": 3,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Meet the tools ↗",
+          "href": "#/features"
+        },
+        {
+          "text": "See the publishing flow ↗",
+          "href": "#/integrations"
+        },
+        {
+          "text": "Understand the feedback ↗",
+          "href": "#/metrics"
+        },
+        {
+          "text": "Tell us what you’re making ↗",
+          "href": "#/contact"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "CONTACT / START A CONVERSATION\n\nTell us what you’re working on.\n\nA product question, a blocked release or an idea for working together? Give us the context and we’ll have a clearer place to start.\n\n01\nProduct and account help\n\nInclude the page involved, what you expected, what happened and the approximate time. For a publishing issue, include the destination and post or task reference if available.\n\nEmail support\n↗\n02\nPlans and collaboration\n\nTell us about your content, the destinations you use and the workflow you want to improve. For collaboration, include a useful example or portfolio.\n\nStart a conversation\n↗\n03\nPrivacy and security\n\nUse this contact for privacy requests or a private security report. Share the affected page and a description; keep passwords, access tokens and payment details out of your message.\n\nSend a private inquiry\n↗\nOne direct contact.\n\nYou can reach AutoPromote at thulani@autopromote.org. Signed-in users can also check their plan’s support options and existing tickets.\n\nOpen support ↗\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/contact",
+      "title": "Tell us what you’re working on.",
+      "gridCards": 3,
+      "buttons": [],
+      "mailtos": [
+        {
+          "text": "Email support ↗",
+          "href": "mailto:thulani@autopromote.org?subject=AutoPromote%20support"
+        },
+        {
+          "text": "Start a conversation ↗",
+          "href": "mailto:thulani@autopromote.org?subject=AutoPromote%20collaboration"
+        },
+        {
+          "text": "Send a private inquiry ↗",
+          "href": "mailto:thulani@autopromote.org?subject=AutoPromote%20privacy%20or%20security"
+        }
+      ],
+      "links": [
+        {
+          "text": "Email support ↗",
+          "href": "mailto:thulani@autopromote.org?subject=AutoPromote%20support"
+        },
+        {
+          "text": "Start a conversation ↗",
+          "href": "mailto:thulani@autopromote.org?subject=AutoPromote%20collaboration"
+        },
+        {
+          "text": "Send a private inquiry ↗",
+          "href": "mailto:thulani@autopromote.org?subject=AutoPromote%20privacy%20or%20security"
+        },
+        {
+          "text": "Open support ↗",
+          "href": "#/support"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "CAREERS / BUILD WITH CREATORS\n\nCare about the details behind a great tool?\n\nThoughtful editing tools, dependable publishing and clear product design take people who care about how the whole workflow feels.\n\n01\nProduct and design\n\nShow us how you make complicated workflows understandable. Creator tools, accessible interfaces and useful interaction details are good starting points.\n\n02\nEditing and engineering\n\nShare work on media, timelines, motion, audio or reliable web applications. Explain the decisions you made and what you learned.\n\n03\nStart with your work\n\nFor an expression of interest, send a portfolio or a concise introduction. Any specific role, working arrangement and application process will be confirmed directly.\n\nIntroduce yourself\n↗\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/careers",
+      "title": "Care about the details behind a great tool?",
+      "gridCards": 3,
+      "buttons": [],
+      "mailtos": [
+        {
+          "text": "Introduce yourself ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Working%20with%20AutoPromote"
+        }
+      ],
+      "links": [
+        {
+          "text": "Introduce yourself ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Working%20with%20AutoPromote"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "COLLABORATION / MAKE SOMETHING USEFUL\n\nBring a workflow worth building together.\n\nWe’re interested in the ways creators, educators and teams can make editing and publishing easier to understand and use.\n\n01\nCreators and educators\n\nHave a practical tutorial, a demonstration or a story about making better content? Tell us the audience, the idea and what viewers will learn.\n\nShare your idea\n↗\n02\nTeams and communities\n\nShow us where your team loses time between editing and publication. A concrete workflow gives us a useful conversation to start with.\n\nDiscuss your workflow\n↗\n03\nTechnology and integration\n\nDescribe the systems you want to connect and the result you need. Integration access, scope and any commercial terms need to be agreed directly.\n\nDiscuss an integration\n↗\nClear arrangements, agreed directly.\n\nPlatform integrations do not imply endorsement or a formal partnership with those platforms. Referral payments, affiliate terms or partnership benefits are only available when agreed explicitly.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/partners",
+      "title": "Bring a workflow worth building together.",
+      "gridCards": 3,
+      "buttons": [],
+      "mailtos": [
+        {
+          "text": "Share your idea ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Creator%20collaboration"
+        },
+        {
+          "text": "Discuss your workflow ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Team%20collaboration"
+        },
+        {
+          "text": "Discuss an integration ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Integration%20collaboration"
+        }
+      ],
+      "links": [
+        {
+          "text": "Share your idea ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Creator%20collaboration"
+        },
+        {
+          "text": "Discuss your workflow ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Team%20collaboration"
+        },
+        {
+          "text": "Discuss an integration ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Integration%20collaboration"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "TRUST / PRIVACY\n\nPrivacy Policy\n\nHow account, content and connected-platform information is handled.\n\nEffective date: December 10, 2025 (Last Updated: November 15, 2025)\n\nNote: This is a draft policy for transparency and platform review. It does not constitute legal advice. For compliance matters, contact us at thulani@autopromote.org.\n\n1. Introduction\n\nWelcome to AutoPromote (\"we\", \"us\", or \"our\"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application and services. Please read this policy carefully. If you do not agree, do not use the Service.\n\n2. Data Controller & Contact\n\nThe data controller for AutoPromote is AutoPromote. For privacy inquiries or to exercise your rights, contact: thulani@autopromote.org.\n\n3. What We Collect\n\nWe collect the following categories of information:\n\nAccount information: name, email address, profile details you provide.\nUser Content: content you create, schedule, or upload through the Service (e.g., posts, captions, media).\nAuthentication & Usage: login tokens, IP address, device and browser metadata, and usage logs.\nPayment Data: billing identifiers and transaction records required to process payments (we do not store full card numbers; payments are processed by PayPal).\nSocial Network Data: information you choose to share from connected social accounts (profile, public posting permissions) when you link third-party platforms.\n4. How We Use Your Information\n\nWe use personal data to operate and improve the Service, including to:\n\nCreate and manage your account and provide core features.\nPost or schedule content on third-party platforms where you grant permission.\nProcess payments and refunds through third-party payment processors.\nCommunicate about your account, updates, or security issues.\nAnalyze and improve functionality, detect fraud, and enforce policies.\n5. Third-Party Processors\n\nWe use third-party service providers to operate the Service. Key processors include:\n\nFirebase / Google: authentication, database, storage.\nResend or SendGrid: transactional email delivery.\nPayPal: payment processing.\nAnalytics providers: usage analytics and performance monitoring.\n\nWe share the minimum data necessary with these processors and require them to protect personal data under contract.\n\n6. Your Rights\n\nDepending on your jurisdiction, you may have rights to access, correct, delete, or export your personal data, and to object to certain processing. To exercise your rights, contact us at thulani@autopromote.org. We will respond within a reasonable timeframe as required by applicable law.\n\n7. Retention\n\nWe retain personal data as long as necessary to provide the Service and for legitimate business or legal purposes (for example, to comply with legal obligations or resolve disputes). For account deletion requests we generally remove account data within 30–90 days, but some backups or aggregated analytics may be retained longer in anonymized form.\n\n8. Cookies & Tracking\n\nWe use cookies and similar technologies for authentication, security, and analytics. You can control cookies through your browser settings; disabling cookies may limit features.\n\n9. Security\n\nWe use commercially reasonable technical and administrative measures (such as TLS in transit and least-privilege for service accounts) to protect personal data. No system is perfect — if you suspect a security issue, contact thulani@autopromote.org.\n\n10. Changes to this Policy\n\nWe may update this Privacy Policy. We will post the new effective date at the top of this page. Material changes will be highlighted or emailed to users where required.\n\n11. Contact Us\n\nIf you have questions about this Privacy Policy, please contact us at: thulani@autopromote.org.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/privacy",
+      "title": "Privacy Policy",
+      "gridCards": 0,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "TRUST / TERMS\n\nTerms of Service\n\nThe terms for using AutoPromote, your account and your content.\n\nEffective date: December 10, 2025 (Last Updated: November 15, 2025)\n\nNote: This is a draft policy for transparency and platform review. It does not constitute legal advice. For compliance matters, contact us at thulani@autopromote.org.\n\n1. Agreement to Terms\n\nBy using our application and services (\"Service\"), you agree to be bound by these Terms of Service (\"Terms\"). If you do not agree to these Terms, do not use the Service.\n\n2. Description of Service\n\nAutoPromote provides users with tools to automate the promotion of their content across various social media platforms. The Service is provided on an \"as is\" and \"as available\" basis.\n\n3. User Accounts\n\nTo use certain features of the Service, you must register for an account. You are responsible for safeguarding your account and are liable for any activities or actions under your account. You agree to notify us immediately of any unauthorized use of your account.\n\n4. Payments and Billing\n\nIf you purchase paid features, subscriptions are billed through third-party payment processors (such as PayPal). Billing, refunds, and chargebacks are handled by the payment provider and in accordance with their terms. We do not store full payment card numbers on our servers.\n\n5. User Content\n\nYou are responsible for the content you post, link, or otherwise make available through the Service (\"User Content\"). You retain all your rights to your User Content, but you grant us a worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display, and distribute such User Content in connection with providing the Service.\n\n6. Prohibited Conduct\n\nYou agree not to use the Service to:\n\nViolate any law or regulation.\nInfringe the intellectual property or other rights of third parties.\nTransmit any viruses, malware, or other malicious code.\nEngage in any activity that is harmful, fraudulent, deceptive, threatening, harassing, defamatory, obscene, or otherwise objectionable.\n7. Termination\n\nWe may terminate or suspend your access to the Service at any time, without prior notice or liability, for any reason, including if you breach these Terms.\n\n8. Third-Party Platforms and Sharing\n\nWhen you connect third-party accounts (for example, social networks), you authorize us to act on your behalf to post, schedule, or otherwise manage content. You are responsible for ensuring you have the right to post content to those platforms and for complying with the target platform's terms.\n\n9. Limitation of Liability\n\nIn no event shall AutoPromote, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.\n\n10. Changes to Terms\n\nWe reserve the right to modify these Terms at any time. We will provide notice of any material changes by posting the new Terms on this site and, where appropriate, notifying users by email or in-app message. Your continued use of the Service after any such change constitutes your acceptance of the new Terms.\n\n11. Governing Law\n\nThese Terms are governed by the laws of the jurisdiction in which AutoPromote is incorporated or operates. For any disputes, you agree to submit to the jurisdiction and venue of the courts located there, except where otherwise required by applicable law.\n\n12. Data Protection & Privacy\n\nYour privacy matters. Our Privacy Policy explains what information we collect and how we use it. You can read the Privacy Policy at /legal/privacy.html (or /privacy on the public site). To exercise privacy rights or for data protection inquiries, contact: thulani@autopromote.org.\n\n13. Contact Us\n\nIf you have any questions about these Terms, please contact us at: thulani@autopromote.org.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/terms",
+      "title": "Terms of Service",
+      "gridCards": 0,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "PRIVACY / YOUR BROWSER STORAGE\n\nWhat your browser remembers.\n\nAutoPromote uses browser storage as well as cookies and similar technologies. They serve different purposes, from keeping you signed in to retaining an editable project on your device.\n\n01\nSign-in and preferences\n\nAuthentication storage helps retain your session. The app also remembers selected preferences on your device. Browser storage restrictions can affect sign-in and saved settings.\n\n02\nLocally saved Studio projects\n\nStudio stores saved projects in your browser. Clearing site data or changing browser profiles can remove those local copies. Download a project backup before clearing storage.\n\nSave and back up a project\n↗\n03\nThird-party services\n\nConnected sign-in providers, payment pages and external platforms apply their own storage and privacy practices. Review the notices presented when using those services.\n\nRead the privacy policy\n↗\nManage storage in your browser.\n\nUse your browser’s privacy and site-data settings to inspect or remove stored data. Signing out, clearing local projects and revoking a connected account are different actions. For a privacy request, contact thulani@autopromote.org.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/cookies",
+      "title": "What your browser remembers.",
+      "gridCards": 3,
+      "buttons": [],
+      "mailtos": [],
+      "links": [
+        {
+          "text": "Save and back up a project ↗",
+          "href": "#/docs/studio"
+        },
+        {
+          "text": "Read the privacy policy ↗",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "TRUST / PROTECT THE WORK\n\nKeep control of your account and content.\n\nPractical account security starts with the people and platforms you authorize, and with the way you share your work.\n\n01\nAccount access\n\nAutoPromote uses Firebase Authentication for sign-in. Use a strong account password, protect your connected sign-in provider and review the security options available in your dashboard.\n\n02\nConnected destinations\n\nReview the identity and permissions shown when connecting a social account. Disconnect access you no longer need and reconnect through the normal flow when a connection expires.\n\nManage publishing access\n↗\n03\nReport an issue privately\n\nSend the affected URL, expected behaviour and steps that demonstrate the issue. Keep other people’s data, passwords and live access tokens out of the report.\n\nReport a security issue\n↗\nClear information about your data.\n\nThe Privacy Policy describes the information handled by the service. This page does not claim an independent security certification, a completed audit or a paid bug-bounty programme.\n\nRead the privacy policy ↗\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/security",
+      "title": "Keep control of your account and content.",
+      "gridCards": 3,
+      "buttons": [],
+      "mailtos": [
+        {
+          "text": "Report a security issue ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Private%20security%20report"
+        }
+      ],
+      "links": [
+        {
+          "text": "Manage publishing access ↗",
+          "href": "#/docs/publishing"
+        },
+        {
+          "text": "Report a security issue ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Private%20security%20report"
+        },
+        {
+          "text": "Read the privacy policy ↗",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "text": "ACCESSIBILITY / MAKE THE WORKFLOW CLEARER\n\nGood tools should be easier to use.\n\nReadable controls, clear focus and useful alternatives matter. We want to hear when an interaction gets in your way.\n\n01\nReading and navigation\n\nThese pages provide headings, keyboard focus indicators and a skip-to-content link. Browser zoom and responsive layouts help keep the text readable.\n\n02\nMotion and media\n\nThe welcome page offers manual playback and reduced-motion behaviour. Studio is a desktop editing workspace; some visual editing tasks require a precise pointer and a larger screen.\n\nSee the Studio workflow\n↗\n03\nTell us about a barrier\n\nInclude the page, task, browser and any assistive technology involved. Describe what stopped you from completing the task and the alternative that would help.\n\nShare accessibility feedback\n↗\nOur reference, and the current limits.\n\nWCAG 2.2 is a reference for improving accessibility. We do not claim a completed independent conformance audit across every AutoPromote workspace. Some timeline, canvas and media interactions still need further accessibility work.\n\nFROM AN IDEA TO ITS NEXT AUDIENCE\n\nSee where your work can go.\nExplore AutoPromote\n↗",
+      "href": "#/accessibility",
+      "title": "Good tools should be easier to use.",
+      "gridCards": 3,
+      "buttons": [],
+      "mailtos": [
+        {
+          "text": "Share accessibility feedback ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Accessibility%20feedback"
+        }
+      ],
+      "links": [
+        {
+          "text": "See the Studio workflow ↗",
+          "href": "#/docs/studio"
+        },
+        {
+          "text": "Share accessibility feedback ↗",
+          "href": "mailto:thulani@autopromote.org?subject=Accessibility%20feedback"
+        },
+        {
+          "text": "Explore AutoPromote ↗",
+          "href": "#/"
+        }
+      ],
+      "overflow": false
+    }
+  ],
+  "errors": []
+}
