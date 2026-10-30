@@ -9905,5 +9905,28 @@
     "ownerCreativeApproval": false,
     "visualCompletion": false,
     "next": "Natural moving person boundaries, complete selected equipment and believable room integration on the supplied podcast through Studio. No missing user input."
+  },
+  "backgroundBlenderTrial20261030": {
+    "status": "CPU_BLENDER_EXTERNAL_MOVING_TRIAL_FEATURE_UNFINISHED",
+    "evidence": "reports/studio-background-blender-trial-20261030/README.md",
+    "blender": "4.5.9 LTS",
+    "framesPerTrial": 90,
+    "previewTrials": 2,
+    "maskPoseKeys": 16,
+    "nativeStudioProjectChanged": false,
+    "rendererFrontendOrRegistryChanged": false,
+    "newNativeFinalMovies": 0,
+    "outsideShoulderBandAlphaExact": true,
+    "faceAlphaProtected": true,
+    "existingHardwareRetained": true,
+    "sourceAndSavedLoginPreserved": true,
+    "projectRecordsRetained": 54,
+    "protectedSourceAndPriorFiles": 97,
+    "existingAppBuildFilesPreserved": 147,
+    "gpuJobs": 0,
+    "professionalQualification": false,
+    "ownerCreativeApproval": false,
+    "visualCompletion": false,
+    "next": "Correct hard shoulder contours and full scene/equipment integration on the supplied podcast through Studio; Blender trial is not feature completion."
   }
 }

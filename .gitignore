@@ -229,3 +229,7 @@ reports/studio-background-visual-review-20261027/*
 # Private background source-edge diagnostics
 /reports/studio-background-source-edge-20261029/*
 !/reports/studio-background-source-edge-20261029/README.md
+
+# Private Blender background evaluation
+/reports/studio-background-blender-trial-20261030/*
+!/reports/studio-background-blender-trial-20261030/README.md

@@ -1,0 +1,17 @@
+# Background replacement — Blender CPU moving trial, 30 October
+
+**Two guest-shot previews are available for inspection; professional background replacement remains unfinished.** This is a bounded external Blender experiment on the existing podcast, not a completed Studio edit, native export or product capability. No further user footage or decision is required.
+
+The [local review page](http://localhost:5000/blender-background-trial/) offers two 3.75-second, 90-frame, 1920×1080/24 fps muted trials: the shoulder correction against the previous room, and the same correction against a newly authored Blender acoustic set. Both use Blender 4.5.9 LTS with Cycles and compositing explicitly set to CPU. No GPU, paid API, production deployment, main merge, publishing or monetization work occurs.
+
+The editable Blender mask contains 16 pose keys initialised from row extents of the existing owned alpha, smoothed into splines and interpolated by Blender. These are not independently hand-traced or validated motion tracks. A 2× mask render supplies coverage in the shoulder band; the face region and all alpha outside the authored band remain exact across all90 frames. Source-conditioned foreground-colour estimation and the retained grading equation/settings are applied. Existing microphone repairs and hardware alpha are retained; they are not repaired by this trial.
+
+The physical set is an editable .blend with acoustic panels, walnut slats, recessed practical lighting, camera and depth of field. CPU rendering of its still plate takes about175 seconds. Moving mask and each moving compositing pass have separate private receipts. The saved 1.1 framing is retained in these guest-only tests. The complete podcast's host shot, titles, audio and full Studio timeline are not part of these clips.
+
+**Visual judgement:** the trial reduces the broad soft shoulder fringe but leaves an overly hard/cut-out contour and unresolved scene/equipment integration. It is not accepted as the requested clean professional result. Rendering successfully in Blender does not qualify the feature. No candidate is applied to the saved Studio project or product registry/renderer/frontend.
+
+The first compositor sequence read was off by one and omitted the guest on the last frame. Browser playback and final-frame inspection caught it; the sequence offset is corrected before the review files are released. Failed clips and the first playback observation remain private. The corrected previews require complete decode, all90 occupied foreground frames and headless muted full playback; engineering checks do not replace visual acceptance.
+
+Saved login/session, all54 current project records, the97 protected source/prior films and all147 existing App build files are preserved. A separate loopback review alias exposes only the two trial movies and two editable .blend files; private session backups and raw diagnostic files are outside that served directory. Large working images remain in private RAM scratch because the shared disk is already below the historical5GiB reserve. Small review artifacts are retained privately with hashes. Nothing is promoted to the welcome page, showroom or readiness.
+
+Remaining work: natural moving person boundaries, complete selected equipment/furniture and believable full-podcast room integration through the existing Studio workflow. These previews do not establish automatic general-video handling or audition readiness.

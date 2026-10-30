@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Record CPU source-edge diagnostics and six pinned BiRefNet lite sample evaluations without promoting creative or product readiness. No model, renderer, frontend, native project, source film or saved login changed; the existing podcast remains the acceptance case and requires no new user input.",
-  "reviewed_at": "2026-10-29T15:31:44.814Z",
+  "reason": "Record external CPU Blender moving-shoulder and physical-set trials without integrating candidates or promoting Studio/creative readiness. Hard contours and complete scene/equipment integration remain unresolved; original sources, saved projects, login and App build are preserved.",
+  "reviewed_at": "2026-10-30T06:05:08.478Z",
   "catalog_sha256": "b4bd50ba347c4de4631aaa46cc9ef2e60e6de61984306ec7a0c531c741aa4e74",
   "sources": [
     {
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "ea3f8379e2d223cb61d08195778af970d50deb8431fdf23d5c2a5bde3d1ccbc8"
+      "sha256": "14f22f77fa9a7ebd215ee6cb5edfd58be31f2fb7d52ea7c2ad24f33bc106795b"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "ab3bc060762bff937cd5e957b26aaca8ba6e4c7da6b9e3e367de908f79164608"
+      "sha256": "f469a3fd513f9479255262394762ebb69e27fd086de9271c2288034add725d9c"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."
