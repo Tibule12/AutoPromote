@@ -73,9 +73,12 @@ def validate_plan(plan, cache):
                 raise ValueError("Use 1–16 source detail repairs")
             import cv2
             for patch in patches:
-                if not isinstance(patch,dict) or not {"source","target","feather","end_blend"}<=set(patch) or set(patch)-{"source","target","feather","end_blend","clear_box","protect_paths"}:
+                if not isinstance(patch,dict) or not {"source","target","feather","end_blend"}<=set(patch) or set(patch)-{"source","target","feather","end_blend","clear_box","protect_paths","source_color","saturation"}:
                     raise ValueError("Source detail repairs need source and target corners, feather and end blend")
                 bounded(patch["feather"],0,3);bounded(patch["end_blend"],0,32)
+                if "source_color" in patch and patch["source_color"] not in ("cleaned", "original"):
+                    raise ValueError("Source repair colour must be cleaned or original")
+                if "saturation" in patch:bounded(patch["saturation"],0,2)
                 for key in ("source","target"):
                     points=patch[key]
                     if not isinstance(points,list) or len(points)!=4:
@@ -598,8 +601,14 @@ class VfxFrameRenderer:
                     included=path_mask([effect["corners"],*effect.get("paths",[]),*effect.get("color_paths",[])])
                     if effect["feather"]:included=included.filter(ImageFilter.GaussianBlur(effect["feather"]))
                     sampled=Image.composite(foreground,treated,included)
-                sample=np.asarray(sampled)
                 for patch in effect["source_patches"]:
+                    # Opaque equipment can retain photographed texture even if
+                    # matte colour estimation replaced its low-alpha pixels.
+                    # Explicit opt-in only; legacy patches sample cleaned RGB.
+                    patch_sample=frame if patch.get("source_color")=="original" else sampled
+                    if patch.get("saturation",1)!=1:
+                        patch_sample=ImageEnhance.Color(patch_sample).enhance(patch["saturation"])
+                    sample=np.asarray(patch_sample)
                     source=np.float32(patch["source"])*[width,height]
                     target=np.float32(patch["target"])*[width,height]
                     padding=math.ceil(patch["feather"]*4)+2

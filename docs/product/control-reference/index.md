@@ -2730,7 +2730,7 @@ Manually copies a clean opaque detail from the same source frame onto an authore
 Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
 
 - Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.
-- The copy uses this frame’s cleaned source colour. It does not reconstruct the hidden original, detect objects or track motion automatically. Review every moving pose and the exported result.
+- The default copies this frame’s cleaned source colour. Set source_color to original to retain photographed opaque equipment texture, with optional saturation 0–2; select clean source pixels so old-room colours are not copied. This does not reconstruct the hidden original, detect objects or track motion. Review every moving pose and the export.
 - New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality.
 - Protection paths place the existing foreground in front of the repaired detail using its actual alpha. Transparent padding does not punch a hole in the repair; soft accessory edges blend over it.
 

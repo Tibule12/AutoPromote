@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review source-bound native opacity controls, corrected removed-reed protection, complete CPU master/timeline and unchanged audio. Preserve request recovery after an unacknowledged submission; no professional or universal qualification.",
-  "reviewed_at": "2026-10-30T09:22:36.624Z",
-  "catalog_sha256": "f551afd51c4490c34f0d622c2f09f476aa05c42543d90eba330e7c800aeff9cb",
+  "reason": "Manual original-source mic repairs, current Studio and nested-logo recovery, owned replacement bindings, completed CPU export and preservation; retain owner and general-footage limits",
+  "reviewed_at": "2026-10-30T14:45:55.644Z",
+  "catalog_sha256": "aac1df418fedbc54c59c0ceefc930436e4bff3521cc77a4ae235a5262a368761",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -179,7 +179,7 @@
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
-      "sha256": "02cd33d5a966e648f6be341c35911ebf95915831dfe421f126c0899b29cabcc9"
+      "sha256": "3f079e6547bacea3a96b39f562e9a24a159b80ec1be7d0a6c9e7820750d1f89a"
     },
     {
       "path": "frontend/src/components/StudioTextAnimatorPanel.js",
@@ -315,7 +315,7 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "3ae058deb36f75f5db599620c8c7f5e3907f7a460b58ee5a56c38dfe41e3e4fc"
+      "sha256": "f8e2acdefa5c1451ad0c0b3f911b1e353e56c7406eafb357c7ac3cae65d8017d"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
@@ -327,7 +327,7 @@
     },
     {
       "path": "frontend/src/components/studioSubjectVfxContract.js",
-      "sha256": "2714359836c692c8eecf879e914b62fc84a0ec475db9621ef034b095cc37d261"
+      "sha256": "e99822c8aac5609d59297b1ac9639e5fb2ab4ca90811c85b3070418803dd528e"
     },
     {
       "path": "frontend/src/components/studioTextAnimator.js",
@@ -427,7 +427,7 @@
     },
     {
       "path": "python_media_worker/studio_vfx_plan.py",
-      "sha256": "f0e1fa00ab9e5215cbc71085d8e939f0426eaf50d457967c85f8aed37c5502b6"
+      "sha256": "da071ab6a245b658459c32a7f0e5acf6c3c35ed5c459de7a52fab0ba684ef1ae"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "916dcb8290b1e914cded3964d882a807f8aa6f766b9f96661b2a40b7c63eb830"
+      "sha256": "c5271a699e8c5cf73e8f6d9146704cae4fcc6a19a32e1d03b60436887ce7c0b8"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "bfe4298594a631fa09110a6dbbb9e76239410bdd7cc76efdb608742f226db0fc"
+      "sha256": "eaa519d337bddcea32a1b8470df28fe993e861698706ca1471eb005ec943931c"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

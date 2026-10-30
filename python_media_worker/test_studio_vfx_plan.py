@@ -1004,3 +1004,39 @@ def test_identity_opacity_levels_keep_exact_legacy_pixels(source_cache):
 def test_invalid_opacity_levels_are_rejected(source_cache,levels):
     _,_,cache=source_cache;command=plan(cache);command['effects']=[opacity_effect(alpha_levels=levels)]
     with pytest.raises(ValueError):validate_plan(command,cache)
+
+
+def test_original_source_repair_preserves_photographed_detail_after_colour_estimation(source_cache, monkeypatch):
+    _,_,cache=source_cache
+    fine={"id":"fine","type":"foreground_refine","start":0,"end":1,
+        "decontaminate":1,"choke":0,"feather":0,"recover_box":[0,0,0,0],"recover_hue":0,
+        "hue_tolerance":0,"saturation_min":1,"detail_box":[0,0,0,0],"dark_max":0,
+        "clear_box":[0,0,0,0],"reject_hue":0,"reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    patch={"source":[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+        "target":[[.15,.2],[.2,.2],[.2,.8],[.15,.8]],"feather":0,"end_blend":0}
+    hold={"id":"rig","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[0,0],[.01,0],[.01,.01],[0,.01]],"feather":0,"source_patches":[patch]}
+    monkeypatch.setattr('pymatting.estimate_foreground_ml',lambda pixels,alpha:np.full_like(pixels,.5))
+    command=plan(cache);command['effects']=[fine,hold];frame=Image.new('RGB',(128,72),(20,40,90));alpha=Image.new('L',(128,72),128)
+    legacy,_=VfxFrameRenderer(command,cache)._prepare_foreground(frame,alpha,[fine,hold],128,72)
+    assert np.all(np.asarray(legacy)[32,22]==128)
+    patch.update(source_color='original',saturation=0)
+    rgb,result=VfxFrameRenderer(command,cache)._prepare_foreground(frame,alpha,[fine,hold],128,72)
+    expected=np.asarray(ImageEnhance.Color(frame).enhance(0))[32,90]
+    assert np.array_equal(np.asarray(rgb)[32,22],expected)
+    assert np.asarray(result)[32,22]==255
+    assert np.array_equal(np.asarray(rgb)[:,110:],np.asarray(legacy)[:,110:])
+    changed=Image.new('RGB',(128,72),(140,170,190))
+    updated,_=VfxFrameRenderer(command,cache)._prepare_foreground(changed,alpha,[fine,hold],128,72)
+    assert not np.array_equal(np.asarray(updated)[32,22],expected), 'Use this frame, never freeze photographed texture'
+
+
+@pytest.mark.parametrize('change',[{'source_color':'other'},{'source_color':None},{'source_color':True},
+    {'saturation':True},{'saturation':float('nan')},{'saturation':2.1}])
+def test_original_source_repair_rejects_invalid_colour_options(source_cache,change):
+    _,_,cache=source_cache;command=plan(cache)
+    patch={'source':[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+        'target':[[.1,.2],[.2,.2],[.2,.8],[.1,.8]],'feather':0,'end_blend':0,**change}
+    command['effects']=[{'id':'rig','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[0,0],[.01,0],[.01,.01],[0,.01]],'feather':0,'source_patches':[patch]}]
+    with pytest.raises(ValueError):validate_plan(command,cache)

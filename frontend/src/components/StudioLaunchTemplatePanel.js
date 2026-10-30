@@ -81,6 +81,20 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
       setStatus('Launch template applied. Clips, titles, keys and sound remain editable.');
     } catch (error) { setStatus(error.message); } finally { setBusy(false); }
   };
+  if (!template) return <details className="studio-template-library" data-testid="launch-template-panel">
+    <summary>Saved template unavailable</summary>
+    <p role="status">This project uses a template version that is unavailable in this Studio build. Your existing edit is preserved.</p>
+    <label>Choose a template for a new edit
+      <select aria-label="Creative template" value="" onChange={event => {
+        const next = STUDIO_CREATIVE_TEMPLATES.find(item => `${item.templateId}@${item.version}` === event.target.value);
+        if (!next) return;
+        setTemplateId(event.target.value); setAspect(next.executionDefinition.defaultAspect || "16:9"); setProposal(null); setSlots({});
+      }}>
+        <option value="" disabled>Choose a template</option>
+        {STUDIO_CREATIVE_TEMPLATES.map(item => <option key={`${item.templateId}@${item.version}`} value={`${item.templateId}@${item.version}`}>{item.label} · {item.version}</option>)}
+      </select>
+    </label>
+  </details>;
   return <details className="studio-template-library" data-testid="launch-template-panel">
     <summary>{template.label} · 20 seconds</summary>
     <ProductHelpButton featureId="studio.templates" label="Templates" workspaceType="STUDIO" />

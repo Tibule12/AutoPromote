@@ -285,3 +285,20 @@ test("edge opacity remains editable after canonical recovery and invalidates old
     expect(()=>validateSubjectVfxScene(bad)).toThrow(/opacity/);
   }
 });
+
+test("photographed source repair colour survives recovery and invalidates earlier pixels",()=>{
+  const value=scene();value.effects=[{id:"rig",type:"foreground_holdout",start:0,end:6,
+    corners:[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],feather:0,
+    source_patches:[{source:[[.1,.1],[.2,.1],[.2,.2],[.1,.2]],target:[[.4,.2],[.42,.2],[.44,.8],[.42,.8]],feather:.3,end_blend:1}]}];
+  const old=reviewed(JSON.parse(JSON.stringify(value)));
+  Object.assign(value.effects[0].source_patches[0],{source_color:"original",saturation:0});
+  expect(()=>validateSubjectVfxScene(value)).not.toThrow();
+  expect(resolveSubjectVfxProgrammePreview([{...old,scene:value}],"source-a",3)).toBeNull();
+  const document=adaptStudioSnapshotToDocument({snapshot:{orderedClips:[{id:"source-a",start:0,end:12}],
+    timeline:[{id:"clip",sourceClipId:"source-a",startRequest:2,endRequest:8}],subjectVfxScenes:[reviewed(value)]},projectId:"repair"});
+  expect(projectStudioLinkedTimingToSnapshot(document).subjectVfxScenes[0].scene.effects[0].source_patches).toEqual(value.effects[0].source_patches);
+  for(const change of [{source_color:"unknown"},{source_color:null},{source_color:true},{saturation:true},{saturation:NaN},{saturation:2.1}]){
+    const bad=JSON.parse(JSON.stringify(value));Object.assign(bad.effects[0].source_patches[0],change);
+    expect(()=>validateSubjectVfxScene(bad)).toThrow(/source detail repairs/);
+  }
+});

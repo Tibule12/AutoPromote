@@ -9349,5 +9349,35 @@
     "visualCompletion": false,
     "scopedPodcastMovingVisualReview": "PASS",
     "next": "Retain the delivered native movie/timeline and source-bound controls. Broader footage, automatic tracking and professional/universal qualification remain separate."
+  },
+  "backgroundMicStandsCurrentStudio20261030": {
+    "status": "NATIVE_HOST_MIC_REVISED_CURRENT_STUDIO_PRIVATE_REVIEW",
+    "evidence": "reports/studio-background-mic-stands-20261030/README.md",
+    "previousHostMicOwnerRejected": true,
+    "hostSourceRepairs": 13,
+    "guestSourceRepairs": 9,
+    "nativeFrames": [
+      208,
+      90
+    ],
+    "newFinalMovie": true,
+    "newMatchingCurrentStudioRecording": true,
+    "logoRestoredAndBrowserVerified": true,
+    "rendererCases": 92,
+    "frontendCases": 28,
+    "ownedBackgroundCases": 3,
+    "knowledgeCases": 17,
+    "savedProjectsPreserved": 54,
+    "otherProjectsExact": 53,
+    "originalPrimaryAppFilesExact": 147,
+    "protectedSourceAndPriorFilesExact": 101,
+    "currentStudioSourceCheckoutFilesUnchanged": 752,
+    "gpuJobs": 0,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "visualCompletion": false,
+    "professionalQualification": false,
+    "ownerCreativeApproval": false,
+    "next": "Retain current native movie/recording and owner review. General-footage tracking, fine foregrounds and shared S02/S04/S03 remain separate."
   }
 }

@@ -1,0 +1,184 @@
+{
+  "master": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "24/1",
+        "nb_frames": "298"
+      },
+      {
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0",
+        "nb_frames": "584"
+      }
+    ],
+    "format": {
+      "duration": "12.417000"
+    }
+  },
+  "movieSha256": "681bb995328505fbf2216fc8e34be907c1b4a980539926953bd89a304ec7be57",
+  "timelineSha256": "97fb485b8052b0c33f39db413ab538fe7a2954bad2e06833e7709f256cf05604",
+  "canonicalHash": "805005904aea99a1a6fc22ce5ff374daaaee6d05756cde519bcd31428b00b80b",
+  "sourceBoundReviewedNativeShots": [
+    {
+      "camera": "a",
+      "jobId": "152d883e-210a-4fc7-a393-1bb161736f20",
+      "frames": 208,
+      "sha256": "dfb82eae9f0150bc5e239d21d8f24a96a6233b165924381b42eca19287423a6c",
+      "cpuOnly": true
+    },
+    {
+      "camera": "b",
+      "jobId": "1806ae1c-bcc9-4620-850f-bfba5156ba13",
+      "frames": 90,
+      "sha256": "a23d0c0b9e405becdf52f186cfac7ce399cb005844a58802ba21e7507563c862",
+      "cpuOnly": true
+    }
+  ],
+  "completeUpdatedStudioTimelineAndPlayback": true,
+  "populatedTimelineRowsVisible": 7,
+  "originalDecodedPcmExact": {
+    "bytes": 2387968,
+    "sha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59"
+  },
+  "fullDecodeMovieAndStudioRecording": true,
+  "logoVisibleInActualUpdatedStudio": true,
+  "gpuJobs": 0,
+  "professionalQualification": false,
+  "ownerCreativeApproval": false,
+  "universalVideoQualityEstablished": false,
+  "preservation": {
+    "savedProjectCount": 54,
+    "allBaselineProjectsRetained": 54,
+    "otherBaselineProjectRecordsExact": 53,
+    "cookiesExact": true,
+    "savedFirebaseIdentityPreserved": true,
+    "normalTokenRefreshRetained": true,
+    "originalMaskReferencesAndMaskJobsExact": true,
+    "allOtherSceneEffectsExact": true,
+    "hostNativeSourceRepairs": 13,
+    "guestNativeSourceRepairs": 9,
+    "originalPrimaryAppBuildFilesExact": 147,
+    "protectedSourceAndPriorFilesExact": 101,
+    "currentStudioSourceCheckoutFilesUnchanged": 752,
+    "sourceFilesDeleted": 0,
+    "gpuJobs": 0,
+    "productionDeployment": false,
+    "mainMerge": false
+  },
+  "browserPlayback": {
+    "headless": true,
+    "muted": true,
+    "servedMovieAndTimelineHashesExact": true,
+    "fullPlaybackBothFiles": [
+      {
+        "duration": 12.417,
+        "time": 12.417,
+        "ended": true,
+        "width": 1920,
+        "height": 1080,
+        "error": null
+      },
+      {
+        "duration": 12.791667,
+        "time": 12.791667,
+        "ended": true,
+        "width": 1600,
+        "height": 1200,
+        "error": null
+      }
+    ],
+    "pageErrors": []
+  },
+  "recordingCapture": {
+    "captureSeconds": 12.647000074386597,
+    "screenFramesPerSecond": 27.12105621748691,
+    "movieFps": 24,
+    "encodedScreenRecordingFps": 24,
+    "sparseCapture": false,
+    "smoothPlaybackEvidence": false,
+    "limitation": "Screen capture cadence and encoding are separate from native movie playback; use playback-performance.js without screencasting to measure the latter"
+  },
+  "rendererTests": 92,
+  "frontendTests": 28,
+  "ownedBackgroundTests": 3,
+  "knowledgeTests": 17,
+  "previousHostMicOwnerRejected": true,
+  "sourceTestsAreCreativeApproval": false,
+  "allOtherSubjectSceneEffectsExact": true,
+  "productionDeployment": false,
+  "mainMerge": false,
+  "hostVisualInspection": {
+    "reviewedFrames": [
+      208,
+      90
+    ],
+    "hostHorizontalBoomAll208FramesVisuallyInspected": true,
+    "fullPictureAll208ContactFramesInspected": true,
+    "fullSizeHostPoses": [
+      0,
+      69,
+      138,
+      207
+    ],
+    "verticalSupportsRecheckedContactPages": [
+      0,
+      6,
+      12,
+      17
+    ],
+    "findings": "Upper and lower host boom rails and spring remain continuous into photographed hinge across moving hands. No missing boom section or copied screen-colour fringe observed in the reviewed crop. Existing connected vertical stands and completed guest scene retained.",
+    "priorHostMovieRejectedByOwner": true,
+    "ownerCreativeApproval": false
+  },
+  "completedPendingMetadataCleanup": {
+    "reason": "Normal Studio cold reopen removed completed request pending metadata. All assets, scenes, masks, reviewed preview receipts, timeline and other effect fields are exactly unchanged.",
+    "before": "fa4871dd7b5506eebf1bf94a98ffac7aa4997596e5e7d91d0583a21908f79349",
+    "after": "805005904aea99a1a6fc22ce5ff374daaaee6d05756cde519bcd31428b00b80b",
+    "changedPaths": [
+      "/revision",
+      "/layers/6/parameters/pending"
+    ]
+  },
+  "nativeEditableBackup": {
+    "sha256": "43dee8a9eef7164ea895e95b60d23ce512af3ff6327e242b0385980fad444f5f",
+    "bytes": 1149650,
+    "normalControlDownload": true,
+    "freshContextDownloadRecovery": true,
+    "noAdditionalRender": true
+  },
+  "videosDelivery": {
+    "directory": "/home/tibule12/Videos/AutoPromote-podcast-host-mic-20261030",
+    "files": {
+      "UNMUTED - corrected host microphone.mp4": "681bb995328505fbf2216fc8e34be907c1b4a980539926953bd89a304ec7be57",
+      "UNMUTED - updated Studio timeline.mp4": "97fb485b8052b0c33f39db413ab538fe7a2954bad2e06833e7709f256cf05604",
+      "UNMUTED - editable project.private.json": "43dee8a9eef7164ea895e95b60d23ce512af3ff6327e242b0385980fad444f5f"
+    },
+    "copiedNativeFilesWithoutEditing": true,
+    "previousDeliverablesOverwritten": false
+  },
+  "completedChecks": {
+    "rendererTests": {
+      "passed": 92
+    },
+    "frontendContractCanonicalAndRecovery": {
+      "passed": 28
+    },
+    "ownedAssetBinding": {
+      "passed": 3
+    },
+    "knowledge": {
+      "passed": 17
+    },
+    "strictCurrentFrontendBuild": true,
+    "scopedLint": true,
+    "generatedReplayMatches": true,
+    "studioContractValidInBothWorktrees": true,
+    "whitespace": true
+  }
+}

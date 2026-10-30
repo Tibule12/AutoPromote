@@ -303,3 +303,14 @@ test("document rejects embedded analysis payloads", () => {
     })
   ).toThrow(/immutable artifact identity/);
 });
+
+test('a replacement image has a canonical owned asset identity without becoming a timeline clip',()=>{
+  const original=snapshot(),contentHash='e'.repeat(64);
+  original.projectMedia=[{id:'set',mediaType:'image',contentHash,storagePath:'uploads/images/owner/set.png',status:'ready'}];
+  original.subjectVfxScenes=[{scene:{id:'subject',effects:[{type:'background_replace',asset_id:'set',asset_sha256:contentHash}]}}];
+  const document=adaptStudioSnapshotToDocument({snapshot:original,projectId:'project-a'});
+  expect(document.assets.find(asset=>asset.sourceId==='set')).toMatchObject({contentHash,storagePath:'uploads/images/owner/set.png',identityState:'hash_verified'});
+  expect(document.clipOccurrences).toHaveLength(2);
+  original.projectMedia=[];
+  expect(()=>adaptStudioSnapshotToDocument({snapshot:original,projectId:'project-a'})).toThrow('Save the selected background');
+});

@@ -226,8 +226,10 @@ function validateSubjectVfxScene(scene) {
       };
       const validRepair=patch=>{
         if (!patch || typeof patch!=="object" || Array.isArray(patch) ||
-            !keys(patch,["source","target","feather","end_blend",...["clear_box","protect_paths"].filter(key=>Object.prototype.hasOwnProperty.call(patch,key))]) ||
+            !keys(patch,["source","target","feather","end_blend",...["clear_box","protect_paths","source_color","saturation"].filter(key=>Object.prototype.hasOwnProperty.call(patch,key))]) ||
             !quad(patch.source) || !quad(patch.target) || !bounded(patch.feather,0,3) || !bounded(patch.end_blend,0,32)) return false;
+        if (Object.prototype.hasOwnProperty.call(patch,"source_color") && !["cleaned","original"].includes(patch.source_color)) return false;
+        if (Object.prototype.hasOwnProperty.call(patch,"saturation") && !bounded(patch.saturation,0,2)) return false;
         if (Object.prototype.hasOwnProperty.call(patch,"clear_box") && (!Array.isArray(patch.clear_box) || patch.clear_box.length!==4 ||
             !patch.clear_box.every(value=>bounded(value,0,1)) || patch.clear_box[0]>=patch.clear_box[2] || patch.clear_box[1]>=patch.clear_box[3])) return false;
         if (Object.prototype.hasOwnProperty.call(patch,"protect_paths") && (!Array.isArray(patch.protect_paths) || patch.protect_paths.length<1 ||

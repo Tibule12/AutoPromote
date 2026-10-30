@@ -830,7 +830,7 @@
         "At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.",
         "For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.",
         "After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.",
-        "If removing an overlapping object exposes damaged rigid equipment, a Foreground holdout offers Repair opaque detail from source. Choose clean source and target quadrilaterals, feather and end blending; optional clear_box removes the damaged outline and protect_paths retains accessories crossing in front. These are manual fixed source-frame coordinates. Render and inspect the entire moving shot after editing.",
+        "If removing an overlapping object exposes damaged rigid equipment, use Foreground holdout → Repair opaque detail from source. Set convex source/target quads, feather/end blend, optional clear_box and protect_paths. Default cleaned colour; source_color original and saturation 0–2 retain photographed opaque texture. Coordinates stay fixed in the source frame. Review the full moving shot and export.",
         "For one coarse clothing edge, set Edge detail width above zero and use Edge refinement region points to limit the CPU edge solve to that source-frame region. Colour cleanup is a soft boundary guide there; explicit removal paths stay excluded and unrelated equipment alpha is retained. Render and inspect the whole moving shot.",
         "For a translucent clothing fringe, adjust Transparent edge level and Opaque edge level before colour recovery, and use Edge opacity region points to limit the change. Defaults 0/1 retain the current soft matte; the opaque level must remain at least 0.05 higher. Render a new preview and inspect the full moving subject and selected objects."
       ],
@@ -11955,7 +11955,7 @@
       ],
       "limitations": [
         "Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.",
-        "The copy uses this frame’s cleaned source colour. It does not reconstruct the hidden original, detect objects or track motion automatically. Review every moving pose and the exported result.",
+        "The default copies this frame’s cleaned source colour. Set source_color to original to retain photographed opaque equipment texture, with optional saturation 0–2; select clean source pixels so old-room colours are not copied. This does not reconstruct the hidden original, detect objects or track motion. Review every moving pose and the export.",
         "New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality.",
         "Protection paths place the existing foreground in front of the repaired detail using its actual alpha. Transparent padding does not punch a hole in the repair; soft accessory edges blend over it."
       ],

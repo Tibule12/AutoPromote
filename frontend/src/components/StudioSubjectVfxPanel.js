@@ -825,7 +825,7 @@ export default function StudioSubjectVfxPanel({
               </label>}
               {effect.type === "foreground_holdout" && <label>
                 Repair opaque detail from source
-                <small>Copy a clean part of this source frame over a damaged object. Coordinates stay fixed; use separate timed repairs for moving objects.</small>
+                <small>Copy a clean part of this source frame over a damaged object. Choose original source colour to retain photographed texture, with optional saturation. Coordinates stay fixed; use separate timed repairs for moving objects.</small>
                 <textarea aria-label="Repair opaque detail from source" key={JSON.stringify(effect.source_patches || [])}
                   defaultValue={JSON.stringify(effect.source_patches || [])}
                   onBlur={event => {
