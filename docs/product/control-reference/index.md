@@ -209,6 +209,9 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.composite.source_detail_repair | Repair opaque detail from source | array | 0 … 16 | normalized source-frame corners; feather and end blending in source pixels | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 | studio.composite.edge_refinement_region | Edge refinement region points | array | 0 … 64 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 | studio.composite.colour_treatment_paths | Colour treatment paths | array | 0 … 32 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.alpha_transparent | Transparent edge level | number | 0 … 1 | alpha | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.alpha_opaque | Opaque edge level | number | 0 … 1 | alpha | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.alpha_region | Edge opacity region points | array | 0 … 64 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -2759,3 +2762,45 @@ Applies to: owned video with a source-bound subject mask. Requires: studio.compo
 - Only the existing object saturation treatment applies. These paths never enlarge the inclusion matte or change the source mask.
 - The regions stay fixed in source coordinates. They do not detect or track an object and do not prove clean replacement on arbitrary footage.
 - The three short room examples pass technical preview/export/reopen checks but remain owner-rejected for whole-shot realism. Colour-only paths fix a selection/colour separation defect; they do not establish a convincing professional background. Fixed geometry and these examples do not qualify arbitrary/longer footage.
+
+<a id="studio-composite-alpha_transparent"></a>
+
+## Transparent edge level
+
+ID: `studio.composite.alpha_transparent` • **PARTIAL**
+
+Sets the soft-matte value treated as transparent before foreground colour recovery. Raising it removes low-opacity residue in the selected region.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.
+- Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.
+- An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement.
+
+<a id="studio-composite-alpha_opaque"></a>
+
+## Opaque edge level
+
+ID: `studio.composite.alpha_opaque` • **PARTIAL**
+
+Sets the soft-matte value treated as opaque before foreground colour recovery. Lower it carefully when clothing edges are too translucent; fractional coverage remains between the two levels.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.
+- Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.
+- An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement.
+
+<a id="studio-composite-alpha_region"></a>
+
+## Edge opacity region points
+
+ID: `studio.composite.alpha_region` • **PARTIAL**
+
+Restricts edge-opacity levels to an authored source-frame polygon. Its boundary fades inward; alpha outside the region remains unchanged.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Use 3–64 normalized source-frame points forming a nonempty polygon. Clear the field to apply levels across the subject.
+- The polygon stays fixed in source coordinates and is not an automatically tracked selection. Explicit removed-background regions remain excluded.
+- Preview and full-film appearance still require moving review; the controls do not establish professional or universal replacement quality.

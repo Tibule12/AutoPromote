@@ -811,7 +811,7 @@ export default function StudioSubjectVfxPanel({
               </label>}
               {effect.type === "foreground_holdout" && <label>
                 Colour treatment paths
-                <small>Apply this object's saturation treatment inside these regions without keeping any additional background pixels.</small>
+                <small>Apply this object&apos;s saturation treatment inside these regions without keeping any additional background pixels.</small>
                 <textarea aria-label="Colour treatment paths" key={JSON.stringify(effect.color_paths || [])}
                   defaultValue={JSON.stringify(effect.color_paths || [])}
                   onBlur={event => {
@@ -837,6 +837,35 @@ export default function StudioSubjectVfxPanel({
                     } catch { setMessage("Use up to 16 repairs with source and target four-corner paths, feather (0–3) and end_blend (0–32 pixels), or [] to remove repairs."); }
                   }} />
               </label>}
+              {effect.type === "foreground_refine" && !effect.after_refine && !effect.after_holdout && <fieldset>
+                <legend>Edge opacity</legend>
+                <small>Adjust a translucent fringe while keeping a soft outline. Choose a region below to limit this correction.</small>
+                {["Transparent edge level", "Opaque edge level"].map((label, coordinate) => <label key={label}>
+                  {label}
+                  <input aria-label={label} type="number" min="0" max="1" step="0.01"
+                    value={(effect.alpha_levels || [0, 1])[coordinate]}
+                    onChange={event => {
+                      const levels=[...(effect.alpha_levels || [0,1])];levels[coordinate]=Number(event.target.value);
+                      if (!levels.every(value=>Number.isFinite(value)&&value>=0&&value<=1) || levels[1]<levels[0]+.05) {
+                        setMessage("Keep the opaque edge level at least 0.05 above the transparent edge level.");return;
+                      }
+                      const next={...effect};if(levels[0]===0&&levels[1]===1)delete next.alpha_levels;else next.alpha_levels=levels;
+                      update({...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)});
+                    }} />
+                </label>)}
+                <label>Edge opacity region points
+                  <textarea aria-label="Edge opacity region points" key={JSON.stringify(effect.alpha_polygon || [])}
+                    defaultValue={JSON.stringify(effect.alpha_polygon || [])}
+                    onBlur={event=>{
+                      try {
+                        const points=JSON.parse(event.target.value),next={...effect};
+                        if(Array.isArray(points)&&!points.length)delete next.alpha_polygon;else next.alpha_polygon=points;
+                        const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                        validateSubjectVfxScene(scene);update(scene);
+                      } catch {setMessage("Use 3–64 source-frame points, or [] to adjust opacity across the whole subject.");}
+                    }}/>
+                </label>
+              </fieldset>}
               {effect.type === "foreground_refine" && <label>
                 Edge refinement region points
                 <small>Limit edge refinement to this source-frame region. Set Edge detail width above zero first. Colour cleanup becomes a soft edge guide here; explicit removal paths stay excluded.</small>
@@ -880,7 +909,7 @@ export default function StudioSubjectVfxPanel({
                   }} />
               </label>}
               {Object.entries(effect.type === "foreground_refine" ? { edge_radius: 0, decontaminate: 0, blue_spill: 0, after_refine: false, after_holdout: false, reject_connected: false, ...effect } : effect.type === "foreground_holdout" ? { after_refine: false, saturation: 1, ...effect } : effect)
-                .filter(([key]) => !["id", "type", "asset_sha256", "detail_polygon", "edge_polygon", "paths", "color_paths", "clear_paths", "source_patches"].includes(key))
+                .filter(([key]) => !["id", "type", "asset_sha256", "alpha_levels", "alpha_polygon", "detail_polygon", "edge_polygon", "paths", "color_paths", "clear_paths", "source_patches"].includes(key))
                 .map(([key, value]) => (
                   <label key={key}>
                     {key === "asset_id" ? "Background media" : key === "after_holdout" ? "Clean protected object edges" : key === "reject_connected" ? "Limit colour cleanup to background edges" : key === "after_refine" ? effect.type === "foreground_refine" ? "Apply colour cleanup after matting" : "Keep thin detail through cleanup" : key.replaceAll("_", " ")}

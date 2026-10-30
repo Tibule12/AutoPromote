@@ -1529,6 +1529,21 @@
       "status": "PARTIAL"
     },
     {
+      "id": "studio.composite.alpha_transparent",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.alpha_opaque",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.alpha_region",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
       "id": "task.image_cinematic",
       "kind": "task",
       "status": "PARTIAL"
@@ -3824,6 +3839,21 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.colour_treatment_paths"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_transparent"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_opaque"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_region"
     }
   ]
 }

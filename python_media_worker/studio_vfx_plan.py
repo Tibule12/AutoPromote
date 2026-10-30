@@ -116,7 +116,7 @@ def validate_plan(plan, cache):
         if kind == "background_replace" and "reveal_seconds" in effect:base.add("reveal_seconds")
         if kind == "background_replace":base.update(key for key in ("surface_corners","asset_crop") if key in effect)
         if kind == "foreground_refine":
-            base.update(key for key in ("edge_radius", "decontaminate", "detail_polygon", "edge_polygon", "blue_spill", "after_refine", "after_holdout", "reject_connected") if key in effect)
+            base.update(key for key in ("alpha_levels", "alpha_polygon", "edge_radius", "decontaminate", "detail_polygon", "edge_polygon", "blue_spill", "after_refine", "after_holdout", "reject_connected") if key in effect)
         if kind not in FIELDS or set(effect) != base | FIELDS[kind] or not isinstance(effect["id"], str) or not 1 <= len(effect["id"]) <= 64 or effect["id"] in ids:
             raise ValueError("Unsupported effect, duplicate ID or unknown command fields")
         ids.add(effect["id"])
@@ -163,6 +163,13 @@ def validate_plan(plan, cache):
             bounded(effect["blur"], 0, 60)
             if not isinstance(effect["asset_id"], str) or not 1 <= len(effect["asset_id"]) <= 100: raise ValueError("An approved background asset ID is required")
         if kind == "foreground_refine":
+            if "alpha_levels" in effect:
+                levels=effect["alpha_levels"]
+                if not isinstance(levels,list) or len(levels)!=2:raise ValueError("Use two edge opacity levels")
+                for value in levels:bounded(value,0,1)
+                if levels[1]<levels[0]+.05:raise ValueError("Edge opacity levels need at least 0.05 between them")
+                if effect.get("after_holdout",False) or effect.get("after_refine",False):
+                    raise ValueError("Edge opacity belongs before post-matting colour or protected-object cleanup")
             if "reject_connected" in effect and type(effect["reject_connected"]) is not bool:
                 raise ValueError("Background-connected colour cleanup must be boolean")
             if "after_holdout" in effect and (type(effect["after_holdout"]) is not bool or effect["after_holdout"] and
@@ -171,7 +178,7 @@ def validate_plan(plan, cache):
             if "after_refine" in effect and (type(effect["after_refine"]) is not bool or effect["after_refine"] and (effect.get("edge_radius",0)>0 or effect.get("decontaminate",0)>0)):
                 raise ValueError("Post-matting colour cleanup cannot run another alpha solver")
             if "blue_spill" in effect:bounded(effect["blue_spill"],0,1)
-            for polygon_key in ("detail_polygon", "edge_polygon"):
+            for polygon_key in ("detail_polygon", "edge_polygon", "alpha_polygon"):
                 if polygon_key not in effect:continue
                 points=effect[polygon_key]
                 if not isinstance(points,list) or not 3<=len(points)<=64:raise ValueError("Detail region needs 3–64 points")
@@ -496,6 +503,24 @@ class VfxFrameRenderer:
             if len(tiny):values[np.isin(labels,tiny)]=0
             if local_edges:values=original*(1-region)+values*region
             alpha=Image.fromarray(np.rint(values*255).astype(np.uint8))
+        # Levels adjust coverage in the saved soft matte, rather than tracing a
+        # hard replacement silhouette. They precede foreground colour recovery:
+        # recovering colour with an underestimated alpha can brighten the edge.
+        # Explicit removal/protection limits and immutable source masks remain
+        # binding. Identity levels take no new pixel path.
+        for effect in active:
+            if effect["type"]!="foreground_refine" or "alpha_levels" not in effect or effect["alpha_levels"]==[0,1]:continue
+            low,high=effect["alpha_levels"]
+            values=np.asarray(alpha,dtype=np.float64)/255
+            adjusted=np.clip((values-low)/(high-low),0,1)
+            if "alpha_polygon" in effect:
+                import cv2
+                selected=np.asarray(path_mask([effect["alpha_polygon"]]),dtype=np.float64)/255
+                inset=cv2.distanceTransform((selected>0).astype(np.uint8),cv2.DIST_L2,5)
+                selected*=np.clip(inset/8,0,1)
+                adjusted=values+(adjusted-values)*selected
+            adjusted=np.minimum(adjusted,exclusion_limit)
+            alpha=Image.fromarray(np.rint(np.clip(adjusted,0,1)*255).astype(np.uint8))
         for effect in active:
             if effect["type"]!="foreground_refine" or not effect.get("decontaminate",0):continue
             # Every alpha correction, including protected-object restoration

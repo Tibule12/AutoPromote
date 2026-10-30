@@ -816,7 +816,10 @@
         "studio.composite.background_decontaminate",
         "studio.composite.source_detail_repair",
         "studio.composite.edge_refinement_region",
-        "studio.composite.colour_treatment_paths"
+        "studio.composite.colour_treatment_paths",
+        "studio.composite.alpha_transparent",
+        "studio.composite.alpha_opaque",
+        "studio.composite.alpha_region"
       ],
       "workflow": [
         "Open Studio → Composite and add effects to the selected owned video clip.",
@@ -828,7 +831,8 @@
         "For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.",
         "After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.",
         "If removing an overlapping object exposes damaged rigid equipment, a Foreground holdout offers Repair opaque detail from source. Choose clean source and target quadrilaterals, feather and end blending; optional clear_box removes the damaged outline and protect_paths retains accessories crossing in front. These are manual fixed source-frame coordinates. Render and inspect the entire moving shot after editing.",
-        "For one coarse clothing edge, set Edge detail width above zero and use Edge refinement region points to limit the CPU edge solve to that source-frame region. Colour cleanup is a soft boundary guide there; explicit removal paths stay excluded and unrelated equipment alpha is retained. Render and inspect the whole moving shot."
+        "For one coarse clothing edge, set Edge detail width above zero and use Edge refinement region points to limit the CPU edge solve to that source-frame region. Colour cleanup is a soft boundary guide there; explicit removal paths stay excluded and unrelated equipment alpha is retained. Render and inspect the whole moving shot.",
+        "For a translucent clothing fringe, adjust Transparent edge level and Opaque edge level before colour recovery, and use Edge opacity region points to limit the change. Defaults 0/1 retain the current soft matte; the opaque level must remain at least 0.05 higher. Render a new preview and inspect the full moving subject and selected objects."
       ],
       "preview_behavior": "Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.",
       "render_behavior": "The shared compiler carries group mask/blend decisions and transform keys into the existing CPU compositor. The ordinary geometric matte rasterizer clips assembled local child alpha before transform/opacity; registered request-owned matte scratch is cleaned after the render. RGB blend color weights the blend result by backdrop alpha, preserving foreground color over transparent isolated parents. Group and child blending share the existing leaf compositor and inverse programme clock. Static/Normal paths retain previous pixels. Source/source-VFX/generated-caption stages remain separate; inspect the exact final movie.",
@@ -854,7 +858,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-24",
+      "updated_at": "2026-10-30",
       "product_version": "1.2.0"
     },
     {
@@ -12030,6 +12034,114 @@
       ],
       "updated_at": "2026-10-28",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_transparent",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Transparent edge level",
+      "status": "PARTIAL",
+      "meaning": "Sets the soft-matte value treated as transparent before foreground colour recovery. Raising it removes low-opacity residue in the selected region.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_opaque",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Opaque edge level",
+      "status": "PARTIAL",
+      "meaning": "Sets the soft-matte value treated as opaque before foreground colour recovery. Lower it carefully when clothing edges are too translucent; fractional coverage remains between the two levels.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_region",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge opacity region points",
+      "status": "PARTIAL",
+      "meaning": "Restricts edge-opacity levels to an authored source-frame polygon. Its boundary fades inward; alpha outside the region remains unchanged.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 64,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Use 3–64 normalized source-frame points forming a nonempty polygon. Clear the field to apply levels across the subject.",
+        "The polygon stays fixed in source coordinates and is not an automatically tracked selection. Explicit removed-background regions remain excluded.",
+        "Preview and full-film appearance still require moving review; the controls do not establish professional or universal replacement quality."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
     }
   ],
   "tasks": [
@@ -15256,6 +15368,21 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.colour_treatment_paths"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_transparent"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_opaque"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_region"
     }
   ]
 }

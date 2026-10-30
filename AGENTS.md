@@ -1,3 +1,7 @@
+<!-- background-opacity-native-20261030 -->
+30 October: [shared soft-alpha opacity correction and native podcast revision](reports/studio-background-opacity-20261030/README.md) add three editable Composite controls before foreground colour recovery and an optional source-frame region. Original masks and all four host source/target repair geometries remain; six wrongly protected removed-plant entries are corrected after close-up review. The complete revised podcast and matching Studio recording are retained for private review. One298-frame Master1080p movie and matching seven-lane recording fully decode, retain exact canonical/owned receipt identity and unchanged PCM. A lost-acknowledgement/worker-busy recovery defect is fixed; the actual completed movie is recovered without another render. 88 renderer/cache,53 frontend and17 knowledge cases pass. Saved authentication/all54 projects, other53 records,97 protected source/prior files and147 primary App files remain. CPU only; no GPU, paid generation, deployment/main merge, publication, monetization or readiness/owner approval promotion.
+<!-- /background-opacity-native-20261030 -->
+
 # Studio product continuity
 
 For any AutoPromote Studio, Director, editing, preview/render, GPU capability,

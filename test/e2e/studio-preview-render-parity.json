@@ -9319,5 +9319,35 @@
     "ownerCreativeApproval": false,
     "visualCompletion": false,
     "next": "Correct hard shoulder contours and full scene/equipment integration on the supplied podcast through Studio; Blender trial is not feature completion."
+  },
+  "backgroundOpacityNative20261030": {
+    "status": "NATIVE_PODCAST_REVISED_PRIVATE_REVIEW",
+    "evidence": "reports/studio-background-opacity-20261030/README.md",
+    "newOptionalControls": 3,
+    "rendererFrontendChanged": true,
+    "modelRegistryChanged": false,
+    "nativeStudioProjectChanged": true,
+    "newNativeFinalMovies": 1,
+    "newCompleteStudioRecordings": 1,
+    "nativeCameraFrames": [
+      208,
+      90
+    ],
+    "sourceMasksUnchanged": true,
+    "hostRepairGeometriesRetained": 4,
+    "removedReedProtectionEntries": 6,
+    "projectRecordsRetained": 54,
+    "otherProjectRecordsExact": 53,
+    "protectedSourceAndPriorFiles": 97,
+    "existingAppBuildFilesPreserved": 147,
+    "rendererCacheCases": 88,
+    "frontendCases": 53,
+    "knowledgeCases": 17,
+    "gpuJobs": 0,
+    "professionalQualification": false,
+    "ownerCreativeApproval": false,
+    "visualCompletion": false,
+    "scopedPodcastMovingVisualReview": "PASS",
+    "next": "Retain the delivered native movie/timeline and source-bound controls. Broader footage, automatic tracking and professional/universal qualification remain separate."
   }
 }

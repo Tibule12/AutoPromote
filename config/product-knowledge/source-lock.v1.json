@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Record external CPU Blender moving-shoulder and physical-set trials without integrating candidates or promoting Studio/creative readiness. Hard contours and complete scene/equipment integration remain unresolved; original sources, saved projects, login and App build are preserved.",
-  "reviewed_at": "2026-10-30T06:05:08.478Z",
-  "catalog_sha256": "b4bd50ba347c4de4631aaa46cc9ef2e60e6de61984306ec7a0c531c741aa4e74",
+  "reason": "Review source-bound native opacity controls, corrected removed-reed protection, complete CPU master/timeline and unchanged audio. Preserve request recovery after an unacknowledged submission; no professional or universal qualification.",
+  "reviewed_at": "2026-10-30T09:22:36.624Z",
+  "catalog_sha256": "f551afd51c4490c34f0d622c2f09f476aa05c42543d90eba330e7c800aeff9cb",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -179,7 +179,7 @@
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
-      "sha256": "57285b1378ab19ddb00fce7da2ff41d855d085c1e717d4d72cddd744aa0992f2"
+      "sha256": "02cd33d5a966e648f6be341c35911ebf95915831dfe421f126c0899b29cabcc9"
     },
     {
       "path": "frontend/src/components/StudioTextAnimatorPanel.js",
@@ -191,7 +191,7 @@
     },
     {
       "path": "frontend/src/components/VideoEditor.js",
-      "sha256": "b24b63dd10d533b7d51e82c4f0847891a566b3639daf1fea55063b8a79b75dad"
+      "sha256": "42fc35124a42363f97e7d55b22c69601ae4da0c31f5f689fc2763f2d9e378916"
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
@@ -327,7 +327,7 @@
     },
     {
       "path": "frontend/src/components/studioSubjectVfxContract.js",
-      "sha256": "27dcb0d59db3261ee73c0a55f8639d5f0de8bd8da48d617a9838ac1104969c6a"
+      "sha256": "2714359836c692c8eecf879e914b62fc84a0ec475db9621ef034b095cc37d261"
     },
     {
       "path": "frontend/src/components/studioTextAnimator.js",
@@ -427,7 +427,7 @@
     },
     {
       "path": "python_media_worker/studio_vfx_plan.py",
-      "sha256": "4004ceda266c1033bc0ef47e0b50492b12f30b5c66619602ab850a4cecc64a04"
+      "sha256": "f0e1fa00ab9e5215cbc71085d8e939f0426eaf50d457967c85f8aed37c5502b6"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "14f22f77fa9a7ebd215ee6cb5edfd58be31f2fb7d52ea7c2ad24f33bc106795b"
+      "sha256": "916dcb8290b1e914cded3964d882a807f8aa6f766b9f96661b2a40b7c63eb830"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "f469a3fd513f9479255262394762ebb69e27fd086de9271c2288034add725d9c"
+      "sha256": "bfe4298594a631fa09110a6dbbb9e76239410bdd7cc76efdb608742f226db0fc"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

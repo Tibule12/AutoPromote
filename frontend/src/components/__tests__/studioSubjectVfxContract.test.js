@@ -257,3 +257,31 @@ test("canonical project stores source effects and durable recovery identities wi
     enabled: true,
   });
 });
+
+test("edge opacity remains editable after canonical recovery and invalidates old pixels",()=>{
+  const value=scene();value.effects=[{id:'opacity',type:'foreground_refine',start:0,end:6,
+    edge_radius:0,decontaminate:1,choke:0,feather:0,recover_box:[0,0,0,0],recover_hue:0,
+    hue_tolerance:0,saturation_min:1,detail_box:[0,0,0,0],dark_max:0,clear_box:[0,0,0,0],
+    reject_hue:0,reject_tolerance:0,reject_saturation:1,reject_value:1}];
+  const previous=reviewed(JSON.parse(JSON.stringify(value)));previous.preview.receipt={pixel_sha256:'old'};
+  value.effects[0].alpha_levels=[.02,.68];
+  value.effects[0].alpha_polygon=[[.4,.3],[.8,.3],[.8,.9],[.4,.9]];
+  expect(()=>validateSubjectVfxScene(value)).not.toThrow();
+  expect(resolveSubjectVfxProgrammePreview([{...previous,scene:value}],"source-a",3)).toBeNull();
+  const document=adaptStudioSnapshotToDocument({snapshot:{orderedClips:[{id:"source-a",start:0,end:12}],
+    timeline:[{id:"clip",sourceClipId:"source-a",startRequest:2,endRequest:8}],subjectVfxScenes:[reviewed(value)]},projectId:"opacity"});
+  expect(projectStudioLinkedTimingToSnapshot(document).subjectVfxScenes[0].scene.effects[0].alpha_levels).toEqual([.02,.68]);
+  expect(projectStudioLinkedTimingToSnapshot(document).subjectVfxScenes[0].scene.effects[0].alpha_polygon).toEqual(value.effects[0].alpha_polygon);
+  for(const polygon of [[[0,0],[.5,.5],[1,1]],[[0,0],[1.1,0],[1,1]],[[0,0],[1,0]]]) {
+    const bad=JSON.parse(JSON.stringify(value));bad.effects[0].alpha_polygon=polygon;
+    expect(()=>validateSubjectVfxScene(bad)).toThrow(/region/);
+  }
+  for(const levels of [[.4,.42],[.7,.3],[0],[0,1,1],[false,1],[0,NaN],[-.1,1],[0,1.1]]){
+    const bad=JSON.parse(JSON.stringify(value));bad.effects[0].alpha_levels=levels;
+    expect(()=>validateSubjectVfxScene(bad)).toThrow(/opacity/);
+  }
+  for(const flag of ['after_holdout','after_refine']){
+    const bad=JSON.parse(JSON.stringify(value));bad.effects[0].decontaminate=0;bad.effects[0][flag]=true;
+    expect(()=>validateSubjectVfxScene(bad)).toThrow(/opacity/);
+  }
+});

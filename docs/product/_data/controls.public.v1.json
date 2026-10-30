@@ -7017,6 +7017,114 @@
       ],
       "updated_at": "2026-10-28",
       "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_transparent",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Transparent edge level",
+      "status": "PARTIAL",
+      "meaning": "Sets the soft-matte value treated as transparent before foreground colour recovery. Raising it removes low-opacity residue in the selected region.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_opaque",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Opaque edge level",
+      "status": "PARTIAL",
+      "meaning": "Sets the soft-matte value treated as opaque before foreground colour recovery. Lower it carefully when clothing edges are too translucent; fractional coverage remains between the two levels.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_region",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge opacity region points",
+      "status": "PARTIAL",
+      "meaning": "Restricts edge-opacity levels to an authored source-frame polygon. Its boundary fades inward; alpha outside the region remains unchanged.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 64,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Use 3–64 normalized source-frame points forming a nonempty polygon. Clear the field to apply levels across the subject.",
+        "The polygon stays fixed in source coordinates and is not an automatically tracked selection. Explicit removed-background regions remain excluded.",
+        "Preview and full-film appearance still require moving review; the controls do not establish professional or universal replacement quality."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
     }
   ]
 }

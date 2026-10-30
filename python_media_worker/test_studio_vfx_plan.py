@@ -952,3 +952,55 @@ def test_final_edge_solve_preserves_narrow_medial_cores_and_separate_gaps(source
     assert result[30,25+rod_width//2]==255
     assert result[30,20]==0, "Narrow supports cannot be fused by refinement"
     assert np.all(result[30,40:50]==0), "Remove a detached ten-pixel room fragment"
+
+
+def opacity_effect(**change):
+    return {"id":"opacity", "type":"foreground_refine", "start":0, "end":1,
+        "choke":0, "feather":0, "edge_radius":0, "decontaminate":0,
+        "recover_box":[0,0,0,0], "recover_hue":0, "hue_tolerance":0, "saturation_min":1,
+        "detail_box":[0,0,0,0], "dark_max":0, "clear_box":[0,0,0,0],
+        "reject_hue":0, "reject_tolerance":0, "reject_saturation":1, "reject_value":1, **change}
+
+
+def test_opacity_levels_recover_known_soft_clothing_edge_without_bright_fringe(source_cache):
+    _,_,cache=source_cache
+    input_alpha=np.broadcast_to(np.clip((np.arange(128)-58)/12,0,1),(72,128)).copy()
+    true_alpha=np.clip((input_alpha-.02)/(.68-.02),0,1)
+    foreground=np.array([190,175,140]);old_background=np.array([135,120,90]);new_background=np.array([35,45,60])
+    photographed=np.rint(true_alpha[:,:,None]*foreground+(1-true_alpha[:,:,None])*old_background).astype(np.uint8)
+    initial=Image.fromarray(np.rint(input_alpha*255).astype(np.uint8));frame=Image.fromarray(photographed)
+    errors=[]
+    for levels in [None,[.02,.68]]:
+        effect=opacity_effect(decontaminate=1,**({"alpha_levels":levels}if levels else {}))
+        command=plan(cache);command['effects']=[effect];renderer=VfxFrameRenderer(command,cache)
+        rgb,alpha=renderer._prepare_foreground(frame,initial,[effect],128,72);a=np.asarray(alpha,dtype=float)/255
+        composite=np.asarray(rgb)*a[:,:,None]+new_background*(1-a[:,:,None])
+        expected=foreground*true_alpha[:,:,None]+new_background*(1-true_alpha[:,:,None])
+        band=(true_alpha>.05)&(true_alpha<.95);errors.append(np.abs(composite[band]-expected[band]).mean())
+        assert np.asarray(alpha)[:,0].max()==0 and np.asarray(alpha)[:,-1].min()==255
+        if levels:assert np.any((np.asarray(alpha)>0)&(np.asarray(alpha)<255)), 'Keep real fractional edge coverage'
+    assert errors[1]<errors[0]*.25, errors
+
+
+def test_opacity_levels_are_local_keep_thin_equipment_and_explicit_removals(source_cache):
+    _,_,cache=source_cache;values=np.zeros((72,128),np.uint8);values[:,65:]=255;values[:,60:65]=[30,70,110,155,210];values[10:65,15:17]=128
+    effect=opacity_effect(alpha_levels=[.02,.68],alpha_polygon=[[.4,.1],[.8,.1],[.8,.9],[.4,.9]],clear_paths=[[[.46,.4],[.53,.4],[.53,.6],[.46,.6]]])
+    command=plan(cache);command['effects']=[effect];renderer=VfxFrameRenderer(command,cache)
+    _,alpha=renderer._prepare_foreground(Image.new('RGB',(128,72),(90,80,70)),Image.fromarray(values),[effect],128,72);a=np.asarray(alpha)
+    assert np.array_equal(a[:,15:17],values[:,15:17]), 'Unselected thin rig must retain its soft coverage'
+    assert a[36,63]==0, 'An authored old-background exclusion cannot be resurrected'
+    assert a[20,63]>values[20,63] and 0<a[20,61]<255
+    assert np.array_equal(a[0],values[0]), 'Keep the region exterior exact'
+
+
+def test_identity_opacity_levels_keep_exact_legacy_pixels(source_cache):
+    _,_,cache=source_cache;values=np.broadcast_to(np.arange(128,dtype=np.uint8)*2,(72,128)).copy();frame=Image.new('RGB',(128,72),(121,104,92));results=[]
+    for change in [{},{'alpha_levels':[0,1]}]:
+        effect=opacity_effect(**change);command=plan(cache);command['effects']=[effect];r=VfxFrameRenderer(command,cache);rgb,alpha=r._prepare_foreground(frame,Image.fromarray(values),[effect],128,72);results.append((rgb.tobytes(),alpha.tobytes()))
+    assert results[0]==results[1]
+
+
+@pytest.mark.parametrize('levels',[[0],[0,1,1],[.4,.42],[.7,.3],[False,1],[0,float('nan')],[-.01,1],[0,1.01]])
+def test_invalid_opacity_levels_are_rejected(source_cache,levels):
+    _,_,cache=source_cache;command=plan(cache);command['effects']=[opacity_effect(alpha_levels=levels)]
+    with pytest.raises(ValueError):validate_plan(command,cache)

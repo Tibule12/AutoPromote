@@ -113,7 +113,7 @@ function validateSubjectVfxScene(scene) {
   for (const effect of scene.effects) {
     const fields = EFFECT_FIELDS[effect?.type] && [...EFFECT_FIELDS[effect.type],
       ...(effect.type === "background_replace" && Object.prototype.hasOwnProperty.call(effect, "reveal_seconds") ? ["reveal_seconds"] : []),
-      ...(effect.type === "foreground_refine" ? ["edge_radius", "decontaminate", "detail_polygon", "edge_polygon", "blue_spill", "clear_paths", "after_refine", "after_holdout", "reject_connected"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)) : [])];
+      ...(effect.type === "foreground_refine" ? ["alpha_levels", "alpha_polygon", "edge_radius", "decontaminate", "detail_polygon", "edge_polygon", "blue_spill", "clear_paths", "after_refine", "after_holdout", "reject_connected"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)) : [])];
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "after_refine")) fields.push("after_refine");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "paths")) fields.push("paths");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "color_paths")) fields.push("color_paths");
@@ -176,6 +176,13 @@ function validateSubjectVfxScene(scene) {
     if (effect.type === "tracked_callout" && typeof effect.avoid_subject !== "boolean")
       fail("Choose whether the callout should avoid the subject.");
     if (effect.type === "foreground_refine") {
+      if (Object.prototype.hasOwnProperty.call(effect, "alpha_levels")) {
+        const levels = effect.alpha_levels;
+        if (!Array.isArray(levels) || levels.length !== 2 || !levels.every(value => bounded(value, 0, 1)) || levels[1] < levels[0] + .05)
+          fail("Use two edge opacity levels from 0 to 1, with at least 0.05 between them.");
+        if (effect.after_holdout || effect.after_refine)
+          fail("Set edge opacity before post-matting colour or protected-object cleanup.");
+      }
       if (Object.prototype.hasOwnProperty.call(effect,"reject_connected") && typeof effect.reject_connected!=="boolean")
         fail("Use a boolean background-connected colour cleanup choice.");
       if (Object.prototype.hasOwnProperty.call(effect,"after_holdout") &&
@@ -185,7 +192,7 @@ function validateSubjectVfxScene(scene) {
       if (Object.prototype.hasOwnProperty.call(effect,"after_refine") &&
           (typeof effect.after_refine!=="boolean" || (effect.after_refine && (effect.edge_radius>0 || effect.decontaminate>0))))
         fail("Use a boolean post-matting colour cleanup without another alpha solver.");
-      for (const polygonKey of ["detail_polygon", "edge_polygon"]) {
+      for (const polygonKey of ["detail_polygon", "edge_polygon", "alpha_polygon"]) {
         if (!Object.prototype.hasOwnProperty.call(effect, polygonKey)) continue;
         const points = effect[polygonKey];
         if (!Array.isArray(points) || points.length < 3 || points.length > 64 ||
