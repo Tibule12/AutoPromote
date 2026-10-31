@@ -15695,7 +15695,11 @@
       "landscapeSha256": "cf485ef176e4f4b6499feebaba96c11a14341df42d21df3b920adf7950193822",
       "canonicalProjects": 2,
       "completeNativePlaybacks": 2,
-      "sourceUnchanged": true
+      "sourceUnchanged": true,
+      "studioRecordingIncludesLiveMonitorAudio": true,
+      "recordingSoundProof": "reports/unmuted-comeback-20261031/review/studio-sound-verification.json",
+      "recordingSoundSha256": "35d69accd2a2ccde6057d0782cfaac075235aef979821332db5b84a742b7cf4c",
+      "originalSilentRecordingPreserved": true
     }
   }
 }

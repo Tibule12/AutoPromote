@@ -17,15 +17,22 @@ Two initial visual passes are preserved under `private-local/portrait-v1`, `land
 - `review/Unmuted - We Are Back - portrait.mp4`: 720×1280, 30fps, 824 frames.
 - `review/Unmuted - We Are Back - landscape.mp4`: 1280×720, 30fps, 824 frames.
 - `review/Raw vs Finished Trailer.mp4`: identical editorial source selection beside the finished landscape; processed original sound.
-- `review/Authoring and Full Studio Playback.mp4`: actual muted headless recording of authoring, export and complete playback for both formats.
+- `review/Studio Playback with Sound.mp4`: replacement real Studio playback recording with captured live monitor audio for both formats.
+- `review/Authoring and Full Studio Playback.mp4`: initial silent authoring/export recording, preserved as history.
 - `review/portrait-editable-project.json`, `landscape-editable-project.json`: native saved canonical state. These reference the verified local source catalogue; they are not packaged portable-media backups.
 - `review/native-verification.json`, `media-proof.json`, `audio-measurements.json`, `portrait-native-render.json`, `landscape-native-render.json`: actual browser, decoded-media, timing and production-worker evidence.
 - `checks/`: twelve Node cases, fifty-two canonical/compiler/sequence cases, four selected mounted-editor regressions, isolated build and generated-kernel checks. The full editor/account suite was not rerun.
 
-Both movies fully decode. Compared with the original selected audio including the L-cut, the best offset is -16 samples at 48kHz (-0.333ms); zero-offset waveform correlation is 0.6594 after voice repair. These measurements do not claim fresh human listening, perceptual lip-sync acceptance or creative approval. The Studio recording is muted; the separate movies preserve sound.
+Both movies fully decode. Compared with the original selected audio including the L-cut, the best offset is -16 samples at 48kHz (-0.333ms); zero-offset waveform correlation is 0.6594 after voice repair. These measurements do not claim fresh human listening, perceptual lip-sync acceptance or creative approval. The initial authoring recording omitted audio and is retained as the silent original. The replacement Studio playback recording captures the actual live monitor audio for both formats.
 
 The source transcript was generated locally from existing cached speech models. Caption phrases were constrained to the selected English speech; uncertain personal/segment names and the poorly transcribed multilingual guest response were excluded. No guest speech or missing material was invented. Caption wording still benefits from the owner's listening review. Portrait framing is authored, not a claim of unrestricted automatic speaker tracking. The pre-existing source picture-in-picture remains in landscape; portrait crops it out.
 
 ## Continue
 
 Retain both saved projects and source hashes. Refine captions/timing from owner feedback, and use substantive interview material from the longer recording for a separate highlight edit. Shared Studio S02 picture/audio/colour/latency, S04 creative depth and S03 ownership remain open. Full customer/cloud qualification, portable local media and broader authoring parity are unchanged. Formal capability/readiness states are not promoted by these private films.
+
+## Recording sound correction
+
+The owner correctly reported that the delivered screen recording had no sound. Its screen-capture stream and final encode contained video only; the separate trailers already contained audio. The replacement records the actual Studio UI using timestamped CDP frames and captures the playing monitor’s live `captureStream()` audio through a Web Audio MediaStreamDestination and MediaRecorder. Browser/device output remains muted; no microphone, system-wide sound or external soundtrack file is used. Real captures cover the complete portrait and landscape playbacks, reuse the exact completed exports, and assert no external requests or browser errors.
+
+`review/studio-sound-capture.json` retains screen/audio clock origins and actual media playheads; `review/studio-sound-verification.json` verifies the included stereo 48kHz AAC track and matching speech. Correlation with the exact monitor movies is 0.9973 / 0.9836 after Opus/AAC encoding. Measured audio/video clock differences are 13.1ms / 1.8ms. Both are below one recorded video frame. The delivered replacement lasts 58.06 seconds, includes both complete playbacks, fully decodes and is copied with a matching hash to Videos. The silent original is retained as file 05; original movies and projects are unchanged. This is captured playback audio, not a substituted soundtrack or a new render. Initial capture timing/EOF observer failures remain in the private capture folders; the final capture succeeds. No creative/listening or general authoring-parity promotion is claimed.

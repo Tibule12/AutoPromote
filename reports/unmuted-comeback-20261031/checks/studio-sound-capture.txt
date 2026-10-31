@@ -1,0 +1,3 @@
+portrait actual Studio picture/audio captured 29.02 seconds 424 frames
+landscape actual Studio picture/audio captured 28.99 seconds 383 frames
+Actual Studio recording now includes captured live monitor audio /home/tibule12/Projects/AutoPromte/AutoPromote-cinematic-evidence-20261031/reports/unmuted-comeback-20261031/review/Studio Playback with Sound.mp4

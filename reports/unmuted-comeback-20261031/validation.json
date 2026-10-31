@@ -230,6 +230,30 @@
     "reports/unmuted-comeback-20261031/checks/studio-build.txt": {
       "bytes": 465,
       "sha256": "ab21481cd9614f2f15cd2b884068c04e066f932d8a89c7cfd70cbc793d5e38bc"
+    },
+    "reports/unmuted-comeback-20261031/review/Studio Playback with Sound.mp4": {
+      "bytes": 12102366,
+      "sha256": "35d69accd2a2ccde6057d0782cfaac075235aef979821332db5b84a742b7cf4c"
+    },
+    "reports/unmuted-comeback-20261031/review/studio-sound-capture.json": {
+      "bytes": 47885,
+      "sha256": "dcdc411fd0dc68ece693f316b645435f65d847f978954c704c0eb0b9261d44b4"
+    },
+    "reports/unmuted-comeback-20261031/review/studio-sound-verification.json": {
+      "bytes": 1346,
+      "sha256": "5d115f6d9657f15a2cefebf14a1b3781c4f83288c529cca3cc048e5c0bc2453e"
+    },
+    "reports/unmuted-comeback-20261031/review/studio-with-sound-frame.png": {
+      "bytes": 1365922,
+      "sha256": "265fe57eb1105d33fb48384c1f1de622f40d147bde48a0157ce18185972ec736"
+    },
+    "reports/unmuted-comeback-20261031/checks/studio-sound-capture.txt": {
+      "bytes": 355,
+      "sha256": "0a4ffa8ebd69be55783f8cfe8502fec0f3f2ee3be04e11b6bade1fc4c2f2a239"
+    },
+    "reports/unmuted-comeback-20261031/checks/studio-sound-verification.txt": {
+      "bytes": 1347,
+      "sha256": "f12aff78f819bcf8bd52d4c1b14b8d18d5dc5e728020930fa83e2dcaf5d29ce8"
     }
   },
   "deliveryFiles": {
@@ -245,7 +269,11 @@
       "bytes": 6223859,
       "sha256": "7af4c0979ca6409ca9ee527055d15a701538629aae8535de11df10bbd8d2c20f"
     },
-    "04 - Authoring and Full Studio Playback.mp4": {
+    "04 - Studio Playback with Sound.mp4": {
+      "bytes": 12102366,
+      "sha256": "35d69accd2a2ccde6057d0782cfaac075235aef979821332db5b84a742b7cf4c"
+    },
+    "05 - Original Silent Authoring Recording.mp4": {
       "bytes": 33675759,
       "sha256": "06c923a4f42db79a9cd1ee2aaec48d2d07d5adb501c233084966fbafc7df9575"
     },
@@ -258,8 +286,64 @@
       "sha256": "d80a74b187d0b02acf550bfa62c47e41880dbc343b897270b89c7e1c8e6c8663"
     },
     "README.txt": {
-      "bytes": 824,
-      "sha256": "b9e01a335c79d937d62c225c433e48b402cac16e8515aefafd7ac047b6cb3d0b"
+      "bytes": 898,
+      "sha256": "59e378c9c3a01d958cb3dd419ad76f97e5bba11848995379a769a3c05c12c168"
     }
+  },
+  "studioRecordingSoundCorrection": {
+    "reason": "Initial screen capture/encode omitted audio",
+    "output": "/home/tibule12/Videos/Unmuted Podcast - Comeback Trailer - 20261031/04 - Studio Playback with Sound.mp4",
+    "sha256": "35d69accd2a2ccde6057d0782cfaac075235aef979821332db5b84a742b7cf4c",
+    "proof": {
+      "actualBrowserCapture": true,
+      "audioIncluded": true,
+      "parts": [
+        {
+          "format": "portrait",
+          "audioStreamCapturedFromActualMonitor": true,
+          "captureRms": 0.1071553452274183,
+          "alignedSpeechCorrelation": 0.9973179933877157,
+          "captureAudioLeadSamplesAt16kHz": 7848,
+          "clockDifferenceMilliseconds": 13.138532638549805,
+          "completeMonitorPlayback": true,
+          "speakersMuted": true,
+          "externalSoundtrackSubstituted": false
+        },
+        {
+          "format": "landscape",
+          "audioStreamCapturedFromActualMonitor": true,
+          "captureRms": 0.10723452453444969,
+          "alignedSpeechCorrelation": 0.9836176236558178,
+          "captureAudioLeadSamplesAt16kHz": 7677,
+          "clockDifferenceMilliseconds": 1.8296241760253906,
+          "completeMonitorPlayback": true,
+          "speakersMuted": true,
+          "externalSoundtrackSubstituted": false
+        }
+      ],
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "58.062663"
+        }
+      },
+      "freshHumanListening": false,
+      "note": "The browser/device stays muted; the recording captures the monitor's live decoded audio stream."
+    },
+    "source": "Actual playing Studio monitor captureStream audio; no substituted soundtrack",
+    "preservedSilentOriginal": "/home/tibule12/Videos/Unmuted Podcast - Comeback Trailer - 20261031/05 - Original Silent Authoring Recording.mp4",
+    "newRenderJobs": 0
   }
 }
