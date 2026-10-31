@@ -1,0 +1,87 @@
+{
+  "base": "3911af6c59989b92cd97036715841fe22f290456",
+  "protected": [
+    {
+      "path": "firestore.rules",
+      "unchanged": true,
+      "sha256": "25436b8888989a527e0d9138ce31cf53ef1f300c95618e89166377d1e15cc996"
+    },
+    {
+      "path": "storage.rules",
+      "unchanged": true,
+      "sha256": "b3ebe33fd6a4ec15263b24040c4ff75cf7cfdfb9fb47eeaad19dcfbf208a0679"
+    },
+    {
+      "path": "src/authMiddleware.js",
+      "unchanged": true,
+      "sha256": "03044686cad64b539c5755cc961bde1a8271b828606723f5add7b33ba43f77c1"
+    },
+    {
+      "path": "src/utils/authAuthority.js",
+      "unchanged": true,
+      "sha256": "a2e30a561463eb8923e9b353033ceea930869b9034d1ed04433932b79022b910"
+    },
+    {
+      "path": "src/config/trustedAdminPolicy.json",
+      "unchanged": true,
+      "sha256": "64701a5ea95f7fbf69ddd5e442751e84f9e19448624673ddcdbfab46b0ade4ac"
+    },
+    {
+      "path": "src/paymentsRoutes.js",
+      "unchanged": true,
+      "sha256": "189c123bc5c5ffce982375ef9183d7974f4c3862c2341f88cf5c0d85a63d5cd2"
+    },
+    {
+      "path": "src/routes/paypalWebhookRoutes.js",
+      "unchanged": true,
+      "sha256": "1fae38e9f46a619fe008780855dddec08e7821194c83a7ef3676d4210e998319"
+    },
+    {
+      "path": "src/mediaRoutes.js",
+      "unchanged": true,
+      "sha256": "494efc3d9f9a02ed4723742f7e738f0ecdaae588b8ea32a4de22b8c57c792b4e"
+    },
+    {
+      "path": "src/services/promotionTaskQueue.js",
+      "unchanged": true,
+      "sha256": "7ec14333169bbcc30fd84499b7032c63c7f69c2f7b6171454ebfee8858d21cc9"
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "unchanged": true,
+      "sha256": "b75be5ba470384e083a0e7659c4c10695b0ed8f239506ea58257f3b18f096406"
+    },
+    {
+      "path": "frontend/src/components/studioRenderCompiler.js",
+      "unchanged": true,
+      "sha256": "5dc0df1fe58e35777e76da4050d603258b4ce7e8f38288cc343edeb48ea18e1a"
+    },
+    {
+      "path": "frontend/src/components/studioProjectDocument.js",
+      "unchanged": true,
+      "sha256": "b12b4d0dee23528cdcb7a2c232911d861f353b76dee744eb0955faf9cd5593f7"
+    },
+    {
+      "path": "python_media_worker/studio_composition.py",
+      "unchanged": true,
+      "sha256": "5e135b6feecc7988ecd0db87e736c07f488a8abcc1e476a266ad4831a4b66d7a"
+    }
+  ],
+  "financialFunctionComparisons": [
+    {
+      "path": "src/services/billingService.js",
+      "unchangedNamedFunctions": 13,
+      "changedPresentationFunctions": []
+    },
+    {
+      "path": "src/routes/paypalSubscriptionRoutes.js",
+      "unchangedNamedFunctions": 17,
+      "changedPresentationFunctions": ["buildSubscriptionStatusPayload"]
+    },
+    {
+      "path": "frontend/src/components/PayPalSubscriptionPanel.js",
+      "unchangedNamedFunctions": 2,
+      "changedPresentationFunctions": []
+    }
+  ]
+}

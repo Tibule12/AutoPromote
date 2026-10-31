@@ -633,7 +633,7 @@ const SecurityPanel = ({ user }) => {
         <div className="privacy-options">
           <div className="privacy-option">
             <div className="privacy-option-info">
-              <strong>Analytics & Performance</strong>
+              <strong>Anonymous usage diagnostics</strong>
               <p>Help us improve by sharing anonymous usage data</p>
             </div>
             <label className="toggle-switch">

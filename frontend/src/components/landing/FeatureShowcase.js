@@ -30,20 +30,6 @@ export const PRODUCT_SCREENS = [
     image: "/screenshots/dashboard/viral-clip-studio.jpg",
   },
   {
-    id: "smart-promo",
-    label: "Smart Promo",
-    eyebrow: "Promotion studio",
-    title: "Build a polished master, social previews, and promotional visuals.",
-    image: "/screenshots/dashboard/smart-promo.jpg",
-  },
-  {
-    id: "idea-to-video",
-    label: "Idea-to-Video",
-    eyebrow: "Creative studio",
-    title: "Turn a written brief into a structured video plan.",
-    image: "/screenshots/dashboard/idea-to-video.jpg",
-  },
-  {
     id: "publisher",
     label: "Publisher",
     eyebrow: "Cross-platform publishing",
@@ -56,13 +42,6 @@ export const PRODUCT_SCREENS = [
     eyebrow: "Publishing control",
     title: "Know what is scheduled, paused, or ready next.",
     image: "/screenshots/dashboard/queue.jpg",
-  },
-  {
-    id: "analytics",
-    label: "Analytics",
-    eyebrow: "Performance",
-    title: "Track views, clicks, and channel performance clearly.",
-    image: "/screenshots/dashboard/analytics.jpg",
   },
   {
     id: "connections",

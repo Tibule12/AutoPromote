@@ -69,6 +69,9 @@ async function main() {
     }
     // Copy src directory recursively
     if (fs.existsSync(sourceDir)) {
+      // This is generated package source, never user data. A fresh tree ensures
+      // deleted routes/services cannot survive a previous packaging run.
+      await fsp.rm(path.join(destPkgDir, "src"), { recursive: true, force: true });
       await copyRecursive(sourceDir, path.join(destPkgDir, "src"), repoRoot);
       console.log("[copy-server] Copied server src into functions/_server");
     } else {

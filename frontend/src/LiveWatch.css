@@ -430,12 +430,12 @@
   }
 }
 
-/* Five stable destinations fit every supported phone width. Logout remains in the
+/* Four stable destinations fit every supported phone width. Logout remains in the
    scrollable dashboard menu so it can never collide with the Create action. */
 @media (max-width: 768px) {
   .mobile-bottomnav {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     width: 100%;
     min-height: 56px;
     height: auto;

@@ -5,7 +5,7 @@ import AutoPromoteLogo from "../AutoPromoteLogo";
 export const LANDING_SECTIONS = [
   ["The Workspace", "workspace"],
   ["Features", "features"],
-  ["Product Tour", "workflow"],
+  ["Workflow", "workflow"],
 ];
 
 // HashRouter owns URL hashes. Section buttons scroll without replacing the route.

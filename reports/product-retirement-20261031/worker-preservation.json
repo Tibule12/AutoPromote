@@ -1,0 +1,26 @@
+{
+  "unchangedTopLevelFunctionsAndClasses": 513,
+  "removedStandaloneOnly": [
+    "IdeaScene",
+    "RenderIdeaRequest",
+    "allocate_idea_scene_durations",
+    "brighten_idea_frame",
+    "build_idea_atempo_filter",
+    "build_idea_caption_text",
+    "clean_idea_tts_text",
+    "cleanup_file",
+    "create_idea_caption_overlay",
+    "create_idea_visual_fallback",
+    "fit_idea_audio_to_duration",
+    "get_idea_clip_luma",
+    "get_idea_video_font",
+    "normalize_idea_target_duration",
+    "normalize_idea_voice_rate",
+    "render_idea_video",
+    "synthesize_idea_tts",
+    "wrap_idea_caption"
+  ],
+  "changedSharedAdmission": ["auto_generate_clips"],
+  "addedRetiredResponse": ["retired_idea_video"],
+  "canonicalRenderAnalysisAndCamCombinerFunctionsUnchanged": true
+}

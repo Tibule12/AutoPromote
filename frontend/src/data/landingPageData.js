@@ -8,14 +8,6 @@ export const featureCards = [
     subtitle: "Combine multi-camera recordings with guided and automatic speaker cuts.",
   },
   {
-    title: "Idea-to-Video",
-    subtitle: "Draft scenes, voiceover, visuals, and captions, then render a video using credits.",
-  },
-  {
-    title: "Smart Promo",
-    subtitle: "Create promotional clip plans, captions, hooks, and copy for eligible videos.",
-  },
-  {
     title: "Cross-Platform Publishing",
     subtitle: "Upload once and publish to supported connected platforms.",
   },
@@ -35,12 +27,12 @@ export const workflowSteps = [
     text: "Publish now or queue content for supported connected platforms.",
   },
   {
-    title: "Track Results",
-    text: "Track views, clicks, CTR, and available platform breakdowns.",
+    title: "Review Delivery",
+    text: "Inspect scheduled posts, delivery status and destination receipts.",
   },
   {
     title: "Learn & Improve",
-    text: "Compare results and optionally rotate an alternate title or hook.",
+    text: "Review the finished edit before preparing the next release.",
   },
 ];
 
@@ -65,10 +57,6 @@ export const exampleContent = [
     text: "Analyze an eligible uploaded video and choose the moments you want to use.",
   },
   {
-    tag: "Idea to video",
-    text: "Draft scenes and captions, review them, and spend credits only when you render.",
-  },
-  {
     tag: "Platform publishing",
     text: "Use one source asset with destination-specific copy and publishing settings.",
   },
@@ -86,7 +74,7 @@ export const pricingCards = [
       "3 uploads per month",
       "1 connected platform",
       "1 workspace seat",
-      "Basic analytics",
+      "Self-serve support",
     ],
   },
   {
@@ -115,7 +103,7 @@ export const pricingCards = [
       "80 uploads per month",
       "6 connected platforms",
       "3 team seats",
-      "Recovery Lab access",
+      "Priority support",
     ],
   },
   {
@@ -129,7 +117,7 @@ export const pricingCards = [
       "240 uploads per month",
       "6 connected platforms",
       "10 team seats",
-      "Export-ready analytics",
+      "Priority support",
     ],
   },
 ];

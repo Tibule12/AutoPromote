@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.45",
+  "knowledge_version": "1.0.46",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -6723,76 +6723,6 @@
         "Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop."
       ],
       "updated_at": "2026-10-18",
-      "product_version": "1.2.0"
-    },
-    {
-      "control_id": "publishing.analytics.sync_latest",
-      "feature_ids": [
-        "publishing.analytics"
-      ],
-      "label": "Sync latest platform statistics",
-      "status": "PARTIAL",
-      "meaning": "Refreshes up to six newest owned published posts in the selected release or account scope, one per destination. Selection uses publication time independently of the performance-ranked display.",
-      "constraints": {
-        "type": "array",
-        "minimum": 1,
-        "maximum": 6,
-        "default": [],
-        "default_known": true,
-        "values": []
-      },
-      "unit": "none",
-      "keyframeable": "UNSUPPORTED",
-      "preview_support": "SUPPORTED",
-      "render_support": "UNSUPPORTED",
-      "director_edit": "UNSUPPORTED",
-      "applicable_media": [
-        "video"
-      ],
-      "dependencies": [
-        "publishing.analytics",
-        "system.account"
-      ],
-      "limitations": [
-        "Five-minute per-post cooldown; only owned successful non-simulated posts qualify.",
-        "Missing permissions or unsupported platform metrics remain unavailable. The action does not publish content or promise reach."
-      ],
-      "updated_at": "2026-10-21",
-      "product_version": "1.2.0"
-    },
-    {
-      "control_id": "publishing.analytics.release",
-      "feature_ids": [
-        "publishing.analytics"
-      ],
-      "label": "Published release",
-      "status": "PARTIAL",
-      "meaning": "Limits collected statistics and refresh targets to one owned published release within the selected date range.",
-      "constraints": {
-        "type": "string",
-        "default": "",
-        "default_known": true,
-        "values": [],
-        "minimum": null,
-        "maximum": null
-      },
-      "unit": "none",
-      "keyframeable": "UNSUPPORTED",
-      "preview_support": "SUPPORTED",
-      "render_support": "UNSUPPORTED",
-      "director_edit": "UNSUPPORTED",
-      "applicable_media": [
-        "video"
-      ],
-      "dependencies": [
-        "publishing.analytics",
-        "system.account"
-      ],
-      "limitations": [
-        "Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.",
-        "Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach."
-      ],
-      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {

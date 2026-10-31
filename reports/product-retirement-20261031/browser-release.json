@@ -1,0 +1,32 @@
+{
+  "checks": [
+    "normal sign-in retains retired-link Studio destination",
+    "native dashboard opens Overview",
+    "native dashboard opens Cam Combiner",
+    "native dashboard opens Find Viral Clips",
+    "native dashboard opens Viral Clip Studio",
+    "native dashboard opens Publisher",
+    "native dashboard opens Queue",
+    "native dashboard opens Billing",
+    "old /analytics redirects to active workspace",
+    "old /metrics redirects to active workspace",
+    "old /smart-promo redirects to active workspace",
+    "old /smart_promo redirects to active workspace",
+    "old /smartpromo redirects to active workspace",
+    "old /idea-to-video redirects to active workspace",
+    "old /idea_to_video redirects to active workspace",
+    "old /idea-video redirects to active workspace",
+    "old /idea_video redirects to active workspace",
+    "mobile navigation contains four active destinations",
+    "public / contains no retired product offer",
+    "public /#/features contains no retired product offer",
+    "public /#/pricing contains no retired product offer",
+    "public /#/help contains no retired product offer",
+    "registration copy contains no retired offers"
+  ],
+  "errors": [],
+  "network": "loopback only",
+  "actualApp": true,
+  "syntheticAuth": false,
+  "productionWrites": 0
+}

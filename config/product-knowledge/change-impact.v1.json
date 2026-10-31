@@ -188,20 +188,6 @@
       "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
     },
     {
-      "feature_id": "generation.idea_to_video",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "src/productAssistance/index.js",
-        "src/routes/productAssistanceRoutes.js",
-        "frontend/src/components/ProductAssistance.js"
-      ],
-      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
-    },
-    {
       "feature_id": "studio.templates",
       "documentation_impact": [
         "FEATURE"
@@ -971,28 +957,6 @@
         "reports/studio-restaurant-film-20261020/README.md"
       ],
       "reason": "Bound HTML music-fallback volume to its real browser range for valid raised automation, preventing the observed IndexSizeError while preserving full decoded-buffer GainNode gain. Native 190-percent edit/playback/cold recovery and thirteen focused audio cases pass; whole preview audio parity and readiness remain separate."
-    },
-    {
-      "feature_id": "publishing.analytics",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "DEPENDENCIES"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "src/analyticsRoutes.js",
-        "src/services/platformMetricValues.js",
-        "src/services/ownedPlatformMetricsRefresh.js",
-        "src/services/platformStatsPoller.js",
-        "src/services/platformPostsService.js",
-        "src/services/platformMetricsService.js",
-        "src/services/facebookService.js",
-        "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
-        "src/services/platformMetricsSchedule.js"
-      ],
-      "reason": "Keep unavailable counters distinct from measured zero; separate views/impressions; initialize collection; retain quiet-post 48/72-hour windows; provide a bounded owned refresh and published-release scope. Twenty-one backend cases and four UI cases pass, alongside actual six-destination metrics collection. Only three destinations supply partial counters. A native observer preflight also verifies the visible release-scoped post count. Ended observations leave the query so they cannot crowd newer posts out of a batch. No full-provider, growth or production deployment claim."
     },
     {
       "feature_id": "creative.showroom",

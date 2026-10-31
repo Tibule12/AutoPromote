@@ -296,6 +296,12 @@ app.get("/api/credit-pilot/object/:id", async (req, res, next) => {
   }
 });
 app.use("/api/auth", require("../../src/authRoutes"));
+app.use("/api/product-assistance", require("../../src/routes/productAssistanceRoutes")());
+app.use("/api/paypal-subscriptions", (req, res, next) => {
+  if (req.method === "GET" && req.path === "/plans")
+    return require("../../src/routes/paypalSubscriptionRoutes")(req, res, next);
+  return next();
+});
 const auth = require("../../src/authMiddleware");
 app.use("/api", auth, (req, res, next) => {
   if (!config.cohort.includes(req.user.uid)) return res.sendStatus(403);
@@ -374,6 +380,13 @@ app.use(
   require("../../src/mediaRoutes")
 );
 app.use("/api/clips", require("../../src/routes/clipRoutes"));
+app.use("/api/ai-video", require("../../src/retiredFeatureResponse"));
+app.use("/api/analytics", require("../../src/analyticsRoutes"));
+// Actual plan/usage presentation against this emulator, with no payment writes.
+app.use("/api/paypal-subscriptions", (req, res, next) => {
+  if (req.method !== "GET") return res.status(405).json({ error: "DEMO_PAYMENTS_DISABLED" });
+  return next();
+}, require("../../src/routes/paypalSubscriptionRoutes"));
 app.use("/api/promotion-tasks", require("../../src/routes/promotionTaskRoutes"));
 app.use("/api", (_req, res) =>
   res.status(404).json({ error: "Not available in isolated demonstration" })

@@ -27,12 +27,8 @@ describe("company footer pages", () => {
     );
   });
 
-  test("analytics and cookies provide labelled reference tables without fabricated customer data", () => {
-    const metrics = render(<InformationPage page="metrics" />);
-    expect(screen.getByRole("columnheader", { name: "Signal" })).toBeInTheDocument();
-    expect(screen.getByRole("rowheader", { name: "Unavailable data" })).toBeInTheDocument();
-    expect(screen.getByText(/rather than as a measured zero/)).toBeInTheDocument();
-    metrics.unmount();
+  test("cookies explain retained project storage", () => {
+
     render(<InformationPage page="cookies" />);
     expect(screen.getByRole("rowheader", { name: "Studio projects" })).toBeInTheDocument();
     expect(

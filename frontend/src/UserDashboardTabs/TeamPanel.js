@@ -307,7 +307,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
           <span>Team workspace</span>
           <h2>Create a shared AutoPromote workspace</h2>
           <p>
-            Share content, publishing queues, analytics, and connected destinations with role-based
+            Share content, publishing queues, delivery status, and connected destinations with role-based
             access.
           </p>
         </div>
@@ -552,7 +552,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
             ["Owner", "Full workspace, billing, security, and publishing access."],
             ["Admin", "Manage members, content, queues, and connections."],
             ["Editor", "Create, edit, review, and publish content."],
-            ["Viewer", "View content, queues, and analytics without editing."],
+            ["Viewer", "View content, queues, and delivery status without editing."],
           ].map(([role, copy], index) => (
             <article key={role}>
               <span>{index + 1}</span>

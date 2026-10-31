@@ -19,7 +19,14 @@ directory = Path(record["directory"])
 started = time.monotonic()
 if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
     raise RuntimeError("Explicit demo runtime required")
-resource.setrlimit(resource.RLIMIT_CPU, (120, 120))
+cpu_seconds = record.get(
+    "localCpuSeconds", 240 if record["expected"]["endpoint"] == "/analyze-clips" else 120
+)
+if not isinstance(cpu_seconds, int) or not 30 <= cpu_seconds <= 300:
+    raise RuntimeError("Invalid local CPU ceiling")
+if record["expected"]["endpoint"] != "/analyze-clips" and cpu_seconds != 120:
+    raise RuntimeError("Render CPU ceiling must remain unchanged")
+resource.setrlimit(resource.RLIMIT_CPU, (cpu_seconds, cpu_seconds))
 resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024**2, 20 * 1024**2))
 connect = socket.socket.connect
 

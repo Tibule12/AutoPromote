@@ -11,7 +11,19 @@ const {
   workerRequestDigest,
 } = require("../../src/services/unifiedCredits/workerVerification");
 const { assertSandbox } = require("../../src/services/unifiedCredits/runtime");
-async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) {
+async function createLocalWorkerProvider({
+  directory,
+  python,
+  env,
+  apiOrigin,
+  analysisTimeoutMs = 120000,
+}) {
+  if (
+    !Number.isSafeInteger(analysisTimeoutMs) ||
+    analysisTimeoutMs < 30000 ||
+    analysisTimeoutMs > 300000
+  )
+    throw new Error("LOCAL_ANALYSIS_DEADLINE_INVALID");
   assertSandbox(env);
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const executionRoot = fs.realpathSync(directory);
@@ -178,7 +190,14 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
         const dir = folder(expected.executionId);
         fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
         const requestFile = path.join(dir, "request.json");
-        const record = { expected, body: req.body, apiOrigin, directory: dir };
+        const record = {
+          expected,
+          body: req.body,
+          apiOrigin,
+          directory: dir,
+          localCpuSeconds:
+            expected.endpoint === "/analyze-clips" ? Math.ceil(analysisTimeoutMs / 1000) : 120,
+        };
         if (
           fs.existsSync(requestFile) &&
           JSON.parse(fs.readFileSync(requestFile)).expected.requestDigest !== expected.requestDigest
@@ -225,11 +244,14 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
             JSON.stringify({ pid: child.pid, startedAt }),
             { mode: 0o600 }
           );
-          const timeout = setTimeout(() => {
-            try {
-              process.kill(-child.pid, "SIGKILL");
-            } catch {}
-          }, 120000);
+          const timeout = setTimeout(
+            () => {
+              try {
+                process.kill(-child.pid, "SIGKILL");
+              } catch {}
+            },
+            expected.endpoint === "/analyze-clips" ? analysisTimeoutMs : 120000
+          );
           const promise = new Promise(resolve => {
             child.once("error", () => {
               clearTimeout(timeout);

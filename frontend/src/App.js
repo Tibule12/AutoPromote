@@ -1,7 +1,8 @@
+import { requestedWorkspace } from "./utils/workspaceDestination";
 // Trigger CI/CD: minor change for deployment
 /* eslint-disable no-console, no-unused-vars */
 import React, { useState, useEffect, lazy, Suspense } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router";
 import DojoPage from "./DojoPage";
 import "./App.css";
 import { auth, db } from "./firebaseClient";
@@ -72,7 +73,6 @@ const Support = lazy(() => import("./Support"));
 const Accessibility = lazy(() => import("./Accessibility"));
 const Features = lazy(() => import("./Features"));
 const Integrations = lazy(() => import("./Integrations"));
-const Metrics = lazy(() => import("./Metrics"));
 const Changelog = lazy(() => import("./Changelog"));
 // CommunityPage removed
 const HelpCenter = lazy(() => import("./HelpCenter"));
@@ -245,7 +245,7 @@ function App() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [pendingLogin, setPendingLogin] = useState(null); // { userData, token }
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const showAdminDashboard = shouldShowAdminDashboard(user, pathname);
 
   // Lock page scrolling only while an auth/verification modal is actually
@@ -852,7 +852,8 @@ function App() {
         navigate("/admin-dashboard");
       } else {
         await fetchUserContent(userData.token);
-        navigate("/");
+        const destination = requestedWorkspace(search);
+        navigate(destination ? `/?tab=${destination}` : "/");
       }
     } catch (error) {
       handleLogout();
@@ -1629,7 +1630,12 @@ function App() {
 
           <Route path="/features" element={<Features />} />
           <Route path="/integrations" element={<Integrations />} />
-          <Route path="/metrics" element={<Metrics />} />
+          {["analytics", "metrics"].map(path => (
+            <Route key={path} path={`/${path}/*`} element={<Navigate replace to="/?tab=schedules" />} />
+          ))}
+          {["smart-promo", "smart_promo", "smartpromo", "idea-to-video", "idea_to_video", "idea-video", "idea_video"].map(path => (
+            <Route key={path} path={`/${path}/*`} element={<Navigate replace to="/?tab=viral_clip_studio" />} />
+          ))}
           <Route path="/changelog" element={<Changelog />} />
           {/* CommunityPage removed */}
           <Route path="/help" element={<HelpCenter />} />

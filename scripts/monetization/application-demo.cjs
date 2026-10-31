@@ -200,6 +200,9 @@ async function main() {
         process.env.CREDITS_PYTHON_BIN || path.resolve(root, "../AutoPromote/.venv/bin/python"),
       env,
       apiOrigin: origin,
+      // Includes cold local model import/loading. Production Cloud Run limits
+      // and the existing render deadline are unaffected; no paid execution.
+      analysisTimeoutMs: 240000,
     });
     env.MEDIA_WORKER_URL = env.LOCAL_MEDIA_WORKER_URL = worker.origin;
     const policy = {
@@ -266,11 +269,19 @@ async function main() {
     const buildLog = fs.openSync(path.join(directory, "build.log"), "a", 0o600);
     const builder = reuse
       ? null
-      : spawn(process.execPath, [require.resolve("react-scripts/scripts/build", { paths: [path.join(root, "frontend")] })], {
-          env: buildEnv,
-          cwd: path.join(root, "frontend"),
-          stdio: ["ignore", buildLog, buildLog],
-        });
+      : spawn(
+          process.execPath,
+          [
+            require.resolve("react-scripts/scripts/build", {
+              paths: [path.join(root, "frontend")],
+            }),
+          ],
+          {
+            env: buildEnv,
+            cwd: path.join(root, "frontend"),
+            stdio: ["ignore", buildLog, buildLog],
+          }
+        );
     const [exit] = builder ? await once(builder, "exit") : [0];
     fs.closeSync(buildLog);
     if (exit !== 0)

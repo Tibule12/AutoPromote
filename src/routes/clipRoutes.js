@@ -1,74 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const axios = require("axios");
+const retiredFeatureResponse = require("../retiredFeatureResponse");
+router.post("/promo-summary", retiredFeatureResponse);
+router.post("/promo-summary/estimate", retiredFeatureResponse);
+
 const videoClippingService = require("../services/videoClippingService");
 const authMiddleware = require("../authMiddleware");
-const { deductCredits, refundCredits, getCreditBreakdown } = require("../creditSystem");
+const { deductCredits, refundCredits } = require("../creditSystem");
 const { db } = require("../firebaseAdmin");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
-const { CREDIT_COSTS } = require("../config/subscriptionPlans");
-const {
-  deleteOwnedTemporaryVideoSource,
-  resolveOwnedTemporaryVideoSource,
-} = require("../services/ownedTemporaryMediaService");
 
 const CLIP_ANALYSIS_COST = 0; // Cost per analysis (Phase 1 default)
-const MEDIA_WORKER_URL =
-  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
-const PROMO_SUMMARY_COST = parseInt(
-  process.env.SMART_PROMO_SUMMARY_CREDIT_COST || `${CREDIT_COSTS["promo-summary"] || 18}`,
-  10
-);
+
 const PROMO_SUMMARY_CLIP_COUNT = parseInt(process.env.SMART_PROMO_SUMMARY_CLIP_COUNT || "4", 10);
 const PROMO_SUMMARY_RETENTION_HOURS = parseInt(
   process.env.SMART_PROMO_SUMMARY_RETENTION_HOURS || "24",
   10
 );
-const PROMO_SUMMARY_MAX_DURATION_SECONDS = parseInt(
-  process.env.SMART_PROMO_MAX_VIDEO_DURATION_SECONDS || "1800",
-  10
-);
-const PROMO_VISUALS_PER_CLIP = parseInt(process.env.SMART_PROMO_VISUALS_PER_CLIP || "3", 10);
-const PROMO_SUMMARY_REUSE_WINDOW_HOURS = Number.isFinite(
-  parseInt(process.env.SMART_PROMO_SUMMARY_REUSE_WINDOW_HOURS || String(PROMO_SUMMARY_RETENTION_HOURS), 10)
-)
-  ? parseInt(process.env.SMART_PROMO_SUMMARY_REUSE_WINDOW_HOURS || String(PROMO_SUMMARY_RETENTION_HOURS), 10)
-  : PROMO_SUMMARY_RETENTION_HOURS;
-const PROMO_SUMMARY_REUSE_WINDOW_MS = Math.max(1, PROMO_SUMMARY_REUSE_WINDOW_HOURS) * 60 * 60 * 1000;
-
-function estimatePromoSummaryCredits({
-  videoDurationSeconds = 0,
-  clipCount = PROMO_SUMMARY_CLIP_COUNT,
-  outputMode = "campaign_set",
-  includeCaptions = true,
-  includeVisuals = true,
-} = {}) {
-  const duration = Math.max(0, Number(videoDurationSeconds || 0) || 0);
-  const safeClipCount = Math.max(1, Math.min(10, Number(clipCount || PROMO_SUMMARY_CLIP_COUNT) || 1));
-  const visualCount = includeVisuals ? safeClipCount * PROMO_VISUALS_PER_CLIP : 0;
-  const durationBuckets = Math.max(1, Math.ceil(Math.max(duration, 60) / 180));
-  const storyModeBoost = String(outputMode).toLowerCase() === "story_edit" ? 8 : 0;
-  const captionCost = includeCaptions ? Math.ceil(safeClipCount * 1.5) : 0;
-  const visualCost = includeVisuals ? Math.ceil(visualCount * 0.5) : 0;
-  const durationCost = durationBuckets * 4;
-  const clipCost = safeClipCount * 3;
-  const estimated = PROMO_SUMMARY_COST + durationCost + clipCost + captionCost + visualCost + storyModeBoost;
-  return {
-    credits: Math.max(PROMO_SUMMARY_COST, estimated),
-    videoDurationSeconds: duration,
-    clipCount: safeClipCount,
-    visualCount,
-    maxDurationSeconds: PROMO_SUMMARY_MAX_DURATION_SECONDS,
-    breakdown: {
-      baseAnalysis: PROMO_SUMMARY_COST,
-      duration: durationCost,
-      clips: clipCost,
-      captions: captionCost,
-      visuals: visualCost,
-      storyMode: storyModeBoost,
-    },
-  };
-}
 
 const PROMO_STYLE_MAP = {
   clean: {
@@ -294,8 +242,6 @@ const PROMO_ANGLE_MAP = {
   },
 };
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 const getPromoStyleConfig = style => {
   const key = String(style || "clean").trim().toLowerCase();
   return PROMO_STYLE_MAP[key] || PROMO_STYLE_MAP.clean;
@@ -318,58 +264,6 @@ const buildPromoCampaignRoles = (angle, durationSeconds, style) => {
     visualStyle: style,
     styleLabel: styleConfig.label,
   }));
-};
-
-const _buildStoryEditCampaignRoles = (angle, durationSeconds, style) => {
-  const angleConfig = getPromoAngleConfig(angle);
-  const styleConfig = getPromoStyleConfig(style);
-  const shortRoles = angleConfig.roleBlueprints.slice(0, Math.max(1, PROMO_SUMMARY_CLIP_COUNT - 1));
-  return [
-    {
-      id: "story_master",
-      label: "Story Master",
-      bestFor: "Product demos, founder videos, feature walkthroughs",
-      captionFallback: "The Full Story",
-      hookReason: "Builds one complete edited story from the strongest chapters.",
-      travelReason: "For users who need the platform to turn a raw full video into a polished promo.",
-      storyMaster: true,
-      preferredDurationSeconds: durationSeconds,
-      promoAngle: angle,
-      promoAngleLabel: angleConfig.label,
-      visualStyle: style,
-      styleLabel: styleConfig.label,
-      index: 0,
-    },
-    ...shortRoles.map((role, index) => ({
-      ...role,
-      index: index + 1,
-      promoAngle: angle,
-      promoAngleLabel: angleConfig.label,
-      preferredDurationSeconds: Math.min(60, Math.max(15, Math.round(Number(durationSeconds || 120) / 3))),
-      visualStyle: style,
-      styleLabel: styleConfig.label,
-    })),
-  ];
-};
-
-const getPromoWorkerProfile = (style, angle, durationSeconds) => {
-  const styleConfig = getPromoStyleConfig(style);
-  const angleConfig = getPromoAngleConfig(angle);
-  const isShort = Number(durationSeconds || 30) <= 20;
-
-  let template = angleConfig.workerTemplate || styleConfig.defaultTemplate || "story";
-  if (style === "hype" && !isShort) template = "reaction";
-  if (style === "minimal") template = "tutorial";
-  if (angle === "emotional_pull" && style === "clean") template = "story";
-
-  return {
-    captionStyle: styleConfig.captionStyle,
-    smartCropMode: styleConfig.smartCropMode,
-    template,
-    promoAngleLabel: angleConfig.label,
-    angleHookReason: angleConfig.hookReason,
-    angleTravelReason: angleConfig.travelReason,
-  };
 };
 
 const normalizePromoCaption = (value, fallback) => {
@@ -407,12 +301,6 @@ const buildPromoCaption = (clip, index, role) => {
 
 const getPromoExpiresAtIso = () =>
   new Date(Date.now() + PROMO_SUMMARY_RETENTION_HOURS * 60 * 60 * 1000).toISOString();
-
-const sanitizeErrorMessage = error => {
-  const rawMessage =
-    typeof error === "string" ? error : typeof error?.message === "string" ? error.message : "unknown_error";
-  return rawMessage.replace(/[\r\n\t]+/g, " ").slice(0, 240).trim() || "unknown_error";
-};
 
 const parseTimestampMs = value => {
   if (!value) return null;
@@ -711,69 +599,8 @@ const buildPromoSummaryStreamPayload = normalized => {
   };
 };
 
-const countReusablePromoClips = data => {
-  const values = [
-    data.generatedClipsCount,
-    Array.isArray(data.generatedClipIds) ? data.generatedClipIds.length : 0,
-    Array.isArray(data.generatedClips) ? data.generatedClips.length : 0,
-    Array.isArray(data.promoClips) ? data.promoClips.length : 0,
-    Array.isArray(data.clips) ? data.clips.length : 0,
-  ];
-  return values.find(value => Number.isFinite(value) && value > 0) || 0;
-};
-
-const isUsablePromoSummaryForReuse = data => {
-  const status = normalizeAnalysisStatus(data.status);
-  const hasClips = countReusablePromoClips(data) > 0;
-  if (status !== "completed" || !hasClips) return false;
-  if (data.billing?.refundedAt) return false;
-  const now = Date.now();
-  const createdAtMs = parseTimestampMs(data.createdAt);
-  const expiresAtMs = parseTimestampMs(data.expiresAt);
-  if (createdAtMs && now - createdAtMs > PROMO_SUMMARY_REUSE_WINDOW_MS) return false;
-  if (expiresAtMs && expiresAtMs < now) return false;
-  return true;
-};
-
-async function findReusablePromoSummaryJob({
-  userId,
-  analysisCacheKey,
-  normalizedOutputMode,
-  normalizedStyle,
-  normalizedPromoAngle,
-  workflowType,
-  targetDurationSeconds,
-}) {
-  if (!analysisCacheKey || !userId) return null;
-
-  const snapshot = await db
-    .collection("clip_analyses")
-    .where("analysisCacheKey", "==", analysisCacheKey)
-    .get();
-
-  const validCandidates = [];
-  snapshot.forEach(doc => {
-    const data = doc.data() || {};
-    if (data.userId !== userId) return;
-    if (data.type !== "promo_summary") return;
-    if (String(data.outputMode || "").trim().toLowerCase() !== normalizedOutputMode) return;
-    if (String(data.style || "").trim().toLowerCase() !== normalizedStyle) return;
-    if (String(data.promoAngle || "").trim().toLowerCase() !== normalizedPromoAngle) return;
-    if (String(data.workflowType || "").trim() !== String(workflowType || "")) return;
-    if (Number(data.targetDurationSeconds || 0) !== Number(targetDurationSeconds || 0)) return;
-    if (!isUsablePromoSummaryForReuse(data)) return;
-
-    validCandidates.push({
-      ...data,
-      id: doc.id,
-      createdAtMs: parseTimestampMs(data.createdAt) || 0,
-    });
-  });
-
-  validCandidates.sort((left, right) => right.createdAtMs - left.createdAtMs);
-  return validCandidates.length ? validCandidates[0] : null;
-}
-
+// Compatibility: keep owned historical results and already-started job settlement.
+// New standalone requests are rejected above, before any financial or worker action.
 async function persistPromoSummaryOutputs(docRef, data) {
   if (data.outputsPersistedAt) return data;
 
@@ -1058,52 +885,6 @@ async function reconcilePromoSummaryJob(docRef, data) {
   }
 
   return data;
-}
-
-async function monitorPromoSummaryJob(jobId) {
-  const jobRef = db.collection("clip_analyses").doc(jobId);
-
-  for (let attempt = 0; attempt < 720; attempt += 1) {
-    const snap = await jobRef.get();
-    if (!snap.exists) return;
-    const data = snap.data() || {};
-
-    if (data.outputsPersistedAt || data.billing?.refundedAt) {
-      return;
-    }
-
-    const status = normalizeAnalysisStatus(data.status);
-    if (status === "completed" || status === "failed") {
-      await reconcilePromoSummaryJob(jobRef, data);
-      return;
-    }
-
-    await sleep(5000);
-  }
-
-  const timeoutSnap = await jobRef.get();
-  if (!timeoutSnap.exists) return;
-  const timeoutData = timeoutSnap.data() || {};
-  if (timeoutData.outputsPersistedAt || timeoutData.billing?.refundedAt) return;
-
-  await jobRef.set(
-    {
-      status: "failed",
-      error: "Promo summary timed out while waiting for worker completion.",
-      failedAt: new Date().toISOString(),
-    },
-    { merge: true }
-  );
-  const failedTimeoutData = {
-    ...timeoutData,
-    status: normalizeAnalysisStatus("failed"),
-    error: "Promo summary timed out while waiting for worker completion.",
-  };
-  if (hasPromoSummaryConsumedCompute(failedTimeoutData)) {
-    await markPromoSummaryNonRefundable(jobRef, failedTimeoutData, "timeout_after_compute");
-  } else {
-    await refundPromoSummaryJob(jobRef, failedTimeoutData, "timeout_before_compute");
-  }
 }
 
 /**
@@ -1460,392 +1241,6 @@ router.get("/promo-summary/:analysisId/preview/stream", authMiddleware, async (r
 });
 
 /**
- * @route POST /promo-summary/estimate
- * @desc Estimate Smart Promo Summary credits before processing
- * @access Private
- */
-router.post("/promo-summary/estimate", authMiddleware, async (req, res) => {
-  const estimate = estimatePromoSummaryCredits({
-    videoDurationSeconds: req.body?.videoDurationSeconds,
-    clipCount: req.body?.clipCount || PROMO_SUMMARY_CLIP_COUNT,
-    outputMode: req.body?.outputMode,
-    includeCaptions: req.body?.includeCaptions !== false,
-    includeVisuals: req.body?.includeVisuals !== false,
-  });
-
-  if (
-    estimate.videoDurationSeconds > 0 &&
-    estimate.videoDurationSeconds > PROMO_SUMMARY_MAX_DURATION_SECONDS
-  ) {
-    return res.status(413).json({
-      success: false,
-      error: "Video too long",
-      message: `Smart Promo currently supports videos up to ${Math.round(PROMO_SUMMARY_MAX_DURATION_SECONDS / 60)} minutes for one job.`,
-      estimate,
-    });
-  }
-
-  res.json({
-    success: true,
-    estimate,
-  });
-});
-
-/**
- * @route POST /promo-summary
- * @desc Generate multiple short promo clips with auto story captions
- * @access Private
- */
-router.post("/promo-summary", authMiddleware, async (req, res) => {
-  const {
-    videoUrl,
-    localPath = null,
-    contentId = null,
-    durationSeconds = 30,
-    style = "clean",
-    promoAngle = "stop_scroll",
-    outputMode = "campaign_set",
-    sourceStoragePath = null,
-    sourceFingerprint = null,
-    videoDurationSeconds = 0,
-  } = req.body || {};
-  const sourceDurationSeconds = Math.max(0, Number(videoDurationSeconds || 0));
-  const userId = req.user.uid;
-  let workerVideoUrl = typeof videoUrl === "string" ? videoUrl.trim() : "";
-  let temporarySourceAttachedToJob = false;
-
-  if (localPath) {
-    return res.status(400).json({
-      error: "Unsafe local source disabled",
-      code: "DIRECT_WORKER_SOURCE_DISABLED",
-      message: "Smart Promo now requires a secure AutoPromote upload.",
-    });
-  }
-
-  if (sourceStoragePath) {
-    try {
-      const ownedSource = await resolveOwnedTemporaryVideoSource({
-        storagePath: sourceStoragePath,
-        userId,
-        purpose: "smart_promo",
-      });
-      workerVideoUrl = ownedSource.signedUrl;
-    } catch (error) {
-      return res.status(error.statusCode || 500).json({
-        error: "Secure source verification failed",
-        code: error.code || "TEMP_SOURCE_VERIFICATION_FAILED",
-        message: error.message,
-      });
-    }
-  }
-
-  const requestedOutputMode = String(outputMode || "visual_edit").trim().toLowerCase();
-  const normalizedOutputMode =
-    requestedOutputMode === "visual_edit" || requestedOutputMode === "story_edit"
-      ? "visual_edit"
-      : "campaign_set";
-  const allowedDurations =
-    normalizedOutputMode === "visual_edit" ? [60, 120, 180, 300] : [15, 30, 60];
-  const targetDurationSeconds = allowedDurations.includes(Number(durationSeconds))
-    ? Number(durationSeconds)
-    : normalizedOutputMode === "visual_edit"
-      ? 120
-      : 30;
-  const normalizedStyle = String(style || "clean").trim().toLowerCase();
-  const normalizedPromoAngle = String(promoAngle || "stop_scroll").trim().toLowerCase();
-  const workerProfile = getPromoWorkerProfile(
-    normalizedStyle,
-    normalizedPromoAngle,
-    targetDurationSeconds
-  );
-  const campaignRoles =
-    normalizedOutputMode === "visual_edit"
-      ? []
-      : buildPromoCampaignRoles(normalizedPromoAngle, targetDurationSeconds, normalizedStyle);
-  const workflowType =
-    normalizedOutputMode === "visual_edit" ? "smart_promo_visual_v1" : "campaign_set_v1";
-  const analysisCacheKey =
-    sourceFingerprint ||
-    sourceStoragePath ||
-    localPath ||
-    contentId ||
-    `${videoUrl}|${Math.round(Number(videoDurationSeconds || 0))}`;
-
-  if (!workerVideoUrl) {
-    return res.status(400).json({ error: "Missing secure video source" });
-  }
-
-  try {
-    const estimate = estimatePromoSummaryCredits({
-      videoDurationSeconds,
-      clipCount: PROMO_SUMMARY_CLIP_COUNT,
-      outputMode: normalizedOutputMode,
-      includeCaptions: normalizedOutputMode !== "visual_edit",
-      includeVisuals: true,
-    });
-    if (
-      estimate.videoDurationSeconds > 0 &&
-      estimate.videoDurationSeconds > PROMO_SUMMARY_MAX_DURATION_SECONDS
-    ) {
-      if (sourceStoragePath) {
-        await deleteOwnedTemporaryVideoSource({
-          storagePath: sourceStoragePath,
-          userId,
-          purpose: "smart_promo",
-        }).catch(() => {});
-      }
-      return res.status(413).json({
-        error: "Video too long",
-        message: `Smart Promo currently supports videos up to ${Math.round(PROMO_SUMMARY_MAX_DURATION_SECONDS / 60)} minutes for one job.`,
-        estimate,
-      });
-    }
-
-    const reusable = await findReusablePromoSummaryJob({
-      userId,
-      analysisCacheKey,
-      normalizedOutputMode,
-      normalizedStyle,
-      normalizedPromoAngle,
-      workflowType,
-      targetDurationSeconds,
-    });
-
-    if (reusable) {
-      if (sourceStoragePath) {
-        await deleteOwnedTemporaryVideoSource({
-          storagePath: sourceStoragePath,
-          userId,
-          purpose: "smart_promo",
-        }).catch(() => {});
-      }
-      const reusableCredits = await getCreditBreakdown(userId).catch(() => null);
-      await db
-        .collection("clip_analyses")
-        .doc(reusable.id)
-        .set(
-          {
-            analysisReused: true,
-            lastReusedAt: new Date().toISOString(),
-            reuseCount: Math.max(0, Number(reusable.reuseCount || 0)) + 1,
-          },
-          { merge: true }
-        )
-        .catch(() => {});
-      const response = {
-        success: true,
-        reused: true,
-        analysisReused: true,
-        jobId: reusable.id,
-        reusedFromJobId: reusable.id,
-        analysisId: reusable.id,
-        cost: 0,
-        estimate,
-        creditsRemaining: reusableCredits?.totalAvailable ?? null,
-        clipCount: Math.max(1, countReusablePromoClips(reusable)),
-        promoAngle: normalizedPromoAngle,
-        outputMode: normalizedOutputMode,
-        workflowType: workflowType,
-        message: "Smart Promo cached summary reused.",
-        preview: buildPromoSummaryPreviewPayload({
-          ...reusable,
-          id: reusable.id,
-        }),
-      };
-      return res.json({
-        ...response,
-        clips: [],
-        promoClips: [],
-        generatedClips: [],
-        clipSuggestions: [],
-        data: response,
-      });
-    }
-
-    const credits = await deductCredits(userId, estimate.credits, "promo-summary");
-    if (!credits.success) {
-      if (sourceStoragePath) {
-        await deleteOwnedTemporaryVideoSource({
-          storagePath: sourceStoragePath,
-          userId,
-          purpose: "smart_promo",
-        }).catch(() => {});
-      }
-      return res.status(402).json({
-        error: "Insufficient credits",
-        message: "Smart Promo Summary is a premium feature and requires credits.",
-        required: estimate.credits,
-        remaining: credits.remaining || 0,
-        estimate,
-      });
-    }
-
-    const jobId = `promo-${Date.now()}-${userId.slice(0, 6)}`;
-    await db
-      .collection("clip_analyses")
-      .doc(jobId)
-      .set({
-        userId,
-        videoUrl: workerVideoUrl,
-        contentId,
-        type: "promo_summary",
-        status: "queued",
-        progress: 0,
-        phase: "queued",
-        requestedClipCount: PROMO_SUMMARY_CLIP_COUNT,
-        targetDurationSeconds,
-        style: normalizedStyle,
-        promoAngle: normalizedPromoAngle,
-        promoAngleLabel: getPromoAngleConfig(normalizedPromoAngle).label,
-        outputMode: normalizedOutputMode,
-        workflowType,
-        captionStyle: workerProfile.captionStyle,
-        smartCropMode: workerProfile.smartCropMode,
-        template: workerProfile.template,
-        campaignRoles,
-        clips: [],
-        createdAt: new Date().toISOString(),
-        cleanupTempSourceOnComplete: Boolean(
-          sourceStoragePath &&
-            /^(temp_uploads|temp_sources)\//.test(String(sourceStoragePath))
-        ),
-        sourceStoragePath: sourceStoragePath || null,
-        sourceFingerprint: sourceFingerprint || null,
-        sourceDurationSeconds,
-        previewEvents: [
-          {
-            id: `evt_${jobId}_queued`,
-            action: "queued",
-            label: "Smart Promo job created.",
-            status: "queued",
-            phase: "queued",
-            atMs: 0,
-            timestampMs: Date.now(),
-          },
-        ],
-        previewFrameOffsetMs: 0,
-        analysisCacheKey,
-        billing: {
-          charged: true,
-          cost: estimate.credits,
-          estimate,
-          chargedAt: new Date().toISOString(),
-          fromMonthly: credits.fromMonthly || 0,
-          fromTopUp: credits.fromTopUp || 0,
-          monthKey: credits.monthKey || new Date().toISOString().slice(0, 7),
-        },
-      });
-    temporarySourceAttachedToJob = Boolean(sourceStoragePath);
-
-    axios
-      .post(
-        `${MEDIA_WORKER_URL}/auto-generate-clips`,
-        {
-          video_url: workerVideoUrl,
-          local_path: "",
-          job_id: jobId,
-          max_clips: PROMO_SUMMARY_CLIP_COUNT,
-          target_duration: targetDurationSeconds,
-          caption_style: workerProfile.captionStyle,
-          smart_crop_mode: workerProfile.smartCropMode,
-          target_aspect_ratio: "9:16",
-          template: workerProfile.template,
-          style: normalizedStyle,
-          promo_angle: normalizedPromoAngle,
-          output_mode: normalizedOutputMode,
-          workflow_type: workflowType,
-          analysis_cache_key: analysisCacheKey,
-          source_duration_seconds: sourceDurationSeconds,
-          campaign_roles: campaignRoles,
-          creative_brief: {
-            promo_angle: normalizedPromoAngle,
-            promo_angle_label: getPromoAngleConfig(normalizedPromoAngle).label,
-            hook_reason: workerProfile.angleHookReason,
-            travel_reason: workerProfile.angleTravelReason,
-            style: normalizedStyle,
-          },
-        },
-        { timeout: 600000 }
-      )
-      .catch(async error => {
-        const safeWorkerError = sanitizeErrorMessage(error);
-        console.error("[ClipRoute] Promo summary worker call failed", {
-          jobId,
-          message: safeWorkerError,
-        });
-        await db
-          .collection("clip_analyses")
-          .doc(jobId)
-          .set(
-            {
-              status: "failed",
-              error: safeWorkerError,
-              failedAt: new Date().toISOString(),
-            },
-            { merge: true }
-          )
-          .catch(() => {});
-      });
-
-    monitorPromoSummaryJob(jobId).catch(error => {
-      console.error("[ClipRoute] Promo summary monitor failed", {
-        jobId,
-        message: sanitizeErrorMessage(error),
-      });
-    });
-
-    const response = {
-      success: true,
-      jobId,
-      analysisId: jobId,
-      cost: estimate.credits,
-      estimate,
-      creditsRemaining: credits.remaining,
-      clipCount: PROMO_SUMMARY_CLIP_COUNT,
-      promoAngle: normalizedPromoAngle,
-      outputMode: normalizedOutputMode,
-      message: "Smart Promo Summary started.",
-      analysis: null,
-      clips: [],
-      promoClips: [],
-      generatedClips: [],
-      clipSuggestions: [],
-      preview: buildPromoSummaryPreviewPayload({
-        id: jobId,
-        status: "queued",
-        stage: "queued",
-        progress: 0,
-        message: "Smart Promo Summary started.",
-        previewEvents: [
-          {
-            id: `evt_${jobId}_queued`,
-            action: "queued",
-            label: "Smart Promo job created.",
-            status: "queued",
-            phase: "queued",
-            atMs: 0,
-            timestampMs: Date.now(),
-          },
-        ],
-      }),
-    };
-    return res.json({ ...response, data: response });
-  } catch (error) {
-    if (sourceStoragePath && !temporarySourceAttachedToJob) {
-      await deleteOwnedTemporaryVideoSource({
-        storagePath: sourceStoragePath,
-        userId,
-        purpose: "smart_promo",
-      }).catch(() => {});
-    }
-    console.error("[ClipRoute] Promo summary error", {
-      message: sanitizeErrorMessage(error),
-    });
-    res.status(500).json({ error: "Smart Promo Summary failed" });
-  }
-});
-
-/**
  * @route POST /:clipId/export
  * @desc Export a specific clip to the Content Library for posting
  * @access Private
@@ -2052,6 +1447,7 @@ router.post("/auto-generate", authMiddleware, async (req, res) => {
           video_url: videoUrl,
           job_id: jobId,
           max_clips: Math.min(Number(maxClips) || 5, 10),
+          workflow_type: "clip_scanner_v1",
           caption_style: captionStyle,
           smart_crop_mode: smartCropMode,
           target_aspect_ratio: targetAspectRatio,

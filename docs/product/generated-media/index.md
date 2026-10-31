@@ -1,46 +1,8 @@
 # Generated media
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.46 • 2026-10-31
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
-
-## Idea-to-Video
-
-ID: `generation.idea_to_video` • **PARTIAL** • HYBRID
-
-Builds a scene draft from an idea with selectable voice and media searches, then requests an output. A scripted safe fallback is not proof of AI-generated moving footage.
-
-**Available to:** signed-in users with owned project and applicable entitlement
-
-**Media:** video
-
-**Requires:** system.account (FUNCTIONAL)
-
-**Optional:** None recorded.
-
-**Workflow**
-
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
-
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
-
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
-
-**Limits**
-
-- Draft quality, source rights, provider availability and render cost need review.
-- A scene description or stock search is not image-to-video generation.
-
-**Common errors**
-
-- Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
-
-**Controls:** No source-qualified editable control is recorded.
-
-**Guides:** No task guide in V1.
-
-**Templates:** No pinned shared-template binding recorded.
 
 ## Content idea suggestions
 

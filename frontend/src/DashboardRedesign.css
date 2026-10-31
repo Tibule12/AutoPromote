@@ -461,9 +461,7 @@ body.dashboard-mode {
 .ap-dashboard-redesign .connections-panel,
 .ap-dashboard-redesign .team-panel,
 .ap-dashboard-redesign .schedules-panel,
-.ap-dashboard-redesign .analytics-panel,
 .ap-dashboard-redesign .security-panel,
-.ap-dashboard-redesign .idea-video-panel,
 .ap-dashboard-redesign .notifications-panel,
 .ap-dashboard-redesign .dashboard-cam-combiner-page,
 .ap-dashboard-redesign .upload-panel,
@@ -569,7 +567,6 @@ body.dashboard-mode {
 .ap-dashboard-redesign .card,
 .ap-dashboard-redesign .team-card,
 .ap-dashboard-redesign .security-card,
-.ap-dashboard-redesign .ap-analytics-panel-card,
 .ap-dashboard-redesign .kpi-card,
 .ap-dashboard-redesign .current-subscription-card,
 .ap-dashboard-redesign .plan-card,
@@ -2416,48 +2413,6 @@ body.dashboard-mode {
   background: rgba(109, 74, 255, 0.16) !important;
 }
 
-/* Analytics */
-
-.ap-dashboard-redesign .analytics-panel {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.ap-dashboard-redesign .analytics-panel > * {
-  order: 20;
-}
-
-.ap-dashboard-redesign .analytics-panel > .ap-analytics-header {
-  order: 0;
-}
-
-.ap-dashboard-redesign .analytics-panel > .analytics-kpi-grid {
-  order: 5;
-}
-
-.ap-dashboard-redesign .analytics-panel > .analytics-performance-overview {
-  order: 6;
-}
-
-.ap-dashboard-redesign .analytics-panel > .platform-breakdown {
-  order: 7;
-}
-
-.ap-dashboard-redesign .analytics-panel > .recent-content {
-  order: 8;
-}
-
-.ap-dashboard-redesign .ap-analytics-header,
-.ap-dashboard-redesign .analytics-kpi-grid,
-.ap-dashboard-redesign .ap-analytics-trackers,
-.ap-dashboard-redesign .platform-breakdown,
-.ap-dashboard-redesign .recent-content {
-  border-color: var(--ap-border) !important;
-}
-
 .ap-dashboard-redesign .ap-workflow-stat-card {
   border-color: var(--ap-border);
   border-radius: 14px;
@@ -2484,13 +2439,6 @@ body.dashboard-mode {
   border-radius: 50%;
   background: rgba(109, 74, 255, 0.08);
   content: "";
-}
-
-.ap-dashboard-redesign .ap-analytics-panel-card {
-  border-radius: 16px !important;
-  color: var(--ap-text);
-  background: rgba(8, 18, 33, 0.82) !important;
-  box-shadow: none !important;
 }
 
 .ap-dashboard-redesign .ap-platform-row,
@@ -2653,21 +2601,6 @@ body.dashboard-mode {
 
 /* Creative tools */
 
-.ap-dashboard-redesign .idea-video-panel {
-  padding: clamp(18px, 2.4vw, 28px);
-  border: 1px solid var(--ap-border);
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at 93% 1%, rgba(34, 211, 238, 0.08), transparent 18rem),
-    linear-gradient(145deg, rgba(12, 24, 42, 0.97), rgba(6, 14, 27, 0.95));
-  box-shadow: var(--ap-shadow);
-}
-
-.ap-dashboard-redesign .iv-header,
-.ap-dashboard-redesign .iv-step-1,
-.ap-dashboard-redesign .iv-step-2,
-.ap-dashboard-redesign .iv-step-3,
-.ap-dashboard-redesign .iv-library,
 .ap-dashboard-redesign .script-item,
 .ap-dashboard-redesign .video-card {
   border-color: var(--ap-border) !important;
@@ -2677,46 +2610,6 @@ body.dashboard-mode {
 
 .ap-dashboard-redesign .idea-input {
   min-height: 130px;
-}
-
-.ap-dashboard-redesign .iv-header {
-  padding: 0 0 18px !important;
-  border: 0 !important;
-  border-bottom: 1px solid var(--ap-border) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-}
-
-.ap-dashboard-redesign .iv-header h2,
-.ap-dashboard-redesign .iv-header p,
-.ap-dashboard-redesign .idea-video-panel h3,
-.ap-dashboard-redesign .idea-video-panel label {
-  color: var(--ap-text);
-}
-
-.ap-dashboard-redesign .iv-header p {
-  color: var(--ap-muted);
-}
-
-.ap-dashboard-redesign .iv-step-1 {
-  position: relative;
-  overflow: hidden;
-  padding: clamp(22px, 4vw, 44px) !important;
-  text-align: center;
-  background:
-    radial-gradient(circle at 50% -25%, rgba(109, 74, 255, 0.28), transparent 24rem),
-    rgba(7, 17, 31, 0.72) !important;
-}
-
-.ap-dashboard-redesign .iv-step-1::before {
-  display: block;
-  margin-bottom: 12px;
-  color: #c4b5fd;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  content: "Turn a thought into a production-ready video";
 }
 
 .ap-dashboard-redesign .idea-input {
@@ -2750,20 +2643,6 @@ body.dashboard-mode {
   font-weight: 700;
 }
 
-.ap-dashboard-redesign .idea-video-panel input,
-.ap-dashboard-redesign .idea-video-panel textarea,
-.ap-dashboard-redesign .idea-video-panel select {
-  border-color: var(--ap-border) !important;
-  border-radius: 9px !important;
-  color: var(--ap-text) !important;
-  background: rgba(4, 11, 22, 0.88) !important;
-}
-
-.ap-dashboard-redesign .iv-step-1 > .btn-primary {
-  min-width: 180px;
-  min-height: 44px;
-}
-
 .ap-dashboard-redesign .script-item {
   padding: 18px !important;
   border-radius: 14px !important;
@@ -2771,10 +2650,6 @@ body.dashboard-mode {
 
 .ap-dashboard-redesign .scene-num {
   color: #c4b5fd;
-}
-
-.ap-dashboard-redesign .iv-library {
-  margin-top: 18px;
 }
 
 /* Notifications */
@@ -3037,7 +2912,6 @@ body.dashboard-mode {
 
   .ap-dashboard-redesign .profile-details,
   .ap-dashboard-redesign .schedules-panel,
-  .ap-dashboard-redesign .idea-video-panel,
   .ap-dashboard-redesign .notifications-panel,
   .ap-dashboard-redesign .unified-publisher-container {
     padding: 15px;

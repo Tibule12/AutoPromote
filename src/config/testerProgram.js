@@ -18,14 +18,12 @@ const TESTER_PROGRAM = Object.freeze({
     "queue",
     "findViralClips",
     "clipRender",
-    "smartPromoSummary",
   ]),
   allowedEditingFeatures: Object.freeze([
     "multicam",
     "autoDirector",
     "findViralClips",
     "clipRender",
-    "smartPromoSummary",
   ]),
 });
 
@@ -72,15 +70,7 @@ function applyTesterCapabilityAllowlist(capabilities, testerAccess) {
   return {
     ...capabilities,
     teamSeats: 1,
-    analytics: {
-      ...(capabilities?.analytics || {}),
-      allowedRanges: ["24h", "7d"],
-      platformBreakdown: false,
-      recoveryLab: false,
-      canExport: false,
-      topContentLimit: 10,
-      summary: "Recent KPI snapshot for Founding Tester feedback.",
-    },
+    recoveryLab: false,
     support: {
       ...(capabilities?.support || {}),
       ticketAccess: true,

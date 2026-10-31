@@ -271,8 +271,7 @@ const Support = () => {
                   >
                     <option value="general">General</option>
                     <option value="billing">Billing</option>
-                    <option value="analytics">Analytics</option>
-                    <option value="publishing">Publishing</option>
+                    <option value="publishing">Publishing and delivery status</option>
                     <option value="connections">Connections</option>
                   </select>
                   <select

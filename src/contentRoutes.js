@@ -48,7 +48,7 @@ async function ensureRecoveryLabAccess(userId) {
     snapshot.testerAccess
   );
 
-  if (!entitlements.analytics.recoveryLab) {
+  if (!entitlements.recoveryLab) {
     const error = new Error("Recovery Lab is available on Studio and Agency plans.");
     error.statusCode = 403;
     error.entitlements = entitlements;

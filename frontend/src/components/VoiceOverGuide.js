@@ -21,8 +21,6 @@ const VoiceOverGuide = ({ activeTab, scripts: customScripts, theme = "dark" }) =
       "This is the Content Upload center. Select your video or image, choose which platforms to post to, and our engines will optimize it for virality.",
     schedules:
       "The Temporal Orchestrator allows you to plan your content calendar. Drag and drop posts to schedule them for the perfect time.",
-    analytics:
-      "The Analytics Panel shows you deep insights into your performance. Track views, engagement runs, and viral growth across all platforms.",
     rewards:
       "Earn credits by completing tasks and referring friends. Use credits to unlock premium viral features.",
     notifications: "Check your latest alerts, system messages, and engagement notifications here.",

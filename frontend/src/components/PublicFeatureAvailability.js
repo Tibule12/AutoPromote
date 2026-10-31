@@ -8,10 +8,10 @@ const DEFAULT_ITEMS = [
       "Upload once, choose platforms, and send content into immediate or scheduled publishing flows.",
   },
   {
-    name: "Analytics and status tracking",
+    name: "Publishing status and delivery diagnostics",
     status: "Live",
     description:
-      "Track upload history, post state, worker health, and available analytics from linked accounts.",
+      "Track upload history, post state and destination delivery diagnostics.",
   },
   {
     name: "Editing, clips, captions, and formatting",

@@ -10,7 +10,6 @@ export const FOOTER_GROUPS = [
     [
       ["Features", "/features"],
       ["Integrations", "/integrations"],
-      ["Analytics", "/metrics"],
       ["Pricing", "/pricing"],
       ["Changelog", "/changelog"],
     ],

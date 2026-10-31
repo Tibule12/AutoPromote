@@ -69,7 +69,7 @@ export default function ProductAssistance({ request = askProductAssistance, laun
       const id = event.detail?.selected_feature_id;
       if (typeof id !== 'string' || !/^[a-z0-9_.]{1,100}$/.test(id)) return;
       const safe = { selected_feature_id: id };
-      if (['STUDIO', 'CAM_COMBINER', 'IDEA_VIDEO'].includes(event.detail?.workspace_type)) safe.workspace_type = event.detail.workspace_type;
+      if (['STUDIO', 'CAM_COMBINER'].includes(event.detail?.workspace_type)) safe.workspace_type = event.detail.workspace_type;
       priorFocus.current = document.activeElement; setContext(safe); setMode('EXPLAIN'); setQuestion('What is this?'); setOpen(true);
       run('What is this?', 'EXPLAIN', safe);
     };

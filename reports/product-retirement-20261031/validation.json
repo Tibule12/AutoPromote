@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-31",
+  "branch": "feat/product-retirement-20261031",
+  "base": "3911af6c59989b92cd97036715841fe22f290456",
+  "tests": {
+    "frontend": 118,
+    "backend": 88,
+    "documentationOwnershipAndSchedules": 55,
+    "applicationEmulator": 12,
+    "httpBoundaries": 5,
+    "python": 4,
+    "totalDistinct": 282,
+    "failuresInFinalRuns": 0
+  },
+  "browser": {
+    "retirementChecks": 23,
+    "desktopAndMobile": true,
+    "studioNativeSaveReopen": true,
+    "studioCpuExports": 2,
+    "nativeHeadlineEditExport": true,
+    "fullEditedMovieDecode": true,
+    "motionFlow": true,
+    "nativeBackupDownload": true,
+    "independentRestore": true,
+    "clipAnalysis": "succeeded",
+    "publisherAndQueue": "actual UI with simulated external destination"
+  },
+  "build": {
+    "mode": "production",
+    "normalPostbuild": true,
+    "entryPages": 47,
+    "welcomeAssetsVerified": 19,
+    "indexSha256": "5d22d7b2f67b64f21083e090dc1c0296b7e3ec2e5cfdee225cc3f80f574c845e",
+    "knownWarnings": [
+      "Inherited studioSequenceEdits.js no-loop-func"
+    ]
+  },
+  "production": {
+    "push": false,
+    "merge": false,
+    "deploy": false,
+    "dataChanges": false,
+    "paidCloudJobs": false,
+    "liveAds": false,
+    "pricesChanged": false,
+    "balanceMigration": false
+  },
+  "limits": [
+    "Generated short test inputs, not representative media/creative qualification.",
+    "External destination delivery is simulated; payment providers are mocked in unit tests.",
+    "Local CPU/wall admission ceilings only; no production worker limit or pricing change.",
+    "Initial harness failures and raw authenticated evidence remain private."
+  ]
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "route": "analytics",
+    "staticRedirect": true,
+    "sha256": "89c6d4a59b99335003c2364784a5cdb698cbbf777563841cbdf8160b43abab9d"
+  },
+  {
+    "route": "metrics",
+    "staticRedirect": true,
+    "sha256": "89c6d4a59b99335003c2364784a5cdb698cbbf777563841cbdf8160b43abab9d"
+  },
+  {
+    "route": "smart-promo",
+    "staticRedirect": true,
+    "sha256": "519df689b61b2a44b81a584bcddae34da3edf4ff471950bf262ffedfb6a74379"
+  },
+  {
+    "route": "smart_promo",
+    "staticRedirect": true,
+    "sha256": "519df689b61b2a44b81a584bcddae34da3edf4ff471950bf262ffedfb6a74379"
+  },
+  {
+    "route": "smartpromo",
+    "staticRedirect": true,
+    "sha256": "519df689b61b2a44b81a584bcddae34da3edf4ff471950bf262ffedfb6a74379"
+  },
+  {
+    "route": "idea-video",
+    "staticRedirect": true,
+    "sha256": "519df689b61b2a44b81a584bcddae34da3edf4ff471950bf262ffedfb6a74379"
+  },
+  {
+    "route": "idea_video",
+    "staticRedirect": true,
+    "sha256": "519df689b61b2a44b81a584bcddae34da3edf4ff471950bf262ffedfb6a74379"
+  },
+  {
+    "route": "idea-to-video",
+    "staticRedirect": true,
+    "sha256": "519df689b61b2a44b81a584bcddae34da3edf4ff471950bf262ffedfb6a74379"
+  },
+  {
+    "route": "idea_to_video",
+    "staticRedirect": true,
+    "sha256": "519df689b61b2a44b81a584bcddae34da3edf4ff471950bf262ffedfb6a74379"
+  }
+]

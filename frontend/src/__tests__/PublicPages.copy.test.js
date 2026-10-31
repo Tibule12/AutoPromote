@@ -1,7 +1,6 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import WelcomePage from "../WelcomePage";
-import { PRODUCT_TOUR } from "../components/landing/productTour";
 import Features from "../Features";
 import About from "../About";
 import Integrations from "../Integrations";
@@ -60,47 +59,11 @@ describe("public marketing pages", () => {
     expect(onGetStarted).toHaveBeenCalledTimes(1);
   });
 
-  test("welcome page opens the recorded product tour on demand", () => {
-    // jsdom has no native dialog implementation; browser checks cover the focus trap.
-    Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
-      configurable: true,
-      writable: true,
-      value: jest.fn(function () {
-        this.setAttribute("open", "");
-      }),
-    });
-    Object.defineProperty(HTMLDialogElement.prototype, "close", {
-      configurable: true,
-      writable: true,
-      value: jest.fn(function () {
-        this.removeAttribute("open");
-      }),
-    });
+  test("welcome uses current workspaces without the retired product tour", () => {
     render(<WelcomePage onGetStarted={() => {}} onSignIn={() => {}} />);
-    expect(screen.getByLabelText(/AutoPromote product tour/i)).not.toHaveAttribute("src");
-    const trigger = screen.getByRole("button", { name: /Watch Demo/ });
-    trigger.focus();
-    fireEvent.click(trigger);
-    expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalledTimes(1);
-    const dialog = screen.getByRole("dialog");
-    const video = within(dialog).getByLabelText(/AutoPromote product tour/i);
-    const pauseVideo = jest.spyOn(video, "pause").mockImplementation(() => {});
-    const releaseVideo = jest.spyOn(video, "load").mockImplementation(() => {});
-    pauseVideo.mockClear();
-    releaseVideo.mockClear();
-    expect(video).not.toHaveAttribute("src");
-    fireEvent.click(within(dialog).getByRole("button", { name: /Play product tour/ }));
-    expect(video).toHaveAttribute("src", PRODUCT_TOUR.src);
-    expect(video).toHaveAttribute("preload", "none");
-    expect(document.body.style.overflow).toBe("hidden");
-    fireEvent.click(within(dialog).getByRole("button", { name: "Close demo" }));
-    expect(pauseVideo).toHaveBeenCalledTimes(1);
-    expect(video).not.toHaveAttribute("src");
-    expect(releaseVideo).toHaveBeenCalledTimes(2);
-    expect(HTMLDialogElement.prototype.close).toHaveBeenCalled();
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(document.body.style.overflow).toBe("");
-    expect(trigger).toHaveFocus();
+    expect(screen.getByRole("button", { name: /Explore the workspace/ })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/AutoPromote product tour/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Analytics|Smart Promo|Idea-to-Video/i)).not.toBeInTheDocument();
   });
 
   test("features and changelog avoid retired viral bonus promises", () => {

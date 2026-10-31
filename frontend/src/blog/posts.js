@@ -22,7 +22,7 @@ const posts = [
     title: "Welcome to AutoPromote",
     date: "2026-01-02",
     content:
-      "# Welcome to AutoPromote\n\nWe're excited to share a publishing platform focused on connected uploads, scheduling, analytics, and practical workflow improvements. This blog will feature product updates, release notes, and honest guidance about what is live, what depends on your setup, and what is still evolving.\n",
+      "# Welcome to AutoPromote\n\nWe're excited to share a publishing platform focused on connected uploads, scheduling, delivery status, and practical workflow improvements. This blog will feature product updates, release notes, and honest guidance about what is live, what depends on your setup, and what is still evolving.\n",
   },
   {
     slug: "release-2026-01",

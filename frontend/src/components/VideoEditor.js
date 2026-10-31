@@ -11,7 +11,6 @@ import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage } from "fire
 import MultiCamCombiner from "./MultiCamCombiner";
 import ViralClipStudio from "./ViralClipStudio"; // Import the new Studio component
 import ThumbnailGenerator from "./ThumbnailGenerator";
-import SmartPromoSummaryPanel from "./SmartPromoSummaryPanel";
 import { sanitizeUrl } from "../utils/security";
 import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
@@ -220,8 +219,6 @@ function VideoEditor({
   const analyzeCost = editing?.features?.findViralClips?.creditCost || creditCosts?.analyze || 8;
   const renderClipCost =
     editing?.features?.clipRender?.creditCost || creditCosts?.["render-clip"] || 5;
-  const promoSummaryCost =
-    editing?.features?.smartPromoSummary?.creditCost || creditCosts?.["promo-summary"] || 18;
   const totalCreditsAvailable =
     subscriptionCredits?.remaining ?? creditBalance ?? creditBreakdown?.remaining ?? null;
   const monthlyIncludedRemaining =
@@ -651,7 +648,6 @@ function VideoEditor({
   const blobUrlRef = useRef(null);
   const [showThumbnailGenerator, setShowThumbnailGenerator] = useState(false);
   const [thumbnailData, setThumbnailData] = useState(null); // { dataUrl, storageUrl, text, time }
-  const [showSmartPromoSummary, setShowSmartPromoSummary] = useState(false);
 
   // Cinematic Effects — all CSS-based, no backend needed
   const {
@@ -1064,85 +1060,6 @@ function VideoEditor({
     setShowThumbnailGenerator(false);
   };
 
-  const handlePromoClipUse = async clip => {
-    if (!clip?.url) {
-      setStatusMessage("Promo clip is missing a usable URL.");
-      return;
-    }
-
-    const safeName = `${
-      (clip.promoCaption || clip.title || "promo-clip")
-        .replace(/[^a-zA-Z0-9._-]+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "") || "promo-clip"
-    }.mp4`;
-
-    try {
-      setStatusMessage("Loading promo clip into the editor...");
-      const response = await fetch(clip.url, { mode: "cors" });
-      if (!response.ok) throw new Error(`Promo clip fetch failed with ${response.status}`);
-      const blob = await response.blob();
-      const promoFile = new File([blob], safeName, { type: blob.type || "video/mp4" });
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-        blobUrlRef.current = null;
-      }
-      const objectUrl = URL.createObjectURL(promoFile);
-      blobUrlRef.current = objectUrl;
-      promoFile.expiresAt = clip.expiresAt || null;
-      promoFile.promoCaption = clip.promoCaption || clip.title || "";
-      promoFile.sourceType = "promo_summary_clip";
-      promoFile.remoteUrl = clip.url;
-      promoFile.promoVisualAssets = clip.visualAssets || [];
-      promoFile.selectedPromoVisual = clip.selectedVisual || null;
-      setProcessedFile(promoFile);
-      setVideoSrc(objectUrl);
-      if (clip.selectedVisual?.url) {
-        setThumbnailData({
-          dataUrl: clip.selectedVisual.url,
-          storageUrl: clip.selectedVisual.url,
-          text: clip.selectedVisual.hookText || clip.titleSuggestion || clip.hookText || "",
-          time: 0,
-          source: "smart_promo_visual",
-          asset: clip.selectedVisual,
-        });
-      }
-    } catch (error) {
-      console.warn("Could not hydrate promo clip locally; using remote URL fallback.", error);
-      const refreshedUrl = clip.url.includes("?")
-        ? `${clip.url}&t=${Date.now()}`
-        : `${clip.url}?t=${Date.now()}`;
-      setProcessedFile({
-        name: safeName,
-        type: "video/mp4",
-        url: clip.url,
-        isRemote: true,
-        expiresAt: clip.expiresAt || null,
-        promoCaption: clip.promoCaption || clip.title || "",
-        sourceType: "promo_summary_clip",
-        promoVisualAssets: clip.visualAssets || [],
-        selectedPromoVisual: clip.selectedVisual || null,
-      });
-      setVideoSrc(refreshedUrl);
-      if (clip.selectedVisual?.url) {
-        setThumbnailData({
-          dataUrl: clip.selectedVisual.url,
-          storageUrl: clip.selectedVisual.url,
-          text: clip.selectedVisual.hookText || clip.titleSuggestion || clip.hookText || "",
-          time: 0,
-          source: "smart_promo_visual",
-          asset: clip.selectedVisual,
-        });
-      }
-    }
-
-    setShowSmartPromoSummary(false);
-    setStatusMessage(
-      `Loaded promo clip${clip.selectedVisual?.url ? " with selected promo visual" : ""}: ${
-        clip.promoCaption || clip.title || "Promo cut"
-      }`
-    );
-  };
 
   const handleSave = () => {
     const payload = processedFile || file;
@@ -2087,25 +2004,6 @@ function VideoEditor({
     return cameraCombiner;
   }
 
-  if (showSmartPromoSummary) {
-    const promoPanel = (
-      <SmartPromoSummaryPanel
-        sourceFile={processedFile || file}
-        sourceUrl={videoSrc}
-        creditBalance={creditBalance}
-        creditCosts={creditCosts}
-        onClose={() => setShowSmartPromoSummary(false)}
-        onUseClip={handlePromoClipUse}
-        onStatusChange={setStatusMessage}
-      />
-    );
-
-    if (typeof document !== "undefined" && document.body) {
-      return createPortal(promoPanel, document.body);
-    }
-
-    return promoPanel;
-  }
 
   return (
     <div className="video-editor-container">
@@ -2466,9 +2364,6 @@ function VideoEditor({
                 <span className="studio-launch-badge metered">
                   Render Final Clip: {renderClipCost} credits
                 </span>
-                <span className="studio-launch-badge metered">
-                  Smart Promo Summary: {promoSummaryCost} credits
-                </span>
               </div>
               <div className="studio-launch-billing-note">
                 <strong>{totalCreditsAvailable ?? "..."}</strong> editing credits available
@@ -2506,17 +2401,6 @@ function VideoEditor({
                   type="button"
                 >
                   Open Podcast Cam Combiner
-                </button>
-                <button
-                  className="legacy-toggle-btn multicam-launch-btn"
-                  onClick={() => {
-                    setStatusMessage("");
-                    setShowSmartPromoSummary(true);
-                  }}
-                  disabled={processing}
-                  type="button"
-                >
-                  Smart Promo Summary
                 </button>
               </div>
             </div>
