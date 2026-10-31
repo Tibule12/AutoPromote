@@ -78,22 +78,24 @@ async function render({ config, jobId, spec, bucket, onRendering }) {
   try {
     await ssh(config, `umask 077; mkdir -p ${quote(remote + '/renderer/assets')} ${quote(remote + '/output')}`);
     const renderer = path.resolve(__dirname, '../..', 'studio_3d_renderer');
-    for (const name of ['spec.py', 'render.py', 'blender_scene.py', 'brand_ident.py', 'vector_geometry.py', 'assets/autopromote-vector-logo.json']) await copy(config, path.join(renderer, name), `${remote}/renderer/${name}`);
+    for (const name of ['spec.py', 'render.py', 'blender_scene.py', 'scene_motion.py', 'plane_scene.py', 'brand_ident.py', 'vector_geometry.py', 'assets/autopromote-vector-logo.json']) await copy(config, path.join(renderer, name), `${remote}/renderer/${name}`);
     const specFile = path.join(directory, 'spec.json');
     await fs.writeFile(specFile, JSON.stringify(spec), { mode: 0o600 });
     await copy(config, specFile, `${remote}/spec.json`);
     let assetArgs = '';
     if (spec.scene.assetStoragePath) {
       const expected = `temp_studio_3d/${spec.ownerUid}/${jobId}/asset.`;
-      if (!spec.scene.assetStoragePath.startsWith(expected) || !/^(png|jpg|webp)$/.test(spec.scene.assetStoragePath.slice(expected.length))) throw new Error('Invalid NVIDIA asset path');
+      const video=spec.scene.assetType==='video';
+      if (!spec.scene.assetStoragePath.startsWith(expected) || !(video ? /^(mp4)$/ : /^(png|jpg|webp)$/).test(spec.scene.assetStoragePath.slice(expected.length))) throw new Error('Invalid NVIDIA asset path');
       const asset = path.join(directory, 'asset');
       await bucket.file(spec.scene.assetStoragePath).download({ destination: asset });
       const data = await fs.readFile(asset);
-      if (!data.length || data.length > 5 * 1024 * 1024 || !(
+      if (!data.length || data.length > (video?50:5) * 1024 * 1024 || (video ?
+        crypto.createHash('sha256').update(data).digest('hex')!==spec.scene.assetContentHash : !(
         data.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')) ||
         data.subarray(0, 3).equals(Buffer.from('ffd8ff', 'hex')) ||
         (data.subarray(0, 4).toString() === 'RIFF' && data.subarray(8, 12).toString() === 'WEBP')
-      )) throw new Error('Invalid NVIDIA image content');
+      ))) throw new Error('Invalid NVIDIA asset content');
       await copy(config, asset, `${remote}/asset`);
       assetArgs = ' --asset /job/asset';
     }

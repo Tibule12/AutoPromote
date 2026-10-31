@@ -6,7 +6,8 @@ const root = path.resolve(__dirname, '../..');
 const baseFolder = path.join(root, 'reports/studio-motion-flow-takeover-20261031');
 const cinematicVariant = process.env.STUDIO_MOTION_VARIANT === 'cinematic';
 const dialogueVariant = process.env.STUDIO_MOTION_VARIANT === 'dialogue';
-const folder = dialogueVariant ? path.join(baseFolder, 'dialogue') : cinematicVariant ? path.join(baseFolder, 'cinematic') : baseFolder;
+const textureVariant = process.env.STUDIO_MOTION_VARIANT === 'video-texture';
+const folder = textureVariant ? path.join(baseFolder,'video-texture') : dialogueVariant ? path.join(baseFolder, 'dialogue') : cinematicVariant ? path.join(baseFolder, 'cinematic') : baseFolder;
 fs.mkdirSync(folder, {recursive:true});
 process.env.STUDIO_TEMPLATE_PROOF_DIR = folder;
 process.env.STUDIO_KINETIC_PROOF_DIR = folder;
@@ -18,6 +19,7 @@ const directory = process.argv[2], phase = process.argv[3] || 'author';
 const config = JSON.parse(fs.readFileSync(path.join(directory, 'browser-private.json')));
 let title = cinematicVariant && (phase !== 'cinematic' || ['Editable Project.autopromote.json','Interrupted Project.autopromote.json'].some(name=>fs.existsSync(path.join(folder,name)))) ? 'Motion & Flow — Evidence Reconstruction' : 'Motion & Flow — Investigative Motion Test';
 if (dialogueVariant) title = 'Motion & Flow — Dialogue Opening';
+if (textureVariant) title = 'Motion & Flow — Open World';
 const source = name => path.join(baseFolder, 'media', name);
 const stamp = name => path.join(folder, name);
 const browserState = stamp('session.private.json');
@@ -92,11 +94,11 @@ async function entry(p) {
 }
 async function open(p) {
   if (!await p.getByRole('button', { name: title, exact: true }).count()) {
-    const names = phase === 'render-raw' ? ['Raw Project.autopromote.json'] : phase === 'portable' ? ['Portable Project.autopromote.json'] : ['Editable Project.autopromote.json', 'Interrupted Project.autopromote.json'];
-    const file = ['cinematic','dialogue'].includes(phase) ? (names.map(stamp).find(f=>fs.existsSync(f)) || path.join(baseFolder, 'Raw Project.autopromote.json')) : names.map(stamp).find(f => fs.existsSync(f));
+    const names = phase === 'texture-rig' ? ['Interrupted Project.autopromote.json','Editable Project.autopromote.json'] : phase === 'render-raw' ? ['Raw Project.autopromote.json'] : phase === 'portable' ? ['Portable Project.autopromote.json'] : ['Editable Project.autopromote.json', 'Interrupted Project.autopromote.json'];
+    const file = ['cinematic','dialogue','video-texture'].includes(phase) ? (names.map(stamp).find(f=>fs.existsSync(f)) || (phase==='video-texture'?path.join(baseFolder,'dialogue/Portable Project.autopromote.json'):path.join(baseFolder, 'Raw Project.autopromote.json'))) : names.map(stamp).find(f => fs.existsSync(f));
     assert(file, 'A native project backup is required to restore this browser.');
     await p.getByLabel('Restore project backup', { exact: true }).setInputFiles(file);
-    if (phase === 'dialogue') {
+    if (['dialogue','video-texture'].includes(phase)) {
       const rawTitle = JSON.parse(fs.readFileSync(file)).name;
       await p.getByRole('button', { name: rawTitle, exact: true }).click();
       await h.rail(p); await pause(p);
@@ -505,11 +507,221 @@ async function dialogue(p) {
     await reviewStills(p);
   } finally {await stop();}
 }
+async function videoTexture(p) {
+  const stop=await recording(p);
+  try{
+    let saved=await save(p,'texture-before');
+    await p.getByTestId('studio-mode-fxflow').click();
+    const panel=p.getByTestId('studio-scene-actions');if(!await panel.evaluate(el=>el.open))await panel.locator('summary').click();
+    const old=saved.snapshot.overlays.find(o=>o.name==='Synchronized recording plane');
+    const plan={format:'autopromote-scene-actions',version:1,projectId:saved.id,baseRevision:saved.snapshot.studioDocument.revision,
+      name:'Replace recording surface with editable 3D scene',actions:[{type:'remove_keys',targetId:old.id,property:'opacity'},
+        {type:'keys',targetId:old.id,keys:[{property:'opacity',time:2.5,value:0,easing:'linear'}]}]};
+    fs.writeFileSync(stamp('replace-plane-actions.json'),JSON.stringify(plan,null,2));
+    await panel.getByLabel('Scene action plan',{exact:true}).setInputFiles(stamp('replace-plane-actions.json'));
+    await panel.getByRole('button',{name:'Apply reviewed scene actions',exact:true}).click();
+    await panel.getByRole('status').filter({hasText:'Scene actions applied'}).waitFor();
+    await seek(p,2.5);await q.tool(p,'Motion');await p.getByRole('button',{name:'3D Motion',exact:true}).click();
+    await p.getByTitle('Add Recording Plane at playhead',{exact:true}).click();
+    const controls=p.getByTestId('studio-3d-panel');
+    await controls.getByLabel('End (s)',{exact:true}).fill('7.4');
+    await controls.getByLabel('3D video texture source',{exact:true}).selectOption(saved.snapshot.projectMedia[0].id);
+    await controls.getByLabel('Texture source start (s)',{exact:true}).fill('2.5');
+    await controls.getByRole('button',{name:'Advanced',exact:true}).click();
+    for(const [time,values] of [[2.5,{X:50,Y:50,Z:0,Scale:1.37,'Rotate Y':0}],
+      [3.35,{X:68,Y:50,Z:0,Scale:.95,'Rotate Y':-12}],
+      [6.65,{X:68,Y:50,Z:.2,Scale:.95,'Rotate Y':-10}],
+      [7.4,{X:50,Y:50,Z:0,Scale:1.37,'Rotate Y':0}]]){
+      await seek(p,time);
+      for(const [label,value] of Object.entries(values))await controls.getByLabel(label==='X'?'X (%)':label==='Y'?'Y (%)':label,{exact:true}).fill(String(value));
+      await controls.getByRole('button',{name:/Add pose keyframe at/}).click();
+    }
+    await controls.getByLabel('Camera motion',{exact:true}).fill('.6');
+    saved=await save(p,'texture-authored');await backup(p,'Editable Project');
+    const scene=saved.snapshot.threeDScenes[0];assert.equal(scene.assetSourceStart,2.5);assert.equal(scene.keyframes.length,4);
+    await seek(p,4);
+    await p.screenshot({path:stamp('native-3d-authoring.png')});
+    await controls.getByRole('button',{name:'Generate HQ 3D Preview',exact:true}).click();
+    await controls.getByLabel('HQ 3D preview',{exact:true}).waitFor({timeout:600000});
+    saved=await save(p,'texture-preview-completed');await backup(p,'Editable Project');
+    fs.writeFileSync(stamp('native-3d-authoring.json'),JSON.stringify({projectId:saved.id,canonicalHash:hash(saved.snapshot.studioDocument),
+      scene:saved.snapshot.threeDScenes[0],normalStudioUI:true,sourceIn:2.5,modelCalls:0,gpuJobs:0},null,2));
+  }finally{await stop();}
+}
+async function openWorld(p) {
+  const files=['City','Footsteps','Open trail','Autumn','Coast','Summit'];
+  await p.locator('.creator-studio-dropzone input[type=file]').setInputFiles(stamp(`open-world-sources/${files[0]}.mp4`));
+  await p.getByRole('button',{name:'Open Creator Studio',exact:true}).click({timeout:180000});
+  await h.rail(p);await pause(p);await p.getByLabel('Project name',{exact:true}).fill(title);
+  const stop=await recording(p);
+  try{
+    await q.tool(p,'Reframe');await p.getByTestId('reframe-aspect-16-9').click();await p.getByTestId('reframe-preserve-frame').click();
+    const rounded=p.getByLabel('Rounded main footage',{exact:true});if(await rounded.count()&&await rounded.isChecked())await rounded.uncheck();
+    for(const name of files.slice(1)){
+      await h.rail(p);await p.getByTestId('project-media-import-input').setInputFiles(stamp(`open-world-sources/${name}.mp4`));
+      const card=p.locator('.studio-media-card').filter({has:p.locator('strong',{hasText:name+'.mp4'})});
+      await card.getByRole('button',{name:'Preview '+name+'.mp4',exact:true}).click();
+      await card.getByRole('button',{name:'Add to sequence',exact:true}).click({timeout:90000});
+    }
+    await q.tool(p,'Sound');await p.getByLabel('Use voice repair on export',{exact:true}).uncheck();
+    await save(p,'open-world-raw');await backup(p,'Raw Project');
+    await seek(p,0);await q.tool(p,'Graphics');
+    const graphics=p.getByTestId('studio-graphics-import');if(!await graphics.evaluate(el=>el.open))await graphics.locator('summary').click();
+    await p.getByLabel('Graphics composition file',{exact:true}).setInputFiles(stamp('open-world.graphics.json'));
+    await graphics.getByRole('status').filter({hasText:'imported'}).waitFor();
+    await q.tool(p,'Sound');
+    await p.getByLabel('Use voice repair on export',{exact:true}).uncheck();
+    await p.getByTestId('background-sound-input').setInputFiles(path.join(root,'reports/studio-break-loop-depth-20261015/assets/Break-loop-score-master.wav'));
+    const duck=p.getByLabel('Duck under speech',{exact:true});if(await duck.count()&&await duck.isChecked())await duck.uncheck();
+    await range(p.getByText('Background volume',{exact:true}).locator('..').locator('..').locator('input'),55);
+    await range(p.getByLabel('Music fade in',{exact:true}),1.2);await range(p.getByLabel('Music fade out',{exact:true}),2.5);
+    let saved=await save(p,'open-world-assembly');await backup(p,'Editable Project');
+    await seek(p,5.5);await q.tool(p,'Motion');await p.getByRole('button',{name:'3D Motion',exact:true}).click();
+    await p.getByTitle('Add Recording Plane at playhead',{exact:true}).click();
+    const controls=p.getByTestId('studio-3d-panel');
+    await controls.getByLabel('End (s)',{exact:true}).fill('8.8');
+    await controls.getByLabel('3D video texture source',{exact:true}).selectOption(saved.snapshot.projectMedia[0].id);
+    await controls.getByLabel('Texture source start (s)',{exact:true}).fill('5.5');
+    await controls.getByRole('button',{name:'Advanced',exact:true}).click();
+    for(const [time,values] of [[5.5,{X:50,Y:50,Z:0,Scale:1.37,'Rotate Y':0}],
+      [6.15,{X:64,Y:47,Z:0,Scale:.98,'Rotate Y':-17}],
+      [8.15,{X:64,Y:47,Z:.2,Scale:.98,'Rotate Y':-10}],
+      [8.8,{X:50,Y:50,Z:0,Scale:1.37,'Rotate Y':0}]]){
+      await seek(p,time);for(const [label,value]of Object.entries(values))await controls.getByLabel(label==='X'?'X (%)':label==='Y'?'Y (%)':label,{exact:true}).fill(String(value));
+      await controls.getByRole('button',{name:/Add pose keyframe at/}).click();
+    }
+    await controls.getByLabel('Camera motion',{exact:true}).fill('.6');
+    saved=await save(p,'open-world-authored');await backup(p,'Editable Project');
+    await controls.getByRole('button',{name:'Generate HQ 3D Preview',exact:true}).click();
+    await Promise.race([controls.getByLabel('HQ 3D preview',{exact:true}).waitFor({timeout:600000}),
+      controls.getByRole('alert').waitFor({timeout:600000}).then(async()=>{throw Error(await controls.getByRole('alert').innerText());})]);
+    saved=await save(p,'open-world-3d-completed');await backup(p,'Editable Project');
+    fs.writeFileSync(stamp('native-3d-authoring.json'),JSON.stringify({projectId:saved.id,canonicalHash:hash(saved.snapshot.studioDocument),
+      scene:saved.snapshot.threeDScenes[0],normalStudioUI:true,sourceIn:5.5,modelCalls:0,gpuJobs:0},null,2));
+  }finally{await stop();}
+}
+async function textureRig(p) {
+  const stop=await recording(p);
+  try{
+    await q.tool(p,'Motion');await p.getByRole('button',{name:'3D Motion',exact:true}).click();
+    const controls=p.getByTestId('studio-3d-panel');await controls.getByRole('button',{name:'Advanced',exact:true}).click();
+    for(const [time,values]of [[5.5,{'X (%)':50,'Y (%)':50,Z:0,Scale:1.37,'Rotate Y':0}],
+      [6.15,{'X (%)':64,'Y (%)':47,Z:0,Scale:.98,'Rotate Y':-17}],
+      [8.15,{'X (%)':64,'Y (%)':47,Z:.2,Scale:.98,'Rotate Y':-10}],
+      [8.8,{'X (%)':50,'Y (%)':50,Z:0,Scale:1.37,'Rotate Y':0}]]){
+      await seek(p,time);for(const [label,value]of Object.entries(values))await controls.getByLabel(label==='X'?'X (%)':label==='Y'?'Y (%)':label,{exact:true}).fill(String(value));
+      await controls.getByRole('button',{name:/Add pose keyframe at/}).click();
+    }
+    await controls.getByLabel('Camera motion',{exact:true}).fill('.6');
+    let saved=await save(p,'open-world-authored');await backup(p,'Editable Project');
+    await controls.getByRole('button',{name:'Generate HQ 3D Preview',exact:true}).click();
+    await controls.getByLabel('HQ 3D preview',{exact:true}).waitFor({timeout:600000});
+    saved=await save(p,'open-world-3d-completed');await backup(p,'Editable Project');
+    fs.writeFileSync(stamp('native-3d-authoring.json'),JSON.stringify({projectId:saved.id,canonicalHash:hash(saved.snapshot.studioDocument),
+      scene:saved.snapshot.threeDScenes[0],normalStudioUI:true,sourceIn:5.5,modelCalls:0,gpuJobs:0},null,2));
+  }finally{await stop();}
+}
+async function texturePreview(p){
+  await q.tool(p,'Motion');await p.getByRole('button',{name:'3D Motion',exact:true}).click();
+  const controls=p.getByTestId('studio-3d-panel'),stop=await recording(p);
+  try{
+    await controls.getByRole('button',{name:/^(Generate HQ 3D Preview|Retry HQ 3D Preview)$/}).click();
+    await Promise.race([controls.getByLabel('HQ 3D preview',{exact:true}).waitFor({timeout:600000}),
+      controls.getByRole('alert').waitFor({timeout:600000}).then(async()=>{throw Error(await controls.getByRole('alert').innerText());})]);
+    const saved=await save(p,'open-world-3d-completed');await backup(p,'Editable Project');
+    fs.writeFileSync(stamp('native-3d-authoring.json'),JSON.stringify({projectId:saved.id,canonicalHash:hash(saved.snapshot.studioDocument),
+      scene:saved.snapshot.threeDScenes[0],normalStudioUI:true,sourceIn:5.5,modelCalls:0,gpuJobs:0},null,2));
+  }finally{await stop();}
+}
+async function texturePolish(p){
+  const stop=await recording(p);
+  try{
+    await q.tool(p,'Graphics');const graphics=p.getByTestId('studio-graphics-import');
+    if(!await graphics.evaluate(el=>el.open))await graphics.locator('summary').click();
+    await p.getByLabel('Graphics composition file',{exact:true}).setInputFiles(stamp('departure.graphics.json'));
+    await graphics.getByRole('status').filter({hasText:'imported'}).waitFor();
+    const before=await save(p,'before-departure-refinement');
+    const path=before.snapshot.overlays.find(o=>o.name==='Journey path');
+    await p.getByTestId('studio-mode-fxflow').click();
+    const plan={format:'autopromote-scene-actions',version:1,projectId:before.id,baseRevision:before.snapshot.studioDocument.revision,
+      name:'Make the departure plane legible',actions:[{type:'keys',targetId:'main-video',keys:[[0,1],[5.5,1],[6.15,.16],[8.15,.16],[8.8,1]].map(([time,value])=>({property:'opacity',time,value,easing:'bezier',curve:[.22,1,.36,1]}))}]};
+    fs.writeFileSync(stamp('departure.scene-actions.json'),JSON.stringify(plan,null,2));
+    const actions=p.getByTestId('studio-scene-actions');if(!await actions.evaluate(el=>el.open))await actions.locator('summary').click();
+    await actions.getByLabel('Scene action plan',{exact:true}).setInputFiles(stamp('departure.scene-actions.json'));
+    await actions.getByRole('button',{name:'Apply reviewed scene actions',exact:true}).click();
+    await actions.getByRole('status').filter({hasText:'Scene actions applied'}).waitFor();
+    await p.getByTestId('dock-tab-comp_rig').click();
+    await p.getByTestId(`comp-layer-row-${path.id}`).locator('.ap-comp-layer-title').click();
+    await q.tool(p,'B-roll');await p.getByRole('button',{name:'Stretch',exact:true}).click();
+    await q.tool(p,'Motion');const transform=p.getByRole('button',{name:'Transform keyframes',exact:true});if(await transform.count())await transform.click();
+    await p.getByLabel('Target layer',{exact:true}).selectOption(path.id);
+    for(const [time,value]of [[5.5,0],[6.8,100]]){
+      await seek(p,time);await p.getByLabel('Stroke end',{exact:true}).fill(String(value));
+      await p.getByLabel('Stroke end',{exact:true}).press('Enter');
+      const add=p.getByRole('button',{name:'Add stroke end key at playhead',exact:true});if(await add.isVisible())await add.click();
+    }
+    await q.tool(p,'Motion');await p.getByRole('button',{name:'3D Motion',exact:true}).click();
+    const controls=p.getByTestId('studio-3d-panel');await controls.getByRole('button',{name:'Advanced',exact:true}).click();
+    for(const [time,values]of [[6.166666,{'X (%)':64,'Y (%)':47,Z:0,Scale:.75,'Rotate Y':-17}],
+      [8.166665,{'X (%)':64,'Y (%)':47,Z:.2,Scale:.75,'Rotate Y':-10}]]){
+      await seek(p,time);for(const [label,value]of Object.entries(values))await controls.getByLabel(label,{exact:true}).fill(String(value));
+      await controls.getByRole('button',{name:/Add pose keyframe at/}).click();
+    }
+    await save(p,'departure-refined');await backup(p,'Editable Project');
+  }finally{await stop();}
+  await texturePreview(p);
+}
+async function textureRecover(p){
+  await q.tool(p,'Motion');await p.getByRole('button',{name:'3D Motion',exact:true}).click();
+  const controls=p.getByTestId('studio-3d-panel'),stop=await recording(p);
+  try{
+    const invalid={...JSON.parse(fs.readFileSync(stamp('completed-3d-preview-receipt.json'))),sceneHash:'0'.repeat(64)};
+    fs.writeFileSync(stamp('mismatched-3d-preview-receipt.json'),JSON.stringify(invalid));
+    await controls.getByLabel('Restore 3D preview receipt',{exact:true}).setInputFiles(stamp('mismatched-3d-preview-receipt.json'));
+    await controls.getByRole('alert').filter({hasText:'different scene settings'}).waitFor();
+    await controls.getByLabel('Restore 3D preview receipt',{exact:true}).setInputFiles(stamp('completed-3d-preview-receipt.json'));
+    await controls.getByRole('alert').filter({hasText:'different scene settings'}).waitFor({state:'hidden',timeout:30000});
+    await Promise.race([controls.getByLabel('HQ 3D preview',{exact:true}).waitFor({timeout:30000}),
+      controls.getByRole('alert').waitFor({timeout:30000}).then(async()=>{throw Error(await controls.getByRole('alert').innerText());})]);
+    const saved=await save(p,'open-world-3d-completed');await backup(p,'Editable Project');
+    fs.writeFileSync(stamp('native-3d-authoring.json'),JSON.stringify({projectId:saved.id,canonicalHash:hash(saved.snapshot.studioDocument),scene:saved.snapshot.threeDScenes[0],normalStudioUI:true,existingCompletedJobRecovered:true,sourceIn:5.5,modelCalls:0,gpuJobs:0},null,2));
+  }finally{await stop();}
+}
+async function textureShade(p){
+  const stop=await recording(p);
+  try{
+    await q.tool(p,'Graphics');const graphics=p.getByTestId('studio-graphics-import');
+    if(!await graphics.evaluate(el=>el.open))await graphics.locator('summary').click();
+    await p.getByLabel('Graphics composition file',{exact:true}).setInputFiles(stamp('departure-shade.graphics.json'));
+    await graphics.getByRole('status').filter({hasText:'imported'}).waitFor();
+    const before=await save(p,'before-shade-optimization'),shade=before.snapshot.overlays.find(o=>o.name==='Departure shade');
+    const plan={format:'autopromote-scene-actions',version:1,projectId:before.id,baseRevision:before.snapshot.studioDocument.revision,name:'Use a native timed shade layer',
+      actions:[{type:'remove_keys',targetId:'main-video',property:'opacity'},
+        {type:'move_layer',targetId:shade.id,beforeId:before.snapshot.overlays.find(o=>o.name==='Light falloff').id}]};
+    fs.writeFileSync(stamp('departure-shade.scene-actions.json'),JSON.stringify(plan,null,2));
+    await p.getByTestId('studio-mode-fxflow').click();const actions=p.getByTestId('studio-scene-actions');if(!await actions.evaluate(el=>el.open))await actions.locator('summary').click();
+    await actions.getByLabel('Scene action plan',{exact:true}).setInputFiles(stamp('departure-shade.scene-actions.json'));
+    await actions.getByRole('button',{name:'Apply reviewed scene actions',exact:true}).click();await actions.getByRole('status').filter({hasText:'Scene actions applied'}).waitFor();
+    const saved=await save(p,'shade-optimized');await backup(p,'Editable Project');
+    assert.equal(saved.snapshot.motionKeyframes.filter(k=>k.targetId==='main-video'&&k.property==='opacity').length,0);
+  }finally{await stop();}
+}
+async function canonicalTextureSave(p){
+  await q.tool(p,'Motion');await p.getByRole('button',{name:'3D Motion',exact:true}).click();
+  const controls=p.getByTestId('studio-3d-panel');
+  assert.equal(await controls.getByLabel('Texture source start (s)',{exact:true}).inputValue(),'5.5');
+  const saved=await save(p,'canonical-video-texture');await backup(p,'Editable Project');
+  const scene=saved.snapshot.threeDScenes[0],layer=saved.snapshot.studioDocument.layers.find(l=>l.layerId===scene.id);
+  for(const key of ['assetType','assetSourceStart','assetAspect','assetContentHash'])assert.equal(layer.parameters[key],scene[key]);
+  assert.equal(scene.assetType,'video');assert.equal(scene.assetSourceStart,5.5);
+  fs.writeFileSync(stamp('canonical-video-texture.json'),JSON.stringify({projectId:saved.id,canonicalHash:hash(saved.snapshot.studioDocument),
+    sourceIn:5.5,sourceHash:scene.assetContentHash,canonicalVideoFieldsRetained:true,normalNativeSave:true,jobId:scene.hqPreviewJobId},null,2));
+}
 async function reviewStills(p) {
   await p.getByTestId('studio-mode-fxflow').click();
   await p.getByTestId('studio-comp-workbench').getByText('Main Programme',{exact:true}).click();
   await p.getByTestId('dock-tab-timeline').click();
-  for(const time of [0,2.5,3.7,5.2,6.25,7.4,8.9,10.9,12.9,14,15.25]) {
+  for(const time of textureVariant?[0,2.5,4,5.5,6.5,8.2,9,11,19,29,33,42,55,59.5]:[0,2.5,3.7,5.2,6.25,7.4,8.9,10.9,12.9,14,15.25]) {
     await seek(p,time);
     await p.waitForFunction(t=>{const v=document.querySelector('[data-testid="studio-after-video"]');
       const c=document.querySelector('[data-testid="studio-program-canvas"]');
@@ -556,8 +768,9 @@ async function review(p) {
   await p.getByTestId('studio-comp-workbench').getByText('Main Programme', { exact: true }).click();
   await p.getByTestId('dock-tab-timeline').click();
   const before = await save(p, 'review-before');
+  const programmeDuration=before.snapshot.studioDocument.outputTimeMap.at(-1).outputRange.endTick/90000;
   const samples = [];
-  for (const time of [0, 1.5, 3.5, 5, 6.5, 6.8, 7.5, 8.1, 9.5, 11, 12.5, 13.5, 14.5, 15.5]) {
+  for (const time of textureVariant?[0,2,5.5,6.5,8.2,9.9,10.1,15.9,16.1,23.9,24.1,30,36,42,48,54,59.9]:[0, 1.5, 3.5, 5, 6.5, 6.8, 7.5, 8.1, 9.5, 11, 12.5, 13.5, 14.5, 15.5]) {
     await seek(p, time);
     await p.waitForFunction(t=>{
       const video=document.querySelector('[data-testid="studio-after-video"]');
@@ -596,11 +809,12 @@ async function review(p) {
   if(profiler) {await profiler.send('Profiler.enable');await profiler.send('Profiler.start');}
   const stop = await recording(p);
   await p.getByRole('button', { name: 'Play edited preview', exact: true }).click();
-  await p.waitForFunction(() => {
+  await p.waitForFunction(end => {
     const canvas = document.querySelector('[data-testid="studio-program-canvas"]');
-    return Number(canvas?.dataset.programmeTime) >= 15.66;
-  }, null, { timeout: 60000 });
+    return Number(canvas?.dataset.programmeTime) >= end-2/24;
+  }, programmeDuration, { timeout: Math.max(60000,programmeDuration*4000) });
   await pause(p); const timing = await p.evaluate(() => window.__stopMotionFlowPlayback()); await stop();
+  if(textureVariant)fs.copyFileSync(stamp('editing-in-studio.mp4'),stamp('live-playback-in-studio.mp4'));
   if(profiler) {const result=await profiler.send('Profiler.stop');fs.writeFileSync(stamp('preview-cpu-profile.private.json'),JSON.stringify(result.profile));await profiler.detach();}
   const after = await save(p, 'review-after'); assert.equal(decisions(after.snapshot.studioDocument), decisions(before.snapshot.studioDocument));
   fs.writeFileSync(stamp('playback.json'), JSON.stringify({ ...timing, canonicalHash: hash(after.snapshot.studioDocument),
@@ -633,6 +847,7 @@ async function refineCinematic(p) {
 }
 async function exportPlayback(p) {
   const receipt=JSON.parse(fs.readFileSync(stamp('native-motion-flow/render-receipt.json')));
+  const programmeDuration=textureVariant?60:15.760333333333334;
   await p.getByTestId('dock-tab-timeline').click();await q.tool(p,'Export');
   const response=p.waitForResponse(r=>new URL(r.url()).pathname===`/api/media/status/${receipt.submittedJobId}` && r.ok(),{timeout:30000});
   await p.getByLabel('Restore export receipt',{exact:true}).setInputFiles(stamp('native-motion-flow/render-receipt.json'));
@@ -646,33 +861,43 @@ async function exportPlayback(p) {
   const transfer=await download;await transfer.saveAs(output);assert.equal(await transfer.failure(),null);
   assert.equal(hash(fs.readFileSync(output)),receipt.outputSha256);
   assert.equal(status.result?.outputSha256||status.outputSha256,receipt.outputSha256);
-  const technical=q.verifyMedia(output,{duration:15.760333333333334,width:1280,height:720,fps:24,frames:378});
+  const technical=q.verifyMedia(output,{duration:programmeDuration,width:1280,height:720,fps:24,frames:Math.round(programmeDuration*24)});
   fs.writeFileSync(stamp('native-motion-flow/recovered-download.json'),JSON.stringify({projectId:receipt.projectId,
     projectHash:receipt.projectHash,outputSha256:receipt.outputSha256,submittedJobId:receipt.submittedJobId,
     normalAuthenticatedReceiptRestore:true,actualNativeDownload:true,technical},null,2));
-  const video=p.getByTestId('studio-after-video');await video.evaluate(el=>{el.pause();el.currentTime=0;el.muted=true;});
+  const showFinished=p.getByRole('button',{name:'Show Finished Video',exact:true});
+  if(await showFinished.isVisible())await showFinished.click();
+  await p.waitForFunction(()=>document.querySelector('[data-testid="hook-preview-frame"]')?.classList.contains('has-rendered-output'));
+  const video=p.getByTestId('studio-after-video');
+  await p.waitForFunction(duration=>{const v=document.querySelector('[data-testid="studio-after-video"]');return v&&v.readyState>=2&&Math.abs(v.duration-duration)<.05;},programmeDuration,{timeout:30000});
+  await seek(p,0);await video.evaluate(el=>{el.pause();el.currentTime=0;el.muted=true;});
   await p.waitForTimeout(250);
   await video.evaluate(el=>{
-    window.__finalPlayback={maximumTime:0,ended:false};
+    window.__finalPlayback={maximumTime:0,ended:false,initialDuration:el.duration};
     const sample=()=>{window.__finalPlayback.maximumTime=Math.max(window.__finalPlayback.maximumTime,el.currentTime);};
-    el.addEventListener('timeupdate',sample);el.addEventListener('ended',()=>{sample();window.__finalPlayback.ended=true;});
+    const quality=()=>{const q=el.getVideoPlaybackQuality();return{time:el.currentTime,duration:el.duration,totalVideoFrames:q.totalVideoFrames,droppedVideoFrames:q.droppedVideoFrames,corruptedVideoFrames:q.corruptedVideoFrames};};
+    el.addEventListener('timeupdate',sample);el.addEventListener('ended',()=>{sample();window.__finalPlayback.ended=true;window.__finalPlayback.finalQuality=quality();});
+    window.__readFinalPlayback=()=>({...quality(),...window.__finalPlayback.finalQuality,...window.__finalPlayback});
   });
   const stop=await recording(p);
   await p.getByRole('button',{name:'Play edited preview',exact:true}).click();
   const start=Date.now();
-  await p.waitForFunction(()=>{
-    return window.__finalPlayback.ended || window.__finalPlayback.maximumTime>=15.7;
-  },null,{timeout:60000});
+  await p.waitForFunction(end=>{
+    return window.__finalPlayback.ended || window.__finalPlayback.maximumTime>=end-1/24;
+  },programmeDuration,{timeout:Math.max(60000,programmeDuration*2000)});
   const playbackWallMs=Date.now()-start;
-  const quality=await video.evaluate(el=>{el.pause();const q=el.getVideoPlaybackQuality();return {time:el.currentTime,duration:el.duration,
-    ...window.__finalPlayback,totalVideoFrames:q.totalVideoFrames,droppedVideoFrames:q.droppedVideoFrames,corruptedVideoFrames:q.corruptedVideoFrames};});
+  const quality=await p.evaluate(()=>window.__readFinalPlayback());
+  assert(quality.maximumTime>=programmeDuration-1/24,'The selected finished movie must reach its full programme duration');
+  assert(Math.abs(quality.initialDuration-programmeDuration)<.05);
+  await pause(p);
   await stop();
   fs.copyFileSync(stamp('editing-in-studio.mp4'),stamp('complete-export-playback-in-studio.mp4'));
   fs.writeFileSync(stamp('export-playback.json'),JSON.stringify({...quality,playbackWallMs,captureAndEncodeWallMs:Date.now()-start,
     nativeReceiptRestored:true,scope:'Finished export played through the signed-in Studio, separately from live graph preview.'},null,2));
 }
 async function main() {
-  const browser = await chromium.launch({ headless: true, args: ['--mute-audio', '--disable-gpu'] });
+  const browser = await chromium.launch({ headless: true, args: ['--mute-audio', '--disable-gpu',
+    ...(textureVariant?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[])] });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1100 },
     ...(fs.existsSync(browserState) ? { storageState: browserState } : {}) });
   await context.route('**/*', route => {
@@ -685,6 +910,7 @@ async function main() {
   try {
     await entry(p);
     if (phase === 'author') await author(p);
+    else if (phase === 'open-world') await openWorld(p);
     else {
       await open(p);
       if (phase === 'render') await render(p);
@@ -694,6 +920,24 @@ async function main() {
       else if (phase === 'polish') await polish(p);
       else if (phase === 'cinematic') await cinematic(p);
       else if (phase === 'dialogue') await dialogue(p);
+      else if (phase === 'video-texture') await videoTexture(p);
+      else if (phase === 'texture-rig') await textureRig(p);
+      else if (phase === 'texture-preview') await texturePreview(p);
+      else if (phase === 'texture-polish') await texturePolish(p);
+      else if (phase === 'texture-recover') await textureRecover(p);
+      else if (phase === 'texture-shade') await textureShade(p);
+      else if (phase === 'canonical-save') await canonicalTextureSave(p);
+      else if (phase === 'restore-native') {
+        const expected=JSON.parse(fs.readFileSync(stamp('Editable Project.autopromote.json'))),saved=await save(p,'independent-native-restore');
+        assert.equal(decisions(saved.snapshot.studioDocument),decisions(expected.snapshot.studioDocument));
+        const sourceFiles=saved.snapshot.projectMedia.map(m=>({name:m.name,sha256:m.contentHash,storagePath:m.storagePath}));
+        for(const source of sourceFiles)assert.equal(source.sha256,hash(fs.readFileSync(stamp('open-world-sources/'+source.name))));
+        const scene=saved.snapshot.threeDScenes[0],canonical=saved.snapshot.studioDocument.layers.find(l=>l.layerId===scene.id);
+        for(const key of ['assetType','assetSourceStart','assetAspect','assetContentHash'])assert.equal(canonical.parameters[key],scene[key]);
+        assert.equal(scene.assetSourceStart,5.5);
+        fs.writeFileSync(stamp('native-project-recovery.json'),JSON.stringify({projectId:saved.id,canonicalHash:hash(saved.snapshot.studioDocument),exactDecisions:true,sourceFiles,
+          canonicalVideoFieldsRetained:true,normalNativeBackupRestore:true,independentBrowser:true,scope:'Ordinary native backup with reauthorized owned media; source proxies are supplied separately. No claim of offline or deleted-storage recovery.'},null,2));
+      }
       else if (phase === 'stills') await reviewStills(p);
       else if (phase === 'settle-dialogue') await settleDialogue(p);
       else if (phase === 'refine') await refineCinematic(p);
@@ -712,7 +956,7 @@ async function main() {
                 artworkFiles:await Promise.all(record.snapshot.overlays.filter(o=>o.type==='image').map(inspect))});};};
         }),title);
         const {sourceFiles,artworkFiles}=restoredFiles;
-        for(const file of sourceFiles) assert.equal(file.sha256,hash(fs.readFileSync(source(file.name))));
+        for(const file of sourceFiles) assert.equal(file.sha256,hash(fs.readFileSync(textureVariant?stamp('open-world-sources/'+file.name):source(file.name))));
         if(dialogueVariant){
           const packaging=JSON.parse(fs.readFileSync(stamp('portable-packaging.json')));
           assert.equal(artworkFiles.length,packaging.artwork.length);

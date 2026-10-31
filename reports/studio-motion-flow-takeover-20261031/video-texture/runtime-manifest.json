@@ -1,0 +1,43 @@
+{
+  "worktree": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "branch": "feat/studio-motion-flow-20261031",
+  "demoProject": "demo-autopromote-credits",
+  "apiOrigin": "http://127.0.0.1:43927",
+  "storageOrigin": "http://127.0.0.1:41569",
+  "buildDir": "/tmp/autopromote-application-demo-5izIlF/build-canonical-migration",
+  "sourceSnapshots": {
+    "frontend/src/components/ViralClipStudio.js": "e1ae4e0917feaac1477b4d2c4e2ef7e1621fcfaebd50b253a2fe0fa2f235ef7f",
+    "frontend/src/components/studioProjectDocument.js": "39ff0e169c182a42fa5ef5bca6031b649f7ffcab499df02abffeb101e51f5bc9",
+    "frontend/src/components/threeD/Studio3DCanvas.js": "8c2cbfa7985db268f0177bf2e3c7e02f909eb2cd9a0c64fecd6d6ff2a9dc3e01",
+    "frontend/src/components/threeD/Studio3DPanel.js": "99be7de0bde41e36d50c64feb7913bc827b79c8e4e16edb11f5a5fec2f60697d",
+    "frontend/src/components/threeD/studio3DModel.js": "1b9c61a9161c6f9536d5909935b5c338c688ef4d404f98e8a17248f2668f9f91",
+    "src/services/studio3DLocal.js": "d5fdddb40ea741ba5233d83f2ac1d6991e5ea2c138c83a15c1b28c6ac6a2d322",
+    "src/services/studio3DService.js": "218b2012772cbac65f26eb36abdb2dbe676c515b49bb0b48a8d050f1773d6142",
+    "src/services/studio3DVideoAsset.js": "ffb41eea15962cb766c430f3387a4ca47dc87aa8a8a3a0c1e3a32f2f62d8f53e",
+    "studio_3d_renderer/plane_scene.py": "be497ee4ebc7be1b81d6693e08a238c355bb97652c762094a1d5f1be09effff1",
+    "studio_3d_renderer/scene_motion.py": "1e471ea50b6d5e27e62024d0d72657e5010362d1a3b504611b414740b92949e4",
+    "studio_3d_renderer/render.py": "8f34e652856b5a2a88a89aa765d1891538fe87f17178d0e5bf838c044765fc2d",
+    "python_media_worker/main_media_server.py": "07e0e24dd38829955228dee1c998cf94167b8f8ea19e43831f8ed5b93e486fd6",
+    "python_media_worker/studio_3d_overlay.py": "b3aeb6de446f4f9f0a7e2dc6083b49a0d0b3adc67fa5fb58f897def40d41f9eb",
+    "python_media_worker/studio_composition.py": "5e135b6feecc7988ecd0db87e736c07f488a8abcc1e476a266ad4831a4b66d7a",
+    "scripts/monetization/local-worker-execution.py": "411ca1e439b760ec0ce45eb89af4a8d429160aee5af0b97b41dd221b3135ab23"
+  },
+  "bundles": {
+    "static/js/main.baa508ae.js": "a35d02e27b77417e61875d5dafed1e74b06ae7de3b8280f37a61e15a04ed362d"
+  },
+  "buildAssetManifestSha256": "04ef8fca632fe2a79920969eb27d7455c96439ccf45cfc47ab8ffd0aed80a8fa",
+  "finalExecutionId": "de67b3d3b59294a818b136a7607aba632fb924aa6cee185d96d45158b02a1fcf",
+  "nativeJobId": "viral_2ee2f9158fb29db3b3f6a16d5e37527f126a84bb32c23499430efa10cf3ec8da",
+  "nativeOutputSha256": "c738100f8e6574cf36cf3ad00307c687305355e3a0f075ee5de7b0861c60c7d2",
+  "nativeProjectHash": "86b22b40e008b1c6bfbaf4d1e233d3c78888ea70d4a5efb8e598deface59f807",
+  "localCpuLimitSeconds": {
+    "ordinary": 600,
+    "withThreeDGraphics": 1200
+  },
+  "localWallCeilingSeconds": 1800,
+  "artifactCeilingBytes": 134217728,
+  "paidModelCalls": 0,
+  "cloudGpuJobs": 0,
+  "productionWrites": 0,
+  "nodeProviderProvenanceLimit": "The final provider process loaded before the subsequent terminal-handoff-failure repair; its loaded module byte hash was not separately captured. The newer repair is verified by the actual fixture subprocess tests, not claimed as code exercised by this successful movie."
+}

@@ -9,6 +9,7 @@ export const STUDIO_3D_TEMPLATES = [
   { id: "impact_explosion", name: "Impact Word Explosion", accent: "#fbbf24", material: "gold", entrance: "burst" },
   { id: "speaker_intro", name: "Speaker Introduction", accent: "#8b5cf6", material: "matte", entrance: "slide" },
   { id: "comparison_card", name: "3D Comparison Card", accent: "#22d3ee", material: "glass", entrance: "orbit" },
+  { id: "media_plane", name: "Recording Plane", accent: "#d5aa68", material: "matte", entrance: "fade" },
 ];
 
 export const STUDIO_3D_MATERIALS = ["chrome", "glass", "neon", "gold", "matte", "holographic"];
@@ -63,13 +64,13 @@ export function normalizeStudio3DScene(raw = {}) {
   const template = STUDIO_3D_TEMPLATES.find(item => item.id === raw.template) || STUDIO_3D_TEMPLATES[0];
   const startTime = between(raw.startTime, 0, 86400, 0);
   const duration = between(raw.duration, 0.5, 10, 5);
-  return {
+  const scene = {
     version: 1,
     id: clean(raw.id, 100),
     template: template.id,
     name: clean(raw.name || template.name, 80),
-    text: clean(raw.text || "AUTOPROMOTE", 80),
-    secondary: clean(raw.secondary || "CREATE WHAT MOVES PEOPLE", 100),
+    text: clean(raw.text ?? "AUTOPROMOTE", 80),
+    secondary: clean(raw.secondary ?? "CREATE WHAT MOVES PEOPLE", 100),
     startTime,
     duration,
     endTime: startTime + duration,
@@ -77,6 +78,12 @@ export function normalizeStudio3DScene(raw = {}) {
     assetUrl: clean(raw.assetUrl, 2048),
     assetStoragePath: clean(raw.assetStoragePath, 512),
     assetName: clean(raw.assetName, 128),
+    ...(raw.assetType === "video" ? {
+      assetType: "video",
+      assetSourceStart: between(raw.assetSourceStart, 0, 86400, 0),
+      assetAspect: between(raw.assetAspect, .25, 4, 16 / 9),
+      assetContentHash: clean(raw.assetContentHash, 64),
+    } : {}),
     fontFamily: choice(raw.fontFamily, ["studio", "sans", "serif"], "studio"),
     fontWeight: choice(raw.fontWeight, ["regular", "bold", "black"], "bold"),
     textAlign: choice(raw.textAlign, ["left", "center", "right"], "center"),
@@ -116,10 +123,17 @@ export function normalizeStudio3DScene(raw = {}) {
     hqPreviewJobId: clean(raw.hqPreviewJobId, 100),
     keyframes: normalizeKeyframes(raw.keyframes, startTime, startTime + duration),
   };
+  if(scene.assetType==='video'){
+    const {hqPreviewUrl,hqPreviewRevision,hqPreviewJobId,...legacy}=scene;
+    const {assetUrl,...bound}=legacy;
+    if(hqPreviewRevision===sceneRevisionToken(JSON.stringify(legacy)))scene.hqPreviewRevision=sceneRevisionToken(JSON.stringify(bound));
+  }
+  return scene;
 }
 
 export function createStudio3DScene(template, startTime, id) {
-  return normalizeStudio3DScene({ template, startTime, id, text: "AutoPromote" });
+  return normalizeStudio3DScene({ template, startTime, id,
+    ...(template==='media_plane'?{text:'',secondary:'',hold:'still',intensity:0,bloom:0}:{text:'AutoPromote'}) });
 }
 
 export function studio3DSceneRevision(scene) {
@@ -129,7 +143,14 @@ export function studio3DSceneRevision(scene) {
     hqPreviewJobId: _hqPreviewJobId,
     ...renderValues
   } = normalizeStudio3DScene(scene);
+  if(renderValues.assetType==='video')delete renderValues.assetUrl;
   return sceneRevisionToken(JSON.stringify(renderValues));
+}
+
+// Matches the API's validated render identity, excluding expiring transport URLs.
+export function studio3DRenderIdentity(scene) {
+  const {assetUrl,hqPreviewUrl,hqPreviewRevision,hqPreviewJobId,...values}=normalizeStudio3DScene(scene);
+  return JSON.stringify(values);
 }
 
 export function studio3DPose(raw, time) {

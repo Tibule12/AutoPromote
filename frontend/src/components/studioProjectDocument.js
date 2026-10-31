@@ -75,6 +75,7 @@ const assetReference = clip => {
 
 const LAYER_PARAMETER_FIELDS = [
   "version", "name", "secondary", "endTime", "assetStoragePath", "assetName",
+  "assetType", "assetSourceStart", "assetAspect", "assetContentHash",
   "sourceStoragePath", "storagePath", "sourceClipId", "contentHash", "sha256",
   "hqPreviewRevision", "hqPreviewJobId",
   "textAlign", "lineSpacing", "primaryColor", "secondaryColor",
@@ -497,6 +498,17 @@ export const projectStudioEditableStateToSnapshot = (document, transportSnapshot
         delete transport[key];
       const path = item.assetStoragePath || item.sourceStoragePath || item.storagePath;
       const oldPath = old?.assetStoragePath || old?.sourceStoragePath || old?.storagePath;
+      // The initial video-texture snapshots predate canonical ownership of
+      // these four fields. Migrate only an intact, same-source legacy video;
+      // the version marker prevents resurrecting later canonical deletions.
+      const videoFields=['assetType','assetSourceStart','assetAspect','assetContentHash'];
+      if(collection==='threeDScenes' && document.compatibility?.videoTextureFieldsVersion!==1 &&
+        videoFields.every(key=>item[key]===undefined) && path===oldPath && String(path).startsWith('studio/sources/') &&
+        old?.assetType==='video' && /^[a-f0-9]{64}$/.test(old.assetContentHash||'') &&
+        Number.isFinite(old.assetSourceStart) && old.assetSourceStart>=0 &&
+        Number.isFinite(old.assetAspect) && old.assetAspect>=.25 && old.assetAspect<=4){
+        for(const key of videoFields)transport[key]=old[key];
+      }
       const hash = item.contentHash || item.sha256;
       const oldHash = old?.contentHash || old?.sha256;
       if ((path && path !== oldPath) || (hash && hash !== oldHash)) {
@@ -819,6 +831,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       editableStateVersion: 1,
       visualStateVersion: 1,
       editStateVersion: 1,
+      ...((snapshot.threeDScenes || []).some(scene=>scene.assetType==='video') || previousDocument?.compatibility?.videoTextureFieldsVersion===1
+        ? {videoTextureFieldsVersion:1} : {}),
       layerComposition: Array.isArray(snapshot.compositionOrder) ? "ordered_flat_layers" : "separate_worker_stages",
     },
   };

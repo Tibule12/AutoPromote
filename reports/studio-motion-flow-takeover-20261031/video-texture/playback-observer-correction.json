@@ -1,0 +1,5 @@
+{
+  "initialObservationRejected": true,
+  "reason": "The receipt was restored but the UI remained on the ten-second source. The observer incorrectly accepted any ended event. It now selects Show Finished Video, checks its 60s duration, retains the same element metrics and requires maximum programme time to reach the final frame.",
+  "nativeExportUnchanged": true
+}

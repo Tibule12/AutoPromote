@@ -149,7 +149,7 @@ import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { titleAnimationPose, normalizeStudioTitleText } from "./studioTitleLayout";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
 import { validateSubjectVfxExport, resolveSubjectVfxProgrammePreview, subjectVfxRevision } from "./studioSubjectVfxContract";
-import { normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
+import { normalizeStudio3DScene, studio3DSceneRevision, studio3DRenderIdentity } from "./threeD/studio3DModel";
 import { SOUND_EFFECT_PRESETS, synthesizeEffect } from "./motion/soundDesign";
 import VideoScopes from "./VideoScopes";
 import {
@@ -3901,6 +3901,8 @@ const ViralClipStudio = ({
         current && (current.sourceStoragePath || current.storagePath) === storagePath ? { ...current, url: result.url } : current);
       // 3D asset access is recovered separately: legacy HQ revisions include
       // assetUrl and must not be invalidated by this media-only refresh.
+      setThreeDScenes(current=>current.map(scene=>scene.assetType==='video'&&scene.assetStoragePath===storagePath
+        ? normalizeStudio3DScene({...scene,assetUrl:result.url}):scene));
       return result.url;
     } catch (error) {
       if (activeProjectIdRef.current !== expectedProjectId) return false;
@@ -5502,7 +5504,7 @@ const ViralClipStudio = ({
       return;
     }
     const localUrl = URL.createObjectURL(file);
-    setThreeDScenes(current => current.map(scene => scene.id === sceneId ? { ...scene, assetUrl: localUrl, assetName: file.name, assetStoragePath: "" } : scene));
+    setThreeDScenes(current => current.map(scene => scene.id === sceneId ? normalizeStudio3DScene({ ...scene, assetType: undefined, assetUrl: localUrl, assetName: file.name, assetStoragePath: "" }) : scene));
     try {
       const token = await getMediaAuthToken();
       if (!token) throw new Error("Sign in to save and render logo assets.");
@@ -5542,7 +5544,7 @@ const ViralClipStudio = ({
           }
           if (status.status === "completed" && status.url) {
             setThreeDScenes(current => current.map(item => item.id === sceneId ? { ...item, hqPreviewJobId: result.jobId, hqPreviewRevision: revision } : item));
-            setThreeDPreviewState({ sceneId, revision, status: "completed", url: status.url, jobId: result.jobId });
+            setThreeDPreviewState({ sceneId, revision, status: "completed", url: status.url, jobId: result.jobId, hash: status.hash });
             return;
           }
           if (status.status === "failed") throw new Error("The HQ 3D render failed. Retry after checking the scene asset.");
@@ -5556,6 +5558,27 @@ const ViralClipStudio = ({
     } catch (error) {
       setThreeDPreviewState({ sceneId, revision, status: "failed", message: error.message });
     }
+  };
+
+  const restoreThreeDPreview = async (scene, file) => {
+    const sceneId=scene.id,revision=studio3DSceneRevision(scene);
+    try {
+      if(file.size>4096)throw new Error('Use a saved 3D preview receipt.');
+      const receipt=JSON.parse(await file.text());
+      if(receipt.format!=='autopromote-3d-preview-receipt'||receipt.version!==1||receipt.sceneId!==sceneId||
+        !/^[A-Za-z0-9_-]{8,100}$/.test(receipt.jobId||'')||!/^[a-f0-9]{64}$/.test(receipt.sceneHash||''))throw new Error('Invalid 3D preview receipt.');
+      const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(studio3DRenderIdentity(scene)));
+      const expected=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
+      if(receipt.sceneHash!==expected)throw new Error('This preview belongs to different scene settings.');
+      const token=await getMediaAuthToken();if(!token)throw new Error('Sign in to reconnect a preview.');
+      const response=await fetch(API_ENDPOINTS.STUDIO_3D_PREVIEW_STATUS(receipt.jobId),{headers:{Authorization:`Bearer ${token}`}});
+      const status=await response.json().catch(()=>({}));
+      if(!response.ok||status.status!=='completed'||status.hash!==expected||!status.url)throw new Error('An owned completed preview matching this scene is required.');
+      const current=threeDScenesRef.current.find(item=>item.id===sceneId);
+      if(!current||studio3DSceneRevision(current)!==revision)throw new Error('Scene changed while reconnecting its preview.');
+      setThreeDScenes(items=>items.map(item=>item.id===sceneId?{...item,hqPreviewJobId:receipt.jobId,hqPreviewRevision:revision}:item));
+      setThreeDPreviewState({sceneId,revision,status:'completed',jobId:receipt.jobId,url:status.url,hash:status.hash});
+    }catch(error){setThreeDPreviewState({sceneId,revision,status:'failed',message:error.message||'Preview recovery failed.'});}
   };
 
   const rippleInsertOverlayIntoSequence = (overlayId) => {
@@ -24700,6 +24723,7 @@ const ViralClipStudio = ({
                 {motionWorkspace === "3d" ? (
                   <Studio3DPanel
                     scenes={threeDScenes}
+                    projectMedia={projectMedia}
                     onChange={setThreeDScenes}
                     focusId={selectedThreeDId}
                     onSelect={setSelectedThreeDId}
@@ -24708,6 +24732,7 @@ const ViralClipStudio = ({
                     onSeek={time => seekLiveEditTimelineItem(time, "motion")}
                     onUploadAsset={uploadThreeDAsset}
                     onGeneratePreview={generateThreeDPreview}
+                    onRestorePreview={restoreThreeDPreview}
                     previewState={threeDPreviewState.sceneId === (selectedThreeDId || threeDScenes[0]?.id) ? threeDPreviewState : { status: "idle" }}
                   />
                 ) : motionWorkspace === "smart_zoom" ? (

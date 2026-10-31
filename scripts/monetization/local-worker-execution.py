@@ -14,20 +14,26 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+# Match the ordinary worker entrypoint's module directory for its deferred
+# native compositors as well as imports performed during initial startup.
+sys.path.insert(0, str(ROOT / 'python_media_worker'))
 record = json.loads(Path(sys.argv[1]).read_text())
 directory = Path(record["directory"])
 started = time.monotonic()
 if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
     raise RuntimeError("Explicit demo runtime required")
-# Three simultaneous native perspective planes exceed the original short-demo
-# CPU allowance. Keep ten CPU minutes per process even when a loaded local
-# machine needs a longer wall observation; production limits are unchanged.
-resource.setrlimit(resource.RLIMIT_CPU, (600, 600))
+# Keep ten CPU minutes for ordinary demos. The measured minute-long masked
+# graphics/3D stack exhausted that bound during final compositing; allow a
+# finite twenty CPU minutes for that explicitly identified local combination.
+# The provider's thirty-minute wall ceiling and production limits are unchanged.
+cpu_ceiling = 1200 if record.get('body', {}).get('threeDGraphics') else 600
+resource.setrlimit(resource.RLIMIT_CPU, (cpu_ceiling, cpu_ceiling))
 # Native full-frame transparency intermediates can exceed a source MP4's size.
 # Keep a finite per-file ceiling for this demo-only CPU process; production
 # execution settings and the separately bounded source-download sizes do not
 # inherit this local limit.
-resource.setrlimit(resource.RLIMIT_FSIZE, (128 * 1024**2, 128 * 1024**2))
+file_ceiling = (750 if record.get('body', {}).get('threeDGraphics') else 128) * 1024**2
+resource.setrlimit(resource.RLIMIT_FSIZE, (file_ceiling, file_ceiling))
 connect = socket.socket.connect
 
 

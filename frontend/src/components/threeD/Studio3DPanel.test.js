@@ -4,6 +4,15 @@ import "@testing-library/jest-dom";
 import Studio3DPanel from "./Studio3DPanel";
 import { STUDIO_3D_TEMPLATES, createStudio3DScene } from "./studio3DModel";
 
+test('reconnects an existing preview through a receipt without starting generation',()=>{
+  const onRestorePreview=jest.fn(),onGeneratePreview=jest.fn(),scene=createStudio3DScene('media_plane',0,'plane');
+  render(<Studio3DPanel scenes={[scene]} onChange={jest.fn()} onSelect={jest.fn()} onRestorePreview={onRestorePreview} onGeneratePreview={onGeneratePreview}/>);
+  const file=new File(['{}'],'receipt.json',{type:'application/json'});
+  fireEvent.change(screen.getByLabelText('Restore 3D preview receipt'),{target:{files:[file]}});
+  expect(onRestorePreview).toHaveBeenCalledWith(expect.objectContaining({id:'plane'}),file);
+  expect(onGeneratePreview).not.toHaveBeenCalled();
+});
+
 test.each(STUDIO_3D_TEMPLATES)("adds %s as a timeline object", template => {
   const onChange = jest.fn();
   render(<Studio3DPanel scenes={[]} onChange={onChange} onSelect={jest.fn()} playhead={3.5} duration={60} />);
@@ -80,4 +89,15 @@ test("unavailable final-render controls cannot create misleading edits while sup
   expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ fontFamily: "serif",
     keyframes: [expect.objectContaining({ easing: "ease_out" })] })]);
   expect(screen.getByRole("note")).not.toHaveTextContent("opacity is also missing");
+});
+
+test('chooses an existing ready owned video texture and authors its source-in',()=>{
+  const change=jest.fn(),scene=createStudio3DScene('comparison_card',0,'plane');
+  const media={id:'take',name:'Presenter',duration:8,status:'ready',storagePath:'studio/sources/owner/take.mp4',url:'blob:take',contentHash:'a'.repeat(64)};
+  const {rerender}=render(<Studio3DPanel scenes={[scene]} onChange={change} projectMedia={[media]} onSelect={jest.fn()}/>);
+  fireEvent.change(screen.getByLabelText('3D video texture source'),{target:{value:'take'}});
+  const next=change.mock.lastCall[0][0];expect(next).toMatchObject({assetType:'video',assetSourceStart:0,assetStoragePath:media.storagePath,assetContentHash:media.contentHash});
+  rerender(<Studio3DPanel scenes={[next]} onChange={change} projectMedia={[media]} onSelect={jest.fn()}/>);
+  fireEvent.change(screen.getByLabelText('Texture source start (s)'),{target:{value:'2.5'}});
+  expect(change.mock.lastCall[0][0].assetSourceStart).toBe(2.5);
 });

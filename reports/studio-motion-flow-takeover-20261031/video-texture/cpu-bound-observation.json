@@ -1,0 +1,11 @@
+{
+  "failedExecutionId": "3ef21eb88ec8d50cf9e0558462aa2de3631b3302b435e3be21e56387537224c4",
+  "measuredWallSeconds": 311.194978748,
+  "measuredTotalCpuSeconds": 990.546396,
+  "subprocessFailure": "Final FFmpeg compositor was killed at the inherited 600 CPU-second process ceiling.",
+  "newLocalThreeDProcessCpuCeilingSeconds": 1200,
+  "ordinaryLocalProcessCpuCeilingSeconds": 600,
+  "localWallCeilingSeconds": 1800,
+  "productionConfigurationChanged": false,
+  "scope": "Local CPU only, no paid execution. The scene remains a heavy CPU stack; no low-latency or production readiness claim."
+}

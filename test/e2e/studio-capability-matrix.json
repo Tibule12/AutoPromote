@@ -15713,5 +15713,41 @@
     ],
     "formalReadinessChanged": false,
     "nextTask": "Continue S02 preview/export precision with S04 rigging and driver qualification; retain S03 ownership and full-minute source/creative blockers."
+  },
+  "studioVideoTexture20261031": {
+    "date": "2026-10-31",
+    "report": "reports/studio-motion-flow-takeover-20261031/video-texture/README.md",
+    "scope": "Owned video textures on the existing 3D Recording Plane; native camera/pose/source timing and completed-preview recovery",
+    "status": "NATIVE_MINUTE_DELIVERED_WITH_QUALIFICATION_LIMITS",
+    "normalEmulatorAuth": true,
+    "sourceSections": 6,
+    "videoOccurrences": 6,
+    "programmeSeconds": 60,
+    "projectionMatrixSamples": 9,
+    "projectionAbsoluteTolerance": 1e-12,
+    "gpuJobsStarted": 0,
+    "paidModelCalls": 0,
+    "productionWrites": 0,
+    "readinessPromotion": false,
+    "wholePictureParityQualified": false,
+    "livePreviewRealtimeQualified": false,
+    "modelInferenceInvoked": false,
+    "remainingBlockers": [
+      "Whole preview/export picture parity fails qualification; visible moving-plane/source differences remain",
+      "Live graph is below a qualified 24fps delivery rate",
+      "Unrestricted depth/material/light/tracking and genuine Director model planning unfinished",
+      "Owner creative/listening approval and shared S02/S04/S03 backlog remain"
+    ],
+    "nativeExportFrames": 1440,
+    "nativeOutputSha256": "c738100f8e6574cf36cf3ad00307c687305355e3a0f075ee5de7b0861c60c7d2",
+    "canonicalProjectHash": "86b22b40e008b1c6bfbaf4d1e233d3c78888ea70d4a5efb8e598deface59f807",
+    "independentNativeRestore": true,
+    "finishedPlaybackSeconds": 60,
+    "finishedPlaybackFrames": 1440,
+    "finishedPlaybackDroppedFrames": 3,
+    "livePreviewWallSeconds": 61.7651,
+    "liveProgrammeUpdates": 1118,
+    "canonicalVideoFieldMigration": true,
+    "creativeStatus": "FOR_OWNER_REVIEW_BELOW_FULL_PREMIUM_BRIEF"
   }
 }

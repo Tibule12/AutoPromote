@@ -78,3 +78,12 @@ describe("3D export ownership boundary", () => {
     await expect(resolveStudio3DExport({ ownerUid: "qa_user_123", items: [{ ...item(), aspect: "16:9" }] })).rejects.toThrow("aspect ratio");
   });
 });
+
+test('video textures bind an owned source hash and bounded source interval without accepting image-path aliases',()=>{
+  const video={...scene(),assetType:'video',assetContentHash:'a'.repeat(64),assetSourceStart:2.5,assetAspect:16/9,
+    assetStoragePath:'studio/sources/qa_user_123/presenter.mp4'};
+  expect(validateStudio3DScene(video,'qa_user_123')).toMatchObject({assetType:'video',assetSourceStart:2.5});
+  for(const patch of [{assetContentHash:'x'+'a'.repeat(64)},{assetSourceStart:-1},{assetAspect:0},
+    {assetStoragePath:'studio/sources/other/presenter.mp4'},{assetStoragePath:'uploads/images/qa_user_123/clip.mp4'},
+    {assetStoragePath:'studio/sources/qa_user_123/../clip.mp4'}])expect(()=>validateStudio3DScene({...video,...patch},'qa_user_123')).toThrow();
+});

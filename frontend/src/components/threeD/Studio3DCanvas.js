@@ -88,6 +88,7 @@ function materialFor(scene) {
 }
 
 function textMesh(text, scene, size, material) {
+  if (!String(text || '').trim()) return new THREE.Mesh(new THREE.PlaneGeometry(0,0),material);
   const geometry = new TextGeometry(text || " ", {
     font, size, depth: scene.extrusionDepth,
     curveSegments: 5, bevelEnabled: scene.bevel > 0,
@@ -207,12 +208,21 @@ function makeGroup(scene) {
     object.userData.baseScale = object.scale.clone();
   });
   if (scene.assetUrl) {
-    new THREE.TextureLoader().load(scene.assetUrl, texture => {
+    const attach = texture => {
       texture.colorSpace = THREE.SRGBColorSpace;
-      const art = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
-      art.position.set(0, 1.38, 0.18);
+      const video = scene.assetType === 'video';
+      const art = new THREE.Mesh(new THREE.PlaneGeometry(video ? 6.8 : 1.8, video ? 6.8/scene.assetAspect : 1.8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: true, side: THREE.DoubleSide, toneMapped: !video }));
+      art.position.set(0, scene.template==='media_plane'?0:1.38, 0.18);
       group.add(art);
-    }, undefined, () => {});
+    };
+    if (scene.assetType === 'video') {
+      const video = document.createElement('video');
+      video.crossOrigin='anonymous';video.muted=true;video.volume=0;video.playsInline=true;video.preload='auto';
+      video.src=scene.assetUrl;
+      const texture=new THREE.VideoTexture(video);
+      group.userData.videoAsset={video,texture};
+      attach(texture);
+    } else new THREE.TextureLoader().load(scene.assetUrl, attach, undefined, () => {});
   }
   return group;
 }
@@ -276,9 +286,21 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
         camera.updateProjectionMatrix();
       }
       const playhead = clockRef.current?.() ?? timeRef.current;
+      // Texture sampling follows source-in plus scene-local programme time.
+      // A paused seek remains paused; generated media never adds another voice.
+      let textureChanged=false;
+      for (const {scene,group} of objects) {
+        const asset=group.userData.videoAsset;if(!asset)continue;
+        const video=asset.video,local=playhead-scene.startTime;
+        const target=scene.assetSourceStart+Math.max(0,Math.min(scene.duration,local));
+        if(video.readyState>=1 && !video.seeking && Math.abs(video.currentTime-target)>1/120)video.currentTime=target;
+        if(!video.seeking && video.readyState>=2 && asset.presentedTime!==video.currentTime){
+          asset.presentedTime=video.currentTime;asset.texture.needsUpdate=true;textureChanged=true;
+        }
+      }
       const reactive = objects.some(({ scene }) => scene.audioReactiveIntensity > 0);
       const audio = reactive ? levelRef.current : 0;
-      if (!resized && playhead === lastPlayhead && audio === lastAudioLevel) return;
+      if (!resized && !textureChanged && playhead === lastPlayhead && audio === lastAudioLevel) return;
       lastPlayhead = playhead;
       lastAudioLevel = audio;
       for (const { scene, group } of objects) {
@@ -292,7 +314,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
         const sound = 1 + Math.min(1, levelRef.current) * scene.audioReactiveIntensity * 0.25;
         group.position.set(pose.x, pose.y, pose.z);
         group.scale.setScalar(pose.scale * sound);
-        group.rotation.set(pose.rotationX * Math.PI / 180, pose.rotationY * Math.PI / 180, pose.rotationZ * Math.PI / 180);
+        group.rotation.set(pose.rotationX * Math.PI / 180, pose.rotationY * Math.PI / 180, pose.rotationZ * Math.PI / 180, 'ZYX');
         group.traverse(child => {
           if (child.isMesh && child.material?.transparent) {
             if (child.material.userData.baseOpacity === undefined) child.material.userData.baseOpacity = child.material.opacity;
@@ -313,6 +335,8 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
     return () => {
       cancelAnimationFrame(raf);
       world.traverse(object => {
+        const asset=object.userData?.videoAsset;
+        if(asset){asset.video.pause();asset.video.removeAttribute('src');asset.video.load();}
         object.geometry?.dispose?.();
         const materials = Array.isArray(object.material) ? object.material : [object.material];
         materials.forEach(material => { material?.map?.dispose?.(); material?.dispose?.(); });

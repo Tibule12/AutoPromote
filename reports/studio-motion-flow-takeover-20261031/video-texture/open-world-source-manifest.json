@@ -1,0 +1,50 @@
+[
+  {
+    "name": "City.mp4",
+    "duration": 10,
+    "original": "/home/tibule12/Downloads/whatsapp-085658-broll/real-video-sources/clips/assets.mixkit.co_videos_4855_4855-1080.mp4.mp4",
+    "originalSha256": "9cd010dbf88c86c9d22412edc8450e7dcd712d3bb0c8c6c365b86d79ad0085d3",
+    "proxySha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+    "scope": "Selected source interval and editing proxy only; no motion graphic effects."
+  },
+  {
+    "name": "Footsteps.mp4",
+    "duration": 6,
+    "original": "/home/tibule12/Downloads/whatsapp-085658-broll/real-video-sources/clips/assets.mixkit.co_videos_23410_23410-720.mp4.mp4",
+    "originalSha256": "0cf8694b6b719a69eb00696f6f9d96e065ddca4287023ce96c32b436c14b4cb8",
+    "proxySha256": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+    "scope": "Selected source interval and editing proxy only; no motion graphic effects."
+  },
+  {
+    "name": "Open trail.mp4",
+    "duration": 8,
+    "original": "/home/tibule12/Downloads/whatsapp-085658-broll/real-video-sources/clips/assets.mixkit.co_videos_23818_23818-720.mp4.mp4",
+    "originalSha256": "749d388a387e649943c70273b28b42ffb587908e05176e4a8ea49324aaf8fa66",
+    "proxySha256": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96",
+    "scope": "Selected source interval and editing proxy only; no motion graphic effects."
+  },
+  {
+    "name": "Autumn.mp4",
+    "duration": 12,
+    "original": "/home/tibule12/Downloads/whatsapp-085658-broll/real-video-sources/clips/assets.mixkit.co_videos_35419_35419-720.mp4.mp4",
+    "originalSha256": "929e75d4f6ae4c1eb18ff4cc5dde495c5acfbb95bb9777f37f2fefb5788fadbb",
+    "proxySha256": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+    "scope": "Selected source interval and editing proxy only; no motion graphic effects."
+  },
+  {
+    "name": "Coast.mp4",
+    "duration": 12,
+    "original": "/home/tibule12/Downloads/whatsapp-085658-broll/v3-real/clips/assets.mixkit.co_videos_35346_35346-720.mp4.mp4",
+    "originalSha256": "30b3b86c61b4f13f97c39107130061c63aff87d372368f39d274c9929da8d236",
+    "proxySha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+    "scope": "Selected source interval and editing proxy only; no motion graphic effects."
+  },
+  {
+    "name": "Summit.mp4",
+    "duration": 12,
+    "original": "/home/tibule12/Downloads/whatsapp-085658-broll/real-video-sources/clips/cdn.coverr.co_videos_coverr-walking-to-the-mountain-top-8360_1080p.mp4.mp4",
+    "originalSha256": "edb0732bd18a1f2a749ca19b7fa707c34d301eb48057b92ac7e43bb541fd2291",
+    "proxySha256": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+    "scope": "Selected source interval and editing proxy only; no motion graphic effects."
+  }
+]

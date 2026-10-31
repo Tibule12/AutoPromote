@@ -1,5 +1,7 @@
 # Motion & Flow — implementation evidence and rejected creative result
 
+31 October continuation delivers a separate [60-second Open World motion study](video-texture/README.md), actual native editable project, 1,440-frame CPU export, independent cold restore and complete finished-file Studio playback. Owned video textures now use the existing 3D scene path, with canonical source metadata and verified completed-job reconnection. It remains below the full premium creative brief; runtime preview/export differences and live-rate limits remain explicit in [the feedback](video-texture/Feedback.md). Prior rejected clock/dialogue work and all originals remain intact. No paid/GPU/cloud execution, production writes, merge or deployment.
+
 31 October 2026. Local feature branch `feat/studio-motion-flow-20261031`, implementation commits `cd0bfb8d` and `172a1461`; original work checkpoint `3911af6c`. No push, production merge, deployment, paid model/GPU call or production data mutation.
 
 **The initial clock study was rejected by the owner; the subsequent Evidence Reconstruction film also fails internal creative review. Both are retained.** The replacement is not approved cinematic work. Oversized clocks, weak callout composition, small labels and clock evidence unsupported by the dialogue make it an inadequate creative result. Native tool counts and technical checks do not qualify it.

@@ -11,8 +11,9 @@ const {
   workerRequestDigest,
 } = require("../../src/services/unifiedCredits/workerVerification");
 const { assertSandbox } = require("../../src/services/unifiedCredits/runtime");
-async function createLocalWorkerProvider({ directory, python, env, apiOrigin, timeoutMs = 120000 }) {
+async function createLocalWorkerProvider({ directory, python, env, apiOrigin, timeoutMs = 120000, maxArtifactBytes = 20 * 1024 * 1024 }) {
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 1800000) throw Error("Local CPU timeout must be 1–1800 seconds.");
+  if (!Number.isSafeInteger(maxArtifactBytes) || maxArtifactBytes < 20 * 1024 * 1024 || maxArtifactBytes > 128 * 1024 * 1024) throw Error('Local artifact limit must be 20–128 MiB.');
   assertSandbox(env);
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const executionRoot = fs.realpathSync(directory);
@@ -139,19 +140,27 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
         : null,
     };
     if (succeeded && result?.output_path) {
-      const actual = fs.realpathSync(result.output_path);
-      const allowed = path.resolve(__dirname, "../../tmp") + path.sep;
-      if (!actual.startsWith(allowed) && !actual.startsWith(dir + path.sep))
-        throw new Error("Worker artifact escaped scratch directory");
-      const bytes = fs.readFileSync(actual);
-      if (bytes.length > 20 * 1024 * 1024) throw new Error("Worker artifact exceeds budget");
-      const artifact = path.join(dir, "artifact.mp4");
-      fs.copyFileSync(actual, artifact);
-      payload.output = {
-        path: artifact,
-        bytes: bytes.length,
-        sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
-      };
+      try {
+        const actual = fs.realpathSync(result.output_path);
+        const allowed = path.resolve(__dirname, "../../tmp") + path.sep;
+        if (!actual.startsWith(allowed) && !actual.startsWith(dir + path.sep))
+          throw new Error("Worker artifact escaped scratch directory");
+        const bytes = fs.readFileSync(actual);
+        if (bytes.length > maxArtifactBytes) throw new Error("Worker artifact exceeds budget");
+        const artifact = path.join(dir, "artifact.mp4");
+        fs.copyFileSync(actual, artifact);
+        payload.output = {
+          path: artifact,
+          bytes: bytes.length,
+          sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+        };
+      } catch (error) {
+        // A completed process can still fail its bounded artifact handoff.
+        // Retain its measured exit code and publish a terminal failure, so the
+        // ordinary reconciler can release the hold instead of leaving it unknown.
+        payload.state = 'failed';
+        payload.providerFailure = String(error.message).slice(0, 200);
+      }
     }
     const envelope = {
       provider: "local-process",
@@ -240,6 +249,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
             child.once("exit", async (code, signal) => {
               clearTimeout(timeout);
               running.delete(expected.executionId);
+              fs.writeFileSync(path.join(dir, 'termination.json'), JSON.stringify({code, signal, startedAt, finishedAt:new Date().toISOString()}), {mode:0o600});
               if (!groupTerminated(child.pid)) {
                 try {
                   process.kill(-child.pid, "SIGKILL");
