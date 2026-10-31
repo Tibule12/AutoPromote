@@ -638,6 +638,75 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId('pro-video-clip-2')).toHaveAttribute('data-end-time', '6');
   });
 
+  test.each([1, 2])("finished Compare resolves trimmed camera cuts from output time at %sx", async rate => {
+    const host = { id: 'host', name: 'Host', start: 2, end: 5, duration: 3, sourceDuration: 30 };
+    const guest = { id: 'guest', name: 'Guest', start: 10, end: 14, duration: 4, sourceDuration: 30 };
+    const { props, rerender } = mountNativePreview({ clips: [host, guest],
+      initialSavedProject: { id: `compare-cuts-${rate}`, name: `Compare cuts ${rate}`, snapshot: {
+        orderedClips: [host, guest], selectedClipId: 'guest', activeTimelineIndex: 1,
+        timeline: [{ ...host, sourceClipId: 'host', url: 'https://example.com/host.mp4', startRequest: 2, endRequest: 5 },
+          { ...guest, sourceClipId: 'guest', url: 'https://example.com/guest.mp4', startRequest: 10, endRequest: 14 }],
+        previewSpeed: rate, autoCaptions: false, smartCrop: false, addHook: false, overlays: [],
+      } } });
+    await screen.findByDisplayValue(`Compare cuts ${rate}`, {}, { timeout: 15000 });
+    rerender(<ViralClipStudio {...props} renderedOutput={{ url: 'https://example.com/finished.mp4' }} />);
+    const after = screen.getByTestId('studio-after-video');
+    Object.defineProperties(after, { currentTime: { configurable: true, writable: true, value: 0 },
+      duration: { configurable: true, value: 7 / rate }, readyState: { configurable: true, value: 4 },
+      paused: { configurable: true, value: true }, currentSrc: { configurable: true, get: () => after.src } });
+    const displayCallbacks = new Map(); let nextDisplayCallback = 1;
+    after.requestVideoFrameCallback = callback => { const id = nextDisplayCallback++; displayCallbacks.set(id, callback); return id; };
+    after.cancelVideoFrameCallback = id => displayCallbacks.delete(id);
+    fireEvent.loadedMetadata(after); fireEvent.loadedData(after);
+    let before = screen.getByLabelText('Untouched source preview');
+    for (const source of [before, screen.getByLabelText('Upcoming untouched source preview')])
+      Object.defineProperties(source, { duration: { configurable: true, value: 30 },
+        readyState: { configurable: true, value: 4 }, seeking: { configurable: true, writable: true, value: false } });
+    fireEvent.click(screen.getByRole('button', { name: 'Compare', exact: true }));
+    expect(before).toHaveStyle({ display: 'block', opacity: '1' });
+    expect(screen.getByLabelText('Untouched source monitor')).toHaveStyle({ display: 'none' });
+    after.currentTime = 0; fireEvent.seeked(after);
+    expect(before.src).toBe('https://example.com/host.mp4');
+    expect(before.currentTime).toBeCloseTo(2, 5);
+    const prepared = screen.getByLabelText('Upcoming untouched source preview');
+    expect(prepared.src).toBe('https://example.com/guest.mp4');
+    expect(prepared.currentTime).toBeCloseTo(10, 5);
+    after.currentTime = 3 / rate; fireEvent.timeUpdate(after);
+    before = screen.getByLabelText('Untouched source preview');
+    expect(before).toBe(prepared);
+    expect(before.src).toBe('https://example.com/guest.mp4');
+    expect(before.currentTime).toBeCloseTo(10, 5);
+    before.seeking = true;
+    after.currentTime = 4 / rate; fireEvent.timeUpdate(after);
+    expect(before.currentTime).toBeCloseTo(10, 5); // Do not starve an in-flight decode by chasing it.
+    before.seeking = false; fireEvent.seeked(before);
+    expect(before.currentTime).toBeCloseTo(11, 5);
+    after.currentTime = 7 / rate; fireEvent.seeked(after);
+    expect(before.currentTime).toBeLessThan(14);
+    expect(before.currentTime).toBeGreaterThan(13.99);
+    Object.defineProperty(after, 'paused', { configurable: true, value: false });
+    before.currentTime = 11.15; after.currentTime = 4.2 / rate;
+    fireEvent.timeUpdate(after);
+    expect(before.currentTime).toBeCloseTo(11.15, 5); // Small drift must not start another seek.
+    expect(before.playbackRate).toBeGreaterThan(rate);
+    Object.defineProperty(after, 'paused', { configurable: true, value: true });
+    after.currentTime = 2.5 / rate; fireEvent.seeked(after);
+    before = screen.getByLabelText('Untouched source preview');
+    expect(before.src).toBe('https://example.com/host.mp4');
+    expect(before.currentTime).toBeCloseTo(4.5, 5);
+    // The next decoded picture can lead currentTime at the cut. Follow that
+    // displayed camera frame rather than leaving the old original beside it.
+    Object.defineProperty(after, 'paused', { configurable: true, value: false });
+    after.currentTime = 2.99 / rate; fireEvent.play(after);
+    act(() => { const pending = [...displayCallbacks.values()]; displayCallbacks.clear();
+      pending.forEach(callback => callback(1000, { mediaTime: 3 / rate })); });
+    before = screen.getByLabelText('Untouched source preview');
+    expect(before.src).toBe('https://example.com/guest.mp4');
+    rerender(<ViralClipStudio {...props} renderedOutput={null} />);
+    expect(screen.getByLabelText('Untouched source preview')).toHaveStyle({ display: 'none', opacity: '1' });
+    expect(screen.getByLabelText('Untouched source monitor')).toHaveStyle({ display: 'block' });
+  });
+
   test("After-only review releases the hidden Before decoder and restoring comparison recues the source", () => {
     const { video } = mountNativePreview();
     const before = screen.getByLabelText('Untouched source preview');
@@ -2360,7 +2429,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("dragging the selected hook range does not toggle selection mode", () => {
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -2387,7 +2456,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("allows choosing a hook point from the timeline and setting it as the hook", async () => {
     const onSave = jest.fn();
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -2458,7 +2527,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("setting a hook point freezes the chosen opening moment", async () => {
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -2542,7 +2611,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("captures preview focus targeting and exports cover frame metadata", async () => {
     const onSave = jest.fn();
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -2649,7 +2718,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("uses face-aware hook banner placement and freeze-text offset in the preview", async () => {
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -2737,7 +2806,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("allows appended clips to be reordered in the timeline", async () => {
     const createdVideos = setupVideoCreateElementMock();
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook" }]}
@@ -2775,7 +2844,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("keeps the same timeline clip active after reordering", async () => {
     const createdVideos = setupVideoCreateElementMock();
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook" }]}
@@ -3479,7 +3548,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("exports the selected hook once and removes the duplicate span from the main clip", async () => {
     const onSave = jest.fn();
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Calm intro" }]}
@@ -3550,7 +3619,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   test("suggests a hook segment from video analysis and applies it", async () => {
     setupHookAnalysisEnvironment();
 
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 8, duration: 8, reason: "Steady explanation" }]}
@@ -3607,7 +3676,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("selected hook segment plays as the opening during normal playback", async () => {
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -3667,7 +3736,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("preview hook once plays the selected range first then jumps back to clip start", async () => {
-    const { container: _container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}

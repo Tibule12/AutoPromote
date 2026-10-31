@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Manual original-source mic repairs, current Studio and nested-logo recovery, owned replacement bindings, completed CPU export and preservation; retain owner and general-footage limits",
-  "reviewed_at": "2026-10-30T14:45:55.644Z",
+  "reason": "Document three native background exports, labelled synchronized review delivery and unresolved live capture; preserve readiness and record exact current playback fixes.",
+  "reviewed_at": "2026-10-31T09:28:29.350Z",
   "catalog_sha256": "aac1df418fedbc54c59c0ceefc930436e4bff3521cc77a4ae235a5262a368761",
   "sources": [
     {
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "8fbe2a3f463b30a068dcad69bec877eecd38034558ed60bda9b4204f1e897c6f"
+      "sha256": "7dcfd60ad707107194d0ec6fd54f0ebae8537c4e3036df0445fda04caf59b2f8"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "c5271a699e8c5cf73e8f6d9146704cae4fcc6a19a32e1d03b60436887ce7c0b8"
+      "sha256": "8a6631200936bbfac2c9ca0e0db2ba2bc477c31542400828ca9de972480459da"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "eaa519d337bddcea32a1b8470df28fe993e861698706ca1471eb005ec943931c"
+      "sha256": "812ad07cdbcef28f95d393a34f636c607a407e1ddf38b5197661a66e2e75c3a5"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

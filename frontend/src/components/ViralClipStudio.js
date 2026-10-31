@@ -3129,6 +3129,7 @@ const ViralClipStudio = ({
   const [pausedSourceFrame, setPausedSourceFrame] = useState(null);
   const adjustmentScratchRef = useRef(null);
   const beforeVideoRef = useRef(null);
+  const beforeStandbyVideoRef = useRef(null);
   const beforeCanvasRef = useRef(null);
   const speakerStackTopVideoRef = useRef(null);
   const speakerStackBottomVideoRef = useRef(null);
@@ -14460,20 +14461,26 @@ const ViralClipStudio = ({
 
   useEffect(() => {
     const afterVideo = videoRef.current;
-    const beforeVideo = beforeVideoRef.current;
+    let beforeVideo = beforeVideoRef.current;
+    const beforeVideos = [beforeVideo, beforeStandbyVideoRef.current].filter(Boolean);
     const beforeCanvas = beforeCanvasRef.current;
     if (!afterVideo || !beforeVideo || !beforeCanvas || !currentTimelineClip) return undefined;
     // The hidden comparison decoder otherwise plays and paints a second copy
     // of every source during After-only review, competing with the programme.
     if (comparisonMode === "after") {
-      beforeVideo.pause();
-      applySafeMediaSource(beforeVideo, null);
+      beforeVideos.forEach(media => { media.pause(); applySafeMediaSource(media, null); });
       return undefined;
     }
 
     let beforeAnimationFrame = 0;
+    let finishedPictureTime = null;
+    const finishedFrameCallbacks = Boolean(renderedOutputUrl && afterVideo.requestVideoFrameCallback);
+    const requestBeforeFrame = callback => finishedFrameCallbacks
+      ? afterVideo.requestVideoFrameCallback(callback) : window.requestAnimationFrame(callback);
     const paintBeforeFrame = () => {
-      if (beforeVideo.readyState < 2 || !beforeVideo.videoWidth || !beforeVideo.videoHeight) return;
+      // Finished movies retain native video picture/sound presentation.
+      if (renderedOutputUrl) return;
+      if (beforeVideo.seeking || beforeVideo.readyState < 2 || !beforeVideo.videoWidth || !beforeVideo.videoHeight) return;
       const context = beforeCanvas.getContext("2d", { alpha: false });
       if (!context) return;
       const canvasWidth = 960;
@@ -14496,33 +14503,107 @@ const ViralClipStudio = ({
         drawHeight
       );
     };
-    const paintBeforeLoop = () => {
-      paintBeforeFrame();
+    const paintBeforeLoop = (_now, metadata) => {
+      if (finishedFrameCallbacks && Number.isFinite(metadata?.mediaTime))
+        finishedPictureTime = metadata.mediaTime;
+      // Resolve a finished camera cut on the display clock, rather than waiting
+      // for the browser's much slower timeupdate event.
+      if (renderedOutputUrl) syncBeforePreview();
+      else paintBeforeFrame();
       if (!afterVideo.paused) {
-        beforeAnimationFrame = window.requestAnimationFrame(paintBeforeLoop);
+        beforeAnimationFrame = requestBeforeFrame(paintBeforeLoop);
       } else {
         beforeAnimationFrame = 0;
       }
     };
     const startBeforeLoop = () => {
       if (!beforeAnimationFrame) {
-        beforeAnimationFrame = window.requestAnimationFrame(paintBeforeLoop);
+        beforeAnimationFrame = requestBeforeFrame(paintBeforeLoop);
       }
     };
 
-    applySafeMediaSource(beforeVideo, currentTimelineClip.url);
+    let activeOccurrence = -1;
+    let preparedOccurrence = -1;
+    let preparedVideo = null;
+    const standbyStarts = new Map();
+    const primeStandby = media => {
+      const start = standbyStarts.get(media);
+      if (start === undefined || media.readyState < 1 || media.seeking) return;
+      if (Math.abs(media.currentTime - start) > .001) media.currentTime = start;
+    };
+    const prepareFinishedSource = position => {
+      if (activeOccurrence === position.index) return;
+      // Only the current and next original are kept. Loading the next camera
+      // before its cut avoids clearing the visible source decoder mid-sentence.
+      const selected = preparedOccurrence === position.index ? preparedVideo : beforeVideo;
+      beforeVideo = selected || beforeVideos[0];
+      activeOccurrence = position.index;
+      standbyStarts.delete(beforeVideo);
+      beforeVideos.forEach(media => {
+        media.muted = true;
+        media.defaultMuted = true;
+        // Keep the next camera on a transparent presentation layer. Toggling
+        // display at the cut can defer its first visible frame by two frames.
+        media.style.display = "block";
+        media.style.opacity = media === beforeVideo ? "1" : "0";
+        media.setAttribute("aria-label", media === beforeVideo
+          ? "Untouched source preview" : "Upcoming untouched source preview");
+        if (media !== beforeVideo) media.pause();
+      });
+      applySafeMediaSource(beforeVideo, position.clip?.url);
+      const next = timeline[position.index + 1];
+      const standby = beforeVideos.find(media => media !== beforeVideo);
+      preparedVideo = standby;
+      preparedOccurrence = next && standby ? position.index + 1 : -1;
+      if (next && standby) {
+        standbyStarts.set(standby, getTimelineClipWindow(next).start || 0);
+        applySafeMediaSource(standby, next.url);
+        primeStandby(standby);
+      }
+    };
+    if (!renderedOutputUrl) {
+      // Returning from a finished comparison restores the hidden live decoder;
+      // it must not retain the standby camera's imperative opacity/layout.
+      beforeVideos.forEach(media => { media.style.display = "none"; media.style.opacity = "1"; });
+      applySafeMediaSource(beforeVideo, currentTimelineClip.url);
+    }
     beforeVideo.muted = true;
     beforeVideo.defaultMuted = true;
 
-    const syncBeforePreview = () => {
+    const syncBeforePreview = event => {
       if (afterVideo.readyState < 2) {
         beforeVideo.pause();
         return;
       }
-      const targetTime = Number(afterVideo.currentTime || currentTimelineWindow.start || 0);
+      // A finished decoder runs on output time, potentially across several
+      // trimmed sources. Resolve the source occurrence from that same clock;
+      // the inspector's last selected clip may belong to a different camera.
+      const comparisonPictureTime = afterVideo.paused || afterVideo.seeking
+        ? afterVideo.currentTime || 0 : finishedPictureTime ?? afterVideo.currentTime ?? 0;
+      const position = renderedOutputUrl
+        ? resolveOutputTimelinePosition(getPreviewTimelineTime(comparisonPictureTime))
+        : { clip: currentTimelineClip, sourceTime: Number(afterVideo.currentTime ?? currentTimelineWindow.start ?? 0) };
+      const source = getSafeMediaSource(position?.clip?.url);
+      if (!source) return;
+      if (renderedOutputUrl) prepareFinishedSource(position);
+      if (beforeVideo.getAttribute("src") !== source) {
+        beforeVideo.pause();
+        beforeCanvas.getContext("2d", { alpha: false })?.clearRect(0, 0, beforeCanvas.width, beforeCanvas.height);
+        applySafeMediaSource(beforeVideo, source);
+      }
+      // A programme may stop exactly at a trim's exclusive end. Hold its last
+      // source picture instead of seeking the original decoder beyond EOF.
+      const targetTime = renderedOutputUrl && Number.isFinite(position.clipWindow?.end)
+        ? Math.min(Number(position.sourceTime), Math.max(Number(position.clipWindow.start || 0),
+          Number(position.clipWindow.end) - .0001)) : Number(position.sourceTime);
+      const sourceDrift = targetTime - Number(beforeVideo.currentTime || 0);
+      const exactSeek = afterVideo.paused || afterVideo.seeking || event?.type === "seeked";
       if (
+        // Repeated seeks during load/seek prevent the new camera from ever
+        // producing its first frame. Reconcile again on its own loaded event.
+        (!renderedOutputUrl || (exactSeek && beforeVideo.readyState >= 1 && !beforeVideo.seeking)) &&
         Number.isFinite(targetTime) &&
-        Math.abs(Number(beforeVideo.currentTime || 0) - targetTime) > (afterVideo.paused ? .001 : .04)
+        Math.abs(sourceDrift) > (renderedOutputUrl ? (exactSeek ? .001 : .2) : (afterVideo.paused ? .001 : .04))
       ) {
         try {
           beforeVideo.currentTime = targetTime;
@@ -14530,16 +14611,27 @@ const ViralClipStudio = ({
           console.log("Before preview seek skipped", error);
         }
       }
-      beforeVideo.playbackRate = afterVideo.playbackRate || 1;
+      const outputTime = afterVideo.currentTime || 0;
+      const sourceRate = renderedOutputUrl
+        ? (getPreviewTimelineTime(outputTime + .01) - getPreviewTimelineTime(outputTime)) / .01 : 1;
+      // Small independent-decoder drift is corrected through pace. Seeking
+      // every frame can continually cancel the new camera's first decoded
+      // picture, even when its whole file is already buffered.
+      const paceCorrection = renderedOutputUrl && !exactSeek
+        ? 1 + clampNumber(sourceDrift * .75, -.08, .08, 0) : 1;
+      beforeVideo.playbackRate = clampNumber((afterVideo.playbackRate || 1) *
+        (sourceRate > 0 ? sourceRate : 1) * paceCorrection, .1, 16, 1);
       if (afterVideo.paused) {
         beforeVideo.pause();
         paintBeforeFrame();
       } else {
-        safePlayMediaElement(beforeVideo);
+        if (!renderedOutputUrl || (beforeVideo.paused && beforeVideo.readyState >= 2 && !beforeVideo.seeking))
+          safePlayMediaElement(beforeVideo);
         startBeforeLoop();
       }
     };
     const pauseBeforePreview = () => {
+      finishedPictureTime = null;
       beforeVideo.pause();
       paintBeforeFrame();
     };
@@ -14555,11 +14647,22 @@ const ViralClipStudio = ({
     // A source can finish loading after the programme has already sought or
     // paused. Reconcile its clock at that point; painting alone leaves a stale
     // Before frame (which is also used by the programme canvas).
-    beforeVideo.addEventListener("loadedmetadata", syncBeforePreview);
-    beforeVideo.addEventListener("loadeddata", syncBeforePreview);
-    beforeVideo.addEventListener("canplay", syncBeforePreview);
-    beforeVideo.addEventListener("seeked", paintBeforeFrame);
-    beforeVideo.addEventListener("timeupdate", paintBeforeFrame);
+    const sourceListeners = beforeVideos.map(media => {
+      const reconcile = () => { if (media === beforeVideo) syncBeforePreview(); else primeStandby(media); };
+      media.addEventListener("loadedmetadata", reconcile);
+      media.addEventListener("loadeddata", reconcile);
+      media.addEventListener("canplay", reconcile);
+      media.addEventListener("seeked", reconcile);
+      media.addEventListener("timeupdate", paintBeforeFrame);
+      return () => {
+        media.removeEventListener("loadedmetadata", reconcile);
+        media.removeEventListener("loadeddata", reconcile);
+        media.removeEventListener("canplay", reconcile);
+        media.removeEventListener("seeked", reconcile);
+        media.removeEventListener("timeupdate", paintBeforeFrame);
+        media.pause();
+      };
+    });
     syncBeforePreview();
 
     return () => {
@@ -14571,15 +14674,19 @@ const ViralClipStudio = ({
       afterVideo.removeEventListener("seeked", syncBeforePreview);
       afterVideo.removeEventListener("ratechange", syncBeforePreview);
       afterVideo.removeEventListener("pause", pauseBeforePreview);
-      beforeVideo.removeEventListener("loadedmetadata", syncBeforePreview);
-      beforeVideo.removeEventListener("loadeddata", syncBeforePreview);
-      beforeVideo.removeEventListener("canplay", syncBeforePreview);
-      beforeVideo.removeEventListener("seeked", paintBeforeFrame);
-      beforeVideo.removeEventListener("timeupdate", paintBeforeFrame);
-      if (beforeAnimationFrame) window.cancelAnimationFrame(beforeAnimationFrame);
+      sourceListeners.forEach(remove => remove());
+      beforeVideos.forEach((media, index) => {
+        media.setAttribute("aria-label", index === 0
+          ? "Untouched source preview" : "Upcoming untouched source preview");
+      });
+      if (beforeAnimationFrame) {
+        if (finishedFrameCallbacks) afterVideo.cancelVideoFrameCallback(beforeAnimationFrame);
+        else window.cancelAnimationFrame(beforeAnimationFrame);
+      }
       beforeVideo.pause();
     };
-  }, [activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start, comparisonMode]);
+  }, [activeTimelineIndex, activeProgrammeSlot, currentTimelineClip, currentTimelineWindow.start,
+    comparisonMode, renderedOutputUrl, timeline, previewOutputTimeMap]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -20117,11 +20224,24 @@ const ViralClipStudio = ({
                         playsInline
                         preload="auto"
                         aria-label="Untouched source preview"
-                        style={{ display: "none" }}
+                        className="studio-video before-native-video"
+                        style={{ display: renderedOutputUrl ? "block" : "none", opacity: 1,
+                          width: "100%", height: "100%", objectFit: "contain" }}
+                      />
+                      <video
+                        ref={beforeStandbyVideoRef}
+                        muted
+                        playsInline
+                        preload="auto"
+                        aria-label="Upcoming untouched source preview"
+                        className="studio-video before-native-video"
+                        style={{ display: renderedOutputUrl ? "block" : "none", opacity: 0,
+                          width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }}
                       />
                       <canvas
                         ref={beforeCanvasRef}
                         className="studio-video before-preview-canvas"
+                        style={{ display: renderedOutputUrl ? "none" : "block" }}
                         aria-label="Untouched source monitor"
                       />
                     </div>

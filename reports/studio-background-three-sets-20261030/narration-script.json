@@ -1,0 +1,106 @@
+{
+  "singleAction": [
+    {
+      "name": "choose_host",
+      "text": "Select the host clip on the timeline.",
+      "seconds": 2.48453514739229,
+      "sha256": "8fe775a4b30005d89f3ebd5fd23dbba8efd6a0432cbc32c5fdfd705cd93d40fd"
+    },
+    {
+      "name": "open_composite",
+      "text": "Open Composite to edit this shot.",
+      "seconds": 2.5658049886621317,
+      "sha256": "c2995760f2c7972d8aff17a495744d79d9d743ba00cec289d6a9995ac69f3738"
+    },
+    {
+      "name": "show_background",
+      "text": "Here is Background choice. The neutral background is selected.",
+      "seconds": 4.5859410430839,
+      "sha256": "08ffce477625f63e749fb5946225aa4b16bc3f20a02cb1048ead7595f381cbb0"
+    },
+    {
+      "name": "change_background",
+      "text": "Choose the cool acoustic background.",
+      "seconds": 2.5658049886621317,
+      "sha256": "ad969208ac56bf8388c618545fea17521235b2f736c07851fcb22c4981777998"
+    },
+    {
+      "name": "render_selection",
+      "text": "Render the changed subject preview.",
+      "seconds": 2.6006349206349206,
+      "sha256": "8b1dc5332838d1505fdb61f3d5fb038840275a4ae1a40f2dfeb2b41413ab50fe"
+    },
+    {
+      "name": "review_selection",
+      "text": "The new preview is ready. Review it, then return to the edit.",
+      "seconds": 4.365351473922902,
+      "sha256": "8307d7526d64ed2c6605e86c6cbe17e85e676aa8eb48a3656ca5304f53b44289"
+    },
+    {
+      "name": "choose_guest",
+      "text": "Now select the guest shot.",
+      "seconds": 2.2175056689342405,
+      "sha256": "b5bf4705c4ba3f59828ae2f46601a3e3a02c74718cccd3c96120569d2f26fe64"
+    },
+    {
+      "name": "guest_background",
+      "text": "Choose the matching cool acoustic background for this camera.",
+      "seconds": 3.541043083900227,
+      "sha256": "d645f89a0a3d1d8a15d4a94f6b7c5096d16fb362577842fdfa2d7b44c3465415"
+    },
+    {
+      "name": "save_project",
+      "text": "Save the project. The source, effects, graphics and sound remain editable.",
+      "seconds": 5.410249433106576,
+      "sha256": "a739d0cf84affd3f26d1cec1efbf263500520c172df66a1f45a56fdd67239d90"
+    },
+    {
+      "name": "compare_result",
+      "text": "Compare shows the original room on the left and the finished edit on the right.",
+      "seconds": 5.2477097505668935,
+      "sha256": "094125121ca91625a3d415159c5b74ca1f5f05e1248076c77cd98de548955595"
+    }
+  ],
+  "changedShots": [
+    {
+      "name": "host_result",
+      "text": "Here is the changed background on the host shot.",
+      "seconds": 3.1579138321995464,
+      "sha256": "e636590428daf84fd1356a88b468c057717e537c6e9c3ca06a9d9393604ade5c"
+    },
+    {
+      "name": "guest_result",
+      "text": "Here is the matching background on the guest shot.",
+      "seconds": 3.1927437641723357,
+      "sha256": "bba5cdf56ed4dd8c07e396821571a9904547b62482dde3bed75a89b6d0bc0b62"
+    },
+    {
+      "name": "saved_result",
+      "text": "Save the edited project. The timeline keeps both camera corrections.",
+      "seconds": 4.957460317460318,
+      "sha256": "fbc0738f07f0d1733548d63f01d0ebeef54cc64864971bb7d6cc1360fc4e8bfa"
+    }
+  ],
+  "threeSets": [
+    {
+      "name": "cool_set",
+      "text": "Cool acoustic studio. Original on the left, finished edit on the right.",
+      "seconds": 5.410249433106576,
+      "sha256": "f0dd799983c8fecfd70cb677c64c8d27d4796ae2e31ec7cb0a9392042f1d3cc2"
+    },
+    {
+      "name": "warm_set",
+      "text": "Warm walnut studio. The same speakers and microphone repairs remain.",
+      "seconds": 5.189659863945578,
+      "sha256": "ad79412f5b6cd7193cd8ce62da168a4f22ea80e0e4dcf1b20a17274f7bace7a7"
+    },
+    {
+      "name": "neutral_set",
+      "text": "Neutral gallery. Check the brighter background around the shoulders and microphone stands.",
+      "seconds": 6.025578231292517,
+      "sha256": "b2b0f59fc430a1d3f7dbd47463b0a905f3bd0efedc03dd8f062dd2f5575c5e28"
+    }
+  ],
+  "allSpeechNaturalTempo": true,
+  "noComputeReferenceInUsedCues": true
+}

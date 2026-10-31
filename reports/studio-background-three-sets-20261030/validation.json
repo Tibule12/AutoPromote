@@ -1,0 +1,704 @@
+{
+  "combinedAudioSync": {
+    "threeComparisonChapters": [
+      {
+        "theme": "cool-acoustic",
+        "chapterStart": 60.83333333333334,
+        "bestAudioOffsetSamples": 0,
+        "bestAudioOffsetSeconds": 0.0,
+        "normalizedCorrelation": 0.9984225630760193,
+        "maximumAllowedOffsetSeconds": 0.041666666666666664
+      },
+      {
+        "theme": "warm-walnut",
+        "chapterStart": 79.45833333333334,
+        "bestAudioOffsetSamples": 0,
+        "bestAudioOffsetSeconds": 0.0,
+        "normalizedCorrelation": 0.9983617067337036,
+        "maximumAllowedOffsetSeconds": 0.041666666666666664
+      },
+      {
+        "theme": "neutral-gallery",
+        "chapterStart": 98.91666666666669,
+        "bestAudioOffsetSamples": 0,
+        "bestAudioOffsetSeconds": 0.0,
+        "normalizedCorrelation": 0.9985572695732117,
+        "maximumAllowedOffsetSeconds": 0.041666666666666664
+      }
+    ],
+    "normalSpeedNarrationAndSingleActionCapture": true,
+    "realTimeCaptureClaim": false
+  },
+  "combinedPictureSync": {
+    "samples": [
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 0,
+        "combinedFrame": 1460,
+        "beforeError": 1,
+        "afterError": 1
+      },
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 24,
+        "combinedFrame": 1484,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 48,
+        "combinedFrame": 1508,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 120,
+        "combinedFrame": 1580,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 192,
+        "combinedFrame": 1652,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 207,
+        "combinedFrame": 1667,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 208,
+        "combinedFrame": 1668,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 209,
+        "combinedFrame": 1669,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 240,
+        "combinedFrame": 1700,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "cool-acoustic",
+        "sourceFrame": 297,
+        "combinedFrame": 1757,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 0,
+        "combinedFrame": 1907,
+        "beforeError": 1,
+        "afterError": 1
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 24,
+        "combinedFrame": 1931,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 48,
+        "combinedFrame": 1955,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 120,
+        "combinedFrame": 2027,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 192,
+        "combinedFrame": 2099,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 207,
+        "combinedFrame": 2114,
+        "beforeError": -1,
+        "afterError": 0
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 208,
+        "combinedFrame": 2115,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 209,
+        "combinedFrame": 2116,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 240,
+        "combinedFrame": 2147,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "warm-walnut",
+        "sourceFrame": 297,
+        "combinedFrame": 2204,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 0,
+        "combinedFrame": 2374,
+        "beforeError": 1,
+        "afterError": 1
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 24,
+        "combinedFrame": 2398,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 48,
+        "combinedFrame": 2422,
+        "beforeError": -1,
+        "afterError": 0
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 120,
+        "combinedFrame": 2494,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 192,
+        "combinedFrame": 2566,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 207,
+        "combinedFrame": 2581,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 208,
+        "combinedFrame": 2582,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 209,
+        "combinedFrame": 2583,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 240,
+        "combinedFrame": 2614,
+        "beforeError": 0,
+        "afterError": 0
+      },
+      {
+        "theme": "neutral-gallery",
+        "sourceFrame": 297,
+        "combinedFrame": 2671,
+        "beforeError": 0,
+        "afterError": 0
+      }
+    ],
+    "maximumBeforeError": 1,
+    "maximumAfterError": 1,
+    "includesAllThreeCameraCutsAndFinalFrames": true,
+    "frameSteppedReview": true
+  },
+  "date": "2026-10-31",
+  "nativeFinals": 3,
+  "originalCompleteTimelineRecordings": 3,
+  "newComparisonReviews": [
+    {
+      "theme": "cool-acoustic",
+      "frames": 298,
+      "fps": 24,
+      "canonicalHash": "f05f26b752c446e36f72f8d910bd7a64860b3993710232e70d924e8ac0a0e4de",
+      "nativeFinalSha256": "85da8d8e82ff9865d284d6f6a255d6e9717d248b7867c31680dd5298ddaa7063",
+      "recordingSha256": "9d822b3ce0f15fdc2b997d2c2a8923227f374476beacc126983c0dc50b653fd5",
+      "maximumIndependentPictureErrors": {
+        "before": 1,
+        "after": 1
+      },
+      "soundtrackPcmExactSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+      "actualUiScreens": true,
+      "frameSteppedReview": true,
+      "realTimePlaybackProof": false,
+      "moviePixelsInsertedIntoUi": false
+    },
+    {
+      "theme": "warm-walnut",
+      "frames": 298,
+      "fps": 24,
+      "canonicalHash": "cdfef3692b8f3bef280c11b4f1eaebf95d6a1b07eaff56015b39a3fd68a4895d",
+      "nativeFinalSha256": "ff8dda97e388b896a07533f88b3cd7bacd757a1fe9a99f50ab8b4534fe420cb7",
+      "recordingSha256": "edbdb2be7ec0fc8e702cfc70583119ad23d765b838f4f43a73713134bd6fb2c8",
+      "maximumIndependentPictureErrors": {
+        "before": 1,
+        "after": 1
+      },
+      "soundtrackPcmExactSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+      "actualUiScreens": true,
+      "frameSteppedReview": true,
+      "realTimePlaybackProof": false,
+      "moviePixelsInsertedIntoUi": false
+    },
+    {
+      "theme": "neutral-gallery",
+      "frames": 298,
+      "fps": 24,
+      "canonicalHash": "ddd4e8bc2990a041659663fe104851559592c1a70280826b7492551f4cb33100",
+      "nativeFinalSha256": "212477b54a8a79d5a8491f6039f5270ec2d4212835c0c02a4d60c35e3896b5ba",
+      "recordingSha256": "2d8a8c0bdcd12fe6d0d490ebfb1741258a8f04e32d217459a9e73c87d7aa7b1a",
+      "maximumIndependentPictureErrors": {
+        "before": 1,
+        "after": 1
+      },
+      "soundtrackPcmExactSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+      "actualUiScreens": true,
+      "frameSteppedReview": true,
+      "realTimePlaybackProof": false,
+      "moviePixelsInsertedIntoUi": false
+    }
+  ],
+  "completeNarratedDemonstration": {
+    "file": "studio-background-edit-and-compare.mp4",
+    "sha256": "c237f18b03925b1cf17b7ae54d9a2d2bd14b5b2c8c9a7b5c8ccd058ed3134383",
+    "seconds": 111.33333333333336,
+    "frames": 2672,
+    "chapters": [
+      {
+        "label": "Camera 1: select",
+        "start": 0,
+        "end": 3.5
+      },
+      {
+        "label": "Camera 1: composite",
+        "start": 3.5,
+        "end": 7.083333333333334
+      },
+      {
+        "label": "Camera 1: show-choice",
+        "start": 7.083333333333334,
+        "end": 12.708333333333334
+      },
+      {
+        "label": "Camera 1: change",
+        "start": 12.708333333333334,
+        "end": 16.291666666666668
+      },
+      {
+        "label": "Camera 1: actual accepted render submission",
+        "start": 16.291666666666668,
+        "end": 19.416666666666668
+      },
+      {
+        "label": "Camera 1: reviewed changed background",
+        "start": 19.416666666666668,
+        "end": 23.583333333333336
+      },
+      {
+        "label": "Camera 2: select",
+        "start": 23.583333333333336,
+        "end": 26.833333333333336
+      },
+      {
+        "label": "Camera 2: composite",
+        "start": 26.833333333333336,
+        "end": 30.416666666666668
+      },
+      {
+        "label": "Camera 2: show-choice",
+        "start": 30.416666666666668,
+        "end": 36.04166666666667
+      },
+      {
+        "label": "Camera 2: change",
+        "start": 36.04166666666667,
+        "end": 40.62500000000001
+      },
+      {
+        "label": "Camera 2: actual accepted render submission",
+        "start": 40.62500000000001,
+        "end": 43.75000000000001
+      },
+      {
+        "label": "Camera 2: reviewed changed background",
+        "start": 43.75000000000001,
+        "end": 47.95833333333334
+      },
+      {
+        "label": "Save edited project",
+        "start": 47.95833333333334,
+        "end": 54.41666666666668
+      },
+      {
+        "label": "cool-acoustic spoken introduction",
+        "start": 54.41666666666668,
+        "end": 60.83333333333334
+      },
+      {
+        "label": "cool-acoustic frame-reviewed native Compare",
+        "start": 60.83333333333334,
+        "end": 73.25000000000001
+      },
+      {
+        "label": "warm-walnut spoken introduction",
+        "start": 73.25000000000001,
+        "end": 79.45833333333334
+      },
+      {
+        "label": "warm-walnut frame-reviewed native Compare",
+        "start": 79.45833333333334,
+        "end": 91.87500000000001
+      },
+      {
+        "label": "neutral-gallery spoken introduction",
+        "start": 91.87500000000001,
+        "end": 98.91666666666669
+      },
+      {
+        "label": "neutral-gallery frame-reviewed native Compare",
+        "start": 98.91666666666669,
+        "end": 111.33333333333336
+      }
+    ]
+  },
+  "shortSpokenControlChapterBrowser": {
+    "ended": true,
+    "duration": 54.416667,
+    "time": 54.416667,
+    "playbackRate": 1,
+    "error": null,
+    "width": 1600,
+    "height": 1200,
+    "wallSeconds": 54.535,
+    "browserErrors": [],
+    "headless": true,
+    "muted": true
+  },
+  "foreground": {
+    "hostSourceRepairs": 13,
+    "guestSourceRepairs": 9,
+    "guestFeather": 0.35,
+    "originalMasksAndOtherEffectsRetained": true
+  },
+  "eightFocusedPlaybackRegressionsPassed": true,
+  "seventeenKnowledgeCasesPassed": true,
+  "strictBuildPassed": true,
+  "fourWelcomeViewportsAndThreeKnownHelpQuestions": {
+    "checkedAt": "2026-10-31T08:40:21.900Z",
+    "headless": true,
+    "muted": true,
+    "mockedResponses": false,
+    "matchingWelcomeContent": false,
+    "checks": [
+      {
+        "name": "candidate",
+        "width": 1440,
+        "height": 1000,
+        "welcomeWorkflowVisible": true,
+        "noOverflow": true
+      },
+      {
+        "name": "candidate",
+        "width": 390,
+        "height": 844,
+        "welcomeWorkflowVisible": true,
+        "noOverflow": true
+      },
+      {
+        "name": "candidate",
+        "width": 360,
+        "height": 800,
+        "welcomeWorkflowVisible": true,
+        "noOverflow": true
+      },
+      {
+        "name": "candidate",
+        "width": 1200,
+        "height": 900,
+        "welcomeWorkflowVisible": true,
+        "noOverflow": true
+      }
+    ],
+    "authenticated": {
+      "realSavedLogin": true,
+      "questions": 3,
+      "savedSessionUnchanged": true,
+      "savedProjectRecordsUnchanged": 54
+    },
+    "browserErrors": []
+  },
+  "appAndProductionSourcePreservation": {
+    "original147PrimaryAppFilesMatch": 147,
+    "currentProductionFrontendPinsMatch": 752,
+    "productionSourceModified": false,
+    "productionDeployed": false,
+    "sourceArchiveDeletedFilesIncidentDoesNotChangeTheseAudits": true
+  },
+  "currentMediaRecovery": [
+    {
+      "theme": "cool-acoustic",
+      "file": "final.mp4",
+      "sha256": "85da8d8e82ff9865d284d6f6a255d6e9717d248b7867c31680dd5298ddaa7063",
+      "byteExactToOriginal": true
+    },
+    {
+      "theme": "cool-acoustic",
+      "file": "edited-in-studio.mp4",
+      "sha256": "d71e4256588bb99f4b9702e1560f98f3dc5294ced4e5a06a830402a4839ec18c",
+      "byteExactToOriginal": true
+    },
+    {
+      "theme": "warm-walnut",
+      "file": "final.mp4",
+      "sha256": "ff8dda97e388b896a07533f88b3cd7bacd757a1fe9a99f50ab8b4534fe420cb7",
+      "byteExactToOriginal": true
+    },
+    {
+      "theme": "warm-walnut",
+      "file": "edited-in-studio.mp4",
+      "sha256": "79782e42079247d242ea1234b86b9fb7271069ee1a34ac11b347063190121fc2",
+      "byteExactToOriginal": true
+    },
+    {
+      "theme": "neutral-gallery",
+      "file": "final.mp4",
+      "sha256": "212477b54a8a79d5a8491f6039f5270ec2d4212835c0c02a4d60c35e3896b5ba",
+      "byteExactToOriginal": true
+    },
+    {
+      "theme": "neutral-gallery",
+      "file": "edited-in-studio.mp4",
+      "sha256": "d4b15968b59ffd6150913312f0eff098f39e81b6d2398784764e72ca2e3a7583",
+      "byteExactToOriginal": true
+    }
+  ],
+  "savedProjects": 54,
+  "otherSavedProjectsExact": 53,
+  "historicalLocalMediaAbsent": 100,
+  "historicalFullPreservationClaimValidNow": false,
+  "comparisonReviewIsFrameStepped": true,
+  "realTimeCompareCaptureQualified": false,
+  "noMoviePixelsInsertedIntoUiScreens": true,
+  "originalSoundtrackPcmExactSha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59",
+  "gpuJobs": 0,
+  "newSchedules": 0,
+  "productionDeployment": false,
+  "mainMerge": false,
+  "ownerCreativeApproval": false,
+  "fullDeliveredBrowserPlayback": {
+    "origin": "http://localhost:5000/background-podcast-review/",
+    "headless": true,
+    "muted": true,
+    "retainedSixUnchangedNativeChecks": false,
+    "fullPlayback": [
+      {
+        "index": 0,
+        "time": 111.333333,
+        "duration": 111.333333,
+        "ended": true,
+        "ready": 4,
+        "muted": true,
+        "width": 1600,
+        "height": 1200,
+        "rate": 1,
+        "wallSeconds": 111.86
+      },
+      {
+        "index": 1,
+        "time": 12.417,
+        "duration": 12.417,
+        "ended": true,
+        "ready": 4,
+        "muted": true,
+        "width": 1920,
+        "height": 1080,
+        "rate": 1,
+        "wallSeconds": 12.745
+      },
+      {
+        "index": 2,
+        "time": 12.417,
+        "duration": 12.417,
+        "ended": true,
+        "ready": 4,
+        "muted": true,
+        "width": 1600,
+        "height": 1200,
+        "rate": 1,
+        "wallSeconds": 12.806
+      },
+      {
+        "index": 3,
+        "time": 12.417,
+        "duration": 12.417,
+        "ended": true,
+        "ready": 4,
+        "muted": true,
+        "width": 1920,
+        "height": 1080,
+        "rate": 1,
+        "wallSeconds": 12.783
+      },
+      {
+        "index": 4,
+        "time": 12.417,
+        "duration": 12.417,
+        "ended": true,
+        "ready": 4,
+        "muted": true,
+        "width": 1600,
+        "height": 1200,
+        "rate": 1,
+        "wallSeconds": 12.719
+      },
+      {
+        "index": 5,
+        "time": 12.417,
+        "duration": 12.417,
+        "ended": true,
+        "ready": 4,
+        "muted": true,
+        "width": 1920,
+        "height": 1080,
+        "rate": 1,
+        "wallSeconds": 12.767
+      },
+      {
+        "index": 6,
+        "time": 12.417,
+        "duration": 12.417,
+        "ended": true,
+        "ready": 4,
+        "muted": true,
+        "width": 1600,
+        "height": 1200,
+        "rate": 1,
+        "wallSeconds": 12.712
+      }
+    ],
+    "browserErrors": []
+  },
+  "finishedLiveReturnNativeBrowser": {
+    "normalFinishedAndLiveControls": true,
+    "observations": [
+      {
+        "after": 1.491322,
+        "before": 1.491322,
+        "sourceVisible": true
+      },
+      {
+        "after": 9.9974,
+        "before": 1.330733,
+        "sourceVisible": true
+      },
+      {
+        "after": 9.9974,
+        "before": 1.330733,
+        "sourceVisible": true
+      }
+    ],
+    "sourceClockExact": true,
+    "liveCanvasRestored": true,
+    "canonicalEditUnchanged": true,
+    "browserErrors": []
+  },
+  "currentBuildWelcomeAndHelp": {
+    "checkedAt": "2026-10-31T09:18:55.005Z",
+    "headless": true,
+    "muted": true,
+    "mockedResponses": false,
+    "matchingWelcomeContent": false,
+    "checks": [
+      {
+        "name": "candidate",
+        "width": 1440,
+        "height": 1000,
+        "welcomeWorkflowVisible": true,
+        "noOverflow": true
+      },
+      {
+        "name": "candidate",
+        "width": 390,
+        "height": 844,
+        "welcomeWorkflowVisible": true,
+        "noOverflow": true
+      },
+      {
+        "name": "candidate",
+        "width": 360,
+        "height": 800,
+        "welcomeWorkflowVisible": true,
+        "noOverflow": true
+      },
+      {
+        "name": "candidate",
+        "width": 1200,
+        "height": 900,
+        "welcomeWorkflowVisible": true,
+        "noOverflow": true
+      }
+    ],
+    "authenticated": {
+      "realSavedLogin": true,
+      "questions": 3,
+      "savedSessionUnchanged": true,
+      "savedProjectRecordsUnchanged": 54
+    },
+    "browserErrors": []
+  },
+  "boundedReviewSourceSha256": {
+    "frontend/src/components/ViralClipStudio.js": "7dcfd60ad707107194d0ec6fd54f0ebae8537c4e3036df0445fda04caf59b2f8",
+    "frontend/src/components/ViralClipStudio.css": "3a53d5b1f60c2519a2f9a85b6151d5ad5f1445f98aef3c98a6d0a0ca430dd027",
+    "frontend/src/components/__tests__/ViralClipStudio.test.js": "61ca5e612ff02e9db4bc579c9f2677b1b409dfe23e91802576f97b6256e619aa"
+  },
+  "comparisonJoinCorrection": "Original combined file lost audio time at section joins. Rebuilt both audio/video sections to exact frame/sample counts; all three comparison chapters now measure zero sample offset. Rejected join version retained privately.",
+  "commitChecks": {
+    "strictFrontendLint": "passed using existing legacy frontend configuration; removed eleven unused test return bindings",
+    "repositoryPrettier": "applied to staged CSS/JSON/Markdown; source/build manifest retains exact recorded and served build identities"
+  }
+}

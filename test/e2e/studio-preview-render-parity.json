@@ -59,20 +59,11 @@
   "checks": [
     {
       "id": "canonical_projection",
-      "capabilityIds": [
-        "preview",
-        "final_render",
-        "save_reload",
-        "director"
-      ],
+      "capabilityIds": ["preview", "final_render", "save_reload", "director"],
       "readiness": "PARTIAL",
       "assertion": "Whole graph serialization/projection digest and mode equivalence",
       "gap": "115-field snapshot inventory is classified and remaining edit decisions are canonical; nested consumers, global output clock/order and whole paired output remain open.",
-      "sourceRefs": [
-        "graph",
-        "compiler",
-        "commands"
-      ],
+      "sourceRefs": ["graph", "compiler", "commands"],
       "automatedGuardFiles": [
         "frontend/src/components/__tests__/studioProjectDocument.test.js",
         "frontend/src/components/__tests__/studioRenderCompiler.test.js",
@@ -101,24 +92,12 @@
     },
     {
       "id": "edited_clock",
-      "capabilityIds": [
-        "preview",
-        "cuts_speed",
-        "captions",
-        "audio"
-      ],
+      "capabilityIds": ["preview", "cuts_speed", "captions", "audio"],
       "readiness": "PARTIAL",
       "assertion": "Trim/split/global speed/ramp/repeated-source output clock",
       "gap": "Native selected 2x/60fps exact 360-frame tail, mapped cut and lossless ordered-frame regression PASS. Ramps/dense audio and broader clocks unqualified.",
-      "sourceRefs": [
-        "clock",
-        "compiler",
-        "timeline",
-        "studio"
-      ],
-      "automatedGuardFiles": [
-        "frontend/src/components/__tests__/studioRenderCompiler.test.js"
-      ],
+      "sourceRefs": ["clock", "compiler", "timeline", "studio"],
+      "automatedGuardFiles": ["frontend/src/components/__tests__/studioRenderCompiler.test.js"],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "Actual r2 CPU and r4 NVIDIA same-edit pre-final/delivery; 13 samples. Scoped fade-clock PASS; full row UNQUALIFIED.",
       "measurement": null,
@@ -146,17 +125,11 @@
     },
     {
       "id": "aspect_crop",
-      "capabilityIds": [
-        "reframing",
-        "preview"
-      ],
+      "capabilityIds": ["reframing", "preview"],
       "readiness": "PARTIAL",
       "assertion": "Aspect/crop/sourceFocus on each source and speed boundary",
       "gap": "Landscape\u2192portrait real source-centre fix; broader paired geometry not measured.",
-      "sourceRefs": [
-        "studio",
-        "worker"
-      ],
+      "sourceRefs": ["studio", "worker"],
       "automatedGuardFiles": [],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "7.5s bounded footage geometry PASS; all modes/boundaries UNQUALIFIED",
@@ -182,18 +155,11 @@
     },
     {
       "id": "caption_layout_animation",
-      "capabilityIds": [
-        "captions",
-        "overlays"
-      ],
+      "capabilityIds": ["captions", "overlays"],
       "readiness": "PARTIAL",
       "assertion": "Exact reviewed words, cue clocks, fonts/lines/safe areas/emphasis/animation",
       "gap": "21 shared style values are foundation; complete paired animation and edge qualification missing.",
-      "sourceRefs": [
-        "caption",
-        "captionStyles",
-        "worker"
-      ],
+      "sourceRefs": ["caption", "captionStyles", "worker"],
       "automatedGuardFiles": [
         "frontend/src/components/__tests__/studioCaptionPreviewStyle.test.js"
       ],
@@ -225,22 +191,12 @@
     },
     {
       "id": "transform_curves",
-      "capabilityIds": [
-        "overlays",
-        "motion_graphics",
-        "cuts_speed"
-      ],
+      "capabilityIds": ["overlays", "motion_graphics", "cuts_speed"],
       "readiness": "PARTIAL",
       "assertion": "Transform/anchor/keyframe/easing/motion path sample equality",
       "gap": "Premature crop fixed in source and actual same saved edit. Static rotation/scale/position, top-label recovery and restricted background geometry PASS; all curves/crop/opacity/nesting not qualified.",
-      "sourceRefs": [
-        "studio",
-        "motionModel",
-        "worker"
-      ],
-      "automatedGuardFiles": [
-        "frontend/src/components/__tests__/StudioProTimeline.test.js"
-      ],
+      "sourceRefs": ["studio", "motionModel", "worker"],
+      "automatedGuardFiles": ["frontend/src/components/__tests__/StudioProTimeline.test.js"],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "NOT_RUN",
       "measurement": null,
@@ -263,21 +219,12 @@
     },
     {
       "id": "mask_subject",
-      "capabilityIds": [
-        "masking",
-        "segmentation"
-      ],
+      "capabilityIds": ["masking", "segmentation"],
       "readiness": "PARTIAL",
       "assertion": "Same source/matte/target/settings hash, mask IoU and temporal edges",
       "gap": "Real reviewed 3s proxy/final first-range output; dense/long/cut/edge coverage missing.",
-      "sourceRefs": [
-        "subject",
-        "subjectContract",
-        "subjectRenderer"
-      ],
-      "automatedGuardFiles": [
-        "python_media_worker/test_studio_subject_vfx_export.py"
-      ],
+      "sourceRefs": ["subject", "subjectContract", "subjectRenderer"],
+      "automatedGuardFiles": ["python_media_worker/test_studio_subject_vfx_export.py"],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "Real native r2 .25s/output vs .5s/source FAIL: programme omits reviewed effects. Matching source proxy implementation and actual r7 programme/cold recovery PASS; native complete retest pending shared GPU availability/CPU fallback. Whole row remains PARTIAL.",
       "measurement": null,
@@ -304,21 +251,12 @@
     },
     {
       "id": "track_cuts",
-      "capabilityIds": [
-        "tracking",
-        "masking",
-        "segmentation"
-      ],
+      "capabilityIds": ["tracking", "masking", "segmentation"],
       "readiness": "PARTIAL",
       "assertion": "Track IDs, cut resets, target correction and composition coordinates",
       "gap": "Algorithm/code guards are not a real camera-cut combination proof.",
-      "sourceRefs": [
-        "subject",
-        "subjectRenderer"
-      ],
-      "automatedGuardFiles": [
-        "python_media_worker/test_studio_subject_vfx_job.py"
-      ],
+      "sourceRefs": ["subject", "subjectRenderer"],
+      "automatedGuardFiles": ["python_media_worker/test_studio_subject_vfx_job.py"],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "Real native r2 .25s/output vs .5s/source FAIL: programme omits reviewed effects. Matching source proxy implementation and actual r7 programme/cold recovery PASS; native complete retest pending shared GPU availability/CPU fallback. Whole row remains PARTIAL.",
       "measurement": null,
@@ -341,17 +279,11 @@
     },
     {
       "id": "depth_occlusion",
-      "capabilityIds": [
-        "depth_occlusion",
-        "compositing"
-      ],
+      "capabilityIds": ["depth_occlusion", "compositing"],
       "readiness": "PARTIAL",
       "assertion": "Mask-derived 2.5D occlusion/parallax vs true claimed depth",
       "gap": "Representative 2.5D path works; do not label it full metric/dense depth.",
-      "sourceRefs": [
-        "subjectRenderer",
-        "worker"
-      ],
+      "sourceRefs": ["subjectRenderer", "worker"],
       "automatedGuardFiles": [],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "Real native r2 .25s/output vs .5s/source FAIL: programme omits reviewed effects. Matching source proxy implementation and actual r7 programme/cold recovery PASS; native complete retest pending shared GPU availability/CPU fallback. Whole row remains PARTIAL.",
@@ -375,21 +307,11 @@
     },
     {
       "id": "layer_order_blends",
-      "capabilityIds": [
-        "compositing",
-        "overlays",
-        "three_d",
-        "motion_graphics",
-        "vfx"
-      ],
+      "capabilityIds": ["compositing", "overlays", "three_d", "motion_graphics", "vfx"],
       "readiness": "PARTIAL",
       "assertion": "One explicit global stage/order/blend model including nested masks",
       "gap": "Canonical masks/blends and nested programme gates share editable group clips; native group timing/history/cold/owned export passes. Nine whole-footage picture comparisons fail. Group source-occurrence/anchor, mask/blend animation, broad modes/media/retiming/full picture/live sound remain unqualified.",
-      "sourceRefs": [
-        "graph",
-        "studio",
-        "worker"
-      ],
+      "sourceRefs": ["graph", "studio", "worker"],
       "automatedGuardFiles": [
         "frontend/src/components/__tests__/studioGroups.test.js",
         "python_media_worker/test_studio_composition.py",
@@ -426,23 +348,12 @@
     },
     {
       "id": "audio_routing_timing",
-      "capabilityIds": [
-        "audio",
-        "voiceover_sfx",
-        "audio_restoration",
-        "cuts_speed"
-      ],
+      "capabilityIds": ["audio", "voiceover_sfx", "audio_restoration", "cuts_speed"],
       "readiness": "PARTIAL",
       "assertion": "Gain/mute/fades/ducking/onset/VO/music/speed and source-clock agreement",
       "gap": "Stereo delivery collapse fixed. Native pre-final/final audio pairing, human listening, ramps/ducking and complete routing qualification remain open.",
-      "sourceRefs": [
-        "audio",
-        "studio",
-        "worker"
-      ],
-      "automatedGuardFiles": [
-        "python_media_worker/test_studio_audio_channels.py"
-      ],
+      "sourceRefs": ["audio", "studio", "worker"],
+      "automatedGuardFiles": ["python_media_worker/test_studio_audio_channels.py"],
       "automatedGuardResultThisSession": "PASS: 4 real PCM/FFmpeg channel guards plus shared renderer stereo diagnostic. Mono sync default, SFX channel separation, cue onset/trim/fades and pitch-preserved centred VO tested.",
       "realPairedRunThisSession": "NOT_RUN",
       "measurement": null,
@@ -465,21 +376,12 @@
     },
     {
       "id": "three_d_pose_camera",
-      "capabilityIds": [
-        "three_d",
-        "blender"
-      ],
+      "capabilityIds": ["three_d", "blender"],
       "readiness": "PARTIAL",
       "assertion": "Scene/hash/camera/pose/material intent and keyframe curves",
       "gap": "One HQ scene and actual alpha final works; Three.js/Blender cameras/materials/text differ.",
-      "sourceRefs": [
-        "model3D",
-        "canvas3D",
-        "blender"
-      ],
-      "automatedGuardFiles": [
-        "studio_3d_renderer/tests/test_pose_parity.py"
-      ],
+      "sourceRefs": ["model3D", "canvas3D", "blender"],
+      "automatedGuardFiles": ["studio_3d_renderer/tests/test_pose_parity.py"],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "NOT_RUN",
       "measurement": null,
@@ -500,19 +402,11 @@
     },
     {
       "id": "three_d_ignored_fields",
-      "capabilityIds": [
-        "three_d",
-        "blender",
-        "three_d_audio"
-      ],
+      "capabilityIds": ["three_d", "blender", "three_d_audio"],
       "readiness": "PARTIAL",
       "assertion": "No active accepted field can disappear from final render",
       "gap": "Nine unsupported fields and known ignored mode choices are now unavailable in the UI. Implementations still ignore legacy accepted values; missing renderer functionality is not resolved by disabling controls.",
-      "sourceRefs": [
-        "panel3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "blender", "dispatch3D"],
       "automatedGuardFiles": [
         "frontend/src/components/threeD/Studio3DPanel.test.js",
         "frontend/src/components/__tests__/studioCapabilities.test.js"
@@ -532,21 +426,12 @@
     },
     {
       "id": "three_d_fade_alpha",
-      "capabilityIds": [
-        "three_d",
-        "blender",
-        "compositing"
-      ],
+      "capabilityIds": ["three_d", "blender", "compositing"],
       "readiness": "PARTIAL",
       "assertion": "Pose opacity reaches final alpha and paired fade boundary frames",
       "gap": "Current Blender applies Timeline opacity at every frame; old unsupported notes are stale. Numeric/source wiring is not full paired alpha-image proof.",
-      "sourceRefs": [
-        "blender",
-        "canvas3D"
-      ],
-      "automatedGuardFiles": [
-        "studio_3d_renderer/tests/test_pose_parity.py"
-      ],
+      "sourceRefs": ["blender", "canvas3D"],
+      "automatedGuardFiles": ["studio_3d_renderer/tests/test_pose_parity.py"],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "NOT_RUN",
       "measurement": null,
@@ -562,18 +447,11 @@
     },
     {
       "id": "three_d_audio_envelope",
-      "capabilityIds": [
-        "three_d_audio",
-        "audio",
-        "blender"
-      ],
+      "capabilityIds": ["three_d_audio", "audio", "blender"],
       "readiness": "BROKEN",
       "assertion": "Same real source-audio envelope modulates browser/proxy/final geometry",
       "gap": "Browser live response exists; Blender receives no audio envelope.",
-      "sourceRefs": [
-        "canvas3D",
-        "blender"
-      ],
+      "sourceRefs": ["canvas3D", "blender"],
       "automatedGuardFiles": [],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "NOT_RUN",
@@ -588,18 +466,11 @@
     },
     {
       "id": "completed_output_seek",
-      "capabilityIds": [
-        "preview",
-        "save_reload",
-        "export"
-      ],
+      "capabilityIds": ["preview", "save_reload", "export"],
       "readiness": "FUNCTIONAL",
       "assertion": "Native completed-file seek/pause retains rendered source and actual output clock",
       "gap": "Real normal cold frame at 0.5s and native same-SHA download after seek; this is recovery, not pre-final creative parity.",
-      "sourceRefs": [
-        "studio",
-        "recovery"
-      ],
+      "sourceRefs": ["studio", "recovery"],
       "automatedGuardFiles": [
         "frontend/src/components/__tests__/VideoEditor.viralRenderRecovery.test.js"
       ],
@@ -622,24 +493,12 @@
     },
     {
       "id": "state_roundtrip",
-      "capabilityIds": [
-        "save_reload",
-        "project_revisions",
-        "director"
-      ],
+      "capabilityIds": ["save_reload", "project_revisions", "director"],
       "readiness": "PARTIAL",
       "assertion": "Stable canonical decision/asset hash across undo/reopen/revision restore",
       "gap": "Same-browser source URL refresh/project recovery repaired; all effect/blob/key/revision paths not qualified.",
-      "sourceRefs": [
-        "graph",
-        "storage",
-        "history",
-        "recovery",
-        "commands"
-      ],
-      "automatedGuardFiles": [
-        "frontend/src/components/__tests__/studioEditableProjection.test.js"
-      ],
+      "sourceRefs": ["graph", "storage", "history", "recovery", "commands"],
+      "automatedGuardFiles": ["frontend/src/components/__tests__/studioEditableProjection.test.js"],
       "automatedGuardResultThisSession": "PASS: mixed graph roundtrip, shared manual/headless trim and undo guards; normal native split/undo/redo/save/cold-reopen preserved seven canonical fields at revision 101.",
       "realPairedRunThisSession": "NOT_RUN",
       "measurement": null,
@@ -659,20 +518,11 @@
     },
     {
       "id": "generated_asset_equivalence",
-      "capabilityIds": [
-        "generated_image",
-        "generated_video",
-        "generated_raw",
-        "b_roll"
-      ],
+      "capabilityIds": ["generated_image", "generated_video", "generated_raw", "b_roll"],
       "readiness": "PARTIAL",
       "assertion": "Reviewed generated assets import as ordinary owned timeline assets",
       "gap": "Exact owned generated asset SHA/review metadata and3s V2 duration survive native undo/redo/save/cold reopen and real final placement. Full mapped frame equivalence, nested live VFX and all generated types remain unqualified.",
-      "sourceRefs": [
-        "factoryAdapter",
-        "factoryRoutes",
-        "graph"
-      ],
+      "sourceRefs": ["factoryAdapter", "factoryRoutes", "graph"],
       "automatedGuardFiles": [],
       "automatedGuardResultThisSession": "NOT_RUN",
       "realPairedRunThisSession": "NOT_RUN",
@@ -711,12 +561,7 @@
       "status": "IGNORED_BY_FINAL_RENDER",
       "uiActive": false,
       "reason": "Fixed browser/Blender fonts; selected family does not reach font loading.",
-      "sourceRefs": [
-        "panel3D",
-        "canvas3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "canvas3D", "blender", "dispatch3D"],
       "uiAvailability": "DISABLED_UNIMPLEMENTED",
       "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
     },
@@ -725,12 +570,7 @@
       "status": "IGNORED_BY_FINAL_RENDER",
       "uiActive": false,
       "reason": "Fixed text geometry/fonts rather than selected weight.",
-      "sourceRefs": [
-        "panel3D",
-        "canvas3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "canvas3D", "blender", "dispatch3D"],
       "uiAvailability": "DISABLED_UNIMPLEMENTED",
       "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
     },
@@ -739,12 +579,7 @@
       "status": "IGNORED_BY_FINAL_RENDER",
       "uiActive": false,
       "reason": "Scene-level choice not consumed by preset pose; per-keyframe easing is a separate implemented field.",
-      "sourceRefs": [
-        "panel3D",
-        "canvas3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "canvas3D", "blender", "dispatch3D"],
       "uiAvailability": "DISABLED_UNIMPLEMENTED",
       "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
     },
@@ -753,12 +588,7 @@
       "status": "IGNORED_BY_FINAL_RENDER",
       "uiActive": false,
       "reason": "Live browser audio scales meshes; no source envelope reaches Blender.",
-      "sourceRefs": [
-        "panel3D",
-        "canvas3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "canvas3D", "blender", "dispatch3D"],
       "uiAvailability": "DISABLED_UNIMPLEMENTED",
       "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
     },
@@ -767,12 +597,7 @@
       "status": "IGNORED_BY_FINAL_RENDER",
       "uiActive": false,
       "reason": "Browser key light moves; Blender key light remains fixed.",
-      "sourceRefs": [
-        "panel3D",
-        "canvas3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "canvas3D", "blender", "dispatch3D"],
       "uiAvailability": "DISABLED_UNIMPLEMENTED",
       "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
     },
@@ -781,12 +606,7 @@
       "status": "IGNORED_BY_FINAL_RENDER",
       "uiActive": false,
       "reason": "Accepted toggle not read to select renderer behavior.",
-      "sourceRefs": [
-        "panel3D",
-        "canvas3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "canvas3D", "blender", "dispatch3D"],
       "uiAvailability": "DISABLED_UNIMPLEMENTED",
       "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
     },
@@ -795,12 +615,7 @@
       "status": "IGNORED_BY_FINAL_RENDER",
       "uiActive": false,
       "reason": "Accepted toggle not read to select renderer behavior.",
-      "sourceRefs": [
-        "panel3D",
-        "canvas3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "canvas3D", "blender", "dispatch3D"],
       "uiAvailability": "DISABLED_UNIMPLEMENTED",
       "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
     },
@@ -809,12 +624,7 @@
       "status": "IGNORED_BY_FINAL_RENDER",
       "uiActive": false,
       "reason": "Transparent scene and fixed dark HQ matte ignore selected value.",
-      "sourceRefs": [
-        "panel3D",
-        "canvas3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "canvas3D", "blender", "dispatch3D"],
       "uiAvailability": "DISABLED_UNIMPLEMENTED",
       "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
     },
@@ -823,12 +633,7 @@
       "status": "IGNORED_BY_FINAL_RENDER",
       "uiActive": false,
       "reason": "Dispatch fixes dimensions/fps/profile rather than selected quality.",
-      "sourceRefs": [
-        "panel3D",
-        "canvas3D",
-        "blender",
-        "dispatch3D"
-      ],
+      "sourceRefs": ["panel3D", "canvas3D", "blender", "dispatch3D"],
       "uiAvailability": "DISABLED_UNIMPLEMENTED",
       "availabilityEvidence": "reports/studio-canonical-visual-20261008/native-3d-controls.json"
     }
@@ -1829,10 +1634,7 @@
   "privateWelcomeCinematic20261009": {
     "status": "CREATIVELY_REJECTED_BY_FOUNDER",
     "duration": 38,
-    "resolution": [
-      1920,
-      1080
-    ],
+    "resolution": [1920, 1080],
     "fps": 24,
     "frames": 912,
     "canonicalProject": "reports/welcome-cinematic-20261009/outputs/final/project.json",
@@ -1920,12 +1722,7 @@
     ],
     "scope": "Real private runtime/canonical render, local signed-out editable lifecycle; no ordinary-account, creative or production qualification.",
     "artifacts": 5,
-    "modelsExecuted": [
-      "Qwen3-VL",
-      "Grounding DINO",
-      "SAM2.1",
-      "Wan2.2"
-    ],
+    "modelsExecuted": ["Qwen3-VL", "Grounding DINO", "SAM2.1", "Wan2.2"],
     "tracking": "CPU geometry derived from real SAM masks; TAPNext++ unavailable",
     "gpuActive": 0,
     "remainingBlockers": [
@@ -2010,11 +1807,7 @@
     "evidence": "reports/model-capability-runtime-v1-20261009/SHOWROOM-FOUNDATION.md",
     "templateRegistry": "config/creative-templates/registry.v1.json",
     "showcaseCatalogue": "config/creative-templates/showcase.v1.json",
-    "sharedSurfaces": [
-      "studio",
-      "director",
-      "welcome"
-    ],
+    "sharedSurfaces": ["studio", "director", "welcome"],
     "requestedCategories": 18,
     "qualifiedTemplates": 0,
     "approvedPublicOutputs": 0,
@@ -2148,9 +1941,7 @@
     "productionDeployment": false,
     "mainMerge": false,
     "publicRelease": false,
-    "evidence": [
-      "reports/model-capability-runtime-v1-20261009/SOUND-EDITING-20261010.md"
-    ],
+    "evidence": ["reports/model-capability-runtime-v1-20261009/SOUND-EDITING-20261010.md"],
     "remainingBlockers": [
       "Native duplicate undo/redo requalification",
       "Exact edited-project cold recovery",
@@ -2168,16 +1959,8 @@
     "nativeSfxPresets": 15,
     "sampledSfxFiles": 6,
     "totalSfxChoices": 21,
-    "nativeEditedProjects": [
-      "ember",
-      "velo",
-      "onda"
-    ],
-    "newCompletedMovies": [
-      "ember",
-      "velo",
-      "onda"
-    ],
+    "nativeEditedProjects": ["ember", "velo", "onda"],
+    "newCompletedMovies": ["ember", "velo", "onda"],
     "pendingNativeEdits": [],
     "nativeSoundCueCounts": {
       "ember": 16,
@@ -2201,9 +1984,7 @@
     "readinessPromotion": false,
     "productionDeployment": false,
     "mainMerge": false,
-    "evidence": [
-      "reports/model-capability-runtime-v1-20261009/MATERIALS-EDITING-20261010.md"
-    ],
+    "evidence": ["reports/model-capability-runtime-v1-20261009/MATERIALS-EDITING-20261010.md"],
     "remainingBlockers": [
       "Founder full-film/sound creative review and possible mastering/revisions",
       "Paired predictive preview/final picture/audio parity (S02)",
@@ -2682,14 +2463,8 @@
     "sourcePlayback": {
       "programmeSeconds": 19.5,
       "beforeWallSeconds": 38.886,
-      "afterWallSeconds": [
-        20.5615,
-        21.3152
-      ],
-      "afterWaitingEvents": [
-        1,
-        2
-      ],
+      "afterWallSeconds": [20.5615, 21.3152],
+      "afterWaitingEvents": [1, 2],
       "scope": "same canonical edit; bounded local runs"
     },
     "frameComparison": {
@@ -2777,14 +2552,8 @@
       "musicStarts": 13,
       "builtInStartsIncludingContinuations": 19,
       "importedMediaStarts": 3,
-      "musicBedCorrelationRange": [
-        0.9022033937327991,
-        0.999841696734498
-      ],
-      "pairedMusicLevelRatioRange": [
-        0.9913355345301832,
-        1.0501774400620036
-      ],
+      "musicBedCorrelationRange": [0.9022033937327991, 0.999841696734498],
+      "pairedMusicLevelRatioRange": [0.9913355345301832, 1.0501774400620036],
       "signalScope": "Stereo-difference music bed only. Original wall-clock windows and observed anchor pairing both retained, fixed +/-200ms residual search. Not whole mix/SFX waveform/creative qualification. Native post-gain taps retain MediaStream source; separate analyser peaks recorded.",
       "nativeControls": "reports/model-capability-runtime-v1-20261009/proof/launch-template/cycling-recovery-20261011/native-audio-controls-final/controls-proof.json",
       "nativePause": {
@@ -2853,10 +2622,7 @@
       "activeRiserGain": {
         "evidence": "reports/model-capability-runtime-v1-20261009/proof/launch-template/cycling-recovery-20261011/sfx-envelope/native-sfx-gain-comparison.json",
         "samples": 49,
-        "range": [
-          0.033766910433769226,
-          0.1599999964237213
-        ],
+        "range": [0.033766910433769226, 0.1599999964237213],
         "maximumObservedDifference": 0.02355814460308467,
         "scope": "Actual existing native post-fader GainNode readings during the unique one-second riser in this canonical edit. Clock observations use the owned active clip/source time. Frame updates and capture sampling can lag; this is gain-control evidence, not waveform/phase/listening parity."
       },
@@ -2953,9 +2719,7 @@
         "waitingEvents": 0,
         "droppedFramesDuringPlay": 0,
         "sourceChanges": 0,
-        "playbackRates": [
-          1
-        ],
+        "playbackRates": [1],
         "scope": "Completed movie only; exact export audio muxed to native screen capture."
       },
       "sourceRates": {
@@ -2975,9 +2739,7 @@
         "actualAfter": "reports/model-capability-runtime-v1-20261009/proof/launch-template/cycling-recovery-20261011/retime-r4/live-audio-after/native-preview-mix.wav",
         "musicStartsBefore": 30,
         "musicStartsAfter": 14,
-        "ratesAfter": [
-          1
-        ],
+        "ratesAfter": [1],
         "rampWindowCorrelationBefore": 0.0783525600567977,
         "rampWindowCorrelationAfter": 0.9998943754292607,
         "minimumObservedBedCorrelation": 0.8784213642715195,
@@ -3093,34 +2855,16 @@
         "importedCallbacks": 2,
         "lateFirstCallbacks": 2,
         "musicCorrelations": [
-          0.9999978839929243,
-          0.9999981844021306,
-          0.9999983175744565,
-          0.9999987635748782,
-          0.9999988865148496,
-          0.9997649083206258,
-          0.9999981134746954,
-          0.9999811730092519
+          0.9999978839929243, 0.9999981844021306, 0.9999983175744565, 0.9999987635748782,
+          0.9999988865148496, 0.9997649083206258, 0.9999981134746954, 0.9999811730092519
         ],
         "wholeMixCorrelations": [
-          0.9816164024260928,
-          0.9983605038453334,
-          0.9999243683929694,
-          0.9998174444354014,
-          0.9999024505366463,
-          0.9400182890164793,
-          0.9999014622772668,
-          0.999521192503501
+          0.9816164024260928, 0.9983605038453334, 0.9999243683929694, 0.9998174444354014,
+          0.9999024505366463, 0.9400182890164793, 0.9999014622772668, 0.999521192503501
         ],
         "wholeMixLevelRatios": [
-          1.0303330704982683,
-          1.0037463003754044,
-          1.0014285674851198,
-          1.0019075706654397,
-          1.0017629354229824,
-          1.1955280579674303,
-          1.0014633006690332,
-          1.0038391504325437
+          1.0303330704982683, 1.0037463003754044, 1.0014285674851198, 1.0019075706654397,
+          1.0017629354229824, 1.1955280579674303, 1.0014633006690332, 1.0038391504325437
         ],
         "directNativeMusicCapture": "UNAVAILABLE_IN_THIS_RUN"
       },
@@ -3140,33 +2884,16 @@
             "seeking": false,
             "readyState": 2,
             "networkState": 2,
-            "buffered": [
-              [
-                0,
-                1.525
-              ]
-            ]
+            "buffered": [[0, 1.525]]
           }
         ],
         "directMusicCorrelations": [
-          0.4352993875808491,
-          0.9999981844021308,
-          0.9999983175744565,
-          0.9999987635748782,
-          0.9999988865148498,
-          0.9997649083206258,
-          0.9999981134746954,
-          0.999981171814946
+          0.4352993875808491, 0.9999981844021308, 0.9999983175744565, 0.9999987635748782,
+          0.9999988865148498, 0.9997649083206258, 0.9999981134746954, 0.999981171814946
         ],
         "wholeMixCorrelations": [
-          0.3269243250886691,
-          0.998506306716997,
-          0.9999243683929696,
-          0.9998174444354017,
-          0.9999024505366463,
-          0.9400083286403319,
-          0.9999014622772668,
-          0.9995211933549896
+          0.3269243250886691, 0.998506306716997, 0.9999243683929696, 0.9998174444354017,
+          0.9999024505366463, 0.9400083286403319, 0.9999014622772668, 0.9995211933549896
         ],
         "exactlyMatchedCues": 10,
         "unmatchedCallbacks": 7,
@@ -3732,21 +3459,12 @@
         "actualCaptureSeconds": 19.541333333333334,
         "missingSamples": 0,
         "observedWaitingEvents": 0,
-        "directMusicCorrelationRange": [
-          0.9997649083206257,
-          0.9999988865148498
-        ],
-        "wholeMixCorrelationRange": [
-          0.924027,
-          0.999924
-        ],
+        "directMusicCorrelationRange": [0.9997649083206257, 0.9999988865148498],
+        "wholeMixCorrelationRange": [0.924027, 0.999924],
         "fullParity": "UNQUALIFIED",
         "humanListening": false,
         "previousCaptureSeconds": 20.490666666666666,
-        "previousWholeMixCorrelationRange": [
-          0.9450306752407928,
-          0.9999243683929696
-        ],
+        "previousWholeMixCorrelationRange": [0.9450306752407928, 0.9999243683929696],
         "directMusicLatest": "12.9s fails across a music restart; other sampled windows remain near 0.999765\u20130.999999.",
         "musicStarts": 3,
         "finalCapture": "audio-live-r5"
@@ -3848,14 +3566,8 @@
       "observedCueStarts": 17,
       "replayWaitingEvents": 0,
       "coldPreparationQualified": false,
-      "directMusicCorrelationRange": [
-        0.9997649083206257,
-        0.9999988865148498
-      ],
-      "wholeMixCorrelationRange": [
-        0.9814172443335528,
-        0.9999243683929694
-      ],
+      "directMusicCorrelationRange": [0.9997649083206257, 0.9999988865148498],
+      "wholeMixCorrelationRange": [0.9814172443335528, 0.9999243683929694],
       "wholeSoundParity": "UNQUALIFIED",
       "humanListening": false,
       "unchangedDriftGuardSeconds": 0.08,
@@ -3976,16 +3688,8 @@
       "exactRetimedPausedSampling": "UNIMPLEMENTED",
       "initialHarnessDemandAfterRetime": "INVALID_UNSUPPORTED_ACCURATE_FRAME_REQUIREMENT_RETAINED",
       "firstBeforeCutRequested1999Ms": "QUANTIZED_TO_AT_CUT_DOES_NOT_QUALIFY_BEFORE_CUT",
-      "nextActualBoundaryFrames": [
-        47,
-        48,
-        49
-      ],
-      "adjacentCutFramesVerified": [
-        47,
-        48,
-        49
-      ],
+      "nextActualBoundaryFrames": [47, 48, 49],
+      "adjacentCutFramesVerified": [47, 48, 49],
       "adjacentCutGeometryPasses": 3
     },
     "nativeLowMusicFader": {
@@ -4080,10 +3784,7 @@
       "decodedComparison": {
         "beforeOutputHash": "9a18755f86cd041d72c72039c3ea24bfe38ea5fca16c5f0b45f98a144f26045b",
         "afterOutputHash": "49257758ffd0bb8e2db2a06b6c8450af287db81ee50f6124c032075fa013e743",
-        "frames": [
-          465,
-          465
-        ],
+        "frames": [465, 465],
         "changedDecodedFrames": 123,
         "firstChangedFrame": 342,
         "lastChangedFrame": 464,
@@ -4114,28 +3815,10 @@
         "outputSha256": "f33b6d4a1135ded161316d811c51bc6f809e777930b7ddf7f6b47991e1946389",
         "nativeCaptureSha256": "65c5285ba54bb4ea752cd56d671eb5ea21d8ca4d68446e7f39d0292d82a1c95f",
         "outputSeconds": 1,
-        "declaredOutputDimensions": [
-          320,
-          240
-        ],
-        "nativeTitleBounds": [
-          103,
-          108,
-          216,
-          131
-        ],
-        "finalTitleBounds": [
-          104,
-          108,
-          217,
-          131
-        ],
-        "absoluteEdgeDifferencesPixels": [
-          1,
-          0,
-          1,
-          0
-        ],
+        "declaredOutputDimensions": [320, 240],
+        "nativeTitleBounds": [103, 108, 216, 131],
+        "finalTitleBounds": [104, 108, 217, 131],
+        "absoluteEdgeDifferencesPixels": [1, 0, 1, 0],
         "geometryTolerancePixels": 2,
         "geometryPassed": true,
         "greenMaskIoU": 0.7984389348025712,
@@ -4208,10 +3891,7 @@
     "creativeApproval": false,
     "publicRelease": false,
     "nextTask": "S02 remaining retimed music reanchor and exact voice/speech-ducking PCM/listening; cold source preparation, mapped picture/raster/matte/grade/staging and paused sampling after retime; nonzero filters/anamorphic handling. Prepared speech-mode cuts now19.456s/zero waits; whole parity remains unqualified. Then bounded S03 global order/nesting and S04/3D; ordinary-account runtime/billing/security/durability and creative/public qualification.",
-    "correctedCpuRenderDownloadWindowsSeconds": [
-      168.837,
-      170.692
-    ],
+    "correctedCpuRenderDownloadWindowsSeconds": [168.837, 170.692],
     "retimedPriorMutedSourceGuardReplay": {
       "seconds": 25.269333333333332,
       "observedWaits": 13,
@@ -4435,16 +4115,8 @@
     "scopedTestsPassed": 41,
     "currentImageMaskBoundaryComparisons": 9,
     "geometryTolerancePixels": 2,
-    "currentTitleMaskEdgeDifferencesPixels": [
-      0,
-      1,
-      0,
-      1
-    ],
-    "outputDimensions": [
-      960,
-      720
-    ],
+    "currentTitleMaskEdgeDifferencesPixels": [0, 1, 0, 1],
+    "outputDimensions": [960, 720],
     "deliveryFps": 30,
     "outputHashes": {
       "imageMasks": "25607ab035861bd98f2a976936d5fd9de7f8132ae48293183ffc061e744aea4d",
@@ -4463,11 +4135,7 @@
     "gpuJobs": 0,
     "readinessPromotion": false,
     "paidCost": 0,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ]
+    "nextTaskIds": ["S02", "S03", "S04"]
   },
   "professionalImageEffects20261013": {
     "evidence": "reports/studio-professional-continuation-20261013/README.md",
@@ -4486,11 +4154,7 @@
     "paidGpuCost": 0,
     "readinessPromotion": false,
     "combinationGatesPromoted": false,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ],
+    "nextTaskIds": ["S02", "S03", "S04"],
     "checkpoint": "reports/studio-professional-continuation-20261013/checkpoint.json",
     "qualificationScope": "One bounded ordinary-image shadow/glow/blur chain; broader effects remain unqualified.",
     "pairedCombinedFrames": 4,
@@ -4521,11 +4185,7 @@
     "paidGpuRuntimeSeconds": 0,
     "paidGpuCost": 0,
     "readinessPromotion": false,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ]
+    "nextTaskIds": ["S02", "S03", "S04"]
   },
   "professionalMaskedEffects20261013": {
     "evidence": "reports/studio-professional-masked-effects-20261013/README.md",
@@ -4554,11 +4214,7 @@
     "paidGpuCost": 0,
     "readinessPromoted": false,
     "wholePreviewFinalParityQualified": false,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ],
+    "nextTaskIds": ["S02", "S03", "S04"],
     "followUpEvidence": "reports/studio-professional-source-sampling-20261013/README.md"
   },
   "professionalLegacySourceSampling20261013": {
@@ -4585,11 +4241,7 @@
     "fullStudioSuiteQualified": false,
     "wholePreviewFinalParityQualified": false,
     "readinessPromoted": false,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ],
+    "nextTaskIds": ["S02", "S03", "S04"],
     "nextImplementationSlice": "S03 global composition order; S02 remaining raster/moving/cold/broad picture and sound remain open"
   },
   "professionalFlatLayerOrder20261014": {
@@ -4616,11 +4268,7 @@
     "wholePreviewFinalParityQualified": false,
     "fullStudioSuiteQualified": false,
     "readinessPromoted": false,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ],
+    "nextTaskIds": ["S02", "S03", "S04"],
     "nextImplementationSlice": "S03 nested composition and group transforms on the existing canonical graph; keep S02 raster/moving/cold/broad picture and sound open"
   },
   "professionalNestedGroups20261014": {
@@ -4648,11 +4296,7 @@
     "wholePreviewFinalParityQualified": false,
     "fullStudioSuiteQualified": false,
     "readinessPromoted": false,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ],
+    "nextTaskIds": ["S02", "S03", "S04"],
     "nextImplementationSlice": "S03 shared group transform keyframes and group property rows on the canonical graph, then group masks/blends and clip ownership; keep S02 raster/moving/cold/broad picture and sound open",
     "ownedLocalQaStopped": true,
     "finalNativePreviewAfterFinalBuild": true,
@@ -4685,11 +4329,7 @@
     "wholePreviewFinalParityQualified": false,
     "fullStudioSuiteQualified": false,
     "readinessPromoted": false,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ],
+    "nextTaskIds": ["S02", "S03", "S04"],
     "nextImplementationSlice": "S03 group masks and blend semantics on the shared canonical hierarchy/compositor, then clip ownership; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open"
   },
   "professionalGroupComposite20261014": {
@@ -4720,11 +4360,7 @@
     "wholePreviewFinalParityQualified": false,
     "fullStudioSuiteQualified": false,
     "readinessPromoted": false,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ],
+    "nextTaskIds": ["S02", "S03", "S04"],
     "nextImplementationSlice": "S03 group clip/occurrence ownership and timing through the canonical hierarchy; keep S02 whole raster/moving/cold/broad picture and sound and S04/AE open"
   },
   "professionalGroupWorkflow20261014": {
@@ -4749,11 +4385,7 @@
     },
     "wholePreviewFinalParityQualified": false,
     "readinessPromoted": false,
-    "nextTaskIds": [
-      "S02",
-      "S03",
-      "S04"
-    ],
+    "nextTaskIds": ["S02", "S03", "S04"],
     "nextImplementationSlice": "Repair the real-footage pre-final picture and CPU export performance, then shared group split/duplicate/source-occurrence ownership and remaining main-timeline mechanics.",
     "evidence": "reports/studio-professional-group-workflow-20261014/README.md",
     "checkpoint": "reports/studio-professional-group-workflow-20261014/checkpoint.json",
@@ -4792,10 +4424,7 @@
     "selectedGroupOpacityKeyCount": 4,
     "nativeEditingRecordings": 1,
     "completeStudioRecordings": 2,
-    "nativeRenderSeconds": [
-      244.079,
-      233.54
-    ],
+    "nativeRenderSeconds": [244.079, 233.54],
     "all480RepairPictureFramesIdentical": true,
     "repairSoundtrackIdentical": false,
     "frontendCasesPassed": 35,
@@ -4815,11 +4444,7 @@
       "All480 repair-export decoded picture frames are byte-identical; decoded soundtrack differs from the retained earlier export. Whole audio parity/listening remains unqualified.",
       "Screen recordings have sparse capture relative to24fps and do not establish playback smoothness. No full Studio suite or readiness/creative/public promotion."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S02",
-      "S03"
-    ],
+    "nextTaskIds": ["S04", "S02", "S03"],
     "nextImplementationSlice": "Continue visible S04 property editing with cross-layer clipboard and marquee selection; retain S02 colour/raster/whole sound and S03 source-occurrence/group ownership blockers."
   },
   "professionalKeyframeMarquee20261015": {
@@ -4856,11 +4481,7 @@
       "Existing S02 colour/ellipse/source-feature and audio differences, S03 source-occurrence/group ownership and broader model lifecycle remain open.",
       "Screen capture averages19.30fps for a24fps movie; full ended playback does not establish smoothness."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S02",
-      "S03"
-    ],
+    "nextTaskIds": ["S04", "S02", "S03"],
     "nextImplementationSlice": "S04 temporal velocity/influence and spatial path editing on the existing canonical key/curve graph. Retain S02 whole colour/raster/sound and S03 occurrence/group ownership limits."
   },
   "professionalMotionWorkspace20261015": {
@@ -4879,10 +4500,7 @@
     "nativeVelocityInfluenceUndoRedo": true,
     "nativeExactColdReopen": true,
     "nativeCpuExports": 2,
-    "renderSeconds": [
-      253.938,
-      226.154
-    ],
+    "renderSeconds": [253.938, 226.154],
     "nativeEditingRecordings": 2,
     "completeStudioRecordings": 1,
     "frontendCasesPassed": 46,
@@ -4901,11 +4519,7 @@
       "Intermediate evaluated-field hold entry did not set the desired key value; the explicit selected-key inspector correction, cold reopen and corrected export are verified. Wider focus/seek/value-commit behavior requires scoped follow-up.",
       "Screen capture cadence is separate from movie decode and does not qualify smooth playback. No readiness/creative/public promotion."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S03",
-      "S02"
-    ],
+    "nextTaskIds": ["S04", "S03", "S02"],
     "nextImplementationSlice": "Continue S04 coordinated spatial tangents and path timing on the canonical graph, then shared S03 occurrence/group ownership. Retain S02 whole picture/sound limits and the evaluated-field focus/seek follow-up."
   },
   "professionalKineticTypography20261015": {
@@ -4952,11 +4566,7 @@
       "Complex script shaping/RTL, arbitrary masks/tracking/retiming/3D and broad parent/media combinations remain unqualified.",
       "S03 group/source-occurrence ownership and dedicated S04 spatial tangent/path timing remain open. No readiness or creative/public/production promotion."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S03",
-      "S02"
-    ],
+    "nextTaskIds": ["S04", "S03", "S02"],
     "nextImplementationSlice": "Continue the user's motion-design feedback with editable typography/shape choreography on this shared graph, then S04 spatial tangent/path timing and S03 occurrence ownership; retain S02 picture/sound limits.",
     "userRejectedBothEarlierMotionSamples": true
   },
@@ -5018,11 +4628,7 @@
       "Screen capture does not qualify smooth live playback. Whole continuous preview/final raster, live sound/human listening, S02 colour/ellipse/source features and broad parent/media combinations remain unqualified.",
       "S03 source-occurrence/group ownership and dedicated S04 spatial path timing remain open; no creative/public/pro/production promotion."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S03",
-      "S02"
-    ],
+    "nextTaskIds": ["S04", "S03", "S02"],
     "nextImplementationSlice": "Continue user motion-design feedback on the same editable graph, then shared S04 spatial tangent/path timing and S03 occurrence ownership; retain S02 picture/sound and export-latency limits.",
     "userFeedback": "Better but still not there / not impressive yet; timeline correspondence rejected and corrected in the later timeline entry."
   },
@@ -5067,11 +4673,7 @@
       "Whole preview/final raster, live audio/listening and smoothness remain unqualified.",
       "S04 spatial tangent/path timing, text range selectors and true vector editing; S03 source occurrence/group ownership; S02 picture/sound and CPU export latency remain open."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S03",
-      "S02"
-    ],
+    "nextTaskIds": ["S04", "S03", "S02"],
     "nextImplementationSlice": "Continue the user\u2019s motion-design refinement through native Studio controls on the same graph; then shared S04 spatial/path timing and S03 occurrence ownership. Retain S02 picture/sound and export latency limits."
   },
   "professionalDepthMotion20261016": {
@@ -5102,10 +4704,7 @@
     "outputSha256": "fdf1a441f8c1901dad939bd7d3704317600ccd20218c2a7a087bb1657a063112",
     "exactCompiledKeyTuples": 729,
     "outlinedNativeTitleLayers": 8,
-    "outlineColors": [
-      "#ff5436",
-      "#f4efe6"
-    ],
+    "outlineColors": ["#ff5436", "#f4efe6"],
     "nativeTransitionCorrection": {
       "projectId": "viral-project-41ce520a-8147-41aa-b84f-c6fb79a2ac6a",
       "canonicalHash": "f0c5093756c470f4e146c03c5caccc8efc722f6323440ac7f38f212caa2d9f11",
@@ -5205,11 +4804,7 @@
       "An ink video provides the existing source clock; a source-free composition is not implemented.",
       "The revised creative result requires user review; no public/showroom/creative/pro/production promotion."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S03",
-      "S02"
-    ],
+    "nextTaskIds": ["S04", "S03", "S02"],
     "nextImplementationSlice": "Continue the requested motion refinement through native controls; then shared spatial/path timing and occurrence ownership, retaining S02 picture/sound and CPU export latency work.",
     "ownedQaServicesStopped": {
       "ownedServices": [
@@ -5355,11 +4950,7 @@
       "S04 dedicated spatial tangents, editable vector paths and range selectors; S03 occurrence/group ownership; S02 picture/sound/export latency remain open.",
       "The ink source supplies the existing programme clock. Artwork is rasterized on import. The new film requires user creative review."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S03",
-      "S02"
-    ],
+    "nextTaskIds": ["S04", "S03", "S02"],
     "nextImplementationSlice": "User motion feedback, then shared spatial/path timing and occurrence ownership, retaining S02 picture/sound and export latency work.",
     "finalMeasuredLufs": -28.53,
     "finalTruePeakDbtp": -13.34,
@@ -5428,11 +5019,7 @@
       "S04 dedicated spatial tangents, editable vector paths and range selectors; S03 occurrence/group ownership; S02 picture/sound/export latency remain open.",
       "The clean ink source supplies the programme clock. Artwork rasterizes on import; masks are static. The replacement requires user creative review."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S03",
-      "S02"
-    ],
+    "nextTaskIds": ["S04", "S03", "S02"],
     "nextImplementationSlice": "User motion feedback; shared spatial/path timing and occurrence ownership, retaining S02 picture/sound and CPU export latency.",
     "outputSha256": "8eb6422025d8d5e456ed7973f333d086a58df4916ac824f52f62465939782a53",
     "submittedJobId": "viral_5551be5ba232445c0731c5172c4a4e2bbe41185944177eed5e00a1ae4f7f4408",
@@ -5620,11 +5207,7 @@
       "S04 spatial tangents, editable vector paths and range selectors; S03 occurrence/group ownership; S02 picture/sound/export latency remain open.",
       "The clean ink source supplies the programme clock. Imported artwork rasterizes. Creative quality still requires user review."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S03",
-      "S02"
-    ],
+    "nextTaskIds": ["S04", "S03", "S02"],
     "ownedQaServicesStopped": {
       "at": "2026-10-16T17:58:42.193Z",
       "ownedServices": [
@@ -5649,10 +5232,7 @@
           "stopped": true
         }
       ],
-      "earlierOwnedApisStopped": [
-        53845,
-        95763
-      ],
+      "earlierOwnedApisStopped": [53845, 95763],
       "otherSessionsPreserved": true,
       "gpuJobs": 0
     }
@@ -5670,14 +5250,7 @@
     "verifiedDestinationSchedules": 24,
     "sourceHashesVerified": 24,
     "postsPerPlatform": 4,
-    "platforms": [
-      "youtube",
-      "tiktok",
-      "instagram",
-      "linkedin",
-      "facebook",
-      "reddit"
-    ],
+    "platforms": ["youtube", "tiktok", "instagram", "linkedin", "facebook", "reddit"],
     "timezone": "Africa/Johannesburg",
     "firstLocalTime": "2026-10-16T20:15",
     "lastLocalTime": "2026-10-16T23:20",
@@ -5748,10 +5321,7 @@
           "stopped": true
         }
       ],
-      "earlierOwnedApisStopped": [
-        53845,
-        95763
-      ],
+      "earlierOwnedApisStopped": [53845, 95763],
       "otherSessionsPreserved": true,
       "gpuJobs": 0
     }
@@ -5907,10 +5477,7 @@
     "submittedJobId": "viral_7a620b54ad0b434572f57aae32126aeb84dd8f2aed1b7aa374d3bc8ac58f08d9",
     "seconds": 60,
     "frames": 1440,
-    "resolution": [
-      1600,
-      1000
-    ],
+    "resolution": [1600, 1000],
     "fps": 24,
     "motionKeys": 132,
     "nativeControlsOnly": true,
@@ -6011,10 +5578,7 @@
     "submittedJobId": "viral_eeae362ae1b05df08af45c72c81f2b3533294866db1c06eca2b5cb17cd24ef9e",
     "seconds": 60,
     "frames": 1440,
-    "resolution": [
-      1600,
-      1000
-    ],
+    "resolution": [1600, 1000],
     "fps": 24,
     "presentationOverlays": 48,
     "presentationKeys": 580,
@@ -6022,13 +5586,7 @@
       "seconds": 12,
       "layers": 46,
       "keys": 521,
-      "words": [
-        "STOP",
-        "POSTING",
-        "START",
-        "CREATING",
-        "AGAIN"
-      ],
+      "words": ["STOP", "POSTING", "START", "CREATING", "AGAIN"],
       "projectId": "viral-project-bf74fbe0-e3e7-4ada-afe5-c7e954512190",
       "canonicalHash": "3a9deecebc06e0239336cfe0308926e0f68008d7c3d3550cc270aeba8fc51faf",
       "outputSha256": "1df48802a9e9e65e5d017d4b2bf1f77b383af846e4fc14139c64f1d428337265",
@@ -6054,10 +5612,7 @@
       "oversizedFullHistoryAttemptRetained": true
     },
     "audio": {
-      "motionSection": [
-        8,
-        20
-      ],
+      "motionSection": [8, 20],
       "narrationPauseMaxAmplitude": 0,
       "motionSourceCorrelation": 0.9989389394920052,
       "nativeMusicGain": 0.6,
@@ -6260,10 +5815,7 @@
     "submittedJobId": "viral_952a30544f7bd2bff874dfb16ef6ff8b581ccc4004892392da85f282aada87ff",
     "seconds": 10,
     "frames": 240,
-    "resolution": [
-      1280,
-      720
-    ],
+    "resolution": [1280, 720],
     "fps": 24,
     "editableLayers": 18,
     "motionKeys": 174,
@@ -6376,10 +5928,7 @@
     "submittedJobId": "viral_ce08ea9932dd58da8b394e6a6d3e68a4b12ac4a54c4d30e2175d176162b6cb59",
     "seconds": 10,
     "frames": 240,
-    "resolution": [
-      1280,
-      720
-    ],
+    "resolution": [1280, 720],
     "fps": 24,
     "editableLayers": 15,
     "groups": 1,
@@ -6501,23 +6050,14 @@
     "submittedJobId": "viral_9d1ebe451ec7a39d9e0abb50821f45f5f7cfa43051e189ef035f6a711b07627e",
     "seconds": 10,
     "frames": 240,
-    "resolution": [
-      1280,
-      720
-    ],
+    "resolution": [1280, 720],
     "fps": 24,
     "editableLayers": 52,
     "groups": 6,
     "motionKeys": 727,
     "nativeWordmarkImagePieces": 22,
     "nativeTextPieces": 15,
-    "words": [
-      "Create.",
-      "Schedule.",
-      "Publish.",
-      "Move",
-      "forward."
-    ],
+    "words": ["Create.", "Schedule.", "Publish.", "Move", "forward."],
     "nativeBuildUndoRedo": true,
     "nativeTextColourEditUndo": true,
     "nativeTitleSizeEditUndoRedo": true,
@@ -6663,10 +6203,7 @@
       "submittedJobId": "viral_e034672a6789bc8dd9918dd2ee3e56c9b2ecd6c09d498a451a14673800c6e492",
       "seconds": 10,
       "frames": 240,
-      "resolution": [
-        1280,
-        720
-      ],
+      "resolution": [1280, 720],
       "fps": 24,
       "layers": 59,
       "groups": 6,
@@ -6797,10 +6334,7 @@
     },
     "subsequentOwnerSelection": {
       "instruction": "schedule both",
-      "selectedVersions": [
-        "A",
-        "B"
-      ],
+      "selectedVersions": ["A", "B"],
       "supersedesSelectionWait": true,
       "schedulingEvidence": "reports/daily-studio/2026-10-17/logo-comparison/publishing/queue-verified.json"
     }
@@ -6809,10 +6343,7 @@
     "updatedAt": "2026-10-17T13:17:54.672Z",
     "status": "BOTH_LOGO_FILMS_TWELVE_NATIVE_SCHEDULES_VERIFIED",
     "ownerInstruction": "schedule both",
-    "selectedVersions": [
-      "Spring assembly",
-      "Diamond cascade"
-    ],
+    "selectedVersions": ["Spring assembly", "Diamond cascade"],
     "normalSignedInPublisherFlow": true,
     "newContentUploads": 2,
     "reusedOwnedAssetSchedules": 10,
@@ -7026,11 +6557,7 @@
     "earlierUpcomingSchedulesPreserved": 26,
     "logosPreserved": true,
     "duplicateActiveFinalDestinations": 0,
-    "dates": [
-      "2026-10-18",
-      "2026-10-19",
-      "2026-10-20"
-    ],
+    "dates": ["2026-10-18", "2026-10-19", "2026-10-20"],
     "timezone": "Africa/Johannesburg",
     "independentDestinationCopyAndTimes": true,
     "nativeFiveDestinationCustomTimes": true,
@@ -7152,11 +6679,7 @@
       "Speech-cut precision and broad S02 source/audio/retiming cases, S03 occurrence/group ownership, normal-account model integration and production/security/billing qualification remain open.",
       "This private eight-second engineering example has no creative/showroom approval and does not replace the planned one-minute production."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S02",
-      "S03"
-    ]
+    "nextTaskIds": ["S04", "S02", "S03"]
   },
   "editableVectorArtwork20261018": {
     "evidence": "reports/studio-vector-artwork-20261018/README.md",
@@ -7228,11 +6751,7 @@
       "Shared S02 speech-cut/preview precision and export latency, S03 occurrence/group ownership, normal-account model integration and full security/billing/durability qualification remain open.",
       "The private eight-second engineering example is not the planned one-minute creative production or a new selected AutoPromote identity. No creative/showroom or public-release approval is implied."
     ],
-    "nextTaskIds": [
-      "S04",
-      "S02",
-      "S03"
-    ]
+    "nextTaskIds": ["S04", "S02", "S03"]
   },
   "creatorMinuteDelivery20261018": {
     "evidence": "reports/studio-creator-film-20261018/README.md",
@@ -8058,12 +7577,7 @@
     "report": "reports/studio-ui-controls-20261021/README.md",
     "scope": "Owner-requested native Studio inspector UI repair. Scoped CSS only; canonical editing/render behavior retained.",
     "source": "frontend/src/components/StudioControls.css",
-    "desktopViewports": [
-      1440,
-      1280,
-      1024,
-      900
-    ],
+    "desktopViewports": [1440, 1280, 1024, 900],
     "desktopPanelChecks": 30,
     "toolFamilies": 9,
     "smallScreenDesktopBoundaryChecks": 2,
@@ -8077,10 +7591,7 @@
       "originalRevision": 303,
       "undoRevision": 305,
       "sameEditData": true,
-      "historyMetadataExcluded": [
-        "revision",
-        "journal"
-      ]
+      "historyMetadataExcluded": ["revision", "journal"]
     },
     "existingComponentCasesPassed": 10,
     "strictLocalAppBuild": "PASS (CI=true; production configuration, local verification bundle without minification)",
@@ -8100,12 +7611,7 @@
     "documentation": {
       "knowledgeVersion": "1.0.42",
       "updatedAt": "2026-10-21T15:16:22.248Z",
-      "features": [
-        "studio.timeline",
-        "studio.keyframes",
-        "studio.logo_design",
-        "studio.sfx"
-      ],
+      "features": ["studio.timeline", "studio.keyframes", "studio.logo_design", "studio.sfx"],
       "nativeEvidenceReused": true,
       "newRuntimeExecutions": 0,
       "readinessChanged": false
@@ -8116,10 +7622,7 @@
     "report": "reports/footer-pages-20261021/README.md",
     "scope": "Owner-requested footer page refresh and canonical public guide reader; native edit engine unchanged.",
     "footerDestinations": 18,
-    "browserViewports": [
-      1440,
-      390
-    ],
+    "browserViewports": [1440, 390],
     "layoutChecks": 36,
     "liveGuides": 8,
     "controlReferenceJump": true,
@@ -8292,10 +7795,7 @@
     ],
     "nativeGuestFrames": 90,
     "nativeHostFrames": 208,
-    "nativeSize": [
-      1920,
-      1080
-    ],
+    "nativeSize": [1920, 1080],
     "deliveries": [
       {
         "theme": "warm-library",
@@ -8362,10 +7862,7 @@
     "newModelJobs": 0,
     "gpuJobs": 0,
     "nativeFrames": 298,
-    "nativeSize": [
-      1920,
-      1080
-    ],
+    "nativeSize": [1920, 1080],
     "deliveries": [
       {
         "theme": "warm-library",
@@ -8496,10 +7993,7 @@
       "b7f3e03f3e5b49a7462b38b92af3026ddd282894f2428051870a4e3d54185c7c"
     ],
     "originalMasksRetained": true,
-    "sourceRepairPatchCounts": [
-      4,
-      11
-    ],
+    "sourceRepairPatchCounts": [4, 11],
     "deliveries": [
       {
         "theme": "warm-library",
@@ -8560,30 +8054,15 @@
     "knowledgeTestsPassed": 18,
     "hostEdgeRadius": 6,
     "hostEdgePolygon": [
-      [
-        0.8463541666666666,
-        0.6666666666666666
-      ],
-      [
-        0.921875,
-        0.6666666666666666
-      ],
-      [
-        0.921875,
-        0.9120370370370371
-      ],
-      [
-        0.8463541666666666,
-        0.9120370370370371
-      ]
+      [0.8463541666666666, 0.6666666666666666],
+      [0.921875, 0.6666666666666666],
+      [0.921875, 0.9120370370370371],
+      [0.8463541666666666, 0.9120370370370371]
     ],
     "correctedMovingKneeClearPaths": 5,
     "guestEdgeRadius": 0,
     "sourceMasksUnchanged": true,
-    "sourceRepairPatchCounts": [
-      4,
-      11
-    ],
+    "sourceRepairPatchCounts": [4, 11],
     "deliveries": [
       {
         "theme": "warm-library",
@@ -8830,13 +8309,7 @@
       "Continue separately tracked S02/S04/S03 without promoting creative or production readiness."
     ],
     "falseFurnitureContainedInReplacementImage": true,
-    "sourceAlphaAtExaminedBackgroundPoints": [
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
+    "sourceAlphaAtExaminedBackgroundPoints": [0, 0, 0, 0, 0],
     "initialSelectionDiagnosisWithdrawn": true,
     "nativeForegroundReselectionIsUnnecessaryDiagnostic": true,
     "originalMaskRefsRestored": true,
@@ -8854,18 +8327,8 @@
       "cacheMisses": 0
     },
     "replacementImageCrop": {
-      "cameraA": [
-        0,
-        0,
-        1,
-        0.55
-      ],
-      "cameraB": [
-        0,
-        0,
-        1,
-        0.46
-      ]
+      "cameraA": [0, 0, 1, 0.55],
+      "cameraB": [0, 0, 1, 0.46]
     },
     "finalEdgeRegion": "full frame including equipment",
     "edgeWidth": 4,
@@ -8882,18 +8345,8 @@
         "completeNativePlayback": true,
         "originalMaskRefsAndOtherEffectsRetained": true,
         "replacementCrop": {
-          "cameraA": [
-            0,
-            0,
-            1,
-            0.55
-          ],
-          "cameraB": [
-            0,
-            0,
-            1,
-            0.46
-          ]
+          "cameraA": [0, 0, 1, 0.55],
+          "cameraB": [0, 0, 1, 0.46]
         },
         "gpuCount": 0
       },
@@ -8908,18 +8361,8 @@
         "completeNativePlayback": true,
         "originalMaskRefsAndOtherEffectsRetained": true,
         "replacementCrop": {
-          "cameraA": [
-            0,
-            0,
-            1,
-            0.55
-          ],
-          "cameraB": [
-            0,
-            0,
-            1,
-            0.46
-          ]
+          "cameraA": [0, 0, 1, 0.55],
+          "cameraB": [0, 0, 1, 0.46]
         },
         "gpuCount": 0
       },
@@ -8934,18 +8377,8 @@
         "completeNativePlayback": true,
         "originalMaskRefsAndOtherEffectsRetained": true,
         "replacementCrop": {
-          "cameraA": [
-            0,
-            0,
-            1,
-            0.55
-          ],
-          "cameraB": [
-            0,
-            0,
-            1,
-            0.46
-          ]
+          "cameraA": [0, 0, 1, 0.55],
+          "cameraB": [0, 0, 1, 0.46]
         },
         "gpuCount": 0
       }
@@ -8988,18 +8421,8 @@
         "completeNativePlayback": true,
         "originalMaskRefsAndOtherEffectsRetained": true,
         "replacementCrop": {
-          "cameraA": [
-            0,
-            0,
-            1,
-            0.55
-          ],
-          "cameraB": [
-            0,
-            0,
-            1,
-            0.46
-          ]
+          "cameraA": [0, 0, 1, 0.55],
+          "cameraB": [0, 0, 1, 0.46]
         },
         "gpuCount": 0
       },
@@ -9014,18 +8437,8 @@
         "completeNativePlayback": true,
         "originalMaskRefsAndOtherEffectsRetained": true,
         "replacementCrop": {
-          "cameraA": [
-            0,
-            0,
-            1,
-            0.55
-          ],
-          "cameraB": [
-            0,
-            0,
-            1,
-            0.46
-          ]
+          "cameraA": [0, 0, 1, 0.55],
+          "cameraB": [0, 0, 1, 0.46]
         },
         "gpuCount": 0
       },
@@ -9040,18 +8453,8 @@
         "completeNativePlayback": true,
         "originalMaskRefsAndOtherEffectsRetained": true,
         "replacementCrop": {
-          "cameraA": [
-            0,
-            0,
-            1,
-            0.55
-          ],
-          "cameraB": [
-            0,
-            0,
-            1,
-            0.46
-          ]
+          "cameraA": [0, 0, 1, 0.55],
+          "cameraB": [0, 0, 1, 0.46]
         },
         "gpuCount": 0
       }
@@ -9097,18 +8500,8 @@
         "completeNativePlayback": true,
         "originalMaskRefsAndOtherEffectsRetained": true,
         "replacementCrop": {
-          "cameraA": [
-            0,
-            0,
-            1,
-            0.55
-          ],
-          "cameraB": [
-            0,
-            0,
-            1,
-            0.46
-          ]
+          "cameraA": [0, 0, 1, 0.55],
+          "cameraB": [0, 0, 1, 0.46]
         },
         "gpuCount": 0
       },
@@ -9123,18 +8516,8 @@
         "completeNativePlayback": true,
         "originalMaskRefsAndOtherEffectsRetained": true,
         "replacementCrop": {
-          "cameraA": [
-            0,
-            0,
-            1,
-            0.55
-          ],
-          "cameraB": [
-            0,
-            0,
-            1,
-            0.46
-          ]
+          "cameraA": [0, 0, 1, 0.55],
+          "cameraB": [0, 0, 1, 0.46]
         },
         "gpuCount": 0
       },
@@ -9149,18 +8532,8 @@
         "completeNativePlayback": true,
         "originalMaskRefsAndOtherEffectsRetained": true,
         "replacementCrop": {
-          "cameraA": [
-            0,
-            0,
-            1,
-            0.55
-          ],
-          "cameraB": [
-            0,
-            0,
-            1,
-            0.46
-          ]
+          "cameraA": [0, 0, 1, 0.55],
+          "cameraB": [0, 0, 1, 0.46]
         },
         "gpuCount": 0
       }
@@ -9270,9 +8643,7 @@
     "newFinalMovies": 0,
     "rendererFrontendOrModelRegistryChanged": false,
     "privateRvmCpuEvaluationFrames": 180,
-    "privateRvmCpuProviders": [
-      "CPUExecutionProvider"
-    ],
+    "privateRvmCpuProviders": ["CPUExecutionProvider"],
     "newStudioModelJobs": 0,
     "newGpuJobs": 0,
     "sourceAndSavedLoginPreserved": true,
@@ -9329,10 +8700,7 @@
     "nativeStudioProjectChanged": true,
     "newNativeFinalMovies": 1,
     "newCompleteStudioRecordings": 1,
-    "nativeCameraFrames": [
-      208,
-      90
-    ],
+    "nativeCameraFrames": [208, 90],
     "sourceMasksUnchanged": true,
     "hostRepairGeometriesRetained": 4,
     "removedReedProtectionEntries": 6,
@@ -9356,10 +8724,7 @@
     "previousHostMicOwnerRejected": true,
     "hostSourceRepairs": 13,
     "guestSourceRepairs": 9,
-    "nativeFrames": [
-      208,
-      90
-    ],
+    "nativeFrames": [208, 90],
     "newFinalMovie": true,
     "newMatchingCurrentStudioRecording": true,
     "logoRestoredAndBrowserVerified": true,
@@ -9379,5 +8744,42 @@
     "professionalQualification": false,
     "ownerCreativeApproval": false,
     "next": "Retain current native movie/recording and owner review. General-footage tracking, fine foregrounds and shared S02/S04/S03 remain separate."
+  },
+  "backgroundThreeSetsNarrated20261030": {
+    "status": "THREE_NATIVE_FINALS_AND_LABELLED_NARRATED_FRAME_REVIEWS_DELIVERED_LIVE_CAPTURE_OPEN",
+    "evidence": "reports/studio-background-three-sets-20261030/README.md",
+    "nativeFinals": 3,
+    "matchingOriginalTimelineRecordings": 3,
+    "originalMovieAndTimelineHashesRecoveredExact": true,
+    "shortActionCuedNarrationRecorded": true,
+    "movingFinishedCompareQualified": false,
+    "originalLiveCompareOwnerCorrectionRetained": true,
+    "savedProjectsPreserved": 54,
+    "otherProjectsExact": 53,
+    "guestFeather": 0.35,
+    "hostSourceRepairs": 13,
+    "guestSourceRepairs": 9,
+    "gpuJobs": 0,
+    "newSchedules": 0,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "professionalQualification": false,
+    "ownerCreativeApproval": false,
+    "missingHistoricalLocalMediaFiles": 100,
+    "historicalMediaPreservationStillVerified": false,
+    "next": "Owner review of exact three native finals and corrected narrated edit; continue unresolved real-time S02 picture/sound/capture smoothness and broader edge/tracking qualification without creative/PRO/production promotion.",
+    "newComparisonReviews": 3,
+    "nativeUiScreensPerReview": 298,
+    "completeNarratedSeconds": 111.33333333333333,
+    "spokenControlSeconds": 54.416666666666664,
+    "maximumIndependentBeforeAndAfterFrameError": 1,
+    "assembledComparisonAudioOffsetSamples": 0,
+    "frameSteppedComparisonReview": true,
+    "comparisonReviewDoesNotQualifyRealTimePlayback": true,
+    "normalNarrationTempo": true,
+    "voiceComputeReferences": false,
+    "finishedCompareFixOnReviewBranchOnly": true,
+    "finishedLiveReturnBrowserPassed": true,
+    "servedFilesFullyPlayedAndHashVerified": true
   }
 }
