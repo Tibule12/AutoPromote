@@ -1,5 +1,6 @@
 import {
   buildCreatorMotionRecipe,
+  buildCreatorShakeRecipe,
   buildCreatorSpeedRecipe,
   buildSpeedSegmentsFromKeyframes,
   mergeCreatorRecipe,
@@ -9,6 +10,16 @@ import { normalizeSpeedSegmentsForRender } from "../viralRenderPayload";
 import { createOutputTimeMap, createTimeRange, secondsToTicks } from "../studioTime";
 
 describe("durable creator recipes", () => {
+  test("shake settles to the original pose, scales its intensity and stays inside the clip", () => {
+    const strong = buildCreatorShakeRecipe({ time: 2, duration: 12, intensity: 80 });
+    const soft = buildCreatorShakeRecipe({ time: 2, duration: 12, intensity: 40 });
+    expect(strong).toHaveLength(6);
+    expect(strong[0]).toMatchObject({time: 2, value: 0});
+    expect(strong.at(-1)).toMatchObject({time: 2.5, value: 0});
+    expect(strong[1].value).toBeCloseTo(soft[1].value * 2);
+    expect(buildCreatorShakeRecipe({time: 11.8, duration: 12}).at(-1).time).toBe(12);
+    expect(buildCreatorShakeRecipe({time: 11.99, duration: 12})).toEqual([]);
+  });
   const apply = (keys, points, property = "scale") => mergeCreatorRecipe({
     keyframes: keys, points, targetId: "main-video", property, fallback: 1.2,
     createId: (() => { let id = 0; return () => `key-${++id}`; })(),

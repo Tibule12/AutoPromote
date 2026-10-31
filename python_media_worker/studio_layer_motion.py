@@ -15,11 +15,13 @@ import numpy as np
 from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFilter, ImageOps
 
 try:
+    from .studio_perspective import project_media, validate_perspective_layer
     from .studio_vector_shape import rasterize_vector_shape, validate_vector_trim
     from .studio_motion import automation_segment_value, finite
     from .viral_motion_graphics import edit_clock
     from .viral_render_contract import map_timeline_time
 except ImportError:
+    from studio_perspective import project_media, validate_perspective_layer
     from studio_vector_shape import rasterize_vector_shape, validate_vector_trim
     from studio_motion import automation_segment_value, finite
     from viral_motion_graphics import edit_clock
@@ -66,6 +68,7 @@ def interpolate_layer_value(layer, property_name, time, fallback):
 def layer_pose(layer, overlay, time):
     base = (layer or {}).get("base_transform") or {}
     return {
+        **({'perspective_progress': max(0,min(100,interpolate_layer_value(layer,'perspectiveProgress',time,base.get('perspective_progress',100))))} if (layer or {}).get('perspective') else {}),
         **({"text_progress": max(0, min(100, interpolate_layer_value(layer, "textProgress", time, base.get("text_progress", 100))))} if (layer or {}).get("text_animator") else {}),
         "x": interpolate_layer_value(layer, "x", time, base.get("x", _get(overlay, "x", 50))),
         "y": interpolate_layer_value(layer, "y", time, base.get("y", _get(overlay, "y", 50))),
@@ -221,6 +224,10 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
             frame_mask = layer_clip_mask(artwork.size, {"enabled": True, "shape": "rectangle", "radius": radius})
             artwork.putalpha(ImageChops.multiply(artwork.getchannel("A"), frame_mask))
 
+    if (layer or {}).get('perspective'):
+        if fullscreen:
+            raise ValueError('Perspective is available on ordinary inset media planes')
+        artwork = project_media(artwork,layer['perspective'],pose['perspective_progress'])
     anchor_x = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_x", 50), 50))) / 100
     anchor_y = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_y", 50), 50))) / 100
     diagonal = max(8, math.ceil(math.hypot(artwork.width, artwork.height) * 2.1))
@@ -340,6 +347,7 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
     # The owned image remains the ordinary import/ownership reference. Editable
     # contour decisions, rather than its original cached PNG, author the result.
     vector_shape = (layer or {}).get('vector_shape')
+    validate_perspective_layer(layer or {})
     validate_vector_trim(layer or {})
     if vector_shape is not None and frame_source is not None:
         raise ValueError('Vector artwork cannot replace a decoded video source')
@@ -351,10 +359,16 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
     motion_blur = ((layer or {}).get("effects") or {}).get("motion_blur") or {}
     samples = max(1, min(8, int(finite(motion_blur.get("samples"), 1)))) if motion_blur.get("enabled") else 1
     shutter = max(0, min(1, finite(motion_blur.get("shutter"), .5)))
+    encoding = (["-filter_complex", "[0:v]split=2[color][a];[a]alphaextract[alpha]",
+                 "-map", "[color]", "-map", "[alpha]",
+                 "-c:v:0", "libx264rgb", "-crf:v:0", "18", "-maxrate:v:0", "8M", "-bufsize:v:0", "2M",
+                 "-preset:v:0", "ultrafast", "-pix_fmt:v:0", "rgb24",
+                 "-c:v:1", "ffv1", "-level:v:1", "3", "-pix_fmt:v:1", "gray", "-f", "matroska"]
+                if (layer or {}).get('perspective') else ["-c:v", "qtrle", "-f", "mov"])
     command = [
         "ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba",
         "-s", f"{width}x{height}", "-r", str(fps), "-i", "pipe:0", "-an",
-        "-c:v", "qtrle", "-threads", "2", "-f", "mov", str(output_path),
+        *encoding, "-threads", "2", str(output_path),
     ]
     with tempfile.TemporaryFile() as log:
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log)
@@ -406,7 +420,11 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                         if frame_source is None:
                             held_pose, held_sample_opacity, held_raster = pose, sample_opacity, raster
                     frame.alpha_composite(raster)
-                process.stdin.write(frame.tobytes())
+                try:
+                    process.stdin.write(frame.tobytes())
+                except BrokenPipeError as error:
+                    process.wait(timeout=10); log.seek(0)
+                    raise RuntimeError(f'Layer encoder stopped ({process.returncode}): '+log.read().decode(errors='replace')[-1200:]) from error
             process.stdin.close()
             if process.wait(timeout=1800):
                 log.seek(0)

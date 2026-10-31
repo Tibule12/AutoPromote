@@ -34,7 +34,7 @@ export default function StudioGroupPreview({ compounds, order, keyframes = [], t
   const [frame, setFrame] = useState(time), clock = useRef(getTime);
   clock.current = getTime;
   const animated = keyframes.some(key => tree.byId.has(key.targetId)) || tree.groups.some(group => group.timing), hasClock = typeof getTime === 'function';
-  useEffect(() => { setFrame(time); }, [time]);
+  useEffect(() => { if (hasClock) setFrame(time); }, [time, hasClock]);
   useEffect(() => {
     if (!animated || !hasClock) return undefined;
     let raf, previous;
@@ -46,6 +46,7 @@ export default function StudioGroupPreview({ compounds, order, keyframes = [], t
     update(); return () => cancelAnimationFrame(raf);
   }, [animated, hasClock]);
   if (!tree.groups.length) return children;
+  const poseTime = hasClock ? frame : time;
   const layers = new Map(), other = [], known = new Set(order);
   const collect = elements => React.Children.forEach(elements, child => {
     if (!React.isValidElement(child)) return;
@@ -60,8 +61,8 @@ export default function StudioGroupPreview({ compounds, order, keyframes = [], t
   const render = id => {
     const group = tree.byId.get(id);
     if (!group) return layers.has(id) ? <React.Suspense key={id} fallback={null}>{layers.get(id)}</React.Suspense> : null;
-    const t = evaluateStudioGroupTransform(group, keyframes, frame);
-    const visible = !group.timing || (frame >= group.timing.startTime && frame < group.timing.startTime + group.timing.duration);
+    const t = evaluateStudioGroupTransform(group, keyframes, poseTime);
+    const visible = !group.timing || (poseTime >= group.timing.startTime && poseTime < group.timing.startTime + group.timing.duration);
     return <GroupCanvas key={id} group={group} pose={t} visible={visible} rank={rank.get(tree.leaves(id)[0])}>
       {group.layerIds.map(render)}
     </GroupCanvas>;

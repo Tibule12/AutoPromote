@@ -10,6 +10,7 @@ import json
 import math
 import shutil
 import subprocess
+from functools import lru_cache
 
 
 PRESETS = {
@@ -17,6 +18,7 @@ PRESETS = {
     "sped_up",
     "deep_voice",
     "nightcore",
+    "chipmunk",
     "amapiano_space",
     "warm_vocal",
     "bass_boost",
@@ -27,6 +29,13 @@ PRESETS = {
 CONTENT_TYPES = {"auto", "choir", "speech", "music"}
 TARGETS = {"master", "voice", "music"}
 QUALITIES = {"preview", "studio"}
+
+
+@lru_cache(maxsize=1)
+def _has_studio_pitch_filter():
+    result = subprocess.run(["ffmpeg", "-hide_banner", "-filters"],
+        capture_output=True, text=True, timeout=15, check=True)
+    return any(" rubberband " in line for line in result.stdout.splitlines())
 
 
 def _read(value, *names, default=None):
@@ -144,15 +153,23 @@ def build_audio_remix_chain(value):
     pitch = remix["pitch_semitones"] * amount
     if abs(pitch) >= .01:
         factor = 2 ** (pitch / 12)
-        # Change pitch, then restore duration without another pitch change.
-        filters.extend(
-            [
+        if remix["quality"] == "studio":
+            if not _has_studio_pitch_filter():
+                raise ValueError("Studio pitch quality requires an FFmpeg build with the rubberband filter")
+            # A single pitch processor retains the original duration and
+            # stereo phase. Resampling then stretching an octave back to its
+            # original length smears drums and creates a rough, fluttering mix.
+            filters.extend(["aresample=48000",
+                f"rubberband=tempo=1:pitch={factor:.9f}:pitchq=quality:"
+                "phase=laminar:channels=together:transients=crisp:"
+                "window=long:smoothing=on:formant=shifted"])
+        else:
+            filters.extend([
                 "aresample=48000",
                 f"asetrate=48000*{factor:.9f}",
                 "aresample=48000",
                 f"atempo={1 / factor:.9f}",
-            ]
-        )
+            ])
     bass = remix["bass_db"] * amount
     clarity = remix["clarity_db"] * amount
     air = remix["air_db"] * amount
@@ -162,6 +179,13 @@ def build_audio_remix_chain(value):
         filters.append(f"equalizer=f=3200:t=q:w=0.85:g={clarity:.3f}")
     if abs(air) >= .01:
         filters.append(f"treble=g={air:.3f}:f=8200:w=0.65")
+    if amount >= .01 and remix["preset"] == "telephone":
+        filters.extend(["highpass=f=300", "lowpass=f=3400"])
+    if amount >= .01 and remix["preset"] == "lo_fi":
+        filters.append(f"lowpass=f={8000 - 3500 * amount:.1f}")
+    if amount >= .01 and remix["preset"] == "spatial_8d":
+        filters.extend(["aformat=channel_layouts=stereo",
+            f"apulsator=mode=sine:hz=0.08:amount={.85 * amount:.5f}:offset_l=0:offset_r=0.5"])
     reverb = remix["reverb_mix"] * amount
     if reverb >= .01:
         delay_a = round(58 + reverb * 92)
@@ -251,6 +275,7 @@ def render_audio_remix_preview(
 
     preview_start = max(0, _number(start_time, 0))
     preview_duration = _bound(duration, 2, 8, 8)
+    output_duration = preview_duration / remix["speed"]
     source_info = _probe(source)
     source_has_audio = any(
         stream.get("codec_type") == "audio" for stream in source_info.get("streams", [])
@@ -262,7 +287,7 @@ def render_audio_remix_preview(
     if include_voice and source_has_audio:
         inputs.extend(["-ss", f"{preview_start:.3f}", "-t", f"{preview_duration:.3f}", "-i", str(source)])
         voice_label = "preview_voice"
-        filter_parts.append("[0:a]asetpts=PTS-STARTPTS[preview_voice_base]")
+        filter_parts.append(f"[0:a]asetpts=PTS-STARTPTS,atempo={remix['speed']:.9f}[preview_voice_base]")
         if remix["target"] == "voice":
             chain, _ = build_audio_remix_chain(remix)
             filter_parts.append(f"[preview_voice_base]{chain}[{voice_label}]")
@@ -282,7 +307,7 @@ def render_audio_remix_preview(
         music_label = "preview_music"
         music_gain = _bound(background_volume, 0, 1.5, .18)
         filter_parts.append(
-            f"[{background_index}:a]asetpts=PTS-STARTPTS,volume={music_gain:.4f}[preview_music_base]"
+            f"[{background_index}:a]asetpts=PTS-STARTPTS,atempo={remix['speed']:.9f},volume={music_gain:.4f}[preview_music_base]"
         )
         if remix["target"] == "music":
             chain, _ = build_audio_remix_chain(remix)
@@ -318,7 +343,7 @@ def render_audio_remix_preview(
             "ffmpeg", "-v", "error", "-nostdin", *inputs,
             "-filter_complex", ";".join(filter_parts), "-map", "[preview_out]",
             "-vn", "-c:a", "aac", "-b:a", bitrate, "-ar", "48000",
-            "-t", f"{preview_duration:.3f}", "-movflags", "+faststart",
+            "-t", f"{output_duration:.3f}", "-movflags", "+faststart",
             "-y", str(destination),
         ]
     )
@@ -327,6 +352,7 @@ def render_audio_remix_preview(
         **remix,
         "status": "preview_ready",
         "start_time": preview_start,
+        "source_duration": preview_duration,
         "duration": rendered_duration,
         "includes_voice": bool(include_voice and source_has_audio),
         "includes_music": bool(background_audio),

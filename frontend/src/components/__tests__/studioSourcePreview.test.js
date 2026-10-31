@@ -1,4 +1,4 @@
-import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, waitForStudioAudio, pausedStudioFrameRequest, pausedStudioFrameKey } from '../studioSourcePreview';
+import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, waitForStudioAudio, pausedStudioFrameRequest, pausedStudioFrameKey } from '../studioSourcePreview';
 import { studioPausedFrameHasIdentityClock, pausedStudioMappedFrameRequest, studioPausedFrameReceiptMatches } from '../studioSourcePreview';
 import { createOutputTimeMap } from '../studioTime';
 const rampMap = () => createOutputTimeMap(270000, [
@@ -172,6 +172,30 @@ test('programme canvas paints decoded frames and never schedules a duplicate dis
   video.seeking = true; video.frame(.5);
   expect(paint).toHaveBeenCalledTimes(2);
   stop(); expect(video.cancelVideoFrameCallback).toHaveBeenCalled(); raf.mockRestore();
+});
+test('composition consumers share one decoded request and an immutable source timestamp', () => {
+  const video = decoder(), times = [], other = jest.fn(time => times.push(time));
+  const stopPicture = watchStudioProgrammeFrames(video, time => {
+    times.push(time); video.currentTime = 7;
+  });
+  const stopTitles = watchStudioProgrammeFrames(video, other);
+  expect(video.requestVideoFrameCallback).toHaveBeenCalledTimes(1);
+  video.frame(2.25, 2.4);
+  expect(times).toEqual([2.25, 2.25]);
+  expect(studioPresentedSourceTime(video)).toBe(2.25);
+  expect(video.requestVideoFrameCallback).toHaveBeenCalledTimes(2);
+  stopPicture(); expect(video.cancelVideoFrameCallback).not.toHaveBeenCalled();
+  video.frame(2.5); expect(other).toHaveBeenLastCalledWith(2.5);
+  video.currentSrc = 'another-shot'; video.currentTime = 8;
+  expect(studioPresentedSourceTime(video)).toBe(8);
+  stopTitles(); expect(video.cancelVideoFrameCallback).toHaveBeenCalledTimes(1);
+});
+test('unsubscribing a later consumer during a frame never calls its stale callback', () => {
+  const video = decoder(), stale = jest.fn(); let stopStale;
+  const stopFirst = watchStudioProgrammeFrames(video, () => stopStale());
+  stopStale = watchStudioProgrammeFrames(video, stale);
+  video.frame(1); expect(stale).not.toHaveBeenCalled();
+  stopFirst();
 });
 test('disposed and paused programme loops cannot keep painting the former shot', () => {
   const video = decoder(), paint = jest.fn();
