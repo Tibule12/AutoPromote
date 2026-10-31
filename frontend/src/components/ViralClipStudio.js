@@ -19427,6 +19427,12 @@ const ViralClipStudio = ({
                               ? o.startTime
                               : o.start_time;
                           if (overlayStart !== undefined && o.duration !== undefined) {
+                            // Legacy CSS entrances start at mount. Preserve their
+                            // original cue until that separate path is paired.
+                            if (['image', 'video'].includes(o.type) && o.animation?.enter &&
+                                !previewMotionKeyframes.some(key => String(key.targetId) === String(o.id)))
+                              return compositionTime >= Number(overlayStart) &&
+                                compositionTime < Number(overlayStart) + getOverlayVisibleDuration(o);
                             // Keep the native graphic available for its exact
                             // decoded-frame cue; visibility follows that clock.
                             // Limit additional decoder allocation on long edits.

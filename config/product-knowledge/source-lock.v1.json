@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Owner-authorized feature-branch push: accumulated Studio editing, native caption/publication and latest bounded frame/source checks reviewed; private media/session data excluded and production/readiness limits preserved.",
-  "reviewed_at": "2026-10-31T07:23:54.415Z",
+  "reason": "Reviewed the final six-line legacy image/video entrance cue guard after the Studio checkpoint; authored cue timing remains on the existing path and no additional browser/readiness qualification is claimed.",
+  "reviewed_at": "2026-10-31T07:25:55.499Z",
   "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
   "sources": [
     {
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "7eb9a348de7f1ad97ed37eb0af656deaed645abb8462ff1d3a131c7be301f837"
+      "sha256": "e3c9fa7a3a04344225a50e2824a17be0235183f9ea43d0fecf6adc855aa6d72d"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",

@@ -31,7 +31,9 @@ test('titles and projected media evaluate on the same presented picture between 
   const groups = [{ id: 'group', kind: 'graphic_group', layerIds: ['title'] }];
   const groupKeys = [{ targetId: 'group', property: 'x', time: 0, value: 0 },
     { targetId: 'group', property: 'x', time: 4, value: 20, easing: 'linear' }];
+  let compositionRenders = 0;
   const children = time => {
+    compositionRenders++;
     const pose = buildMotionAutomationStyle(keys, time, { perspective: value });
     return <StudioGroupPreview compounds={groups} order={['title']} keyframes={groupKeys} time={time}>
       <div data-studio-layer-id="title" data-testid="title" data-time={time} style={{ left: `${pose.x}%` }}>
@@ -40,6 +42,7 @@ test('titles and projected media evaluate on the same presented picture between 
   };
   const props = { clockRef, mapTime: t => t + 1, time: 0, layers: [layer], groups, keyframes: [...keys.map(key => ({ ...key, targetId: 'title' })), ...groupKeys] };
   const view = render(<StudioProgrammeFrame {...props}>{children}</StudioProgrammeFrame>);
+  const initialRenders = compositionRenders;
   expect(video.requestVideoFrameCallback).toHaveBeenCalledTimes(1);
   act(() => {
     video.frame(1, 1.2);
@@ -48,6 +51,7 @@ test('titles and projected media evaluate on the same presented picture between 
     expect(screen.getByTestId('title').dataset.programmeTime).toBe('2');
   });
   expect(picture).toHaveBeenLastCalledWith(1);
+  expect(compositionRenders).toBe(initialRenders);
   expect(screen.getByTestId('title').dataset.programmeTime).toBe('2');
   expect(screen.getByTestId('title').style.left).toBe('50%');
   expect(JSON.parse(screen.getByTestId('title').parentElement.dataset.studioGroupPose).x).toBe(10);
