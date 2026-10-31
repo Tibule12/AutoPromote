@@ -1,0 +1,434 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-5be72287-c09e-4ec1-9a75-0c008037b4c5",
+  "baseRevision": 1,
+  "name": "Spoken-cue recording reconstruction",
+  "actions": [
+    {
+      "type": "media_plane",
+      "id": "recording",
+      "name": "Synchronized recording plane",
+      "sourceMediaId": "primary-studio/sources/demo-pilot-alice/55951b60905eb78a5278f0dc_presenter-1.mp4",
+      "sourceStart": 2.5,
+      "startTime": 2.5,
+      "duration": 4.9,
+      "perspective": {
+        "version": 1,
+        "corners": [
+          [
+            0,
+            5
+          ],
+          [
+            98,
+            0
+          ],
+          [
+            98,
+            100
+          ],
+          [
+            0,
+            95
+          ]
+        ]
+      },
+      "transform": {
+        "x": 50,
+        "y": 50,
+        "scale": 1.4285714285714286,
+        "opacity": 1
+      }
+    },
+    {
+      "type": "keys",
+      "targetId": "recording",
+      "keys": [
+        {
+          "property": "x",
+          "time": 2.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 3.35,
+          "value": 59,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 6.55,
+          "value": 59,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 7.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "recording",
+      "keys": [
+        {
+          "property": "y",
+          "time": 2.5,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 3.35,
+          "value": 46,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 6.55,
+          "value": 46,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 7.4,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "recording",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 2.5,
+          "value": 1.4285714285714286,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 3.35,
+          "value": 1.12,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 6.55,
+          "value": 1.12,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.4,
+          "value": 1.4285714285714286,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "recording",
+      "keys": [
+        {
+          "property": "perspectiveProgress",
+          "time": 2.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "perspectiveProgress",
+          "time": 3.35,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "perspectiveProgress",
+          "time": 6.55,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "perspectiveProgress",
+          "time": 7.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "main-video",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.08,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.7,
+          "value": 60,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 13.95,
+          "value": 60,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 14.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "keys",
+      "targetId": "main-video",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.9,
+          "value": 1.025,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 2.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.08,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.7,
+          "value": 1.04,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 13.95,
+          "value": 1.04,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "move_layer",
+      "targetId": "recording",
+      "beforeId": "graphic-9bce7867-c714-40e4-a630-7ed4820a8d29"
+    }
+  ]
+}

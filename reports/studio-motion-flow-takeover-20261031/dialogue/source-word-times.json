@@ -1,0 +1,214 @@
+[
+  {
+    "source": "presenter-1.mp4",
+    "language": "en",
+    "words": [
+      {
+        "start": 0.0,
+        "end": 0.1,
+        "word": " At",
+        "probability": 0.7672528028488159
+      },
+      {
+        "start": 0.1,
+        "end": 0.28,
+        "word": " 8",
+        "probability": 0.7739298939704895
+      },
+      {
+        "start": 0.28,
+        "end": 0.54,
+        "word": ".42",
+        "probability": 0.5535008460283279
+      },
+      {
+        "start": 0.54,
+        "end": 0.96,
+        "word": " this",
+        "probability": 0.8686040639877319
+      },
+      {
+        "start": 0.96,
+        "end": 1.32,
+        "word": " morning,",
+        "probability": 0.9988148212432861
+      },
+      {
+        "start": 1.78,
+        "end": 2.08,
+        "word": " I",
+        "probability": 0.9981762170791626
+      },
+      {
+        "start": 2.08,
+        "end": 2.36,
+        "word": " watched",
+        "probability": 0.996675968170166
+      },
+      {
+        "start": 2.36,
+        "end": 2.5,
+        "word": " a",
+        "probability": 0.9962522387504578
+      },
+      {
+        "start": 2.5,
+        "end": 2.86,
+        "word": " video",
+        "probability": 0.998704195022583
+      },
+      {
+        "start": 2.86,
+        "end": 3.28,
+        "word": " of",
+        "probability": 0.9968557357788086
+      },
+      {
+        "start": 3.28,
+        "end": 3.8,
+        "word": " myself",
+        "probability": 0.9949264526367188
+      },
+      {
+        "start": 3.8,
+        "end": 4.78,
+        "word": " saying",
+        "probability": 0.9855033159255981
+      },
+      {
+        "start": 4.78,
+        "end": 5.18,
+        "word": " something",
+        "probability": 0.9983773231506348
+      },
+      {
+        "start": 5.18,
+        "end": 5.44,
+        "word": " I",
+        "probability": 0.9932811260223389
+      },
+      {
+        "start": 5.44,
+        "end": 5.62,
+        "word": " had",
+        "probability": 0.9724273085594177
+      },
+      {
+        "start": 5.62,
+        "end": 5.88,
+        "word": " never",
+        "probability": 0.9955825209617615
+      },
+      {
+        "start": 5.88,
+        "end": 6.3,
+        "word": " said.",
+        "probability": 0.9992770552635193
+      }
+    ],
+    "scope": "Local CPU recognition estimates, to review against source; no lip-sync/voice quality inference."
+  },
+  {
+    "source": "presenter-2.mp4",
+    "language": "en",
+    "words": [
+      {
+        "start": 0.0,
+        "end": 0.36,
+        "word": " The",
+        "probability": 0.6955000162124634
+      },
+      {
+        "start": 0.36,
+        "end": 0.7,
+        "word": " face",
+        "probability": 0.9873554110527039
+      },
+      {
+        "start": 0.7,
+        "end": 0.9,
+        "word": " was",
+        "probability": 0.9984404444694519
+      },
+      {
+        "start": 0.9,
+        "end": 1.26,
+        "word": " mine,",
+        "probability": 0.996783971786499
+      },
+      {
+        "start": 1.7,
+        "end": 2.34,
+        "word": " the",
+        "probability": 0.9192081689834595
+      },
+      {
+        "start": 2.34,
+        "end": 2.64,
+        "word": " voice",
+        "probability": 0.997808039188385
+      },
+      {
+        "start": 2.64,
+        "end": 2.88,
+        "word": " was",
+        "probability": 0.9992584586143494
+      },
+      {
+        "start": 2.88,
+        "end": 3.32,
+        "word": " mine,",
+        "probability": 0.9991779923439026
+      },
+      {
+        "start": 3.32,
+        "end": 4.52,
+        "word": " even",
+        "probability": 0.9074022173881531
+      },
+      {
+        "start": 4.52,
+        "end": 4.68,
+        "word": " the",
+        "probability": 0.9951144456863403
+      },
+      {
+        "start": 4.68,
+        "end": 4.9,
+        "word": " room",
+        "probability": 0.9965202808380127
+      },
+      {
+        "start": 4.9,
+        "end": 5.2,
+        "word": " behind",
+        "probability": 0.9967774748802185
+      },
+      {
+        "start": 5.2,
+        "end": 5.48,
+        "word": " me",
+        "probability": 0.994860053062439
+      },
+      {
+        "start": 5.48,
+        "end": 5.68,
+        "word": " looked",
+        "probability": 0.9820277690887451
+      },
+      {
+        "start": 5.68,
+        "end": 6.18,
+        "word": " exactly",
+        "probability": 0.9974138736724854
+      },
+      {
+        "start": 6.18,
+        "end": 6.54,
+        "word": " right.",
+        "probability": 0.9976750016212463
+      }
+    ],
+    "scope": "Local CPU recognition estimates, to review against source; no lip-sync/voice quality inference."
+  }
+]

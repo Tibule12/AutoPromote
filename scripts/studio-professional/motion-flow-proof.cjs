@@ -5,7 +5,8 @@ const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '../..');
 const baseFolder = path.join(root, 'reports/studio-motion-flow-takeover-20261031');
 const cinematicVariant = process.env.STUDIO_MOTION_VARIANT === 'cinematic';
-const folder = cinematicVariant ? path.join(baseFolder, 'cinematic') : baseFolder;
+const dialogueVariant = process.env.STUDIO_MOTION_VARIANT === 'dialogue';
+const folder = dialogueVariant ? path.join(baseFolder, 'dialogue') : cinematicVariant ? path.join(baseFolder, 'cinematic') : baseFolder;
 fs.mkdirSync(folder, {recursive:true});
 process.env.STUDIO_TEMPLATE_PROOF_DIR = folder;
 process.env.STUDIO_KINETIC_PROOF_DIR = folder;
@@ -16,6 +17,7 @@ const { hash } = require('../../src/creativeTemplates/contract');
 const directory = process.argv[2], phase = process.argv[3] || 'author';
 const config = JSON.parse(fs.readFileSync(path.join(directory, 'browser-private.json')));
 let title = cinematicVariant && (phase !== 'cinematic' || ['Editable Project.autopromote.json','Interrupted Project.autopromote.json'].some(name=>fs.existsSync(path.join(folder,name)))) ? 'Motion & Flow — Evidence Reconstruction' : 'Motion & Flow — Investigative Motion Test';
+if (dialogueVariant) title = 'Motion & Flow — Dialogue Opening';
 const source = name => path.join(baseFolder, 'media', name);
 const stamp = name => path.join(folder, name);
 const browserState = stamp('session.private.json');
@@ -91,9 +93,18 @@ async function entry(p) {
 async function open(p) {
   if (!await p.getByRole('button', { name: title, exact: true }).count()) {
     const names = phase === 'render-raw' ? ['Raw Project.autopromote.json'] : phase === 'portable' ? ['Portable Project.autopromote.json'] : ['Editable Project.autopromote.json', 'Interrupted Project.autopromote.json'];
-    const file = phase === 'cinematic' ? (names.map(stamp).find(f=>fs.existsSync(f)) || path.join(baseFolder, 'Raw Project.autopromote.json')) : names.map(stamp).find(f => fs.existsSync(f));
+    const file = ['cinematic','dialogue'].includes(phase) ? (names.map(stamp).find(f=>fs.existsSync(f)) || path.join(baseFolder, 'Raw Project.autopromote.json')) : names.map(stamp).find(f => fs.existsSync(f));
     assert(file, 'A native project backup is required to restore this browser.');
     await p.getByLabel('Restore project backup', { exact: true }).setInputFiles(file);
+    if (phase === 'dialogue') {
+      const rawTitle = JSON.parse(fs.readFileSync(file)).name;
+      await p.getByRole('button', { name: rawTitle, exact: true }).click();
+      await h.rail(p); await pause(p);
+      await p.getByRole('button', { name: 'Duplicate', exact: true }).click();
+      await p.getByLabel('Project name', { exact: true }).fill(title);
+      await save(p, 'dialogue-duplicate');
+      return;
+    }
     await p.getByRole('button', { name: title, exact: true }).waitFor({timeout: 90000});
   }
   await p.getByRole('button', { name: title, exact: true }).click(); await p.locator('.viral-studio-container').waitFor(); await pause(p); }
@@ -438,7 +449,109 @@ async function cinematic(p) {
     for(const time of [3.5,5,9.5,11.5,13]) {await seek(p,time);await p.getByTestId('hook-preview-frame').screenshot({path:stamp(`design-${time}.png`)});}
   } finally {await stop();}
 }
+async function dialogue(p) {
+  let saved = await save(p, 'dialogue-before');
+  assert.equal(saved.snapshot.overlays.length, 0, 'Start with a new duplicate of the retained raw project.');
+  const stop = await recording(p);
+  try {
+    await q.tool(p, 'Graphics');
+    const graphics = p.getByTestId('studio-graphics-import');
+    if (!await graphics.evaluate(el => el.open)) await graphics.locator('summary').click();
+    await p.getByLabel('Graphics composition file', { exact: true }).setInputFiles(stamp('dialogue.graphics.json'));
+    await graphics.getByRole('status').filter({ hasText: 'imported' }).waitFor();
+    saved = await save(p, 'dialogue-graphics');
+    const actions = [{ type: 'media_plane', id: 'recording', name: 'Synchronized recording plane',
+      sourceMediaId: saved.snapshot.projectMedia[0].id, sourceStart: 2.5, startTime: 2.5, duration: 4.9,
+      perspective: { version: 1, corners: [[0,5],[98,0],[98,100],[0,95]] },
+      transform: { x: 50, y: 50, scale: 100/70, opacity: 1 } }];
+    const channel = (id, property, rows) => actions.push({ type: 'keys', targetId: id,
+      keys: rows.map(([time,value]) => ({ property,time,value,easing:'bezier',curve:[.22,1,.36,1] })) });
+    channel('recording', 'x', [[2.5,50],[3.35,59],[6.55,59],[7.4,50]]);
+    channel('recording', 'y', [[2.5,50],[3.35,46],[6.55,46],[7.4,50]]);
+    channel('recording', 'scale', [[2.5,100/70],[3.35,1.12],[6.55,1.12],[7.4,100/70]]);
+    channel('recording', 'perspectiveProgress', [[2.5,0],[3.35,100],[6.55,100],[7.4,0]]);
+    channel('main-video', 'x', [[0,50],[8.08,50],[8.7,51],[13.95,51],[14.7,50]]);
+    channel('main-video', 'scale', [[0,1],[1.9,1.025],[2.5,1],[7.4,1],[8.08,1],[8.7,1.025],[13.95,1.025],[14.7,1]]);
+    actions.push({type:'move_layer',targetId:'recording',beforeId:saved.snapshot.overlays.find(o=>o.name==='Time observed').id});
+    const plan = { format:'autopromote-scene-actions',version:1,projectId:saved.id,
+      baseRevision:saved.snapshot.studioDocument.revision,name:'Spoken-cue recording reconstruction',actions };
+    fs.writeFileSync(stamp('dialogue-scene-actions.json'),JSON.stringify(plan,null,2));
+    await p.getByTestId('studio-mode-fxflow').click();
+    const panel=p.getByTestId('studio-scene-actions');
+    if(!await panel.evaluate(el=>el.open)) await panel.locator('summary').click();
+    await panel.getByLabel('Scene action plan',{exact:true}).setInputFiles(stamp('dialogue-scene-actions.json'));
+    await panel.getByRole('button',{name:'Apply reviewed scene actions',exact:true}).click();
+    await panel.getByRole('status').filter({hasText:'Scene actions applied'}).waitFor();
+    saved=await save(p,'dialogue-spatial');
+    const waveform=saved.snapshot.overlays.find(o=>o.name==='Original voice amplitude');
+    await p.getByTestId('dock-tab-comp_rig').click();
+    await p.getByTestId(`comp-layer-row-${waveform.id}`).locator('.ap-comp-layer-title').click();
+    await q.tool(p,'B-roll');await p.getByRole('button',{name:'Stretch',exact:true}).click();
+    await q.tool(p,'Motion');
+    const transform=p.getByRole('button',{name:'Transform keyframes',exact:true});if(await transform.count())await transform.click();
+    await p.getByLabel('Target layer',{exact:true}).selectOption(waveform.id);
+    for(const [time,value] of [[9.451333,0],[11.071333,100]]) {
+      await seek(p,time);const input=p.getByLabel('Stroke end',{exact:true});await input.fill(String(value));await input.blur();
+      const add=p.getByRole('button',{name:'Add stroke end key at playhead',exact:true});if(await add.count())await add.click();
+    }
+    saved=await save(p,'dialogue-authored');await backup(p,'Editable Project');
+    assert(saved.snapshot.overlays.every(o=>!/clock/i.test(o.name)));
+    assert.equal(saved.snapshot.overlays.find(o=>o.name==='Synchronized recording plane').sourceStartTime,2.5);
+    assert.equal(saved.snapshot.overlays.find(o=>o.name==='Original voice amplitude').mediaFit,'stretch');
+    fs.writeFileSync(stamp('dialogue-authoring.json'),JSON.stringify({projectId:saved.id,canonicalHash:hash(saved.snapshot.studioDocument),
+      layers:saved.snapshot.overlays.length,keys:saved.snapshot.motionKeyframes.length,clockGraphics:0,
+      actualNativeUI:true,sourceWordTimeMethod:'Local CPU recognition estimates; human listening unqualified',
+      synchronizedPlaneSourceStart:2.5,paidGenerationCalls:0,creativeStatus:'INTERNAL_COMPOSITION_REVIEW'},null,2));
+    await reviewStills(p);
+  } finally {await stop();}
+}
+async function reviewStills(p) {
+  await p.getByTestId('studio-mode-fxflow').click();
+  await p.getByTestId('studio-comp-workbench').getByText('Main Programme',{exact:true}).click();
+  await p.getByTestId('dock-tab-timeline').click();
+  for(const time of [0,2.5,3.7,5.2,6.25,7.4,8.9,10.9,12.9,14,15.25]) {
+    await seek(p,time);
+    await p.waitForFunction(t=>{const v=document.querySelector('[data-testid="studio-after-video"]');
+      const c=document.querySelector('[data-testid="studio-program-canvas"]');
+      return v&&!v.seeking&&v.readyState>=2&&Math.abs(Number(c?.dataset.programmeTime)-t)<1/24;
+    },time,{timeout:15000});
+    await p.getByTestId('hook-preview-frame').screenshot({path:stamp(`composition-${time}.png`)});
+    if (dialogueVariant && time === 10.9) fs.writeFileSync(stamp('vector-preview-geometry.json'),JSON.stringify(await p.locator('[data-studio-layer-id]').evaluateAll(nodes=>nodes.filter(el=>el.querySelector('img[src^="data:image/svg"]')).map(el=>{
+      const img=el.querySelector('img'),s=getComputedStyle(img),box=el.getBoundingClientRect(),i=img.getBoundingClientRect();
+      return {id:el.dataset.studioLayerId,layer:{width:box.width,height:box.height},image:{width:i.width,height:i.height},fit:s.objectFit,src:img.src};
+    })),null,2));
+  }
+}
+async function settleDialogue(p) {
+  const before=await save(p,'dialogue-before-framing');
+  const rows={x:[[0,50],[8.08,50],[8.7,51],[13.95,51],[14.7,50]],
+    scale:[[0,1],[1.9,1.025],[2.5,1],[7.4,1],[8.08,1],[8.7,1.025],[13.95,1.025],[14.7,1]]};
+  const actions=Object.entries(rows).flatMap(([property,values])=>[
+    {type:'remove_keys',targetId:'main-video',property},
+    {type:'keys',targetId:'main-video',keys:values.map(([time,value])=>({property,time,value,easing:'bezier',curve:[.22,1,.36,1]}))}
+  ]);
+  const plan={format:'autopromote-scene-actions',version:1,projectId:before.id,baseRevision:before.snapshot.studioDocument.revision,name:'Preserve full presenter framing',actions};
+  fs.writeFileSync(stamp('dialogue-framing-actions.json'),JSON.stringify(plan,null,2));
+  const stop=await recording(p);
+  try{
+    await p.getByTestId('studio-mode-fxflow').click();const panel=p.getByTestId('studio-scene-actions');
+    if(!await panel.evaluate(el=>el.open))await panel.locator('summary').click();
+    await panel.getByLabel('Scene action plan',{exact:true}).setInputFiles(stamp('dialogue-framing-actions.json'));
+    await panel.getByRole('button',{name:'Apply reviewed scene actions',exact:true}).click();
+    await panel.getByRole('status').filter({hasText:'Scene actions applied'}).waitFor();
+    const saved=await save(p,'dialogue-framing');await backup(p,'Editable Project');
+    const receipt=JSON.parse(fs.readFileSync(stamp('dialogue-authoring.json')));receipt.canonicalHash=hash(saved.snapshot.studioDocument);
+    receipt.framingReviewed=true;fs.writeFileSync(stamp('dialogue-authoring.json'),JSON.stringify(receipt,null,2));
+    await reviewStills(p);
+  }finally{await stop();}
+}
 async function review(p) {
+  // Completed projects can reopen showing their finished movie. Select the
+  // existing live-edit control before measuring the editable graph.
+  await q.tool(p, 'Export');
+  const live = p.getByRole('button', { name:'Show Live Edit', exact:true });
+  if (await live.isVisible()) await live.click();
+  assert.equal(await p.getByTestId('hook-preview-frame').evaluate(el=>el.classList.contains('has-rendered-output')),false);
   await p.getByTestId('studio-mode-fxflow').click();
   await p.getByTestId('studio-comp-workbench').getByText('Main Programme', { exact: true }).click();
   await p.getByTestId('dock-tab-timeline').click();
@@ -580,21 +693,32 @@ async function main() {
       else if (phase === 'review') await review(p);
       else if (phase === 'polish') await polish(p);
       else if (phase === 'cinematic') await cinematic(p);
+      else if (phase === 'dialogue') await dialogue(p);
+      else if (phase === 'stills') await reviewStills(p);
+      else if (phase === 'settle-dialogue') await settleDialogue(p);
       else if (phase === 'refine') await refineCinematic(p);
       else if (phase === 'export-playback') await exportPlayback(p);
       else if (phase === 'portable') {
         const saved=await save(p,'portable-reopened');
         const expected=JSON.parse(fs.readFileSync(stamp('Portable Project.autopromote.json')));
         assert.equal(decisions(saved.snapshot.studioDocument),decisions(expected.snapshot.studioDocument));
-        const sourceFiles=await p.evaluate(title=>new Promise((resolve,reject)=>{
+        const restoredFiles=await p.evaluate(title=>new Promise((resolve,reject)=>{
           const opening=indexedDB.open('autopromote-viral-studio');opening.onerror=()=>reject(opening.error);
           opening.onsuccess=()=>{const db=opening.result,q=db.transaction('projects','readonly').objectStore('projects').getAll();
             q.onsuccess=async()=>{const record=q.result.find(x=>x.name===title);db.close();
-              const files=await Promise.all(record.snapshot.projectMedia.map(async m=>({name:m.name,bytes:m.file.size,
-                sha256:[...new Uint8Array(await crypto.subtle.digest('SHA-256',await m.file.arrayBuffer()))].map(x=>x.toString(16).padStart(2,'0')).join('')})));resolve(files);};};
+              const inspect=async m=>({name:m.name,bytes:m.file?.size,
+                sha256:m.file?[...new Uint8Array(await crypto.subtle.digest('SHA-256',await m.file.arrayBuffer()))].map(x=>x.toString(16).padStart(2,'0')).join(''):null});
+              resolve({sourceFiles:await Promise.all(record.snapshot.projectMedia.map(inspect)),
+                artworkFiles:await Promise.all(record.snapshot.overlays.filter(o=>o.type==='image').map(inspect))});};};
         }),title);
+        const {sourceFiles,artworkFiles}=restoredFiles;
         for(const file of sourceFiles) assert.equal(file.sha256,hash(fs.readFileSync(source(file.name))));
-        fs.writeFileSync(stamp('portable-restore.json'),JSON.stringify({projectId:saved.id,exactDecisions:true,sourceFiles,normalNativeBackupRestore:true},null,2));
+        if(dialogueVariant){
+          const packaging=JSON.parse(fs.readFileSync(stamp('portable-packaging.json')));
+          assert.equal(artworkFiles.length,packaging.artwork.length);
+          for(const item of artworkFiles)assert.equal(item.sha256,packaging.artwork.find(a=>a.name===item.name)?.sha256);
+        }
+        fs.writeFileSync(stamp('portable-restore.json'),JSON.stringify({projectId:saved.id,exactDecisions:true,sourceFiles,artworkFiles,normalNativeBackupRestore:true},null,2));
       }
       else if (phase === 'inspect') { console.log((await p.locator('body').innerText()).slice(-7000)); await p.screenshot({ path: stamp('inspect.png') }); }
     }

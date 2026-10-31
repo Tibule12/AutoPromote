@@ -15,8 +15,9 @@ from scipy.spatial import ConvexHull
 ROOT = Path(__file__).resolve().parents[2]
 FOLDER = ROOT / 'reports/studio-motion-flow-takeover-20261031'
 BASE_FOLDER = FOLDER
-if os.environ.get('STUDIO_MOTION_VARIANT') == 'cinematic':
-    FOLDER = FOLDER / 'cinematic'
+VARIANT = os.environ.get('STUDIO_MOTION_VARIANT')
+if VARIANT in {'cinematic', 'dialogue'}:
+    FOLDER = FOLDER / VARIANT
 
 
 def run(args):
@@ -111,7 +112,7 @@ def main():
              '-frames:v', '1', str(destination)])
         image = Image.open(destination).convert('RGB')
         preview_path = FOLDER / f'preview-{t:.2f}.png'
-        if t in [11, 12.5, 13.5] and preview_path.exists():
+        if VARIANT != 'dialogue' and t in [11, 12.5, 13.5] and preview_path.exists():
             preview = Image.open(preview_path).convert('RGB').resize(image.size, Image.Resampling.LANCZOS)
             for side in ['source', 'studio']:
                 p, e = clock_mask(preview, side), clock_mask(image, side)
@@ -126,6 +127,22 @@ def main():
         x, y = (i % 3)*384, (i // 3)*244
         sheet.paste(picture, (x, y+24)); draw.text((x+8, y+6), f'{t:.2f}s', fill='white')
     sheet.save(FOLDER / 'export-contact-sheet.jpg', quality=92)
+    if VARIANT == 'dialogue':
+        destination = FOLDER / 'export-frames' / 'voice-10.9.png'
+        run(['ffmpeg', '-v', 'error', '-y', '-i', str(edited), '-vf',
+             f'select=eq(n\\,{round(10.9*24)})', '-frames:v', '1', str(destination)])
+        exported = Image.open(destination).convert('RGB')
+        preview = Image.open(FOLDER / 'composition-10.9.png').convert('RGB').resize(exported.size, Image.Resampling.LANCZOS)
+        def voice_mask(im):
+            rgb = np.asarray(im).astype(np.int16)
+            r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+            mask = (r > 130) & (g > 90) & (b < 180) & (r > b*1.25) & (g > b*1.15)
+            h, w = mask.shape
+            roi = np.zeros_like(mask)
+            roi[int(.60*h):int(.715*h), int(.04*w):int(.36*w)] = True
+            return mask & roi
+        report['voiceContourPair'] = {'time': 10.9, **parity(voice_mask(preview), voice_mask(exported)),
+            'scope': 'Single native contour raster pair, unchanged IoU .95 / p95 2px limits; not whole-picture parity.'}
     small = np.frombuffer(run(['ffmpeg', '-v', 'error', '-i', str(edited), '-vf', 'scale=160:90,format=gray',
                               '-f', 'rawvideo', '-']), dtype=np.uint8).reshape(-1, 90, 160).astype(np.float32)
     differences = np.mean(np.abs(np.diff(small, axis=0)), axis=(1, 2))
@@ -135,6 +152,8 @@ def main():
     report['scope'] = ('Actual native exports. Clock geometry measures the convex silhouette of the isolated gold outline; '
                        'strictGoldEdgePairs separately retains thin-stroke colour/raster failures. '
                        'No whole-picture, listening or creative approval inferred.')
+    if VARIANT == 'dialogue':
+        report['scope'] = 'Dialogue-led revision; no clock graphics. Native contour pair and complete decode/audio measurements do not establish cinematic, listening or whole-picture approval.'
     (FOLDER / 'output-verification.json').write_text(json.dumps(report, indent=2))
     print(json.dumps({'frames': len(small), 'channels': sound['channels'], 'geometryPairs': report['clockGeometryPairs'],
                       'stereoDifferenceRms': report['audio']['stereoDifferenceRms']}))

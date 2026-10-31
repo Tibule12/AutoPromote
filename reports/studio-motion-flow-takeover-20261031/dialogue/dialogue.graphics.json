@@ -1,0 +1,1800 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Dialogue-led opening revision",
+  "width": 1280,
+  "height": 720,
+  "duration": 15.75,
+  "layers": [
+    {
+      "id": "Recording space",
+      "name": "Recording space",
+      "startTime": 2.5,
+      "duration": 4.9,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 2.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.9,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.05,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#090d14\"/></svg>",
+      "height": 100
+    },
+    {
+      "id": "Room light falloff",
+      "name": "Room light falloff",
+      "startTime": 8.08,
+      "duration": 6.62,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 8.08,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.28,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><defs><linearGradient id=\"fall\"><stop offset=\"0\" stop-color=\"#050910\" stop-opacity=\"0.94\"/><stop offset=\"0.38\" stop-color=\"#050910\" stop-opacity=\"0.78\"/><stop offset=\"0.59\" stop-color=\"#050910\" stop-opacity=\"0\"/></linearGradient></defs><rect width=\"1280\" height=\"720\" fill=\"url(#fall)\"/></svg>",
+      "height": 100
+    },
+    {
+      "id": "Time observed",
+      "name": "Time observed",
+      "startTime": 2.94,
+      "duration": 4.01,
+      "x": 15.5,
+      "y": 21,
+      "width": 90,
+      "scale": 1.5,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 2.94,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.14,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.95,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 2.94,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 3.32,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "08:42",
+      "color": "#ddb983",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 22,
+        "fromX": 0,
+        "fromY": 0.85,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.015,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Morning marker",
+      "name": "Morning marker",
+      "startTime": 3.2,
+      "duration": 3.75,
+      "x": 15.5,
+      "y": 29,
+      "width": 90,
+      "scale": 0.5,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.95,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "THIS MORNING",
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center"
+    },
+    {
+      "id": "Never phrase",
+      "name": "Never phrase",
+      "startTime": 5.62,
+      "duration": 1.43,
+      "x": 20,
+      "y": 65,
+      "width": 90,
+      "scale": 2.05,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 5.62,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 5.82,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.05,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 5.62,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 6.0,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "NEVER",
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 22,
+        "fromX": 0,
+        "fromY": 0.85,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.015,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Said phrase",
+      "name": "Said phrase",
+      "startTime": 5.88,
+      "duration": 1.17,
+      "x": 20,
+      "y": 77,
+      "width": 90,
+      "scale": 2.05,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 5.88,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.08,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.05,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 5.88,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 6.26,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "SAID.",
+      "color": "#ddb983",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 22,
+        "fromX": 0,
+        "fromY": 0.85,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.015,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Source disclosure",
+      "name": "Source disclosure",
+      "startTime": 0.25,
+      "duration": 15.2,
+      "x": 80,
+      "y": 94,
+      "width": 90,
+      "scale": 0.51,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0.25,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 0.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 15.2,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 15.45,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "FICTIONAL PERFORMANCE",
+      "color": "#b7bfcc",
+      "fontWeight": 600,
+      "textAlign": "center"
+    },
+    {
+      "id": "Face cue",
+      "name": "Face cue",
+      "startTime": 8.111333,
+      "duration": 6.438667,
+      "x": 20,
+      "y": 31,
+      "width": 90,
+      "scale": 1.58,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 8.111333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.291333,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 8.111333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 8.471333,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "FACE.",
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 22,
+        "fromX": 0,
+        "fromY": 0.85,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.015,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Voice cue",
+      "name": "Voice cue",
+      "startTime": 10.091333,
+      "duration": 4.458667,
+      "x": 20,
+      "y": 45,
+      "width": 90,
+      "scale": 1.58,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 10.091333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 10.271333,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 10.091333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 10.451333,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "VOICE.",
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 22,
+        "fromX": 0,
+        "fromY": 0.85,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.015,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Room cue",
+      "name": "Room cue",
+      "startTime": 12.431333,
+      "duration": 2.118667,
+      "x": 20,
+      "y": 59,
+      "width": 90,
+      "scale": 1.58,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 12.431333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 12.611333,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 12.431333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 12.791333,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "ROOM.",
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 22,
+        "fromX": 0,
+        "fromY": 0.85,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.015,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Identity phrase",
+      "name": "Identity phrase",
+      "startTime": 8.651333333333334,
+      "duration": 2.8,
+      "x": 20,
+      "y": 76,
+      "width": 90,
+      "scale": 0.66,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 8.651333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.851333,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 11.201333,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 11.451333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "WAS MINE.",
+      "color": "#ddb983",
+      "fontWeight": 600,
+      "textAlign": "center"
+    },
+    {
+      "id": "Room phrase",
+      "name": "Room phrase",
+      "startTime": 13.431333333333333,
+      "duration": 1.118667,
+      "x": 20,
+      "y": 76,
+      "width": 90,
+      "scale": 0.66,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 13.431333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 13.631333,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "text",
+      "text": "EXACTLY RIGHT.",
+      "color": "#ddb983",
+      "fontWeight": 600,
+      "textAlign": "center"
+    },
+    {
+      "id": "Original voice amplitude",
+      "name": "Original voice amplitude",
+      "startTime": 9.451333333333332,
+      "duration": 2.2,
+      "x": 20,
+      "y": 66,
+      "width": 28,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9.451333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9.651333,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 11.401333,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 11.651333,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "type": "artwork",
+      "height": 7,
+      "vectorShape": {
+        "version": 1,
+        "closed": false,
+        "nodes": [
+          {
+            "x": 2.0,
+            "y": 50.04324,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 4.04255,
+            "y": 49.9591,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 6.08511,
+            "y": 50.06021,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 8.12766,
+            "y": 49.91158,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 10.17021,
+            "y": 50.05536,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 12.21277,
+            "y": 49.93657,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 14.25532,
+            "y": 50.09249,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 16.29787,
+            "y": 49.93958,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 18.34043,
+            "y": 50.09384,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 20.38298,
+            "y": 49.90326,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 22.42553,
+            "y": 50.11603,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 24.46809,
+            "y": 49.89789,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 26.51064,
+            "y": 50.06662,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 28.55319,
+            "y": 49.94712,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 30.59574,
+            "y": 50.07006,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 32.6383,
+            "y": 49.9029,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 34.68085,
+            "y": 50.1636,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 36.7234,
+            "y": 42.50372,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 38.76596,
+            "y": 81.00125,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 40.80851,
+            "y": 41.08479,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 42.85106,
+            "y": 52.77715,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 44.89362,
+            "y": 36.06108,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 46.93617,
+            "y": 90.14307,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 48.97872,
+            "y": 7.0,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 51.02128,
+            "y": 81.24022,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 53.06383,
+            "y": 12.31079,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 55.10638,
+            "y": 63.08044,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 57.14894,
+            "y": 43.10726,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 59.19149,
+            "y": 56.21786,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 61.23404,
+            "y": 44.95313,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 63.2766,
+            "y": 53.22693,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 65.31915,
+            "y": 49.21683,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 67.3617,
+            "y": 63.52013,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 69.40426,
+            "y": 35.15953,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 71.44681,
+            "y": 53.79674,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 73.48936,
+            "y": 49.39156,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 75.53191,
+            "y": 60.14773,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 77.57447,
+            "y": 33.99052,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 79.61702,
+            "y": 63.50846,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 81.65957,
+            "y": 40.5687,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 83.70213,
+            "y": 59.80793,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 85.74468,
+            "y": 40.81332,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 87.78723,
+            "y": 57.37874,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 89.82979,
+            "y": 43.18024,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 91.87234,
+            "y": 55.32333,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 93.91489,
+            "y": 45.65881,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 95.95745,
+            "y": 54.91763,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 98.0,
+            "y": 47.01221,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#ddb983",
+          "endColor": "#ddb983",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#ddb983",
+          "width": 0.65
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "Never phrase mask",
+      "name": "Never phrase masked reveal",
+      "layerIds": [
+        "Never phrase"
+      ],
+      "startTime": 5.62,
+      "duration": 1.43,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Said phrase mask",
+      "name": "Said phrase masked reveal",
+      "layerIds": [
+        "Said phrase"
+      ],
+      "startTime": 5.88,
+      "duration": 1.17,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Face cue mask",
+      "name": "Face cue masked reveal",
+      "layerIds": [
+        "Face cue"
+      ],
+      "startTime": 8.111333,
+      "duration": 6.438667,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Voice cue mask",
+      "name": "Voice cue masked reveal",
+      "layerIds": [
+        "Voice cue"
+      ],
+      "startTime": 10.091333,
+      "duration": 4.458667,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Room cue mask",
+      "name": "Room cue masked reveal",
+      "layerIds": [
+        "Room cue"
+      ],
+      "startTime": 12.431333,
+      "duration": 2.118667,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    }
+  ]
+}

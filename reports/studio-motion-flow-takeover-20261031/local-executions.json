@@ -274,5 +274,68 @@
     },
     "outputSha256": null,
     "outputBytes": null
+  },
+  {
+    "executionId": "bba8a16a1a18b54031460147af209cfdb59196c47074b0e1183134a9a3b63a3a",
+    "operationId": "05abee9ce039b87268052e6e68881098bb44f0210be415a461d5447d2e5151e3",
+    "stage": "studio.render",
+    "state": "succeeded",
+    "exitCode": 0,
+    "signal": null,
+    "processTerminated": true,
+    "startedAt": "2026-10-31T15:36:12.226Z",
+    "finishedAt": "2026-10-31T15:38:05.005Z",
+    "resource": {
+      "wallSeconds": 111.90837364899926,
+      "cpuSeconds": 266.92604800000004,
+      "peakRssKiB": 1512136,
+      "providerChargesStarted": false,
+      "invoiceCostMicros": null
+    },
+    "outputSha256": null,
+    "outputBytes": null,
+    "milestone": "dialogue-revision"
+  },
+  {
+    "executionId": "17fb42fdd0e873fd41cf516fb61463ebb5b051c55921e6c202a1ec213b9841d0",
+    "operationId": "0935450404764f2467b66483070b18cc01cc52250bbe3f958ed781d11880868c",
+    "stage": "studio.render",
+    "state": "failed",
+    "exitCode": 1,
+    "signal": null,
+    "processTerminated": true,
+    "startedAt": "2026-10-31T15:33:14.991Z",
+    "finishedAt": "2026-10-31T15:33:57.738Z",
+    "resource": {
+      "wallSeconds": 41.80544517299859,
+      "cpuSeconds": 72.524163,
+      "peakRssKiB": 815720,
+      "providerChargesStarted": false,
+      "invoiceCostMicros": null
+    },
+    "outputSha256": null,
+    "outputBytes": null,
+    "milestone": "dialogue-revision"
+  },
+  {
+    "executionId": "6a5058986f8facd06a96c67ccf840e74bad02fcfd42db9a7a9580454a9f29978",
+    "operationId": "ea5c49a40e767ad69fe5964a6f39e79d161c9f8a48af4c9ee8bf38691078845a",
+    "stage": "studio.render",
+    "state": "failed",
+    "exitCode": 1,
+    "signal": null,
+    "processTerminated": true,
+    "startedAt": "2026-10-31T15:29:00.021Z",
+    "finishedAt": "2026-10-31T15:29:39.001Z",
+    "resource": {
+      "wallSeconds": 38.063531127001625,
+      "cpuSeconds": 62.953387,
+      "peakRssKiB": 815264,
+      "providerChargesStarted": false,
+      "invoiceCostMicros": null
+    },
+    "outputSha256": null,
+    "outputBytes": null,
+    "milestone": "dialogue-revision"
   }
 ]

@@ -1,0 +1,13 @@
+{
+  "actualCssImageDefault": {
+    "xMin": 109,
+    "xMax": 170,
+    "span": 62
+  },
+  "actualCssImageAspectNone": {
+    "xMin": 14,
+    "xMax": 265,
+    "span": 252
+  },
+  "scope": "Headless native img object-fit fill, independent of drawImage canvas behavior"
+}

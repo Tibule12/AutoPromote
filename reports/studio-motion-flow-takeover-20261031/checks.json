@@ -90,5 +90,30 @@
   ],
   "noPaidCalls": true,
   "productionWrites": false,
-  "productionDeploy": false
+  "productionDeploy": false,
+  "dialogueRevision": {
+    "frontendVectorRegressions": 14,
+    "actualBrowserImageFitCases": 9,
+    "workerLayerVectorTextPerspectiveRegressions": 71,
+    "strictOptimizedAppBuild": "PASS",
+    "welcomeViewportChecks": 8,
+    "rejectedPriorCreativeStatus": "REJECTED_INTERNAL_CREATIVE_REVIEW",
+    "remainingNativeThinStrokePair": {
+      "iou": 0.648786717752235,
+      "boundaryP95Px": 1,
+      "pass": false
+    },
+    "localFileCeilingMiB": 128,
+    "localCpuCeilingPerProcessSeconds": 600,
+    "productionCapsChanged": false,
+    "initialFailedChecks": [
+      "First browser raster comparison used shrinking flex items; corrected fixed element dimensions reproduce legacy fit failure.",
+      "Initial packaging walked canonical document; exact hash guard rejected it before writing; corrected packaging skips canonical edit data.",
+      "Live graph observer initially inspected finished-file mode; native Show Live Edit selection repairs observer without changing product state.",
+      "Two native exports terminated SIGXFSZ at 20MiB before bounded demo ceiling repair; both outcomes retained.",
+      "Optional mixed-canvas invocation first named a nonexistent suite; corrected suite is test_studio_mixed_sequence_canvas.py."
+    ],
+    "mixedSequenceCanvasRegressions": 13,
+    "comparisonFullDecodeClean": true
+  }
 }
