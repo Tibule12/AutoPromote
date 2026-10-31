@@ -1,0 +1,15 @@
+# Cut, Hook, Creator FX and audio — current checkpoint
+
+30 October 2026. The local repairs now include actual precision Cut transactions, separate per-edit Undo/Redo, native Hook/FX render delivery and finished-monitor clock repair. Production code has not been deployed. The earlier Razor/Chipmunk patch is retained as [initial-cut-chipmunk-only.patch](initial-cut-chipmunk-only.patch); it is not the complete current release candidate.
+
+Razor splits the clicked frame and owning layer. Finished Split/Trim/marked removal map output time to the correct programme/source occurrence. Ripple, Roll, Slip, Slide and J/L changes use the canonical document and respect source handles/locks; Hand pans the timeline. An actual 16-second source was edited into four occurrences, cold reopened, rendered into a 15-second CPU movie and checked against twelve source-frame pairs. Five source-audio onset/phase cases pass. Full evidence remains private.
+
+History now compares complete meaningful edits rather than matching the timeline alone. Tool/panel/layer selection, zoom, snapping, link/ripple mode and track display/locks do not consume Undo. Keyboard handlers use current state. Hook enable and initial copy commit together. Caption-panel navigation no longer auto-enables captions. Frame styling, export settings and caption language/translation now trigger history. The focused frame → export → Cut Undo regression and baked-Hook replay guard pass.
+
+The actual App separately verifies Cut then Creator setting Undo/Redo, Hook enable/template/copy Undo/Redo, native shake keys, embedded emoji, captured freeze and a cut transition. Exact cold reopen and an actual eight-second combined Hook/FX CPU download pass with zero browser errors. Preserve the earlier bounded worker timeout and failed harness attempts.
+
+All eleven Remix identities remain distinct. Studio pitch now uses FFmpeg Rubber Band with stereo channels together; preview quality retains the earlier basic resampling/stretch path. Chipmunk defaults to balanced source protection rather than gating every mixed source as speech. The owner supplied music clip explicitly uses music protection. Actual 440→880 Hz pitch/duration, exact preview, decode and release tests pass. These signal checks do not establish perceptual approval.
+
+Completed movies use native video presentation, avoiding an extra live compositor canvas pass. Compare maps the finished speed plan back to source time, and baked Hook playback cannot restart the already-rendered opening. Timeline treatment/processed samples are present. Preview smoothness still needs work even when the soundtrack clock passes.
+
+[Current verification](verification.json) separates overlapping targeted test runs. Full editor-suite conformance, every Creator FX mode, stabilization export, arbitrary detached-audio programme removal and production rollout are not complete. Formal Studio readiness counts remain unchanged. The owner’s requested genuine-account localhost recordings and publication are tracked in the [remix collection](../whatsapp-remix-collection-20261030/README.md).

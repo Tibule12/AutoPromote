@@ -1,0 +1,47 @@
+{
+  "at": "2026-10-30T21:47:07.932628+00:00",
+  "nativeCount": 3,
+  "combinedCount": 3,
+  "total": 3,
+  "entries": [
+    {
+      "preset": "chipmunk",
+      "name": "Chipmunk",
+      "native": true,
+      "finalFile": "/home/tibule12/Videos/AutoPromote Remix Collection 2026-10-30/Chipmunk.mp4",
+      "sha256": "0d44ed0532cde6d21d0d91a84505c5e0501509cb4dc8d557e644b4eb6e056e94",
+      "combined": true,
+      "combinedFile": "/home/tibule12/Videos/AutoPromote Remix Collection 2026-10-30/Studio recordings/Chipmunk \u2014 Studio edit and full playback.mp4",
+      "sync": "PASS",
+      "smoothness": "REVIEW_REQUIRED",
+      "publication": "Five successful provider responses"
+    },
+    {
+      "preset": "slowed_reverb",
+      "name": "Slowed + Reverb",
+      "native": true,
+      "finalFile": "/home/tibule12/Videos/AutoPromote Remix Collection 2026-10-30/Slowed + Reverb.mp4",
+      "sha256": "3b06a2ee59420cefa9b4926ee32611c99a974514b6ab7ea62858ddec6faf4398",
+      "combined": true,
+      "combinedFile": "/home/tibule12/Videos/AutoPromote Remix Collection 2026-10-30/Studio recordings/Slowed + Reverb \u2014 Studio edit and full playback.mp4",
+      "sync": "PASS",
+      "smoothness": "REVIEW_REQUIRED",
+      "publication": "5 Queue destinations observed"
+    },
+    {
+      "preset": "sped_up",
+      "name": "Sped Up",
+      "native": true,
+      "finalFile": "/home/tibule12/Videos/AutoPromote Remix Collection 2026-10-30/Sped Up.mp4",
+      "sha256": "31b8253a46116da5c89c1308885b5b80bb0308cea0f8cbf1e40e6fa38004d7d1",
+      "combined": true,
+      "combinedFile": "/home/tibule12/Videos/AutoPromote Remix Collection 2026-10-30/Studio recordings/Sped Up \u2014 Studio edit and full playback.mp4",
+      "sync": "PASS",
+      "smoothness": "REVIEW_REQUIRED",
+      "publication": "5 Queue destinations observed"
+    }
+  ],
+  "reddit": "Blocked by current five-destination release limit; no plan change",
+  "productionControlFixesDeployed": false,
+  "wholeControlConformance": false
+}

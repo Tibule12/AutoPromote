@@ -12,6 +12,7 @@ import { studioLayerEntries } from "./studioLayerOrder";
 import { validateSpatialCurve } from "./studioAutomation";
 import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
+import { validateStudioPerspectiveLayer } from './studioPerspective';
 
 import {
   STUDIO_EDIT_SETTING_FIELDS, STUDIO_SOURCE_DECISION_FIELDS,
@@ -77,6 +78,7 @@ const LAYER_PARAMETER_FIELDS = [
   "bloom", "background",
   "bg", "anchorX", "anchorY", "blendMode", "glow", "layerShadow", "motionBlur",
   "cropX", "cropY", "blur", "sourceDuration", "aspectRatio",
+  "perspective", "perspectiveProgress",
   "isCaption",
   "shadow", "strokeWidth", "strokeColor",
   "frameShape", "frame_shape", "borderRadius", "border_radius", "mediaFit", "media_fit",
@@ -932,6 +934,9 @@ export const validateStudioProjectDocument = document => {
     ...(document.linkedTiming?.keys?.motionKeyframes || []).map(key => ({ ...key.parameters,
       time: key.atProgrammeTick === null ? NaN : ticksToSeconds(key.atProgrammeTick) }))];
   (document.layers || []).forEach(layer => {
+    validateStudioPerspectiveLayer({ ...layer.parameters, id: layer.layerId, type: layer.legacyType },
+      vectorMotionKeys.filter(key => key.targetId === layer.layerId),
+      (document.editGraph?.settings?.compoundClips || []).some(group => group.layerIds?.includes(layer.layerId)));
     validateStudioTextAnimation({ ...layer.parameters, type: layer.legacyType }, vectorMotionKeys.filter(key => key.targetId === layer.layerId));
     if (layer.parameters?.vectorShape !== undefined) validateStudioVectorShape(layer.parameters.vectorShape);
     validateStudioVectorTrim(layer.parameters || {}, vectorMotionKeys

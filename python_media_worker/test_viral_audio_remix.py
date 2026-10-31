@@ -16,6 +16,27 @@ from viral_audio_remix import (
 
 
 class AudioRemixContractTests(unittest.TestCase):
+    def test_named_spatial_telephone_and_lofi_treatments_reach_the_shared_chain(self):
+        spatial, _ = build_audio_remix_filter(dict(enabled=True,preset='spatial_8d',intensity=.8))
+        telephone, _ = build_audio_remix_filter(dict(enabled=True,preset='telephone',intensity=.8))
+        lofi, _ = build_audio_remix_filter(dict(enabled=True,preset='lo_fi',intensity=.8))
+        self.assertIn('apulsator=',spatial)
+        self.assertIn('offset_r=0.5',spatial)
+        self.assertIn('highpass=f=300',telephone)
+        self.assertIn('lowpass=f=3400',telephone)
+        self.assertIn('lowpass=f=5200',lofi)
+
+    def test_exact_preview_speed_matches_the_finished_picture_clock(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source, output = str(Path(temp)/'source.wav'), str(Path(temp)/'preview.m4a')
+            subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','sine=frequency=440:sample_rate=48000:duration=4','-y',source],check=True)
+            for speed in [.8,1.25]:
+                receipt=render_audio_remix_preview(source,output,dict(enabled=True,preset='slowed_reverb',speed=speed,keep_pitch=True),duration=4)
+                self.assertAlmostEqual(receipt['duration'],4/speed,delta=.08)
+                raw=subprocess.check_output(['ffmpeg','-v','error','-i',output,'-ac','1','-ar','48000','-f','f32le','pipe:1'])
+                samples=np.frombuffer(raw,dtype='<f4')[24000:48000]
+                freq=np.fft.rfftfreq(len(samples),1/48000)[np.argmax(np.abs(np.fft.rfft(samples*np.hanning(len(samples)))))]
+                self.assertAlmostEqual(freq,440,delta=4)
     def test_contract_is_bounded_and_keep_pitch_disables_pitch_shift(self):
         remix = normalize_audio_remix(
             dict(
@@ -57,8 +78,9 @@ class AudioRemixContractTests(unittest.TestCase):
                 intensity=.7,
             )
         )
-        self.assertIn("asetrate=48000", result)
-        self.assertIn("atempo=", result)
+        self.assertIn("rubberband=tempo=1:pitch=", result)
+        self.assertIn("channels=together", result)
+        self.assertNotIn("asetrate=", result)
         self.assertIn("bass=", result)
         self.assertIn("equalizer=", result)
         self.assertIn("treble=", result)
@@ -83,6 +105,40 @@ class AudioRemixContractTests(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg required")
 class AudioRemixRenderTests(unittest.TestCase):
+    def test_chipmunk_exact_preview_and_export_raise_pitch_without_retiming(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = str(Path(temp) / "source.mp4")
+            output = str(Path(temp) / "chipmunk.mp4")
+            preview = str(Path(temp) / "chipmunk.m4a")
+            subprocess.run([
+                "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                "color=c=black:s=160x90:r=24:d=2", "-f", "lavfi", "-i",
+                "sine=frequency=440:sample_rate=48000:duration=2", "-c:v", "libx264",
+                "-threads", "1", "-c:a", "aac", "-shortest", "-y", source,
+            ], check=True)
+            settings = dict(enabled=True, preset="chipmunk", speed=1, pitch_semitones=12,
+                intensity=1, bass_db=-3, clarity_db=2, air_db=3, reverb_mix=0,
+                target="voice", content_type="speech", keep_pitch=False)
+            final = render_audio_remix(source, output, settings)
+            exact = render_audio_remix_preview(source, preview, settings, duration=2)
+            self.assertEqual(final["status"], "applied")
+            self.assertEqual(exact["status"], "preview_ready")
+            for path in (output, preview):
+                duration = float(subprocess.check_output([
+                    "ffprobe", "-v", "error", "-show_entries", "format=duration",
+                    "-of", "default=nw=1:nk=1", path,
+                ]))
+                self.assertAlmostEqual(duration, 2, delta=.08)
+                raw = subprocess.check_output([
+                    "ffmpeg", "-v", "error", "-i", path, "-vn", "-ac", "1",
+                    "-ar", "48000", "-t", "1.5", "-f", "f32le", "pipe:1",
+                ])
+                samples = np.frombuffer(raw, dtype="<f4")
+                window = samples[:65536] * np.hanning(min(len(samples), 65536))
+                spectrum = np.abs(np.fft.rfft(window))
+                peak = np.fft.rfftfreq(len(window), 1 / 48000)[np.argmax(spectrum)]
+                self.assertAlmostEqual(peak, 880, delta=12)
+
     def test_real_render_changes_pitch_and_preserves_video_duration(self):
         with tempfile.TemporaryDirectory() as temp:
             source = str(Path(temp) / "source.mp4")

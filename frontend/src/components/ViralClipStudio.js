@@ -1,4 +1,7 @@
 /* eslint-disable no-unused-vars, no-control-regex */
+import StudioPerspectiveSurface from './StudioPerspectiveSurface';
+import StudioProgrammeFrame from './StudioProgrammeFrame';
+import { validateStudioPerspectiveLayer, encodeStudioPerspective } from './studioPerspective';
 import {
   applySafeMediaSource,
   createSecureId,
@@ -26,7 +29,7 @@ import { buildStudioLogoMotion } from './studioLogoMotion';
 import { editStudioPositionPose, editStudioSpatialPath } from './studioMotionEditing';
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
-import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
+import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity } from "./studioMusicBufferClock";
 import { loadStudioVoiceBus, scheduleStudioPreparedDuck } from './studioPreparedVoiceBus';
 import { studioCueSourceKey, createStudioCueBuffer, prepareStudioCuePlayback, prepareStudioBuiltInCue } from "./studioCueBuffer";
@@ -144,6 +147,7 @@ import {
 } from "./studioAutomation";
 import {
   buildCreatorMotionRecipe,
+  buildCreatorShakeRecipe,
   buildCreatorSpeedRecipe,
   buildSpeedSegmentsFromKeyframes,
   mergeCreatorRecipe,
@@ -152,6 +156,7 @@ import {
 import { studioMusicFadeGain } from "./studioAudioFades";
 import { applyStudioClipMetadata } from "./studioTimelineEdits";
 import { rippleStudioSnapshotLinkedTimeline, splitStudioOverlayAtProgrammeTime } from "./studioTrimTransaction";
+import { editStudioSequence, removeStudioProgrammeRanges } from './studioSequenceEdits';
 import { studioGroupTimingRows, editStudioGroupTiming, clipStudioGroupMotionCues } from "./studioGroupTiming";
 import { editStudioKeyframeSelection } from "./studioKeyframeSelection";
 import {
@@ -201,6 +206,7 @@ import {
 } from "./viralStudioProjectStore";
 import AudioRemixPanel from "./audio/AudioRemixPanel";
 import {
+  AUDIO_REMIX_PRESETS,
   DEFAULT_AUDIO_REMIX,
   audioRemixForRender,
   normalizeAudioRemix,
@@ -248,6 +254,7 @@ const getCaptionServiceError = (payload, fallback) => {
 
 const normalizeOverlayFrameShape = (value, bRollMode = "pip") => {
   if (bRollMode === "fullscreen") return "edge";
+  if (["edge", "none", "square"].includes(value)) return "edge";
   return "round";
 };
 
@@ -2638,6 +2645,7 @@ const ViralClipStudio = ({
   const [overlays, setOverlays] = useState([]);
   const [activeOverlayId, setActiveOverlayId] = useState(null);
   const [videoTime, setVideoTime] = useState(0);
+  const studioShortcutActionsRef = useRef({});
   const [programmeMediaAspectRatio, setProgrammeMediaAspectRatio] = useState(16 / 9);
   const [videoFit, setVideoFit] = useState("cover");
   const [safeFaceFraming, setSafeFaceFraming] = useState(false);
@@ -4061,14 +4069,50 @@ const ViralClipStudio = ({
       activeTimelineIndex: _activeTimelineIndex,
       cutRangeStart: _cutRangeStart,
       cutRangeEnd: _cutRangeEnd,
+      timelineZoom: _timelineZoom,
+      timelineEditTool: _timelineEditTool,
+      timelineSnapping: _timelineSnapping,
+      linkedSelection: _linkedSelection,
+      rippleMode: _rippleMode,
+      motionTargetId: _motionTargetId,
+      compositeTargetId: _compositeTargetId,
+      audioAutomationSource: _audioAutomationSource,
+      activeReframeKeyframeId: _activeReframeKeyframeId,
+      activeAngleGroupId: _activeAngleGroupId,
+      hookPreviewLoop: _hookPreviewLoop,
+      proxySettings: _proxySettings,
       projectMedia: snapshotProjectMedia,
       timeline: snapshotTimeline,
       orderedClips: snapshotOrderedClips,
       overlays: snapshotOverlays,
       ...editableSnapshot
     } = snapshot;
+    const { revision, journal, idempotency, ...documentDecisions } = snapshot.studioDocument || {};
+    const cleanCreator = value => {
+      if (!value) return value;
+      const { section, enabled, ...decisions } = value;
+      return decisions;
+    };
+    const cleanTrackState = state => Object.fromEntries(Object.entries(state || {}).filter(([key]) => !['visible','locked'].includes(key)));
+    const cleanTracks = tracks => Object.fromEntries(Object.entries(tracks || {}).map(([key,state]) => [key,cleanTrackState(state)]));
+    if (documentDecisions.editGraph?.settings) {
+      const {proxySettings, ...settings} = documentDecisions.editGraph.settings;
+      documentDecisions.editGraph = {...documentDecisions.editGraph,settings};
+    }
+    if (documentDecisions.audioGraph) {
+      const {audioAutomationSource,...audioSettings}=documentDecisions.audioGraph.settings || {};
+      documentDecisions.audioGraph = {...documentDecisions.audioGraph,settings:audioSettings,
+        routes:(documentDecisions.audioGraph.routes || []).map(route => ({...route,state:cleanTrackState(route.state)}))};
+    }
+    if (documentDecisions.editGraph?.settings?.creatorPreview) documentDecisions.editGraph = {
+      ...documentDecisions.editGraph, settings: { ...documentDecisions.editGraph.settings,
+        creatorPreview: cleanCreator(documentDecisions.editGraph.settings.creatorPreview) },
+    };
     return {
       ...editableSnapshot,
+      creatorPreview: cleanCreator(snapshot.creatorPreview),
+      trackStates: cleanTracks(snapshot.trackStates),
+      studioDocument: documentDecisions,
       timeline: (snapshotTimeline || []).map(historyMediaIdentity),
       orderedClips: (snapshotOrderedClips || []).map(historyMediaIdentity),
       overlays: (snapshotOverlays || []).map(historyMediaIdentity),
@@ -4302,12 +4346,17 @@ const ViralClipStudio = ({
     setBRollGenerationJobId(snapshot.bRollGenerationJobId || "");
     setTimeline(snapshot.timeline || []);
     setActiveTimelineIndex(Math.max(0, Number(snapshot.activeTimelineIndex || 0)));
-    setTimelineZoom(Number(snapshot.timelineZoom || 1));
-    setTimelineEditTool(snapshot.timelineEditTool || "select");
-    setTimelineSnapping(snapshot.timelineSnapping !== false);
-    setLinkedSelection(snapshot.linkedSelection !== false);
-    setRippleMode(!!snapshot.rippleMode);
-    setTrackStates({ ...DEFAULT_TRACK_STATES, ...(snapshot.trackStates || {}) });
+    if (!isRestoringHistoryRef.current) {
+      setTimelineZoom(Number(snapshot.timelineZoom || 1));
+      setTimelineEditTool(snapshot.timelineEditTool || "select");
+      setTimelineSnapping(snapshot.timelineSnapping !== false);
+      setLinkedSelection(snapshot.linkedSelection !== false);
+      setRippleMode(!!snapshot.rippleMode);
+    }
+    setTrackStates(current => Object.fromEntries(Object.entries({...DEFAULT_TRACK_STATES,...(snapshot.trackStates || {})})
+      .map(([id,state]) => [id, {...state,...(isRestoringHistoryRef.current ? {
+        visible:current[id]?.visible,locked:current[id]?.locked,
+      } : {})}])));
     setMotionKeyframes(Array.isArray(snapshot.motionKeyframes) ? snapshot.motionKeyframes : []);
     setMotionScenes(Array.isArray(snapshot.motionScenes) ? snapshot.motionScenes.map(normalizeMotion) : []);
     setCompositionOrder(Array.isArray(snapshot.compositionOrder) ? snapshot.compositionOrder : null);
@@ -4381,6 +4430,7 @@ const ViralClipStudio = ({
     setCreatorPreview({
       ...DEFAULT_CREATOR_PREVIEW,
       ...(snapshot.creatorPreview || {}),
+      ...(isRestoringHistoryRef.current ? { section: creatorPreview.section } : {}),
     });
     setSplitExportEnabled(!!snapshot.splitExportEnabled);
     setSplitExportHooks(Array.isArray(snapshot.splitExportHooks) ? snapshot.splitExportHooks : []);
@@ -4469,19 +4519,23 @@ const ViralClipStudio = ({
       }
       if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "z") {
         event.preventDefault();
-        togglePunchInAtPlayhead();
+        studioShortcutActionsRef.current.punch?.();
       }
       if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "j") {
         event.preventDefault();
-        toggleJCutAtPlayhead();
+        studioShortcutActionsRef.current.jcut?.();
       }
       if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "l") {
         event.preventDefault();
-        toggleLCutAtPlayhead();
+        studioShortcutActionsRef.current.lcut?.();
       }
-      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "b") {
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "b") {
         event.preventDefault();
         setBeatSnapEnabled(current => !current);
+      }
+      const tool = { v: 'select', c: 'razor', b: 'ripple', n: 'roll', y: 'slip', u: 'slide', h: 'hand' }[event.key.toLowerCase()];
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && tool) {
+        event.preventDefault(); setTimelineEditTool(tool);
       }
       if (event.key === "Escape") setCommandPaletteOpen(false);
     };
@@ -4534,6 +4588,15 @@ const ViralClipStudio = ({
     setHookDarkOverlay(template.darkOverlay);
     setHookFreezeFrame(template.freezeFrame);
     setHookTextAnimation(template.textAnimation);
+  };
+
+  const setOpeningHookEnabled = enabled => {
+    // Choose the initial copy in the same user action. A later effect would
+    // create an extra Undo step, and could rewrite text restored by Undo.
+    setAddHook(enabled);
+    if (enabled && isGenericHookText(hookText)) {
+      setHookText(currentHookCopySuggestions[0] || DEFAULT_HOOK_TEXT);
+    }
   };
 
   const setHookDuration = durationSeconds => {
@@ -5087,8 +5150,7 @@ const ViralClipStudio = ({
     const currentSnapshot = cloneSnapshot(getEditorSnapshot());
     const currentSignature = serializeSnapshot(getHistoryRelevantSnapshot(currentSnapshot));
     const cutTransaction = cutHistoryTransactionRef.current;
-    const currentTimelineSignature = serializeSnapshot(currentSnapshot.timeline || []);
-    if (cutTransaction?.appliedTimelineSignature === currentTimelineSignature) {
+    if (cutTransaction?.appliedSignature === currentSignature) {
       const baselineSignature = serializeSnapshot(
         getHistoryRelevantSnapshot(cutTransaction.baseline)
       );
@@ -5149,6 +5211,9 @@ const ViralClipStudio = ({
     setStudioActionMessage("Redo restored the next edit, including uploaded media.");
     syncHistoryAvailability();
   };
+
+  studioShortcutActionsRef.current.undo = handleUndo;
+  studioShortcutActionsRef.current.redo = handleRedo;
 
   const addOverlayAsset = ({
     type,
@@ -7049,6 +7114,7 @@ const ViralClipStudio = ({
     Number(videoTime || 0) - Number(currentTimelineWindow.start || 0)
   );
   const previewTimelineTime = getPreviewTimelineTime(videoTime);
+  const originalAudioWindow = useMemo(() => buildAudioSplitSequence(timeline)[activeTimelineIndex], [timeline, activeTimelineIndex]);
   const isPlayheadPunched = useMemo(
     () => isTimePunched(motionKeyframes, previewTimelineTime),
     [motionKeyframes, previewTimelineTime]
@@ -7068,7 +7134,7 @@ const ViralClipStudio = ({
     if (!video || !timeline.length) return;
 
     const syncSplitAudioPlayback = () => {
-      if (video.paused) {
+      if (video.paused || renderedOutputUrl || previewMuted || muteOriginalAudio || !isStudioAudioTrackAudible(trackStates, 'originalAudio')) {
         timelineAudioPoolRef.current.forEach(audio => {
           if (!audio.paused) audio.pause();
         });
@@ -7097,7 +7163,10 @@ const ViralClipStudio = ({
         if (Math.abs(audio.currentTime - proxy.sourceSeekTime) > 0.15) {
           audio.currentTime = proxy.sourceSeekTime;
         }
-        audio.volume = proxy.volume;
+        audio.playbackRate = video.playbackRate || 1;
+        audio.preservesPitch = true;
+        audio.volume = clampNumber(previewVolume * proxy.volume * interpolateAutomationValue({
+          keyframes: audioKeyframes.originalAudio, property: 'volume', time: globalTime, fallback: 100 }) / 100, 0, 1, 0);
         if (audio.paused) {
           safePlayMediaElement(audio);
         }
@@ -7119,7 +7188,7 @@ const ViralClipStudio = ({
         } catch (_) {}
       });
     };
-  }, [timeline, activeTimelineIndex]);
+  }, [timeline, activeTimelineIndex, renderedOutputUrl, previewMuted, muteOriginalAudio, trackStates, previewVolume, audioKeyframes.originalAudio]);
   const effectiveSmartCropMode = resolveReframeModeAtTime(
     reframeModeCuts,
     previewTimelineTime,
@@ -7816,7 +7885,11 @@ const ViralClipStudio = ({
   const liveTimelineSource = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
   const liveTimelinePlayheadLeft =
     (clampNumber(previewTimelineTime, 0, liveTimelineDuration, 0) / liveTimelineDuration) * 100;
-  const liveTimelineFilmstripFrames = timeline.flatMap((clip, clipIndex) => {
+  const liveTimelineFilmstripFrames = renderedOutputUrl ? Array.from({length:10},(_,index)=>({
+    id:`finished-filmstrip-${index}`,src:renderedOutputUrl,
+    previewTime:ticksToSeconds(mapProgrammeTickToOutputTick(previewOutputTimeMap,
+      secondsToTicks(liveTimelineDuration*(index+.5)/10)) || 0),left:index*10,width:10,isJoin:false,
+  })) : timeline.flatMap((clip, clipIndex) => {
     const window = getTimelineClipWindow(clip);
     const duration = Math.max(0, Number(window.duration || 0));
     const source = getSafeMediaSource(clip.url);
@@ -8994,8 +9067,44 @@ const ViralClipStudio = ({
     );
   };
 
+  // The finished monitor runs on output time; source decoders run on source
+  // time. Resolve the displayed programme playhead before choosing an occurrence
+  // or a source boundary. Never subtract a source trim from finished-file time.
+  const getCutPlayheadPosition = () => {
+    if (renderedOutputUrl) return resolveOutputTimelinePosition(previewTimelineTime);
+    if (!currentTimelineClip) return null;
+    const clipWindow = getTimelineClipWindow(currentTimelineClip);
+    const localTime = clampNumber(Number(videoTime || 0) - Number(clipWindow.start || 0),
+      0, Number(clipWindow.duration || 0), 0);
+    return { index: activeTimelineIndex, clip: currentTimelineClip, clipWindow,
+      sourceTime: Number(clipWindow.start || 0) + localTime, localTime };
+  };
+
+  const continueCutInSourcePreview = (position, index = position.index) => {
+    programmeSeekIntentRef.current = { version: programmeSeekIntentRef.current.version + 1,
+      sourceId: position.clip.sourceClipId || position.clip.id, time: position.sourceTime };
+    pendingTimelineSeekRef.current = { index, sourceTime: position.sourceTime,
+      play: previewPlaybackIntentRef.current };
+    if (!renderedOutputUrl && index === activeTimelineIndex && videoRef.current) {
+      videoRef.current.currentTime = position.sourceTime;
+      pendingTimelineSeekRef.current = null;
+    }
+    setActiveTimelineIndex(index);
+    setPreviewFinishedFile(false);
+    setVideoTime(position.sourceTime);
+  };
+
   const markCutBoundary = boundary => {
-    const markedTime = Number(trimAwareCurrentTime.toFixed(2));
+    const position = getCutPlayheadPosition();
+    if (!position) return;
+    const markedTime = Number(position.localTime.toFixed(2));
+    // First marking a finished movie returns to its corresponding editable
+    // source occurrence, so the second mark uses the same clock and clip.
+    if (renderedOutputUrl) continueCutInSourcePreview(position);
+    if (position.index !== activeTimelineIndex) {
+      setCutRangeStart(null);
+      setCutRangeEnd(null);
+    }
     if (boundary === "start") {
       setCutRangeStart(markedTime);
       if (cutRangeEnd !== null && Number(cutRangeEnd) <= markedTime) setCutRangeEnd(null);
@@ -9046,95 +9155,26 @@ const ViralClipStudio = ({
 
   const removePendingCutRange = () => {
     if (!normalizedPendingCutRange || !currentTimelineClip) return;
-
-    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
-    const localDuration = Number(sourceWindow.duration || 0);
-    const localStart = clampNumber(normalizedPendingCutRange.start, 0, localDuration, 0);
-    const localEnd = clampNumber(normalizedPendingCutRange.end, 0, localDuration, localDuration);
-    const minimumKeptEdge = 0.12;
-    if (localEnd - localStart < 0.15 || localEnd - localStart >= localDuration - 0.05) {
-      setStudioActionMessage("Choose at least 0.15 seconds, but leave some video to keep.");
-      return;
-    }
-
-    const absoluteCutStart = Number(sourceWindow.start || 0) + localStart;
-    const absoluteCutEnd = Number(sourceWindow.start || 0) + localEnd;
-    const outputCutStart = getTimelineOffsetForIndex(activeTimelineIndex) + localStart;
-    const outputCutEnd = outputCutStart + (localEnd - localStart);
-    const removedDuration = outputCutEnd - outputCutStart;
-    const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
-    const transitionDuration =
-      resolvedJoinTransition === "clean_cut"
-        ? 0.02
-        : clampNumber(joinTransitionDuration, 0.04, 2, 0.18);
-    const retainedBefore = {
-      ...currentTimelineClip,
-      id: createSecureId("kept-before"),
-      sourceClipId,
-      startRequest: Number(sourceWindow.start || 0),
-      endRequest: absoluteCutStart,
-      transitionOut: resolvedJoinTransition,
-      transitionDuration,
-    };
-    const retainedAfter = {
-      ...currentTimelineClip,
-      id: createSecureId("kept-after"),
-      sourceClipId,
-      startRequest: absoluteCutEnd,
-      endRequest: Number(sourceWindow.end || 0),
-      transitionIn: resolvedJoinTransition,
-      transitionDuration,
-    };
-    const retainedSegments = [];
-    if (localStart >= minimumKeptEdge) retainedSegments.push(retainedBefore);
-    if (localDuration - localEnd >= minimumKeptEdge) retainedSegments.push(retainedAfter);
-
-    // This action updates the source timeline, overlays, SFX, marks, and
-    // playback position together. Store one explicit pre-cut checkpoint so a
-    // single Undo restores the complete edit instead of only the last cleared
-    // marker from the multi-state transaction.
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-    pendingHistoryBaselineRef.current = cutHistoryBaseline;
-    cutHistoryTransactionRef.current = {
-      baseline: cutHistoryBaseline,
-      appliedSignature: null,
-      appliedTimelineSignature: null,
-    };
-
-    pendingTimelineSeekRef.current = {
-      index: activeTimelineIndex,
-      sourceTime:
-        localStart < minimumKeptEdge
-          ? absoluteCutEnd
-          : Math.max(Number(sourceWindow.start || 0), absoluteCutStart - 0.65),
-      play: true,
-    };
-    setTimeline(previous => [
-      ...previous.slice(0, activeTimelineIndex),
-      ...retainedSegments,
-      ...previous.slice(activeTimelineIndex + 1),
-    ]);
-    rippleLinkedTimeline(outputCutStart, outputCutEnd);
-    setCutRangeStart(null);
-    setCutRangeEnd(null);
-    setHookPreviewLoop(false);
-    setTrimPreviewLoop(false);
-    setComparisonMode("split");
-    setStudioActionMessage(
-      `${(localEnd - localStart).toFixed(1)}s removed. Preview is playing across the ${JOIN_TRANSITIONS.find(item => item.id === resolvedJoinTransition)?.label || "clean"} join. Undo restores it.`
-    );
+    const offset=getTimelineOffsetForIndex(activeTimelineIndex), start=offset+normalizedPendingCutRange.start;
+    const result=commitProgrammeRemoval([{start,end:offset+normalizedPendingCutRange.end}], 'Marked range removed', {
+      transition:resolvedJoinTransition, transitionDuration:resolvedJoinTransition==='clean_cut'?.02:joinTransitionDuration,
+      previewAtProgramme:Math.max(0,start-.65), play:true });
+    if (result) setComparisonMode('split');
   };
 
-  const splitCurrentClipAtPlayhead = () => {
-    const overlay = overlays.find(item => item.id === activeOverlayId);
+  const splitCurrentClipAtPlayhead = (requestedProgrammeTime = null, layerId = activeOverlayId) => {
+    const hasRequestedTime = typeof requestedProgrammeTime === "number" && Number.isFinite(requestedProgrammeTime);
+    const position = hasRequestedTime
+      ? resolveOutputTimelinePosition(requestedProgrammeTime) : getCutPlayheadPosition();
+    const overlay = overlays.find(item => item.id === layerId);
     if (!allowTimelineTimingEdit(overlay ? (overlay.bRollMode ? "broll" : "graphics") : "video")) return;
-    if (activeOverlayId) {
-      const activeOverlay = overlays.find(item => item.id === activeOverlayId);
+    if (layerId) {
+      const activeOverlay = overlay;
       if (activeOverlay) {
         const overlayStart = Number(activeOverlay.startTime ?? activeOverlay.start_time ?? 0);
         const overlayDuration = Number(activeOverlay.duration || 3);
         const overlayEnd = overlayStart + overlayDuration;
-        const currentPlayhead = Number(previewTimelineTime || 0);
+        const currentPlayhead = hasRequestedTime ? requestedProgrammeTime : Number(previewTimelineTime || 0);
 
         if (currentPlayhead > overlayStart + 0.15 && currentPlayhead < overlayEnd - 0.15) {
           const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
@@ -9152,21 +9192,20 @@ const ViralClipStudio = ({
           setCompositionOrder(Array.isArray(next.compositionOrder) ? next.compositionOrder : null);
           setMotionKeyframes(next.motionKeyframes);
           setActiveOverlayId(rightId);
+          if (position) continueCutInSourcePreview(position);
           setStudioActionMessage(`B-roll split at ${formatPreviewTimePrecise(currentPlayhead)} into 2 clips!`);
           return;
         }
+        setStudioActionMessage("Move the playhead inside the selected layer (at least 0.15s from its edges) to split.");
+        return;
       }
     }
 
-    if (!currentTimelineClip) return;
-    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    if (!position) return;
+    const sourceWindow = position.clipWindow;
     const localDuration = Number(sourceWindow.duration || 0);
     const clipStart = Number(sourceWindow.start || 0);
-    const currentVideoTime = Number(videoTime || 0);
-    let splitPoint = currentVideoTime - clipStart;
-    if (splitPoint <= 0.2 || splitPoint >= localDuration - 0.2) {
-      splitPoint = Number(previewClipTime || 0);
-    }
+    const splitPoint = position.localTime;
     if (splitPoint <= 0.2 || splitPoint >= localDuration - 0.2) {
       setStudioActionMessage("Move the playhead inside the clip (at least 0.2s from edges) to split.");
       return;
@@ -9201,7 +9240,7 @@ const ViralClipStudio = ({
           actor: { type: "human", id: "viral-studio-ui" },
           operations: [{
             type: "split_clip",
-            target: { occurrenceId: String(currentTimelineClip.id) },
+            target: { occurrenceId: String(position.clip.id) },
             at: { space: "source", ticks: splitTick },
             newOccurrenceIds: {
               left: createSecureId("split-left"),
@@ -9218,30 +9257,15 @@ const ViralClipStudio = ({
       setStudioActionMessage(error.message || "Clip could not be split.");
       return;
     }
-    setActiveTimelineIndex(activeTimelineIndex + 1);
+    continueCutInSourcePreview(position, position.index + 1);
     setStudioActionMessage(`Clip split at ${formatPreviewTimePrecise(splitPoint)}! You now have 2 independent clips.`);
   };
 
-  const deleteActiveTimelineClip = () => {
-    if (!allowTimelineTimingEdit("video")) return;
-    if (timeline.length <= 1) {
-      setStudioActionMessage("Cannot delete the only remaining clip in the timeline.");
-      return;
-    }
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-    pendingHistoryBaselineRef.current = cutHistoryBaseline;
-    cutHistoryTransactionRef.current = {
-      baseline: cutHistoryBaseline,
-      appliedSignature: null,
-      appliedTimelineSignature: null,
-    };
-    const nextTimeline = timeline.filter((_, idx) => idx !== activeTimelineIndex);
-    const removedStart = getTimelineOffsetForIndex(activeTimelineIndex);
-    rippleLinkedTimeline(removedStart, removedStart + getTimelineClipWindow(currentTimelineClip).duration);
-    const nextIndex = Math.min(activeTimelineIndex, nextTimeline.length - 1);
-    setTimeline(nextTimeline);
-    setActiveTimelineIndex(nextIndex);
-    setStudioActionMessage("Clip removed from timeline. Tap Undo if you change your mind.");
+  const deleteActiveTimelineClip = requestedIndex => {
+    const index=typeof requestedIndex==='number'?requestedIndex:getCutPlayheadPosition()?.index;
+    if (index===undefined || !timeline[index]) return;
+    const start=getTimelineOffsetForIndex(index);
+    commitProgrammeRemoval([{start,end:start+getTimelineClipWindow(timeline[index]).duration}],'Clip removed from timeline');
   };
 
   const applyLinkedCommandSnapshot = result => {
@@ -9435,14 +9459,11 @@ const ViralClipStudio = ({
 
   const trimClipStartToPlayhead = () => {
     if (!allowTimelineTimingEdit("video")) return;
-    if (!currentTimelineClip) return;
-    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const position = getCutPlayheadPosition();
+    if (!position) return;
+    const sourceWindow = position.clipWindow;
     const clipStart = Number(sourceWindow.start || 0);
-    const currentVideoTime = Number(videoTime || 0);
-    let localTime = currentVideoTime - clipStart;
-    if (localTime <= 0.1 || localTime >= Number(sourceWindow.duration || 0) - 0.2) {
-      localTime = Number(previewClipTime || 0);
-    }
+    const localTime = position.localTime;
     if (localTime <= 0.1 || localTime >= Number(sourceWindow.duration || 0) - 0.2) {
       setStudioActionMessage("Move playhead to where you want the clip to start.");
       return;
@@ -9470,7 +9491,7 @@ const ViralClipStudio = ({
           actor: { type: "human", id: "viral-studio-ui" },
           operations: [{
             type: "trim_clip",
-            target: { occurrenceId: String(currentTimelineClip.id) },
+            target: { occurrenceId: String(position.clip.id) },
             keep: {
               space: "source",
               startTick: secondsToTicks(clipStart + localTime),
@@ -9480,6 +9501,7 @@ const ViralClipStudio = ({
         },
       });
       applyLinkedCommandSnapshot(result);
+      continueCutInSourcePreview(position);
     } catch (error) {
       pendingHistoryBaselineRef.current = null;
       cutHistoryTransactionRef.current = null;
@@ -9491,14 +9513,11 @@ const ViralClipStudio = ({
 
   const trimClipEndToPlayhead = () => {
     if (!allowTimelineTimingEdit("video")) return;
-    if (!currentTimelineClip) return;
-    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const position = getCutPlayheadPosition();
+    if (!position) return;
+    const sourceWindow = position.clipWindow;
     const clipStart = Number(sourceWindow.start || 0);
-    const currentVideoTime = Number(videoTime || 0);
-    let localTime = currentVideoTime - clipStart;
-    if (localTime <= 0.2 || localTime >= Number(sourceWindow.duration || 0) - 0.000001) {
-      localTime = Number(previewClipTime || 0);
-    }
+    const localTime = position.localTime;
     if (localTime <= 0.2 || localTime >= Number(sourceWindow.duration || 0) - 0.000001) {
       setStudioActionMessage("Move playhead to where you want the clip to end.");
       return;
@@ -9526,7 +9545,7 @@ const ViralClipStudio = ({
           actor: { type: "human", id: "viral-studio-ui" },
           operations: [{
             type: "trim_clip",
-            target: { occurrenceId: String(currentTimelineClip.id) },
+            target: { occurrenceId: String(position.clip.id) },
             keep: {
               space: "source",
               startTick: secondsToTicks(clipStart),
@@ -9536,6 +9555,7 @@ const ViralClipStudio = ({
         },
       });
       applyLinkedCommandSnapshot(result);
+      continueCutInSourcePreview(position);
     } catch (error) {
       pendingHistoryBaselineRef.current = null;
       cutHistoryTransactionRef.current = null;
@@ -9584,7 +9604,7 @@ const ViralClipStudio = ({
 
       if (normalizedCaptions.length > 0) {
         const matchingCaptions = normalizedCaptions
-          .filter(c => c.end > clipStart && c.start < clipEnd)
+          .filter(c => (!c.sourceClipId || String(c.sourceClipId)===String(targetClip.sourceClipId||targetClip.id)) && c.end > clipStart && c.start < clipEnd)
           .sort((a, b) => a.start - b.start);
 
         if (matchingCaptions.length > 1) {
@@ -9649,191 +9669,64 @@ const ViralClipStudio = ({
   };
 
   const rippleCutAllSilences = async () => {
-    if (!allowTimelineTimingEdit("video")) return;
-    if (!currentTimelineClip) return;
+    const position=getCutPlayheadPosition();
+    if (!position || !allowTimelineTimingEdit('video') || !allowTimelineTimingEdit('originalAudio')) return;
+    const baseline=getEditorSnapshot(), signature=serializeSnapshot(getHistoryRelevantSnapshot(baseline)), requestProject=projectId;
     setIsRippleCuttingSilence(true);
     try {
-      let silenceData = null;
-      if (
-        silencePreview?.clipId === currentTimelineClip.id &&
-        Array.isArray(silencePreview.keepSegments) &&
-        silencePreview.keepSegments.length > 0
-      ) {
-        silenceData = silencePreview;
-      } else {
-        setStudioActionMessage("Analyzing audio waveform for pauses and dead air...");
-        silenceData = await detectSilenceSegments(currentTimelineClip);
+      const data=silencePreview?.clipId===position.clip.id && silencePreview.keepSegments?.length
+        ? silencePreview : await detectSilenceSegments(position.clip);
+      const latest=latestEditorSnapshotRef.current?.();
+      if (activeProjectIdRef.current!==requestProject || !latest || serializeSnapshot(getHistoryRelevantSnapshot(latest))!==signature)
+        throw Error('The project changed during silence analysis. Your newer edits were kept; run it again.');
+      if (!data?.keepSegments?.length) throw Error('No retained sound intervals were found; the clip was kept.');
+      const window=position.clipWindow, keeps=[];
+      for (const segment of data.keepSegments.map(item=>({start:Math.max(Number(window.start),Number(item.start??item.start_time)),
+        end:Math.min(Number(window.end),Number(item.end??item.end_time))})).filter(item=>Number.isFinite(item.start)&&Number.isFinite(item.end)&&item.end>item.start)
+        .sort((left,right)=>left.start-right.start)) {
+        const previous=keeps.at(-1);
+        if(previous&&segment.start<=previous.end) previous.end=Math.max(previous.end,segment.end);else keeps.push({...segment});
       }
-
-      if (!silenceData || !Array.isArray(silenceData.keepSegments) || !silenceData.keepSegments.length) {
-        setStudioActionMessage("No speech intervals detected. Try lowering speech threshold in Pacing tab.");
-        toast("No dead-air pauses detected to cut.", { icon: "ℹ️" });
-        return;
+      if (!keeps.length) throw Error('No retained sound intervals fall inside this source clip.');
+      const offset=getTimelineOffsetForIndex(position.index), gaps=[];
+      let cursor=Number(window.start);
+      for (const keep of keeps) {
+        if(keep.start>cursor+.00001)gaps.push({start:offset+cursor-Number(window.start),end:offset+keep.start-Number(window.start)});
+        cursor=Math.max(cursor,keep.end);
       }
-
-      const sourceWindow = getTimelineClipWindow(currentTimelineClip);
-      const clipStart = Number(sourceWindow.start || 0);
-      const clipEnd = Number(sourceWindow.end || clipStart + Number(sourceWindow.duration || 0));
-
-      const validKeepSegments = silenceData.keepSegments
-        .map(seg => ({
-          start: Math.max(clipStart, Number(seg.start ?? seg.start_time ?? 0)),
-          end: Math.min(clipEnd, Number(seg.end ?? seg.end_time ?? 0)),
-        }))
-        .filter(seg => seg.end - seg.start > 0.08)
-        .sort((a, b) => a.start - b.start);
-
-      if (validKeepSegments.length === 0) {
-        setStudioActionMessage("Silence cutting would remove the entire clip. Adjust threshold first.");
-        toast.error("Threshold too aggressive - would remove entire clip.");
-        return;
-      }
-
-      if (validKeepSegments.length === 1) {
-        const seg = validKeepSegments[0];
-        if (Math.abs(seg.start - clipStart) < 0.1 && Math.abs(seg.end - clipEnd) < 0.1) {
-          setStudioActionMessage("No dead air found at current settings. Pacing is already tight!");
-          toast("No dead air found at current settings.", { icon: "ℹ️" });
-          return;
-        }
-      }
-
-      const silenceGaps = [];
-      let cursor = clipStart;
-      for (const seg of validKeepSegments) {
-        if (seg.start > cursor + 0.06) {
-          silenceGaps.push({
-            sourceStart: cursor,
-            sourceEnd: seg.start,
-            duration: seg.start - cursor,
-          });
-        }
-        cursor = Math.max(cursor, seg.end);
-      }
-      if (clipEnd > cursor + 0.06) {
-        silenceGaps.push({
-          sourceStart: cursor,
-          sourceEnd: clipEnd,
-          duration: clipEnd - cursor,
-        });
-      }
-
-      if (!silenceGaps.length) {
-        setStudioActionMessage("No dead-air pauses found to remove.");
-        toast("No dead-air pauses found.", { icon: "ℹ️" });
-        return;
-      }
-
-      // 1. Snapshot editor state for full undo / redo
-      const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-      pendingHistoryBaselineRef.current = cutHistoryBaseline;
-      cutHistoryTransactionRef.current = {
-        baseline: cutHistoryBaseline,
-        appliedSignature: null,
-        appliedTimelineSignature: null,
-      };
-
-      const clipTimelineOffset = getTimelineOffsetForIndex(activeTimelineIndex);
-
-      // 2. Map silence gaps from source time to timeline time coordinates
-      const timelineGaps = silenceGaps.map(gap => ({
-        from: clipTimelineOffset + (gap.sourceStart - clipStart),
-        to: clipTimelineOffset + (gap.sourceEnd - clipStart),
-        duration: gap.duration,
-      }));
-
-      // 3. Ripple linked items (overlays, B-roll, SFX, voiceovers, keyframes) across all tracks
-      rippleLinkedTimelineMultiGaps(timelineGaps);
-
-      // 4. Construct sliced primary timeline speech takes
-      const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
-      const newClips = validKeepSegments.map((seg, idx) => ({
-        ...currentTimelineClip,
-        id: createSecureId(`take-${idx + 1}`),
-        sourceClipId,
-        startRequest: Number(seg.start.toFixed(3)),
-        endRequest: Number(seg.end.toFixed(3)),
-        duration: Number((seg.end - seg.start).toFixed(3)),
-        transitionIn: idx > 0 ? "crossfade" : (currentTimelineClip.transitionIn || null),
-        transitionOut: idx < validKeepSegments.length - 1 ? "crossfade" : (currentTimelineClip.transitionOut || null),
-        transitionDuration: 0.06,
-      }));
-
-      const nextTimeline = [
-        ...timeline.slice(0, activeTimelineIndex),
-        ...newClips,
-        ...timeline.slice(activeTimelineIndex + 1),
-      ];
-
-      setTimeline(nextTimeline);
-      // Physical cut replaces virtual skipping - turn virtual silence removal off
-      setSilenceRemoval(false);
-      setSilencePreview(null);
-
-      const totalSavedSeconds = silenceGaps.reduce((acc, g) => acc + g.duration, 0);
-      const deadAirCount = silenceGaps.length;
-
-      setStudioActionMessage(
-        `✓ Sliced ${deadAirCount} pauses · Removed ${totalSavedSeconds.toFixed(1)}s dead air · Created ${newClips.length} clean takes!`
-      );
-      toast.success(`Removed ${totalSavedSeconds.toFixed(1)}s dead air across ${deadAirCount} pauses!`);
-    } catch (err) {
-      console.error("Failed to ripple cut silence:", err);
-      toast.error("Could not slice dead air: " + (err.message || "Unknown error"));
-    } finally {
-      setIsRippleCuttingSilence(false);
-    }
+      if(Number(window.end)>cursor+.00001)gaps.push({start:offset+cursor-Number(window.start),end:offset+Number(window.end)-Number(window.start)});
+      if (!gaps.length) {setStudioActionMessage('No dead air found at the current settings.');return;}
+      if (commitProgrammeRemoval(gaps,'Silences cut')) {setSilenceRemoval(false);setSilencePreview(null);}
+    } catch(error) {setStudioActionMessage(error.message);}
+    finally {setIsRippleCuttingSilence(false);}
   };
 
+  const commitSequenceEdit = request => {
+    try {
+      const baseline = getEditorSnapshot();
+      if (!baseline.studioDocument) throw Error('Wait for source timing before editing.');
+      let result = { snapshot: baseline };
+      for (const operation of Array.isArray(request) ? request : [request]) result = editStudioSequence(result.snapshot, {
+        minimumDuration: (Number(previewSpeed) || 1) / (Number(exportSettings.fps) || 30), ...operation, id: createSecureId('sequence-edit') });
+      const position = getCutPlayheadPosition();
+      const clip = result.snapshot.timeline[result.index], window = getTimelineClipWindow(clip);
+      const localTime = position?.clip.id === clip.id ? Math.min(position.localTime, window.duration) : 0;
+      const saved = cloneSnapshot(baseline);
+      pendingHistoryBaselineRef.current = saved;
+      cutHistoryTransactionRef.current = { baseline: saved, appliedSignature: null, appliedTimelineSignature: null };
+      applyLinkedCommandSnapshot(result);
+      continueCutInSourcePreview({ index: result.index, clip, sourceTime: Number(window.start) + localTime });
+      setStudioActionMessage(`${Array.isArray(request) ? 'Audio pre-laps' : request.mode} edit applied${result.delta ? ` (${result.delta > 0 ? '+' : ''}${result.delta.toFixed(3)}s)` : ''}. Undo restores it.`);
+      return true;
+    } catch (error) { setStudioActionMessage(error.message); return false; }
+  };
   const applyPrecisionTimelineEdit = (mode, direction = 1) => {
-    const delta = Number(precisionNudge || 0.1) * (direction < 0 ? -1 : 1);
-    const currentIndex = activeTimelineIndex;
-    if (!timeline[currentIndex]) return;
-    setTimeline(previous => {
-      const next = previous.map(item => ({ ...item }));
-      const clip = next[currentIndex];
-      const clipWindow = getTimelineClipWindow(clip);
-      if (mode === "slip") {
-        const shiftedStart = Math.max(0, Number(clipWindow.start || 0) + delta);
-        const shiftedEnd = shiftedStart + Number(clipWindow.duration || 0);
-        clip.startRequest = shiftedStart;
-        clip.endRequest = shiftedEnd;
-      } else if (mode === "ripple") {
-        clip.endRequest = Math.max(
-          Number(clipWindow.start || 0) + 0.1,
-          Number(clipWindow.end || 0) + delta
-        );
-      } else if (mode === "roll" && next[currentIndex + 1]) {
-        const nextClip = next[currentIndex + 1];
-        const nextWindow = getTimelineClipWindow(nextClip);
-        clip.endRequest = Math.max(
-          Number(clipWindow.start || 0) + 0.1,
-          Number(clipWindow.end || 0) + delta
-        );
-        nextClip.startRequest = Math.min(
-          Number(nextWindow.end || 0) - 0.1,
-          Math.max(0, Number(nextWindow.start || 0) + delta)
-        );
-      } else if (mode === "slide") {
-        const targetIndex = direction < 0 ? currentIndex - 1 : currentIndex + 1;
-        if (targetIndex >= 0 && targetIndex < next.length) {
-          const [moved] = next.splice(currentIndex, 1);
-          next.splice(targetIndex, 0, moved);
-          window.setTimeout(() => setActiveTimelineIndex(targetIndex), 0);
-        }
-      } else if (mode === "jcut") {
-        clip.audioStartOffset = Number(clip.audioStartOffset || 0) + delta;
-        clip.audioLinked = false;
-      } else if (mode === "lcut") {
-        clip.audioEndOffset = Number(clip.audioEndOffset || 0) + delta;
-        clip.audioLinked = false;
-      }
-      return next;
-    });
-    setTimelineEditTool(["ripple", "roll", "slip", "slide"].includes(mode) ? mode : "select");
-    setStudioActionMessage(
-      `${mode === "jcut" ? "J-cut" : mode === "lcut" ? "L-cut" : `${mode[0].toUpperCase()}${mode.slice(1)} edit`} moved ${Math.abs(delta).toFixed(2)}s ${direction < 0 ? "earlier" : "later"}.`
-    );
+    const position = getCutPlayheadPosition();
+    if (!position) return;
+    const frame = (Number(previewSpeed) || 1) / (Number(exportSettings.fps) || 30);
+    const step = precisionNudge === 'frame' ? frame : Number(precisionNudge);
+    if (commitSequenceEdit({ mode, clipId: position.clip.id, edge: 'end', delta: step * (direction < 0 ? -1 : 1) }))
+      setTimelineEditTool(['ripple', 'roll', 'slip', 'slide'].includes(mode) ? mode : 'select');
   };
 
   const selectCreativeTool = toolId => {
@@ -9865,16 +9758,8 @@ const ViralClipStudio = ({
     ) {
       setStudioInspectorTab(toolId);
     }
-    if (toolId === "captions") {
-      setAutoCaptions(true);
-      setComparisonMode("after");
-      if (!captionSegments.length && !captionTextOverride) {
-        const initialForClip = resolveInitialCaptionSegments(selectedClip, selectedClip?.duration);
-        if (initialForClip.length) {
-          setCaptionSegments(initialForClip);
-        }
-      }
-    }
+    // Opening an inspector is navigation. Caption generation/enabling is an
+    // explicit control inside it, and must not create an invisible Undo step.
     if (toolId === "moments") {
       setStudioActionMessage("Choose a story moment, then shape how it earns attention.");
     }
@@ -10200,93 +10085,35 @@ const ViralClipStudio = ({
   };
 
   const handleAudioTrim = (clipIndex, offsets) => {
-    if (!allowTimelineTimingEdit("originalAudio")) return;
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-    pendingHistoryBaselineRef.current = cutHistoryBaseline;
-    cutHistoryTransactionRef.current = {
-      baseline: cutHistoryBaseline,
-      appliedSignature: null,
-      appliedTimelineSignature: null,
-    };
-    setTimeline(prev =>
-      prev.map((clip, idx) =>
-        idx === clipIndex ? { ...clip, ...offsets } : clip
-      )
-    );
+    const clip = timeline[clipIndex];
+    if (clip) commitSequenceEdit({ mode: 'audio-trim', clipId: clip.id, offsets });
   };
-
   const toggleJCutAtPlayhead = () => {
-    const activeClip = timeline[activeTimelineIndex];
-    if (!activeClip) return;
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-    pendingHistoryBaselineRef.current = cutHistoryBaseline;
-    cutHistoryTransactionRef.current = {
-      baseline: cutHistoryBaseline,
-      appliedSignature: null,
-      appliedTimelineSignature: null,
-    };
-    const currentlyJCut = Number(activeClip.audioTrimOffsetStart || 0) < -0.04;
-    const newOffset = currentlyJCut ? 0 : -0.8;
-    setTimeline(prev =>
-      prev.map((clip, idx) =>
-        idx === activeTimelineIndex
-          ? { ...clip, audioTrimOffsetStart: newOffset }
-          : clip
-      )
-    );
-    if (currentlyJCut) {
-      setStudioActionMessage("J-Cut removed: audio & video cuts are straight.");
-      toast("J-Cut removed (Straight Cut)", { icon: "↺" });
-    } else {
-      setStudioActionMessage("🎧 0.8s J-Cut applied: dialogue leads video by 0.8s.");
-      toast.success("🎧 0.8s J-Cut applied (Dialogue Pre-lap)!");
-    }
+    const position = getCutPlayheadPosition();
+    if (!position) return;
+    handleAudioTrim(position.index, { audioTrimOffsetStart:
+      Number(position.clip.audioTrimOffsetStart || 0) < 0 ? 0 : -0.8 });
   };
-
   const toggleLCutAtPlayhead = () => {
-    const activeClip = timeline[activeTimelineIndex];
-    if (!activeClip) return;
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-    pendingHistoryBaselineRef.current = cutHistoryBaseline;
-    cutHistoryTransactionRef.current = {
-      baseline: cutHistoryBaseline,
-      appliedSignature: null,
-      appliedTimelineSignature: null,
-    };
-    const currentlyLCut = Number(activeClip.audioTrimOffsetEnd || 0) > 0.04;
-    const newOffset = currentlyLCut ? 0 : 0.8;
-    setTimeline(prev =>
-      prev.map((clip, idx) =>
-        idx === activeTimelineIndex
-          ? { ...clip, audioTrimOffsetEnd: newOffset }
-          : clip
-      )
-    );
-    if (currentlyLCut) {
-      setStudioActionMessage("L-Cut removed: audio & video cuts are straight.");
-      toast("L-Cut removed (Straight Cut)", { icon: "↺" });
-    } else {
-      setStudioActionMessage("🎧 0.8s L-Cut applied: dialogue trails video by 0.8s.");
-      toast.success("🎧 0.8s L-Cut applied (Dialogue Trail)!");
-    }
+    const position = getCutPlayheadPosition();
+    if (!position) return;
+    handleAudioTrim(position.index, { audioTrimOffsetEnd:
+      Number(position.clip.audioTrimOffsetEnd || 0) > 0 ? 0 : 0.8 });
   };
+  Object.assign(studioShortcutActionsRef.current, { punch: togglePunchInAtPlayhead,
+    jcut: toggleJCutAtPlayhead, lcut: toggleLCutAtPlayhead });
 
   const autoApplyAllDialoguePreLaps = () => {
-    if (!timeline || timeline.length <= 1) {
-      toast("Add at least 2 clips to apply dialogue pre-laps", { icon: "ℹ️" });
-      return;
-    }
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-    pendingHistoryBaselineRef.current = cutHistoryBaseline;
-    cutHistoryTransactionRef.current = {
-      baseline: cutHistoryBaseline,
-      appliedSignature: null,
-      appliedTimelineSignature: null,
-    };
-    const updated = autoApplyDialoguePreLaps(timeline, 0.6);
-    setTimeline(updated);
-    setStudioActionMessage(`⚡ Applied 0.6s dialogue pre-laps across ${timeline.length - 1} cuts.`);
-    toast.success(`⚡ Applied 0.6s dialogue pre-laps across ${timeline.length - 1} cuts!`);
+    let elapsed = 0;
+    const edits = timeline.flatMap((clip, index) => {
+      const window = getTimelineClipWindow(clip);
+      const lead = Math.min(.6, elapsed, Number(window.start));
+      elapsed += Number(window.duration);
+      return index && lead > 0 && Math.abs(Number(clip.audioTrimOffsetStart || 0) + lead) > .000001
+        ? [{ mode: 'audio-trim', clipId: clip.id, offsets: { audioTrimOffsetStart: -lead } }] : [];
+    });
+    if (!edits.length) { setStudioActionMessage('No incoming clip has unused source audio for a new pre-lap.'); return; }
+    commitSequenceEdit(edits);
   };
 
   const handleAlignCutsToBeat = () => {
@@ -10397,188 +10224,60 @@ const ViralClipStudio = ({
     return detectFillerWords(captionSegments);
   }, [captionSegments]);
 
-  const resolveCaptionTimelineRange = (segment) => {
-    const segStart = Number(segment.start || 0);
-    const segEnd = Number(segment.end || segStart + 1);
-
-    if (!timeline || !timeline.length) {
-      return { start: segStart, end: Math.max(segStart + 0.05, segEnd) };
+  const resolveCaptionTimelineRange = segment => {
+    const sourceId = segment.sourceClipId || timeline.find(clip => clip.id === 'main')?.sourceClipId || 'main';
+    const indices = [activeTimelineIndex, ...timeline.map((_,index)=>index).filter(index=>index!==activeTimelineIndex)];
+    for (const index of indices) {
+      const clip=timeline[index], window=getTimelineClipWindow(clip);
+      if (String(clip.sourceClipId || clip.id)!==String(sourceId)) continue;
+      const start=Math.max(Number(segment.start),Number(window.start)), end=Math.min(Number(segment.end),Number(window.end));
+      if (end>start) return {start:getTimelineOffsetForIndex(index)+start-Number(window.start),
+        end:getTimelineOffsetForIndex(index)+end-Number(window.start)};
     }
-
-    let elapsed = 0;
-    for (let i = 0; i < timeline.length; i++) {
-      const clip = timeline[i];
-      const clipWindow = getTimelineClipWindow(clip);
-      const clipStart = Number(clipWindow.start || 0);
-      const clipEnd = Number(clipWindow.end || 0);
-      const clipDuration = Math.max(0.04, clipEnd - clipStart);
-
-      if (segStart >= clipStart && segStart < clipEnd) {
-        const startInTimeline = elapsed + (segStart - clipStart);
-        const endInTimeline = elapsed + (Math.min(segEnd, clipEnd) - clipStart);
-        return { start: Math.max(0, startInTimeline), end: Math.max(startInTimeline + 0.05, endInTimeline) };
-      }
-      if (clipStart > 0 && segStart < clipDuration && (segment.sourceClipId === clip.id || segment.sourceClipId === clip.sourceClipId)) {
-        const startInTimeline = elapsed + segStart;
-        const endInTimeline = elapsed + Math.min(segEnd, clipDuration);
-        return { start: Math.max(0, startInTimeline), end: Math.max(startInTimeline + 0.05, endInTimeline) };
-      }
-      elapsed += clipDuration;
-    }
-
-    return { start: segStart, end: Math.max(segStart + 0.05, segEnd) };
+    return null;
   };
-
-  const handleCutCaptionFromVideo = (segment) => {
-    if (!segment) return;
-    if (!timeline || !timeline.length) {
-      toast.error("Timeline has no video clips to cut");
-      return;
-    }
-
-    const { start: cutStart, end: cutEnd } = resolveCaptionTimelineRange(segment);
-    if (cutEnd <= cutStart) {
-      toast("Invalid caption duration to cut", { icon: "⚠️" });
-      return;
-    }
-
-    // 1. Snapshot editor state for full undo / redo (Ctrl+Z)
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-    pendingHistoryBaselineRef.current = cutHistoryBaseline;
-    cutHistoryTransactionRef.current = {
-      baseline: cutHistoryBaseline,
-      appliedSignature: null,
-      appliedTimelineSignature: null,
-    };
-
-    // 2. Slice the video timeline
-    const sliceResult = sliceTimelineTimeRange(timeline, cutStart, cutEnd);
-    if (sliceResult.removedDuration <= 0) {
-      toast("Could not cut clip at that timestamp", { icon: "⚠️" });
-      return;
-    }
-
-    // 3. Ripple linked items across all tracks (B-roll, voiceovers, SFX, keyframes)
-    rippleLinkedTimeline(cutStart, cutEnd);
-
-    // 4. Retime remaining captions
-    const retimedCaptions = retimeCaptionsAfterCut(captionSegments, cutStart, cutEnd);
-
-    setTimeline(sliceResult.updatedTimeline);
-    setCaptionSegments(retimedCaptions);
-
-    const cutDur = (cutEnd - cutStart).toFixed(2);
-    setStudioActionMessage(`✂️ Script Sliced "${(segment.text || "").slice(0, 24)}..." · Removed ${cutDur}s and rippled timeline!`);
-    toast.success(`✂️ Sliced line from video (-${cutDur}s)!`);
+  const commitProgrammeRemoval = (ranges, label, options = {}) => {
+    try {
+      const baseline=getEditorSnapshot();
+      if (!baseline.studioDocument) throw Error('Wait for source timing before cutting.');
+      const result=removeStudioProgrammeRanges(baseline,ranges,createSecureId('range-cut'),options);
+      const saved=cloneSnapshot(baseline);
+      pendingHistoryBaselineRef.current=saved;
+      cutHistoryTransactionRef.current={baseline:saved,appliedSignature:null,appliedTimelineSignature:null};
+      applyLinkedCommandSnapshot(result);
+      let index=Math.min(activeTimelineIndex,result.snapshot.timeline.length-1),elapsed=0,localTime=0;
+      if (options.previewAtProgramme!==undefined) for(let i=0;i<result.snapshot.timeline.length;i++) {
+        const duration=getTimelineClipWindow(result.snapshot.timeline[i]).duration;
+        if(options.previewAtProgramme<elapsed+duration || i===result.snapshot.timeline.length-1) {index=i;localTime=Math.max(0,Math.min(duration,options.previewAtProgramme-elapsed));break;}
+        elapsed+=duration;
+      }
+      const clip=result.snapshot.timeline[index];
+      if(options.play) {previewPlaybackIntentRef.current=true;setIsPreviewPaused(false);}
+      continueCutInSourcePreview({index,clip,sourceTime:Number(getTimelineClipWindow(clip).start)+localTime});
+      setCutRangeStart(null);setCutRangeEnd(null);
+      setStudioActionMessage(`${label}: removed ${result.removed.toFixed(3)}s. Undo restores the complete edit.`);
+      return result;
+    } catch(error) {setStudioActionMessage(error.message);return null;}
   };
-
+  const handleCutCaptionFromVideo = segment => {
+    const range=segment && resolveCaptionTimelineRange(segment);
+    if (!range) {setStudioActionMessage('This caption has no retained occurrence in the source timeline.');return;}
+    commitProgrammeRemoval([range],'Caption cut');
+  };
+  const fillerRanges = fillers => fillers.flatMap(filler => {
+    const segment=captionSegments.find(cue=>cue.id===filler.segmentId);
+    const range=resolveCaptionTimelineRange({...segment,...filler,sourceClipId:segment?.sourceClipId});
+    return range?[range]:[];
+  });
   const handleRemoveAllFillerWords = () => {
-    if (!detectedFillerWords || !detectedFillerWords.length) {
-      toast("No filler words detected in captions!", { icon: "🎉" });
-      return;
-    }
-    if (!timeline || !timeline.length) {
-      toast.error("Timeline has no video clips to slice");
-      return;
-    }
-
-    // 1. Snapshot editor state for full undo
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-    pendingHistoryBaselineRef.current = cutHistoryBaseline;
-    cutHistoryTransactionRef.current = {
-      baseline: cutHistoryBaseline,
-      appliedSignature: null,
-      appliedTimelineSignature: null,
-    };
-
-    // 2. Map filler words to timeline ranges
-    const fillerTimelineRanges = detectedFillerWords.map(f => {
-      const seg = captionSegments.find(s => s.id === f.segmentId) || { start: f.start, end: f.end };
-      const base = resolveCaptionTimelineRange(seg);
-      const segStart = Number(seg.start || 0);
-      const segEnd = Number(seg.end || segStart + 1);
-      const segDur = Math.max(0.1, segEnd - segStart);
-      const timelineSegDur = Math.max(0.1, base.end - base.start);
-
-      const offsetStartRatio = Math.max(0, (f.start - segStart) / segDur);
-      const offsetEndRatio = Math.min(1, (f.end - segStart) / segDur);
-
-      const tStart = base.start + offsetStartRatio * timelineSegDur;
-      const tEnd = base.start + offsetEndRatio * timelineSegDur;
-
-      return {
-        start: Math.round(tStart * 100) / 100,
-        end: Math.round(Math.max(tStart + 0.12, tEnd) * 100) / 100,
-      };
-    });
-
-    // 3. Batch slice timeline & captions in reverse chronological order
-    const batchResult = sliceMultipleTimeRanges(timeline, fillerTimelineRanges, captionSegments);
-    if (batchResult.slicesApplied === 0) {
-      toast("No filler ranges could be trimmed", { icon: "ℹ️" });
-      return;
-    }
-
-    // 4. Ripple all other tracks
-    const gaps = fillerTimelineRanges.map(r => ({
-      from: r.start,
-      to: r.end,
-      duration: r.end - r.start,
-    }));
-    rippleLinkedTimelineMultiGaps(gaps);
-
-    setTimeline(batchResult.updatedTimeline);
-    setCaptionSegments(batchResult.updatedCaptionSegments);
-
-    const saved = batchResult.totalRemovedDuration.toFixed(2);
-    const count = batchResult.slicesApplied;
-    setStudioActionMessage(`⚡ Removed ${count} filler words ("um", "uh", "like") · Saved ${saved}s!`);
-    toast.success(`⚡ Removed ${count} filler words (-${saved}s)!`);
+    const ranges=fillerRanges(detectedFillerWords);
+    if (!ranges.length) {setStudioActionMessage('No retained filler-word ranges to remove.');return;}
+    commitProgrammeRemoval(ranges,'Filler words cut');
   };
-
-  const handleCutSingleFillerWord = (filler) => {
-    if (!filler) return;
-    if (!timeline || !timeline.length) {
-      toast.error("Timeline has no video clips to slice");
-      return;
-    }
-
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
-    pendingHistoryBaselineRef.current = cutHistoryBaseline;
-    cutHistoryTransactionRef.current = {
-      baseline: cutHistoryBaseline,
-      appliedSignature: null,
-      appliedTimelineSignature: null,
-    };
-
-    const seg = captionSegments.find(s => s.id === filler.segmentId) || { start: filler.start, end: filler.end };
-    const base = resolveCaptionTimelineRange(seg);
-    const segStart = Number(seg.start || 0);
-    const segEnd = Number(seg.end || segStart + 1);
-    const segDur = Math.max(0.1, segEnd - segStart);
-    const timelineSegDur = Math.max(0.1, base.end - base.start);
-
-    const offsetStartRatio = Math.max(0, (filler.start - segStart) / segDur);
-    const offsetEndRatio = Math.min(1, (filler.end - segStart) / segDur);
-
-    const tStart = Math.round((base.start + offsetStartRatio * timelineSegDur) * 100) / 100;
-    const tEnd = Math.round(Math.max(tStart + 0.12, base.start + offsetEndRatio * timelineSegDur) * 100) / 100;
-
-    const sliceResult = sliceTimelineTimeRange(timeline, tStart, tEnd);
-    if (sliceResult.removedDuration <= 0) {
-      toast("Could not cut filler word at that timestamp", { icon: "⚠️" });
-      return;
-    }
-
-    rippleLinkedTimeline(tStart, tEnd);
-    const retimedCaptions = retimeCaptionsAfterCut(captionSegments, tStart, tEnd);
-
-    setTimeline(sliceResult.updatedTimeline);
-    setCaptionSegments(retimedCaptions);
-
-    const saved = (tEnd - tStart).toFixed(2);
-    setStudioActionMessage(`⚡ Cut filler "${filler.matchWord}" · Saved ${saved}s!`);
-    toast.success(`⚡ Cut filler "${filler.matchWord}" (-${saved}s)!`);
+  const handleCutSingleFillerWord = filler => {
+    const ranges=fillerRanges([filler]);
+    if (ranges.length) commitProgrammeRemoval(ranges,'Filler word cut');
+    else setStudioActionMessage('This filler word has no retained source occurrence.');
   };
 
   const addAudioAutomationKeyframe = () => {
@@ -10655,6 +10354,8 @@ const ViralClipStudio = ({
 
   const createCompoundFromSelection = selected => {
     try {
+      if (selected.some(id=>overlays.find(layer=>layer.id===id)?.perspective))
+        throw Error('Perspective planes must remain outside graphic groups.');
       const names = new Set(compositionGroups.groups.map(group => group.name));
       let index = compositionGroups.groups.length + 1;
       while (names.has(`Group ${index}`)) index += 1;
@@ -11258,15 +10959,6 @@ const ViralClipStudio = ({
       video.removeEventListener("seeking", syncAutomationRate);
     };
   }, [activeTimelineIndex, currentTimelineClip, previewSpeed, previewOutputTimeMap, renderedOutputUrl]);
-
-  useEffect(() => {
-    if (!addHook) return;
-    if (!isGenericHookText(hookText)) return;
-
-    const preferredHookText = currentHookCopySuggestions[0] || DEFAULT_HOOK_TEXT;
-    if (normalizeHookText(hookText) === preferredHookText) return;
-    setHookText(preferredHookText);
-  }, [addHook, currentHookCopySuggestions, hookText]);
 
   useEffect(() => {
     if (!addHook) {
@@ -12110,6 +11802,8 @@ const ViralClipStudio = ({
           transition_duration: Number(clip.transitionDuration || 0),
           audioTrimOffsetStart: Number(clip.audioTrimOffsetStart || 0),
           audioTrimOffsetEnd: Number(clip.audioTrimOffsetEnd || 0),
+          ...(clip.audioDetached ? { audioDetached: true, audioSourceStart: clip.audioSourceStart,
+            audioSourceEnd: clip.audioSourceEnd, audioProgrammeStart: clip.audioProgrammeStart } : {}),
         };
       })
     );
@@ -12175,7 +11869,8 @@ const ViralClipStudio = ({
   };
 
   const normalizeOverlaysForExport = (exportTimeline, sourceOverlays) =>
-    mapStudioOverlayTiming({ overlays: sourceOverlays, timeline, exportTimeline, getWindow: getTimelineClipWindow });
+    mapStudioOverlayTiming({ overlays: sourceOverlays, timeline, exportTimeline, getWindow: getTimelineClipWindow })
+      .map(layer=>({...layer,...(layer.perspective?{perspective:encodeStudioPerspective(layer.perspective)}:{})}));
 
   const validateCaptionCoverage = async (exportTimeline, token) => {
     const analyses = new Map();
@@ -12464,7 +12159,21 @@ const ViralClipStudio = ({
         exportEditState.overlays.map(async overlay => {
           let fileToUpload = overlay.file;
           let isNewBlob = false;
+          let generatedExtension = "png";
           let finalOverlay = { ...overlay };
+
+          // Native raster effects survive backups as embedded pixels. Send
+          // those pixels through the ordinary owned image uploader before
+          // quoting/rendering, just like an imported image. Inline media must
+          // not become part of the credit operation's bounded descriptor.
+          const embeddedRaster = overlay.type === "image" &&
+            /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(overlay.src || "");
+          if (embeddedRaster && !overlay.vectorShape) {
+            const bytes = Uint8Array.from(atob(embeddedRaster[2]), char => char.charCodeAt(0));
+            fileToUpload = new Blob([bytes], { type: `image/${embeddedRaster[1]}` });
+            generatedExtension = embeddedRaster[1] === "jpeg" ? "jpg" : embeddedRaster[1];
+            isNewBlob = true;
+          }
 
           if (overlay.type === "text" && overlay.isRainbow) {
             const tempContainer = document.createElement("div");
@@ -12510,7 +12219,7 @@ const ViralClipStudio = ({
 
           if (fileToUpload && (isNewBlob || overlay.isLocal)) {
             const ext = isNewBlob
-              ? "png"
+              ? generatedExtension
               : fileToUpload.name
                 ? fileToUpload.name.split(".").pop()
                 : "bin";
@@ -13023,6 +12732,10 @@ const ViralClipStudio = ({
         serializeSnapshot(previousDocument) !== serializeSnapshot(currentDocument)) {
       onEditInvalidated?.();
     }
+    if (renderedOutputUrl) {
+      const position = getCutPlayheadPosition();
+      if (position) continueCutInSourcePreview(position);
+    }
 
     if (pendingHistoryBaselineRef.current) {
       const baseline = pendingHistoryBaselineRef.current;
@@ -13086,6 +12799,8 @@ const ViralClipStudio = ({
     captionTextOverride,
     captionCoverageMode,
     captionSegments,
+    translateCaptionsToEnglish,
+    captionSourceLanguage,
     previewSpeed,
     pacingLevel,
     creativeIntent,
@@ -13124,6 +12839,8 @@ const ViralClipStudio = ({
     removeWatermark,
     watermarkMode,
     brandWatermark,
+    mainFrame,
+    exportSettings,
     manualWatermarkRegions,
     activeWatermarkRegionId,
     addHook,
@@ -13151,6 +12868,8 @@ const ViralClipStudio = ({
     soundEffects,
     activeSoundEffectId,
     extractedAudio,
+    audioRemix,
+    creatorPreview,
     bRollCadence,
     bRollGenerationJobId,
     timeline,
@@ -13199,10 +12918,10 @@ const ViralClipStudio = ({
 
       if (isUndo) {
         event.preventDefault();
-        handleUndo();
+        studioShortcutActionsRef.current.undo?.();
       } else if (isRedoShortcut) {
         event.preventDefault();
-        handleRedo();
+        studioShortcutActionsRef.current.redo?.();
       }
     };
 
@@ -13340,6 +13059,7 @@ const ViralClipStudio = ({
     const handlePlay = () => {
       const currentClip = timeline[activeTimelineIndex];
       if (
+        renderedOutputUrl ||
         !currentClip ||
         activeTimelineIndex !== 0 ||
         !addHook ||
@@ -13760,9 +13480,13 @@ const ViralClipStudio = ({
     const video = videoRef.current;
     const canvas = afterCanvasRef.current;
     if (!video || !canvas) return undefined;
+    // The completed movie already contains the composition. Let the native
+    // video presenter keep picture/audio together instead of copying every
+    // decoded frame through the live editor's canvas and layout effects.
+    if (renderedOutputUrl) return undefined;
 
     let stopProgrammeFrames = null;
-    const paintProgrammeFrame = () => {
+    const paintProgrammeFrame = decodedSourceTime => {
       // CSS effects do not alter drawImage's decoded pixels. Use the actual
       // programme element, not the lagging Before comparison clock: a 100 ms
       // scrub across a camera cut must not show the previous shot's pixels.
@@ -13789,11 +13513,16 @@ const ViralClipStudio = ({
       const pausedClockIsCurrent = pausedRequest && pausedSourceFrame.key === pausedStudioFrameKey(pausedRequest);
       const sampledSourceTime = pausedClockIsCurrent
         ? pausedRequest.start + pausedRequest.frameIndex / pausedRequest.fps
-        : Number(programmeVideo.currentTime || 0);
+        : Number.isFinite(decodedSourceTime) ? decodedSourceTime : studioPresentedSourceTime(programmeVideo);
       // Crop/finish automation was applied to this input picture before final
       // retiming. Evaluate it on that picture's sampled clock, rather than
       // the fractional seek position between it and the next source frame.
       const frameOutputTime = getPreviewTimelineTime(sampledSourceTime);
+      const frameMainMotion = buildMotionAutomationStyle(
+        previewMotionKeyframes.filter(keyframe => keyframe.targetId === "main-video"),
+        frameOutputTime, mainTransform
+      );
+      canvas.dataset.programmeTime = String(frameOutputTime);
       const frameCropMode = resolveReframeModeAtTime(
         reframeModeCuts, frameOutputTime, smartCrop ? smartCropMode : "off"
       );
@@ -13891,23 +13620,23 @@ const ViralClipStudio = ({
         : timelineDirectorZoom;
       const programmeScale = (renderedOutputUrl || activeSideBySideOverlay
         ? 1
-        : hookVisualScale * smartCropBackgroundScale * finishZoom * mainMotionAutomation.scale) * directorZoom;
+        : hookVisualScale * smartCropBackgroundScale * finishZoom * frameMainMotion.scale) * directorZoom;
       const translateX = renderedOutputUrl || activeSideBySideOverlay
         ? 0
-        : ((mainMotionAutomation.x - 50) / 100) * canvasWidth;
+        : ((frameMainMotion.x - 50) / 100) * canvasWidth;
       const translateY = renderedOutputUrl || activeSideBySideOverlay
         ? 0
-        : ((mainMotionAutomation.y - 50) / 100) * canvasHeight;
+        : ((frameMainMotion.y - 50) / 100) * canvasHeight;
       const rotation = renderedOutputUrl || activeSideBySideOverlay
         ? 0
-        : (mainMotionAutomation.rotation * Math.PI) / 180;
+        : (frameMainMotion.rotation * Math.PI) / 180;
       context.translate(canvasWidth / 2 + translateX, canvasHeight / 2 + translateY);
       context.rotate(rotation);
       context.scale(programmeScale, programmeScale);
       context.translate(-canvasWidth / 2, -canvasHeight / 2);
       context.globalAlpha = renderedOutputUrl
         ? 1
-        : hookPrimaryVideoOpacity * mainMotionAutomation.opacity;
+        : hookPrimaryVideoOpacity * frameMainMotion.opacity;
       const isDualCamStackLive =
         (isDualCamShowEveryone || (frameCropMode === "group_stack" && speakerStackIsReady)) &&
         !renderedOutputUrl &&
@@ -14360,6 +14089,8 @@ const ViralClipStudio = ({
     pausedSourceGeneration,
     timeline,
     previewOutputTimeMap,
+    previewMotionKeyframes,
+    mainTransform,
     smartCrop,
     smartCropMode,
     speakerTrackZoom,
@@ -14416,6 +14147,7 @@ const ViralClipStudio = ({
 
     let beforeAnimationFrame = 0;
     const paintBeforeFrame = () => {
+      if (renderedOutputUrl) return;
       if (beforeVideo.readyState < 2 || !beforeVideo.videoWidth || !beforeVideo.videoHeight) return;
       const context = beforeCanvas.getContext("2d", { alpha: false });
       if (!context) return;
@@ -14448,6 +14180,7 @@ const ViralClipStudio = ({
       }
     };
     const startBeforeLoop = () => {
+      if (renderedOutputUrl) return;
       if (!beforeAnimationFrame) {
         beforeAnimationFrame = window.requestAnimationFrame(paintBeforeLoop);
       }
@@ -14462,7 +14195,11 @@ const ViralClipStudio = ({
         beforeVideo.pause();
         return;
       }
-      const targetTime = Number(afterVideo.currentTime || currentTimelineWindow.start || 0);
+      const finishedPosition = renderedOutputUrl
+        ? resolveOutputTimelinePosition(getPreviewTimelineTime(afterVideo.currentTime)) : null;
+      const targetTime = finishedPosition?.sourceTime ?? Number(afterVideo.currentTime || currentTimelineWindow.start || 0);
+      if (finishedPosition && beforeVideo.src !== getSafeMediaSource(finishedPosition.clip.url))
+        applySafeMediaSource(beforeVideo,finishedPosition.clip.url);
       if (
         Number.isFinite(targetTime) &&
         Math.abs(Number(beforeVideo.currentTime || 0) - targetTime) > (afterVideo.paused ? .001 : .04)
@@ -14473,7 +14210,9 @@ const ViralClipStudio = ({
           console.log("Before preview seek skipped", error);
         }
       }
-      beforeVideo.playbackRate = afterVideo.playbackRate || 1;
+      const programmeTick = renderedOutputUrl ? secondsToTicks(getPreviewTimelineTime(afterVideo.currentTime)) : null;
+      const rateSegment = renderedOutputUrl ? previewOutputTimeMap.find(item=>programmeTick>=item.programmeRange.startTick&&programmeTick<item.programmeRange.endTick) : null;
+      beforeVideo.playbackRate = rateSegment ? rateSegment.rateNumerator/rateSegment.rateDenominator : afterVideo.playbackRate || 1;
       if (afterVideo.paused) {
         beforeVideo.pause();
         paintBeforeFrame();
@@ -14522,7 +14261,7 @@ const ViralClipStudio = ({
       if (beforeAnimationFrame) window.cancelAnimationFrame(beforeAnimationFrame);
       beforeVideo.pause();
     };
-  }, [activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start, comparisonMode]);
+  }, [activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start, comparisonMode, renderedOutputUrl, previewOutputTimeMap]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -14654,6 +14393,9 @@ const ViralClipStudio = ({
     const baseMuted =
       previewMuted ||
       muteOriginalAudio ||
+      (!renderedOutputUrl && (currentTimelineClip?.audioDetached || (originalAudioWindow &&
+        (previewTimelineTime < originalAudioWindow.audioTimelineStart ||
+          previewTimelineTime >= originalAudioWindow.audioTimelineStart + originalAudioWindow.audioTimelineDuration)))) ||
       !isStudioAudioTrackAudible(trackStates, "originalAudio") ||
       (extractedAudio?.enabled !== false && extractedAudio?.url && extractedMode === "replace");
     const restoredBaseGain =
@@ -14689,6 +14431,9 @@ const ViralClipStudio = ({
     extractedAudio,
     audioKeyframes.originalAudio,
     trackStates,
+    originalAudioWindow,
+    currentTimelineClip,
+    renderedOutputUrl,
   ]);
 
   useEffect(() => {
@@ -15740,6 +15485,7 @@ const ViralClipStudio = ({
   };
 
   const applyCreatorMotionPreset = (preset, zoom = creatorPreview.zoom) => {
+    if (!allowTimelineTimingEdit('video')) return;
     const points = buildCreatorMotionRecipe({ preset, zoom, time: previewTimelineTime, duration: outputTimelineDuration });
     if (!points.length) {
       setStudioActionMessage("Move the playhead earlier: a zoom needs at least 0.1 seconds of picture.");
@@ -15756,6 +15502,7 @@ const ViralClipStudio = ({
   };
 
   const applyCreatorSpeedRamp = () => {
+    if (!allowTimelineTimingEdit('video')) return;
     const points = buildCreatorSpeedRecipe({ time: previewTimelineTime, duration: outputTimelineDuration });
     if (!points.length) {
       setStudioActionMessage("Move the playhead earlier: a speed ramp needs at least 0.3 seconds of picture.");
@@ -15769,12 +15516,85 @@ const ViralClipStudio = ({
     setComparisonMode("after");
   };
 
+  const commitCreatorProjectEdit = (changes, label) => {
+    try {
+      const baseline=getEditorSnapshot(),next={...baseline,...changes,
+        creatorPreview:{...creatorPreview,activeDemo:''}};
+      if(!baseline.studioDocument)throw Error('Wait for source timing before adding the effect.');
+      const document=reconcileStudioDocument({snapshot:next,projectId,storedDocument:baseline.studioDocument});
+      const saved=cloneSnapshot(baseline);
+      pendingHistoryBaselineRef.current=saved;
+      cutHistoryTransactionRef.current={baseline:saved,appliedSignature:null,appliedTimelineSignature:null};
+      applyLinkedCommandSnapshot({snapshot:next,document});
+      setCreatorPreview(next.creatorPreview);
+      const position=getCutPlayheadPosition();if(position)continueCutInSourcePreview(position);
+      setStudioActionMessage(`${label} added to the editable timeline. Undo restores the complete edit.`);
+    }catch(error){setStudioActionMessage(error.message);}
+  };
+  const applyCreatorEffect = effect => {
+    const time=previewTimelineTime,remaining=outputTimelineDuration-time;
+    if(remaining<.05){setStudioActionMessage('Move the playhead before the end to add an effect.');return;}
+    if(effect==='shake'){
+      if(!allowTimelineTimingEdit('video'))return;
+      const points=buildCreatorShakeRecipe({time,duration:outputTimelineDuration,intensity:creatorPreview.intensity});
+      let keys=motionKeyframes;
+      for(const [property,fallback,amount] of [['x',mainTransform.x??50,1],['y',mainTransform.y??50,-.6],['rotation',mainTransform.rotation??0,.3]])
+        keys=mergeCreatorRecipe({keyframes:keys,points:points.map(point=>({...point,value:Number(fallback)+point.value*amount})),
+          targetId:'main-video',property,fallback,createId:()=>createSecureId('creator-shake')});
+      commitCreatorProjectEdit({motionKeyframes:keys},'Impact shake');return;
+    }
+    if(effect==='transition'){
+      if(!allowTimelineTimingEdit('video')||!allowTimelineTimingEdit('originalAudio'))return;
+      if(timeline.length<2){setStudioActionMessage('Split or add a second clip, then apply a transition to their cut.');return;}
+      const position=getCutPlayheadPosition(),left=Math.min(position?.index??activeTimelineIndex,timeline.length-2);
+      const transition=['clean_cut','soft_dip','energy_flash'].includes(creatorPreview.transition)?creatorPreview.transition:'soft_dip';
+      const clips=timeline.map((clip,index)=>index===left?{...clip,transitionOut:transition,transitionDuration:.18}
+        :index===left+1?{...clip,transitionIn:transition,transitionDuration:.18}:clip);
+      commitCreatorProjectEdit({timeline:clips},'Cut transition');return;
+    }
+    const freeze=['micro_freeze','reaction_punch'].includes(effect);
+    if(!allowTimelineTimingEdit(freeze?'broll':'graphics'))return;
+    const canvas=document.createElement('canvas');
+    try {
+      const hold=Math.min(remaining,Math.max(.1,Math.min(2,Number(creatorPreview.duration)||.8)));
+      if(freeze){
+        const video=videoRef.current;
+        if(renderedOutputUrl||!video||video.readyState<2||video.seeking||!video.videoWidth)
+          throw Error('Pause on a loaded source frame before adding a freeze.');
+        pauseSynchronizedPreview();
+        canvas.width=Math.min(1280,video.videoWidth);canvas.height=Math.max(2,Math.round(canvas.width*video.videoHeight/video.videoWidth));
+        canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+      }else if(effect==='emoji'){
+        if(!String(creatorPreview.emoji||'').trim())throw Error('Enter an emoji before adding it.');
+        canvas.width=512;canvas.height=512;const context=canvas.getContext('2d');
+        context.font='380px "Noto Color Emoji", "Apple Color Emoji", sans-serif';context.textAlign='center';context.textBaseline='middle';
+        context.fillText(creatorPreview.emoji,256,272,480);
+      }else throw Error('Choose a supported timeline effect.');
+      const id=createSecureId('creator-effect');
+      const overlay={id,type:'image',name:freeze?'Micro-freeze':'Reaction emoji',src:canvas.toDataURL('image/png'),
+        startTime:time,duration:freeze?hold:Math.min(remaining,2),x:freeze?50:Number(creatorPreview.x),y:freeze?50:Number(creatorPreview.y),
+        width:freeze?100:18,height:freeze?100:18*previewAspectRatio,opacity:1,scale:1,rotation:0,
+        frameShape:'edge',borderRadius:0,
+        ...(freeze?{bRollMode:'fullscreen',coverMainVideo:true,objectFit:'contain',muteMainAudio:false}:{}),
+        animation:{enter:'none',exit:'none',enterDuration:0,exitDuration:0}};
+      const changes={overlays:[...overlays,overlay],
+        ...(compositionOrder?{compositionOrder:[...compositionOrder,id]}:{})};
+      if(effect==='reaction_punch')changes.motionKeyframes=[...motionKeyframes,
+        {id:createSecureId('freeze-punch'),targetId:id,property:'scale',time,value:1,easing:'linear'},
+        {id:createSecureId('freeze-punch'),targetId:id,property:'scale',time:time+hold*.35,value:Number(creatorPreview.zoom)||1.34,easing:'ease_out'},
+        {id:createSecureId('freeze-punch'),targetId:id,property:'scale',time:time+hold,value:1,easing:'ease_out'}];
+      commitCreatorProjectEdit(changes,freeze?'Freeze picture':'Reaction emoji');setActiveOverlayId(id);
+    }catch(error){setStudioActionMessage(error.message);}
+  };
+
   const addCreatorImpactSound = () => {
+    if (!allowTimelineTimingEdit('sfx')) return;
     const impact = SOUND_EFFECT_PRESETS.find(preset => preset.id === "impact");
     if (impact) addSoundEffectPreset(impact);
   };
 
   const applyCreatorBeatSync = () => {
+    if (!allowTimelineTimingEdit('sfx')) return;
     const beat = findCreatorBeat(musicBeatMarkers, previewTimelineTime, outputTimelineDuration);
     if (beat === null) {
       selectCreativeTool("sound");
@@ -17069,6 +16889,12 @@ const ViralClipStudio = ({
 
   const setOverlayStyleOption = (id, key, value) => {
     const target = overlays.find(layer => layer.id === id);
+    if (target?.perspective || key === 'perspective') {
+      try { validateStudioPerspectiveLayer({...target,[key]:value},
+        motionKeyframes.filter(k=>k.targetId===id && !(key==='perspective'&&!value&&k.property==='perspectiveProgress')),
+        effectiveCompoundClips.some(g=>g.layerIds?.includes(id))); }
+      catch(error){setStudioActionMessage(error.message);return;}
+    }
     if (target?.textAnimator) {
       try { validateStudioTextAnimation({ ...target, [key]: value }); }
       catch (error) { setStudioActionMessage(error.message); return; }
@@ -19035,8 +18861,8 @@ const ViralClipStudio = ({
                         if (event.currentTarget === videoRef.current) confirmAfterPreviewFrame(event);
                       }}
                       style={{
-                        display: "none",
-                        objectFit: previewProgrammeFit,
+                        display: renderedOutputUrl && slot === activeProgrammeSlot ? "block" : "none",
+                        objectFit: renderedOutputUrl ? "contain" : previewProgrammeFit,
                         objectPosition: previewProgrammePosition,
                         width: renderedOutputUrl
                           ? "100%"
@@ -19047,15 +18873,15 @@ const ViralClipStudio = ({
                         background: "transparent",
                         position: "absolute",
                         inset: "0 auto 0 0",
-                        zIndex: -1,
-                        visibility: "hidden",
+                        zIndex: renderedOutputUrl ? 1 : -1,
+                        visibility: renderedOutputUrl && slot === activeProgrammeSlot ? "visible" : "hidden",
                         pointerEvents: "none",
                         transformOrigin: activeSideBySideOverlay
                           ? "center center"
                           : finishTransformOrigin,
                         transform: "none",
-                        opacity: 0,
-                        mixBlendMode: mainTransform.blendMode || "normal",
+                        opacity: renderedOutputUrl && slot === activeProgrammeSlot ? 1 : 0,
+                        mixBlendMode: renderedOutputUrl ? "normal" : mainTransform.blendMode || "normal",
                         clipPath: renderedOutputUrl
                           ? undefined
                           : getOverlayMaskClipPath({
@@ -19146,6 +18972,7 @@ const ViralClipStudio = ({
                       aria-label="Edited programme monitor"
                       aria-busy={pausedSourceFrame?.status === "loading"}
                       style={{
+                        display: renderedOutputUrl ? "none" : undefined,
                         position: "absolute",
                         top:
                           renderedOutputUrl || !mainFrame.enabled
@@ -19555,9 +19382,14 @@ const ViralClipStudio = ({
                           ) : null}
                         </div>
                       ) : null}
+                      <StudioProgrammeFrame clockRef={videoRef} mapTime={getPreviewTimelineTime}
+                        time={previewTimelineTime} enabled={!renderedOutputUrl} layers={overlays}
+                        keyframes={previewMotionKeyframes} groups={effectiveCompoundClips}
+                        programmeWidth={720 * previewAspectRatio} getDuration={getOverlayVisibleDuration}
+                        getClipPath={getOverlayMaskClipPath}>
+                        {compositionTime => (
                       <StudioGroupPreview compounds={effectiveCompoundClips} order={compositionIds}
-                        keyframes={previewMotionKeyframes} time={previewTimelineTime}
-                        getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}>
+                        keyframes={previewMotionKeyframes} time={compositionTime}>
                       {!renderedOutputUrl && motionScenes.length > 0 ? (
                         (Array.isArray(compositionOrder) ? motionScenes.map(scene => [scene]) : [motionScenes]).map(scenes => <MotionCanvas
                           key={Array.isArray(compositionOrder) ? scenes[0].id : "motion-stage"}
@@ -19595,11 +19427,12 @@ const ViralClipStudio = ({
                               ? o.startTime
                               : o.start_time;
                           if (overlayStart !== undefined && o.duration !== undefined) {
-                            return (
-                              previewTimelineTime >= Number(overlayStart) &&
-                              previewTimelineTime <
-                                Number(overlayStart) + getOverlayVisibleDuration(o)
-                            );
+                            // Keep the native graphic available for its exact
+                            // decoded-frame cue; visibility follows that clock.
+                            // Limit additional decoder allocation on long edits.
+                            if (o.type === 'video' && !o.perspective) return compositionTime >= Number(overlayStart) - .5 &&
+                              compositionTime < Number(overlayStart) + getOverlayVisibleDuration(o) + .25;
+                            return true;
                           }
                           return true;
                         })
@@ -19624,19 +19457,20 @@ const ViralClipStudio = ({
                           const animClass = anim.enter && !keyedMedia ? `broll-anim-${anim.enter}` : "";
                           const overlayMotion = buildMotionAutomationStyle(
                             overlayKeys,
-                            previewTimelineTime,
+                            compositionTime,
                             overlay
                           );
                           const safeOverlaySrc = overlay.vectorShape ? studioVectorUri(overlay.vectorShape, overlayMotion) : getSafeMediaSource(overlay.src);
                           const isStyledTitle = overlay.type === "text" && !isFullscreen;
                           const titlePose = isStyledTitle
-                            ? titleAnimationPose(overlay, previewTimelineTime)
+                            ? titleAnimationPose(overlay, compositionTime)
                             : { x: 0, y: 0, scale: 1, opacity: 1 };
 
                           return (
                             <div
                               key={overlay.id}
                               data-studio-layer-id={overlay.id}
+                              data-programme-time={compositionTime}
                               className={`draggable-overlay ${
                                 activeOverlayId === overlay.id && comparisonMode !== "split"
                                   ? "active"
@@ -19690,6 +19524,7 @@ const ViralClipStudio = ({
                                 // priority. Export uses this same saved stack.
                                 zIndex: compositionRank.get(overlay.id) ?? 100 + index,
                                 opacity: overlayMotion.opacity * titlePose.opacity,
+                                visibility: overlay.perspective && (compositionTime < Number(overlay.startTime || 0) || compositionTime >= Number(overlay.startTime || 0)+Number(overlay.duration || 0)) ? 'hidden' : undefined,
                                 "--layer-opacity": overlay.type === "image"
                                   ? overlayMotion.opacity * titlePose.opacity : undefined,
                                 mixBlendMode: overlay.blendMode || "normal",
@@ -19737,6 +19572,7 @@ const ViralClipStudio = ({
                             >
                               <StudioLayerMask mask={overlay.mask} cropX={overlayMotion.cropX}
                                 cropY={overlayMotion.cropY} title={isStyledTitle} stageRef={phoneFrameRef} />
+                              <StudioPerspectiveSurface value={overlay.perspective} progress={overlayMotion.perspectiveProgress ?? 100}>
                               {overlay.type === "text" ? (
                                 overlay.bRollPlaceholder ? (
                                   <div
@@ -19826,6 +19662,7 @@ const ViralClipStudio = ({
                                 />
                               ) : null}
 
+                              </StudioPerspectiveSurface>
                               {comparisonMode !== "split" &&
                                 activeOverlayId === overlay.id &&
                                 isPreviewPaused &&
@@ -19978,6 +19815,8 @@ const ViralClipStudio = ({
                           );
                         })}
                       </StudioGroupPreview>
+                        )}
+                      </StudioProgrammeFrame>
                     </div>
                   </div>
                     {(
@@ -20060,12 +19899,13 @@ const ViralClipStudio = ({
                         playsInline
                         preload="auto"
                         aria-label="Untouched source preview"
-                        style={{ display: "none" }}
+                        style={{ display: renderedOutputUrl ? "block" : "none",width:"100%",height:"100%",objectFit:"contain" }}
                       />
                       <canvas
                         ref={beforeCanvasRef}
                         className="studio-video before-preview-canvas"
                         aria-label="Untouched source monitor"
+                        style={{ display: renderedOutputUrl ? "none" : undefined }}
                       />
                     </div>
                   </div>
@@ -21146,10 +20986,7 @@ const ViralClipStudio = ({
                           title="Remove Clip"
                           onClick={e => {
                             e.stopPropagation();
-                            const newTimeline = timeline.filter((_, i) => i !== index);
-                            setTimeline(newTimeline);
-                            if (activeTimelineIndex >= index)
-                              setActiveTimelineIndex(Math.max(0, activeTimelineIndex - 1));
+                            deleteActiveTimelineClip(index);
                           }}
                           style={{
                             fontSize: "10px",
@@ -21215,20 +21052,10 @@ const ViralClipStudio = ({
                           ? timeline[activeTimelineIndex].startRequest
                           : 0
                       }
-                      onChange={e => {
-                        const val = parseFloat(e.target.value);
-                        setTimeline(prev =>
-                          prev.map((item, i) =>
-                            i === activeTimelineIndex ? { ...item, startRequest: val } : item
-                          )
-                        );
-                        if (videoRef.current) {
-                          setHookPreviewLoop(false);
-                          setTrimPreviewLoop(true);
-                          videoRef.current.currentTime = val;
-                          safePlayMediaElement(videoRef.current);
-                        }
-                      }}
+                      disabled={!!trackStates.video?.locked}
+                      onChange={event => commitSequenceEdit({ mode: 'ripple', edge: 'start',
+                        clipId: timeline[activeTimelineIndex].id,
+                        delta: Number(event.target.value) - Number(currentTimelineWindow.start) })}
                     />
                   </label>
                   <div className="split-audio-panel" style={{ borderTop: "1px solid var(--border)", paddingTop: "10px", marginTop: "10px" }}>
@@ -21254,9 +21081,8 @@ const ViralClipStudio = ({
                             type="button"
                             className={`split-audio-pill ${isPresetActive ? "is-active" : ""}`}
                             onClick={() => {
-                              const updated = applySplitAudioPreset(timeline, activeTimelineIndex, preset.id);
-                              setTimeline(updated);
-                              toast.success(`Applied ${preset.label}`);
+                              preset.id === 'straight' ? commitSequenceEdit({ mode:'audio-reset',clipId:timeline[activeTimelineIndex].id })
+                                : handleAudioTrim(activeTimelineIndex, { audioTrimOffsetStart: -preset.jCut, audioTrimOffsetEnd: preset.lCut });
                             }}
                             title={preset.description}
                           >
@@ -21284,11 +21110,7 @@ const ViralClipStudio = ({
                         value={timeline[activeTimelineIndex].audioTrimOffsetStart || 0}
                         onChange={e => {
                           const val = parseFloat(e.target.value);
-                          setTimeline(prev =>
-                            prev.map((item, i) =>
-                              i === activeTimelineIndex ? { ...item, audioTrimOffsetStart: val } : item
-                            )
-                          );
+                          handleAudioTrim(activeTimelineIndex, { audioTrimOffsetStart: val });
                         }}
                       />
                     </label>
@@ -21311,11 +21133,7 @@ const ViralClipStudio = ({
                         value={timeline[activeTimelineIndex].audioTrimOffsetEnd || 0}
                         onChange={e => {
                           const val = parseFloat(e.target.value);
-                          setTimeline(prev =>
-                            prev.map((item, i) =>
-                              i === activeTimelineIndex ? { ...item, audioTrimOffsetEnd: val } : item
-                            )
-                          );
+                          handleAudioTrim(activeTimelineIndex, { audioTrimOffsetEnd: val });
                         }}
                       />
                     </label>
@@ -21825,6 +21643,7 @@ const ViralClipStudio = ({
                         className="simple-cut-btn is-primary"
                         onClick={splitCurrentClipAtPlayhead}
                         title="Split clip into two at the current playhead"
+                        disabled={Boolean(trackStates[activeOverlay ? (activeOverlay.bRollMode ? "broll" : "graphics") : "video"]?.locked)}
                         data-testid="inspector-cut-split"
                       >
                         ✂️ Split at playhead
@@ -21834,6 +21653,7 @@ const ViralClipStudio = ({
                         className="simple-cut-btn"
                         onClick={trimClipStartToPlayhead}
                         title="Cut everything before the playhead"
+                        disabled={!!trackStates.video?.locked}
                         data-testid="inspector-cut-trim-start"
                       >
                         ⏮️ Trim start to here
@@ -21843,6 +21663,7 @@ const ViralClipStudio = ({
                         className="simple-cut-btn"
                         onClick={trimClipEndToPlayhead}
                         title="Cut everything after the playhead"
+                        disabled={!!trackStates.video?.locked}
                         data-testid="inspector-cut-trim-end"
                       >
                         ⏭️ Trim end to here
@@ -21853,6 +21674,7 @@ const ViralClipStudio = ({
                           className="simple-cut-btn is-danger"
                           onClick={deleteActiveTimelineClip}
                           title="Delete the currently selected clip"
+                          disabled={!!trackStates.video?.locked}
                           data-testid="inspector-cut-delete"
                         >
                           🗑️ Delete this clip
@@ -21874,9 +21696,9 @@ const ViralClipStudio = ({
                           <select
                             aria-label="Precision edit nudge"
                             value={precisionNudge}
-                            onChange={event => setPrecisionNudge(Number(event.target.value))}
+                            onChange={event => setPrecisionNudge(event.target.value === 'frame' ? 'frame' : Number(event.target.value))}
                           >
-                            <option value={0.04}>1 frame</option>
+                            <option value="frame">1 frame</option>
                             <option value={0.1}>0.10s</option>
                             <option value={0.25}>0.25s</option>
                             <option value={1}>1.00s</option>
@@ -21897,6 +21719,7 @@ const ViralClipStudio = ({
                               type="button"
                               aria-label={`${mode} earlier`}
                               onClick={() => applyPrecisionTimelineEdit(mode, -1)}
+                              disabled={!!trackStates[['jcut', 'lcut'].includes(mode) ? 'originalAudio' : 'video']?.locked}
                             >
                               −
                             </button>
@@ -21904,6 +21727,7 @@ const ViralClipStudio = ({
                               type="button"
                               aria-label={`${mode} later`}
                               onClick={() => applyPrecisionTimelineEdit(mode, 1)}
+                              disabled={!!trackStates[['jcut', 'lcut'].includes(mode) ? 'originalAudio' : 'video']?.locked}
                             >
                               +
                             </button>
@@ -22153,7 +21977,7 @@ const ViralClipStudio = ({
                     type="button"
                     className="inspector-primary-action is-danger-safe"
                     onClick={removePendingCutRange}
-                    disabled={!cutRangeIsReady}
+                    disabled={!cutRangeIsReady || !!trackStates.video?.locked}
                     data-testid="remove-marked-range"
                   >
                     ✂ Remove marked part & preview join
@@ -22187,7 +22011,7 @@ const ViralClipStudio = ({
                       type="checkbox"
                       checked={addHook}
                       onChange={event => {
-                        setAddHook(event.target.checked);
+                        setOpeningHookEnabled(event.target.checked);
                         setStudioActionMessage(
                           event.target.checked
                             ? "Opening hook enabled. Choose its exact range and treatment below."
@@ -25001,6 +24825,13 @@ const ViralClipStudio = ({
                   }}
                   onUpdateOverlay={(field, value) => {
                     if (!compositeInspectorTarget) return;
+                    if (field === 'perspective') {
+                      const candidate = { ...compositeInspectorTarget, perspective: value };
+                      try { validateStudioPerspectiveLayer(candidate, value ? motionKeyframes.filter(k=>k.targetId===candidate.id) : [],
+                        effectiveCompoundClips.some(g=>g.layerIds?.includes(candidate.id))); }
+                      catch (error) { setStudioActionMessage(error.message); return; }
+                      if (!value) setMotionKeyframes(current=>current.filter(k=>k.targetId!==candidate.id||k.property!=='perspectiveProgress'));
+                    }
                     if (compositeInspectorTarget.id === "main-video") {
                       setMainTransform(current => ({ ...current, [field]: value }));
                     } else {
@@ -25033,6 +24864,7 @@ const ViralClipStudio = ({
                     setStudioActionMessage("Programme resumed from the held reaction frame.");
                   }}
                   onApplyMotionPreset={applyCreatorMotionPreset}
+                  onApplyEffect={applyCreatorEffect}
                   onApplySpeedRamp={applyCreatorSpeedRamp}
                   onAddImpactSound={addCreatorImpactSound}
                   onApplyBeatSync={applyCreatorBeatSync}
@@ -25989,7 +25821,9 @@ const ViralClipStudio = ({
                         safePlayMediaElement(video);
                       }
                       setStudioActionMessage(
-                        `${normalized.preset.replaceAll("_", " ")} remix is live. EQ, reverb and speed are active in After.`
+                        normalized.preset === "chipmunk"
+                          ? "Chipmunk selected. Press Preview Remix to hear the high voice; it is also applied on export."
+                          : `${normalized.preset.replaceAll("_", " ")} remix is live. EQ, reverb and speed are active in After.`
                       );
                     }}
                     onBefore={() => {
@@ -26069,7 +25903,7 @@ const ViralClipStudio = ({
                         onClick={() => setBeatSnapEnabled(prev => !prev)}
                         title="Toggle magnetic snapping to musical beats across the timeline (Hotkey: B)"
                       >
-                        {beatSnapEnabled ? "🧲 Magnetic Beats ON" : "🧲 Enable Beat Snap (B)"}
+                        {beatSnapEnabled ? "🧲 Magnetic Beats ON" : "🧲 Enable Beat Snap (Shift+B)"}
                       </button>
                       <button
                         type="button"
@@ -28202,7 +28036,7 @@ const ViralClipStudio = ({
                   <input
                     type="checkbox"
                     checked={addHook}
-                    onChange={e => setAddHook(e.target.checked)}
+                    onChange={e => setOpeningHookEnabled(e.target.checked)}
                     style={{ marginRight: "8px" }}
                   />
                   Add Hook
@@ -29723,7 +29557,8 @@ const ViralClipStudio = ({
               voiceovers={voiceovers}
               adjustmentLayers={adjustmentLayers}
               creativeEffects={
-                [...(creativeEffectsEnabled
+                [...(audioRemix.enabled ? [{id:'audio-remix-effect',name:`Remix · ${AUDIO_REMIX_PRESETS.find(preset=>preset.id===audioRemix.preset)?.name || audioRemix.preset}`,
+                  startTime:0,duration:liveTimelineDuration,toolId:'sound'}] : []), ...(creativeEffectsEnabled
                   ? [
                       {
                         id: "signature-transformation",
@@ -29806,6 +29641,8 @@ const ViralClipStudio = ({
               onAutoGenerateMotionBeats={handleAutoGenerateMotionBeats}
               onSelectTool={toolId => toolId && selectCreativeTool(toolId)}
               onSplit={splitCurrentClipAtPlayhead}
+              onRazorCut={(time, layerId) => splitCurrentClipAtPlayhead(time, layerId)}
+              onSequenceEdit={commitSequenceEdit}
               splitLocked={Boolean(selectedGroupClip || trackStates[activeOverlay ? (activeOverlay.bRollMode ? "broll" : "graphics") : "video"]?.locked)}
               onTrimStart={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-start', previewTimelineTime) : trimClipStartToPlayhead}
               onTrimEnd={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-end', previewTimelineTime) : trimClipEndToPlayhead}

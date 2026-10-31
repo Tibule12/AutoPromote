@@ -192,5 +192,12 @@ reports/studio-background-captions-20261021/*
 # Production welcome verification is source, not a local verify script.
 !frontend/scripts/verify-welcome-assets.js
 
+# Private fictional-podcast source, owned-media receipts and authenticated QA.
+reports/the-video-i-never-recorded-20261030/proof/
+
+# Local cut-control recordings, editable backups and test-account media links.
+reports/studio-cut-controls-20261030/private-evidence/
+
 # Reviewed native welcome release media must ship with the frontend.
 !frontend/public/welcome/2026-10-21/*
+reports/whatsapp-remix-collection-20261030/private/

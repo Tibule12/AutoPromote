@@ -15,8 +15,25 @@ Object.assign(process.env, { NODE_ENV:'development', PORT:String(port),
   SCHEDULER_ENABLED:'false', ENABLE_HEALTH_SCANS:'false',
   CONTENT_FACTORY_ENABLED:'false', ENABLE_CONTENT_FACTORY:'false',
   FIREBASE_ADMIN_BYPASS:'0', CI_ROUTE_IMPORTS:'0',
+  DEBUG_AUTH:'false',
   MEDIA_WORKER_URL:`http://127.0.0.1:${workerPort}`, LOCAL_MEDIA_WORKER_URL:`http://127.0.0.1:${workerPort}` });
-const server = require(path.join(root,'src/server')).listen(port,'127.0.0.1', error => {
+const actualApp = require(path.join(root,'src/server'));
+const localApp = require('express')();
+if (process.env.STUDIO_QA_APP_ORIGIN) {
+  const {createLocalStudioMediaProxy}=require('./local-studio-media-proxy');
+  const {resolveIngestBucketName}=require(path.join(root,'src/services/multicamUploadService'));
+  const keyFile=process.env.STUDIO_QA_TRANSPORT_KEY_FILE;
+  if(keyFile&&!fs.existsSync(keyFile))fs.writeFileSync(keyFile,require('node:crypto').randomBytes(32),{mode:0o600,flag:'wx'});
+  const proxy=createLocalStudioMediaProxy({appOrigin:process.env.STUDIO_QA_APP_ORIGIN,
+    apiOrigin:`http://localhost:${port}`,bucket:()=>require('firebase-admin').storage().bucket(resolveIngestBucketName()),
+    cacheDirectory:process.env.STUDIO_QA_MEDIA_CACHE,
+    workerOutputDirectory:process.env.STUDIO_QA_MEDIA_CACHE?path.join(root,'tmp/worker_outputs'):undefined,
+    ...(keyFile?{key:fs.readFileSync(keyFile)}:{})});
+  localApp.get(proxy.prefix+':capability',proxy.stream);
+  localApp.use(proxy.wrap);
+}
+localApp.use(actualApp);
+const server = localApp.listen(port,'127.0.0.1', error => {
   // Express 5 also calls its listen callback on failure. Do not report readiness
   // while an older API still owns the port and is executing stale source.
   if (error) { console.error('Local Studio API listen failed:',error.code);process.exit(1); }

@@ -122,6 +122,7 @@ export function StudioCreatorWorkbench({
   onSaveTemplate,
   onApplyDirectorSuggestion,
   onInsertTitle,
+  onApplyEffect,
   cameraCount = 1,
   beatCount = 0,
   layerCount = 1,
@@ -182,8 +183,8 @@ export function StudioCreatorWorkbench({
     reactions: (
       <>
         <div className="creator-demo-grid is-three">
-          <DemoButton id="reaction_freeze" active={demo === "reaction_freeze"} onClick={() => { activate("reaction_freeze"); onFreeze?.(); }}>Freeze reaction</DemoButton>
-          <DemoButton id="reaction_punch" active={demo === "reaction_punch"} onClick={() => { activate("reaction_punch"); onFreeze?.(); }}>Freeze + punch</DemoButton>
+          <DemoButton id="reaction_freeze" timeline active={false} onClick={() => onApplyEffect?.('micro_freeze')}>Freeze reaction</DemoButton>
+          <DemoButton id="reaction_punch" timeline active={false} onClick={() => onApplyEffect?.('reaction_punch')}>Freeze + punch</DemoButton>
           <DemoButton id="reaction_montage" active={demo === "reaction_montage"} onClick={() => activate("reaction_montage")}>Reaction montage</DemoButton>
           <DemoButton id="instant_replay" active={demo === "instant_replay"} onClick={() => activate("instant_replay", { reactionMode: "instant" })}>Instant replay</DemoButton>
           <DemoButton id="slow_replay" active={demo === "slow_replay"} onClick={() => activate("slow_replay", { reactionMode: "slow" })}>Slow replay</DemoButton>
@@ -252,17 +253,21 @@ export function StudioCreatorWorkbench({
     effects: (
       <>
         <div className="creator-demo-grid is-three">
-          <DemoButton id="emoji" active={demo === "emoji"} onClick={() => activate("emoji")}>Emoji</DemoButton>
-          <DemoButton id="meme" active={demo === "meme"} onClick={() => activate("meme")}>Meme cutaway</DemoButton>
-          <DemoButton id="micro_freeze" active={demo === "micro_freeze"} onClick={() => { activate("micro_freeze"); onFreeze?.(); }}>Micro-freeze</DemoButton>
-          <DemoButton id="shake" active={demo === "shake"} onClick={() => activate("shake")}>Impact shake</DemoButton>
-          <DemoButton id="stabilization" active={demo === "stabilization"} onClick={() => activate("stabilization")}>Stabilization</DemoButton>
-          <DemoButton id="transition" active={demo === "transition"} onClick={() => activate("transition")}>Transition</DemoButton>
+          <DemoButton id="emoji" timeline active={false} onClick={() => onApplyEffect?.('emoji')}>Emoji</DemoButton>
+          <button type="button" className="creator-demo-button" data-testid="creator-demo-meme" onClick={() => onOpenTool('broll')}><span>Meme cutaway</span><small>Import your own media</small></button>
+          <DemoButton id="micro_freeze" timeline active={false} onClick={() => onApplyEffect?.('micro_freeze')}>Micro-freeze</DemoButton>
+          <DemoButton id="shake" timeline active={false} onClick={() => onApplyEffect?.('shake')}>Impact shake</DemoButton>
+          <button type="button" className="creator-demo-button" data-testid="creator-demo-stabilization" onClick={() => onOpenTool('cut')}><span>Stabilization</span><small>Open source controls</small></button>
+          <DemoButton id="transition" timeline active={false} onClick={() => onApplyEffect?.('transition')}>Transition</DemoButton>
           <DemoButton id="beat_sync" timeline active={false} onClick={() => onApplyBeatSync?.()}>Beat sync</DemoButton>
         </div>
         <label className="creator-text-field"><span>Emoji</span><input aria-label="Reaction emoji" value={state.emoji} maxLength={4} onChange={event => set({ emoji: event.target.value })} /></label>
+        <label className="creator-text-field"><span>Cut transition</span><select aria-label="Creator cut transition" value={['clean_cut','soft_dip','energy_flash'].includes(state.transition)?state.transition:'soft_dip'} onChange={event=>set({transition:event.target.value})}>
+          <option value="clean_cut">Clean cut</option><option value="soft_dip">Soft dip</option><option value="energy_flash">Energy flash</option>
+        </select></label>
         <label className="creator-range"><span>Graphic position <b>{Math.round(state.x)}% · {Math.round(state.y)}%</b></span><input aria-label="Creator graphic vertical position" type="range" min="12" max="84" value={state.y} onChange={event => set({ y: Number(event.target.value) })} /></label>
-        <label className="creator-range"><span>Effect intensity <b>{Math.round(state.intensity)}%</b></span><input aria-label="Creator effect intensity" type="range" min="10" max="100" value={state.intensity} onChange={event => set({ intensity: Number(event.target.value) })} /></label>
+        <label className="creator-range"><span>Shake intensity <b>{Math.round(state.intensity)}%</b></span><input aria-label="Creator effect intensity" type="range" min="10" max="100" value={state.intensity} onChange={event => set({ intensity: Number(event.target.value) })} /></label>
+        <label className="creator-range"><span>Freeze hold <b>{Number(state.duration).toFixed(1)}s</b></span><input aria-label="Creator freeze hold" type="range" min="0.1" max="2" step="0.1" value={state.duration} onChange={event=>set({duration:Number(event.target.value)})}/></label>
         <div className="creator-inline-actions"><button type="button" onClick={onApplySpeedRamp}>Apply smooth speed ramp</button><button type="button" onClick={() => onOpenTool("pacing")}>Edit ramp points</button></div>
       </>
     ),

@@ -171,22 +171,56 @@ export function watchStudioAudioClock(video, onFrame) {
 // source at the display's 60/120 Hz repeats expensive draw/filter work without
 // adding motion. Paused edits and layout changes still paint through their
 // ordinary events; older browsers retain the animation-frame fallback.
+const programmeFrameStreams = new WeakMap();
+export function studioPresentedSourceTime(video) {
+  const stream = video && programmeFrameStreams.get(video);
+  return stream && !video.paused && !video.seeking &&
+    stream.source === (video.currentSrc || video.src) && Number.isFinite(stream.time)
+    ? stream.time : Number(video?.currentTime || 0);
+}
 export function watchStudioProgrammeFrames(video, paint) {
-  let frame, disposed = false;
-  const decoded = typeof video?.requestVideoFrameCallback === 'function';
-  const request = callback => decoded
-    ? video.requestVideoFrameCallback(callback) : window.requestAnimationFrame(callback);
-  const tick = () => {
-    if (disposed) return;
-    if (!video.paused && !video.ended && !video.seeking && video.readyState >= 2) paint();
-    if (!disposed && !video.paused && !video.ended) frame = request(tick);
-  };
-  if (video && !video.paused && !video.ended) frame = request(tick);
+  if (!video) return () => {};
+  let stream = programmeFrameStreams.get(video);
+  if (!stream) {
+    const subscribers = new Set();
+    const decoded = typeof video.requestVideoFrameCallback === 'function';
+    let frame;
+    const request = () => {
+      if (frame !== undefined || !subscribers.size || video.paused || video.ended) return;
+      frame = decoded ? video.requestVideoFrameCallback(tick) : window.requestAnimationFrame(tick);
+    };
+    const tick = (_now, metadata) => {
+      frame = undefined;
+      if (!subscribers.size) return;
+      if (!video.paused && !video.ended && !video.seeking && video.readyState >= 2) {
+        // Snapshot once. A subscriber may seek/switch media; every consumer of
+        // this presented picture must still receive the same decoded time.
+        const time = metadata?.mediaTime ?? video.currentTime;
+        stream.time = time; stream.source = video.currentSrc || video.src;
+        for (const callback of [...subscribers]) {
+          if (subscribers.has(callback)) callback(time);
+        }
+      }
+      request();
+    };
+    stream = { subscribers, request, cancel() {
+      if (frame !== undefined) {
+        if (decoded) video.cancelVideoFrameCallback(frame);
+        else window.cancelAnimationFrame(frame);
+        frame = undefined;
+      }
+    } };
+    programmeFrameStreams.set(video, stream);
+  }
+  // Each subscription owns its membership, even when the callback is reused.
+  const listener = time => paint(time);
+  stream.subscribers.add(listener);
+  stream.request();
   return () => {
-    disposed = true;
-    if (frame !== undefined) {
-      if (decoded) video.cancelVideoFrameCallback(frame);
-      else window.cancelAnimationFrame(frame);
+    stream.subscribers.delete(listener);
+    if (!stream.subscribers.size) {
+      stream.cancel();
+      if (programmeFrameStreams.get(video) === stream) programmeFrameStreams.delete(video);
     }
   };
 }

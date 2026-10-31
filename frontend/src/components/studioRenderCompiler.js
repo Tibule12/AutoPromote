@@ -7,6 +7,7 @@ import { parseStudioMaskPolygon } from "./studioMaskGeometry";
 import { studioGroupTree, removeStudioGroupMembers, GROUP_KIND, validateStudioGroupKeyframes } from "./studioGroups";
 import { validateSpatialCurve } from "./studioAutomation";
 import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
+import { validateStudioPerspectiveLayer, encodeStudioPerspective } from './studioPerspective';
 
 export const compileStudioOverlaysForRender = (document, transportSnapshot = {}) =>
   projectStudioEditableStateToSnapshot(document, transportSnapshot).overlays
@@ -16,7 +17,7 @@ export const compileStudioOverlaysForRender = (document, transportSnapshot = {})
         if (layer.type !== 'image') fail('INVALID_VECTOR_LAYER', 'Vector artwork needs an ordinary image layer.');
         validateStudioVectorShape(layer.vectorShape);
       }
-      return { ...layer, start_time: Number(layer.startTime ?? 0), duration: Number(layer.duration ?? 0) };
+      return { ...layer, ...(layer.perspective ? {perspective: encodeStudioPerspective(layer.perspective)} : {}), start_time: Number(layer.startTime ?? 0), duration: Number(layer.duration ?? 0) };
     });
 
 const fail = (code, message) => {
@@ -40,6 +41,9 @@ export const compileStudioTimelineForRender = document => {
       ...(occurrence.parameters?.transitionIn ? { transition_in: occurrence.parameters.transitionIn } : {}),
       ...(occurrence.parameters?.transitionOut ? { transition_out: occurrence.parameters.transitionOut } : {}),
       ...(occurrence.parameters?.transitionDuration !== undefined ? { transition_duration: occurrence.parameters.transitionDuration } : {}),
+      ...Object.fromEntries(['audioTrimOffsetStart', 'audioTrimOffsetEnd', 'audioDetached',
+        'audioSourceStart', 'audioSourceEnd', 'audioProgrammeStart']
+        .filter(field => occurrence.parameters?.[field] !== undefined).map(field => [field, occurrence.parameters[field]])),
     };
   });
 };
@@ -80,6 +84,7 @@ export const compileStudioFinishForRender = document => {
 };
 
 const compileBaseTransform = layer => ({
+  ...(layer.perspective ? { perspective_progress: layer.perspectiveProgress ?? 100 } : {}),
   ...(layer.textAnimator ? { text_progress: layer.textProgress ?? 100 } : {}),
   x: Number(layer.x ?? 50), y: Number(layer.y ?? 50), scale: Number(layer.scale ?? 1),
   rotation: Number(layer.rotation ?? 0), opacity: Number(layer.opacity ?? 1),
@@ -105,6 +110,8 @@ export const compileStudioCompositionForRender = document => {
   assertStudioMainBlendMode(state.mainTransform);
   state.overlays.filter(overlay => !overlay.isCaption).forEach(assertStudioLayerBlendMode);
   for (const layer of [state.mainTransform, ...state.overlays]) {
+    validateStudioPerspectiveLayer(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id),
+      compounds.some(group => group.layerIds?.includes(layer?.id)));
     validateStudioTextAnimation(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id));
     validateStudioVectorTrim(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id));
     if (layer?.mask?.enabled && (layer.id === "main-video" || layer.type === "video" || layer.bRollPlaceholder || (layer.bRollMode === "fullscreen" && layer.type === "text")))
@@ -127,6 +134,7 @@ export const compileStudioCompositionForRender = document => {
     layers: [state.mainTransform || { id: "main-video", type: "video" },
       ...state.overlays.filter(overlay => !overlay.isCaption)].map(layer => ({
       id: layer.id, name: layer.name || layer.text || "Visual layer", type: layer.type || "visual",
+      ...(layer.perspective ? { perspective: encodeStudioPerspective(layer.perspective) } : {}),
       ...(layer.vectorShape ? {vector_shape: JSON.parse(JSON.stringify(validateStudioVectorShape(layer.vectorShape)))} : {}),
       ...(layer.textAnimator ? { text_animator: JSON.parse(JSON.stringify(layer.textAnimator)) } : {}),
       blend_mode: layer.blendMode || "normal",

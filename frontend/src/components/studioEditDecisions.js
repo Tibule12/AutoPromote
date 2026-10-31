@@ -29,6 +29,7 @@ export const STUDIO_LAYER_BINDING_FIELDS = ["titlePreset", "clipId", "mixAudio"]
 export const STUDIO_OCCURRENCE_PARAMETER_FIELDS = [
   "name", "duration", "sourceMediaId", "angleGroupId", "sharedStart", "sharedEnd",
   "transitionIn", "transitionOut", "transitionDuration", "audioTrimOffsetStart", "audioTrimOffsetEnd",
+  "audioDetached", "audioSourceStart", "audioSourceEnd", "audioProgrammeStart",
 ];
 export const STUDIO_MUSIC_MIX_FIELDS = ["ducking", "duckingStrength", "duckingMode", "startTime"];
 export const STUDIO_EXTRACTED_AUDIO_FIELDS = [

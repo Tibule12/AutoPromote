@@ -13,6 +13,9 @@ const {
 const { assertSandbox } = require("../../src/services/unifiedCredits/runtime");
 async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) {
   assertSandbox(env);
+  const executionSeconds = Number(env.CREDITS_DEMO_EXECUTION_SECONDS || 120);
+  if (!Number.isInteger(executionSeconds) || executionSeconds < 1 || executionSeconds > 900)
+    throw Error('Invalid local worker execution limit');
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const executionRoot = fs.realpathSync(directory);
   const privateFile = path.join(directory, "signing-key.pem");
@@ -229,7 +232,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
             try {
               process.kill(-child.pid, "SIGKILL");
             } catch {}
-          }, 120000);
+          }, executionSeconds * 1000);
           const promise = new Promise(resolve => {
             child.once("error", () => {
               clearTimeout(timeout);

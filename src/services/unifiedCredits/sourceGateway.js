@@ -20,10 +20,16 @@ function createSourceGateway({
   cohort,
   admission,
   service,
+  limits = {},
 }) {
   assertSandbox(process.env, db);
   if (bucket.name !== "demo-autopromote-credits" || !/^http:\/\/127\.0\.0\.1:[0-9]+$/.test(origin))
     fail("DEMO_STORAGE_REQUIRED");
+  const maxSourceSeconds = Number(limits.maxSourceSeconds ?? 30);
+  const maxExecutionSeconds = Number(limits.maxExecutionSeconds ?? 120);
+  if (!Number.isInteger(maxSourceSeconds) || maxSourceSeconds < 1 || maxSourceSeconds > 120 ||
+      !Number.isInteger(maxExecutionSeconds) || maxExecutionSeconds < 1 || maxExecutionSeconds > 900)
+    fail("INVALID_LOCAL_DEMO_LIMITS");
   const mac = value => crypto.createHmac("sha256", secret).update(value).digest("base64url");
   const owner = (name, meta) =>
     meta.metadata?.ownerUid ||
@@ -113,6 +119,7 @@ function createSourceGateway({
     return ownedUrl(uid, url);
   }
   const api = {
+    async describeOwnedUrl(uid, url) { return ownedUrl(uid, url); },
     async signedUrl(uid, name) {
       return capability(await describe(uid, name));
     },
@@ -171,7 +178,7 @@ function createSourceGateway({
           { timeout: 5000, maxBuffer: 65536 }
         );
         duration = Number(JSON.parse(result.stdout).format.duration);
-        if (!Number.isFinite(duration) || duration <= 0 || duration > 30)
+        if (!Number.isFinite(duration) || duration <= 0 || duration > maxSourceSeconds)
           fail("PILOT_MEDIA_LIMIT", 413);
       } finally {
         await fs.rm(dir, { recursive: true, force: true });
@@ -196,7 +203,7 @@ function createSourceGateway({
         gpu: false,
         contentHash: primary.contentHash,
         objectGeneration: primary.objectGeneration,
-        enforcedMaxSeconds: 120,
+        enforcedMaxSeconds: maxExecutionSeconds,
         allowedDestinations: destinations || [],
         workflowInput: {
           requestBody,

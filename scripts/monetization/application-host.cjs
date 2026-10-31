@@ -115,6 +115,7 @@ gateway = createSourceGateway({
   cohort: config.cohort,
   admission,
   service,
+  limits: config.localMediaLimits,
 });
 const verifier = createLocalProcessVerifier({ db, ...config.worker });
 async function afterResponse(ctx, operation, req, body) {
@@ -297,6 +298,38 @@ app.get("/api/credit-pilot/object/:id", async (req, res, next) => {
 });
 app.use("/api/auth", require("../../src/authRoutes"));
 const auth = require("../../src/authMiddleware");
+// The exact eight-second preview is local CPU work, with owned emulator
+// bytes and the same canonical mastering function used by the real worker.
+let audioPreviewActive = false;
+app.post('/api/media/preview-audio-remix', auth, async (req,res,next) => {
+  let scratch, acquired=false;
+  try {
+    assertSandbox(process.env,db);
+    if (!config.cohort.includes(req.user.uid)) return res.sendStatus(403);
+    if (audioPreviewActive) return res.status(429).json({message:'An exact preview is already rendering.'});
+    if (req.body.backgroundAudio || req.body.includeVoice === false)
+      return res.status(400).json({message:'This isolated preview supports the owned original soundtrack.'});
+    const source = await gateway.describeOwnedUrl(req.user.uid,req.body.fileUrl);
+    audioPreviewActive = true;
+    acquired=true;
+    scratch = await fs.promises.mkdtemp(path.join(path.dirname(process.argv[2]),'audio-preview-'));
+    const bytes = (await rawBucket.file(source.storagePath).download())[0];
+    if (bytes.length !== source.size || crypto.createHash('sha256').update(bytes).digest('hex') !== source.contentHash)
+      throw Error('Preview source changed');
+    const start = Math.max(0,Number(req.body.startTime)||0), duration = Math.min(8,Math.max(2,Number(req.body.duration)||8));
+    const request = {source:path.join(scratch,'source.mp4'),output:path.join(scratch,'preview.m4a'),
+      receipt:path.join(scratch,'receipt.json'),settings:req.body.audioRemix,start,duration};
+    await fs.promises.writeFile(request.source,bytes,{mode:0o600});
+    const requestFile=path.join(scratch,'request.json');await fs.promises.writeFile(requestFile,JSON.stringify(request),{mode:0o600});
+    await require('node:util').promisify(require('node:child_process').execFile)(
+      process.env.CREDITS_PYTHON_BIN,[path.join(__dirname,'local-audio-preview.py'),requestFile],
+      {timeout:60000,maxBuffer:65536,env:{...process.env,CUDA_VISIBLE_DEVICES:'-1'}});
+    const storagePath=`studio/previews/${req.user.uid}/${crypto.randomUUID()}.m4a`;
+    await rawBucket.upload(request.output,{destination:storagePath,metadata:{contentType:'audio/mp4',metadata:{ownerUid:req.user.uid}}});
+    return res.json({preview_url:await gateway.signedUrl(req.user.uid,storagePath),receipt:JSON.parse(await fs.promises.readFile(request.receipt,'utf8'))});
+  } catch(error) { next(error); }
+  finally { if(acquired)audioPreviewActive=false;if(scratch)await fs.promises.rm(scratch,{recursive:true,force:true}); }
+});
 app.use("/api", auth, (req, res, next) => {
   if (!config.cohort.includes(req.user.uid)) return res.sendStatus(403);
   // Block every unpriced/provider/admin mutation; allow ordinary own profile and workspace saving.

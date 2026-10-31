@@ -19,7 +19,10 @@ directory = Path(record["directory"])
 started = time.monotonic()
 if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
     raise RuntimeError("Explicit demo runtime required")
-resource.setrlimit(resource.RLIMIT_CPU, (120, 120))
+execution_seconds = int(os.environ.get("CREDITS_DEMO_EXECUTION_SECONDS", "120"))
+if not 1 <= execution_seconds <= 900:
+    raise RuntimeError("Invalid local worker execution limit")
+resource.setrlimit(resource.RLIMIT_CPU, (execution_seconds, execution_seconds))
 resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024**2, 20 * 1024**2))
 connect = socket.socket.connect
 

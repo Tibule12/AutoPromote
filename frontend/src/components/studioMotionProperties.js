@@ -2,6 +2,7 @@
 import { GROUP_BOUNDS, GROUP_KIND } from './studioGroups';
 export const STUDIO_MOTION_PROPERTIES = [
   { id: "textProgress", label: "Text progress", min: 0, max: 100, step: .1, textAnimatorOnly: true },
+  { id: "perspectiveProgress", label: "Perspective progress", min: 0, max: 100, step: .1, perspectiveOnly: true },
   { id: "x", label: "X", min: 0, max: 100, step: 0.1 },
   { id: "y", label: "Y", min: 0, max: 100, step: 0.1 },
   { id: "scale", label: "Scale", min: 0.1, max: 5, step: 0.01 },
@@ -17,7 +18,7 @@ export const STUDIO_MOTION_PROPERTIES = [
 export const studioMotionPropertiesForTarget = target => target?.kind === GROUP_KIND
   ? STUDIO_MOTION_PROPERTIES.filter(property => Object.hasOwn(GROUP_BOUNDS, property.id))
     .map(property => ({ ...property, min: GROUP_BOUNDS[property.id][0], max: GROUP_BOUNDS[property.id][1] }))
-  : STUDIO_MOTION_PROPERTIES.filter(property => (!property.textAnimatorOnly || !!target?.textAnimator) && (!property.vectorOnly || !!target?.vectorShape) &&
+  : STUDIO_MOTION_PROPERTIES.filter(property => (!property.perspectiveOnly || !!target?.perspective) && (!property.textAnimatorOnly || !!target?.textAnimator) && (!property.vectorOnly || !!target?.vectorShape) &&
     (!property.mediaOnly || target?.id === 'main-video' || ['image', 'video'].includes(target?.type)));
 
 // Authoring time is the edit clock; one output frame spans playbackRate / fps.

@@ -7,6 +7,7 @@ import { STUDIO_EXPORT_BLEND_MODES } from "./studioBlendModes";
 import StudioMaskPathEditor from "./StudioMaskPathEditor";
 import StudioLayerStack from "./StudioLayerStack";
 import StudioGroupInspector from "./StudioGroupInspector";
+import StudioPerspectiveInspector from './StudioPerspectiveInspector';
 
 const Range = ({ label, valueLabel, ...props }) => (
   <label className="inspector-range">
@@ -105,6 +106,13 @@ export function MotionInspector({
 
       {activeOverlay ? (
         <>
+          {activeOverlay.perspective && <details className="advanced-tool-section" open><summary>Perspective motion</summary>
+            <label><span>Perspective progress (%)</span><StrokePropertyValue
+              descriptor={studioMotionPropertiesForTarget(activeOverlay).find(p=>p.id==='perspectiveProgress')}
+              value={evaluated.perspectiveProgress} playhead={playhead} locked={keyframesLocked}
+              onCommit={value=>onUpdateOverlay('perspectiveProgress',value)} /></label>
+            <button type="button" disabled={keyframesLocked} onClick={()=>onTogglePropertyKeyframe?.('perspectiveProgress')}>Toggle perspective key</button>
+          </details>}
           {activeOverlay.textAnimator && <details className="advanced-tool-section" open><summary>Text choreography</summary>
             <p>0 shows the starting arrangement; 100 settles the selected letters or words. Set order, stagger and starting poses in Titles.</p>
             <div className="motion-position-grid"><label><span>Text progress (%)</span><StrokePropertyValue key={`${activeOverlay.id}:textProgress`}
@@ -599,6 +607,9 @@ export function CompositeInspector({
               ))}
             </select>
           </label>
+
+          {activeOverlay.id !== 'main-video' && ['image','video'].includes(activeOverlay.type) &&
+            <StudioPerspectiveInspector layer={activeOverlay} onChange={value=>onUpdateOverlay('perspective',value)} />}
 
           <details className="advanced-tool-section" open>
             <summary>Mask / rotoscope</summary>

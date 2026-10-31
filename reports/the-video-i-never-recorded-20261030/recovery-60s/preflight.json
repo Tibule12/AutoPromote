@@ -1,0 +1,111 @@
+{
+  "at": "2026-10-30T12:58:45.374009+00:00",
+  "worktree": "/home/tibule12/Projects/AutoPromte/AutoPromote-monetization-continuation-20261027",
+  "branch": "feat/rewarded-credits-continuation-20261027",
+  "retainedFrontendSourcesMatch": {
+    "ViralClipStudio.js": true,
+    "StudioProTimeline.js": true,
+    "studioGraphicsPackage.js": true,
+    "studioRenderCompiler.js": true
+  },
+  "retainedBundle": "main.742119f1.js",
+  "retainedBundleMatches": true,
+  "sourceInventory": {
+    "frontend/src/components/ViralClipStudio.js": {
+      "exists": true,
+      "sha256": "2715d65c4c1915295085c30244496cf6e2cfcf2da051df9b86e6a05845c11685"
+    },
+    "frontend/src/components/StudioProTimeline.js": {
+      "exists": true,
+      "sha256": "a0fe4f8e6fc3d18e70577452c835aaaacfe32aaad19fc9af4ab604f726fa0329"
+    },
+    "frontend/src/components/studioGraphicsPackage.js": {
+      "exists": true,
+      "sha256": "919a313579f10920beb813b909d00ac0c13d8ab3b355bd01bb2e200bcbcb2344"
+    },
+    "frontend/src/components/studioRenderCompiler.js": {
+      "exists": true,
+      "sha256": "978ea432f5d8d8384bdcfc628395a3c54a580ead3a50d11ba304135e64c19af1"
+    },
+    "src/server.js": {
+      "exists": true,
+      "sha256": "f63e6fac8a3193e08a1f1aab43ac9cb705d3ef1b6efab89603af8acc8551f668"
+    },
+    "src/mediaRoutes.js": {
+      "exists": true,
+      "sha256": "494efc3d9f9a02ed4723742f7e738f0ecdaae588b8ea32a4de22b8c57c792b4e"
+    },
+    "src/services/videoEditingService.js": {
+      "exists": true,
+      "sha256": "b90f65c203042810a24d75f7907a570623fe42bd0d7d8889c0dec8c6ccf38fa4"
+    },
+    "python_media_worker/main_media_server.py": {
+      "exists": true,
+      "sha256": "5bf45a1335f81d796fd5c4ccc939839d818a69b04956493dd3e619e5080f5b79"
+    },
+    "python_media_worker/studio_layer_motion.py": {
+      "exists": true,
+      "sha256": "76671a323bd23ccffd06d50bc3f638b1dec769019ab3e5013f493eb8317be5a6"
+    },
+    "python_media_worker/studio_composition.py": {
+      "exists": true,
+      "sha256": "1179976216602f2ac380fca0de781b9a80f99ddb1e751f2aedb4f04c016ab45b"
+    },
+    "python_media_worker/studio_motion.py": {
+      "exists": true,
+      "sha256": "92046739c2c2b3359b3faf3734554c9779e6ecbeef5e21104bb25d0b24114caf"
+    },
+    "scripts/monetization/application-host.cjs": {
+      "exists": true,
+      "sha256": "b3358383d80b78c53fdd12e66f83bc1d881d1612d665fc5c548ab0b14013e4cd"
+    },
+    "scripts/monetization/application-demo.cjs": {
+      "exists": true,
+      "sha256": "ba81121fcbf30baeacf3b37282c37aee3c65b77e5e53ce0a0a2246d2f023f70a"
+    },
+    "scripts/monetization/local-worker-execution.py": {
+      "exists": true,
+      "sha256": "743cfca94f029907ea1a2c155e92a5d81304b591f5356993e2dc8c669590700b"
+    }
+  },
+  "originalEvidence": {
+    "script.md": {
+      "exists": true,
+      "bytes": 9272,
+      "sha256": "421d11d990317898c3b5b783613518d15ca926a911f7e0300f21174453024d03"
+    },
+    "storyboard.md": {
+      "exists": true,
+      "bytes": 10010,
+      "sha256": "58ab9a0056ce59ce2492dc23d052b1f19feafd36b75dc2bba8bbcad44b33bed7"
+    },
+    "proof/take-A.mp4": {
+      "exists": true,
+      "bytes": 9014989,
+      "sha256": "28d97f2a63bea987c11c037327d215874fa4219c36755fd52aabb81fbfdddbaf"
+    },
+    "proof/CLOCK-PILOT-FINAL.autopromote.json": {
+      "exists": true,
+      "bytes": 118845,
+      "sha256": "d66d36aaceca1eb6a6bb6626ee17ba46457362308476f4f322ba1ecf0fa4d04f"
+    },
+    "proof/clock-pilot/final.mp4": {
+      "exists": true,
+      "bytes": 3850101,
+      "sha256": "3edc6691a9a15c4260e95ff1f8368344f38b9c7fbc571fed9509ef22b17b9a83"
+    },
+    "proof/clock-pilot/edited-in-studio.mp4": {
+      "exists": true,
+      "bytes": 994417,
+      "sha256": "f2939a7b9f3fd614138e8f1242c370994054afdd484e02c449d4eeca98d5bc83"
+    }
+  },
+  "newGenerationRequests": 0,
+  "newCpuRenderJobs": 0,
+  "paidGpuJobs": 0,
+  "liveUserDataWrites": 0,
+  "appSourceEdits": 0,
+  "servicesStarted": 0,
+  "productionDeployment": false,
+  "warning": "Retained bundle is a verified historical source-build artifact but has live Firebase/API config. It is NOT approved for recovery runtime isolation. No running Studio was used in this preflight."
+}

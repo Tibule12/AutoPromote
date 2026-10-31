@@ -33,7 +33,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-21T19:28:46.375062Z",
+  "updatedAt": "2026-10-30T21:05:10.505048+00:00",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -82,7 +82,7 @@
         "audio_pulse_reference"
       ],
       "whatWorksOrExists": "Caption/reframe and speed ran in separate evidence; exact triple not qualified.",
-      "requiredFlow": "Manual reviewed cues \u2192 portrait crop \u2192 2x then ramp; compare cue/source boundaries and safe areas after undo/reopen.",
+      "requiredFlow": "Manual reviewed cues → portrait crop → 2x then ramp; compare cue/source boundaries and safe areas after undo/reopen.",
       "lifecycle": {
         "add_use": {
           "status": "UNVERIFIED",
@@ -160,7 +160,7 @@
       ],
       "latestFoundationScope": "Combined captions/reframe/transforms/keyframe/grade state flow passed cold native recovery. This did not exercise this entire named combination or deliver paired final output; full edit blocked by missing HQ 3D and separate 2D variant failed speech-caption coverage.",
       "latestNativeStateEvidence": "reports/studio-canonical-visual-20261008/browser-flow/receipt.json",
-      "latestResumeScope": "Real frame-off export HTTP500 reproduced and optional-frame preflight repaired; 55 worker guards PASS. Native reset/history/save/new-App/reopen retain identity transform, 16:9 and disabled frame; actual 12s delivery/full decode succeeds. Original and final border measurements agree exactly (x32\u20131247/y32\u2013687); border is embedded in source. r11/r12 harness failures and interrupted r13 preserved. Real 2x combined preview/final revealed source-clock versus output-clock Minimal fades; shared 90kHz mapped preview repaired. Same CPU flow rerun, 13 cue samples, actual native 6s delivery and visual fade subset PASS. Actual NVIDIA normal Studio 6s/60fps NVENC/native download/full decode succeeds. r3 30fps expectation failure was the test helper resetting the selected rate, not a product defect; repaired and r4 delivers 60fps. Full raster/mix/listening and subject/3D/global composition remain unqualified.",
+      "latestResumeScope": "Real frame-off export HTTP500 reproduced and optional-frame preflight repaired; 55 worker guards PASS. Native reset/history/save/new-App/reopen retain identity transform, 16:9 and disabled frame; actual 12s delivery/full decode succeeds. Original and final border measurements agree exactly (x32–1247/y32–687); border is embedded in source. r11/r12 harness failures and interrupted r13 preserved. Real 2x combined preview/final revealed source-clock versus output-clock Minimal fades; shared 90kHz mapped preview repaired. Same CPU flow rerun, 13 cue samples, actual native 6s delivery and visual fade subset PASS. Actual NVIDIA normal Studio 6s/60fps NVENC/native download/full decode succeeds. r3 30fps expectation failure was the test helper resetting the selected rate, not a product defect; repaired and r4 delivers 60fps. Full raster/mix/listening and subject/3D/global composition remain unqualified.",
       "latestResumeEvidence": [
         "reports/studio-canonical-completion-20261008/paired-speed-2x-r2/clock-retest-review.json",
         "reports/studio-canonical-completion-20261008/paired-speed-2x-gpu-r4/gpu-delivery-review.json",
@@ -296,7 +296,7 @@
       "fixtureIds": [
         "landscape_short"
       ],
-      "whatWorksOrExists": "Actual HQ title \u2192 real-source alpha composition \u2192 cold reopen \u2192 paused visible frame \u2192 identical native download.",
+      "whatWorksOrExists": "Actual HQ title → real-source alpha composition → cold reopen → paused visible frame → identical native download.",
       "requiredFlow": "Edit scene/camera/keys, regenerate matching proxy, combine with overlays; verify pre-final/final alpha, fade and ordering.",
       "lifecycle": {
         "add_use": {
@@ -591,7 +591,7 @@
       "latestNativeVoiceoverDuckingEvidence": "reports/model-capability-runtime-v1-20261009/VOICEOVER-DUCKING-AND-RECOVERY-20261012.md",
       "latestNativeVoiceoverDuckingScope": "Real import/trim/gain/history/owned save/cold-reopen/CPU export/full Studio timeline; short1x voice phase corrected. Full retimed sound/picture, speech DSP and human review remain unqualified.",
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
-      "latestProfessionalPropertyScope": "Native unanimated layer \u2192 base-value edit \u2192 individual X keys \u2192 evaluated midpoint \u2192 undo/redo \u2192 remove/undo \u2192 save/cold reopen \u2192 real 3s CPU render/download \u2192 full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion."
     },
     {
       "id": "multi_source_vo_captions",
@@ -856,7 +856,7 @@
       "execution": {
         "kind": "PREPARED_PROJECT_NATIVE_FLOW",
         "commands": [
-          "node test/e2e/playwright/studio-stability/run.js render vfx '{\"duration\":120,\"width\":1920,\"height\":1080,\"fps\":24,\"frames\":2880,\"audio\":true,\"projectName\":\"Podcast \u2014 finished two-minute edit 20261009\"}'"
+          "node test/e2e/playwright/studio-stability/run.js render vfx '{\"duration\":120,\"width\":1920,\"height\":1080,\"fps\":24,\"frames\":2880,\"audio\":true,\"projectName\":\"Podcast — finished two-minute edit 20261009\"}'"
         ],
         "prerequisites": [
           "Normal authorized signed-in headless muted Studio; genuine prepared project; already-running authorized workers for GPU actions."
@@ -1147,7 +1147,7 @@
         "landscape_short",
         "nested_stack_project"
       ],
-      "whatWorksOrExists": "Reviewed Director split/export works; sophisticated automatic edit \u2192 manual continuation \u2192 cold export exact combination not run.",
+      "whatWorksOrExists": "Reviewed Director split/export works; sophisticated automatic edit → manual continuation → cold export exact combination not run.",
       "requiredFlow": "Director creates ordinary operations; human changes a timing/layer/audio decision; undo/redo/save/reopen/revise/render same graph.",
       "lifecycle": {
         "add_use": {
@@ -1428,7 +1428,7 @@
       "latestCompleteBlendCueClockEvidence": "reports/model-capability-runtime-v1-20261009/CUE-CLOCK-AND-COMPLETE-BLENDS-20261011.md",
       "latestCompleteBlendCueClockScope": "Nine ordinary flat overlay blend modes, one native CPU delivery, live/finished view switch and bounded source/cue clock repairs; whole Studio remains unqualified.",
       "latestProfessionalPropertyEvidence": "reports/studio-professional-editing-20261013/README.md",
-      "latestProfessionalPropertyScope": "Native unanimated layer \u2192 base-value edit \u2192 individual X keys \u2192 evaluated midpoint \u2192 undo/redo \u2192 remove/undo \u2192 save/cold reopen \u2192 real 3s CPU render/download \u2192 full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+      "latestProfessionalPropertyScope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
       "latestProfessionalGroupWorkflowEvidence": "reports/studio-professional-group-workflow-20261014/README.md",
       "latestProfessionalGroupWorkflowScope": "Real 20-second footage edit: group clip pointer/numeric move, trim, opacity keys, locks, group delete/undo, source split/history, exact save/cold reopen, one owned CPU export/download/full decode and full editable Studio playback pass. Nine native visibility gates pass; nine declared whole-footage source comparisons fail. Full picture/live sound and export speed remain unqualified.",
       "latestPropertyTimelineEvidence": "reports/studio-keyframe-selection-20261015/README.md",
@@ -1687,7 +1687,7 @@
       {
         "at": "2026-10-08T20:14:31.419187+00:00",
         "kind": "S02 verified native transform/clipping/clock repairs and seven-effect NVIDIA preview/recovery",
-        "summary": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29\u20131.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval."
+        "summary": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29–1.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval."
       },
       {
         "lastSessionKind": "S02 verified native transform/clipping/clock repairs and seven-effect NVIDIA preview/recovery",
@@ -1706,7 +1706,7 @@
           "pythonDeliveryTiming": 10,
           "totalPassed": 250,
           "scope": "Distinct scoped checks retained across continuation. This block ran 68 worker/timing checks, three related component passes and one isolated source-metadata pass. Combined component selection had a retained fixture-order failure on source URL refresh; isolated guard passed. Other suites not rerun. Guards do not qualify actual user paths.",
-          "realUserE2E": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29\u20131.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval.",
+          "realUserE2E": "Native same saved r11 CPU r9 export/download/full decode PASS: 6s60fps/360 frames, 6s stereo AAC SHA 576fa3b2c4e7fe24b7e5cfc804e135189a53d9b3891a5ea6e70d3d484a0a3e51. Premature crop before rotation/translation reproduced and fixed; tracked label fully survives in actual final. Static paired geometry p95 1.29–1.37px at declared 2px tolerance. Exact mapped cut at 1.5s and split title PASS. Previous repaired EOS padding, selected-FPS speed preservation and editing-tool recovery retained. 68 worker/timing and 8 real FFmpeg motion guards PASS; scoped aggregate 250. Fresh seven-effect SAM2/NVENC preview completed on L40S: 72 frames/3s. Initial real status 503 stopped automatic polling; native Check saved render recovered the SAME owned job, saved it, downloaded matching bytes and fully decoded with exact reviewed-proxy PCM. Representative visual review PASS; this seven-effect project final export not run. Underlying transient 503 cause unconfirmed; redacted route diagnostics added in source/syntax checked, without a reproduced diagnostic rerun. NVIDIA window ended; exact instance freshly verified STOPPED. No new paid restart. Cloud Run read-only audit: five us-central1 services are CPU/minimum0/request-based; existing GPU qualification Job has no running execution. No new Google execution. Whole edit 3D font/material/vertical parity still FAIL; captions ASR BROKEN; whole Studio NOT READY. Continue S02 3D/raster/matte/audio parity, then S03. No creative/pro/production approval.",
           "visualOrAudioParity": "Scoped transform clipping/cut/exact tail/static geometry PASS; seven-effect GPU preview/PCM identity PASS, final unqualified; full 3D parity FAIL."
         },
         "nextSlice": "S02: recover and visually inspect the same postfix CPU export; prepare seven existing subject effects; execute queued GPU checks after founder renders finish and within 22:00 SAST. Fresh Blender is blocked by daily allowance."
@@ -1749,7 +1749,7 @@
           "Final optimized normal App build PASS with existing lint warnings",
           "Native CPU export/download hash and complete decode PASS",
           "47 native source/final paired geometry:24 PASS/22 FAIL/1 insufficient",
-          "15/15 built-in cues;TapeStop344ms\u219221ms;whole mix/listening unqualified",
+          "15/15 built-in cues;TapeStop344ms→21ms;whole mix/listening unqualified",
           "Fresh full Studio movie playback FAIL at14s;subsequent QA entry signed out"
         ],
         "nextSlice": "S02: recover legitimate signed-in QA session, diagnose the existing completed film14s native stall without rerender; retest image shadow, align dip/frame/crop mapping and capture full live mix before creative review.",
@@ -2805,7 +2805,7 @@
       "velo": 14,
       "onda": 14
     },
-    "nativeDuplicateUndoRedo": "PASS: 14\u219215\u219214\u219215\u219214",
+    "nativeDuplicateUndoRedo": "PASS: 14→15→14→15→14",
     "nativeEmberNavigation": "PASS: five positions retain exact canonical hash",
     "nativeEmberColdRecovery": "PASS: native reload/saved-project entry retains exact canonical hash",
     "lateRecoveryFixes": "Native VELO/ONDA completed-output recovery after reload now observed; broader durability remains unqualified",
@@ -3088,7 +3088,7 @@
     "mainMerge": false,
     "nextSharedTaskId": "S02",
     "remainingBlockers": [
-      "Raw-source playback still has 1.6\u20131.8 seconds overhead in this short headless/software test; broader long/mixed/speed/mask/camera/audio playback coverage is unqualified.",
+      "Raw-source playback still has 1.6–1.8 seconds overhead in this short headless/software test; broader long/mixed/speed/mask/camera/audio playback coverage is unqualified.",
       "Installed Chrome153 exits with SIGSEGV during native download; bundled Chromium147 succeeds. Browser/environment root cause remains unresolved.",
       "Whole-stage paired preview/final picture, cut timing and sound parity remain unqualified.",
       "Full moving-film/sound creative review and founder acceptance remain pending.",
@@ -4368,7 +4368,7 @@
           0.9450306752407928,
           0.9999243683929696
         ],
-        "directMusicLatest": "12.9s fails across a music restart; other sampled windows remain near 0.999765\u20130.999999.",
+        "directMusicLatest": "12.9s fails across a music restart; other sampled windows remain near 0.999765–0.999999.",
         "musicStarts": 3,
         "finalCapture": "audio-live-r5"
       },
@@ -5080,7 +5080,7 @@
     "evidence": "reports/studio-professional-editing-20261013/README.md",
     "checkpoint": "reports/studio-professional-editing-20261013/checkpoint.json",
     "branch": "agent/studio-professional-editing-v1",
-    "scope": "Native unanimated layer \u2192 base-value edit \u2192 individual X keys \u2192 evaluated midpoint \u2192 undo/redo \u2192 remove/undo \u2192 save/cold reopen \u2192 real 3s CPU render/download \u2192 full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
+    "scope": "Native unanimated layer → base-value edit → individual X keys → evaluated midpoint → undo/redo → remove/undo → save/cold reopen → real 3s CPU render/download → full Studio playback with editable timeline. Four paired positions differ by at most 0.5 display pixel per axis. Whole picture/audio, other properties/easings and nesting remain unqualified; no readiness promotion.",
     "gpuJobs": 0,
     "readinessPromotion": false,
     "paidCost": 0,
@@ -5693,7 +5693,7 @@
       "S03",
       "S02"
     ],
-    "nextImplementationSlice": "Continue the user\u2019s motion-design refinement through native Studio controls on the same graph; then shared S04 spatial/path timing and S03 occurrence ownership. Retain S02 picture/sound and export latency limits."
+    "nextImplementationSlice": "Continue the user’s motion-design refinement through native Studio controls on the same graph; then shared S04 spatial/path timing and S03 occurrence ownership. Retain S02 picture/sound and export latency limits."
   },
   "professionalDepthMotion20261016": {
     "date": "2026-10-16",
@@ -8206,7 +8206,7 @@
     "physicalEvidenceVerified": true,
     "ownedQaServicesStopped": true,
     "remainingBlockers": [
-      "Bounded deterministic logo authoring supports Flow/Orbit/Facet and bundled Inter 600/900 A\u2013Z/a\u2013z, digits, space, &, dot and hyphen. Arbitrary-brief AI design, automatic uploaded-logo tracing and arbitrary font conversion are separate.",
+      "Bounded deterministic logo authoring supports Flow/Orbit/Facet and bundled Inter 600/900 A–Z/a–z, digits, space, &, dot and hyphen. Arbitrary-brief AI design, automatic uploaded-logo tracing and arbitrary font conversion are separate.",
       "Outlined letters are normal editable vector layers; changing the source name creates another design rather than live-replacing an existing outline binding. Compound geometry is bounded to eight contours, 64 nodes each and 256 total; boolean operations and morph keys remain separate.",
       "Transparent masters export a flat group of native vectors and base transforms before motion; masks, crops, filters, rounded frames and blends fail explicitly. Nested/non-vector members are rejected.",
       "Three settled opaque native geometry pairs pass fixed thresholds; low-alpha arrivals, whole colour/paint/live sound, broad masks/parents/retiming, capture smoothness and owner creative/listening/public acceptance remain separate.",
@@ -8996,5 +8996,319 @@
       "S04",
       "S03"
     ]
+  },
+  "fictionalPodcastPilot20261030": {
+    "at": "2026-10-30T12:47:09.346712+00:00",
+    "status": "NATIVE_EIGHT_SECOND_PILOT_DELIVERED_FULL_PRODUCTION_NOT_STARTED",
+    "evidence": "reports/the-video-i-never-recorded-20261030/README.md",
+    "scriptWords": 1294,
+    "durationSeconds": 8,
+    "width": 1920,
+    "height": 1080,
+    "frames": 192,
+    "projectId": "viral-project-e8a2d410-f86d-418c-919a-c61ed42cd52a",
+    "projectHash": "ea31a91940736b4de351bbdb2d1e80eea3cc1d39c22918d620b19354c1ef7597",
+    "jobId": "viral_3e17140c11eaa1c8ea197fa6904c9d0b0993abee959e8fa934e392363e9347be",
+    "outputSha256": "3edc6691a9a15c4260e95ff1f8368344f38b9c7fbc571fed9509ef22b17b9a83",
+    "sourceSha256": "28d97f2a63bea987c11c037327d215874fa4219c36755fd52aabb81fbfdddbaf",
+    "nativeGraphicLayers": 12,
+    "nativeMotionKeys": 94,
+    "nativeGroups": 1,
+    "nativeBackupRestore": true,
+    "nativeUndoRedoColdReopen": true,
+    "completeMatchingStudioPlayback": true,
+    "sourceAudioCorrelation": 0.9977192841165132,
+    "successfulGoogleTakes": 1,
+    "filteredGoogleTakes": 1,
+    "estimatedGoogleUsd": 0.96,
+    "actualBilledUsd": null,
+    "correctWorktreeNativeExports": 1,
+    "retainedSupersededRawExports": 1,
+    "paidGpuJobs": 0,
+    "productionDeployment": false,
+    "mainMerge": false,
+    "formalReadinessPromotion": false,
+    "savedMovie": "/home/tibule12/Videos/The Video I Never Recorded - AutoPromote Preview.mp4",
+    "remainingBlockers": [
+      "Google reference take filtered; no cross-take face/voice consistency proof",
+      "Source gaze slightly off lens; perceptual lip sync and owner listening approval pending",
+      "Eight-second condensed clock study is not the fully narrated opening minute",
+      "Six full sequences and ten-minute source/edit await successful pilot and explicit cost/quality approval",
+      "Whole live picture/audio parity and true 3D/tracking/blur remain unqualified"
+    ],
+    "nextTask": "Owner review of delivered movie and full production cost/quality gate; no automatic additional model generation."
+  },
+  "cinematicQualityRecovery20261030": {
+    "at": "2026-10-30T13:44:40.172829+00:00",
+    "status": "TWO_APPROVED_SOURCE_TESTS_DELIVERED_CREATIVE_CONTINUITY_NOT_QUALIFIED",
+    "evidence": "reports/the-video-i-never-recorded-20261030/recovery-60s/README.md",
+    "rejectedPriorPreview": true,
+    "worktree": "AutoPromote-monetization-continuation-20261027",
+    "retainedSourceAndBundleHashesMatch": true,
+    "originalEvidencePreserved": true,
+    "newGenerationRequests": 2,
+    "newRenderJobs": 0,
+    "servicesStarted": 0,
+    "productionUserDataWrites": 0,
+    "applicationSourceChanges": 0,
+    "paidGpuJobs": 0,
+    "productionDeployment": false,
+    "openingSpokenWords": 115,
+    "completeScriptV2Words": 1303,
+    "clockReadings": [
+      "02:17",
+      "11:06"
+    ],
+    "realClockBrokenMonths": 3,
+    "initialSourceApprovalUsd": 1.92,
+    "initialSourceApprovalTakes": 2,
+    "initialSourceApprovalSeconds": 16,
+    "approvalGranted": true,
+    "fullMinuteSourceApproved": false,
+    "tenMinuteGenerationApproved": false,
+    "nativeGap": "Ordinary video/image layers lack shared out-of-plane / four-corner projection; bounded native repair proposed, not implemented.",
+    "remainingBlockers": [
+      "Second take has visible sharpening/skin-texture change",
+      "Perceptual voice identity, lip sync and creative source acceptance remain unqualified",
+      "Native perspective repair and source-frame preview/final conformance remain unimplemented/unqualified",
+      "No replacement 60-second film exists; further generation allowance not approved"
+    ],
+    "nextTask": "Review the delivered two-take source pair; continuity, voice, lip sync and native perspective repair remain gates before any further paid source generation.",
+    "authorizationFile": "source-test-authorization.json",
+    "approvalExhausted": true,
+    "successfulGoogleTakes": 2,
+    "totalGeneratedSeconds": 16,
+    "estimatedGoogleGenerationUsd": 1.92,
+    "actualBilledUsd": null,
+    "resultsFile": "source-test-results.json",
+    "savedReviewDirectory": "/home/tibule12/Videos/The Video I Never Recorded - Presenter Tests"
+  },
+  "nativeMotionExcerpt20261030": {
+    "at": "2026-10-30T14:42:52.377788+00:00",
+    "status": "NATIVE_16_SECOND_EDIT_DELIVERED_CINEMATIC_MINUTE_NOT_QUALIFIED",
+    "evidence": "reports/the-video-i-never-recorded-20261030/recovery-60s/edit-feedback.md",
+    "worktree": "/home/tibule12/Projects/AutoPromte/AutoPromote-monetization-continuation-20261027",
+    "branch": "feat/rewarded-credits-continuation-20261027",
+    "actualStudioFrontend": true,
+    "actualNativeControls": true,
+    "canonicalCpuRenderer": true,
+    "demoFirebaseProject": "demo-autopromote-credits",
+    "origin": "http://127.0.0.1:42231",
+    "newGenerationRequests": 0,
+    "nativeRenderAttempts": 4,
+    "successfulNativeExports": 1,
+    "productionUserDataWrites": 0,
+    "productionDeployments": 0,
+    "paidGpuJobs": 0,
+    "localApplicationFilesChanged": [
+      "python_media_worker/main_media_server.py",
+      "python_media_worker/test_studio_mixed_sequence_canvas.py"
+    ],
+    "videoSeconds": 16,
+    "videoFrames": 384,
+    "fps": 24,
+    "deliveryDimensions": [
+      1280,
+      720
+    ],
+    "graphicsLayers": 23,
+    "motionKeys": 160,
+    "nativeMainVideoKeys": 56,
+    "exactNativeBackupRestore": true,
+    "pairedPausedFrames": 8,
+    "exactDecodedPtsPixelParityQualified": false,
+    "fullMatchingStudioPlayback": true,
+    "fullLiveLoopObserved": true,
+    "finalDisplayFramesDropped": 74,
+    "liveDisplayFramesDropped": 62,
+    "studioCaptureFramesPerSecond": 18.06442533215708,
+    "workerTestsPassed": 29,
+    "workerSubtestsPassed": 7,
+    "formalReadinessPromotion": false,
+    "creativeApproval": false,
+    "outputSha256": "f3bebb22e269046a55953c9d195a02500bcb3c51a02fe1a14d4482d8ac8cda85",
+    "directVideosCopy": "/home/tibule12/Videos/The Video I Never Recorded - Motion Edit.mp4",
+    "initialGenerationApprovalExhausted": true,
+    "fullMinuteSourceApproved": false,
+    "tenMinuteGenerationApproved": false,
+    "remainingBlockers": [
+      "Ordinary image/video perspective is still missing; this recording frame is 2D.",
+      "Native display drops frames and UI playhead readback lags the decoded clock; whole moving preview/export parity is unqualified.",
+      "Second-take sharpening differs; voice, lip-sync and acting need perceptual review.",
+      "Secondary evidence labels are too small at review size.",
+      "Available narration ends before the clock; no replacement 60-second film exists.",
+      "Native backup embeds artwork but links video; source re-upload in a different session is not qualified."
+    ],
+    "nextTask": "Repair decoded-clock-driven live overlay/playhead updates and display throughput, then ordinary-layer perspective; retain actual edited preview and all rejected attempts. No automatic further paid generation.",
+    "ownedIsolatedServicesStopped": true,
+    "unrelatedServicesPreserved": true,
+    "ownerRejected": true
+  },
+  "nativePerspectiveRevision20261030": {
+    "at": "2026-10-30T16:36:44.744903+00:00",
+    "status": "BOUNDED_NATIVE_PERSPECTIVE_VERIFIED_CINEMATIC_MINUTE_UNFINISHED",
+    "evidence": "reports/the-video-i-never-recorded-20261030/recovery-60s/perspective-revision-feedback.md",
+    "ownerRejectedEarlierFlat16SecondEdit": true,
+    "actualUpdatedStudioFrontend": true,
+    "normalDemoSignIn": true,
+    "localCanonicalRenderer": true,
+    "newModelGenerationRequests": 0,
+    "paidGpuJobs": 0,
+    "productionUserDataWrites": 0,
+    "productionDeployments": 0,
+    "videoSeconds": 16,
+    "videoFrames": 384,
+    "fps": 24,
+    "dimensions": [
+      1280,
+      720
+    ],
+    "nativeOverlays": 13,
+    "nativeMotionKeys": 100,
+    "nativeUiHistoryAndMalformedCornerRejection": true,
+    "independentExactRestore": true,
+    "labelledNativeGridSeconds": 3,
+    "labelledNativeGridFrames": 72,
+    "geometryMarkerDriftUnderOnePixel": true,
+    "lastFrameBugRepaired": true,
+    "fullMatchingFinalStudioPlayback": true,
+    "studioCaptureFramesPerSecond": 19.641430517325357,
+    "finishedDroppedDisplayFrames": 1,
+    "liveDroppedDisplayFrames": 26,
+    "finalProjectHash": "148e46a82cc3c620aaf790b498adc942b681afe51c1858cf412778e575a3e109",
+    "finalOutputSha256": "7bb811e0b0f4b58a9046b717eb96bbf09b730348e69888d804465089d453231c",
+    "finalJobId": "viral_994a34d443019f93a5cba02da9386b313bc007dafeba0c686164d16d643afc8b",
+    "frontendCasesPassed": 60,
+    "workerCasesPassed": 164,
+    "anonymousEntryPointComparisons": 8,
+    "previewWholePictureParityQualified": false,
+    "creativeApproval": false,
+    "formalReadinessPromotion": false,
+    "standaloneMediaPortabilityQualified": false,
+    "fullMinuteSourceApproved": false,
+    "tenMinuteGenerationApproved": false,
+    "ownedIsolatedServicesStopped": true,
+    "remainingBlockers": [
+      "Complete narrated 60-second source and clock sequence do not exist; further generation remains unapproved.",
+      "Creative result still falls short of the requested cinematic standard.",
+      "Live preview drops display frames and independent consumer clocks still diverge under load.",
+      "Perceptual voice continuity, acting and lip sync remain unqualified; take 2 sharpening differs.",
+      "Projected groups/text/masks/crop/vector/motion-blur combinations are unsupported; broader mutation and recovery qualification remains.",
+      "Native backup references isolated demo assets; standalone/offline media portability is not qualified."
+    ],
+    "nextTask": "Unify canvas/media/typography/playhead on one presented-frame dispatch and validate moving picture/sound; develop cohesive cinematic art direction. Do not initiate further paid generation, a production merge or deployment.",
+    "unrelatedServicesPreserved": true
+  },
+  "cutControlsAndChipmunk20261030": {
+    "at": "2026-10-30T17:14:40.150233+00:00",
+    "status": "LOCAL_CUT_AND_CHIPMUNK_REPAIR_VERIFIED_PRODUCTION_UNCHANGED",
+    "evidence": "reports/studio-cut-controls-20261030/README.md",
+    "verification": "reports/studio-cut-controls-20261030/verification.json",
+    "frontendCases": 65,
+    "workerCases": 9,
+    "nativeRazorUndoRedoTrimRangeLockSaveReopen": true,
+    "readinessPromotion": false,
+    "productionDeployments": 0,
+    "paidJobs": 0,
+    "remaining": [
+      "Production frontend and Python worker release not performed.",
+      "Independent pitch is heard via exact Preview Remix; immediate Web Audio remains approximate.",
+      "Remaining S02/S04/S03 and whole picture/audio qualification unchanged."
+    ]
+  },
+  "cutHookFxRemixContinuation20261030": {
+    "at": "2026-10-30T21:05:10.505048+00:00",
+    "report": "reports/studio-cut-controls-20261030/README.md",
+    "verification": "reports/studio-cut-controls-20261030/verification.json",
+    "nativePrecisionCutRenderVerified": true,
+    "nativeCombinedHookFxUndoReopenRenderVerified": true,
+    "genuineOwnerLocalApp": "http://localhost:5008",
+    "wholeControlConformance": false,
+    "stabilizationRenderConsumer": false,
+    "previewSmoothnessQualified": false,
+    "productionDeployments": 0,
+    "readinessPromotion": false,
+    "remaining": [
+      "Ordinary stabilization render integration",
+      "Preview-only Creator FX modes",
+      "Detached-audio programme removal combinations",
+      "Whole moving picture/sound and production qualification"
+    ]
+  },
+  "selectedThreeCaptionDelivery20261031": {
+    "at": "2026-10-31T06:56:32.879116+00:00",
+    "report": "reports/whatsapp-remix-collection-20261030/README.md",
+    "validation": "reports/whatsapp-remix-collection-20261030/captioned-three-validation.json",
+    "ownerSelectedPresets": [
+      "chipmunk",
+      "slowed_reverb",
+      "sped_up"
+    ],
+    "captionSequence": [
+      "Sidla ngamaphuthakho",
+      "Sidla ngamaphuthakho",
+      "zingaphi'ntozenzayo yho yho",
+      "zingaphi'ntozenzayo",
+      "ngconuxolise"
+    ],
+    "repeatStructure": {
+      "sidla": 2,
+      "zingaphi": 2,
+      "ngconuxolise": 1,
+      "yho": "first zingaphi"
+    },
+    "actualOwnerLocalStudio": true,
+    "nativeExportsDelivered": 3,
+    "combinedStudioRecordingsDelivered": 3,
+    "fullMovieAndRecordingDecode": true,
+    "acceptedAudioPacketsUnchanged": true,
+    "matchingFinishedAfterBytes": true,
+    "allRecordingAudioSyncPassed": true,
+    "recordingSmoothnessQualified": false,
+    "captionedRevisionsPublished": true,
+    "productionDeployments": 0,
+    "readinessPromotion": false,
+    "remaining": [
+      "Display throughput and dropped playback frames",
+      "Ordinary stabilization render integration",
+      "Preview-only Creator FX modes",
+      "Detached-audio programme removal combinations",
+      "Whole moving picture/sound and production qualification"
+    ],
+    "nextTask": "Owner review of corrected captioned files; shared display throughput and remaining control qualification within authorized scope",
+    "publishedPresets": [
+      "slowed_reverb"
+    ],
+    "slowedReverbPublication": {
+      "evidence": "reports/whatsapp-remix-collection-20261030/slowed-reverb-publication.json",
+      "providerConfirmedPlatforms": [
+        "linkedin",
+        "tiktok",
+        "youtube",
+        "instagram",
+        "facebook"
+      ],
+      "exactStudioRecordingUploadVerified": true,
+      "tiktokFinalStatus": "PUBLISH_COMPLETE",
+      "supersededUncaptionedSchedulesPaused": 5
+    }
+  },
+  "studioPushCheckpoint20261031": {
+    "at": "2026-10-31T07:23:53.554588+00:00",
+    "report": "reports/studio-cut-controls-20261030/PUSH_CHECKPOINT_20261031.md",
+    "ownerAuthorizedPush": true,
+    "targetBranch": "feat/rewarded-credits-continuation-20261027",
+    "frontendFocusedCases": 160,
+    "selectedEditorCases": 10,
+    "latestFrameAndSourceCases": 35,
+    "frameCasesOverlapEarlierRun": true,
+    "workerCases": 39,
+    "workerSubtests": 4,
+    "emulatorApplicationCases": 12,
+    "mediaTransportCases": 2,
+    "latestPresentedFrameBrowserQualification": false,
+    "productionDeployment": false,
+    "readinessPromotion": false,
+    "nextTask": "Qualify the latest shared presented-frame path and remaining control combinations in the ordinary App."
   }
 }

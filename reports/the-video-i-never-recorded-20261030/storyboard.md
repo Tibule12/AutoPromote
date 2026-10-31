@@ -1,0 +1,49 @@
+# Timestamped edit and source plan
+
+Private preproduction, 30 October 2026. Full movie not generated. Script times are targets; measured, reviewed narration becomes the timing authority before final authoring. 1920×1080, 16:9, 24fps; target 600 seconds / 14,400 frames. No public scheduling or production changes.
+
+| Programme | Performance / narration anchor | AutoPromote direction | Execution boundary |
+|---|---|---|---|
+| 00:00–00:08 | “At 8:42 … never said” | Bare presenter, one restrained native main-video push; small editable FICTIONAL DRAMATIZATION disclosure | Opening source must contain the exact line; no ident before hook |
+| 00:08–00:22 | “Not someone … Then I smiled” | Hold his face; one phrase, NEVER SAID, only after the sentence | Native text + opacity keys; no bouncing captions |
+| 00:22–00:45 | Clock at 02:17:36 | Signature 01: editable vector clock reconstruction, hands move then stop at 02:17:36; isolate second hand, annotate OLD CAMERA TEST | Reconstruction labelled; no claim of automatic camera tracking. Match timing after audio review |
+| 00:45–01:00 | “room that no longer existed” | Clock fades, native camera returns to face; hold question | Native layers/keys; no external animated plate |
+| 01:00–01:35 | “phone was hot … sister” | Signature 02: invented reaction cards enter on staggered paths from frame edges, growing in number; face remains readable | Manual 2D cards; true perspective/occlusion is a separate unqualified option |
+| 01:35–02:05 | Accounts versus eighteen seconds | Two restrained panels: ACCOUNTS and 00:18; cards crowd the margins, then stop | Count values as discrete timed titles; no claimed native continuously changing counter |
+| 02:05–02:30 | Camera as witness / “first upload” | Abruptly clear cards. Eye contact, long breath, then FIRST UPLOAD | Do not imply the fictional cards are real platform captures |
+| 02:30–03:10 | 08:31 / frames twelve and thirteen | Signature 03: original-file node, ruler and discrete frame markers at 24fps. Magnified clock inset compares labelled F12 and F13 | Native duplicate B-roll/crop if functional; otherwise labelled static source stills, each a normal asset. Verify fit and exact source clocks |
+| 03:10–03:40 | Clicks recur five seconds later | Show two measured waveform excerpts with matching transients; align A and B only at the matching line | Use accepted source PCM. Story sound is a labelled fictional reconstruction; no invented audio-reactivity claim |
+| 03:40–04:00 | Private camera test | Reveal the old recording date and unchanged collar/lamp | Dates must be explicit and identical on every document |
+| 04:00–04:24 | “I had sent it” | Signature 04: original recording → private evaluation → Northline; final link draws at “sent it,” then two seconds without score | Native vector stroke end or opacity steps; motion keys drive map movement |
+| 04:24–05:00 | Agreement / uploader link | Private-use restriction becomes focal point. Leave non-probative profile link visually tentative | Use fabricated editorial documents labelled STORY RECONSTRUCTION |
+| 05:00–05:30 | Matching checksum / limitation | File node and upload node join only at “matched.” Show HASH MATCH = SAME BYTES | Avoid pretending checksum proves all provenance or truth |
+| 05:30–06:10 | “They had written one” | Signature 05: face / generated words / waveform in three native panels, with editable connectors | Same fictional host; separate audio-input lip sync is not verified for Veo |
+| 06:10–06:40 | Clock and repeated room sound | Build the scene from FACE, VOICE, ROOM, ROOM TONE; each only when narrated | Stylized diagram, not an assertion about a specific real model's training process |
+| 06:40–07:00 | History around the face | Return source details to earlier evidence nodes; controlled outward move | Flat native composition fallback if perspective cannot be verified |
+| 07:00–08:30 | Sister / apology / room / frightened | Nearly uninterrupted face. No animation over sister's tears or four-second silence. Native audio gain only after listening review | Room tone and breaths stay; no default voice repair changing the performance |
+| 08:30–09:04 | Authorized confirmation / deliberate release | One release record enters, confirms the account. Show CONFESSION FIRST → CORRECTION LATER | Fictional record, reviewed source wording; no sensational real-company allegation |
+| 09:04–09:28 | “clock … sound … private test … matching file” | Signature 06: reverse evidence chain; four earlier layouts return with same labels and times. Each link appears at its spoken anchor | Native title/vector motion; don't overrun the next sentence |
+| 09:28–09:42 | Apology / denial | One quiet message, then remove all evidence panels | No graphics under “convincing denial” |
+| 09:42–10:00 | Lamp / final question | Face fills the composition. Music resolves before final question; three-second face hold | No CTA or advertisement; do not fade to black early |
+
+## Sound and pacing
+
+No music in Google source. Preserve dry source speech and breaths. AutoPromote may place a restrained original/licensed bed on its ordinary music track, with native gain/ducking and deliberately empty passages at 03:10, 04:00–04:24, 07:00–08:30 and the ending. No music or sound effects are yet approved. Do not synthesize fake evidence signals and describe them as measurements. Show measured waveform geometry from the accepted audio where a real waveform is useful; otherwise clearly label it as a story diagram.
+
+## Continuity ledger
+
+The first upload is 08:31; discovery is 08:42 the same morning. Viral caption claims yesterday. The clock stopped at 14:17:36 seven months earlier and was replaced the following day. The private camera test is the only supplied source with that clock/collar/lamp combination. A five-second room-tone loop repeats the same three-click sample. The original camera test contains no relief-fund confession. Permission covers private evaluation only. Northline's engineer provides records; the company subsequently confirms generation and its release manager's intentional release. The matching checksum connects the saved initial upload and supplied generated file; it does not authenticate all other records. The correction is planned but has not yet been posted when Daniel discovers the experiment. Never place a supposedly advancing physical clock in the reconstructed evidence shot.
+
+## First fresh source pilot — actual result
+
+The user's first low-cost-pilot request was bounded to two eight-second 1080p Veo 3.1 Fast submissions, one each, no retries. A returned the real opening-hook performance, 1920×1080/24fps, 192 frames, eight seconds with native dialogue. Local Whisper recovers the opening line through 6.7s. B used an extracted A image and the script's “Behind my shoulder … thirty-six” observation, but Google filtered its result and explicitly reports that blocked videos are not charged. No B video exists. No rephrased retry or third take was submitted. Estimated successful-generation charge is $0.96; actual invoice is unverified. Source-reference extraction is static preparation, not external motion editing.
+
+The native clock study is consequently eight seconds and explicitly condensed. It places the clock beside the opening sentence to test native motion/composition; it does not pretend the clock is mentioned in that source line or that the intervening full-script lines were generated. Correct final revelation timing and cross-take continuity remain unmet. Source A is not creatively approved: the gaze is slightly off lens, and the microphone includes incidental provider-generated branding despite the no-logo prompt. No external footage is substituted.
+
+Fresh character: Daniel Vale, original fictional adult male, approximately 38, short dark curly hair, brown eyes, subtle stubble, charcoal open-collar shirt. Requested waist-up front three-quarter neutral composition, face near x=47%, eye line y=35%, standard black podcast microphone below mouth at frame right. Dark charcoal acoustic wall, cool blue practical left, restrained purple rim right, soft warm key, fixed 50mm-equivalent camera. No resemblance request or celebrity reference. Canonical face/wardrobe/studio reference and source hashes become frozen only after owner review. The historical laptop presenter was inspected as a possible calibration asset but was not used in this pilot.
+
+## Full source production, pending pilot and cost approval
+
+Veo's documented short outputs require segmented generation. Target 75 eight-second accepted segments for 600 seconds, but natural sentence boundaries, pauses and trim handles require more generated footage. Budget 100 eight-second takes as an initial ceiling, including rejects; no automatic retries. Roughly 17–20 spoken words fit comfortably in an eight-second take, fewer with pauses. Chunk only at sentence/phrase boundaries; split each chapter after measuring the actual pilot delivery. Use fixed visual references and identical description, but do not promise a fixed seed will lock a voice. Adjacent take voice, room-tone, mouth, pose and lighting continuity must pass review before continuing. A Google TTS master by itself does not solve lip sync: the inspected Veo model lists audio input unsupported, so do not dub it onto unrelated mouth movements. If native generated dialogue cannot stay consistent, full production is blocked until a valid Google audio-conditioned workflow is verified and approved.
+
+Raw assembly uses ordinary Studio source imports, clip occurrences and cuts; all extra images are static or raw source assets. All animated typography, clock, evidence maps, split layouts, compositing and final audio placement remain native Studio graph decisions. Supply raw and edited movies, exact native backup and full matching Studio/timeline playback. A CLI worker render alone is only a renderer test.

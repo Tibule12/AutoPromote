@@ -11,6 +11,9 @@ const settings = fs.existsSync(configured) ? dotenv.parse(fs.readFileSync(config
 const port = Number(process.env.STUDIO_QA_CPU_PORT || 8019);
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid local CPU port');
 const python = process.env.STUDIO_QA_PYTHON || path.resolve(root, '../AutoPromote/python_media_worker/.venv/bin/python');
+const appOrigin = new URL(process.env.STUDIO_QA_APP_ORIGIN || 'http://localhost:5000');
+if (appOrigin.protocol !== 'http:' || !['localhost', '127.0.0.1', '[::1]'].includes(appOrigin.hostname))
+  throw new Error('Local CPU preview requires a loopback App origin');
 const worker = path.join(root, 'python_media_worker');
 const child = spawn(python, ['-m','uvicorn','main_media_server:app','--host','127.0.0.1','--port',String(port)], {
   cwd: worker, stdio: 'inherit', env: { ...settings, ...process.env,
@@ -21,7 +24,7 @@ const child = spawn(python, ['-m','uvicorn','main_media_server:app','--host','12
     // Avoid a second worker-to-cloud upload blocking the async health loop
     // for fifteen minutes after a network change during local CPU work.
     LOCAL_MEDIA_OUTPUT_ONLY:'true', ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK:'true',
-    MEDIA_WORKER_ALLOWED_ORIGINS:'http://localhost:5000',
+    MEDIA_WORKER_ALLOWED_ORIGINS:appOrigin.origin,
     FIREBASE_STATUS_UPDATES_ENABLED:'false' },
 });
 // The existing authenticated Node job service owns this local synchronous

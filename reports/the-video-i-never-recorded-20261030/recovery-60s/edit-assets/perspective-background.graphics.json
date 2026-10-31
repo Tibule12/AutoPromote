@@ -1,0 +1,52 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "perspective-background.graphics.json",
+  "width": 1920,
+  "height": 1080,
+  "duration": 16,
+  "layers": [
+    {
+      "id": "Studio-depth-background",
+      "name": "Studio-depth-background",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1920\" height=\"1080\" viewBox=\"0 0 1920 1080\"><defs><radialGradient id=\"light\"><stop stop-color=\"#293341\"/><stop offset=\"1\" stop-color=\"#080b11\"/></radialGradient></defs><rect width=\"1920\" height=\"1080\" fill=\"url(#light)\"/></svg>",
+      "startTime": 2.5,
+      "duration": 12.3,
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 2.5,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 2.7,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 14.600000000000001,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 14.799000000000001,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    }
+  ],
+  "groups": []
+}

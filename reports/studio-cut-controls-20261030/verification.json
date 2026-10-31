@@ -1,0 +1,57 @@
+{
+  "at": "2026-10-30T21:05:10.505048+00:00",
+  "status": "NATIVE_PRECISION_CUT_HOOK_FX_UNDO_DELIVERED_LOCAL_REPAIRS_NOT_DEPLOYED",
+  "initialEvidence": "verification-initial-1714.json",
+  "precisionCutEvidence": "private-evidence/advanced-cut-and-hook-runtime/all-cut-tools-proof",
+  "hookFxEvidence": "reports/whatsapp-remix-collection-20261030/private/local-repair-runtime/hook-fx-undo-proof/results.json",
+  "hookFxNativeResult": {
+    "steps": [
+      "Keyboard Undo/Redo reverses Creator setting then cut, one action each",
+      "Hook enable, template and copy each Undo/Redo without losing the cut",
+      "Native shake, emoji, captured freeze and cut transition each Undo/Redo",
+      "Exact cold reopen preserves cuts, Hook and native FX",
+      "Actual canonical CPU Hook/FX render delivered and downloaded"
+    ],
+    "browserErrors": [],
+    "status": "PASS"
+  },
+  "validation": {
+    "kernelAndCompilerRun": {
+      "suites": 10,
+      "passed": 139
+    },
+    "creatorWorkbenchCallbackRun": {
+      "passed": 14,
+      "overlapsKernelRun": true
+    },
+    "latestRemixWorkerAndHookReleaseRun": {
+      "passed": 12
+    },
+    "remixFrontendModelPanelRun": {
+      "passed": 20
+    },
+    "frameExportUndoEditorRun": {
+      "passed": 1,
+      "fullEditorSuiteNotRun": true
+    },
+    "bakedHookPlaybackEditorRun": {
+      "passed": 1,
+      "fullEditorSuiteNotRun": true
+    },
+    "localMediaOwnerRangeSourceRecoveryRun": {
+      "passed": 1
+    },
+    "build": "optimized local App builds passed; current own-account build served at localhost:5008"
+  },
+  "productionDeployment": false,
+  "pushOrMerge": false,
+  "readinessPromotion": false,
+  "limitations": [
+    "Ordinary stabilization is still not wired into the final render contract.",
+    "Several Creator FX study modes remain browser previews and correctly block export.",
+    "Programme removal with detached audio still requires relinking first.",
+    "Some completed Studio captures remain unsmooth; sync and frame smoothness are separate.",
+    "Current real-account combined recordings and six-platform publication are in progress.",
+    "Initial patch is stale and is retained under its historical filename."
+  ]
+}

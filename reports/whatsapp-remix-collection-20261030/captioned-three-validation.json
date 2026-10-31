@@ -1,0 +1,162 @@
+{
+  "validatedAt": "2026-10-31T06:55:47.551620+00:00",
+  "sequence": [
+    "Sidla ngamaphuthakho",
+    "Sidla ngamaphuthakho",
+    "zingaphi'ntozenzayo yho yho",
+    "zingaphi'ntozenzayo",
+    "ngconuxolise"
+  ],
+  "results": [
+    {
+      "preset": "chipmunk",
+      "file": "Chipmunk — Corrected lyrics.mp4",
+      "fullFinalDecode": true,
+      "fullStudioRecordingDecode": true,
+      "audioPacketsIdenticalToAcceptedVersion": true,
+      "ownerLyricsExact": true,
+      "cueCount": 5,
+      "repeatStructure": {
+        "sidla": 2,
+        "zingaphi": 2,
+        "ngconuxolise": 1,
+        "yho": "first zingaphi"
+      },
+      "sourceCueTimes": [
+        [
+          29.66,
+          32.84
+        ],
+        [
+          32.84,
+          36.2
+        ],
+        [
+          36.2,
+          39.68
+        ],
+        [
+          39.68,
+          42.12
+        ],
+        [
+          42.12,
+          44.06
+        ]
+      ],
+      "sourceEnd": 78,
+      "actualOwnerLocalStudio": true,
+      "nativeFinalSha256": "7f4bc1f93ea3a71980d9644c846c6fe79dd1d0d8c6975087da1da0e85b4ce987",
+      "matchingAfterBytes": true,
+      "studioRecordingSha256": "89fe84405141554fe4e9de79d754ce8ebd997509b72f08bdb4f8e69da4981425",
+      "audioSyncStatus": "PASS",
+      "audioDriftSeconds": 0.003667053405763454,
+      "droppedDisplayFrames": 90,
+      "totalDisplayFrames": 1946,
+      "smoothnessQualified": false,
+      "decodedAudioClippedSamples": 0,
+      "captionedRevisionPublished": false
+    },
+    {
+      "preset": "slowed_reverb",
+      "file": "Slowed + Reverb — Corrected lyrics.mp4",
+      "fullFinalDecode": true,
+      "fullStudioRecordingDecode": true,
+      "audioPacketsIdenticalToAcceptedVersion": true,
+      "ownerLyricsExact": true,
+      "cueCount": 5,
+      "repeatStructure": {
+        "sidla": 2,
+        "zingaphi": 2,
+        "ngconuxolise": 1,
+        "yho": "first zingaphi"
+      },
+      "sourceCueTimes": [
+        [
+          29.66,
+          32.84
+        ],
+        [
+          32.84,
+          36.2
+        ],
+        [
+          36.2,
+          39.68
+        ],
+        [
+          39.68,
+          42.12
+        ],
+        [
+          42.12,
+          44.06
+        ]
+      ],
+      "sourceEnd": 78.00933333333333,
+      "actualOwnerLocalStudio": true,
+      "nativeFinalSha256": "0910d0e2c2c68698dd1a0b54130181a9b9c9ec8b974e36a1599b244ac4ac5f65",
+      "matchingAfterBytes": true,
+      "studioRecordingSha256": "c97ca02bebf8ce5cc2eeb81f715fef35fd566239805fa05aeb54d15d04e0b843",
+      "audioSyncStatus": "PASS",
+      "audioDriftSeconds": -7.820129610536242e-08,
+      "droppedDisplayFrames": 112,
+      "totalDisplayFrames": 2374,
+      "smoothnessQualified": false,
+      "decodedAudioClippedSamples": 0,
+      "captionedRevisionPublished": false
+    },
+    {
+      "preset": "sped_up",
+      "file": "Sped Up — Corrected lyrics.mp4",
+      "fullFinalDecode": true,
+      "fullStudioRecordingDecode": true,
+      "audioPacketsIdenticalToAcceptedVersion": true,
+      "ownerLyricsExact": true,
+      "cueCount": 5,
+      "repeatStructure": {
+        "sidla": 2,
+        "zingaphi": 2,
+        "ngconuxolise": 1,
+        "yho": "first zingaphi"
+      },
+      "sourceCueTimes": [
+        [
+          29.66,
+          32.84
+        ],
+        [
+          32.84,
+          36.2
+        ],
+        [
+          36.2,
+          39.68
+        ],
+        [
+          39.68,
+          42.12
+        ],
+        [
+          42.12,
+          44.06
+        ]
+      ],
+      "sourceEnd": 78,
+      "actualOwnerLocalStudio": true,
+      "nativeFinalSha256": "adbce957d3405003bd5449eeb63e530752cac0904f59cf418ecadcbddc2ee6bd",
+      "matchingAfterBytes": true,
+      "studioRecordingSha256": "0438c3d57aeba9841f6c63b47f1db4bbe0f5c591bae031c1420ed34dc740c816",
+      "audioSyncStatus": "PASS",
+      "audioDriftSeconds": 0.007131858856205042,
+      "droppedDisplayFrames": 57,
+      "totalDisplayFrames": 1621,
+      "smoothnessQualified": false,
+      "decodedAudioClippedSamples": 0,
+      "captionedRevisionPublished": false
+    }
+  ],
+  "humanListeningApproval": false,
+  "completeSongTranscription": false,
+  "readinessPromotion": false
+}

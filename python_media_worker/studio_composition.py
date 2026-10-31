@@ -1,6 +1,10 @@
 """Deterministic RGB/alpha composition for the canonical Studio stack."""
 import math
 import re
+try:
+    from .studio_perspective import validate_perspective_layer
+except ImportError:
+    from studio_perspective import validate_perspective_layer
 
 try:
     from .studio_text_animator import validate_text_animation_layer
@@ -54,6 +58,12 @@ def graphic_group_mask(group, width, height):
 def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids, *, source_overlays=None):
     """An explicit canonical stack must name every graphic exactly once."""
     for layer in (plan or {}).get('layers') or []:
+        validate_perspective_layer(layer, any(layer.get('id') in g.get('layerIds',[]) for g in (plan or {}).get('groups') or []))
+        if layer.get('perspective') and source_overlays is not None:
+            sources = [s if isinstance(s,dict) else s.model_dump() for s in source_overlays]
+            source = next((s for s in sources if str(s.get('id')) == str(layer.get('id'))),None)
+            if not source or source.get('type') not in ('image','video') or source.get('bRollMode') == 'fullscreen' or source.get('b_roll_mode') == 'fullscreen':
+                raise ValueError('Perspective needs an ordinary inset image/video source')
         validate_text_animation_layer(layer)
         if layer.get("text_animator") is not None and source_overlays is not None:
             try:

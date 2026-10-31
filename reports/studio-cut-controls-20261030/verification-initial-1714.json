@@ -1,0 +1,63 @@
+{
+  "at": "2026-10-30T17:14:40.150233+00:00",
+  "productionReadOnly": {
+    "buildInfoUrl": "https://autopromote.org/build-info.json",
+    "commit": "eedf45a4a6f0bb3f14ff34f24f70f48df1ee15bd",
+    "builtAt": "2026-10-29T17:49:11.614Z",
+    "welcomeAssets": "2026-10-21",
+    "patchAppliesToCommit": true
+  },
+  "candidate": {
+    "worktree": "/home/tibule12/Projects/AutoPromte/AutoPromote-monetization-continuation-20261027",
+    "bundle": "main.2e32469c.js",
+    "bundleSha256": "b48eecc7a7b8e733985f2a4b29b384517e4f0897998ebbbdb42775257a3213f7",
+    "isolationProject": "demo-autopromote-credits",
+    "headlessMuted": true,
+    "nativeUi": {
+      "razorAtClickedFrame": [
+        [
+          0,
+          4.005977777777778
+        ],
+        [
+          4.005977777777778,
+          8
+        ]
+      ],
+      "razorUndoRedo": true,
+      "trimStart": [
+        [
+          2,
+          8
+        ]
+      ],
+      "trimEnd": true,
+      "markedRemovalAndLock": true,
+      "chipmunkSaved": true,
+      "coldReopen": true,
+      "browserErrors": []
+    }
+  },
+  "validation": {
+    "frontendControlsModelAndOverlayCases": 59,
+    "editorComponentCases": 6,
+    "realFfmpegAndContractWorkerCases": 9,
+    "optimizedAppBuild": "PASS",
+    "nativeRenderSubmitted": false,
+    "humanListeningQualified": false,
+    "publicDataWrites": 0,
+    "productionDeployments": 0,
+    "pushes": 0,
+    "paidJobs": 0,
+    "studioContract": "PASS",
+    "productKnowledgeBuildAndCheck": "PASS (10 existing undocumented surfaces)",
+    "gitDiffCheck": "PASS"
+  },
+  "limits": [
+    "Independent pitch uses Preview Remix and export, not the immediate Web Audio approximation.",
+    "Other timeline edit tools, whole moving-picture/sound parity, broad retimed/nested compositions and production rollout remain outside this bounded proof.",
+    "Earlier failed harness attempts and component runs are retained. No readiness promotion."
+  ],
+  "demoStopRequestedAt": "2026-10-30T17:16:11.840420+00:00",
+  "focusedPatchSha256": "24cc0bd3d98a87e01f9c5fd57e14766c90673f3c2333739ecb994e0c9de56327"
+}

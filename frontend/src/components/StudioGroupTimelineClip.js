@@ -1,12 +1,13 @@
 import React, { useRef, useState } from 'react';
 
 // Commit one gesture, rather than writing history during each pointer sample.
-export default function StudioGroupTimelineClip({ item, duration, frameStep, snapping, snapTargets = [], selected, onSelect, onEdit, kind = 'group', displayRate = 1 }) {
+export default function StudioGroupTimelineClip({ item, duration, frameStep, snapping, snapTargets = [], selected, onSelect, onEdit, onCut, kind = 'group', displayRate = 1 }) {
   const drag = useRef(null), [pending, setPending] = useState(null);
   const start = item.startTime, end = start + item.duration;
   const quantize = value => Math.max(0, Math.min(duration, Math.round(value / frameStep) * frameStep));
   const down = (event, action) => {
     event.stopPropagation(); onSelect?.(item.id);
+    if (onCut) return;
     if (item.locked || event.button !== 0) return;
     drag.current = { action, x: event.clientX, value: action === 'trim-end' ? end : start,
       width: event.currentTarget.closest('.pro-track-lane').getBoundingClientRect().width };
@@ -43,11 +44,11 @@ export default function StudioGroupTimelineClip({ item, duration, frameStep, sna
     data-testid={`${kind}-timeline-clip-${item.id}`} data-start={start} data-end={end}
     title={`${item.name} · ${(start / displayRate).toFixed(3)}s–${(end / displayRate).toFixed(3)}s`}
     style={{ left: `${shownStart / duration * 100}%`, width: `${Math.max(0, (shownEnd - shownStart) / duration * 100)}%` }}>
-    <button type="button" className="pro-group-trim" aria-label={`Trim ${item.name} in`} disabled={item.locked} {...handlers('trim-start')}>▏</button>
+    <button type="button" className="pro-group-trim" aria-label={`Trim ${item.name} in`} disabled={item.locked || !!onCut} {...handlers('trim-start')}>▏</button>
     <button type="button" className="pro-group-body" aria-label={`Select ${item.name} ${kind} clip`} aria-pressed={selected}
-      {...handlers('move')} onClick={event => { event.stopPropagation(); onSelect?.(item.id); }}>
+      {...handlers('move')} onClick={event => { event.stopPropagation(); if (onCut) { if (!item.locked) onCut(event); } else onSelect?.(item.id); }}>
       {kind === 'group' ? '▣ ' : ''}{item.name} {kind === 'group' && <small>{item.childCount} layers</small>}
     </button>
-    <button type="button" className="pro-group-trim" aria-label={`Trim ${item.name} out`} disabled={item.locked} {...handlers('trim-end')}>▕</button>
+    <button type="button" className="pro-group-trim" aria-label={`Trim ${item.name} out`} disabled={item.locked || !!onCut} {...handlers('trim-end')}>▕</button>
   </div>;
 }

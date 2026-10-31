@@ -1,0 +1,13 @@
+{
+  "sourceSha256": "28d97f2a63bea987c11c037327d215874fa4219c36755fd52aabb81fbfdddbaf",
+  "finalSha256": "3edc6691a9a15c4260e95ff1f8368344f38b9c7fbc571fed9509ef22b17b9a83",
+  "sourceDecodedMonoSamples": 384448,
+  "finalDecodedMonoSamples": 384000,
+  "comparisonSamples": 384000,
+  "zeroOffsetCorrelation": 0.9977192841165132,
+  "gain": 0.9836456814668177,
+  "sourceRepairEnabled": false,
+  "music": false,
+  "externalVoiceReplacement": false,
+  "humanListeningApproval": false
+}

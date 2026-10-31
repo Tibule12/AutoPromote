@@ -145,6 +145,7 @@ export const buildMotionAutomationStyle = (keyframes, time, fallback = {}) => {
     fallback: fallback.cropY ?? 0,
   });
   return { x, y, scale, rotation, opacity, cropX, cropY,
+    ...(fallback.perspective ? { perspectiveProgress: clamp(interpolateAutomationValue({keyframes,property:'perspectiveProgress',time,fallback:fallback.perspectiveProgress ?? 100}),0,100) } : {}),
     ...(fallback.textAnimator ? { textProgress: clamp(interpolateAutomationValue({ keyframes, property: "textProgress", time, fallback: fallback.textProgress ?? 100 }), 0, 100) } : {}),
     ...(fallback.vectorShape ? Object.fromEntries(['strokeStart', 'strokeEnd', 'strokeOffset'].map(property => [property,
       clamp(interpolateAutomationValue({ keyframes, property, time,

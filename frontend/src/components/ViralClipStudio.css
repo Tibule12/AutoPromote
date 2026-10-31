@@ -4443,7 +4443,7 @@ body.dashboard-mode.viral-studio-open {
 }
 
 .phone-frame.has-rendered-output > video.studio-video {
-  opacity: 0 !important;
+  opacity: 1 !important;
 }
 
 .rendered-output-ready {

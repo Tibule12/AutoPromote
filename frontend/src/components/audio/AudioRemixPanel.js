@@ -73,6 +73,10 @@ export default function AudioRemixPanel({
         ))}
       </div>
 
+      {remix.enabled && remix.preset === "chipmunk" && !remix.keepPitch ? (
+        <p className="audio-remix-note">Use Preview Remix to hear the Chipmunk voice at the original timing.</p>
+      ) : null}
+
       <div className="audio-remix-hero-controls">
         <div className="audio-remix-stepper">
           <span>◔</span>
