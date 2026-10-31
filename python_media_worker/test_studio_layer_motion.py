@@ -104,7 +104,7 @@ def test_video_layer_maps_its_cue_and_pose_to_the_retained_speed_clock(tmp_path)
         {"type": "video", "start_time": .5, "duration": .5, "width": 20, "height": 20},
         {"motion_keyframes": [{"property": "opacity", "time": .5, "value": .5}]},
         80, 80, .75, [{"start_time": 0, "end_time": 1.5, "rate": 2}], fps=10)
-    assert receipt["start_time"] == .25 and receipt["duration"] == .25
+    assert receipt["start_time"] == .3 and receipt["duration"] == .2
     raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
         "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
     assert np.frombuffer(raw, np.uint8).reshape(-1, 80, 80, 4)[..., 3].max() == 128
@@ -344,9 +344,26 @@ def test_layer_render_uses_identity_clock_without_speed_segments():
             [],
             fps=10,
         )
-        assert receipt["start_time"] == .25
+        assert receipt["start_time"] == .3
         assert receipt["duration"] == .5
         assert output.exists()
+
+
+def test_fractional_layer_cue_samples_pose_on_the_delivery_grid(tmp_path, monkeypatch):
+    from python_media_worker import studio_layer_motion as motion
+    source, output = tmp_path / 'cue.png', tmp_path / 'cue.mov'
+    Image.new('RGBA', (8, 8), 'white').save(source)
+    times = []
+    original = motion.layer_pose
+    def observe(layer, overlay, time):
+        times.append(time)
+        return original(layer, overlay, time)
+    monkeypatch.setattr(motion, 'layer_pose', observe)
+    receipt = motion.render_image_layer_motion(source, output,
+        {'start_time': .15, 'duration': .5, 'width': 10, 'height': 10},
+        {'base_transform': {'x': 50, 'y': 50, 'scale': 1, 'opacity': 1}}, 32, 32, 1, [], fps=24)
+    np.testing.assert_allclose(times, np.arange(4, 16)/24, atol=1e-9)
+    assert receipt['start_time'] == 4/24
 
 
 def test_fullscreen_image_covers_stage_despite_inactive_pip_keys_and_retains_opacity():

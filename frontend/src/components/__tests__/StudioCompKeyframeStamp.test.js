@@ -17,6 +17,7 @@ const plate = {
 
 function Harness({ layer = plate, keys = [], main = false }) {
   const [motionKeyframes, setMotionKeyframes] = useState(keys);
+  const [activeOverlayId, setActiveOverlayId] = useState(main ? 'main-video' : layer.id);
   const overlays = main ? [parent] : [parent, layer];
   const mainTransform = main ? layer : {};
   const pose = evaluateWorldLayerPose(layer, overlays, motionKeyframes, time, mainTransform);
@@ -25,7 +26,8 @@ function Harness({ layer = plate, keys = [], main = false }) {
       overlays={overlays}
       mainTransform={mainTransform}
       motionKeyframes={motionKeyframes}
-      activeOverlayId={main ? "main-video" : layer.id}
+      activeOverlayId={activeOverlayId}
+      onSelectOverlay={setActiveOverlayId}
       currentTime={time}
       programmeDuration={4}
       onChangeMotionKeyframes={setMotionKeyframes}
@@ -41,6 +43,14 @@ const stamp = property => {
   });
   fireEvent.click(screen.getByTestId("comp-add-keyframe-playhead"));
 };
+
+test('selecting Main Programme stamps the source transform rather than the first graphic', () => {
+  render(<Harness />);
+  fireEvent.click(screen.getByText('Main Programme', { exact: true }));
+  stamp('scale');
+  expect(state().motionKeyframes[0].targetId).toBe('main-video');
+  expect(state().motionKeyframes[0].value).toBe(1);
+});
 
 test.each(["x", "y", "scale", "rotation", "opacity"])(
   "stamping %s on an animated parented layer retains its authored local value and visible pose",

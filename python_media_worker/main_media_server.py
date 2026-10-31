@@ -31170,7 +31170,10 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
         f"saturation={saturation_value}:eval=frame",
     ]
     if color.get("precisionGrade"):
-        from studio_precision_grade import build_precision_grade_filter
+        try:
+            from .studio_precision_grade import build_precision_grade_filter
+        except ImportError:
+            from studio_precision_grade import build_precision_grade_filter
         filters = [build_precision_grade_filter(color)]
     if abs(warmth) > 0.005 and not color.get("precisionGrade"):
         red_shift = warmth * 0.035
@@ -31213,11 +31216,15 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
 
 def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
     """Apply actual timed grade layers on the same clock as the editor timeline."""
+    try:
+        from .studio_adjustment_grade import adjustment_grade_filter
+    except ImportError:
+        from studio_adjustment_grade import adjustment_grade_filter
     duration = max(0.04, float(duration or 0))
     active_layers = []
     boundaries = {0.0, duration}
     for layer in layers or []:
-        if not isinstance(layer, dict):
+        if not isinstance(layer, dict) or layer.get("enabled") is False:
             continue
         start = max(0.0, float(layer.get("startTime", layer.get("start_time", 0)) or 0))
         end = min(duration, start + max(0.0, float(layer.get("duration", 0) or 0)))
@@ -31226,12 +31233,7 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
         effects = layer.get("effects") or {}
         if effects.get("blendMode", "normal") != "normal" or float(effects.get("opacity", 1)) != 1:
             raise ValueError("Timed color adjustment supports normal blend at full opacity only")
-        grade = build_studio_finish_filter({
-            "enabled": True,
-            "color": effects.get("color") or {},
-            "texture": effects.get("texture") or {},
-        })
-        active_layers.append((start, end, grade))
+        active_layers.append((start, end, effects))
         boundaries.update((start, end))
     if not active_layers:
         return ""
@@ -31242,7 +31244,8 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
     parts = [base, f"[finish_base]split={len(intervals)}{inputs}"]
     outputs = []
     for index, (start, end) in enumerate(intervals):
-        grades = [grade for layer_start, layer_end, grade in active_layers
+        grades = [adjustment_grade_filter(effects, build_studio_finish_filter, f"adj{index}_{j}_")
+                  for j, (layer_start, layer_end, effects) in enumerate(active_layers)
                   if layer_start <= start + 1e-6 and layer_end >= end - 1e-6]
         output = f"[finish_{index}_out]"
         parts.append(
@@ -31257,11 +31260,15 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
 
 def plan_studio_adjustment_segments(layers, duration, max_segment_duration=30.0):
     """Return bounded Finish Rack intervals and their active grade filters."""
+    try:
+        from .studio_adjustment_grade import adjustment_grade_filter
+    except ImportError:
+        from studio_adjustment_grade import adjustment_grade_filter
     duration = max(0.04, float(duration or 0))
     active_layers = []
     boundaries = {0.0, duration}
     for layer in layers or []:
-        if not isinstance(layer, dict):
+        if not isinstance(layer, dict) or layer.get("enabled") is False:
             continue
         start = max(0.0, float(layer.get("startTime", layer.get("start_time", 0)) or 0))
         end = min(duration, start + max(0.0, float(layer.get("duration", 0) or 0)))
@@ -31270,12 +31277,7 @@ def plan_studio_adjustment_segments(layers, duration, max_segment_duration=30.0)
         effects = layer.get("effects") or {}
         if effects.get("blendMode", "normal") != "normal" or float(effects.get("opacity", 1)) != 1:
             raise ValueError("Timed color adjustment supports normal blend at full opacity only")
-        grade = build_studio_finish_filter({
-            "enabled": True,
-            "color": effects.get("color") or {},
-            "texture": effects.get("texture") or {},
-        })
-        active_layers.append((start, end, grade))
+        active_layers.append((start, end, effects))
         boundaries.update((start, end))
     if not active_layers:
         return []
@@ -31285,7 +31287,8 @@ def plan_studio_adjustment_segments(layers, duration, max_segment_duration=30.0)
         if interval_end - interval_start < 0.02:
             continue
         grades = [
-            grade for layer_start, layer_end, grade in active_layers
+            adjustment_grade_filter(effects, build_studio_finish_filter, f"adj{j}_")
+            for j, (layer_start, layer_end, effects) in enumerate(active_layers)
             if layer_start <= interval_start + 1e-6 and layer_end >= interval_end - 1e-6
         ]
         start = interval_start
@@ -31310,33 +31313,50 @@ async def render_studio_finish_timeline_sequential(
         raise ValueError("A sequential Finish Rack render needs at least one timed adjustment")
     work_dir = os.path.dirname(os.path.abspath(output_path))
     segment_paths = []
-    joined_transport_path = os.path.join(work_dir, f"{job_id}_finish_joined.ts")
+    concat_path = os.path.join(work_dir, f"{job_id}_finish.ffconcat")
+    picture = next((stream for stream in probe_media_stream_summary(source_path).get("streams", [])
+                    if stream.get("codec_type") == "video"), {})
+    numerator, denominator = str(picture.get("avg_frame_rate") or "0/1").split("/")
+    fps = float(numerator) / float(denominator)
+    if not math.isfinite(fps) or fps <= 0:
+        raise ValueError("Timed grade requires a verified picture frame rate")
+    total_frames = max(1, round(float(duration) * fps))
     try:
         for index, segment in enumerate(specs):
-            segment_path = os.path.join(work_dir, f"{job_id}_finish_{index:03d}.ts")
+            start_frame = min(total_frames, math.ceil(segment["start"] * fps - 1e-6))
+            end_frame = min(total_frames, math.ceil(segment["end"] * fps - 1e-6))
+            frame_count = end_frame - start_frame
+            if frame_count <= 0:
+                continue
+            start_time = start_frame / fps
+            segment_path = os.path.join(work_dir, f"{job_id}_finish_{index:03d}.mp4")
             segment_paths.append(segment_path)
-            filters = [part for part in [base_filter, *segment["grades"], "format=yuv420p", "setsar=1"] if part]
+            # Grade/motion expressions evaluate programme time, while each
+            # encoded segment starts at zero. Quantize shared boundaries once
+            # so neighbouring sections cannot drop or duplicate a frame.
+            filters = [part for part in [f"setpts=PTS-STARTPTS+{start_time:.9f}/TB",
+                       base_filter, *segment["grades"], "setpts=PTS-STARTPTS",
+                       "format=yuv420p", "setsar=1"] if part]
             await run_subprocess_async([
-                "ffmpeg", "-ss", f"{segment['start']:.6f}", "-i", source_path,
-                "-t", f"{segment['end']-segment['start']:.6f}",
+                "ffmpeg", "-ss", f"{start_time:.9f}", "-i", source_path,
+                "-t", f"{frame_count/fps:.9f}", "-frames:v", str(frame_count),
                 "-vf", ",".join(filters), "-an",
                 # This is encoded again by the final caption/delivery graph.
                 # Veryfast keeps the intermediate compact enough for Cloud
                 # Run's memory-backed filesystem while preserving CRF 19.
                 "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
-                "-pix_fmt", "yuv420p", "-f", "mpegts", "-y", segment_path,
+                "-pix_fmt", "yuv420p", "-fps_mode", "passthrough", "-y", segment_path,
             ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
-            # MPEG-TS is safely byte-concatenable. Fold each completed interval
-            # into one transport stream and delete it immediately so a long
-            # grade never retains dozens of standalone media files.
-            with open(segment_path, "rb") as segment_file, open(
-                joined_transport_path, "ab"
-            ) as joined_file:
-                shutil.copyfileobj(segment_file, joined_file, length=1024 * 1024)
-            os.remove(segment_path)
+        # The concat demuxer rebases every segment's packet timestamps. Binary
+        # concatenation of reset MPEG-TS timestamps lost B-frames at grade cuts.
+        with open(concat_path, "w") as concat_file:
+            concat_file.write("ffconcat version 1.0\n")
+            for segment_path in segment_paths:
+                escaped = segment_path.replace("'", "'\\''")
+                concat_file.write(f"file '{escaped}'\n")
         finish_has_audio = has_audio_stream(source_path)
         concat_command = [
-            "ffmpeg", "-fflags", "+genpts", "-i", joined_transport_path,
+            "ffmpeg", "-f", "concat", "-safe", "0", "-i", concat_path,
             "-i", source_path, "-map", "0:v:0",
         ]
         if finish_has_audio:
@@ -31352,7 +31372,7 @@ async def render_studio_finish_timeline_sequential(
             timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
         )
     finally:
-        for temporary_path in [*segment_paths, joined_transport_path]:
+        for temporary_path in [*segment_paths, concat_path]:
             try:
                 os.remove(temporary_path)
             except FileNotFoundError:
@@ -31974,18 +31994,36 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 # following clip's timestamps stretch the exported sequence.
                 video_filters = build_studio_sequence_video_filters(
                     normalize_vf, selected_timeline_fps, source_framing)
+                try:
+                    from .studio_sequence_video import sequence_picture_window
+                except ImportError:
+                    from studio_sequence_video import sequence_picture_window
+                picture = next((stream for stream in probe_media_stream_summary(segment_picture_path).get("streams", [])
+                                if stream.get("codec_type") == "video"), {})
+                rate_n, rate_d = str(picture.get("avg_frame_rate") or "0/1").split("/")
+                source_fps = float(rate_n) / float(rate_d)
+                if not math.isfinite(source_fps) or source_fps <= 0:
+                    raise ValueError("Sequence requires a verified source picture frame rate")
+                picture_window = sequence_picture_window(programme_segment_start-segment_duration,
+                    segment_duration, programme_duration, segment_picture_start, source_fps, selected_timeline_fps)
+                if source_framing:
+                    normalize_vf = build_reviewed_reframe_filter(sequence_framing_keys,
+                        timeline_canvas_width, timeline_canvas_height,
+                        programme_offset=picture_window["programme_start"])
+                video_filters = picture_window["clock"] + [normalize_vf]
                 video_filters.extend(transition_filters["video_filters"])
                 
                 # 1. Render Video (No Audio)
                 segment_v_cmd = [
-                    "ffmpeg", "-ss", str(segment_picture_start), "-i", segment_picture_path,
-                    "-t", str(segment_duration), "-vf", ",".join(video_filters),
+                    "ffmpeg", "-ss", f"{picture_window['seek']:.6f}", "-i", segment_picture_path,
+                    "-frames:v", str(picture_window["frames"]), "-vf", ",".join(video_filters),
                     "-map", "0:v:0", "-an",
                     "-c:v", "libx264", "-preset", "ultrafast",
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
                     segment_video_path,
                 ]
-                await run_subprocess_async(segment_v_cmd, check=True)
+                if picture_window["frames"]:
+                    await run_subprocess_async(segment_v_cmd, check=True)
                 
                 # 2. Render Audio with J/L-Cut offsets
                 if segment_source_path not in sequence_source_durations:
@@ -32007,7 +32045,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 else:
                     segment_audio_paths.append(None)
 
-                segment_paths.append(segment_video_path)
+                if picture_window["frames"]:
+                    segment_paths.append(segment_video_path)
 
             if not segment_paths:
                 raise HTTPException(status_code=400, detail="No valid timeline segments supplied")
@@ -32591,7 +32630,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         except ImportError:
             from studio_motion import build_studio_motion_filter
         if (request.finish_plan or {}).get("color_cube"):
-            from studio_color_cube import write_color_cube
+            try:
+                from .studio_color_cube import write_color_cube
+            except ImportError:
+                from studio_color_cube import write_color_cube
             color_cube_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_grade.cube")
             write_color_cube(request.finish_plan["color_cube"], color_cube_path)
         finish_filter = build_studio_finish_filter(request.finish_plan, color_cube_path)
@@ -32600,6 +32642,19 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         )
         finish_filter = ",".join(part for part in (finish_filter, zoom_filter) if part)
         adjustment_layers = (request.finish_plan or {}).get("adjustment_layers") or []
+        for index, adjustment in enumerate(adjustment_layers):
+            effects = adjustment.setdefault("effects", {})
+            effects.pop("_worker_cube_path", None)
+            effects["_worker_height"] = get_video_dimensions(working_path)[1]
+            if effects.get("color_cube"):
+                try:
+                    from .studio_color_cube import write_color_cube
+                except ImportError:
+                    from studio_color_cube import write_color_cube
+                adjustment_cube_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_adjustment_{index}.cube")
+                write_color_cube(effects["color_cube"], adjustment_cube_path)
+                sequence_temp_paths.add(adjustment_cube_path)
+                effects["_worker_cube_path"] = adjustment_cube_path
         adjustment_graph = build_studio_adjustment_timeline_filter(
             finish_filter, adjustment_layers, get_media_duration(working_path),
         )
@@ -33502,7 +33557,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         base_height,
                         rendered_timeline_duration,
                         speed_plan,
-                        (delivery_profile['fps'] or 30) if layer_plan.get('perspective') else 30,
+                        delivery_profile['fps'] or 30,
                     )
                     inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", motion_layer_path])
                     media_label = f'{input_idx}:v'
@@ -33571,7 +33626,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
 
         # Process Text Overlays
-        text_overlays = [o for o in request.overlays if o.type == 'text' and o.opacity > 0]
+        # A zero base opacity is a valid authored start pose. Ordinary motion
+        # keys may reveal it later; the shared layer renderer evaluates alpha.
+        text_overlays = [o for o in request.overlays if o.type == 'text']
         
         # Robust Font Selection
         font_path = "Arial" # Default to system font name if file not found
@@ -33698,7 +33755,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             rendered_title = txt.model_copy(update={key: value for key, value in geometry.items() if key not in {"lines", "clipBox"}})
             receipt = await asyncio.to_thread(render_image_layer_motion, text_asset, text_motion,
                                              rendered_title, layer_plan, base_width, base_height,
-                                             rendered_timeline_duration, speed_plan, 30, title_animator=title_animator)
+                                             rendered_timeline_duration, speed_plan, delivery_profile['fps'] or 30, title_animator=title_animator)
             inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", text_motion])
             next_label = f"text_overlay_{idx}"
             filter_chain.append(f"[{current_v_label}][{input_idx}:v]overlay=0:0:eof_action=pass:format=auto[{next_label}];")

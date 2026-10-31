@@ -36,7 +36,7 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
       if (!layer) continue;
       const start = Number(layer.startTime ?? layer.start_time);
       const duration = Number(current.getDuration?.(layer) ?? layer.duration);
-      const active = !Number.isFinite(start) || !Number.isFinite(duration) ||
+      const active = layer.isNullRig || !Number.isFinite(start) || !Number.isFinite(duration) ||
         (programmeTime >= start && programmeTime < start + duration);
       style(node, 'visibility', active ? 'visible' : 'hidden');
       node.dataset.programmeTime = String(programmeTime);

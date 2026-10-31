@@ -15,6 +15,24 @@ test("rejects invalid, incomplete, 1D and nonfinite LUTs", () => {
     identity+"\nDOMAIN_MIN 1 0 0\nDOMAIN_MAX 0 1 1"]) expect(() => parseColorCube(text)).toThrow();
 });
 
+test('separable and cross-channel LUT pixels retain the trilinear reference across byte values', () => {
+  const warm = parseColorCube(identity);
+  warm.data = warm.data.map((value, index) => index % 3 === 0 ? .01 + value*.98 : index % 3 === 1 ? value*.98 : .01+value*.94);
+  const cross = buildAdvancedColorCube({ hsl: { hue: 17, saturation: -20 }, curve: { midtones: 12 } }, 9);
+  for (const cube of [warm, cross]) {
+    const input = new Uint8ClampedArray(4096*4);
+    for (let i=0;i<input.length;i+=4) {
+      input[i]=(i/4)%256; input[i+1]=(i*17+3)%256; input[i+2]=(i*43+79)%256; input[i+3]=(i*7)%256;
+    }
+    const reference=input.slice();
+    for(let i=0;i<reference.length;i+=4) {
+      const rgb=sampleColorCube(cube, input[i]/255,input[i+1]/255,input[i+2]/255);
+      for(let c=0;c<3;c++) reference[i+c]=rgb[c]*255;
+    }
+    expect(applyColorCube(input.slice(),cube)).toEqual(reference);
+  }
+});
+
 test("curve, global HSL and LUT mix produce actual pixel changes", () => {
   const pixels = new Uint8ClampedArray([90, 55, 35, 255]);
   const curve = buildAdvancedColorCube({ curve: { midtones: 50 } });

@@ -19,7 +19,10 @@ directory = Path(record["directory"])
 started = time.monotonic()
 if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
     raise RuntimeError("Explicit demo runtime required")
-resource.setrlimit(resource.RLIMIT_CPU, (120, 120))
+# Three simultaneous native perspective planes exceed the original short-demo
+# CPU allowance. Keep a finite local ceiling matching the provider's maximum
+# ten-minute supervision window; production worker limits are unchanged.
+resource.setrlimit(resource.RLIMIT_CPU, (600, 600))
 resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024**2, 20 * 1024**2))
 connect = socket.socket.connect
 
@@ -68,6 +71,19 @@ def process_telemetry(job_id, data, **kwargs):
     (directory / "progress.json").write_text(json.dumps({"jobId": job_id, "progress": data}, default=str))
     return True
 worker.update_firestore_job = process_telemetry
+# Observe real intermediate timing before the canonical renderer removes its
+# temporary files. This demo-only trace does not alter commands or validation.
+canonical_subprocess = worker.run_subprocess_async
+stage_timing = []
+async def traced_subprocess(command, *args, **kwargs):
+    result = await canonical_subprocess(command, *args, **kwargs)
+    if command and str(command[0]).endswith("ffmpeg"):
+        candidate = Path(str(command[-1]))
+        if candidate.is_file() and candidate.suffix in (".mp4", ".ts", ".m4a"):
+            stage_timing.append({"file": candidate.name, "media": worker.probe_media_stream_summary(str(candidate))})
+            (directory / "stage-timing.json").write_text(json.dumps(stage_timing))
+    return result
+worker.run_subprocess_async = traced_subprocess
 # The canonical renderer still runs. Its transport returns a local artifact URI;
 # the Node service verifies/copies real bytes into the private Storage emulator.
 uploaded = []

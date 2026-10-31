@@ -365,6 +365,13 @@ def layer_output_window(overlay, output_duration, speed_plan):
     return output_start, clip_duration, normalized_speed_plan
 
 
+def layer_picture_window(overlay, output_duration, speed_plan, fps):
+    start, duration, plan = layer_output_window(overlay, output_duration, speed_plan)
+    first = math.ceil(start * fps - 1e-7)
+    end = min(round(output_duration * fps), math.ceil((start + duration) * fps - 1e-7))
+    return first / fps, max(0, end - first), first / fps - start, plan
+
+
 def render_image_layer_motion(asset_path, output_path, overlay, layer, width, height,
                               output_duration, speed_plan, fps=30, *, frame_source=None, title_animator=None):
     """Render canonical media poses; a video supplies decoded frames to this same compositor."""
@@ -379,7 +386,10 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
              Image.open(asset_path).convert("RGBA")) if frame_source is None else None
     if asset is not None and asset.width * asset.height > 8192 * 8192:
         raise ValueError("Logo/image layer exceeds the 8192px safety limit")
-    output_start, clip_duration, normalized_speed_plan = layer_output_window(overlay, output_duration, speed_plan)
+    output_start, frame_count, _, normalized_speed_plan = layer_picture_window(overlay, output_duration, speed_plan, fps)
+    clip_duration = frame_count / fps
+    if not frame_count:
+        raise ValueError("Layer cue contains no delivery picture")
     motion_blur = ((layer or {}).get("effects") or {}).get("motion_blur") or {}
     samples = max(1, min(8, int(finite(motion_blur.get("samples"), 1)))) if motion_blur.get("enabled") else 1
     shutter = max(0, min(1, finite(motion_blur.get("shutter"), .5)))
@@ -403,7 +413,7 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
         held_pose = held_sample_opacity = held_raster = None
         vector_trim = text_progress = None
         try:
-            for frame_index in range(math.ceil(clip_duration * fps)):
+            for frame_index in range(frame_count):
                 if frame_source is not None:
                     asset = frame_source(frame_index)
                 absolute_output = output_start + frame_index / fps
@@ -476,11 +486,10 @@ def render_video_layer_motion(asset_path, output_path, overlay, layer, width, he
     source_width, source_height = int(stream["width"]), int(stream["height"])
     if min(source_width, source_height) <= 0 or source_width * source_height > 8192 * 8192:
         raise ValueError("Video layer exceeds the 8192px safety limit")
-    _, duration, _ = layer_output_window(overlay, output_duration, speed_plan)
-    frame_count = math.ceil(duration * fps)
+    _, frame_count, phase, _ = layer_picture_window(overlay, output_duration, speed_plan, fps)
     frame_bytes = source_width * source_height * 4
     command = ["ffmpeg", "-nostdin", "-v", "error", "-threads", "2", "-i", str(asset_path),
-               "-an", "-vf", f"fps={fps}", "-frames:v", str(frame_count),
+               "-an", "-vf", f"setpts=PTS-STARTPTS-{phase:.9f}/TB,fps={fps}:start_time=0:round=up", "-frames:v", str(frame_count),
                "-f", "rawvideo", "-pix_fmt", "rgba", "pipe:1"]
     with tempfile.TemporaryFile() as log:
         decoder = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=log)

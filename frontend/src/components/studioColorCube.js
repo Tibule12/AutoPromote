@@ -84,7 +84,38 @@ export function buildAdvancedColorCube(advanced = {}, size = 33) {
   return cube;
 }
 
+const separableCubes = new WeakMap();
+function separableColorTables(cube) {
+  const cached = separableCubes.get(cube);
+  if (cached?.data === cube.data && cached.size === cube.size) return cached.tables;
+  const n = cube.size, data = cube.data;
+  let separable = true;
+  // Canonical cubes are immutable. A channel-independent LUT has exactly the
+  // same trilinear result as three one-dimensional byte lookup tables.
+  for (let b = 0; b < n && separable; b++) for (let g = 0; g < n && separable; g++) for (let r = 0; r < n; r++) {
+    const i = ((b*n+g)*n+r)*3;
+    if (data[i] !== data[r*3] || data[i+1] !== data[g*n*3+1] || data[i+2] !== data[b*n*n*3+2]) {
+      separable = false; break;
+    }
+  }
+  const tables = separable ? [new Uint8ClampedArray(256), new Uint8ClampedArray(256), new Uint8ClampedArray(256)] : null;
+  if (tables) for (let i = 0; i < 256; i++) {
+    tables[0][i] = sampleColorCube(cube, i/255, 0, 0)[0]*255;
+    tables[1][i] = sampleColorCube(cube, 0, i/255, 0)[1]*255;
+    tables[2][i] = sampleColorCube(cube, 0, 0, i/255)[2]*255;
+  }
+  separableCubes.set(cube, {data, size:n, tables});
+  return tables;
+}
+
 export function applyColorCube(pixels, cube) {
+  const tables = separableColorTables(cube);
+  if (tables) {
+    for (let i = 0; i < pixels.length; i += 4) {
+      pixels[i] = tables[0][pixels[i]]; pixels[i+1] = tables[1][pixels[i+1]]; pixels[i+2] = tables[2][pixels[i+2]];
+    }
+    return pixels;
+  }
   const output = [0, 0, 0];
   for (let i = 0; i < pixels.length; i += 4) {
     sampleColorCube(cube, pixels[i]/255, pixels[i+1]/255, pixels[i+2]/255, output);

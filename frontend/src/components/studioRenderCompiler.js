@@ -1,3 +1,4 @@
+import { compileStudioAdjustmentStack } from './studioAdjustmentGrade';
 import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { createOutputTimeMap, createTimeRange, secondsToTicks, ticksToSeconds } from "./studioTime";
 import { projectStudioLinkedTimingToSnapshot, projectStudioEditableStateToSnapshot, validateStudioProjectDocument } from "./studioProjectDocument";
@@ -132,6 +133,7 @@ export const compileStudioFinishForRender = document => {
     "brightness", "contrast", "saturation", "temperature", "sharpness", "vignette"];
   return {
     color_cube: buildAdvancedColorCube(state.advancedColor),
+    adjustment_layers: compileStudioAdjustmentStack(state.adjustmentLayers),
     main_frame: { enabled: frame.enabled !== false, shape: "round", inset_percent: frame.insetPercent,
       border_radius_percent: frame.radiusPercent, background: frame.background },
     color: { ...Object.fromEntries(colorFields.filter(field => fx[field] !== undefined)

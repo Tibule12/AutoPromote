@@ -200,6 +200,7 @@ async function main() {
         process.env.CREDITS_PYTHON_BIN || path.resolve(root, "../AutoPromote/.venv/bin/python"),
       env,
       apiOrigin: origin,
+      timeoutMs: Number(process.env.CREDITS_LOCAL_RENDER_TIMEOUT_MS || 120000),
     });
     env.MEDIA_WORKER_URL = env.LOCAL_MEDIA_WORKER_URL = worker.origin;
     const policy = {

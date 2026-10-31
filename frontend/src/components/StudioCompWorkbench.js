@@ -18,6 +18,7 @@ import {
   reparentStudioLayerPreservingWorldPose,
 } from "./studioCompRigging";
 import "./StudioMotionFlow.css";
+import StudioCurveHandles from './StudioCurveHandles';
 
 const PROP_META = {
   x: { label: "Pos X", color: "#fb7185", unit: "%", min: 0, max: 100, fallback: 50 },
@@ -46,6 +47,8 @@ export default function StudioCompWorkbench({
   onChangeAdjustmentLayers,
   onChangeHideShyLayers,
   onSeek,
+  onInteractionStart,
+  onInteractionEnd,
 }) {
   const [graphMode, setGraphMode] = useState(initialGraphMode); // "dope" | "value" | "speed"
   const [visibleProps, setVisibleProps] = useState(["x", "scale"]);
@@ -64,7 +67,7 @@ export default function StudioCompWorkbench({
     [visualOverlays, hideShyLayers]
   );
 
-  const selectedTargetId = activeOverlayId || (visualOverlays[0]?.id ?? "main-video");
+  const selectedTargetId = activeOverlayId || "main-video";
   const selectedLayer = useMemo(() => {
     if (selectedTargetId === "main-video") {
       return { id: "main-video", name: "Main Programme Video", type: "video", x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, ...mainTransform };
@@ -159,7 +162,7 @@ export default function StudioCompWorkbench({
       id: `null-rig-${Date.now()}`,
       name: `Null Rig ${count}`,
       startTime: Math.max(0, Number(currentTime) || 0),
-      duration: Math.max(1.5, Math.min(5, (Number(programmeDuration) || 8) - (Number(currentTime) || 0))),
+      duration: Math.max(.2, (Number(programmeDuration) || 8) - (Number(currentTime) || 0)),
     });
     onChangeOverlays?.([...(overlays || []), nullLayer]);
     onSelectOverlay?.(nullLayer.id);
@@ -168,18 +171,18 @@ export default function StudioCompWorkbench({
   const handleAddAdjustmentLayer = () => {
     const idx = (adjustmentLayers || []).length + 1;
     const cueStart = Math.max(0, Number(currentTime) || 0);
-    const cueDur = Math.max(1.5, Math.min(5, (Number(programmeDuration) || 8) - cueStart));
+    const cueDur = Math.max(.05, Math.min(5, (Number(programmeDuration) || 8) - cueStart));
     const nextAdj = {
       id: `adj-layer-${Date.now()}`,
       name: `Adjustment Grade ${idx}`,
       label: `Adjustment Grade ${idx}`,
       enabled: true,
       preset: "cinema_pop",
-      opacity: 0.9,
-      intensity: 80,
+      opacity: 1,
+      intensity: 100,
       startTime: cueStart,
       duration: cueDur,
-      finishFx: { contrast: 112, saturation: 108, vignette: 16 },
+      finishFx: { contrast: 1.12, saturation: 1.08, vignette: 16 },
     };
     onChangeAdjustmentLayers?.([...(adjustmentLayers || []), nextAdj]);
   };
@@ -1128,6 +1131,13 @@ export default function StudioCompWorkbench({
             />
             <circle cx={toSvgX(currentTime)} cy={12} r="3.5" fill="#22d3ee" />
           </svg>
+
+          {selectedKeyframe && graphMode !== 'dope' ? <StudioCurveHandles
+            value={selectedKeyframe.curve}
+            onInteractionStart={onInteractionStart} onInteractionEnd={onInteractionEnd}
+            onChange={curve => onChangeMotionKeyframes?.((motionKeyframes || []).map(key =>
+              String(key.id) === String(selectedKeyframe.id) ? { ...key, easing: 'bezier', curve } : key))}
+          /> : null}
 
           {/* 1-Click AutoPromote Curve Presets */}
           <div className="ap-comp-preset-strip">

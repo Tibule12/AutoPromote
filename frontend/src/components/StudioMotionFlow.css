@@ -695,6 +695,7 @@
   content: "";
   position: absolute;
   background: rgba(34, 211, 238, 0.85);
+  pointer-events: none;
 }
 
 .ap-null-rig-gizmo::before {

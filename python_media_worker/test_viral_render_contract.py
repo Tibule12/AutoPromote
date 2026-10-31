@@ -229,7 +229,7 @@ class ViralRenderContractTests(unittest.TestCase):
         }}]
         async def create_mock_segment(command, **_kwargs):
             output = Path(command[-1])
-            if output.suffix == ".ts":
+            if output.name != "output.mp4":
                 output.write_bytes(b"transport-segment")
 
         with tempfile.TemporaryDirectory(prefix="bounded-finish-") as temp_dir, patch(
@@ -237,6 +237,9 @@ class ViralRenderContractTests(unittest.TestCase):
             new=AsyncMock(side_effect=create_mock_segment),
         ) as run, patch(
             "python_media_worker.main_media_server.has_audio_stream", return_value=True
+        ), patch(
+            "python_media_worker.main_media_server.probe_media_stream_summary",
+            return_value={"streams": [{"codec_type": "video", "avg_frame_rate": "24/1"}]},
         ):
             asyncio.run(render_studio_finish_timeline_sequential(
                 "/tmp/source.mp4", str(Path(temp_dir) / "output.mp4"),
@@ -249,10 +252,10 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertTrue(all("-ss" in command and "-t" in command for command in interval_commands))
         self.assertTrue(all(command[command.index("-preset") + 1] == "veryfast" for command in interval_commands))
         self.assertTrue(all(float(command[command.index("-t") + 1]) <= 30 for command in interval_commands))
-        self.assertTrue(all(command[-1].endswith(".ts") for command in interval_commands))
+        self.assertTrue(all(command[-1].endswith(".mp4") for command in interval_commands))
         self.assertTrue(all("split=3" not in " ".join(command) for command in interval_commands))
         concat_command = run.await_args_list[-1].args[0]
-        self.assertEqual(concat_command[1:4], ["-fflags", "+genpts", "-i"])
+        self.assertEqual(concat_command[1:5], ["-f", "concat", "-safe", "0"])
         self.assertIn("1:a?", concat_command)
         self.assertEqual(concat_command[concat_command.index("-c:v") + 1], "copy")
         self.assertEqual(float(concat_command[concat_command.index("-t") + 1]), 600)
@@ -263,14 +266,14 @@ class ViralRenderContractTests(unittest.TestCase):
             output = str(Path(temp_dir) / "output.mp4")
             created = subprocess.run([
                 "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
-                "testsrc2=s=180x320:r=10:d=2", "-f", "lavfi", "-i",
+                "testsrc2=s=180x320:r=24:d=2", "-f", "lavfi", "-i",
                 "sine=frequency=440:duration=2", "-c:v", "libx264", "-c:a", "aac",
                 "-shortest", "-y", source,
             ], capture_output=True)
             self.assertEqual(created.returncode, 0, created.stderr.decode())
             asyncio.run(render_studio_finish_timeline_sequential(
                 source, output, "eq=brightness=0.01",
-                [{"startTime": 1, "duration": 1, "effects": {
+                [{"startTime": .571, "duration": 1.429, "effects": {
                     "color": {"brightness": 1.04, "contrast": 1, "saturation": 1},
                 }}],
                 2,
@@ -278,10 +281,13 @@ class ViralRenderContractTests(unittest.TestCase):
             ))
             validation = subprocess.run([
                 "ffprobe", "-v", "error", "-show_entries",
-                "format=duration:stream=codec_type", "-of", "json", output,
+                "format=duration:stream=codec_type,nb_frames,duration", "-of", "json", output,
             ], capture_output=True, text=True)
             self.assertEqual(validation.returncode, 0, validation.stderr)
             probe = json.loads(validation.stdout)
+            picture = next(s for s in probe["streams"] if s["codec_type"] == "video")
+            self.assertEqual(int(picture["nb_frames"]), 48)
+            self.assertAlmostEqual(float(picture["duration"]), 2, delta=.00001)
             self.assertAlmostEqual(float(probe["format"]["duration"]), 2.0, delta=0.15)
             self.assertEqual(
                 {stream["codec_type"] for stream in probe["streams"]},

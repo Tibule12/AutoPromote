@@ -13,6 +13,8 @@ import {
   disconnectNodeFlowPort,
 } from "./studioNodeFlow";
 import "./StudioMotionFlow.css";
+import StudioAdjustmentControls from "./StudioAdjustmentControls";
+import StudioSourceGradeViewer from './StudioSourceGradeViewer';
 
 const NODE_WIDTH = 158;
 const NODE_BASE_HEIGHT = 76;
@@ -44,6 +46,9 @@ export default function StudioNodeFlow({
   onChangeCompositionOrder,
   onChangeAdjustmentLayers,
   onChangeNodeFlow,
+  videoRef,
+  mapTime,
+  advancedColor,
 }) {
   const [selectedNodeId, setSelectedNodeId] = useState("MediaOut");
   const [zoom, setZoom] = useState(0.95);
@@ -276,6 +281,13 @@ export default function StudioNodeFlow({
     );
   };
 
+  const picture = signal => {
+    const supported = signal && (signal.nodeId === 'MediaIn:main-video' || signal.nodeId === 'ColorCorrector:finish' || signal.nodeId.startsWith('Adjustment:'));
+    return supported && videoRef ? <><StudioSourceGradeViewer nodeId={signal.nodeId} videoRef={videoRef}
+      mapTime={mapTime} time={currentTime} finishFx={finishFx} advancedColor={advancedColor} adjustmentLayers={adjustmentLayers} />
+      <small>Source grade · graphics excluded</small></> : <small>Signal settings · inspect full composition in the programme monitor</small>;
+  };
+
   return (
     <section
       className="ap-mfx-shell"
@@ -447,7 +459,7 @@ export default function StudioNodeFlow({
                       >
                         2
                       </button>
-                      {node.kind !== "MediaIn" && node.kind !== "MediaOut" ? (
+                      {node.kind === "Adjustment" ? (
                         <button
                           type="button"
                           className="ap-flow-vbtn"
@@ -543,6 +555,7 @@ export default function StudioNodeFlow({
             <div className="ap-flow-ab-screen">
               <div className="ap-flow-ab-half">
                 <span style={{ fontSize: 9.5, color: "#67e8f9", fontWeight: 800 }}>VIEWER [1]</span>
+                {picture(signalA)}
                 <div style={{ fontSize: 10.5, color: "#cbd5e1" }}>
                   Grade: <strong>{signalA.includeGrade ? "On" : "Bypassed"}</strong> &middot; Overlays:{" "}
                   <strong>
@@ -553,9 +566,10 @@ export default function StudioNodeFlow({
               {signalB ? (
                 <div
                   className="ap-flow-ab-half is-b"
-                  style={{ left: `${graph.splitPosition}%` }}
+                  style={{ left: 0, clipPath: `inset(0 0 0 ${graph.splitPosition}%)` }}
                 >
                   <span style={{ fontSize: 9.5, color: "#f5d0fe", fontWeight: 800 }}>VIEWER [2]</span>
+                  {picture(signalB)}
                   <div style={{ fontSize: 10.5, color: "#f8fafc" }}>
                     Grade: <strong>{signalB.includeGrade ? "On" : "Bypassed"}</strong> &middot; Overlays:{" "}
                     <strong>
@@ -729,25 +743,39 @@ export default function StudioNodeFlow({
                 </>
               ) : null}
 
+              {selectedNode.kind === 'Adjustment' ? (() => {
+                const index = adjustmentLayers.findIndex(layer => String(layer.id) === String(selectedNode.targetId));
+                const layer = adjustmentLayers[index];
+                return layer ? <StudioAdjustmentControls layer={layer} index={index} count={adjustmentLayers.length}
+                  onChange={next => onChangeAdjustmentLayers?.(adjustmentLayers.map(item => item.id === layer.id ? next : item))}
+                  onMove={delta => {
+                    const next = [...adjustmentLayers];
+                    [next[index], next[index + delta]] = [next[index + delta], next[index]];
+                    onChangeAdjustmentLayers?.(next);
+                  }} /> : null;
+              })() : null}
+
               {selectedNode.kind === "ColorCorrector" ? (
                 <>
                   <label className="ap-comp-field">
-                    <span>Contrast ({finishFx?.contrast ?? 100}%)</span>
+                    <span>Contrast ({finishFx?.contrast ?? 1}%)</span>
                     <input
                       type="range"
-                      min="60"
-                      max="150"
-                      value={finishFx?.contrast ?? 100}
+                      min="0.65"
+                      max="1.75"
+                      step="0.01"
+                      value={finishFx?.contrast ?? 1}
                       onChange={e => onChangeFinishFx?.({ ...(finishFx || {}), contrast: Number(e.target.value) })}
                     />
                   </label>
                   <label className="ap-comp-field">
-                    <span>Saturation ({finishFx?.saturation ?? 100}%)</span>
+                    <span>Saturation ({finishFx?.saturation ?? 1}%)</span>
                     <input
                       type="range"
                       min="0"
-                      max="180"
-                      value={finishFx?.saturation ?? 100}
+                      max="1.8"
+                      step="0.01"
+                      value={finishFx?.saturation ?? 1}
                       onChange={e => onChangeFinishFx?.({ ...(finishFx || {}), saturation: Number(e.target.value) })}
                     />
                   </label>
@@ -771,7 +799,8 @@ export default function StudioNodeFlow({
                     <input
                       type="range"
                       min="0"
-                      max="45"
+                      max="1"
+                      step="0.01"
                       value={finishFx?.filmGrain ?? 0}
                       onChange={e => onChangeFinishFx?.({ ...(finishFx || {}), filmGrain: Number(e.target.value) })}
                     />
@@ -781,7 +810,8 @@ export default function StudioNodeFlow({
                     <input
                       type="range"
                       min="0"
-                      max="20"
+                      max="1"
+                      step="0.01"
                       value={finishFx?.chromaticAberration ?? 0}
                       onChange={e =>
                         onChangeFinishFx?.({ ...(finishFx || {}), chromaticAberration: Number(e.target.value) })

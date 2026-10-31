@@ -273,6 +273,36 @@ export const deriveNodeFlowGraph = (state = {}) => {
 
   let currentSpineId = textureId;
 
+  // 4. Adjustment Grade Cues on Spine
+  let adjustmentX = spineX + 196;
+  (state.adjustmentLayers || []).forEach((adj, idx) => {
+    const adjNodeId = `Adjustment:${adj.id || idx}`;
+    nodes.push({
+      id: adjNodeId,
+      kind: "Adjustment",
+      category: "color",
+      targetId: String(adj.id || idx),
+      label: adj.name || adj.label || `AdjGrade_${idx + 1}`,
+      subtitle: `${adj.preset || "Contrast"} · ${Math.round(Number(adj.opacity ?? 1) * 100)}%`,
+      accent: "#fbbf24",
+      bypassed: adj.enabled === false,
+      inputs: ["In"],
+      outputs: ["Out"],
+      ...resolvePos(positions, adjNodeId, adjustmentX, spineY),
+    });
+    wires.push({
+      id: `${currentSpineId}->${adjNodeId}`,
+      fromNodeId: currentSpineId,
+      fromPort: "Out",
+      toNodeId: adjNodeId,
+      toPort: "In",
+    });
+    currentSpineId = adjNodeId;
+    adjustmentX += 204;
+  });
+
+  spineX = adjustmentX - 196;
+
   // Optional Subject Isolation branch
   (state.subjectVfxScenes || []).forEach((item, idx) => {
     const subId = `SubjectMatte:${item.scene?.id || idx}`;
@@ -494,34 +524,7 @@ export const deriveNodeFlowGraph = (state = {}) => {
     }
   });
 
-  // 4. Adjustment Grade Cues on Spine
-  let outX = spineX + 216 + mergeIndex * 224;
-  (state.adjustmentLayers || []).forEach((adj, idx) => {
-    const adjNodeId = `Adjustment:${adj.id || idx}`;
-    nodes.push({
-      id: adjNodeId,
-      kind: "Adjustment",
-      category: "color",
-      targetId: String(adj.id || idx),
-      label: adj.name || adj.label || `AdjGrade_${idx + 1}`,
-      subtitle: `${adj.preset || "Contrast"} · ${Math.round(Number(adj.opacity ?? 1) * 100)}%`,
-      accent: "#fbbf24",
-      bypassed: adj.enabled === false,
-      inputs: ["In"],
-      outputs: ["Out"],
-      ...resolvePos(positions, adjNodeId, outX, spineY),
-    });
-    wires.push({
-      id: `${currentSpineId}->${adjNodeId}`,
-      fromNodeId: currentSpineId,
-      fromPort: "Out",
-      toNodeId: adjNodeId,
-      toPort: "In",
-    });
-    currentSpineId = adjNodeId;
-    outX += 204;
-  });
-
+  const outX = spineX + 216 + mergeIndex * 224;
   // 5. MediaOut Sink
   const mediaOutId = "MediaOut";
   nodes.push({
@@ -545,8 +548,9 @@ export const deriveNodeFlowGraph = (state = {}) => {
     toPort: "In",
   });
 
-  const viewerA = nodeIds.has(flow.viewerA) ? flow.viewerA : "MediaOut";
-  const viewerB = flow.viewerB && nodeIds.has(flow.viewerB) ? flow.viewerB : null;
+  const viewerNodeIds = new Set(nodes.map(node => node.id));
+  const viewerA = viewerNodeIds.has(flow.viewerA) ? flow.viewerA : "MediaOut";
+  const viewerB = flow.viewerB && viewerNodeIds.has(flow.viewerB) ? flow.viewerB : null;
 
   return {
     nodes,
@@ -832,7 +836,7 @@ export const createNodePaletteAddition = (
       intensity: 75,
       startTime: cueStart,
       duration: cueDur,
-      finishFx: { contrast: 112, saturation: 108, vignette: 18 },
+      finishFx: { contrast: 1.12, saturation: 1.08, vignette: 18 },
     };
     return { adjustmentLayers: [...adjustmentLayers, adj] };
   }
@@ -1043,7 +1047,7 @@ export const buildSmartFlowRigState = (
       height: 30,
       scale: 1,
       rotation: 0,
-      opacity: 0.9,
+      opacity: 1,
       frameShape: "edge",
       blendMode: "screen",
       glow: { enabled: true, color: "#22d3ee", radius: 24, intensity: 0.85 },
@@ -1067,11 +1071,11 @@ export const buildSmartFlowRigState = (
       label: "Halation Top Grade",
       enabled: true,
       preset: "cinema_halation",
-      opacity: 0.9,
-      intensity: 80,
+      opacity: 1,
+      intensity: 100,
       startTime: 0,
       duration: Math.max(2, Number(programmeDuration) || 8),
-      finishFx: { contrast: 114, saturation: 106, vignette: 22 },
+      finishFx: { contrast: 1.14, saturation: 1.06, vignette: 22 },
     };
     return {
       finishFx: {

@@ -231,7 +231,8 @@ export function removeStudioProgrammeRanges(snapshot, ranges, id, options = {}) 
   if (!removed || total-removed<minimum) throw Error('Keep at least one frame of video outside the removed ranges.');
   if (snapshot.timeline.some(clip=>clip.audioDetached))
     throw Error('Use Straight Cut to relink detached source audio before removing programme time.');
-  let next={...snapshot}, sequence=0;
+  let next={...snapshot};
+  const sequence={value:0};
   for (const range of [...merged].reverse()) {
     let elapsed=0;
     const timeline=next.timeline.flatMap(clip=>{
@@ -245,7 +246,7 @@ export function removeStudioProgrammeRanges(snapshot, ranges, id, options = {}) 
       const pieces=[];
       if (left>0) pieces.push({...clip,sourceClipId:clip.sourceClipId||clip.id,endRequest:seconds(w.start+left),duration:seconds(left),
         ...(options.transition ? {transitionOut:options.transition,transitionDuration:options.transitionDuration} : {})});
-      if (right<w.duration) pieces.push({...clip,id:pieces.length?`kept:${id}:${++sequence}`:clip.id,
+      if (right<w.duration) pieces.push({...clip,id:pieces.length?`kept:${id}:${++sequence.value}`:clip.id,
         sourceClipId:clip.sourceClipId||clip.id,startRequest:seconds(w.start+right),duration:seconds(w.duration-right),
         ...(options.transition ? {transitionIn:options.transition,transitionDuration:options.transitionDuration} : {})});
       return pieces;

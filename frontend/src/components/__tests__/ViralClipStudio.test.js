@@ -6900,6 +6900,28 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(onDirectorReview).not.toHaveBeenCalled();
   });
 
+  test('native export retains Null Rig editing state while omitting its helper layer from pixel sources', async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    const source = { id: 'range', start: 2, end: 8, duration: 6, sourceDuration: 12 };
+    mountNativePreview({ onSave, initialSavedProject: { id: 'rig-export', name: 'Rig export', snapshot: {
+      orderedClips: [source], selectedClipId: 'range',
+      timeline: [{ ...source, sourceClipId: 'range', startRequest: 2, endRequest: 8, url: 'https://example.com/source.mp4' }],
+      addHook: false, autoCaptions: false,
+      overlays: [
+        { id: 'rig', name: 'Evidence Rig', type: 'text', text: '', isNullRig: true, x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, startTime: 0, duration: 6 },
+        { id: 'title', name: 'Evidence Title', type: 'text', text: 'EVIDENCE', parentId: 'rig', x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, startTime: 0, duration: 6 },
+      ], compositionOrder: ['rig', 'title'],
+    } } });
+    await screen.findByDisplayValue('Rig export');
+    await act(async () => { await clickRenderFinalClip(); });
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    const [, overlays, options] = onSave.mock.calls[0];
+    expect(overlays.map(o => o.id)).toEqual(['title']);
+    expect(options.compositionPlan.order).toEqual(['title']);
+    fireEvent.click(screen.getByTestId('studio-mode-fxflow'));
+    expect(screen.getByTestId('comp-layer-row-rig')).toBeInTheDocument();
+  });
+
   test("switches into Motion & Flow workspace mode, synchronizes Null Rig & Signal Node Flow, and round-trips Undo/Redo with zero competitor brand labels", async () => {
     const { container } = render(
       <ViralClipStudio
