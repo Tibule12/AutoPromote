@@ -8,3 +8,4 @@ export { compileStudioOverlaysForRender } from "../frontend/src/components/studi
 export { buildViralRenderData } from "../frontend/src/components/viralRenderPayload";
 export { createModelArtifactReference } from "../frontend/src/components/studioModelArtifactReference";
 export { instantiateStudioCreativeTemplate, proposeStudioDirectorTemplate, PRODUCT_LAUNCH_TEMPLATE } from "../frontend/src/components/studioCreativeTemplate";
+export { validateCinematicScene, buildCinematicGraph, planCinematicIntent } from "../frontend/src/components/threeD/cinematicContract";

@@ -60,6 +60,25 @@ const normalizeKeyframes = (raw, startTime, endTime) => (Array.isArray(raw) ? ra
   .sort((left, right) => left.time - right.time);
 
 export function normalizeStudio3DScene(raw = {}) {
+  if (raw.sceneType === "cinematic_evidence") {
+    // Keep the scene editable in the ordinary 3D collection/canonical graph.
+    // Validation belongs to the shared cinematic contract before render.
+    const startTime = between(raw.startTime, 0, 86400, 0);
+    const duration = Math.round(between(raw.duration, 4, 10, 8) * 24) / 24;
+    return {
+      version: 1, sceneType: "cinematic_evidence", id: clean(raw.id, 100),
+      name: "Cinematic evidence", text: raw.cinematic?.content?.headline || "Cinematic evidence",
+      template: "evidence_stage_v1", startTime, duration, endTime: startTime + duration,
+      enabled: raw.enabled !== false, layerOrder: between(raw.layerOrder, 0, 100, 50),
+      primaryColor: "#f4b969", keyframes: [],
+      cinematic: JSON.parse(JSON.stringify(raw.cinematic || {})),
+      hqPreviewUrl: clean(raw.hqPreviewUrl, 2048),
+      hqPreviewRevision: clean(raw.hqPreviewRevision, 128), hqPreviewJobId: clean(raw.hqPreviewJobId, 100),
+      ...(raw.localExport ? { localExport: { url: clean(raw.localExport.url, 2048),
+        revision: clean(raw.localExport.revision, 128), jobId: clean(raw.localExport.jobId, 100),
+        sha256: clean(raw.localExport.sha256, 64) } } : {}),
+    };
+  }
   const template = STUDIO_3D_TEMPLATES.find(item => item.id === raw.template) || STUDIO_3D_TEMPLATES[0];
   const startTime = between(raw.startTime, 0, 86400, 0);
   const duration = between(raw.duration, 0.5, 10, 5);
@@ -127,9 +146,12 @@ export function studio3DSceneRevision(scene) {
     hqPreviewUrl: _hqPreviewUrl,
     hqPreviewRevision: _hqPreviewRevision,
     hqPreviewJobId: _hqPreviewJobId,
+    localExport: _localExport,
     ...renderValues
   } = normalizeStudio3DScene(scene);
-  return sceneRevisionToken(JSON.stringify(renderValues));
+  return sceneRevisionToken(JSON.stringify(renderValues, (_key, value) =>
+    scene.sceneType === "cinematic_evidence" && value && typeof value === "object" && !Array.isArray(value)
+      ? Object.fromEntries(Object.keys(value).sort().map(key => [key, value[key]])) : value));
 }
 
 export function studio3DPose(raw, time) {

@@ -1,0 +1,56 @@
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { execFileSync } = require("node:child_process");
+const { createLocalEngine, createLocalServer } = require("../src/cinematic/localServer.cjs");
+const { createCinematicParameters } = require("../frontend/src/components/threeD/cinematicContract");
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+test("real local media registration, HTTP origin boundary, source validation, wall timeout and process-group cancellation", { timeout: 30000 }, async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "cinematic-server-test-"));
+  const source = path.join(directory, "source.mp4");
+  execFileSync("ffmpeg", ["-nostdin", "-v", "error", "-f", "lavfi", "-i", "testsrc2=s=64x36:r=24:d=4", "-c:v", "libx264", "-threads", "1", "-pix_fmt", "yuv420p", source]);
+  let engine = createLocalEngine({ directory, maxSeconds: 1 });
+  const asset = engine.register(source);
+  assert.equal(asset.duration, 4);
+  assert.equal(engine.register(source).id, asset.id, "Identical source bytes must retain identity");
+  const malicious = path.join(directory, "playlist.m3u8");
+  fs.writeFileSync(malicious, "#EXTM3U\n#EXTINF:4,\nhttps://example.invalid/remote.ts\n");
+  assert.throws(() => engine.register(malicious), /ffprobe|format|whitelist/i);
+  const port = 16000 + Math.floor(Math.random() * 5000), base = `http://127.0.0.1:${port}`;
+  const server = createLocalServer(engine, { port });
+  await new Promise(resolve => server.listen(port, "127.0.0.1", resolve));
+  try {
+    const caps = await (await fetch(base + "/api/cinematic/capabilities")).json();
+    assert.equal(caps.cloudEnabled, false); assert.equal(caps.gpuEnabled, false); assert.equal(caps.externalCharges, 0);
+    const blocked = await fetch(base + "/api/cinematic/jobs", { method: "POST", headers: { Origin: "https://untrusted.invalid", "Content-Type": "application/json" }, body: "{}" });
+    assert.equal(blocked.status, 403);
+    const noOrigin = await fetch(base + "/api/cinematic/jobs", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    assert.equal(noOrigin.status, 403);
+    const range = await fetch(base + `/api/cinematic/assets/${asset.id}/media`, { headers: { Range: "bytes=0-31" } });
+    assert.equal(range.status, 206); assert.equal((await range.arrayBuffer()).byteLength, 32);
+    const missing = await fetch(base + "/api/cinematic/assets/" + "b".repeat(64) + "/media");
+    assert.equal(missing.status, 404);
+    const scene = { id: "bounded-job", sceneType: "cinematic_evidence", startTime: 0, duration: 4, endTime: 4, cinematic: createCinematicParameters(asset.id) };
+    assert.throws(() => engine.submit({ ...scene, duration: 5, endTime: 5 }, "preview"), /too short/);
+    const job = engine.submit(scene, "preview");
+    const duplicate = engine.submit(scene, "preview");
+    assert.equal(duplicate.id, job.id); assert.equal(duplicate.reused, true);
+    for (let i = 0; i < 80 && !["failed", "completed"].includes(engine.status(job.id).status); i++) await wait(50);
+    assert.equal(engine.status(job.id).status, "failed");
+    assert.match(engine.status(job.id).error, /exceeded 1s/);
+    await wait(300);
+    assert.equal(fs.existsSync(path.join(directory, "jobs", job.id, "movie.mp4")), false);
+    engine.shutdown();
+    engine = createLocalEngine({ directory, maxSeconds: 20 });
+    const retry = engine.submit(scene, "preview");
+    await wait(150);
+    engine.cancel(retry.id);
+    await wait(300);
+    assert.equal(engine.status(retry.id).status, "cancelled", "Late worker close must preserve cancellation");
+  } finally {
+    engine.shutdown(); await new Promise(resolve => server.close(resolve));
+    await wait(100); fs.rmSync(directory, { recursive: true, force: true });
+  }
+});

@@ -126,6 +126,7 @@ import MotionPanel from "./motion/MotionPanel";
 import MotionCanvas from "./motion/MotionCanvas";
 import { motionCues, normalizeMotion, generateSmartMotionBeats } from "./motion/motionModel";
 import Studio3DPanel from "./threeD/Studio3DPanel";
+import StudioCinematicPanel, { StudioCinematicPreview, cinematicLocalEnabled } from "./threeD/StudioCinematicPanel";
 import StudioSubjectVfxPanel from "./StudioSubjectVfxPanel";
 import { findUncoveredCaptionSpeechRanges, mapCaptionSilencesToProgramme } from "./studioCaptionCoverage";
 import { historyMediaIdentity, historySubjectVfxIdentity } from "./studioHistoryMedia";
@@ -2624,6 +2625,7 @@ const ViralClipStudio = ({
   onEditInvalidated,
   onRenderedPreviewError,
   onProjectOpened,
+  onCinematicSceneReview,
   renderRecoveryPanel,
   renderRecoveryNeedsAttention = false,
   onDownloadRendered,
@@ -11938,6 +11940,12 @@ const ViralClipStudio = ({
     }
 
     const enabledThreeDScenes = exportEditState.threeDScenes.filter(scene => scene.enabled !== false);
+    const cinematicScene = enabledThreeDScenes.find(scene => scene.sceneType === "cinematic_evidence");
+    if (cinematicScene) {
+      setStudioInspectorTab("motion"); setMotionWorkspace("cinematic"); setSelectedThreeDId(cinematicScene.id);
+      const message = "Cinematic scenes currently export their own interval from Motion → Cinematic scene. Full programme/cloud assembly is not available yet; no ordinary render was submitted.";
+      setStudioActionMessage(message); toast.error(message); return;
+    }
     const staleThreeDScenes = enabledThreeDScenes.filter(scene => !scene.hqPreviewJobId || scene.hqPreviewRevision !== studio3DSceneRevision(scene));
     if (staleThreeDScenes.length) {
       setStudioInspectorTab("motion");
@@ -12768,6 +12776,9 @@ const ViralClipStudio = ({
       lastSnapshotRef.current = snapshot;
       lastSnapshotSignatureRef.current = serializedSnapshot;
       syncHistoryAvailability();
+      // An older edit may still own a pending debounce. Replacing it with the
+      // restored snapshot keeps Undo/Redo durable on close/reopen.
+      scheduleProjectAutosave(snapshot);
       return;
     }
 
@@ -19048,7 +19059,11 @@ const ViralClipStudio = ({
                         fromDisplay={point => studioGroupLocalPoint(compositionGroups, motionTargetId,
                           point.x, point.y, previewAspectRatio, 1, motionKeyframes, point.time)} />
                     ) : null}
-                    {!isAfterPreviewReady && !renderedOutputUrl ? (
+                    {!isAfterPreviewReady && !renderedOutputUrl && !threeDScenes.some(scene =>
+                      scene.sceneType === "cinematic_evidence" && scene.enabled !== false &&
+                      previewTimelineTime >= scene.startTime && previewTimelineTime < scene.endTime &&
+                      ((scene.hqPreviewUrl && scene.hqPreviewRevision === studio3DSceneRevision(scene)) ||
+                        (scene.localExport?.url && scene.localExport.revision === studio3DSceneRevision(scene)))) ? (
                       <div className="after-preview-loading" role="status" aria-live="polite">
                         <span />
                         Loading edited preview…
@@ -19401,7 +19416,7 @@ const ViralClipStudio = ({
                       ) : null}
                       {!renderedOutputUrl && threeDScenes.length > 0 ? (
                         <React.Suspense fallback={null}>
-                          {(Array.isArray(compositionOrder) ? threeDScenes.map(scene => [scene]) : [threeDScenes]).map(scenes => <Studio3DCanvas
+                          {(Array.isArray(compositionOrder) ? threeDScenes.filter(scene => scene.sceneType !== "cinematic_evidence").map(scene => [scene]) : [threeDScenes.filter(scene => scene.sceneType !== "cinematic_evidence")]).filter(scenes => scenes.length).map(scenes => <Studio3DCanvas
                             key={Array.isArray(compositionOrder) ? scenes[0].id : "3d-stage"}
                             scenes={scenes}
                             zIndex={Math.max(...scenes.map(scene => compositionRank.get(scene.id) ?? 100))}
@@ -19410,6 +19425,12 @@ const ViralClipStudio = ({
                           />)}
                         </React.Suspense>
                       ) : null}
+                      {!renderedOutputUrl && threeDScenes.some(scene => scene.sceneType === "cinematic_evidence") ? <StudioCinematicPreview
+                        scenes={threeDScenes.filter(scene => scene.sceneType === "cinematic_evidence")}
+                        time={previewTimelineTime} getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}
+                        getPlaybackState={() => ({ paused: isPreviewPaused, rate: previewSpeed })}
+                        zIndex={Math.max(...threeDScenes.filter(scene => scene.sceneType === "cinematic_evidence").map(scene => compositionRank.get(scene.id) ?? 100))}
+                      /> : null}
                       {silenceRemoval && !showHookPreview ? (
                         <div className="silence-preview-indicator">
                           <span />
@@ -20502,7 +20523,7 @@ const ViralClipStudio = ({
                       <div className="compact-timeline-track motion-timeline-track">
                         <button type="button" className="motion-timeline-block" aria-label={`Inspect 3D motion ${scene.text}`}
                           style={{ left: `${(100 * scene.startTime) / Math.max(0.1, liveTimelineDuration)}%`, width: `${(100 * scene.duration) / Math.max(0.1, liveTimelineDuration)}%` }}
-                          onClick={() => { setSelectedThreeDId(scene.id); setMotionWorkspace("3d"); seekLiveEditTimelineItem(scene.startTime, "motion"); }}>
+                          onClick={() => { setSelectedThreeDId(scene.id); setMotionWorkspace(scene.sceneType === "cinematic_evidence" ? "cinematic" : "3d"); seekLiveEditTimelineItem(scene.startTime, "motion"); }}>
                           ◈ {scene.text}
                         </button>
                       </div>
@@ -24508,6 +24529,7 @@ const ViralClipStudio = ({
                 <div className="motion-workspace-switch" role="group" aria-label="Motion workspace">
                   <button type="button" aria-pressed={motionWorkspace === "design"} onClick={() => setMotionWorkspace("design")}>Motion + sound</button>
                   <button type="button" aria-pressed={motionWorkspace === "3d"} onClick={() => setMotionWorkspace("3d")}>3D Motion</button>
+                  {cinematicLocalEnabled() || threeDScenes.some(scene => scene.sceneType === "cinematic_evidence") ? <button type="button" aria-pressed={motionWorkspace === "cinematic"} onClick={() => setMotionWorkspace("cinematic")}>Cinematic scene</button> : null}
                   <ProductHelpButton featureId="studio.three_d" label="3D Motion" workspaceType="STUDIO" />
                   <button type="button" aria-pressed={motionWorkspace === "logo"} onClick={() => setMotionWorkspace("logo")}>Logo & layers</button>
                   <button type="button" aria-pressed={motionWorkspace === "smart_zoom"} onClick={() => setMotionWorkspace("smart_zoom")}>🎯 Viral Punch-Ins {activePunchZones.length ? `(${activePunchZones.length})` : ""}</button>
@@ -24521,10 +24543,20 @@ const ViralClipStudio = ({
                   data-testid="motion-logo-input"
                   hidden
                 />
-                {motionWorkspace === "3d" ? (
+                {motionWorkspace === "cinematic" ? <StudioCinematicPanel
+                    scenes={threeDScenes} onChange={setThreeDScenes} focusId={selectedThreeDId}
+                    onSelect={setSelectedThreeDId} playhead={previewTimelineTime} duration={outputTimelineDuration}
+                    onUseLandscape={() => setReframeAspect("16:9")}
+                    onReviewScene={onCinematicSceneReview ? (scene, url) => {
+                      setPreviewFinishedFile(true); setComparisonMode("after");
+                      onCinematicSceneReview({ url, sceneId: scene.id, duration: scene.duration,
+                        label: "Scene movie review · other programme effects are excluded" });
+                      seekLiveEditTimelineItem(0, "motion");
+                    } : null}
+                    onSeek={time => seekLiveEditTimelineItem(time, "motion")} /> : motionWorkspace === "3d" ? (
                   <Studio3DPanel
-                    scenes={threeDScenes}
-                    onChange={setThreeDScenes}
+                    scenes={threeDScenes.filter(scene => scene.sceneType !== "cinematic_evidence")}
+                    onChange={next => setThreeDScenes(current => [...current.filter(scene => scene.sceneType === "cinematic_evidence"), ...next])}
                     focusId={selectedThreeDId}
                     onSelect={setSelectedThreeDId}
                     playhead={previewTimelineTime}
@@ -29552,7 +29584,7 @@ const ViralClipStudio = ({
                 setSelectedGroupId(null);
                 if (threeDScenes.some(scene => scene.id === id)) {
                   setSelectedThreeDId(id);
-                  setMotionWorkspace("3d");
+                  setMotionWorkspace(threeDScenes.find(scene => scene.id === id)?.sceneType === "cinematic_evidence" ? "cinematic" : "3d");
                 } else {
                   setSelectedMotionId(id);
                   setMotionWorkspace("design");

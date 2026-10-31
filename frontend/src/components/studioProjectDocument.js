@@ -68,6 +68,7 @@ const assetReference = clip => {
 };
 
 const LAYER_PARAMETER_FIELDS = [
+  "sceneType", "cinematic", "localExport",
   "version", "name", "secondary", "endTime", "assetStoragePath", "assetName",
   "sourceStoragePath", "storagePath", "sourceClipId", "contentHash", "sha256",
   "hqPreviewRevision", "hqPreviewJobId",

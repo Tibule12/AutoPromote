@@ -194,3 +194,7 @@ reports/studio-background-captions-20261021/*
 
 # Reviewed native welcome release media must ship with the frontend.
 !frontend/public/welcome/2026-10-21/*
+# Isolated cinematic runtime, media and browser evidence; retain public code/report.
+reports/cinematic-evidence-20261031/local-app/
+reports/cinematic-evidence-20261031/private-local/
+reports/cinematic-evidence-20261031/review/

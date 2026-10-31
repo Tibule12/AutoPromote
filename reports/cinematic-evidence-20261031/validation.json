@@ -1,0 +1,149 @@
+{
+  "date": "2026-10-31",
+  "status": "LOCAL_WORKING_SLICE_QUALIFICATION_OPEN",
+  "report": "reports/cinematic-evidence-20261031/README.md",
+  "sourceBase": "eedf45a4a6f0bb3f14ff34f24f70f48df1ee15bd",
+  "retainedStudioFoundation": "4305b6da",
+  "sceneCollection": "threeDScenes",
+  "canonicalLayerType": "three_d",
+  "schema": "cinematic_evidence v1 / evidence_stage_v1",
+  "verifiedScope": [
+    "actual Studio component in isolated local shell",
+    "Director plan to editable timeline scene",
+    "camera/light/material/text/source controls",
+    "360p real Blender CPU movie and source comparison",
+    "native save/cold reopen and Undo/Redo",
+    "pending-autosave history regression repaired",
+    "current-revision invalidation and identical-output reuse",
+    "native download SHA-256 matches real output",
+    "processed-scene programme review and complete muted timeline recording"
+  ],
+  "tests": {
+    "frontendFocusedDistinctPasses": 140,
+    "nodeDistinctPasses": 7,
+    "pythonDistinctPasses": 28,
+    "totalDistinctPasses": 175,
+    "fullMountedEditorSuite": "INCONCLUSIVE: interrupted long run; scoped history suite had one load-related 15s timeout; same B-roll case passes unchanged with Blender briefly paused"
+  },
+  "renderProfileQualification": {
+    "preview360p": "VERIFIED",
+    "export720p": "RENDERING: 127/192 frames; no completed movie or export qualification yet"
+  },
+  "realAccountFlow": false,
+  "productionFirebaseAccess": false,
+  "paidGpuOrModelUsed": false,
+  "deployed": false,
+  "creativeApproval": "NOT_CLAIMED",
+  "parity": {
+    "sameSceneBuilder": true,
+    "processedMovieReview": "VERIFIED",
+    "interactiveAuthoringPictureAudio": "UNQUALIFIED: independent decoder drift observed",
+    "pixelParity": "NOT_CLAIMED"
+  },
+  "remainingBlockers": [
+    "finish/review the 720p job",
+    "whole-programme assembly and tenant-owned render receipts",
+    "grounded narration/evidence beyond illustrative local cues",
+    "reliable interactive authoring playback",
+    "portable local-media backup/relinking",
+    "cloud isolation, concurrency and real-account qualification",
+    "owner creative/listening acceptance"
+  ],
+  "nextTask": "Complete native high-resolution review; then integrate the same adapter with ordinary owned-source programme assembly before cloud qualification. Retain shared S02/S04/S03 backlog; no readiness promotion.",
+  "artifactDirectory": "reports/cinematic-evidence-20261031/review/",
+  "sourceHash": "7011e9e110f31ba82211ecdafc9f6391e28261431429463614409f31bed2b864",
+  "previewJobId": "cf4322eaa47e7e51e41f38bf3cc894277f1d77b81f336901b6dde455bfd3cb0e",
+  "exportJobId": "043f337d56660060749650c9b2939e1d606e4210679e96f6bcbe22654ce98624",
+  "audio": {
+    "sourceSamples": 384000,
+    "previewSamples": 384000,
+    "sampleRate": 48000,
+    "bestLagSamples": 0,
+    "zeroOffsetCorrelation": 0.9992545920184005,
+    "measuredGain": 0.9897678733056705,
+    "freshHumanListening": "unverified",
+    "note": "AAC re-encoding; measurement is not creative or perceptual lip-sync approval"
+  },
+  "artifacts": {
+    "reports/cinematic-evidence-20261031/review/native-timeline-clock.png": {
+      "bytes": 595867,
+      "sha256": "c932fcde3a2f8002c928f85d0bbb4b88e2e03eb33a3d93f8dbcfe008e0ef9691"
+    },
+    "reports/cinematic-evidence-20261031/review/preview-completed.png": {
+      "bytes": 493459,
+      "sha256": "b1328598ecc7be4254ff52561f7e7a51b65f622c282fcd0b50e3b28d27748e76"
+    },
+    "reports/cinematic-evidence-20261031/review/editable-scene.png": {
+      "bytes": 458923,
+      "sha256": "f702185a03446baeb0c3684f74caf12ab3b3dc10df5d860da681fc362a40bade"
+    },
+    "reports/cinematic-evidence-20261031/review/raw-versus-edited-preview.mp4": {
+      "bytes": 1602475,
+      "sha256": "60067876ccb5df88976caab36cc3f1893de4bef0b87ccd1a4cf7e93768727bd4"
+    },
+    "reports/cinematic-evidence-20261031/review/edited-in-studio.webm": {
+      "bytes": 3806883,
+      "sha256": "e51098d08ae47778ac35b694f07e49b34f26b361b1d0bb31ee03acf10d68465b"
+    },
+    "reports/cinematic-evidence-20261031/review/audio-validation.json": {
+      "bytes": 317,
+      "sha256": "374231c6241c32106a5dab5a74fa2d4b1c43894cc51a721993c6b0b2fc9eb512"
+    },
+    "reports/cinematic-evidence-20261031/review/scene-added.png": {
+      "bytes": 491519,
+      "sha256": "df674176ceb2d3ae8e7b5acc9918f29e51a39c71f44797989afeb796c41acc63"
+    },
+    "reports/cinematic-evidence-20261031/review/playback-observations.json": {
+      "bytes": 3032,
+      "sha256": "0f524faf3ff0d2d964c92616ea0ed29c9da12488f8b058a437550586921eeacc"
+    },
+    "reports/cinematic-evidence-20261031/review/studio-preview-verification.json": {
+      "bytes": 2355,
+      "sha256": "deb53d1139e6764d11b76e936dc49ff3d9cae34b41866f36c13c58b3cb42ce5c"
+    },
+    "reports/cinematic-evidence-20261031/review/cinematic-preview.mp4": {
+      "bytes": 837922,
+      "sha256": "9633a47da28fb08da901fc8ed0814727457a6f853527ccbbeab3d9cd3c230434"
+    },
+    "reports/cinematic-evidence-20261031/review/native-preview-clock.png": {
+      "bytes": 312879,
+      "sha256": "137804608ae0db87dd4b41c4f26ae9af0292735080589f6cbe42c5cae2b4493a"
+    },
+    "reports/cinematic-evidence-20261031/review/downloaded-scene-preview.mp4": {
+      "bytes": 837922,
+      "sha256": "9633a47da28fb08da901fc8ed0814727457a6f853527ccbbeab3d9cd3c230434"
+    },
+    "reports/cinematic-evidence-20261031/review/cold-reopen.png": {
+      "bytes": 404947,
+      "sha256": "b81cb204692db5c7cbd21470ba05113c8541b7819fb3774f7de8f7a9813c4f50"
+    },
+    "reports/cinematic-evidence-20261031/review/director-plan.json": {
+      "bytes": 7397,
+      "sha256": "2993b0a179eae70f17b4e8bfc7fefad453a799784f48cf48a6259976fc464e84"
+    },
+    "reports/cinematic-evidence-20261031/review/edited-in-studio.mp4": {
+      "bytes": 4239956,
+      "sha256": "ae38334ea650211627e683017856f24bd6bff087e9544e3c47f09d2dfe605d9e"
+    },
+    "reports/cinematic-evidence-20261031/review/preview-clock-frame.png": {
+      "bytes": 257179,
+      "sha256": "6024c66b8b564f848817ec80b9055a9d91b6ad2455ba8fcc9bdc99df9e358741"
+    },
+    "reports/cinematic-evidence-20261031/review/native-timeline-before-playback.png": {
+      "bytes": 446525,
+      "sha256": "58cc52484f4ab0a54ba209d3ad7083fbd5204539ed93d33e02d0de800740c231"
+    },
+    "reports/cinematic-evidence-20261031/review/editable-project.json": {
+      "bytes": 337964,
+      "sha256": "76e4de2cf11e4ea30eac53f959be3bced0c0756c66a3a5a1440e050601dd4113"
+    },
+    "reports/cinematic-evidence-20261031/review/rejected-occluded-source.png": {
+      "bytes": 196491,
+      "sha256": "59b80fb8735924f830fdfd699e7256dbb07b33490a494a113eb060cfcbb157ec"
+    },
+    "reports/cinematic-evidence-20261031/review/preview-contact.png": {
+      "bytes": 936385,
+      "sha256": "bc5f06944d2db3c5f6f98935f466153fd80205607f7742a212c95db2e72fa806"
+    }
+  }
+}

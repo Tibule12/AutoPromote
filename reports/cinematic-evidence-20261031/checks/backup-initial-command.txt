@@ -1,0 +1,21 @@
+
+> autopromote-frontend@1.0.0 test
+> react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/__tests__/studioProjectBackup.test.js src/components/__tests__/studioProjectBackupMedia.test.js
+
+PASS src/components/__tests__/studioProjectBackupMedia.test.js
+FAIL src/components/__tests__/studioProjectBackup.test.js
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open '/home/tibule12/Projects/AutoPromte/AutoPromote-cinematic-evidence-20261031/frontend/src/components/__tests__/studioProjectBackup.test.js'
+
+      at runTestInternal (../../AutoPromote/frontend/node_modules/jest-runner/build/runTest.js:202:27)
+      at TestScheduler.scheduleTests (../../AutoPromote/frontend/node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../../AutoPromote/frontend/node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../../AutoPromote/frontend/node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../../AutoPromote/frontend/node_modules/@jest/core/build/cli/index.js:173:3)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        2.329 s
+Ran all test suites within paths "src/components/__tests__/studioProjectBackup.test.js", "src/components/__tests__/studioProjectBackupMedia.test.js".

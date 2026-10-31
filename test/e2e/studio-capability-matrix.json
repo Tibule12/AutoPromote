@@ -1,4 +1,57 @@
 {
+  "cinematicEvidence20261031": {
+    "date": "2026-10-31",
+    "status": "LOCAL_WORKING_SLICE_QUALIFICATION_OPEN",
+    "report": "reports/cinematic-evidence-20261031/README.md",
+    "sourceBase": "eedf45a4a6f0bb3f14ff34f24f70f48df1ee15bd",
+    "retainedStudioFoundation": "4305b6da",
+    "sceneCollection": "threeDScenes",
+    "canonicalLayerType": "three_d",
+    "schema": "cinematic_evidence v1 / evidence_stage_v1",
+    "verifiedScope": [
+      "actual Studio component in isolated local shell",
+      "Director plan to editable timeline scene",
+      "camera/light/material/text/source controls",
+      "360p real Blender CPU movie and source comparison",
+      "native save/cold reopen and Undo/Redo",
+      "pending-autosave history regression repaired",
+      "current-revision invalidation and identical-output reuse",
+      "native download SHA-256 matches real output",
+      "processed-scene programme review and complete muted timeline recording"
+    ],
+    "tests": {
+      "frontendFocusedDistinctPasses": 140,
+      "nodeDistinctPasses": 7,
+      "pythonDistinctPasses": 28,
+      "totalDistinctPasses": 175,
+      "fullMountedEditorSuite": "INCONCLUSIVE: interrupted long run; scoped history suite had one load-related 15s timeout; same B-roll case passes unchanged with Blender briefly paused"
+    },
+    "renderProfileQualification": {
+      "preview360p": "VERIFIED",
+      "export720p": "RENDERING / NOT YET QUALIFIED"
+    },
+    "realAccountFlow": false,
+    "productionFirebaseAccess": false,
+    "paidGpuOrModelUsed": false,
+    "deployed": false,
+    "creativeApproval": "NOT_CLAIMED",
+    "parity": {
+      "sameSceneBuilder": true,
+      "processedMovieReview": "VERIFIED",
+      "interactiveAuthoringPictureAudio": "UNQUALIFIED: independent decoder drift observed",
+      "pixelParity": "NOT_CLAIMED"
+    },
+    "remainingBlockers": [
+      "finish/review the 720p job",
+      "whole-programme assembly and tenant-owned render receipts",
+      "grounded narration/evidence beyond illustrative local cues",
+      "reliable interactive authoring playback",
+      "portable local-media backup/relinking",
+      "cloud isolation, concurrency and real-account qualification",
+      "owner creative/listening acceptance"
+    ],
+    "nextTask": "Complete native high-resolution review; then integrate the same adapter with ordinary owned-source programme assembly before cloud qualification. Retain shared S02/S04/S03 backlog; no readiness promotion."
+  },
   "playwrightLoopbackRepair20261028": {
     "date": "2026-10-28",
     "report": "reports/playwright-loopback-repair-20261028/README.md",
@@ -149,7 +202,11 @@
     "motion": "frontend/src/components/motion/MotionPanel.js",
     "motionModel": "frontend/src/components/motion/motionModel.js",
     "audio": "frontend/src/components/audio/AudioRemixPanel.js",
-    "timeline": "frontend/src/components/StudioProTimeline.js"
+    "timeline": "frontend/src/components/StudioProTimeline.js",
+    "cinematicContract": "frontend/src/components/threeD/cinematicContract.js",
+    "cinematicPanel": "frontend/src/components/threeD/StudioCinematicPanel.js",
+    "cinematicLocal": "src/cinematic/localServer.cjs",
+    "cinematicBlender": "studio_3d_renderer/cinematic_scene.py"
   },
   "mediaFixtures": [
     {
