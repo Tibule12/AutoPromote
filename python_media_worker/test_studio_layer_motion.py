@@ -45,6 +45,30 @@ def test_still_holds_reuse_one_raster_without_changing_encoded_pixels(tmp_path, 
     assert len(calls) == 2, "Each distinct held pose is rasterized once"
 
 
+def test_large_alpha_gradient_retains_exact_pixels_with_bounded_intermediate(tmp_path):
+    source, output = tmp_path / 'gradient.png', tmp_path / 'gradient.mov'
+    # Alpha and colour both vary: dropping alpha or quantizing RGB cannot pass.
+    pixels = np.zeros((720, 1280, 4), dtype=np.uint8)
+    ramp = np.arange(1280, dtype=np.uint16) * 255 // 1279
+    pixels[:, :, 0] = ramp
+    pixels[:, :, 1] = 47
+    pixels[:, :, 2] = 113
+    pixels[:, :, 3] = 255-ramp
+    Image.fromarray(pixels).save(source)
+    overlay = {'type': 'image', 'start_time': 0, 'duration': 1,
+               'width': 100, 'height': 100, 'mediaFit': 'stretch', 'frameShape': 'edge'}
+    layer = {'base_transform': {'x': 50, 'y': 50, 'scale': 1, 'opacity': 1}}
+    render_image_layer_motion(source, output, overlay, layer, 1280, 720, 1, [], fps=24)
+    raw = subprocess.check_output(['ffmpeg', '-v', 'error', '-i', str(output),
+        '-f', 'rawvideo', '-pix_fmt', 'rgba', '-'])
+    decoded = np.frombuffer(raw, np.uint8).reshape(24, 720, 1280, 4)
+    expected = np.asarray(_render_pose(Image.open(source).convert('RGBA'), overlay,
+        layer, layer_pose(layer, overlay, 0), (1280, 720)))
+    for frame in decoded:
+        np.testing.assert_array_equal(frame, expected)
+    assert output.stat().st_size < 2 * 1024**2
+
+
 def test_changing_decoded_frames_never_reuse_still_raster(tmp_path, monkeypatch):
     from python_media_worker import studio_layer_motion as motion
     calls = []
@@ -318,7 +342,8 @@ def test_real_logo_layer_render_preserves_alpha_and_moves_across_canvas():
         info = json.loads(subprocess.check_output([
             "ffprobe", "-v", "error", "-show_streams", "-of", "json", str(output),
         ]))
-        assert info["streams"][0]["pix_fmt"] == "argb"
+        assert info["streams"][0]["codec_name"] == "png"
+        assert info["streams"][0]["pix_fmt"] == "rgba"
         raw = subprocess.check_output([
             "ffmpeg", "-v", "error", "-i", str(output), "-f", "rawvideo", "-pix_fmt", "rgba", "-",
         ])

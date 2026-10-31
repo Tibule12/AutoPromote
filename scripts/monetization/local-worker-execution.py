@@ -23,7 +23,11 @@ if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
 # CPU allowance. Keep ten CPU minutes per process even when a loaded local
 # machine needs a longer wall observation; production limits are unchanged.
 resource.setrlimit(resource.RLIMIT_CPU, (600, 600))
-resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024**2, 20 * 1024**2))
+# Native full-frame transparency intermediates can exceed a source MP4's size.
+# Keep a finite per-file ceiling for this demo-only CPU process; production
+# execution settings and the separately bounded source-download sizes do not
+# inherit this local limit.
+resource.setrlimit(resource.RLIMIT_FSIZE, (128 * 1024**2, 128 * 1024**2))
 connect = socket.socket.connect
 
 

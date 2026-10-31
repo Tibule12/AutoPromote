@@ -440,7 +440,12 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                  "-c:v:0", "libx264rgb", "-crf:v:0", "18", "-maxrate:v:0", "8M", "-bufsize:v:0", "2M",
                  "-preset:v:0", "ultrafast", "-pix_fmt:v:0", "rgb24",
                  "-c:v:1", "ffv1", "-level:v:1", "3", "-pix_fmt:v:1", "gray", "-f", "matroska"]
-                if (layer or {}).get('perspective') else ["-c:v", "qtrle", "-f", "mov"])
+                # Full-frame alpha gradients compress poorly as qtrle and can
+                # exhaust bounded local intermediate storage. PNG-in-MOV
+                # retains the exact RGBA frames and the existing single-stream
+                # compositor contract, including fractional cue timestamps.
+                if (layer or {}).get('perspective') else ["-c:v", "png", "-pred", "mixed",
+                    "-compression_level", "1", "-pix_fmt", "rgba", "-f", "mov"])
     command = [
         "ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba",
         "-s", f"{width}x{height}", "-r", str(fps), "-i", "pipe:0", "-an",
