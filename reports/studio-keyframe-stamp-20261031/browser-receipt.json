@@ -1,0 +1,59 @@
+{
+  "passed": true,
+  "scope": "Signed-out actual Studio component on isolated loopback fixture; no normal-account export or creative qualification",
+  "documentSha256": "da7b2426ce782bb47a41d3d42d773e44fa29d75926224ed468e7592261afa2fc",
+  "results": [
+    {
+      "check": "Parented rotation key retains local -45 degrees and visible world pose",
+      "before": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(1, 0, 0, 1, -77.1562, -85.1328)",
+        "rotation": "0deg",
+        "scale": "1",
+        "opacity": "1"
+      },
+      "after": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(1, 0, 0, 1, -77.1562, -85.1328)",
+        "rotation": "0deg",
+        "scale": "1",
+        "opacity": "1"
+      }
+    },
+    {
+      "check": "Parenting plus spin applies the driver once when stamping",
+      "before": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(0, 1, -1, 0, -77.1562, -85.1328)",
+        "rotation": "90deg",
+        "scale": "1",
+        "opacity": "1"
+      },
+      "after": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(0, 1, -1, 0, -77.1562, -85.1328)",
+        "rotation": "90deg",
+        "scale": "1",
+        "opacity": "1"
+      }
+    },
+    {
+      "check": "Ordinary Undo/Redo retains authored key values",
+      "keyCountBefore": 3,
+      "keyCountAfterRedo": 4
+    },
+    {
+      "check": "Cold saved-project reopen retains exact canonical document and driven preview pose",
+      "sha256": "ce5a09bd84bb84bf1e7d09c0a681bf821c992b0e4012745177caba97f6d2e370"
+    }
+  ],
+  "errors": [],
+  "apiRequests": [],
+  "blocked": [],
+  "gpuJobs": 0,
+  "paidGenerationRequests": 0
+}

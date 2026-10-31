@@ -1,0 +1,5 @@
+{
+  "frontend/src/components/StudioCompWorkbench.js": "5108d0570cbc7ab04a8573344748b924af20f59ec70921ccefd27605842b9d40",
+  "frontend/src/components/__tests__/StudioCompKeyframeStamp.test.js": "866049635c344148b1eeebc90a959fd9c8f7f185ad3bba10acf6356fdcaa964c",
+  "test/e2e/playwright/verify-studio-keyframe-stamp.cjs": "ecd3640a3e2ca965f51ed434cd1643be597615d38dfb19579ae1969555d6e222"
+}

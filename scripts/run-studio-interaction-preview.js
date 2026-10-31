@@ -102,6 +102,77 @@ if (!fs.existsSync(secondFixture)) {
       result.error?.message || result.stderr || "Could not generate the second fixture"
     );
 }
+const motionflowSource = path.join(folder, "motionflow-source.mp4");
+const motionflowFill = path.join(folder, "motionflow-fill-cyan.png");
+const motionflowMatte = path.join(folder, "motionflow-matte-plate.png");
+if (process.env.STUDIO_MOTIONFLOW_FIXTURE === "1") {
+  const spawnSync = require("child_process").spawnSync;
+  if (!fs.existsSync(motionflowSource)) {
+    const res = spawnSync(
+      "ffmpeg",
+      [
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-f",
+        "lavfi",
+        "-i",
+        "color=c=0x0a0f1a:size=360x640:rate=24",
+        "-f",
+        "lavfi",
+        "-i",
+        "sine=frequency=330:sample_rate=44100",
+        "-t",
+        "6",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "ultrafast",
+        "-crf",
+        "18",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-ac",
+        "2",
+        "-b:a",
+        "64k",
+        "-movflags",
+        "+faststart",
+        motionflowSource,
+      ],
+      { encoding: "utf8" }
+    );
+    if (res.status !== 0) throw new Error(res.stderr || "Could not generate motionflow-source.mp4");
+  }
+  for (const [imgPath, hex] of [
+    [motionflowFill, "0x00e5ff"],
+    [motionflowMatte, "0xffffff"],
+  ]) {
+    if (!fs.existsSync(imgPath)) {
+      const res = spawnSync(
+        "ffmpeg",
+        [
+          "-hide_banner",
+          "-loglevel",
+          "error",
+          "-f",
+          "lavfi",
+          "-i",
+          `color=c=${hex}:size=360x360`,
+          "-frames:v",
+          "1",
+          "-pix_fmt",
+          "rgba",
+          imgPath,
+        ],
+        { encoding: "utf8" }
+      );
+      if (res.status !== 0) throw new Error(res.stderr || `Could not generate ${imgPath}`);
+    }
+  }
+}
 process.env.NODE_ENV = "development";
 process.env.BABEL_ENV = "development";
 process.env.FAST_REFRESH = "false";
@@ -163,8 +234,14 @@ webpack(config, (error, stats) => {
           '<body><div id="root"></div><script defer src="/static/js/bundle.js"></script></body></html>'
       )
   );
+  app.get("/favicon.ico", (_req, res) => res.status(204).end());
   app.get("/fixture.mp4", (_req, res) => res.sendFile(path.join(folder, "fixture.mp4")));
   app.get("/fixture-second.mp4", (_req, res) => res.sendFile(secondFixture));
+  if (process.env.STUDIO_MOTIONFLOW_FIXTURE === "1") {
+    app.get("/motionflow-source.mp4", (_req, res) => res.sendFile(motionflowSource));
+    app.get("/motionflow-fill-cyan.png", (_req, res) => res.sendFile(motionflowFill));
+    app.get("/motionflow-matte-plate.png", (_req, res) => res.sendFile(motionflowMatte));
+  }
   const podcastSource = process.env.STUDIO_PODCAST_SOURCE;
   const captionArtifact = process.env.STUDIO_GPU_CAPTION_ARTIFACT;
   if (podcastSource)
@@ -188,6 +265,7 @@ webpack(config, (error, stats) => {
     );
   }
   app.use(express.static(config.output.path));
+  app.use(express.static(path.join(root, "frontend/public")));
   app.listen(port, "127.0.0.1", () =>
     console.log(JSON.stringify({ ready: true, port, cloudApi: false, signedIn: false }))
   );

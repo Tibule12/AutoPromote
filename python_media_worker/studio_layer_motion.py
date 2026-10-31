@@ -15,11 +15,13 @@ import numpy as np
 from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFilter, ImageOps
 
 try:
+    from .studio_perspective import project_media, validate_perspective_layer
     from .studio_vector_shape import rasterize_vector_shape, validate_vector_trim
     from .studio_motion import automation_segment_value, finite
     from .viral_motion_graphics import edit_clock
     from .viral_render_contract import map_timeline_time
 except ImportError:
+    from studio_perspective import project_media, validate_perspective_layer
     from studio_vector_shape import rasterize_vector_shape, validate_vector_trim
     from studio_motion import automation_segment_value, finite
     from viral_motion_graphics import edit_clock
@@ -66,6 +68,7 @@ def interpolate_layer_value(layer, property_name, time, fallback):
 def layer_pose(layer, overlay, time):
     base = (layer or {}).get("base_transform") or {}
     return {
+        **({'perspective_progress': max(0,min(100,interpolate_layer_value(layer,'perspectiveProgress',time,base.get('perspective_progress',100))))} if (layer or {}).get('perspective') else {}),
         **({"text_progress": max(0, min(100, interpolate_layer_value(layer, "textProgress", time, base.get("text_progress", 100))))} if (layer or {}).get("text_animator") else {}),
         "x": interpolate_layer_value(layer, "x", time, base.get("x", _get(overlay, "x", 50))),
         "y": interpolate_layer_value(layer, "y", time, base.get("y", _get(overlay, "y", 50))),
@@ -176,7 +179,7 @@ def _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacit
     return projected
 
 
-def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
+def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, reference_surface=False):
     canvas_width, canvas_height = canvas_size
     fullscreen = str(_get(overlay, "bRollMode", _get(overlay, "b_roll_mode", ""))) == "fullscreen"
     if fullscreen:
@@ -221,6 +224,10 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
             frame_mask = layer_clip_mask(artwork.size, {"enabled": True, "shape": "rectangle", "radius": radius})
             artwork.putalpha(ImageChops.multiply(artwork.getchannel("A"), frame_mask))
 
+    if (layer or {}).get('perspective'):
+        if fullscreen:
+            raise ValueError('Perspective is available on ordinary inset media planes')
+        artwork = project_media(artwork,layer['perspective'],pose['perspective_progress'])
     anchor_x = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_x", 50), 50))) / 100
     anchor_y = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_y", 50), 50))) / 100
     diagonal = max(8, math.ceil(math.hypot(artwork.width, artwork.height) * 2.1))
@@ -249,15 +256,39 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         y = round(canvas_height * pose["y"] / 100 - anchor[1]) + round(anchor[1] - artwork.height * anchor_y)
         destination.alpha_composite(artwork, (x, y))
         return destination
-    transform_surface = Image.new("RGBA", (diagonal, diagonal))
+    surface_size, surface_origin, original_anchor = (diagonal, diagonal), (0, 0), anchor
+    surface_artwork_position = (round(anchor[0] - artwork.width * anchor_x),
+                                round(anchor[1] - artwork.height * anchor_y))
+    shadow = effects.get("shadow") or {}
+    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") in ("image", "video") else 1
+    # An unrotated projected video with only a drop shadow needs no square
+    # rotation canvas. Retain the old canvas origin and integer placement so
+    # this bounded allocation preserves the original pixels, including edges.
+    if (not reference_surface and (layer or {}).get('perspective') and
+            _get(overlay, "type") == "video" and abs(pose["rotation"]) <= .001 and
+            shadow.get("enabled") and not (effects.get("glow") or {}).get("enabled") and
+            finite(effects.get("blur"), 0) <= 0 and not effects.get("mask", {}).get("enabled") and
+            not pose.get("crop_x") and not pose.get("crop_y") and
+            all(clip_box.get(key, default) == default for key, default in
+                [("x", 0), ("y", 0), ("width", 1), ("height", 1)])):
+        padding = math.ceil(4 * max(0, finite(shadow.get("blur"), 18)) * effect_units) + 4
+        padding_x = padding + abs(round(finite(shadow.get("x"), 0) * effect_units))
+        padding_y = padding + abs(round(finite(shadow.get("y"), 10) * effect_units))
+        left, top = round(anchor[0] - artwork.width * anchor_x), round(anchor[1] - artwork.height * anchor_y)
+        origin_x, origin_y = max(0, left - padding_x), max(0, top - padding_y)
+        right, bottom = min(diagonal, left + artwork.width + padding_x), min(diagonal, top + artwork.height + padding_y)
+        surface_origin = (origin_x, origin_y)
+        surface_size = (right - origin_x, bottom - origin_y)
+        surface_artwork_position = (surface_artwork_position[0] - origin_x,
+                                    surface_artwork_position[1] - origin_y)
+        anchor = (anchor[0] - origin_x, anchor[1] - origin_y)
+    transform_surface = Image.new("RGBA", surface_size)
     transform_surface.alpha_composite(
         artwork,
-        (round(anchor[0] - artwork.width * anchor_x), round(anchor[1] - artwork.height * anchor_y)),
+        surface_artwork_position,
     )
     alpha = transform_surface.getchannel("A")
-    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") in ("image", "video") else 1
     composed = transform_surface
-    shadow = effects.get("shadow") or {}
     if shadow.get("enabled"):
         shadow_layer = _effect_layer(
             alpha,
@@ -314,8 +345,8 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         composed.putalpha(composed.getchannel("A").point(lambda value: round(value * opacity)))
 
     destination = Image.new("RGBA", canvas_size)
-    x = round(canvas_width * pose["x"] / 100 - anchor[0])
-    y = round(canvas_height * pose["y"] / 100 - anchor[1])
+    x = round(canvas_width * pose["x"] / 100 - original_anchor[0]) + surface_origin[0]
+    y = round(canvas_height * pose["y"] / 100 - original_anchor[1]) + surface_origin[1]
     destination.alpha_composite(composed, (x, y))
     return destination
 
@@ -340,6 +371,7 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
     # The owned image remains the ordinary import/ownership reference. Editable
     # contour decisions, rather than its original cached PNG, author the result.
     vector_shape = (layer or {}).get('vector_shape')
+    validate_perspective_layer(layer or {})
     validate_vector_trim(layer or {})
     if vector_shape is not None and frame_source is not None:
         raise ValueError('Vector artwork cannot replace a decoded video source')
@@ -351,10 +383,16 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
     motion_blur = ((layer or {}).get("effects") or {}).get("motion_blur") or {}
     samples = max(1, min(8, int(finite(motion_blur.get("samples"), 1)))) if motion_blur.get("enabled") else 1
     shutter = max(0, min(1, finite(motion_blur.get("shutter"), .5)))
+    encoding = (["-filter_complex", "[0:v]split=2[color][a];[a]alphaextract[alpha]",
+                 "-map", "[color]", "-map", "[alpha]",
+                 "-c:v:0", "libx264rgb", "-crf:v:0", "18", "-maxrate:v:0", "8M", "-bufsize:v:0", "2M",
+                 "-preset:v:0", "ultrafast", "-pix_fmt:v:0", "rgb24",
+                 "-c:v:1", "ffv1", "-level:v:1", "3", "-pix_fmt:v:1", "gray", "-f", "matroska"]
+                if (layer or {}).get('perspective') else ["-c:v", "qtrle", "-f", "mov"])
     command = [
         "ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba",
         "-s", f"{width}x{height}", "-r", str(fps), "-i", "pipe:0", "-an",
-        "-c:v", "qtrle", "-threads", "2", "-f", "mov", str(output_path),
+        *encoding, "-threads", "2", str(output_path),
     ]
     with tempfile.TemporaryFile() as log:
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log)
@@ -406,7 +444,11 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                         if frame_source is None:
                             held_pose, held_sample_opacity, held_raster = pose, sample_opacity, raster
                     frame.alpha_composite(raster)
-                process.stdin.write(frame.tobytes())
+                try:
+                    process.stdin.write(frame.tobytes())
+                except BrokenPipeError as error:
+                    process.wait(timeout=10); log.seek(0)
+                    raise RuntimeError(f'Layer encoder stopped ({process.returncode}): '+log.read().decode(errors='replace')[-1200:]) from error
             process.stdin.close()
             if process.wait(timeout=1800):
                 log.seek(0)

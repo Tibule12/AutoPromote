@@ -1,0 +1,709 @@
+/* AutoPromote Comp & Rig Workbench + Signal Node Flow Surface */
+.ap-mfx-shell {
+  --mfx-bg: #050b16;
+  --mfx-elevated: #08111f;
+  --mfx-surface: #0c1728;
+  --mfx-surface-strong: #101d31;
+  --mfx-border: rgba(148, 163, 184, 0.16);
+  --mfx-border-strong: rgba(34, 211, 238, 0.36);
+  --mfx-text: #f8fafc;
+  --mfx-muted: #94a3b8;
+  --mfx-purple: #8b5cf6;
+  --mfx-cyan: #22d3ee;
+  --mfx-green: #34d399;
+  --mfx-gold: #facc15;
+  --mfx-danger: #fb7185;
+  background: var(--mfx-bg);
+  border: 1px solid var(--mfx-border);
+  border-radius: 14px;
+  color: var(--mfx-text);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-variant-numeric: tabular-nums;
+  container-type: inline-size;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ap-mfx-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #0b1629 0%, #08111f 100%);
+  border-bottom: 1px solid var(--mfx-border);
+}
+
+.ap-mfx-toolbar-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ap-mfx-brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(139, 92, 246, 0.16);
+  border: 1px solid rgba(139, 92, 246, 0.38);
+  color: #ddd6fe;
+}
+
+.ap-mfx-seg {
+  display: inline-flex;
+  background: #050b16;
+  border: 1px solid var(--mfx-border);
+  border-radius: 9px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.ap-mfx-seg-btn {
+  border: none;
+  background: transparent;
+  color: var(--mfx-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.ap-mfx-seg-btn:hover {
+  color: var(--mfx-text);
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.ap-mfx-seg-btn.is-active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.32), rgba(34, 211, 238, 0.24));
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.35);
+}
+
+.ap-mfx-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--mfx-surface);
+  color: #e2e8f0;
+  border: 1px solid var(--mfx-border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, transform 80ms ease;
+}
+
+.ap-mfx-btn:hover:not(:disabled) {
+  background: var(--mfx-surface-strong);
+  border-color: rgba(34, 211, 238, 0.42);
+  color: #ffffff;
+}
+
+.ap-mfx-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ap-mfx-btn.is-accent {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.28), rgba(34, 211, 238, 0.2));
+  border-color: rgba(139, 92, 246, 0.48);
+  color: #f8fafc;
+}
+
+.ap-mfx-btn.is-active {
+  background: rgba(34, 211, 238, 0.18);
+  border-color: rgba(34, 211, 238, 0.52);
+  color: #67e8f9;
+}
+
+/* AutoPromote Comp & Rig Split Grid */
+.ap-comp-workbench-body {
+  display: grid;
+  grid-template-columns: minmax(460px, 1.15fr) minmax(360px, 1fr);
+  min-height: 300px;
+  position: relative;
+}
+
+@media (max-width: 1180px) {
+  .ap-comp-workbench-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container (max-width: 820px) {
+  .ap-comp-workbench-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ap-comp-matrix-pane {
+  border-right: 1px solid var(--mfx-border);
+  display: flex;
+  flex-direction: column;
+  background: var(--mfx-elevated);
+  position: relative;
+  overflow-x: auto;
+}
+
+.ap-comp-matrix-head,
+.ap-comp-matrix-row {
+  display: grid;
+  grid-template-columns: 28px 108px minmax(120px, 1.2fr) 128px 156px 96px minmax(110px, 0.9fr);
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+.ap-comp-matrix-head {
+  background: #060d1b;
+  color: var(--mfx-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--mfx-border);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.ap-comp-matrix-row {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  background: rgba(12, 23, 40, 0.55);
+  transition: background 100ms ease;
+}
+
+.ap-comp-matrix-row:hover {
+  background: rgba(16, 29, 49, 0.9);
+}
+
+.ap-comp-matrix-row.is-selected {
+  background: rgba(139, 92, 246, 0.16);
+  box-shadow: inset 3px 0 0 var(--mfx-cyan);
+}
+
+.ap-comp-matrix-row.is-matte-hidden {
+  opacity: 0.72;
+}
+
+.ap-comp-switches {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ap-comp-sw {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 5px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: #050b16;
+  color: var(--mfx-muted);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ap-comp-sw.is-on {
+  background: rgba(34, 211, 238, 0.2);
+  border-color: rgba(34, 211, 238, 0.55);
+  color: #67e8f9;
+}
+
+.ap-comp-sw.is-solo.is-on {
+  background: rgba(250, 204, 21, 0.22);
+  border-color: rgba(250, 204, 21, 0.6);
+  color: #fde047;
+}
+
+.ap-comp-sw.is-lock.is-on {
+  background: rgba(251, 113, 133, 0.2);
+  border-color: rgba(251, 113, 133, 0.55);
+  color: #fda4af;
+}
+
+.ap-comp-layer-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.ap-comp-layer-name {
+  font-weight: 600;
+  color: var(--mfx-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ap-comp-type-tag {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.ap-comp-type-tag.is-null {
+  background: rgba(168, 85, 247, 0.24);
+  color: #e9d5ff;
+  border: 1px solid rgba(168, 85, 247, 0.5);
+}
+
+.ap-comp-type-tag.is-title {
+  background: rgba(34, 211, 238, 0.18);
+  color: #a5f3fc;
+}
+
+.ap-comp-type-tag.is-vec {
+  background: rgba(52, 211, 153, 0.18);
+  color: #a7f3d0;
+}
+
+.ap-comp-type-tag.is-media {
+  background: rgba(148, 163, 184, 0.18);
+  color: #cbd5e1;
+}
+
+.ap-comp-select {
+  width: 100%;
+  background: #050b16;
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 6px;
+  padding: 3px 5px;
+  font-size: 10.5px;
+  min-width: 0;
+}
+
+.ap-comp-select:focus {
+  outline: none;
+  border-color: var(--mfx-cyan);
+}
+
+.ap-comp-whip-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ap-comp-whip-handle {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(168, 85, 247, 0.48);
+  background: rgba(168, 85, 247, 0.16);
+  color: #d8b4fe;
+  font-size: 11px;
+  cursor: grab;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ap-comp-whip-handle:hover {
+  background: rgba(168, 85, 247, 0.32);
+  color: #ffffff;
+}
+
+.ap-comp-matte-cell {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.ap-comp-driver-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ap-comp-driver-chip {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(34, 211, 238, 0.16);
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  color: #67e8f9;
+  cursor: pointer;
+}
+
+/* AutoPromote Motion Driver Drawer */
+.ap-comp-driver-drawer {
+  padding: 10px 12px;
+  background: #07101e;
+  border-top: 1px solid var(--mfx-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ap-comp-driver-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+
+.ap-comp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10.5px;
+  color: var(--mfx-muted);
+}
+
+.ap-comp-field input[type="range"],
+.ap-comp-field input[type="number"] {
+  width: 100%;
+  accent-color: var(--mfx-cyan);
+}
+
+.ap-comp-field input[type="number"] {
+  background: #050b16;
+  border: 1px solid var(--mfx-border);
+  color: var(--mfx-text);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 11px;
+}
+
+/* Right Graph / Dope Sheet Pane */
+.ap-comp-graph-pane {
+  display: flex;
+  flex-direction: column;
+  background: #050b16;
+  padding: 10px 12px;
+  gap: 8px;
+}
+
+.ap-comp-prop-toggles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ap-comp-prop-pill {
+  border: 1px solid var(--mfx-border);
+  background: #091324;
+  color: var(--mfx-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ap-comp-prop-pill.is-active {
+  color: #ffffff;
+  border-color: currentColor;
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.ap-comp-graph-svg {
+  width: 100%;
+  height: 210px;
+  background: radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.06), transparent 70%), #040914;
+  border: 1px solid var(--mfx-border);
+  border-radius: 10px;
+  user-select: none;
+  touch-action: none;
+}
+
+.ap-comp-preset-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* AutoPromote Signal Node Flow Surface */
+.ap-flow-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  min-height: 320px;
+}
+
+@media (max-width: 1100px) {
+  .ap-flow-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container (max-width: 760px) {
+  .ap-flow-layout {
+    grid-template-columns: 1fr;
+  }
+  .ap-flow-canvas-wrap {
+    min-height: 240px;
+    max-height: 280px;
+  }
+  .ap-flow-sidebar {
+    border-left: none;
+    border-top: 1px solid var(--mfx-border);
+  }
+}
+
+.ap-flow-canvas-wrap {
+  position: relative;
+  overflow: auto;
+  min-height: 320px;
+  background-color: #040913;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  cursor: grab;
+  user-select: none;
+}
+
+.ap-flow-canvas-wrap:active {
+  cursor: grabbing;
+}
+
+.ap-flow-stage {
+  position: relative;
+  width: 1400px;
+  height: 460px;
+  transform-origin: 0 0;
+}
+
+.ap-flow-wires-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4000px;
+  height: 2000px;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.ap-flow-node {
+  position: absolute;
+  width: 158px;
+  background: linear-gradient(180deg, #101d31 0%, #091221 100%);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.65);
+  color: var(--mfx-text);
+  z-index: 2;
+  transition: border-color 100ms ease, box-shadow 100ms ease;
+}
+
+.ap-flow-node.is-selected {
+  border-color: var(--mfx-cyan);
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.26), 0 12px 28px rgba(2, 6, 23, 0.8);
+}
+
+.ap-flow-node.is-bypassed {
+  opacity: 0.5;
+  filter: grayscale(0.6);
+}
+
+.ap-flow-node-bar {
+  height: 4px;
+  border-radius: 9px 9px 0 0;
+}
+
+.ap-flow-node-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px 4px;
+  cursor: grab;
+}
+
+.ap-flow-node-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ap-flow-node-sub {
+  padding: 0 8px 6px;
+  font-size: 10px;
+  color: var(--mfx-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ap-flow-node-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ap-flow-vbtn {
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  border-radius: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: #050b16;
+  color: var(--mfx-muted);
+  font-size: 9.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ap-flow-vbtn.is-v1 {
+  background: rgba(34, 211, 238, 0.24);
+  border-color: #22d3ee;
+  color: #67e8f9;
+}
+
+.ap-flow-vbtn.is-v2 {
+  background: rgba(168, 85, 247, 0.28);
+  border-color: #a855f7;
+  color: #e9d5ff;
+}
+
+.ap-flow-ports {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  gap: 4px;
+}
+
+.ap-flow-port-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ap-flow-port {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #cbd5e1;
+  background: transparent;
+  border: none;
+  padding: 1px 3px;
+  cursor: crosshair;
+}
+
+.ap-flow-port-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1.5px solid #020617;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* Signal Node Flow Right Sidebar: Dual Viewer [1]/[2] + Node Inspector */
+.ap-flow-sidebar {
+  border-left: 1px solid var(--mfx-border);
+  background: var(--mfx-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.ap-flow-ab-monitor {
+  background: #040914;
+  border: 1px solid var(--mfx-border);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ap-flow-ab-screen {
+  position: relative;
+  height: 112px;
+  border-radius: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(135deg, #0b172a 0%, #131c31 100%);
+}
+
+.ap-flow-ab-half {
+  position: absolute;
+  inset: 0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ap-flow-ab-half.is-b {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.24) 0%, rgba(34, 211, 238, 0.18) 100%);
+  border-left: 2px solid var(--mfx-cyan);
+}
+
+/* Null Rig Crosshair Gizmo on Stage */
+.ap-null-rig-gizmo {
+  width: 100%;
+  height: 100%;
+  min-width: 48px;
+  min-height: 48px;
+  border: 1.5px dashed rgba(168, 85, 247, 0.85);
+  background: rgba(168, 85, 247, 0.08);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: #e9d5ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  pointer-events: auto;
+}
+
+.ap-null-rig-gizmo::before,
+.ap-null-rig-gizmo::after {
+  content: "";
+  position: absolute;
+  background: rgba(34, 211, 238, 0.85);
+}
+
+.ap-null-rig-gizmo::before {
+  width: 18px;
+  height: 1.5px;
+}
+
+.ap-null-rig-gizmo::after {
+  width: 1.5px;
+  height: 18px;
+}
+

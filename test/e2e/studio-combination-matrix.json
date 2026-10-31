@@ -1,4 +1,17 @@
 {
+  "studioMotionFlow20261031": {
+    "date": "2026-10-31",
+    "report": "reports/studio-motion-flow-parity-20261031/README.md",
+    "parityReceipt": "reports/studio-motion-flow-parity-20261031/parity-receipt.json",
+    "browserReceipt": "reports/studio-motion-flow-parity-20261031/browser-receipt.json",
+    "scope": "Native AutoPromote Motion & Flow (Comp & Rig parenting, Null Rig controllers, Alpha/Luma Track Mattes, Motion Drivers, Speed/Value Bezier graphs, and Signal Node Flow [1]/[2] A/B viewer wipe) with local CPU FFmpeg track-matte parity",
+    "competitorBrandLeaks": 0,
+    "productionAuthRelaxed": false,
+    "gpuJobsStarted": 0,
+    "cloudUploads": 0,
+    "readinessPromotion": false,
+    "nextWork": "Retain formal readiness counts and shared S02/S04/S03 blockers."
+  },
   "playwrightLoopbackRepair20261028": {
     "date": "2026-10-28",
     "report": "reports/playwright-loopback-repair-20261028/README.md",
@@ -53,7 +66,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-21T19:28:46.375062Z",
+  "updatedAt": "2026-10-31T11:25:00.000Z",
   "baseline": "reports/studio-stability-20261008/results.json",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -1452,7 +1465,9 @@
       "latestProfessionalGroupWorkflowEvidence": "reports/studio-professional-group-workflow-20261014/README.md",
       "latestProfessionalGroupWorkflowScope": "Real 20-second footage edit: group clip pointer/numeric move, trim, opacity keys, locks, group delete/undo, source split/history, exact save/cold reopen, one owned CPU export/download/full decode and full editable Studio playback pass. Nine native visibility gates pass; nine declared whole-footage source comparisons fail. Full picture/live sound and export speed remain unqualified.",
       "latestPropertyTimelineEvidence": "reports/studio-keyframe-selection-20261015/README.md",
-      "latestPropertyTimelineScope": "Native property timeline multi-key selection, atomic drag/nudge/time scale/interpolation/copy/paste/delete/history, exact cold reopen and one20s CPU export/full editable Studio playback pass. One group opacity channel has complete native evidence; multi-property/mixed-lock guards have component evidence. Supporting stale Finish clock and byte-preserving source-motion performance repairs pass; full picture/sound stays unqualified."
+      "latestPropertyTimelineScope": "Native property timeline multi-key selection, atomic drag/nudge/time scale/interpolation/copy/paste/delete/history, exact cold reopen and one20s CPU export/full editable Studio playback pass. One group opacity channel has complete native evidence; multi-property/mixed-lock guards have component evidence. Supporting stale Finish clock and byte-preserving source-motion performance repairs pass; full picture/sound stays unqualified.",
+      "latestMotionFlowEvidence": "reports/studio-motion-flow-parity-20261031/README.md",
+      "latestMotionFlowScope": "Local loopback AutoPromote Comp & Rig (Null Rig parenting, Motion Drivers, Bezier keyframe curves, Alpha Track Matte) + Signal Node Flow [1]/[2] wipe pass headless muted browser authoring, Undo/Redo, exact cold-reload SHA-256 recovery, and 4-frame local CPU FFmpeg render parity (min IoU 0.976516, max boundary p95 1.4142px); combination readiness remains PARTIAL."
     }
   ],
   "continuity": {
@@ -9016,5 +9031,24 @@
       "S04",
       "S03"
     ]
+  },
+  "localKeyframeStamp20261031": {
+    "evidence": "reports/studio-keyframe-stamp-20261031/README.md",
+    "scope": "Comp & Rig key stamping preserves authored local values under parenting and motion drivers.",
+    "validation": {
+      "componentCasesPassed": 17,
+      "newRegressionCases": 7,
+      "preRepairFailures": 6,
+      "browserChecksPassed": 4,
+      "workerPoseSamplesPassed": 6,
+      "browserMode": "headless muted signed-out loopback fixture"
+    },
+    "limitations": [
+      "No new MP4 or normal-account export qualification",
+      "No whole pixel/audio parity or live smoothness qualification",
+      "Animated reparenting and long/high-frequency driver bakes remain unqualified"
+    ],
+    "formalReadinessChanged": false,
+    "nextTask": "Continue S02 preview/export precision with S04 rigging and driver qualification; retain S03 ownership and full-minute source/creative blockers."
   }
 }

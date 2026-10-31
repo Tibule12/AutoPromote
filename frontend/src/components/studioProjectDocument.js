@@ -12,6 +12,13 @@ import { studioLayerEntries } from "./studioLayerOrder";
 import { validateSpatialCurve } from "./studioAutomation";
 import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
+import { validateStudioPerspectiveLayer } from './studioPerspective';
+import {
+  validateStudioMotionDrivers,
+  validateStudioParentGraph,
+  validateStudioTrackMattes,
+} from "./studioCompRigging";
+import { validateStudioNodeFlow } from "./studioNodeFlow";
 
 import {
   STUDIO_EDIT_SETTING_FIELDS, STUDIO_SOURCE_DECISION_FIELDS,
@@ -77,6 +84,7 @@ const LAYER_PARAMETER_FIELDS = [
   "bloom", "background",
   "bg", "anchorX", "anchorY", "blendMode", "glow", "layerShadow", "motionBlur",
   "cropX", "cropY", "blur", "sourceDuration", "aspectRatio",
+  "perspective", "perspectiveProgress",
   "isCaption",
   "shadow", "strokeWidth", "strokeColor",
   "frameShape", "frame_shape", "borderRadius", "border_radius", "mediaFit", "media_fit",
@@ -171,6 +179,7 @@ const VISUAL_SETTING_FIELDS = [
   "speakerStackCameraCount", "speakerStackLayout", "speakerStackSyncConfirmed",
   "exportSettings", "stabilization", "enhanceQuality", "beatSnapEnabled",
   "creativeIntent", "creativeEffectsEnabled", "creativePreset", "creativeIntensity", "pacingLevel",
+  "nodeFlow", "hideShyLayers",
 ];
 const CAMERA_SOURCE_FIELDS = [
   "id", "name", "duration", "sourceClipId", "sourceMediaId", "sourceStoragePath",
@@ -932,11 +941,29 @@ export const validateStudioProjectDocument = document => {
     ...(document.linkedTiming?.keys?.motionKeyframes || []).map(key => ({ ...key.parameters,
       time: key.atProgrammeTick === null ? NaN : ticksToSeconds(key.atProgrammeTick) }))];
   (document.layers || []).forEach(layer => {
+    validateStudioPerspectiveLayer({ ...layer.parameters, id: layer.layerId, type: layer.legacyType },
+      vectorMotionKeys.filter(key => key.targetId === layer.layerId),
+      (document.editGraph?.settings?.compoundClips || []).some(group => group.layerIds?.includes(layer.layerId)));
     validateStudioTextAnimation({ ...layer.parameters, type: layer.legacyType }, vectorMotionKeys.filter(key => key.targetId === layer.layerId));
     if (layer.parameters?.vectorShape !== undefined) validateStudioVectorShape(layer.parameters.vectorShape);
     validateStudioVectorTrim(layer.parameters || {}, vectorMotionKeys
       .filter(key => key.targetId === layer.layerId));
+    validateStudioMotionDrivers(layer.parameters || {});
   });
+  if (document.visualGraph?.settings?.mainTransform) {
+    validateStudioMotionDrivers(document.visualGraph.settings.mainTransform);
+  }
+  validateStudioNodeFlow(document.visualGraph?.settings?.nodeFlow);
+  const docOverlayParams = (document.layers || [])
+    .filter(layer => layer.legacyCollection === "overlays" && !layer.parameters?.isCaption)
+    .map(layer => ({ ...layer.parameters, id: layer.layerId, type: layer.legacyType }));
+  validateStudioParentGraph(docOverlayParams, document.visualGraph?.settings?.mainTransform || null);
+  validateStudioTrackMattes(
+    docOverlayParams,
+    (document.layers || [])
+      .filter(layer => layer.type === "three_d" && layer.parameters?.enabled === false)
+      .map(layer => layer.layerId)
+  );
   const validParameters = (parameters, fields) => parameters &&
     typeof parameters === "object" && !Array.isArray(parameters) &&
     Object.keys(parameters).every(key => fields.includes(key));

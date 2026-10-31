@@ -53,4 +53,20 @@ describe("AudioRemixPanel", () => {
     expect(screen.getByRole("button", { name: /Replay Exact Preview/i })).toBeEnabled();
     expect(screen.getByText(/final FFmpeg mastering chain/i)).toBeInTheDocument();
   });
+
+  test("selects the Chipmunk voice and offers its exact preview", () => {
+    const onChange = jest.fn();
+    const onPreview = jest.fn();
+    const props = { onChange, onPreview, onBefore: jest.fn(), onToggleLoop: jest.fn() };
+    const { rerender } = render(<AudioRemixPanel {...props} value={DEFAULT_AUDIO_REMIX} />);
+    fireEvent.click(screen.getByTestId("audio-remix-preset-chipmunk"));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+      enabled: true, preset: "chipmunk", pitch: 12, speed: 1, target: "voice", keepPitch: false,
+    }));
+    rerender(<AudioRemixPanel {...props} value={onChange.mock.calls[0][0]} />);
+    expect(screen.getByTestId("audio-remix-preset-chipmunk")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText(/hear the Chipmunk voice/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Preview Remix/ }));
+    expect(onPreview).toHaveBeenCalledTimes(1);
+  });
 });

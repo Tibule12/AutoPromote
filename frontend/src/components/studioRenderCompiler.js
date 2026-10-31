@@ -7,17 +7,58 @@ import { parseStudioMaskPolygon } from "./studioMaskGeometry";
 import { studioGroupTree, removeStudioGroupMembers, GROUP_KIND, validateStudioGroupKeyframes } from "./studioGroups";
 import { validateSpatialCurve } from "./studioAutomation";
 import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
+import { validateStudioPerspectiveLayer, encodeStudioPerspective } from './studioPerspective';
+import { studioLayerEntries } from "./studioLayerOrder";
+import {
+  MOTION_DRIVER_PROPERTIES,
+  bakeLayerMotionToKeyframes,
+  layerHasActiveMotionDrivers,
+  layerRequiresWorldBake,
+  validateStudioMotionDrivers,
+  validateStudioParentGraph,
+  validateStudioTrackMattes,
+} from "./studioCompRigging";
 
-export const compileStudioOverlaysForRender = (document, transportSnapshot = {}) =>
-  projectStudioEditableStateToSnapshot(document, transportSnapshot).overlays
-    .filter(layer => !layer.isCaption).map(layer => {
+export const compileStudioOverlaysForRender = (document, transportSnapshot = {}) => {
+  const projected = projectStudioEditableStateToSnapshot(document, transportSnapshot);
+  const programmeDuration = ticksToSeconds(
+    document.clipOccurrences?.at(-1)?.programmeRange?.endTick || secondsToTicks(6)
+  );
+  return projected.overlays
+    .filter(layer => !layer.isCaption && !layer.isNullRig)
+    .map(layer => {
       assertStudioLayerBlendMode(layer);
       if (layer.vectorShape !== undefined) {
         if (layer.type !== 'image') fail('INVALID_VECTOR_LAYER', 'Vector artwork needs an ordinary image layer.');
         validateStudioVectorShape(layer.vectorShape);
       }
-      return { ...layer, start_time: Number(layer.startTime ?? 0), duration: Number(layer.duration ?? 0) };
+      const bakedPose = layerRequiresWorldBake(layer, projected.overlays, projected.mainTransform)
+        ? bakeLayerMotionToKeyframes({
+            layer,
+            overlays: projected.overlays,
+            motionKeyframes: projected.motionKeyframes || [],
+            mainTransform: projected.mainTransform || null,
+            programmeDuration,
+            fps: 30,
+          }).initialPose
+        : null;
+      return {
+        ...layer,
+        ...(bakedPose
+          ? {
+              x: bakedPose.x,
+              y: bakedPose.y,
+              scale: bakedPose.scale,
+              rotation: bakedPose.rotation,
+              opacity: bakedPose.opacity,
+            }
+          : {}),
+        ...(layer.perspective ? { perspective: encodeStudioPerspective(layer.perspective) } : {}),
+        start_time: Number(layer.startTime ?? 0),
+        duration: Number(layer.duration ?? 0),
+      };
     });
+};
 
 const fail = (code, message) => {
   const error = new Error(message);
@@ -40,6 +81,9 @@ export const compileStudioTimelineForRender = document => {
       ...(occurrence.parameters?.transitionIn ? { transition_in: occurrence.parameters.transitionIn } : {}),
       ...(occurrence.parameters?.transitionOut ? { transition_out: occurrence.parameters.transitionOut } : {}),
       ...(occurrence.parameters?.transitionDuration !== undefined ? { transition_duration: occurrence.parameters.transitionDuration } : {}),
+      ...Object.fromEntries(['audioTrimOffsetStart', 'audioTrimOffsetEnd', 'audioDetached',
+        'audioSourceStart', 'audioSourceEnd', 'audioProgrammeStart']
+        .filter(field => occurrence.parameters?.[field] !== undefined).map(field => [field, occurrence.parameters[field]])),
     };
   });
 };
@@ -59,6 +103,31 @@ export const compileStudioFinishForRender = document => {
   const state = visualRenderState(document);
   const fx = state.finishFx || {}, transform = state.mainTransform || {}, frame = state.mainFrame || {};
   assertStudioMainBlendMode(transform);
+  validateStudioMotionDrivers(transform);
+  const programmeDuration = ticksToSeconds(
+    document.clipOccurrences?.at(-1)?.programmeRange?.endTick || secondsToTicks(6)
+  );
+  const mainLayer = { id: "main-video", ...transform };
+  const mainBaked = layerHasActiveMotionDrivers(mainLayer)
+    ? bakeLayerMotionToKeyframes({
+        layer: mainLayer,
+        overlays: state.overlays || [],
+        motionKeyframes: state.motionKeyframes || [],
+        mainTransform: transform,
+        programmeDuration,
+        fps: 12,
+        maxSamples: 40,
+      })
+    : null;
+  const nonPoseMainKeys = (state.motionKeyframes || []).filter(
+    key => key.targetId === "main-video" && !MOTION_DRIVER_PROPERTIES.includes(key.property)
+  );
+  const resolvedMainKeys = mainBaked
+    ? [...mainBaked.keyframes, ...nonPoseMainKeys]
+    : (state.motionKeyframes || []).filter(key => key.targetId === "main-video");
+  const resolvedMainBase = mainBaked
+    ? compileBaseTransform({ ...transform, ...mainBaked.initialPose })
+    : compileBaseTransform(transform);
   const colorFields = ["preset", "exposureStops", "lift", "gamma", "gain", "tint",
     "brightness", "contrast", "saturation", "temperature", "sharpness", "vignette"];
   return {
@@ -67,10 +136,10 @@ export const compileStudioFinishForRender = document => {
       border_radius_percent: frame.radiusPercent, background: frame.background },
     color: { ...Object.fromEntries(colorFields.filter(field => fx[field] !== undefined)
       .map(field => [field, fx[field]])), precisionGrade: !!fx.precisionGrade },
-    motion: { zoom: fx.zoom, zoom_anchor: fx.zoomAnchor, base_scale: transform.scale ?? 1,
-      scale_keyframes: (state.motionKeyframes || []).filter(key => key.targetId === "main-video" && key.property === "scale"),
-      base_transform: compileBaseTransform(transform),
-      keyframes: (state.motionKeyframes || []).filter(key => key.targetId === "main-video") },
+    motion: { zoom: fx.zoom, zoom_anchor: fx.zoomAnchor, base_scale: resolvedMainBase.scale ?? 1,
+      scale_keyframes: resolvedMainKeys.filter(key => key.property === "scale"),
+      base_transform: resolvedMainBase,
+      keyframes: resolvedMainKeys },
     texture: { film_grain: fx.filmGrain, chromatic_aberration: fx.chromaticAberration,
       vhs_tracking: fx.vhsTracking, light_leak: fx.lightLeak },
     visualizer: { ...state.podcastVisualizer, source: "original_speech" },
@@ -80,6 +149,7 @@ export const compileStudioFinishForRender = document => {
 };
 
 const compileBaseTransform = layer => ({
+  ...(layer.perspective ? { perspective_progress: layer.perspectiveProgress ?? 100 } : {}),
   ...(layer.textAnimator ? { text_progress: layer.textProgress ?? 100 } : {}),
   x: Number(layer.x ?? 50), y: Number(layer.y ?? 50), scale: Number(layer.scale ?? 1),
   rotation: Number(layer.rotation ?? 0), opacity: Number(layer.opacity ?? 1),
@@ -95,16 +165,34 @@ export const compileStudioCompositionForRender = document => {
   if (compounds.some(group => group.kind === GROUP_KIND) && !Array.isArray(state.compositionOrder))
     fail("MISSING_GROUP_LAYER_ORDER", "Graphic groups need an explicit canonical layer order.");
   const disabledIds = state.threeDScenes.filter(scene => scene.enabled === false).map(scene => scene.id);
-  const order = state.compositionOrder?.filter(id => !disabledIds.includes(id));
-  // Validate the saved hierarchy first. Disabled 3D retains its editable parent;
-  // only the render projection removes that leaf and any resulting empty group.
+  const nullRigIds = state.overlays
+    .filter(overlay => !overlay.isCaption && overlay.isNullRig)
+    .map(overlay => String(overlay.id));
+  const omittedRenderIds = [...disabledIds, ...nullRigIds];
+  validateStudioParentGraph(state.overlays, state.mainTransform);
+  validateStudioTrackMattes(state.overlays, disabledIds);
+  const hasTrackMattes = state.overlays.some(
+    overlay => !overlay.isCaption && !overlay.isNullRig && overlay.trackMatte?.mode && overlay.trackMatte.mode !== "none"
+  );
+  const rawOrder = Array.isArray(state.compositionOrder)
+    ? state.compositionOrder
+    : hasTrackMattes
+      ? studioLayerEntries(state).map(entry => entry.id)
+      : undefined;
+  const order = rawOrder?.filter(id => !omittedRenderIds.includes(id));
+  // Validate the saved hierarchy first. Disabled 3D and Null Rigs retain their editable parent;
+  // only the render projection removes non-pixel leaves and any resulting empty group.
   if (Array.isArray(state.compositionOrder)) {
     studioGroupTree(compounds, state.compositionOrder);
   }
-  const groups = studioGroupTree(removeStudioGroupMembers(compounds, disabledIds), order || []).groups;
+  const groups = studioGroupTree(removeStudioGroupMembers(compounds, omittedRenderIds), order || []).groups;
   assertStudioMainBlendMode(state.mainTransform);
-  state.overlays.filter(overlay => !overlay.isCaption).forEach(assertStudioLayerBlendMode);
+  state.overlays.filter(overlay => !overlay.isCaption && !overlay.isNullRig).forEach(assertStudioLayerBlendMode);
   for (const layer of [state.mainTransform, ...state.overlays]) {
+    if (!layer) continue;
+    validateStudioMotionDrivers(layer);
+    validateStudioPerspectiveLayer(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id),
+      compounds.some(group => group.layerIds?.includes(layer?.id)));
     validateStudioTextAnimation(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id));
     validateStudioVectorTrim(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id));
     if (layer?.mask?.enabled && (layer.id === "main-video" || layer.type === "video" || layer.bRollPlaceholder || (layer.bRollMode === "fullscreen" && layer.type === "text")))
@@ -114,6 +202,9 @@ export const compileStudioCompositionForRender = document => {
       catch (error) { fail("INVALID_GEOMETRIC_MASK_PATH", `Mask polygon path: ${error.message}`); }
     }
   }
+  const programmeDuration = ticksToSeconds(
+    document.clipOccurrences?.at(-1)?.programmeRange?.endTick || secondsToTicks(6)
+  );
   return { version: 1, coordinate_space: "canvas_percent", preview_timebase: "output_timeline_seconds",
     ...(order ? { order } : {}),
     ...(groups.length ? { groups: groups.map(group => {
@@ -124,30 +215,63 @@ export const compileStudioCompositionForRender = document => {
         ...(key.spatialCurve ? { spatialCurve: [...key.spatialCurve] } : {}),
       })) } : {}) };
     }) } : {}),
-    layers: [state.mainTransform || { id: "main-video", type: "video" },
-      ...state.overlays.filter(overlay => !overlay.isCaption)].map(layer => ({
-      id: layer.id, name: layer.name || layer.text || "Visual layer", type: layer.type || "visual",
-      ...(layer.vectorShape ? {vector_shape: JSON.parse(JSON.stringify(validateStudioVectorShape(layer.vectorShape)))} : {}),
-      ...(layer.textAnimator ? { text_animator: JSON.parse(JSON.stringify(layer.textAnimator)) } : {}),
-      blend_mode: layer.blendMode || "normal",
-      base_transform: compileBaseTransform(layer), anchor_x: Number(layer.anchorX ?? 50),
-      anchor_y: Number(layer.anchorY ?? 50), effects: {
-        mask: layer.mask ? JSON.parse(JSON.stringify(layer.mask)) : { enabled: false },
-        blur: Number(layer.blur || 0),
-        glow: { enabled: !!layer.glow?.enabled, color: layer.glow?.color || "#8b5cf6",
-          radius: Number(layer.glow?.radius || 0), intensity: Number(layer.glow?.intensity || 0) },
-        shadow: { enabled: !!layer.layerShadow?.enabled, color: layer.layerShadow?.color || "#000000",
-          blur: Number(layer.layerShadow?.blur || 0), opacity: Number(layer.layerShadow?.opacity || 0),
-          x: Number(layer.layerShadow?.x || 0), y: Number(layer.layerShadow?.y || 0) },
-        motion_blur: { enabled: !!layer.motionBlur?.enabled, samples: Number(layer.motionBlur?.samples || 1),
-          shutter: Number(layer.motionBlur?.shutter || 0) },
-      },
-      motion_keyframes: (state.motionKeyframes || []).filter(key => String(key.targetId) === String(layer.id))
-        .map(key => ({ id: key.id, property: key.property, time: Number(key.time || 0),
-          value: Number(key.value || 0), easing: key.easing || "ease_in_out",
-          ...(key.curve ? { curve: key.curve.map(Number) } : {}),
-          ...(key.spatialCurve ? { spatialCurve: [...key.spatialCurve] } : {}) })),
-    })),
+    layers: [{ id: "main-video", type: "video", ...(state.mainTransform || {}) },
+      ...state.overlays.filter(overlay => !overlay.isCaption && !overlay.isNullRig)].map(layer => {
+      const needsBake = layerRequiresWorldBake(layer, state.overlays, state.mainTransform);
+      const baked = needsBake
+        ? bakeLayerMotionToKeyframes({
+            layer,
+            overlays: state.overlays,
+            motionKeyframes: state.motionKeyframes || [],
+            mainTransform: state.mainTransform || null,
+            programmeDuration,
+            fps: layer.id === "main-video" ? 12 : 30,
+            maxSamples: layer.id === "main-video" ? 40 : 240,
+          })
+        : null;
+      const rawLayerKeys = (state.motionKeyframes || []).filter(
+        key => String(key.targetId) === String(layer.id)
+      );
+      const effectiveKeys = baked
+        ? [
+            ...baked.keyframes,
+            ...rawLayerKeys.filter(key => !MOTION_DRIVER_PROPERTIES.includes(key.property)),
+          ]
+        : rawLayerKeys;
+      const effectiveBaseLayer = baked ? { ...layer, ...baked.initialPose } : layer;
+      const hasMatte = layer.trackMatte?.mode && layer.trackMatte.mode !== "none" && layer.trackMatte.sourceLayerId;
+      return {
+        id: layer.id, name: layer.name || layer.text || "Visual layer", type: layer.type || "visual",
+        ...(layer.perspective ? { perspective: encodeStudioPerspective(layer.perspective) } : {}),
+        ...(layer.vectorShape ? {vector_shape: JSON.parse(JSON.stringify(validateStudioVectorShape(layer.vectorShape)))} : {}),
+        ...(layer.textAnimator ? { text_animator: JSON.parse(JSON.stringify(layer.textAnimator)) } : {}),
+        ...(hasMatte ? {
+          track_matte: {
+            mode: layer.trackMatte.mode,
+            source_layer_id: String(layer.trackMatte.sourceLayerId),
+          },
+        } : {}),
+        ...(layer.keepMatteVisible === true ? { keep_matte_visible: true } : {}),
+        blend_mode: layer.blendMode || "normal",
+        base_transform: compileBaseTransform(effectiveBaseLayer), anchor_x: Number(layer.anchorX ?? 50),
+        anchor_y: Number(layer.anchorY ?? 50), effects: {
+          mask: layer.mask ? JSON.parse(JSON.stringify(layer.mask)) : { enabled: false },
+          blur: Number(layer.blur || 0),
+          glow: { enabled: !!layer.glow?.enabled, color: layer.glow?.color || "#8b5cf6",
+            radius: Number(layer.glow?.radius || 0), intensity: Number(layer.glow?.intensity || 0) },
+          shadow: { enabled: !!layer.layerShadow?.enabled, color: layer.layerShadow?.color || "#000000",
+            blur: Number(layer.layerShadow?.blur || 0), opacity: Number(layer.layerShadow?.opacity || 0),
+            x: Number(layer.layerShadow?.x || 0), y: Number(layer.layerShadow?.y || 0) },
+          motion_blur: { enabled: !!layer.motionBlur?.enabled, samples: Number(layer.motionBlur?.samples || 1),
+            shutter: Number(layer.motionBlur?.shutter || 0) },
+        },
+        motion_keyframes: effectiveKeys
+          .map(key => ({ id: key.id, property: key.property, time: Number(key.time || 0),
+            value: Number(key.value || 0), easing: key.easing || "ease_in_out",
+            ...(key.curve ? { curve: key.curve.map(Number) } : {}),
+            ...(key.spatialCurve ? { spatialCurve: [...key.spatialCurve] } : {}) })),
+      };
+    }),
   };
 };
 

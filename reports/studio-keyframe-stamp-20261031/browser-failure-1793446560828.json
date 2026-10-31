@@ -1,0 +1,130 @@
+{
+  "message": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.studio-project-rail__head').locator(':scope > summary')\u001b[22m\n\u001b[2m    - locator resolved to <summary title=\"AutoPromote Motion & Flow source\">AutoPromote Motion & Flow source</summary>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    37 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+  "stack": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.studio-project-rail__head').locator(':scope > summary')\u001b[22m\n\u001b[2m    - locator resolved to <summary title=\"AutoPromote Motion & Flow source\">AutoPromote Motion & Flow source</summary>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    37 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at main (/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/test/e2e/playwright/verify-studio-keyframe-stamp.cjs:134:87)",
+  "results": [
+    {
+      "check": "Parented rotation key retains local -45 degrees and visible world pose",
+      "before": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(1, 0, 0, 1, -77.1562, -85.1328)",
+        "rotation": "0deg",
+        "scale": "1",
+        "opacity": "1"
+      },
+      "after": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(1, 0, 0, 1, -77.1562, -85.1328)",
+        "rotation": "0deg",
+        "scale": "1",
+        "opacity": "1"
+      }
+    },
+    {
+      "check": "Parenting plus spin applies the driver once when stamping",
+      "before": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(0, 1, -1, 0, -77.1562, -85.1328)",
+        "rotation": "90deg",
+        "scale": "1",
+        "opacity": "1"
+      },
+      "after": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(0, 1, -1, 0, -77.1562, -85.1328)",
+        "rotation": "90deg",
+        "scale": "1",
+        "opacity": "1"
+      }
+    },
+    {
+      "check": "Ordinary Undo/Redo retains authored key values",
+      "keyCountBefore": 3,
+      "keyCountAfterRedo": 4
+    }
+  ],
+  "errors": [],
+  "blocked": [],
+  "apiRequests": [],
+  "state": {
+    "video": [
+      {
+        "time": 2.317493,
+        "seeking": false,
+        "paused": true,
+        "readyState": 4
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 2.317493,
+        "seeking": false,
+        "paused": true,
+        "readyState": 4
+      }
+    ],
+    "slider": "2.33333333333333",
+    "body": "ature\nFX Flow\n● Local edit active\n● No render credits used\n↶ Undo\n↷ Redo\n×\n✦\nMoments\n✂\nCut\n⌁\nHook\n⌗\nReframe\nCC\nCaptions\nT\nGraphics\n◆\nMotion\n◫\nComposite\n☍\nNode Flow\n✺\nCreator FX\n≋\nPacing\n▣\nB-roll\n◐\nColor\n♫\nSound\n⇧\nExport\nPreview\nBefore\nAfter\nCompare\nⅡ\nShow media\nHide timeline\nView options\n↻ Preview synced\n♪ Source audio on\n❚❚\n0:2.32 / 0:6.00\n🔊\n100%\nBEFORE\nMoments controls\n\nChoose a source range. Review Director suggestions before applying them to the timeline.\n\nAI CREATIVE DIRECTOR\nTell it how the clip should feel\n☷\n✦ MAKE IT HIT\nWhat are you making?\nPick the closest style. Every suggestion remains editable.\nAuto\nTalk / Story\nBeauty / Fashion\nFitness / Dance\nFood / DIY\nTravel / Lifestyle\nGaming / Tech\n\nLet AutoPromote balance clarity, movement and payoff.\n\nSIGNATURE TRANSFORMATION\nOff\n✦\nAuto Story\n≋\nMotion Sculpture\n◫\nBeat Echo\n◇\nReality Break\n◐\nTracked Reveal\nClean\nBold\nUnreal\nOne tap, editable intensity, clean fallback. Original and overlay audio stay independent.\nCHOOSE YOUR INTENT\n✂\nRemove boring parts\nϟ\nIncrease energy\n▥\nShow proof\n↻\nMake it loop\nRetention Score\n59\n\nApply the suggested improvements to strengthen retention.\n↗ Live estimate · no render needed\n\nPACING\nCalm\nBalanced\nEnergetic\n5 improvements ready\nReview every suggestion before render\n›\nOpening moment\nMake the first seconds impossible to skip\nOff\nEnable opening hook\nOff removes every hook treatment while keeping Signature effects.\nAI HOOK SUGGESTION\nTHIS CHANGES FAST\nFinds the sharpest visual and spoken opening in this moment.\nTry another\nHOOK TEXT\n17/120 · keep it clear enough to read in one glance\nMOTION PRESET\nBlur Reveal\nZoom Focus\nFreeze frame\nA sharp blur-to-clear reveal with high-contrast text that lands immediately.\nDuration\n3.0s\nPreview once\nSelect focal point\n✦ Apply Hook\n✓\n\nProject saved locally with media, captions, layers and render settings.\n\nTimeline\nComp & Rig\nSpeed / Value Graph\nSignal Node Flow\nSynced 1:1 with canonical Studio project & FFmpeg render compiler\nSplit\nTrim Start\nTrim End\nMore actions\nV\nSelect\nC\nRazor\nB\nRipple\nN\nRoll\nY\nSlip\nU\nSlide\nH\nHand\nSequence tracks\nComposition layers\nAt playhead\nShow empty tracks\n⌁ Snap\n⛓ Linked\n⇥ Ripple layers\n−\n+\nFit\n1×\n◆ Keyframes\n0:00\n0:01\n0:02\n0:03\n0:04\n0:05\n0:06\nFront → back · one row per layer · bars show clip timing · groups clip their children\nV1\nSource video · base\n◉\n□\n▏\nAutoPromote Motion & Flow source\n6.0s\n▕\nA2\nOriginal audio\n◉\n□\nM\nS\nAutoPromote Motion & Flow source audio\nSelect Tool\nMagnetic Snapping\nAudio/Video Linked\n0:02"
+  }
+}

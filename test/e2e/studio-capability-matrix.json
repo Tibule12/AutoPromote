@@ -1,4 +1,17 @@
 {
+  "studioMotionFlow20261031": {
+    "date": "2026-10-31",
+    "report": "reports/studio-motion-flow-parity-20261031/README.md",
+    "parityReceipt": "reports/studio-motion-flow-parity-20261031/parity-receipt.json",
+    "browserReceipt": "reports/studio-motion-flow-parity-20261031/browser-receipt.json",
+    "scope": "Native AutoPromote Motion & Flow (Comp & Rig parenting, Null Rig controllers, Alpha/Luma Track Mattes, Motion Drivers, Speed/Value Bezier graphs, and Signal Node Flow [1]/[2] A/B viewer wipe) with local CPU FFmpeg track-matte parity",
+    "competitorBrandLeaks": 0,
+    "productionAuthRelaxed": false,
+    "gpuJobsStarted": 0,
+    "cloudUploads": 0,
+    "readinessPromotion": false,
+    "nextWork": "Retain formal readiness counts and shared S02/S04/S03 blockers."
+  },
   "playwrightLoopbackRepair20261028": {
     "date": "2026-10-28",
     "report": "reports/playwright-loopback-repair-20261028/README.md",
@@ -53,7 +66,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-21T19:28:46.375062Z",
+  "updatedAt": "2026-10-31T11:25:00.000Z",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -149,7 +162,12 @@
     "motion": "frontend/src/components/motion/MotionPanel.js",
     "motionModel": "frontend/src/components/motion/motionModel.js",
     "audio": "frontend/src/components/audio/AudioRemixPanel.js",
-    "timeline": "frontend/src/components/StudioProTimeline.js"
+    "timeline": "frontend/src/components/StudioProTimeline.js",
+    "studioCompRigging": "frontend/src/components/studioCompRigging.js",
+    "studioNodeFlow": "frontend/src/components/studioNodeFlow.js",
+    "studioCompWorkbench": "frontend/src/components/StudioCompWorkbench.js",
+    "studioNodeFlowUi": "frontend/src/components/StudioNodeFlowPanel.js",
+    "workerComposition": "python_media_worker/studio_composition.py"
   },
   "mediaFixtures": [
     {
@@ -738,6 +756,10 @@
         {
           "path": "reports/studio-keyframe-selection-20261015/checkpoint.json",
           "kind": "bounded_native_property_timeline_and_shared_engine_repair"
+        },
+        {
+          "path": "reports/studio-motion-flow-parity-20261031/README.md",
+          "kind": "bounded_local_loopback_motion_flow_and_cpu_ffmpeg_parity"
         }
       ],
       "testExecution": {
@@ -1004,6 +1026,10 @@
         {
           "path": "reports/studio-keyframe-selection-20261015/checkpoint.json",
           "kind": "bounded_native_property_timeline_and_shared_engine_repair"
+        },
+        {
+          "path": "reports/studio-motion-flow-parity-20261031/README.md",
+          "kind": "bounded_local_loopback_motion_flow_and_cpu_ffmpeg_parity"
         }
       ],
       "testExecution": {
@@ -2009,6 +2035,10 @@
         {
           "path": "reports/studio-keyframe-selection-20261015/checkpoint.json",
           "kind": "bounded_native_property_timeline_and_shared_engine_repair"
+        },
+        {
+          "path": "reports/studio-motion-flow-parity-20261031/README.md",
+          "kind": "bounded_local_loopback_motion_flow_and_cpu_ffmpeg_parity"
         }
       ],
       "testExecution": {
@@ -2039,7 +2069,9 @@
       "latestProfessionalMaskedEffectsEvidence": "reports/studio-professional-masked-effects-20261013/README.md",
       "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified.",
       "latestPropertyTimelineEvidence": "reports/studio-keyframe-selection-20261015/README.md",
-      "latestPropertyTimelineScope": "Native property timeline multi-key selection, atomic drag/nudge/time scale/interpolation/copy/paste/delete/history, exact cold reopen and one20s CPU export/full editable Studio playback pass. One group opacity channel has complete native evidence; multi-property/mixed-lock guards have component evidence. Supporting stale Finish clock and byte-preserving source-motion performance repairs pass; full picture/sound stays unqualified."
+      "latestPropertyTimelineScope": "Native property timeline multi-key selection, atomic drag/nudge/time scale/interpolation/copy/paste/delete/history, exact cold reopen and one20s CPU export/full editable Studio playback pass. One group opacity channel has complete native evidence; multi-property/mixed-lock guards have component evidence. Supporting stale Finish clock and byte-preserving source-motion performance repairs pass; full picture/sound stays unqualified.",
+      "latestMotionFlowEvidence": "reports/studio-motion-flow-parity-20261031/README.md",
+      "latestMotionFlowScope": "Native AutoPromote Motion & Flow (Comp & Rig Null Rig parenting, loop/wiggle/spin Motion Drivers, Whip Snap Bezier keyframe curves, Alpha/Luma Track Mattes, and Signal Node Flow [1]/[2] A/B viewer wipe): headless muted loopback authoring across 1440x1000/1280x860/1024x820, zero competitor brand leaks, Undo/Redo, exact IndexedDB cold-reload SHA-256 recovery, signed-out export auth gate, and 4-frame local CPU FFmpeg render parity (min IoU 0.976516, max boundary p95 1.4142px) pass. Whole signed-in cloud/GPU/audio breadth and formal readiness remain unchanged."
     },
     {
       "id": "masking",
@@ -4107,6 +4139,10 @@
         {
           "path": "reports/studio-professional-group-workflow-20261014/checkpoint.json",
           "kind": "bounded_native_group_footage_workflow_with_failed_full_picture_comparisons"
+        },
+        {
+          "path": "reports/studio-motion-flow-parity-20261031/parity-receipt.json",
+          "kind": "bounded_local_loopback_track_matte_and_node_flow_parity"
         }
       ],
       "testExecution": {
@@ -4152,7 +4188,9 @@
       "latestProfessionalMaskedEffectsScope": "Native image mask/shadow/glow/blur with eight X/scale/rotation/opacity keys: two edits, history/save/cold reopen, two owned CPU exports/native downloads/full decode and complete editable Studio playback. Legacy CSS opacity/transform override repaired. Inverted polygon4/4 raster pairs pass; ellipse3/4 passes with strict1.5s raster failure retained. Whole moving/broad picture/sound and readiness remain unqualified.",
       "latestFlatLayerOrderEvidence": "reports/studio-professional-layer-order-20261014/README.md",
       "latestProfessionalGroupWorkflowEvidence": "reports/studio-professional-group-workflow-20261014/README.md",
-      "latestProfessionalGroupWorkflowScope": "Real 20-second footage edit: group clip pointer/numeric move, trim, opacity keys, locks, group delete/undo, source split/history, exact save/cold reopen, one owned CPU export/download/full decode and full editable Studio playback pass. Nine native visibility gates pass; nine declared whole-footage source comparisons fail. Full picture/live sound and export speed remain unqualified."
+      "latestProfessionalGroupWorkflowScope": "Real 20-second footage edit: group clip pointer/numeric move, trim, opacity keys, locks, group delete/undo, source split/history, exact save/cold reopen, one owned CPU export/download/full decode and full editable Studio playback pass. Nine native visibility gates pass; nine declared whole-footage source comparisons fail. Full picture/live sound and export speed remain unqualified.",
+      "latestMotionFlowEvidence": "reports/studio-motion-flow-parity-20261031/README.md",
+      "latestMotionFlowScope": "Native AutoPromote Comp & Rig Alpha/Luma Track Mattes, Null Rig parenting, Motion Drivers, and Signal Node Flow [1]/[2] A/B viewer wipe pass headless muted loopback authoring, exact cold-reload SHA-256 recovery, and 4-frame local CPU FFmpeg render parity (min IoU 0.976516, max boundary p95 1.4142px) with zero competitor brand leaks; formal readiness remains PARTIAL."
     },
     {
       "id": "vfx",
@@ -6474,6 +6512,10 @@
         {
           "path": "reports/studio-professional-group-workflow-20261014/checkpoint.json",
           "kind": "bounded_native_group_footage_workflow_with_failed_full_picture_comparisons"
+        },
+        {
+          "path": "reports/studio-motion-flow-parity-20261031/parity-receipt.json",
+          "kind": "bounded_local_loopback_track_matte_and_node_flow_parity"
         }
       ],
       "testExecution": {
@@ -15577,5 +15619,24 @@
       "S04",
       "S03"
     ]
+  },
+  "localKeyframeStamp20261031": {
+    "evidence": "reports/studio-keyframe-stamp-20261031/README.md",
+    "scope": "Comp & Rig key stamping preserves authored local values under parenting and motion drivers.",
+    "validation": {
+      "componentCasesPassed": 17,
+      "newRegressionCases": 7,
+      "preRepairFailures": 6,
+      "browserChecksPassed": 4,
+      "workerPoseSamplesPassed": 6,
+      "browserMode": "headless muted signed-out loopback fixture"
+    },
+    "limitations": [
+      "No new MP4 or normal-account export qualification",
+      "No whole pixel/audio parity or live smoothness qualification",
+      "Animated reparenting and long/high-frequency driver bakes remain unqualified"
+    ],
+    "formalReadinessChanged": false,
+    "nextTask": "Continue S02 preview/export precision with S04 rigging and driver qualification; retain S03 ownership and full-minute source/creative blockers."
   }
 }

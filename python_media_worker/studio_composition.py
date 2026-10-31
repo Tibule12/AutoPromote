@@ -1,6 +1,10 @@
 """Deterministic RGB/alpha composition for the canonical Studio stack."""
 import math
 import re
+try:
+    from .studio_perspective import validate_perspective_layer
+except ImportError:
+    from studio_perspective import validate_perspective_layer
 
 try:
     from .studio_text_animator import validate_text_animation_layer
@@ -16,8 +20,48 @@ except ImportError:
     from studio_layer_motion import layer_clip_mask
 
 BLEND_MODES = {"normal", "multiply", "screen", "difference", "overlay", "hard-light", "soft-light", "color-dodge", "luminosity"}
+TRACK_MATTE_MODES = {"none", "alpha", "alpha_inverted", "luma", "luma_inverted"}
 GROUP_TRANSFORM = {"x": 0, "y": 0, "scale": 1, "rotation": 0, "opacity": 1}
 GROUP_BOUNDS = {"x": (-100, 100), "y": (-100, 100), "scale": (.1, 2), "rotation": (-180, 180), "opacity": (0, 1)}
+
+
+def validate_track_mattes(plan, order=None):
+    """Validate optional alpha/luma track mattes on canonical layers."""
+    layers = (plan or {}).get("layers") or []
+    by_id = {str(layer.get("id")): layer for layer in layers if isinstance(layer, dict) and layer.get("id")}
+    active = {}
+    for layer in layers:
+        if not isinstance(layer, dict):
+            continue
+        if "keep_matte_visible" in layer and not isinstance(layer["keep_matte_visible"], bool):
+            raise ValueError("keep_matte_visible requires a boolean")
+        matte = layer.get("track_matte")
+        if matte is None:
+            continue
+        if not isinstance(matte, dict) or set(matte) - {"mode", "source_layer_id"}:
+            raise ValueError("Track matte supports mode and source_layer_id only")
+        mode = matte.get("mode", "none")
+        if mode not in TRACK_MATTE_MODES:
+            raise ValueError(f"Unsupported track matte mode {mode!r}")
+        if mode == "none":
+            continue
+        layer_id = str(layer.get("id") or "")
+        if not layer_id or layer_id == "main-video":
+            raise ValueError("Track mattes apply to graphic overlay layers")
+        if order is None:
+            raise ValueError("Track mattes require an explicit canonical layer order")
+        source_id = matte.get("source_layer_id")
+        if not isinstance(source_id, str) or not source_id or source_id == layer_id:
+            raise ValueError("Track matte needs a distinct source_layer_id")
+        if source_id not in by_id or source_id == "main-video":
+            raise ValueError(f"Track matte source {source_id!r} is missing from composition layers")
+        if layer_id not in order or source_id not in order:
+            raise ValueError("Track matte layers must exist in the canonical layer order")
+        source_matte = by_id[source_id].get("track_matte") or {}
+        if isinstance(source_matte, dict) and source_matte.get("mode", "none") != "none":
+            raise ValueError("Chained track mattes are unsupported")
+        active[layer_id] = {"mode": mode, "source_layer_id": source_id}
+    return active, by_id
 
 
 def validate_group_mask(mask):
@@ -54,6 +98,12 @@ def graphic_group_mask(group, width, height):
 def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids, *, source_overlays=None):
     """An explicit canonical stack must name every graphic exactly once."""
     for layer in (plan or {}).get('layers') or []:
+        validate_perspective_layer(layer, any(layer.get('id') in g.get('layerIds',[]) for g in (plan or {}).get('groups') or []))
+        if layer.get('perspective') and source_overlays is not None:
+            sources = [s if isinstance(s,dict) else s.model_dump() for s in source_overlays]
+            source = next((s for s in sources if str(s.get('id')) == str(layer.get('id'))),None)
+            if not source or source.get('type') not in ('image','video') or source.get('bRollMode') == 'fullscreen' or source.get('b_roll_mode') == 'fullscreen':
+                raise ValueError('Perspective needs an ordinary inset image/video source')
         validate_text_animation_layer(layer)
         if layer.get("text_animator") is not None and source_overlays is not None:
             try:
@@ -71,6 +121,7 @@ def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids, *, source_o
                 raise ValueError('Vector artwork needs an image layer')
             validate_vector_shape(layer['vector_shape'])
     if "order" not in (plan or {}):
+        validate_track_mattes(plan, None)
         return None
     order = plan["order"]
     known = list(overlay_ids) + list(motion_ids) + list(three_d_ids)
@@ -79,6 +130,7 @@ def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids, *, source_o
             or len(set(order)) != len(order) or len(set(known)) != len(known)
             or set(order) != set(known)):
         raise ValueError("Composition order must name every graphic layer exactly once")
+    validate_track_mattes(plan, order)
     return order
 
 
@@ -235,26 +287,109 @@ def animated_group_filter(group, input_label, prefix, width, height, duration, s
 
 
 def connect_grouped_layer_blocks(blocks, base_label, order, plan, width, height, duration, speed_plan=None, frame_rate=30, mask_inputs=None):
-    """Reuse each prepared leaf; compose/clip groups before parent transforms."""
+    """Reuse each prepared leaf; compose/clip groups and track mattes before parent transforms."""
     by_id, roots, _ = validate_graphic_groups(plan, order)
-    if not by_id:
+    active_mattes, layers_by_id = validate_track_mattes(plan, order)
+    if not by_id and not active_mattes:
         return connect_layer_blocks(blocks, base_label, order)
+    if not by_id:
+        roots = list(order)
     if width <= 0 or height <= 0 or duration <= 0:
         raise ValueError("Invalid group canvas geometry")
-    animated = any(group.get("motion_keyframes") or group.get("timing") for group in by_id.values())
+    animated = any(group.get("motion_keyframes") or group.get("timing") for group in by_id.values()) or bool(active_mattes)
     fps = float(frame_rate) if animated else 30.0
     if not math.isfinite(fps) or not 1 <= fps <= 120:
         raise ValueError("Invalid group animation frame rate")
     prepared = {item[0]: item for item in blocks}
     if len(prepared) != len(blocks) or any(identity not in order for identity in prepared):
         raise ValueError("Rendered group leaf is missing or duplicated in the composition order")
-    filters, counter = [], 0
+    filters, counter, matte_counter = [], 0, 0
+
+    hidden_matte_sources = {
+        spec["source_layer_id"]
+        for spec in active_mattes.values()
+        if not layers_by_id.get(spec["source_layer_id"], {}).get("keep_matte_visible", False)
+    }
+    matte_pad_queues = {}
+    for src_index, src_id in enumerate(dict.fromkeys(spec["source_layer_id"] for spec in active_mattes.values())):
+        if src_id not in prepared:
+            continue
+        matte_consumers = sum(
+            1 for fill_id, spec in active_mattes.items()
+            if spec["source_layer_id"] == src_id and fill_id in prepared
+        )
+        direct_consumer = 0 if src_id in hidden_matte_sources else 1
+        total_uses = matte_consumers + direct_consumer
+        if total_uses == 0:
+            continue
+        _, src_block, src_prev, src_out = prepared[src_id]
+        src_prefix = f"studio_tmsrc_{src_index}"
+        filters.append(f"color=c=black:s={int(width)}x{int(height)}:r={fps:.9f}:d={float(duration):.6f},"
+                       f"format=rgba,colorchannelmixer=aa=0[{src_prefix}_blank];")
+        filters.extend(part.replace(f"[{src_prev}]", f"[{src_prefix}_blank]")
+                           .replace(f"[{src_out}]", f"[{src_prefix}_raw]") for part in src_block)
+        if total_uses == 1:
+            matte_pad_queues[src_id] = [f"{src_prefix}_raw"]
+        else:
+            split_pads = [f"{src_prefix}_use_{idx}" for idx in range(total_uses)]
+            filters.append(f"[{src_prefix}_raw]format=rgba,split={total_uses}"
+                           + "".join(f"[{pad}]" for pad in split_pads) + ";")
+            matte_pad_queues[src_id] = split_pads
 
     def draw(identity, backdrop):
-        nonlocal counter
+        nonlocal counter, matte_counter
         if identity not in by_id:
-            if identity not in prepared:  # Disabled/out-of-programme leaves.
+            if identity not in prepared or identity in hidden_matte_sources:
                 return backdrop
+            if identity in matte_pad_queues and identity not in active_mattes:
+                pad = matte_pad_queues[identity].pop(0)
+                vis_out = f"studio_tmvis_{matte_counter}"
+                matte_counter += 1
+                vis_block = [f"[{backdrop}][{pad}]overlay=0:0:eof_action=pass:repeatlast=0:format=auto[{vis_out}];"]
+                filters.extend(blend_layer_block(
+                    vis_block, backdrop, vis_out,
+                    layers_by_id.get(identity, {}).get("blend_mode", "normal"),
+                    width, height, duration, f"{vis_out}_blend", frame_rate=fps))
+                return vis_out
+            if identity in active_mattes:
+                spec = active_mattes[identity]
+                src_id, mode = spec["source_layer_id"], spec["mode"]
+                if src_id not in prepared or not matte_pad_queues.get(src_id):
+                    if mode in {"alpha_inverted", "luma_inverted"}:
+                        _, block, previous, output = prepared[identity]
+                        filters.extend(part.replace(f"[{previous}]", f"[{backdrop}]") for part in block)
+                        return output
+                    return backdrop
+                tm_prefix = f"studio_tmatte_{matte_counter}"
+                matte_counter += 1
+                matte_pad = matte_pad_queues[src_id].pop(0)
+                _, fill_block, fill_prev, fill_out = prepared[identity]
+                filters.append(f"color=c=black:s={int(width)}x{int(height)}:r={fps:.9f}:d={float(duration):.6f},"
+                               f"format=rgba,colorchannelmixer=aa=0[{tm_prefix}_fill_blank];")
+                filters.extend(part.replace(f"[{fill_prev}]", f"[{tm_prefix}_fill_blank]")
+                                   .replace(f"[{fill_out}]", f"[{tm_prefix}_fill_fg]") for part in fill_block)
+                if mode == "alpha":
+                    matte_extract = "format=rgba,alphaextract,setsar=1"
+                elif mode == "alpha_inverted":
+                    matte_extract = "format=rgba,alphaextract,negate,setsar=1"
+                elif mode == "luma":
+                    matte_extract = "format=gbrap,premultiply=inplace=1,format=gray,setsar=1"
+                else:
+                    matte_extract = "format=gbrap,premultiply=inplace=1,format=gray,negate,setsar=1"
+                out_label = f"{tm_prefix}_out"
+                filters.extend([
+                    f"[{tm_prefix}_fill_fg]format=rgba,split=2[{tm_prefix}_color][{tm_prefix}_ain];",
+                    f"[{tm_prefix}_ain]alphaextract[{tm_prefix}_alpha];",
+                    f"[{matte_pad}]{matte_extract}[{tm_prefix}_mask];",
+                    f"[{tm_prefix}_alpha][{tm_prefix}_mask]blend=all_mode=multiply[{tm_prefix}_masked_alpha];",
+                    f"[{tm_prefix}_color][{tm_prefix}_masked_alpha]alphamerge[{tm_prefix}_masked_rgba];",
+                ])
+                raw_overlay = [f"[{backdrop}][{tm_prefix}_masked_rgba]overlay=0:0:eof_action=pass:repeatlast=0:format=auto[{out_label}];"]
+                filters.extend(blend_layer_block(
+                    raw_overlay, backdrop, out_label,
+                    layers_by_id.get(identity, {}).get("blend_mode", "normal"),
+                    width, height, duration, f"{tm_prefix}_blend", frame_rate=fps))
+                return out_label
             _, block, previous, output = prepared[identity]
             filters.extend(part.replace(f"[{previous}]", f"[{backdrop}]") for part in block)
             return output

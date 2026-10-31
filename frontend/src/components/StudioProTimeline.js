@@ -1,5 +1,7 @@
 import React from "react";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
+import StudioSequenceClip from './StudioSequenceClip';
+import { normalizeSplitAudioClip } from './studioAudioSplit';
 import StudioControlMenu from "./StudioControlMenu";
 import StudioGroupTimelineClip from "./StudioGroupTimelineClip";
 import StudioKeyframeActions from "./StudioKeyframeActions";
@@ -418,6 +420,7 @@ const AudioSplitClip = ({
   locked = false,
 }) => {
   const dragRef = React.useRef(null);
+  const [pendingOffsets, setPendingOffsets] = React.useState(null);
 
   const resolveSnap = (targetTime, threshold = 0.18) => {
     if (!snapping || !snapTargets || !snapTargets.length)
@@ -476,11 +479,8 @@ const AudioSplitClip = ({
       const targetTime = Number(item.outputStart || 0) + clamped;
       const snapRes = resolveSnap(targetTime);
       const finalOffset = snapRes.snapped ? snapRes.time - Number(item.outputStart || 0) : clamped;
-      if (onAudioTrim) {
-        onAudioTrim(item.originalIndex ?? index, {
-          audioTrimOffsetStart: Math.round(finalOffset * 100) / 100,
-        });
-      }
+      dragRef.current.offsets = { audioTrimOffsetStart: Math.round(finalOffset * 90000) / 90000 };
+      setPendingOffsets(dragRef.current.offsets);
     } else if (type === "trim-end") {
       const rawNewOffset = startOffset + deltaSeconds;
       const clamped = Math.max(-0.5, Math.min(3.0, rawNewOffset));
@@ -491,11 +491,8 @@ const AudioSplitClip = ({
         ? snapRes.time -
           (Number(item.outputStart || 0) + Number(item.videoDuration ?? item.duration ?? 0))
         : clamped;
-      if (onAudioTrim) {
-        onAudioTrim(item.originalIndex ?? index, {
-          audioTrimOffsetEnd: Math.round(finalOffset * 100) / 100,
-        });
-      }
+      dragRef.current.offsets = { audioTrimOffsetEnd: Math.round(finalOffset * 90000) / 90000 };
+      setPendingOffsets(dragRef.current.offsets);
     }
   };
 
@@ -504,7 +501,9 @@ const AudioSplitClip = ({
       try {
         e.target.releasePointerCapture(e.pointerId);
       } catch (_) {}
-      dragRef.current = null;
+      const offsets = dragRef.current.offsets;
+      dragRef.current = null; setPendingOffsets(null);
+      if (offsets && !locked) onAudioTrim?.(item.originalIndex ?? index, offsets);
     }
   };
 
@@ -539,9 +538,11 @@ const AudioSplitClip = ({
         onPointerDown={handlePointerDownLeft}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerCancel={() => { dragRef.current = null; setPendingOffsets(null); }}
         title="Drag left/right to adjust J-Cut dialogue pre-lap"
       />
 
+      {pendingOffsets && <output className="pro-sequence-delta">Audio boundary {Object.values(pendingOffsets)[0].toFixed(3)}s</output>}
       {hasJCut && (
         <div className="pro-jcut-wing" title={`J-Cut audio lead: ${jCutDur}s`}>
           <span>🎧 J -{jCutDur}s</span>
@@ -572,6 +573,7 @@ const AudioSplitClip = ({
         onPointerDown={handlePointerDownRight}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerCancel={() => { dragRef.current = null; setPendingOffsets(null); }}
         title="Drag left/right to adjust L-Cut dialogue trail"
       />
     </div>
@@ -846,7 +848,7 @@ export default function StudioProTimeline({
   onRippleModeChange,
   trackStates,
   onTrackStateChange,
-  timelineSegments,
+  timelineSegments = [],
   activeTool,
   sourceFrames = [],
   overlays,
@@ -884,6 +886,8 @@ export default function StudioProTimeline({
   onSelectOverlay,
   onSelectTool,
   onSplit,
+  onRazorCut,
+  onSequenceEdit,
   splitLocked = trackStates?.video?.locked,
   onTrimStart,
   onTrimEnd,
@@ -1076,10 +1080,11 @@ export default function StudioProTimeline({
       (total, sequenceItem) => total + Number(sequenceItem.duration || 0),
       0
     );
-    const aStartOffset = Number(item.audioTrimOffsetStart || 0);
-    const aEndOffset = Number(item.audioTrimOffsetEnd || 0);
-    const audioOutputStart = Math.max(0, outputStart + aStartOffset);
-    const audioDuration = Math.max(0.05, itemDuration - aStartOffset + aEndOffset);
+    const audio = normalizeSplitAudioClip(item, index, outputStart);
+    const aStartOffset = audio.audioTrimOffsetStart;
+    const aEndOffset = audio.audioTrimOffsetEnd;
+    const audioOutputStart = audio.audioTimelineStart;
+    const audioDuration = audio.audioTimelineDuration;
 
     sequence.push({
       ...item,
@@ -1536,6 +1541,7 @@ export default function StudioProTimeline({
               className={editTool === id ? "is-active" : ""}
               title={`${label} (${shortcut})`}
               aria-label={`${label} tool`}
+              aria-pressed={editTool === id}
               onClick={() => onEditToolChange(id)}
             >
               <span>{shortcut}</span>
@@ -1578,7 +1584,7 @@ export default function StudioProTimeline({
             className={rippleMode ? "is-on" : ""}
             onClick={() => onRippleModeChange(!rippleMode)}
           >
-            ⇥ Ripple
+            ⇥ Ripple layers
           </button>
           <div className="pro-timeline-zoom" role="group" aria-label="Timeline zoom controls">
             <button
@@ -1644,7 +1650,31 @@ export default function StudioProTimeline({
             setSelectedMotionKey(id); setSelectedMotionKeys(new Set([id])); onSelectMotionKeyframe?.(id, graphTarget.id);
           }} />
       </div>}
-      <div className="pro-timeline-scroll" style={showGraph ? { display: 'none' } : undefined} ref={scrollRef} onScroll={marquee.handlers.onScroll}>
+      <div className="pro-timeline-scroll" style={showGraph ? { display: 'none' } : undefined} ref={scrollRef} onScroll={marquee.handlers.onScroll}
+        onKeyDownCapture={event => {
+          if (editTool !== 'hand' || !['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) return;
+          event.preventDefault(); event.stopPropagation();
+          const amount = event.shiftKey ? 400 : 40;
+          if (event.key === 'ArrowLeft') event.currentTarget.scrollLeft -= amount;
+          if (event.key === 'ArrowRight') event.currentTarget.scrollLeft += amount;
+          if (event.key === 'ArrowUp') event.currentTarget.scrollTop -= amount;
+          if (event.key === 'ArrowDown') event.currentTarget.scrollTop += amount;
+        }} onPointerDownCapture={event => {
+          if (editTool !== 'hand' || event.button !== 0 || event.target.closest('input,select,textarea')) return;
+          event.preventDefault(); event.stopPropagation();
+          const scroll = event.currentTarget;
+          scroll.__handDrag = { x: event.clientX, y: event.clientY, left: scroll.scrollLeft, top: scroll.scrollTop };
+          scroll.setPointerCapture?.(event.pointerId);
+        }} onPointerMove={event => {
+          const scroll = event.currentTarget, drag = scroll.__handDrag;
+          if (!drag) return;
+          event.preventDefault(); event.stopPropagation();
+          scroll.scrollLeft = drag.left + drag.x - event.clientX;
+          scroll.scrollTop = drag.top + drag.y - event.clientY;
+        }} onPointerUp={event => { event.currentTarget.__handDrag = null;
+          if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+        }} onPointerCancel={event => { event.currentTarget.__handDrag = null; }}
+        onClickCapture={event => { if (editTool === 'hand') { event.preventDefault(); event.stopPropagation(); } }}>
         <div className="pro-timeline-content" tabIndex={-1} style={{ width: visibleWidth, position: 'relative' }}
           {...marquee.handlers}>
           {marquee.box && <div className="pro-keyframe-marquee" data-testid="keyframe-marquee" style={marquee.box} />}
@@ -1690,6 +1720,12 @@ export default function StudioProTimeline({
                     id: row.id, name: row.label, startTime: row.start, duration: row.end - row.start, locked }}
                     duration={safeDuration} displayRate={displayRate} frameStep={displayRate / Math.max(1, Number(frameRate) || 30)}
                     snapping={snapping} snapTargets={snapTargets} selected={selected} onSelect={() => selectLayer(row)}
+                    onCut={editTool === 'razor' && onRazorCut && row.kind === 'overlay' ? event => {
+                      const lane = event.currentTarget.closest('.pro-track-lane').getBoundingClientRect();
+                      const time = Math.max(row.start, Math.min(row.end,
+                        (event.clientX - lane.left) / Math.max(1, lane.width) * safeDuration));
+                      onRazorCut(time, row.id);
+                    } : undefined}
                     onEdit={group ? onEditGroupTiming : (id, action, value) => {
                       if (row.kind === 'overlay') {
                         if (action === 'move') onOverlayMove?.(id, value); else onOverlayTrim?.(id, action === 'trim-start' ? 'start' : 'end', value);
@@ -1814,6 +1850,15 @@ export default function StudioProTimeline({
                           onOverlaySlip={onOverlaySlip}
                           onClick={event => {
                             event.stopPropagation();
+                            if (editTool === "razor" && onRazorCut && ["graphics", "broll"].includes(trackId)) {
+                              if (!state.locked) {
+                                const lane = event.currentTarget.closest(".pro-track-lane").getBoundingClientRect();
+                                const time = Math.max(start, Math.min(start + itemDuration,
+                                  (event.clientX - lane.left) / Math.max(1, lane.width) * safeDuration));
+                                onRazorCut(time, item.id);
+                              }
+                              return;
+                            }
                             if (trackId === "motion") onSelectMotion?.(item.id);
                             if (trackId === "graphics" || trackId === "broll")
                               onSelectOverlay?.(item.id);
@@ -1884,9 +1929,17 @@ export default function StudioProTimeline({
                         />
                       );
                     }
+                    const ClipElement = trackId === 'video' ? StudioSequenceClip : 'button';
                     return (
-                      <button
+                      <ClipElement
                         key={item.id || `${trackId}-${index}`}
+                        {...(trackId === 'video' ? { item: timelineSegments[index] || item, index, start, duration: itemDuration,
+                          safeDuration, displayRate, editTool, locked: !!state.locked, onEdit: onSequenceEdit,
+                          label: itemLabel, canRollStart: index > 0, canRollEnd: index < timelineSegments.length - 1,
+                          frameStep: displayRate / Math.max(1, Number(frameRate) || 30), snapping, snapTargets,
+                          ranges: timelineSegments.map(clip => ({ id: clip.id,
+                            start: Math.round(Number(clip.startRequest || 0) * 90000),
+                            end: Math.round(Number(clip.endRequest ?? clip.duration) * 90000) })) } : {})}
                         type="button"
                         className={`pro-track-clip ${item.isPunch ? "pro-punch-clip" : ""} ${Number(playhead || 0) >= start && Number(playhead || 0) < start + itemDuration ? "is-at-playhead" : ""}`}
                         data-testid={`pro-${trackId}-clip-${index + 1}`}
@@ -1918,6 +1971,15 @@ export default function StudioProTimeline({
                         aria-label={`${itemLabel} · ${(start / displayRate).toFixed(2)}s–${((start + itemDuration) / displayRate).toFixed(2)}s`}
                         onClick={event => {
                           event.stopPropagation();
+                          if (editTool === "razor" && onRazorCut && ["video", "graphics", "broll"].includes(trackId)) {
+                            if (!state.locked) {
+                              const lane = event.currentTarget.closest('.pro-track-lane').getBoundingClientRect();
+                              const time = Math.max(start, Math.min(start + itemDuration,
+                                (event.clientX - lane.left) / Math.max(1, lane.width) * safeDuration));
+                              onRazorCut(time, trackId === "video" ? null : item.id);
+                            }
+                            return;
+                          }
                           if (trackId === "video" || trackId === "originalAudio")
                             onSelectOverlay?.(null);
                           if (trackId === "motion") {
@@ -1948,7 +2010,7 @@ export default function StudioProTimeline({
                             (trackId === "video" || trackId === "originalAudio") &&
                             event.detail > 0
                           ) {
-                            const lane = event.currentTarget.parentElement.getBoundingClientRect();
+                            const lane = event.currentTarget.closest('.pro-track-lane').getBoundingClientRect();
                             const ratio = Math.max(
                               0,
                               Math.min(1, (event.clientX - lane.left) / Math.max(1, lane.width))
@@ -1967,7 +2029,7 @@ export default function StudioProTimeline({
                             {(itemDuration / displayRate).toFixed(1)}s
                           </small>
                         )}
-                      </button>
+                      </ClipElement>
                     );
                   })}
                   {trackId === "framing"

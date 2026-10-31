@@ -4,7 +4,10 @@ import subprocess
 import numpy as np
 import pytest
 
-from python_media_worker.main_media_server import studio_sequence_canvas_dimensions
+from python_media_worker.main_media_server import (
+    studio_sequence_canvas_dimensions,
+    studio_sequence_delivery_dimensions,
+)
 
 
 def decode(source, canvas):
@@ -39,3 +42,25 @@ def test_wide_preserve_frame_does_not_bake_the_portrait_upload_into_every_cut():
     dict(enabled=True,mode='group_stack',aspect='16:9')])
 def test_other_sequence_framing_keeps_its_existing_canvas(plan):
     assert studio_sequence_canvas_dimensions(720,1280,plan) == (720,1280)
+
+
+def test_smaller_delivery_preserves_wide_picture_and_portrait_letterboxing():
+    canvas = studio_sequence_delivery_dimensions(1920,1080,dict(resolution='720p'))
+    assert canvas == (1280,720)
+    wide = decode('320x180',canvas)
+    portrait = decode('180x320',canvas)
+    assert np.min(wide[[0,-1],:,0]) > 180
+    assert np.max(portrait[:,0,0]) < 10
+    assert np.min(portrait[:,160,0]) > 180
+    assert .30 < np.mean(portrait[:,:,0] > 180) < .34
+
+
+@pytest.mark.parametrize('size,settings,expected', [
+    ((1080,1920),dict(resolution='720p'),(720,1280)),
+    ((1920,1080),dict(resolution='source'),(1920,1080)),
+    ((1920,1080),dict(resolution='1080p'),(1920,1080)),
+    ((1920,1080),dict(resolution='2160p'),(1920,1080)),
+    ((1280,720),dict(resolution='1080p'),(1280,720)),
+])
+def test_only_explicit_downsizing_changes_temporary_canvas(size,settings,expected):
+    assert studio_sequence_delivery_dimensions(*size,settings) == expected
