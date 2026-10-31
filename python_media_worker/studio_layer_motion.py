@@ -256,6 +256,36 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
         y = round(canvas_height * pose["y"] / 100 - anchor[1]) + round(anchor[1] - artwork.height * anchor_y)
         destination.alpha_composite(artwork, (x, y))
         return destination
+    if (not reference_surface and abs(pose["rotation"]) > .001
+            and not (effects.get("shadow") or {}).get("enabled")
+            and not (effects.get("glow") or {}).get("enabled")
+            and finite(effects.get("blur"), 0) <= 0
+            and all(clip_box.get(key, default) == default for key, default in
+                    [("x", 0), ("y", 0), ("width", 1), ("height", 1)])):
+        clip = layer_clip_mask(artwork.size, effects.get("mask") or {}, pose.get("crop_x", 0),
+                               pose.get("crop_y", 0), canvas_height / 720 * pose["scale"])
+        if clip is not None:
+            artwork.putalpha(ImageChops.multiply(artwork.getchannel("A"), clip))
+        # Preserve Pillow rotate's inverse matrix, its rounded local placement
+        # and final canvas offset. Sample only the delivery canvas rather than
+        # a mostly empty diagonal square for every shutter sample.
+        angle = math.radians(pose["rotation"] % 360)
+        c, s = round(math.cos(angle), 15), round(math.sin(angle), 15)
+        ax, ay = anchor
+        left, top = round(ax-artwork.width*anchor_x), round(ay-artwork.height*anchor_y)
+        x, y = round(canvas_width*pose["x"]/100-ax), round(canvas_height*pose["y"]/100-ay)
+        padding = 4
+        padded = Image.new('RGBA', (artwork.width+2*padding, artwork.height+2*padding))
+        padded.alpha_composite(artwork, (padding,padding))
+        matrix = (c, s, ax-c*ax-s*ay-c*x-s*y-left+padding,
+                  -s, c, ay+s*ax-c*ay+s*x-c*y-top+padding)
+        warped = padded.transform(canvas_size, Image.Transform.AFFINE, matrix, Image.Resampling.BICUBIC)
+        opacity = max(0, min(1, pose["opacity"] * sample_opacity))
+        if opacity < 1:
+            warped.putalpha(warped.getchannel("A").point(lambda value: round(value*opacity)))
+        destination = Image.new('RGBA', canvas_size)
+        destination.alpha_composite(warped)
+        return destination
     surface_size, surface_origin, original_anchor = (diagonal, diagonal), (0, 0), anchor
     surface_artwork_position = (round(anchor[0] - artwork.width * anchor_x),
                                 round(anchor[1] - artwork.height * anchor_y))
@@ -265,7 +295,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
     # rotation canvas. Retain the old canvas origin and integer placement so
     # this bounded allocation preserves the original pixels, including edges.
     if (not reference_surface and (layer or {}).get('perspective') and
-            _get(overlay, "type") == "video" and abs(pose["rotation"]) <= .001 and
+            _get(overlay, "type") == "video" and
             shadow.get("enabled") and not (effects.get("glow") or {}).get("enabled") and
             finite(effects.get("blur"), 0) <= 0 and not effects.get("mask", {}).get("enabled") and
             not pose.get("crop_x") and not pose.get("crop_y") and
@@ -335,6 +365,18 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
         # Native clip-path clips the filtered group in its local box; rotating
         # only the artwork first incorrectly leaves shadows outside the mask.
         composed.putalpha(ImageChops.multiply(composed.getchannel("A"), matte))
+    if abs(pose["rotation"]) > .001 and surface_origin != (0, 0):
+        angle = math.radians(pose['rotation'] % 360)
+        c,s = round(math.cos(angle),15),round(math.sin(angle),15)
+        ax,ay = anchor
+        x = round(canvas_width*pose['x']/100-original_anchor[0])+surface_origin[0]
+        y = round(canvas_height*pose['y']/100-original_anchor[1])+surface_origin[1]
+        composed = composed.transform(canvas_size,Image.Transform.AFFINE,
+            (c,s,ax-c*ax-s*ay-c*x-s*y,-s,c,ay+s*ax-c*ay+s*x-c*y),Image.Resampling.BICUBIC)
+        opacity=max(0,min(1,pose['opacity']*sample_opacity))
+        if opacity<1:composed.putalpha(composed.getchannel('A').point(lambda value:round(value*opacity)))
+        destination=Image.new('RGBA',canvas_size);destination.alpha_composite(composed)
+        return destination
     if abs(pose["rotation"]) > .001:
         composed = composed.rotate(-pose["rotation"], Image.Resampling.BICUBIC, center=anchor)
     # Native CSS opacity applies after filtering the entire layer. Fading only

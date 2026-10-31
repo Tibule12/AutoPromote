@@ -8,6 +8,31 @@ from python_media_worker.studio_layer_motion import render_image_layer_motion,la
 
 PLANE={'version':1,'corners':[[0,12],[88,0],[88,100],[0,88]]}
 
+def test_analytic_projection_matches_the_full_linear_system():
+    from python_media_worker.studio_perspective import inverse_projection,perspective_corners
+    for plane in [PLANE,{'version':1,'corners':[[12,0],[100,12],[100,88],[12,100]]},
+                  {'version':1,'corners':[[10,8],[92,4],[86,95],[4,82]]}]:
+        for progress in [0,17,55,100]:
+            corners=perspective_corners(plane,progress)
+            for width,height in [(377,401),(1280,720)]:
+                equations,values=[],[]
+                for (u,v),(x,y) in zip(corners*[width,height],[[0,0],[width,0],[width,height],[0,height]]):
+                    equations.extend([[u,v,1,0,0,0,-x*u,-x*v],[0,0,0,u,v,1,-y*u,-y*v]])
+                    values.extend([x,y])
+                expected=np.linalg.solve(np.asarray(equations),np.asarray(values))
+                np.testing.assert_allclose(inverse_projection(corners,width,height),expected,atol=1e-9)
+
+@pytest.mark.parametrize('angle',[-7,-1,.35,2,13])
+def test_rotated_shadow_plane_keeps_reference_pixels_with_bounded_surface(angle):
+    asset=Image.fromarray(np.random.default_rng(842).integers(0,256,(99,177,4),dtype=np.uint8))
+    overlay={'type':'video','width':70,'height':70,'frameShape':'edge'}
+    layer={'id':'plane','type':'video','perspective':PLANE,'anchor_x':50,'anchor_y':50,
+           'effects':{'shadow':{'enabled':True,'color':'#000000','opacity':.35,'blur':12,'x':0,'y':16}}}
+    pose={'x':68,'y':46,'scale':.9,'rotation':angle,'opacity':.73,'crop_x':0,'crop_y':0,'perspective_progress':75}
+    bounded=np.asarray(_render_pose(asset,overlay,layer,pose,(320,180)))
+    reference=np.asarray(_render_pose(asset,overlay,layer,pose,(320,180),reference_surface=True))
+    np.testing.assert_array_equal(bounded,reference)
+
 def test_warp_preserves_identity_changes_real_picture_and_clips_alpha():
     a=np.zeros((100,200,4),np.uint8)
     a[:,:,:]=[10,20,30,255]

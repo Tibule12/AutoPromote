@@ -61,18 +61,27 @@ def perspective_corners(value, progress=100):
     return np.asarray(p, dtype=float)/100
 
 
+def inverse_projection(corners, width, height):
+    # Same normalized homography as the native preview, with the analytic
+    # inverse. Avoid dispatching a threaded linear solver for an 8x8 system on
+    # every bitmap/frame/shutter sample.
+    (x0,y0),(x1,y1),(x2,y2),(x3,y3) = corners
+    dx1,dx2,dy1,dy2 = x1-x2,x3-x2,y1-y2,y3-y2
+    dx3,dy3 = x0-x1+x2-x3,y0-y1+y2-y3
+    det = dx1*dy2-dx2*dy1
+    g,h = (dx3*dy2-dx2*dy3)/det,(dx1*dy3-dx3*dy1)/det
+    a,b,c,d,e,f = x1-x0+g*x1,x3-x0+h*x3,x0,y1-y0+g*y1,y3-y0+h*y3,y0
+    z = a*e-b*d
+    return [(e-f*h)/z,(c*h-b)*width/height/z,(b*f-c*e)*width/z,
+            (f*g-d)*height/width/z,(a-c*g)/z,(c*d-a*f)*height/z,
+            (d*h-e*g)/width/z,(b*g-a*h)/height/z]
+
+
 def project_media(artwork, value, progress):
     corners = perspective_corners(value,progress)
     if np.max(np.abs(corners-np.asarray(IDENTITY)/100)) < 1e-10:
         return artwork
-    width,height = artwork.size
-    src = np.asarray([[0,0],[width,0],[width,height],[0,height]],dtype=float)
-    dst = corners * [width,height]
-    equations, values = [], []
-    for (u,v),(x,y) in zip(dst,src):
-        equations.extend([[u,v,1,0,0,0,-x*u,-x*v],[0,0,0,u,v,1,-y*u,-y*v]])
-        values.extend([x,y])
-    inverse = np.linalg.solve(np.asarray(equations),np.asarray(values))
+    inverse = inverse_projection(corners, *artwork.size)
     # Premultiplied sampling keeps dark transparent edges from bleeding inward.
     return artwork.convert('RGBa').transform(artwork.size,Image.Transform.PERSPECTIVE,
-        inverse.tolist(),Image.Resampling.BICUBIC).convert('RGBA')
+        inverse,Image.Resampling.BICUBIC).convert('RGBA')

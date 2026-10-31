@@ -366,6 +366,17 @@ def test_fractional_layer_cue_samples_pose_on_the_delivery_grid(tmp_path, monkey
     assert receipt['start_time'] == 4/24
 
 
+@pytest.mark.parametrize('angle', [-17, -.8, .35, 13, 90])
+def test_bounded_rotation_preserves_the_original_transparent_surface_pixels(angle):
+    source = Image.fromarray(np.random.default_rng(217).integers(0, 256, (31, 91, 4), dtype=np.uint8))
+    overlay = {'type':'image','width':86,'height':29,'frameShape':'edge'}
+    layer = {'anchor_x':23,'anchor_y':67}
+    pose = {'x':45.3,'y':58.1,'scale':1.03,'rotation':angle,'opacity':.73,'crop_x':0,'crop_y':0}
+    bounded = np.asarray(_render_pose(source,overlay,layer,pose,(320,180),.28))
+    reference = np.asarray(_render_pose(source,overlay,layer,pose,(320,180),.28,reference_surface=True))
+    np.testing.assert_array_equal(bounded,reference)
+
+
 def test_fullscreen_image_covers_stage_despite_inactive_pip_keys_and_retains_opacity():
     with tempfile.TemporaryDirectory() as temp:
         source, output = Path(temp) / "shot.png", Path(temp) / "full.mov"
