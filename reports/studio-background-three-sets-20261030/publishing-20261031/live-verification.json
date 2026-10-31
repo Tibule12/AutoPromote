@@ -1,0 +1,147 @@
+{
+  "liveUploadedFiles": {
+    "verifiedAt": "2026-10-31T11:14:20.682Z",
+    "service": "https://api.autopromote.org",
+    "results": [
+      {
+        "release": "studio",
+        "contentId": "YOw2tY2s6lCsBM8JtFtJ",
+        "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+        "scheduledAt": "2026-11-02T16:00:00.000Z",
+        "effectiveCopyVerifiedSeparately": true,
+        "uploadedMediaSha256": "c237f18b03925b1cf17b7ae54d9a2d2bd14b5b2c8c9a7b5c8ccd058ed3134383",
+        "uploadedMediaHashVerified": true,
+        "ownedContentRead": true
+      },
+      {
+        "release": "cool-acoustic.compare",
+        "contentId": "TpYqJ6ouydBImT3Ac5LT",
+        "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+        "scheduledAt": "2026-11-03T16:00:00.000Z",
+        "effectiveCopyVerifiedSeparately": true,
+        "uploadedMediaSha256": "f6deab475b83c2f0ff5a26d655491c6e3947a3267db662092646a191bd7173e4",
+        "uploadedMediaHashVerified": true,
+        "ownedContentRead": true
+      },
+      {
+        "release": "cool-acoustic.after",
+        "contentId": "k9MejBrT6zMqCjfOrPbM",
+        "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+        "scheduledAt": "2026-11-04T16:00:00.000Z",
+        "effectiveCopyVerifiedSeparately": true,
+        "uploadedMediaSha256": "a888cc61e3463d1fa5c0b434384ffd4ca41a71981d06a56a0c8b6f062ef4a38b",
+        "uploadedMediaHashVerified": true,
+        "ownedContentRead": true
+      },
+      {
+        "release": "warm-walnut.compare",
+        "contentId": "jxH8ReVcfRd5C79P6rp4",
+        "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+        "scheduledAt": "2026-11-05T16:00:00.000Z",
+        "effectiveCopyVerifiedSeparately": true,
+        "uploadedMediaSha256": "397b84aa31966b5fac9a1f0dced3babd2e61cfbef8dbc4c9277a9a624ad07836",
+        "uploadedMediaHashVerified": true,
+        "ownedContentRead": true
+      },
+      {
+        "release": "warm-walnut.after",
+        "contentId": "UB0yt8wrl3dPFY0syNsJ",
+        "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+        "scheduledAt": "2026-11-06T16:00:00.000Z",
+        "effectiveCopyVerifiedSeparately": true,
+        "uploadedMediaSha256": "e4afff5a3e79771daf38aba9c3712d5e59cc2000e838003b83e57914347eefce",
+        "uploadedMediaHashVerified": true,
+        "ownedContentRead": true
+      },
+      {
+        "release": "neutral-gallery.compare",
+        "contentId": "Dya6VHwijup7rE74s9Rc",
+        "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+        "scheduledAt": "2026-11-07T16:00:00.000Z",
+        "effectiveCopyVerifiedSeparately": true,
+        "uploadedMediaSha256": "47f32bf396639fde08229af04d8335bf25d54cfcbeba0db51f0ae55556261f47",
+        "uploadedMediaHashVerified": true,
+        "ownedContentRead": true
+      },
+      {
+        "release": "neutral-gallery.after",
+        "contentId": "daeAD1x2ZbALsFK3EAZf",
+        "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+        "scheduledAt": "2026-11-08T16:00:00.000Z",
+        "effectiveCopyVerifiedSeparately": true,
+        "uploadedMediaSha256": "da2d54e0e576f01feb698a146c35230ba59ff70da7582408398e56d732424d45",
+        "uploadedMediaHashVerified": true,
+        "ownedContentRead": true
+      }
+    ],
+    "allSevenOwnedMediaHashes": true,
+    "effectiveCopyProofFile": "final-effective-copy-verification.json",
+    "publicationVerified": false
+  },
+  "savedDestinationCopy": {
+    "allThirtyFiveSavedEffectiveTitlesAndCaptionsExact": true,
+    "verifiedDestinationCount": 35,
+    "nativeQueueCopyEdits": [
+      {
+        "release": "studio",
+        "platform": "reddit",
+        "scheduleId": "PaPwhOsl4ynX6sGV9xi1",
+        "usedNormalQueueCopyEditor": true,
+        "otherDatesUnchanged": true
+      },
+      {
+        "release": "cool-acoustic.compare",
+        "platform": "reddit",
+        "scheduleId": "c7ItprpKgGT64TpGZZsg",
+        "usedNormalQueueCopyEditor": true,
+        "otherDatesUnchanged": true
+      },
+      {
+        "release": "cool-acoustic.after",
+        "platform": "reddit",
+        "scheduleId": "9xMrb6lTsnGBX1dhAsEu",
+        "usedNormalQueueCopyEditor": true,
+        "otherDatesUnchanged": true
+      },
+      {
+        "release": "warm-walnut.compare",
+        "platform": "reddit",
+        "scheduleId": "wH55jAvPAdRPYOq7VozI",
+        "usedNormalQueueCopyEditor": true,
+        "otherDatesUnchanged": true
+      },
+      {
+        "release": "warm-walnut.after",
+        "platform": "reddit",
+        "scheduleId": "2HRGqsqThnfn5j6KYW5O",
+        "usedNormalQueueCopyEditor": true,
+        "otherDatesUnchanged": true
+      },
+      {
+        "release": "neutral-gallery.compare",
+        "platform": "reddit",
+        "scheduleId": "6UojBkc61x3RQNxTRzOR",
+        "usedNormalQueueCopyEditor": true,
+        "otherDatesUnchanged": true
+      },
+      {
+        "release": "neutral-gallery.after",
+        "platform": "reddit",
+        "scheduleId": "MHxMLf1kVsydv2aWaQT2",
+        "usedNormalQueueCopyEditor": true,
+        "otherDatesUnchanged": true
+      }
+    ],
+    "originalSchedulesAndInstantsRetained": true,
+    "newOrDuplicateSchedulesCreated": 0
+  },
+  "accountReadinessCorrection": {
+    "sameAuthenticatedAccount": true,
+    "liveAllowed": true,
+    "liveUploadRemainingBeforeCampaign": 86,
+    "livePublisherCreditBalanceBeforeCampaign": 300,
+    "localReviewLimitsWereOutdated": true,
+    "noWalletPlanLimitOrSubscriptionMutation": true
+  },
+  "publishedAlready": false
+}

@@ -244,6 +244,26 @@ describe("ViralClipStudio timeline sequencing", () => {
     return video;
   };
 
+  test("Hook source range keeps the original opening and exports one continuous conversation", async () => {
+    const onSave = jest.fn();
+    mountNativePreview({ clips: [{ id: "opening", start: 0, end: 12, duration: 12 }], onSave });
+    fireEvent.click(screen.getByRole("button", { name: "Hook", exact: true }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Enable opening hook/ }));
+    fireEvent.click(within(screen.getByTestId("clip-studio-inspector")).getByRole("button", { name: "Zoom Focus", exact: true }));
+    fireEvent.change(screen.getByLabelText("Hook source start"), { target: { value: "0" } });
+    fireEvent.change(screen.getByLabelText("Hook source end"), { target: { value: "3" } });
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    const options = onSave.mock.calls[0][2];
+    expect(options.addHook).toBe(true);
+    expect(options.hookSourceStartTime).toBe(0);
+    expect(options.hookSourceEndTime).toBe(3);
+    expect(options.hookFreezeFrame).toBe(false);
+    expect(options.timelineSegments[0]).toMatchObject({ start_time: 0, end_time: 3 });
+    expect(options.timelineSegments.at(-1).end_time).toBe(12);
+    expect(options.timelineSegments.reduce((total, segment) => total + segment.end_time - segment.start_time, 0)).toBe(12);
+  });
+
   test("an existing finished URL cannot hide recovery actions that still need attention", () => {
     mountNativePreview({ renderedOutput: { url: 'https://example.com/finished.mp4' },
       renderRecoveryNeedsAttention: true,

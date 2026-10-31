@@ -22408,6 +22408,28 @@ const ViralClipStudio = ({
                     </small>
                   </label>
 
+                  <div className="inspector-time-grid">
+                    <label>
+                      <span>Source start</span>
+                      <input aria-label="Hook source start" type="number" min={0}
+                        max={hookStartLimit} step={0.01} value={resolvedHookStart}
+                        onChange={event => {
+                          const start = Number(event.target.value);
+                          setHookSegmentRange(start, start + hookDuration, { preview: false });
+                        }} />
+                    </label>
+                    <label>
+                      <span>Source end</span>
+                      <input aria-label="Hook source end" type="number" min={hookEndMinimum}
+                        max={Number(currentTimelineWindow.duration || hookEndMaximum)} step={0.01}
+                        value={hookEnd} onChange={event =>
+                          setHookSegmentRange(resolvedHookStart, Number(event.target.value), { preview: false })} />
+                    </label>
+                  </div>
+                  <p className="inspector-preset-note">
+                    The selected source range plays first. Start at 0 to keep the original opening.
+                  </p>
+
                   <div className="inspector-field">
                     <span>Motion preset</span>
                     <div className="inspector-choice-grid is-three">

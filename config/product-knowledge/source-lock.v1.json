@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Document three native background exports, labelled synchronized review delivery and unresolved live capture; preserve readiness and record exact current playback fixes.",
-  "reviewed_at": "2026-10-31T09:28:29.350Z",
+  "reason": "Record three dedicated Studio Hook0–3s native exports and35 verified live destination schedules; preserve same-account actual live billing and honest Compare limitations.",
+  "reviewed_at": "2026-10-31T11:14:05.971Z",
   "catalog_sha256": "aac1df418fedbc54c59c0ceefc930436e4bff3521cc77a4ae235a5262a368761",
   "sources": [
     {
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "7dcfd60ad707107194d0ec6fd54f0ebae8537c4e3036df0445fda04caf59b2f8"
+      "sha256": "5d52dc4265cba24838f5ffed71e3798fb6731bde8b22891d0cb293243c776197"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "8a6631200936bbfac2c9ca0e0db2ba2bc477c31542400828ca9de972480459da"
+      "sha256": "0ec0c3812e35bd83f8ce0549fa1da85689fcaba76f0f98cd4a90eb658cb4d64a"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "812ad07cdbcef28f95d393a34f636c607a407e1ddf38b5197661a66e2e75c3a5"
+      "sha256": "781c0746538dc925c4c8c62c7ca030991ed276ca3c7b422141c4a01e79ec5663"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

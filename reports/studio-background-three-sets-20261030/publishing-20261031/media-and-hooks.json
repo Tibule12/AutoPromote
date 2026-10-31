@@ -1,0 +1,149 @@
+{
+  "date": "2026-10-31",
+  "selectedSevenVideos": [
+    {
+      "release": "studio",
+      "title": "One podcast. Three backgrounds. Here is the Studio edit.",
+      "localTime": "2026-11-02 18:00 SAST",
+      "scheduledAt": "2026-11-02T16:00:00.000Z",
+      "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+      "mediaSha256": "c237f18b03925b1cf17b7ae54d9a2d2bd14b5b2c8c9a7b5c8ccd058ed3134383",
+      "bytes": 11790220
+    },
+    {
+      "release": "cool-acoustic.compare",
+      "title": "Same podcast, a different setting | Cool Acoustic before and after",
+      "localTime": "2026-11-03 18:00 SAST",
+      "scheduledAt": "2026-11-03T16:00:00.000Z",
+      "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+      "mediaSha256": "f6deab475b83c2f0ff5a26d655491c6e3947a3267db662092646a191bd7173e4",
+      "bytes": 2609816
+    },
+    {
+      "release": "cool-acoustic.after",
+      "title": "Change the room. Keep the conversation. | Cool Acoustic",
+      "localTime": "2026-11-04 18:00 SAST",
+      "scheduledAt": "2026-11-04T16:00:00.000Z",
+      "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+      "mediaSha256": "a888cc61e3463d1fa5c0b434384ffd4ca41a71981d06a56a0c8b6f062ef4a38b",
+      "bytes": 7685135,
+      "dedicatedStudioHook": {
+        "enabled": true,
+        "text": "Same podcast. New room.",
+        "template": "zoom_focus",
+        "start": 0,
+        "end": 3,
+        "freeze": false,
+        "zoom": 1.08
+      },
+      "canonicalHash": "382f655ff997c55b6f9ac983083ece26a7c95b982028a1b511255273bd74fb3d",
+      "actualFrontendAuthoring": true,
+      "originalRecordingRemainsInSequence": true,
+      "fullNativePlayback": {
+        "duration": 12.417,
+        "time": 12.417,
+        "ended": true
+      },
+      "audioCheck": {
+        "theme": "cool-acoustic",
+        "originalSeconds": 12.4373125,
+        "hookSeconds": 12.4373125,
+        "matchingSourceOffsetSeconds": 0.0,
+        "correlation": 0.9815640418185175,
+        "voiceRepairDisabled": true
+      }
+    },
+    {
+      "release": "warm-walnut.compare",
+      "title": "Same podcast, a different setting | Warm Walnut before and after",
+      "localTime": "2026-11-05 18:00 SAST",
+      "scheduledAt": "2026-11-05T16:00:00.000Z",
+      "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+      "mediaSha256": "397b84aa31966b5fac9a1f0dced3babd2e61cfbef8dbc4c9277a9a624ad07836",
+      "bytes": 2577940
+    },
+    {
+      "release": "warm-walnut.after",
+      "title": "Change the room. Keep the conversation. | Warm Walnut",
+      "localTime": "2026-11-06 18:00 SAST",
+      "scheduledAt": "2026-11-06T16:00:00.000Z",
+      "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+      "mediaSha256": "e4afff5a3e79771daf38aba9c3712d5e59cc2000e838003b83e57914347eefce",
+      "bytes": 7979694,
+      "dedicatedStudioHook": {
+        "enabled": true,
+        "text": "Same podcast. New room.",
+        "template": "zoom_focus",
+        "start": 0,
+        "end": 3,
+        "freeze": false,
+        "zoom": 1.08
+      },
+      "canonicalHash": "08f3a6212efb91cb1ac43968b27796c8f060d7dbd920baaf3fc7e9eb97d32df4",
+      "actualFrontendAuthoring": true,
+      "originalRecordingRemainsInSequence": true,
+      "fullNativePlayback": {
+        "duration": 12.417,
+        "time": 12.417,
+        "ended": true
+      },
+      "audioCheck": {
+        "theme": "warm-walnut",
+        "originalSeconds": 12.4373125,
+        "hookSeconds": 12.4373125,
+        "matchingSourceOffsetSeconds": 0.0,
+        "correlation": 0.9815640418185175,
+        "voiceRepairDisabled": true
+      }
+    },
+    {
+      "release": "neutral-gallery.compare",
+      "title": "Same podcast, a different setting | Neutral Gallery before and after",
+      "localTime": "2026-11-07 18:00 SAST",
+      "scheduledAt": "2026-11-07T16:00:00.000Z",
+      "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+      "mediaSha256": "47f32bf396639fde08229af04d8335bf25d54cfcbeba0db51f0ae55556261f47",
+      "bytes": 2581280
+    },
+    {
+      "release": "neutral-gallery.after",
+      "title": "Change the room. Keep the conversation. | Neutral Gallery",
+      "localTime": "2026-11-08 18:00 SAST",
+      "scheduledAt": "2026-11-08T16:00:00.000Z",
+      "platforms": ["tiktok", "facebook", "youtube", "reddit", "linkedin"],
+      "mediaSha256": "da2d54e0e576f01feb698a146c35230ba59ff70da7582408398e56d732424d45",
+      "bytes": 7486721,
+      "dedicatedStudioHook": {
+        "enabled": true,
+        "text": "Same podcast. New room.",
+        "template": "zoom_focus",
+        "start": 0,
+        "end": 3,
+        "freeze": false,
+        "zoom": 1.08
+      },
+      "canonicalHash": "5b6f9f01bfd2f6175ba1a2d258610364186cad9f68a59c8b5129ceb779b6ebd3",
+      "actualFrontendAuthoring": true,
+      "originalRecordingRemainsInSequence": true,
+      "fullNativePlayback": {
+        "duration": 12.417,
+        "time": 12.417,
+        "ended": true
+      },
+      "audioCheck": {
+        "theme": "neutral-gallery",
+        "originalSeconds": 12.4373125,
+        "hookSeconds": 12.4373125,
+        "matchingSourceOffsetSeconds": 0.0,
+        "correlation": 0.9815640418185175,
+        "voiceRepairDisabled": true
+      }
+    }
+  ],
+  "graphicsHeadlineCandidateExcluded": true,
+  "defaultPointEightHookCandidateExcluded": true,
+  "gpuExecution": false,
+  "paidGeneration": false,
+  "sourceAndNewHookProjectsRetained": true,
+  "notes": "The three original canonical background outputs are imported through normal Studio as sources for the dedicated Hook revisions. Full original background projects/backups remain separate. Review-environment development credit bypass is not production billing proof; actual publishing uses the live API and its real policy."
+}
