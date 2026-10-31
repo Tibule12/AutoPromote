@@ -2627,6 +2627,7 @@ const ViralClipStudio = ({
   onRenderedPreviewError,
   onProjectOpened,
   onCinematicSceneReview,
+  onLocalProgrammeRender,
   renderRecoveryPanel,
   renderRecoveryNeedsAttention = false,
   onDownloadRendered,
@@ -11907,12 +11908,12 @@ const ViralClipStudio = ({
     if (isExporting) return;
     setExportErrorMessage("");
     const exportEditState = getEditorSnapshot();
-    if (destination === "local" && cinematicLocalEnabled() && onCinematicSceneReview) {
+    if ((destination === "local" || onLocalProgrammeRender) && cinematicLocalEnabled() && onCinematicSceneReview) {
       const document = exportEditState.studioDocument;
       const submittedKey = programmeDocumentKey(document);
       try {
         setIsExporting(true); setExportStatusLabel("Assembling local programme…");
-        let job = await cinematicRequest("programmes", { document });
+        let job = onLocalProgrammeRender ? await onLocalProgrammeRender(document) : await cinematicRequest("programmes", { document });
         localProgrammeJobRef.current = job.id;
         while (!["completed", "failed", "cancelled"].includes(job.status)) {
           setExportStatusLabel(`Programme ${job.status} · ${Math.round((job.progress || 0) * 100)}%`);
@@ -11920,7 +11921,7 @@ const ViralClipStudio = ({
           job = await cinematicRequest(`jobs/${job.id}`);
         }
         if (job.status !== "completed") throw new Error(job.error || "Local programme was cancelled");
-        if (programmeDocumentKey(getEditorSnapshot().studioDocument) !== submittedKey)
+        if (programmeDocumentKey(latestEditorSnapshotRef.current().studioDocument) !== submittedKey)
           throw new Error("Programme changed during assembly. The rendered version is retained; render the current edit to review it.");
         setLocalProgrammeResult({ ...job, documentKey: submittedKey });
         setPreviewFinishedFile(true); setComparisonMode("after");

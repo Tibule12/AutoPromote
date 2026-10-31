@@ -8,6 +8,7 @@ const crypto = require("node:crypto");
 const { spawn, spawnSync, execFileSync } = require("node:child_process");
 const { validateCinematicScene, buildCinematicGraph, planCinematicIntent } = require("../../frontend/src/components/threeD/cinematicContract");
 const { compileLocalProgramme, programmeCodeHashes } = require("./programmePlan.cjs");
+const { compileOfflineProgramme } = require("./offlineProgramme.cjs");
 const ROOT = path.resolve(__dirname, "../..");
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const stable = value => JSON.stringify(value, (_key, item) => item && typeof item === "object" && !Array.isArray(item)
@@ -158,9 +159,11 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
     let job = { id, status: "queued", progress: 0, quality: identity.quality || "programme", ...metadata,
       createdAt: new Date().toISOString(), externalCharges: 0, reused: false };
     persist(job);
-    const child = spawn(pythonExecutable, [executable, path.join(work, "manifest.json")], { cwd: work, detached: true,
+    const interpreter=identity.kind==="studio_offline_programme" ? process.env.CINEMATIC_FULL_WORKER_PYTHON : pythonExecutable;
+    const child = spawn(interpreter, [executable, path.join(work, "manifest.json")], { cwd: work, detached: true,
       env: { PATH: process.env.PATH, LANG: "C.UTF-8", HOME: work, OMP_NUM_THREADS: String(threads),
-        CUDA_VISIBLE_DEVICES: "", HIP_VISIBLE_DEVICES: "", OPENBLAS_NUM_THREADS: "1" }, stdio: ["ignore", "pipe", "pipe"] });
+        CUDA_VISIBLE_DEVICES: "", HIP_VISIBLE_DEVICES: "", OPENBLAS_NUM_THREADS: "1",VIDEO_ENCODER:"libx264",
+        FIREBASE_STATUS_UPDATES_ENABLED:"false",HF_HUB_OFFLINE:"1",HF_HUB_DISABLE_TELEMETRY:"1" }, stdio: ["ignore", "pipe", "pipe"] });
     const log = fs.createWriteStream(path.join(work, "worker.log"));
     let buffer = "", ended = false;
     const kill = () => { try { process.kill(-child.pid, "SIGKILL"); } catch {} };
@@ -199,7 +202,7 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
       }
       job.finishedAt = new Date().toISOString(); persist(job);
       if (job.status !== "completed") {
-        for (const folder of ["presenter", "evidence", "frames", "assembly"]) fs.rmSync(path.join(work, folder), { recursive: true, force: true });
+        for (const folder of ["presenter", "evidence", "frames", "assembly", "scratch"]) fs.rmSync(path.join(work, folder), { recursive: true, force: true });
         fs.rmSync(path.join(work, "movie.mp4"), { force: true });
       }
     };
@@ -214,7 +217,18 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
     }
     return status(id);
   }
-  return { directory, register, assets, submit, submitProgramme, status, cancel, capabilities,
+  function submitOffline(document) {
+    if(!process.env.CINEMATIC_FULL_WORKER_PYTHON || !fs.existsSync(process.env.CINEMATIC_FULL_WORKER_PYTHON))
+      throw Error("The offline full Studio worker is not enabled on this local host");
+    const {payload,source,documentHash}=compileOfflineProgramme(document,inventory);
+    const identity={version:1,kind:"studio_offline_programme",request:payload,codeHashes:{...programmeCodeHashes(ROOT),
+      worker:hash(fs.readFileSync(path.join(ROOT,"python_media_worker/main_media_server.py"))),
+      boundary:hash(fs.readFileSync(path.join(ROOT,"scripts/cinematic/localWorkerBoundary.py"))),
+      compiler:hash(fs.readFileSync(path.join(ROOT,"src/cinematic/offlineProgramme.cjs")))},versions,threads};
+    return launch(identity,path.join(ROOT,"scripts/cinematic/localWorkerBoundary.py"),{kind:identity.kind,documentHash},
+      {document,documentHash,sourcePath:source.path});
+  }
+  return { directory, register, assets, submit, submitProgramme, submitOffline, status, cancel, capabilities,
     assetFile: id => inventory.get(id)?.path,
     shutdown: () => { if (active) active.kill(); },
     plan: intent => planCinematicIntent(intent, assets()) };
@@ -265,6 +279,11 @@ function createLocalServer(engine, { port = 6341, build } = {}) {
         if (req.headers["content-type"] !== "application/json") throw new Error("JSON body required");
         const input = JSON.parse((await body(req, 1024 * 1024)).toString());
         return send(engine.submitProgramme(input.document), 202);
+      }
+      if(req.method==="POST" && url.pathname==="/api/cinematic/offline-programmes") {
+        if(req.headers["content-type"]!=="application/json") throw Error("JSON body required");
+        const input=JSON.parse((await body(req,1024*1024)).toString());
+        return send(engine.submitOffline(input.document),202);
       }
       if (req.method === "POST" && ["/api/cinematic/jobs", "/api/cinematic/plan"].includes(url.pathname)) {
         if (req.headers["content-type"] !== "application/json") throw new Error("JSON body required");

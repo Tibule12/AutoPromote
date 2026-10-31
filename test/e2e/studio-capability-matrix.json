@@ -15656,5 +15656,46 @@
       "S04",
       "S03"
     ]
+  },
+  "unmutedComeback20261031": {
+    "date": "2026-10-31",
+    "status": "NATIVE_PRIVATE_PODCAST_FILMS_DELIVERED_CREATIVE_LISTENING_OPEN",
+    "report": "reports/unmuted-comeback-20261031/README.md",
+    "duration": 27.466666666666665,
+    "frames": 824,
+    "fps": 30,
+    "captionLines": 23,
+    "checks": {
+      "node": 12,
+      "canonicalCompilerSequence": 52,
+      "mountedEditorSelected": 4,
+      "focusedTotal": 68,
+      "fullEditorSuite": "NOT_RERUN"
+    },
+    "productionDataAccess": false,
+    "paidModelOrGpu": false,
+    "deployed": false,
+    "published": false,
+    "readinessPromoted": false,
+    "creativeApproval": false,
+    "freshHumanListening": false,
+    "remaining": [
+      "Owner listening/wording and creative acceptance",
+      "Portable local source packaging/relinking",
+      "Normal customer/cloud dispatch and tenant-owned receipt qualification",
+      "Whole authoring picture/sound/colour/edge parity",
+      "Shared S02/S04/S03 backlog"
+    ],
+    "nextTask": "Retain both native films and exact saved states; incorporate owner feedback and select substantive interview highlights from the longer original.",
+    "evidence": {
+      "native": "reports/unmuted-comeback-20261031/review/native-verification.json",
+      "media": "reports/unmuted-comeback-20261031/review/media-proof.json",
+      "audio": "reports/unmuted-comeback-20261031/review/audio-measurements.json",
+      "portraitSha256": "7d4249e8739d06a664b3b01f2428d90e536a641bc45375d1cd1b2bacd613f04c",
+      "landscapeSha256": "cf485ef176e4f4b6499feebaba96c11a14341df42d21df3b920adf7950193822",
+      "canonicalProjects": 2,
+      "completeNativePlaybacks": 2,
+      "sourceUnchanged": true
+    }
   }
 }
