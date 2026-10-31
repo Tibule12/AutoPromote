@@ -7,6 +7,7 @@ const os = require("node:os");
 const crypto = require("node:crypto");
 const { spawn, spawnSync, execFileSync } = require("node:child_process");
 const { validateCinematicScene, buildCinematicGraph, planCinematicIntent } = require("../../frontend/src/components/threeD/cinematicContract");
+const { compileLocalProgramme, programmeCodeHashes } = require("./programmePlan.cjs");
 const ROOT = path.resolve(__dirname, "../..");
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const stable = value => JSON.stringify(value, (_key, item) => item && typeof item === "object" && !Array.isArray(item)
@@ -25,6 +26,11 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
   const font = path.join(ROOT, "frontend/src/components/motion/fonts/Inter-SemiBold.ttf");
   const builder = path.join(ROOT, "studio_3d_renderer/cinematic_scene.py");
   const runner = path.join(ROOT, "studio_3d_renderer/cinematic_local.py");
+  const python = process.env.CINEMATIC_PYTHON || path.join(os.homedir(), ".cache/autopromote-cinematic-runtime/worker-venv/bin/python");
+  const pythonExecutable = fs.existsSync(python) ? python : "python3";
+  const packageProbe = spawnSync(pythonExecutable, ["-c", "import json,sys,numpy,PIL;print(json.dumps({'python':sys.version,'numpy':numpy.__version__,'pillow':PIL.__version__}))"],
+    { encoding: "utf8", timeout: 10000, env: { PATH: process.env.PATH, OPENBLAS_NUM_THREADS: "1" } });
+  const programmeRuntime = packageProbe.status === 0 ? JSON.parse(packageProbe.stdout) : null;
   const inventory = new Map(), jobs = new Map();
   let active = null;
   const versions = { blender: fs.existsSync(blender) ? execFileSync(blender, ["--version"], { encoding: "utf8", timeout: 10000 }).split("\n")[0] : "unavailable",
@@ -35,7 +41,9 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
   const capabilities = () => ({ version: 1, renderer: "blender_cycles_cpu", available: versions.blender !== "unavailable", versions,
     execution: "local_cpu", gpuEnabled: false, cpuThreads: threads, maxSeconds, maxDuration: 10,
     cpu: { architecture: os.arch(), logicalCores: os.availableParallelism(), threadLimit: threads }, gpu,
-    profiles: PROFILES, externalCharges: 0, currency: "USD", cloudEnabled: false });
+    profiles: PROFILES, programmeAvailable: !!programmeRuntime, programmeRuntime,
+    programmeProfile: { width: 1280, height: 720, fps: 24, maxDuration: 60 },
+    externalCharges: 0, currency: "USD", cloudEnabled: false });
   function register(file, name) {
     const stat = fs.statSync(file);
     if (!stat.isFile() || stat.size < 1 || stat.size > 128 * 1024 ** 2) throw new Error("Local media must be 1 byte–128 MB");
@@ -96,6 +104,43 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
       assetHashes: Object.fromEntries(Object.entries(media).map(([role, asset]) => [role, asset.id])),
       builderHash: hash(fs.readFileSync(builder)), runnerHash: hash(fs.readFileSync(runner)), fontHash: hash(fs.readFileSync(font)), versions,
       disclosure: scene.cinematic.content.disclosure, threads };
+    // A move on the programme timeline reuses exactly the same local scene
+    // frames. Source, camera, duration and renderer bytes still bind the cache.
+    const localIdentity = spec => stable({ ...Object.fromEntries(Object.keys(identity).map(key => [key, spec[key]])),
+      graph: { ...spec.graph, programmeStart: 0 } });
+    for (const candidate of fs.readdirSync(path.join(directory, "jobs"))) {
+      if (!/^[a-f0-9]{64}$/.test(candidate)) continue;
+      try {
+        const work = path.join(directory, "jobs", candidate);
+        const prior = status(candidate), spec = JSON.parse(fs.readFileSync(path.join(work, "manifest.json")));
+        if (prior.status === "completed" && localIdentity(spec) === localIdentity(identity)
+            && hash(fs.readFileSync(path.join(work, "movie.mp4"))) === prior.outputSha256)
+          return { ...prior, reused: true };
+      } catch { /* Incomplete/corrupt jobs cannot establish a reusable artifact. */ }
+    }
+    return launch(identity, runner, { sceneId: scene.id,
+      sceneRevision: hash(stable({ ...scene, hqPreviewUrl: "", hqPreviewRevision: "", hqPreviewJobId: "" })) },
+      { blender, font, assets: media });
+  }
+  function submitProgramme(document) {
+    if (!programmeRuntime) throw new Error("Local programme assembly needs Python, NumPy and Pillow; set CINEMATIC_PYTHON to that interpreter");
+    const rendered = id => {
+      if (!/^[a-f0-9]{64}$/.test(id || "")) return null;
+      try {
+        const work = path.join(directory, "jobs", id);
+        return { state: status(id), manifest: JSON.parse(fs.readFileSync(path.join(work, "manifest.json"))), file: path.join(work, "movie.mp4") };
+      } catch { return null; }
+    };
+    const { plan, documentHash } = compileLocalProgramme(document, { asset: id => inventory.get(id), rendered });
+    const identity = { version: 1, kind: "studio_programme", plan, profile: { width: 1280, height: 720 },
+      // Journal/save revisions do not change rendered decisions or charge twice.
+      codeHashes: programmeCodeHashes(ROOT), versions: { ffmpeg: versions.ffmpeg, ...programmeRuntime }, threads };
+    const assets = Object.fromEntries(plan.cuts.map(cut => [cut.assetId, { ...inventory.get(cut.assetId), sha256: cut.assetId }]));
+    const renderedScenes = Object.fromEntries(plan.scenes.map(scene => [scene.jobId, { path: rendered(scene.jobId).file, sha256: scene.sha256 }]));
+    return launch(identity, path.join(ROOT, "python_media_worker/studio_cinematic_programme.py"),
+      { kind: "studio_programme", documentHash }, { documentHash, document, assets, renderedScenes });
+  }
+  function launch(identity, executable, metadata, extra) {
     const id = hash(stable(identity));
     const work = path.join(directory, "jobs", id);
     if (fs.existsSync(statePath(id))) {
@@ -108,13 +153,12 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
     if (fs.statfsSync(directory).bavail * fs.statfsSync(directory).bsize < 3 * 1024 ** 3) throw new Error("Local render requires at least 3 GiB free disk");
     fs.rmSync(work, { recursive: true, force: true });
     fs.mkdirSync(work, { recursive: true });
-    const manifest = { ...identity, manifestId: id, blender, font, assets: media };
+    const manifest = { ...identity, manifestId: id, ...extra };
     fs.writeFileSync(path.join(work, "manifest.json"), JSON.stringify(manifest, null, 2));
-    let job = { id, status: "queued", progress: 0, quality, sceneId: scene.id,
-      sceneRevision: hash(stable({ ...scene, hqPreviewUrl: "", hqPreviewRevision: "", hqPreviewJobId: "" })),
+    let job = { id, status: "queued", progress: 0, quality: identity.quality || "programme", ...metadata,
       createdAt: new Date().toISOString(), externalCharges: 0, reused: false };
     persist(job);
-    const child = spawn("python3", [runner, path.join(work, "manifest.json")], { cwd: work, detached: true,
+    const child = spawn(pythonExecutable, [executable, path.join(work, "manifest.json")], { cwd: work, detached: true,
       env: { PATH: process.env.PATH, LANG: "C.UTF-8", HOME: work, OMP_NUM_THREADS: String(threads),
         CUDA_VISIBLE_DEVICES: "", HIP_VISIBLE_DEVICES: "", OPENBLAS_NUM_THREADS: "1" }, stdio: ["ignore", "pipe", "pipe"] });
     const log = fs.createWriteStream(path.join(work, "worker.log"));
@@ -155,7 +199,7 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
       }
       job.finishedAt = new Date().toISOString(); persist(job);
       if (job.status !== "completed") {
-        for (const folder of ["presenter", "evidence", "frames"]) fs.rmSync(path.join(work, folder), { recursive: true, force: true });
+        for (const folder of ["presenter", "evidence", "frames", "assembly"]) fs.rmSync(path.join(work, folder), { recursive: true, force: true });
         fs.rmSync(path.join(work, "movie.mp4"), { force: true });
       }
     };
@@ -170,7 +214,7 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
     }
     return status(id);
   }
-  return { directory, register, assets, submit, status, cancel, capabilities,
+  return { directory, register, assets, submit, submitProgramme, status, cancel, capabilities,
     assetFile: id => inventory.get(id)?.path,
     shutdown: () => { if (active) active.kill(); },
     plan: intent => planCinematicIntent(intent, assets()) };
@@ -216,6 +260,11 @@ function createLocalServer(engine, { port = 6341, build } = {}) {
       if (media && ["GET", "HEAD"].includes(req.method)) {
         const file = engine.assetFile(media[1]); if (!file) return send({ error: "Asset unavailable" }, 404);
         return serveFile(req, res, file, "video/mp4");
+      }
+      if (req.method === "POST" && url.pathname === "/api/cinematic/programmes") {
+        if (req.headers["content-type"] !== "application/json") throw new Error("JSON body required");
+        const input = JSON.parse((await body(req, 1024 * 1024)).toString());
+        return send(engine.submitProgramme(input.document), 202);
       }
       if (req.method === "POST" && ["/api/cinematic/jobs", "/api/cinematic/plan"].includes(url.pathname)) {
         if (req.headers["content-type"] !== "application/json") throw new Error("JSON body required");

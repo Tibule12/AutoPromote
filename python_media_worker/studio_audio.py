@@ -51,10 +51,15 @@ def build_dialogue_filter(raw):
     settings = normalize_audio_restoration(raw)
     if not settings["enabled"]:
         return "", settings
-    filters = ["highpass=f=55", "lowpass=f=18000"]
+    filters = ["aresample=48000", "highpass=f=55", "lowpass=f=18000"]
     if settings["denoise"] > 0 or settings["voice_isolation"]:
         strength = max(settings["denoise"], 58 if settings["voice_isolation"] else 0)
-        filters.append(f"afftdn=nr={3 + strength * .24:.2f}:nf={-62 + strength * .22:.2f}:tn=1:gs={round(2 + strength * .08)}")
+        # afftdn's overlap window delays content by two sample advances
+        # (25 ms at the Studio delivery clock). Flush its actual tail, then
+        # remove its delayed prefix; resetting PTS alone cannot align speech.
+        filters.extend(["apad=pad_len=1200",
+            f"afftdn=nr={3 + strength * .24:.2f}:nf={-62 + strength * .22:.2f}:tn=1:gs={round(2 + strength * .08)}",
+            "atrim=start_sample=1200", "asetpts=PTS-STARTPTS"])
     if settings["hum_frequency"]:
         hum = settings["hum_frequency"]
         filters.extend([f"bandreject=f={hum:.0f}:width_type=h:width=3", f"bandreject=f={hum*2:.0f}:width_type=h:width=4"])

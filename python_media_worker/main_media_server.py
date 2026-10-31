@@ -33739,7 +33739,15 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         if request.threeDGraphics:
             from studio_3d_overlay import download_overlay, validate_overlay_media, validate_resolved_overlays
+            try:
+                from .studio_rendered_scene import rendered_scene_block
+            except ImportError:
+                from studio_rendered_scene import rendered_scene_block
             for index, graphic in enumerate(validate_resolved_overlays(request.threeDGraphics)):
+                start = rendered_timeline_time(graphic["startTime"])
+                end = rendered_timeline_time(graphic["startTime"] + graphic["duration"])
+                if end <= start:  # A saved scene can lie beyond a shorter edit.
+                    continue
                 block_start, block_input = len(filter_chain), current_v_label
                 alpha_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_3d_{index}.mov")
                 creative_adjusted_paths.append(alpha_path)
@@ -33747,19 +33755,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 await asyncio.to_thread(download_overlay, graphic, alpha_path)
                 await asyncio.to_thread(validate_overlay_media, alpha_path, graphic["duration"])
                 inputs.extend(["-i", alpha_path])
-                start = rendered_timeline_time(graphic["startTime"])
-                end = rendered_timeline_time(graphic["startTime"] + graphic["duration"])
-                stretch = max(.01, (end - start) / graphic["duration"])
-                layer_label = f"v_3d_input_{index}"
                 next_label = f"v_3d_{index}"
-                graphic_format = ":format=auto" if explicit_layer_order is not None else ""
-                filter_chain.append(
-                    f"[{input_idx}:v]format=rgba,scale={base_width}:{base_height}:flags=lanczos,"
-                    f"setpts=(PTS-STARTPTS)*{stretch:.8f}+{start:.3f}/TB[{layer_label}];"
-                )
-                filter_chain.append(
-                    f"[{current_v_label}][{layer_label}]overlay=0:0:eof_action=pass:repeatlast=0{graphic_format}[{next_label}];"
-                )
+                filter_chain.extend(rendered_scene_block(
+                    input_idx, current_v_label, next_label, f"v_3d_{index}",
+                    base_width, base_height, graphic["startTime"], graphic["duration"],
+                    start, end, explicit_layer_order is not None))
                 input_idx += 1
                 current_v_label = next_label
                 if explicit_layer_order is not None:

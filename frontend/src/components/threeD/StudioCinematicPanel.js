@@ -16,14 +16,15 @@ export async function cinematicRequest(route, body, method = body ? "POST" : "GE
 const makeId = () => `cinematic-${globalThis.crypto?.randomUUID?.() || Date.now()}`;
 const assetUrl = id => `/api/cinematic/assets/${id}/media`;
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-export default function StudioCinematicPanel({ scenes, onChange, focusId, onSelect, playhead = 0, duration = 60, onSeek, onUseLandscape, onReviewScene }) {
+export default function StudioCinematicPanel({ scenes, onChange, focusId, onSelect, playhead = 0, duration = 60, onSeek, onUseLandscape, onReviewScene,
+  onRenderProgramme, programmeRendering = false, programmeResult, programmeError, onCancelProgramme }) {
   const [assets, setAssets] = useState([]), [capabilities, setCapabilities] = useState(null);
   const [state, setState] = useState({ status: "idle" }), [error, setError] = useState("");
   const active = useRef(null), alive = useRef(true), current = useRef(scenes);
   current.current = scenes;
   const cinematics = scenes.filter(item => item.sceneType === "cinematic_evidence");
   const scene = cinematics.find(item => item.id === focusId) || cinematics[0];
-  const busy = ["queued", "preparing", "rendering", "assembling"].includes(state.status);
+  const busy = programmeRendering || ["queued", "preparing", "rendering", "assembling"].includes(state.status);
   useEffect(() => {
     alive.current = true;
     if (cinematicLocalEnabled()) Promise.all([cinematicRequest("assets"), cinematicRequest("capabilities")])
@@ -33,6 +34,12 @@ export default function StudioCinematicPanel({ scenes, onChange, focusId, onSele
   }, []);
   const updateScene = patch => {
     const next = normalizeStudio3DScene({ ...scene, ...patch });
+    if (Object.keys(patch).every(key => ["startTime", "layerOrder", "enabled"].includes(key))) {
+      // Programme placement cannot change scene-local Blender pixels.
+      const before = studio3DSceneRevision(scene), after = studio3DSceneRevision(next);
+      if (scene.hqPreviewRevision === before) next.hqPreviewRevision = after;
+      if (scene.localExport?.revision === before) next.localExport.revision = after;
+    }
     onChange(scenes.map(item => item.id === scene.id ? next : item));
   };
   const edit = (section, field, value) => updateScene({ cinematic: { ...scene.cinematic,
@@ -153,7 +160,15 @@ export default function StudioCinematicPanel({ scenes, onChange, focusId, onSele
       {readyExport && <a href={readyExport.url} download="cinematic-evidence.mp4">Download scene movie</a>}
       {readyPreview && <a href={readyPreview} download="cinematic-evidence-preview-360p.mp4">Download rendered preview · 360p</a>}
       {(readyExport || readyPreview) && <video aria-label="Rendered cinematic scene review" controls muted preload="metadata" src={readyExport?.url || readyPreview} />}
-      <p className="cinematic-limits">Scene export covers this scene interval with original presenter audio. Full programme assembly with other effects, cloud rendering, arbitrary node editing and grounded narration timing remain unfinished. Ordinary Studio rendering remains available for projects without cinematic scenes.</p>
+      {onRenderProgramme && <div className="cinematic-programme-export">
+        <h4>Programme delivery</h4>
+        <p>Assemble the complete timeline with verified 720p scenes, source cuts, ordinary Inter titles, motion graphics, groups and voice repair. Original programme audio stays continuous. Maximum 60 seconds, 24fps, 16:9.</p>
+        <button type="button" disabled={busy || !capabilities?.programmeAvailable} onClick={onRenderProgramme}>Render programme · 720p</button>
+        {programmeRendering && <button type="button" onClick={onCancelProgramme}>Cancel programme render</button>}
+        {programmeResult && <p><a href={programmeResult.movieUrl} download="autopromote-programme-720p.mp4">Download rendered programme · 720p</a></p>}
+        {programmeError && <p role="alert">{programmeError}</p>}
+      </div>}
+      <p className="cinematic-limits">Scene export covers this scene interval. Local programme assembly validates supported timeline decisions before processing; unsupported effects must use the ordinary worker. Cloud cinematic rendering, arbitrary node editing and grounded narration timing remain unfinished.</p>
     </>}
     {busy && <progress aria-label="Cinematic render progress" max={1} value={state.progress || 0} />}
     <output aria-live="polite">{state.status}{busy ? ` · ${Math.round((state.progress || 0) * 100)}%` : ""}{state.reused ? " · cached output reused" : ""}</output>

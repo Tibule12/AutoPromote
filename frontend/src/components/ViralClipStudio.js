@@ -126,7 +126,8 @@ import MotionPanel from "./motion/MotionPanel";
 import MotionCanvas from "./motion/MotionCanvas";
 import { motionCues, normalizeMotion, generateSmartMotionBeats } from "./motion/motionModel";
 import Studio3DPanel from "./threeD/Studio3DPanel";
-import StudioCinematicPanel, { StudioCinematicPreview, cinematicLocalEnabled } from "./threeD/StudioCinematicPanel";
+import StudioCinematicPanel, { StudioCinematicPreview, cinematicLocalEnabled, cinematicRequest } from "./threeD/StudioCinematicPanel";
+import { programmeDocumentKey } from "./threeD/cinematicProgrammeClient";
 import StudioSubjectVfxPanel from "./StudioSubjectVfxPanel";
 import { findUncoveredCaptionSpeechRanges, mapCaptionSilencesToProgramme } from "./studioCaptionCoverage";
 import { historyMediaIdentity, historySubjectVfxIdentity } from "./studioHistoryMedia";
@@ -3060,6 +3061,8 @@ const ViralClipStudio = ({
   const [audioExtractionStatus, setAudioExtractionStatus] = useState("");
   const [isExtractingAudio, setIsExtractingAudio] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const localProgrammeJobRef = useRef(null);
+  const [localProgrammeResult, setLocalProgrammeResult] = useState(null);
   const [exportStatusLabel, setExportStatusLabel] = useState("Render Final Clip");
   const [selectedExportDestination, setSelectedExportDestination] = useState("general");
   const [splitExportEnabled, setSplitExportEnabled] = useState(false);
@@ -3087,7 +3090,7 @@ const ViralClipStudio = ({
   // editor's explicit monitor choice through that transport transition.
   // A different project starts in its finished view; a successful explicit
   // export below also selects its newly rendered result.
-  useEffect(() => { setPreviewFinishedFile(true); }, [projectId]);
+  useEffect(() => { setPreviewFinishedFile(true); setLocalProgrammeResult(null); }, [projectId]);
 
   useEffect(() => {
     if (!isExporting || !renderStatus) return;
@@ -11904,6 +11907,34 @@ const ViralClipStudio = ({
     if (isExporting) return;
     setExportErrorMessage("");
     const exportEditState = getEditorSnapshot();
+    if (destination === "local" && cinematicLocalEnabled() && onCinematicSceneReview) {
+      const document = exportEditState.studioDocument;
+      const submittedKey = programmeDocumentKey(document);
+      try {
+        setIsExporting(true); setExportStatusLabel("Assembling local programme…");
+        let job = await cinematicRequest("programmes", { document });
+        localProgrammeJobRef.current = job.id;
+        while (!["completed", "failed", "cancelled"].includes(job.status)) {
+          setExportStatusLabel(`Programme ${job.status} · ${Math.round((job.progress || 0) * 100)}%`);
+          await new Promise(resolve => setTimeout(resolve, 750));
+          job = await cinematicRequest(`jobs/${job.id}`);
+        }
+        if (job.status !== "completed") throw new Error(job.error || "Local programme was cancelled");
+        if (programmeDocumentKey(getEditorSnapshot().studioDocument) !== submittedKey)
+          throw new Error("Programme changed during assembly. The rendered version is retained; render the current edit to review it.");
+        setLocalProgrammeResult({ ...job, documentKey: submittedKey });
+        setPreviewFinishedFile(true); setComparisonMode("after");
+        onCinematicSceneReview({ url: job.movieUrl, duration: job.receipt.duration,
+          label: "Rendered programme · 720p · original programme audio", jobId: job.id, sha256: job.outputSha256 });
+        setStudioActionMessage(job.reused ? "Verified programme reused. No scene was regenerated." : "Programme assembled with the saved cuts, graphic stack and original programme audio.");
+        seekLiveEditTimelineItem(0, "motion");
+      } catch (error) {
+        setExportErrorMessage(error.message); setStudioActionMessage(error.message); toast.error(error.message);
+      } finally {
+        localProgrammeJobRef.current = null; setIsExporting(false); setExportStatusLabel("Render Final Clip");
+      }
+      return;
+    }
     const {
       autoCaptions, captionStyle, captionPosition, captionScale, captionTextOverride, captionCoverageMode,
       captionSegments, translateCaptionsToEnglish, advancedColor, smartCrop, smartCropMode,
@@ -11943,7 +11974,7 @@ const ViralClipStudio = ({
     const cinematicScene = enabledThreeDScenes.find(scene => scene.sceneType === "cinematic_evidence");
     if (cinematicScene) {
       setStudioInspectorTab("motion"); setMotionWorkspace("cinematic"); setSelectedThreeDId(cinematicScene.id);
-      const message = "Cinematic scenes currently export their own interval from Motion → Cinematic scene. Full programme/cloud assembly is not available yet; no ordinary render was submitted.";
+      const message = "Use Render programme · 720p in the isolated cinematic Studio for local assembly. Cloud assembly of cinematic scenes is unavailable; no cloud job was submitted.";
       setStudioActionMessage(message); toast.error(message); return;
     }
     const staleThreeDScenes = enabledThreeDScenes.filter(scene => !scene.hqPreviewJobId || scene.hqPreviewRevision !== studio3DSceneRevision(scene));
@@ -15641,7 +15672,7 @@ const ViralClipStudio = ({
     setComparisonMode("after");
   };
 
-  const addVideoLayer = event => {
+  const addVideoLayer = async event => {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -15683,6 +15714,19 @@ const ViralClipStudio = ({
         width: 40,
         height: 30,
       });
+    } else if (cinematicLocalEnabled()) {
+      try {
+        if (file.size > 128 * 1024 ** 2) throw new Error("Use a local video smaller than 128 MB");
+        const response = await fetch("/api/cinematic/assets", { method: "POST", headers: {
+          "Content-Type": "application/octet-stream", "X-File-Name": encodeURIComponent(file.name) }, body: file });
+        const asset = await response.json();
+        if (!response.ok) throw new Error(asset.error || "Local source import failed");
+        setTimeline(current => [...current, { id: createSecureId("clip"), sourceClipId: `local-${asset.id}`,
+          contentHash: asset.id, url: `/api/cinematic/assets/${asset.id}/media`, name: asset.name,
+          duration: asset.duration, startRequest: 0, endRequest: asset.duration }]);
+        setStudioActionMessage(`“${asset.name}” appended from the local catalogue. Source bytes verified; no cloud upload.`);
+      } catch (error) { toast.error(error.message); setStudioActionMessage(error.message); }
+      finally { URL.revokeObjectURL(url); }
     } else {
       // Add to Timeline (Sequencing)
       // Create temp video to get duration
@@ -24546,6 +24590,10 @@ const ViralClipStudio = ({
                 {motionWorkspace === "cinematic" ? <StudioCinematicPanel
                     scenes={threeDScenes} onChange={setThreeDScenes} focusId={selectedThreeDId}
                     onSelect={setSelectedThreeDId} playhead={previewTimelineTime} duration={outputTimelineDuration}
+                    onRenderProgramme={cinematicLocalEnabled() && onCinematicSceneReview ? () => handleExportRender("local") : null}
+                    programmeRendering={isExporting} programmeResult={localProgrammeResult}
+                    programmeError={exportErrorMessage}
+                    onCancelProgramme={() => localProgrammeJobRef.current && cinematicRequest(`jobs/${localProgrammeJobRef.current}`, null, "DELETE")}
                     onUseLandscape={() => setReframeAspect("16:9")}
                     onReviewScene={onCinematicSceneReview ? (scene, url) => {
                       setPreviewFinishedFile(true); setComparisonMode("after");
@@ -29048,6 +29096,10 @@ const ViralClipStudio = ({
                 <button
                   className="export-btn cancel-export-btn"
                   onClick={() => {
+                    if (localProgrammeJobRef.current) {
+                      void cinematicRequest(`jobs/${localProgrammeJobRef.current}`, null, "DELETE");
+                      return;
+                    }
                     if (window.confirm("Cancel this render? You can retry after.")) {
                       onCancel();
                     }

@@ -45,6 +45,7 @@ compiler.run((error, stats) => {
     const hashFile = file => crypto.createHash("sha256").update(fs.readFileSync(path.join(ROOT, file))).digest("hex");
     const sourceFiles = ["frontend/src/components/ViralClipStudio.js", "frontend/src/components/studioProjectDocument.js",
       "frontend/src/components/threeD/StudioCinematicPanel.js", "frontend/src/components/threeD/studio3DModel.js",
+      "frontend/src/components/threeD/cinematicProgrammeClient.js",
       "frontend/src/components/threeD/cinematicContract.js", "scripts/cinematic/localStudio.jsx", "scripts/cinematic/localFirebase.js"];
     fs.writeFileSync(path.join(output, "build.json"), JSON.stringify({ editor: "frontend/src/components/ViralClipStudio.js", flags,
       worktree: ROOT, branch: execFileSync("git", ["branch", "--show-current"], { cwd: ROOT, encoding: "utf8" }).trim(),
