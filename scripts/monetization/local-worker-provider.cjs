@@ -12,7 +12,7 @@ const {
 } = require("../../src/services/unifiedCredits/workerVerification");
 const { assertSandbox } = require("../../src/services/unifiedCredits/runtime");
 async function createLocalWorkerProvider({ directory, python, env, apiOrigin, timeoutMs = 120000 }) {
-  if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 600000) throw Error("Local CPU timeout must be 1–600 seconds.");
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 1800000) throw Error("Local CPU timeout must be 1–1800 seconds.");
   assertSandbox(env);
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const executionRoot = fs.realpathSync(directory);

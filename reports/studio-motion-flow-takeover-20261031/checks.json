@@ -1,0 +1,94 @@
+{
+  "branch": "feat/studio-motion-flow-20261031",
+  "implementationCommits": [
+    "3911af6c",
+    "cd0bfb8d",
+    "172a1461"
+  ],
+  "checks": [
+    {
+      "suite": "focused controls/rig/compiler/document/scene frontend",
+      "passed": 47
+    },
+    {
+      "suite": "scene executor and existing sequence edits frontend",
+      "passed": 29,
+      "overlapsOtherRuns": true
+    },
+    {
+      "suite": "LUT sampling/control regressions frontend",
+      "passed": 10,
+      "overlapsOtherRuns": true
+    },
+    {
+      "suite": "full Studio Null helper export regression",
+      "passed": 1,
+      "otherTestsSkipped": 149
+    },
+    {
+      "suite": "worker sequence/grade/finish/matte/audio/render contract",
+      "passed": 77
+    },
+    {
+      "suite": "layer motion and mixed canvas before last optimization",
+      "passed": 37
+    },
+    {
+      "suite": "rotation grid/pixels and layer regression after last optimization",
+      "passed": 29
+    },
+    {
+      "suite": "projection and rotated-shadow pixel regressions after last optimization",
+      "passed": 20
+    },
+    {
+      "suite": "compact creative descriptor hash binding",
+      "passed": 1
+    },
+    {
+      "suite": "isolated credits application integration",
+      "passed": 12
+    }
+  ],
+  "build": {
+    "strictOptimizedApp": "PASS",
+    "welcomeViewportPairs": 8,
+    "anonymousWelcomeMatch": true,
+    "browserErrors": 0,
+    "receipt": "welcome-lut-throughput/verification.json"
+  },
+  "nativeUi": {
+    "normalEmulatorSignIn": true,
+    "headless": true,
+    "muted": true,
+    "gpuDisabled": true,
+    "exactPortableRestore": true,
+    "rigOneUndoExact": true,
+    "curveOneUndoExact": true
+  },
+  "initialFailedChecks": [
+    "first imported asset match/interrupted source restore",
+    "wrong-directory Jest command",
+    "pytest absent from reused runtime, installed under /dev/shm",
+    "wrong dependency-root build plugin conflict",
+    "strict lint warnings corrected",
+    "LUT descriptor too large",
+    "Null helper render stack mismatch",
+    "packaged LUT import",
+    "fractional source picture truncation",
+    "zero-base-opacity text omitted",
+    "native layer fractional phase mismatch",
+    "local CPU supervision limit with sampled blur",
+    "initial rotation optimization failed exact pixels and was corrected"
+  ],
+  "limits": [
+    "No readiness promotion",
+    "No qualified real-time live graph",
+    "No whole-picture parity",
+    "No human listening approval",
+    "No genuine model plan inference"
+  ],
+  "noPaidCalls": true,
+  "productionWrites": false,
+  "productionDeploy": false
+}

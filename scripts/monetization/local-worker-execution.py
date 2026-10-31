@@ -20,8 +20,8 @@ started = time.monotonic()
 if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
     raise RuntimeError("Explicit demo runtime required")
 # Three simultaneous native perspective planes exceed the original short-demo
-# CPU allowance. Keep a finite local ceiling matching the provider's maximum
-# ten-minute supervision window; production worker limits are unchanged.
+# CPU allowance. Keep ten CPU minutes per process even when a loaded local
+# machine needs a longer wall observation; production limits are unchanged.
 resource.setrlimit(resource.RLIMIT_CPU, (600, 600))
 resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024**2, 20 * 1024**2))
 connect = socket.socket.connect

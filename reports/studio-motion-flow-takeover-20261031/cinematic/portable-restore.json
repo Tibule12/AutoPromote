@@ -1,0 +1,17 @@
+{
+  "projectId": "viral-project-6b11eb33-f22d-4989-8ccc-0a255bd05a19",
+  "exactDecisions": true,
+  "sourceFiles": [
+    {
+      "name": "presenter-1.mp4",
+      "bytes": 2163535,
+      "sha256": "efb9c383419b52bf5b3cc9a2c1749a442bd0fbc7e549ecd65d3868e09437dc0d"
+    },
+    {
+      "name": "presenter-2.mp4",
+      "bytes": 2784929,
+      "sha256": "f29825cd1e716b4c6301e101db923e1d130e88e6068d74e25881af6bdbb1d078"
+    }
+  ],
+  "normalNativeBackupRestore": true
+}

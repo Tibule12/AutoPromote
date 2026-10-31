@@ -72,6 +72,8 @@ def inverse_projection(corners, width, height):
     g,h = (dx3*dy2-dx2*dy3)/det,(dx1*dy3-dx3*dy1)/det
     a,b,c,d,e,f = x1-x0+g*x1,x3-x0+h*x3,x0,y1-y0+g*y1,y3-y0+h*y3,y0
     z = a*e-b*d
+    if not math.isfinite(z) or abs(z) < 1e-12:
+        raise ValueError('Perspective inverse is not finite at the picture origin')
     return [(e-f*h)/z,(c*h-b)*width/height/z,(b*f-c*e)*width/z,
             (f*g-d)*height/width/z,(a-c*g)/z,(c*d-a*f)*height/z,
             (d*h-e*g)/width/z,(b*g-a*h)/height/z]
