@@ -1,5 +1,7 @@
 # Open World — native motion continuation
 
+1 November continuation: [specific source/texture preview defects repaired, native UI verification and remaining limits](../../studio-source-sampling-20261101/README.md). The retained film and original project/source hashes remain unchanged; this does not qualify its creative quality.
+
 31 October 2026. This is a separate 60-second stock-footage motion study after the owner questioned the need to keep the presenter video. The presenter tests, clock films and original story remain intact. This study does not complete that spoken story or establish equivalence with the full feature sets of other editing platforms.
 
 The ordinary signed-in Studio frontend authors the six-source timeline, native graphics import, character choreography, cubic motion, editable vector stroke, source-linked video texture, camera/lens/object poses and native 3D preview. CPU execution is isolated to demo Auth/Firestore/Storage and loopback URLs; no paid call, production write, merge or deployment.

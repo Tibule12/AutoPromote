@@ -1,4 +1,27 @@
 {
+  "studioSourceSampling20261101": {
+    "date": "2026-11-01",
+    "report": "reports/studio-source-sampling-20261101/README.md",
+    "scope": "Bounded source-frame/scene-clock/shared-decoder preview repair in the existing signed-in Studio",
+    "focusedTests": 61,
+    "pausedPairs": 4,
+    "normalSaveRetainsExactCanonicalDecisions": true,
+    "sourceHashesPreserved": 6,
+    "nativeExportUnchanged": true,
+    "liveProgrammeEnd": 60,
+    "liveWallToEndMs": 61705.5,
+    "observedProgrammeUpdates": 1206,
+    "sharedSceneUpdates": 53,
+    "sceneUpdates": 54,
+    "wholePictureParityQualified": false,
+    "realTime24FpsQualified": false,
+    "creativeApproved": false,
+    "readinessPromoted": false,
+    "productionWrites": 0,
+    "paidCalls": 0,
+    "newExportJobs": 0,
+    "next": "S02 whole picture/sound and live performance, then S04 depth and S03 ownership"
+  },
   "studioMotionFlowTakeover20261031": {
     "date": "2026-10-31",
     "report": "reports/studio-motion-flow-takeover-20261031/README.md",
@@ -109,7 +132,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-31T11:25:00.000Z",
+  "updatedAt": "2026-11-01",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",

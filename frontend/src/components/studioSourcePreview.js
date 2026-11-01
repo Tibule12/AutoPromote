@@ -210,6 +210,14 @@ export function watchStudioProgrammeFrames(video, paint) {
         frame = undefined;
       }
     } };
+    // A paused seek can return to the same source URL. Its last presented
+    // timestamp belongs to the previous position until the new decoder frame
+    // arrives; consumers must not briefly jump back there when Play resumes.
+    const invalidate = () => { stream.time = undefined; stream.source = undefined; };
+    for (const event of ['seeking', 'emptied']) video.addEventListener?.(event, invalidate);
+    stream.release = () => {
+      for (const event of ['seeking', 'emptied']) video.removeEventListener?.(event, invalidate);
+    };
     programmeFrameStreams.set(video, stream);
   }
   // Each subscription owns its membership, even when the callback is reused.
@@ -220,6 +228,7 @@ export function watchStudioProgrammeFrames(video, paint) {
     stream.subscribers.delete(listener);
     if (!stream.subscribers.size) {
       stream.cancel();
+      stream.release();
       if (programmeFrameStreams.get(video) === stream) programmeFrameStreams.delete(video);
     }
   };

@@ -197,6 +197,18 @@ test('unsubscribing a later consumer during a frame never calls its stale callba
   video.frame(1); expect(stale).not.toHaveBeenCalled();
   stopFirst();
 });
+test('a paused seek invalidates the former presented clock before playback resumes', () => {
+  const video=decoder(),events=new EventTarget();
+  video.addEventListener=events.addEventListener.bind(events);
+  video.removeEventListener=jest.fn(events.removeEventListener.bind(events));
+  const stop=watchStudioProgrammeFrames(video,()=>{});
+  video.frame(2.25);expect(studioPresentedSourceTime(video)).toBe(2.25);
+  video.paused=true;video.currentTime=6;events.dispatchEvent(new Event('seeking'));
+  video.paused=false;
+  expect(studioPresentedSourceTime(video)).toBe(6);
+  video.frame(6,6.1);expect(studioPresentedSourceTime(video)).toBe(6);
+  stop();expect(video.removeEventListener).toHaveBeenCalledTimes(2);
+});
 test('disposed and paused programme loops cannot keep painting the former shot', () => {
   const video = decoder(), paint = jest.fn();
   watchStudioProgrammeFrames(video, paint);

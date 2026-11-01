@@ -938,6 +938,102 @@ async function main() {
         fs.writeFileSync(stamp('native-project-recovery.json'),JSON.stringify({projectId:saved.id,canonicalHash:hash(saved.snapshot.studioDocument),exactDecisions:true,sourceFiles,
           canonicalVideoFieldsRetained:true,normalNativeBackupRestore:true,independentBrowser:true,scope:'Ordinary native backup with reauthorized owned media; source proxies are supplied separately. No claim of offline or deleted-storage recovery.'},null,2));
       }
+      else if(phase==='sampling-playback'){
+        const audit=stamp('scene-sampling-audit-20261101/full-playback');fs.mkdirSync(audit,{recursive:true});
+        await q.tool(p,'Export');
+        const live=p.getByRole('button',{name:'Show Live Edit',exact:true});
+        await live.waitFor({state:'visible',timeout:30000});await live.click();
+        await p.getByTestId('studio-program-canvas').waitFor({state:'visible'});
+        await p.getByTestId('studio-mode-fxflow').click();
+        await p.getByTestId('studio-comp-workbench').getByText('Main Programme',{exact:true}).click();
+        await p.getByTestId('dock-tab-timeline').click();await seek(p,0);
+        await p.evaluate(()=>{
+          const start=performance.now(),frames=[],scene=[];
+          const observer=new MutationObserver(()=>{
+            const c=document.querySelector('[data-testid="studio-program-canvas"]'),time=Number(c?.dataset.programmeTime);
+            if(Number.isFinite(time)&&time!==frames.at(-1)?.programmeTime){
+              frames.push({programmeTime:time,ms:performance.now()-start});
+              if(time>=5.5&&time<8.8)scene.push({programmeTime:time,...document.querySelector('[data-testid="studio-3d-preview"]')?.dataset});
+            }
+          });
+          observer.observe(document.querySelector('[data-testid="hook-preview-frame"]'),{subtree:true,attributes:true,attributeFilter:['data-programme-time']});
+          window.__finishSamplingPlayback=()=>{observer.disconnect();return {elapsedMs:performance.now()-start,frames,scene};};
+        });
+        const stop=await recording(p,audit);
+        try{
+          await p.getByRole('button',{name:'Play edited preview',exact:true}).click();
+          await p.waitForFunction(()=>Number(document.querySelector('[data-testid="studio-program-canvas"]')?.dataset.programmeTime)>=60-2/24,undefined,{timeout:180000});
+          await pause(p);const result=await p.evaluate(()=>window.__finishSamplingPlayback());
+          fs.writeFileSync(path.join(audit,'playback.json'),JSON.stringify({...result,headless:true,muted:true,softwareWebGL:true,
+            realTime24FpsQualified:false,wholePictureParityQualified:false},null,2));
+          await p.getByTestId('hook-preview-frame').screenshot({path:path.join(audit,'after-playback.png')});
+        }finally{await stop();}
+      }
+      else if(['sampling-audit','scene-sampling-audit'].includes(phase)){
+        const audit=stamp(phase==='scene-sampling-audit'?'scene-sampling-audit-20261101':'sampling-audit-20261101');fs.mkdirSync(audit,{recursive:true});
+        await q.tool(p,'Export');
+        const live=p.getByRole('button',{name:'Show Live Edit',exact:true});
+        // A completed project reconnects its retained render asynchronously.
+        // Wait for that real control before switching; an earlier hidden
+        // canvas is not a measurement of the live edit.
+        await live.waitFor({state:'visible',timeout:30000});await live.click();
+        await p.getByTestId('studio-program-canvas').waitFor({state:'visible'});
+        assert.equal(await p.getByTestId('hook-preview-frame').evaluate(el=>el.classList.contains('has-rendered-output')),false);
+        const requests=[];
+        p.on('response',async response=>{if(new URL(response.url()).pathname.endsWith('/studio-assets/source-frame')){
+          const {image,...result}=await response.json().catch(()=>({}));requests.push({status:response.status(),...result});
+          fs.writeFileSync(path.join(audit,'requests.json'),JSON.stringify(requests,null,2));
+        }});
+        await p.getByTestId('studio-mode-fxflow').click();
+        await p.getByTestId('studio-comp-workbench').getByText('Main Programme',{exact:true}).click();
+        const samples=[],canvas=p.getByTestId('studio-program-canvas');
+        const stopAuditRecording=phase==='scene-sampling-audit'?await recording(p,audit):async()=>{};
+        try{
+        const state=()=>canvas.evaluate(el=>({programmeTime:el.dataset.programmeTime,sampling:el.dataset.sourceSampling,
+          sourceFrameIndex:el.dataset.sourceFrameIndex,busy:el.getAttribute('aria-busy'),width:el.width,height:el.height}));
+        for(const time of [6.5,8.2,10.1,15.9]){
+          await seek(p,time);const initial=await state();
+          samples.push({requested:time,initial});fs.writeFileSync(path.join(audit,'sampling.json'),JSON.stringify(samples,null,2));
+          await p.getByTestId('hook-preview-frame').screenshot({path:path.join(audit,`initial-${time.toFixed(2)}.png`)});
+          const start=Date.now();
+          await p.waitForFunction(()=>{const c=document.querySelector('[data-testid="studio-program-canvas"]');return c?.dataset.sourceSampling==='accurate-paused'&&c.getAttribute('aria-busy')!=='true';},undefined,{timeout:30000});
+          if(phase==='scene-sampling-audit'&&time<9){
+            await p.waitForFunction(()=>document.querySelector('[data-testid="studio-3d-preview"]')?.dataset.textureSampling==='accurate-paused',undefined,{timeout:30000});
+            samples.at(-1).scene=await p.getByTestId('studio-3d-preview').evaluate(el=>({...el.dataset}));
+          }
+          await p.waitForTimeout(100);
+          await p.getByTestId('hook-preview-frame').screenshot({path:path.join(audit,`settled-${time.toFixed(2)}.png`)});
+          Object.assign(samples.at(-1),{settled:await state(),settleWaitMs:Date.now()-start});
+        }
+        fs.writeFileSync(path.join(audit,'sampling.json'),JSON.stringify(samples,null,2));
+        if(phase==='scene-sampling-audit'){
+          await seek(p,5.6);
+          await p.getByRole('button',{name:'Play edited preview',exact:true}).click();
+          const transport=[];
+          for(let index=0;index<12;index++){
+            await p.waitForTimeout(150);
+            transport.push(await p.getByTestId('studio-3d-preview').evaluate(el=>({...el.dataset})));
+          }
+          await pause(p);
+          fs.writeFileSync(path.join(audit,'transport.json'),JSON.stringify(transport,null,2));
+          assert(transport.some(row=>row.textureTransport==='playing'),'Texture transport must actually play');
+          assert(new Set(transport.map(row=>row.textureSourceTime)).size>5,'Texture must present moving source frames');
+          // Transport may cross the short scene's out-point while headless
+          // capture is slow. Seek back into it before inspecting paused parity.
+          await seek(p,6.5);
+          await p.waitForFunction(()=>document.querySelector('[data-testid="studio-3d-preview"]')?.dataset.textureSampling==='accurate-paused',undefined,{timeout:30000});
+          await p.getByTestId('hook-preview-frame').screenshot({path:path.join(audit,'paused-after-play.png')});
+          const reopened=await save(p,'sampling-audit-reopened');
+          const expected=JSON.parse(fs.readFileSync(stamp('Editable Project.autopromote.json')));
+          assert.equal(decisions(reopened.snapshot.studioDocument),decisions(expected.snapshot.studioDocument));
+          await backup(p,'scene-sampling-audit-20261101/Editable Project');
+          fs.writeFileSync(path.join(audit,'project-preservation.json'),JSON.stringify({
+            projectId:reopened.id,exactCanonicalDecisions:true,canonicalDecisionHash:decisions(reopened.snapshot.studioDocument),
+            normalSave:true,nativeBackupDownloaded:true,sourceFiles:reopened.snapshot.projectMedia.map(m=>({name:m.name,sha256:m.contentHash})),
+          },null,2));
+        }
+        }finally{await stopAuditRecording();}
+      }
       else if (phase === 'stills') await reviewStills(p);
       else if (phase === 'settle-dialogue') await settleDialogue(p);
       else if (phase === 'refine') await refineCinematic(p);

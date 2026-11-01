@@ -42,7 +42,8 @@ import { buildStudioLogoMotion } from './studioLogoMotion';
 import { editStudioPositionPose, editStudioSpatialPath } from './studioMotionEditing';
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
-import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
+import { primeStudioSourceVideo, watchStudioProgrammeFrames, studioPresentedSourceTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey } from "./studioSourcePreview";
+import { loadStudioSourceFrame } from "./studioSourceFrameClient";
 import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity } from "./studioMusicBufferClock";
 import { loadStudioVoiceBus, scheduleStudioPreparedDuck } from './studioPreparedVoiceBus';
 import { studioCueSourceKey, createStudioCueBuffer, prepareStudioCuePlayback, prepareStudioBuiltInCue } from "./studioCueBuffer";
@@ -13525,7 +13526,7 @@ const ViralClipStudio = ({
     : undefined;
   const pausedFrameRequestKey = !renderedOutputUrl && isPreviewPaused && !projectSourcesRefreshing &&
     !subjectProgrammePreview && !activeSideBySideOverlay && !speakerStackPreviewIsLive &&
-    smartCrop && smartCropMode === "speaker_track"
+    (!smartCrop || ["center", "speaker_track"].includes(smartCropMode))
       ? pausedStudioFrameKey(pausedStudioMappedFrameRequest(currentTimelineClip, Number(videoTime),
         exportSettings.fps, timeline, previewOutputTimeMap, pausedSourceGeneration))
       : "";
@@ -13542,33 +13543,9 @@ const ViralClipStudio = ({
     }, 30000);
     const timer = setTimeout(async () => {
       try {
-        const token = await getMediaAuthToken();
-        if (disposed) return;
-        if (!token) throw new Error("Sign in to prepare this frame");
-        let response, result;
-        for (let attempt = 0; attempt < 3; attempt++) {
-          response = await fetch(`${API_BASE_URL}/api/media/studio-assets/source-frame`, {
-            method: "POST", signal: controller.signal,
-            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-            body: JSON.stringify(request),
-          });
-          result = await response.json();
-          if (disposed || controller.signal.aborted) return;
-          if (response.status !== 429 || attempt === 2) break;
-          // An abandoned older seek may still be finishing its bounded CPU
-          // decode. Retry the current identity without starting parallel work.
-          await new Promise(resolve => setTimeout(resolve, 500));
-          if (disposed || controller.signal.aborted) return;
-        }
-        if (!response.ok || !studioPausedFrameReceiptMatches(request, result))
-          throw new Error("Paused frame unavailable");
-        const image = new Image();
-        image.onload = () => { clearTimeout(deadline); if (!disposed && !controller.signal.aborted) setPausedSourceFrame({ key, image, status: "accurate", receipt: {
-          sampler: result.sampler, sourceGeneration: result.sourceGeneration, imageContentHash: result.imageContentHash,
-          sourceContentHash: result.sourceContentHash, frameIndex: result.frameIndex,
-        } }); };
-        image.onerror = () => { clearTimeout(deadline); if (!disposed) setPausedSourceFrame({ key, status: "unavailable" }); };
-        image.src = `data:image/png;base64,${result.image}`;
+        const frame = await loadStudioSourceFrame(request, controller.signal);
+        clearTimeout(deadline);
+        if (!disposed && !controller.signal.aborted) setPausedSourceFrame({ key, ...frame, status: "accurate" });
       } catch (_) { clearTimeout(deadline); if (!disposed) setPausedSourceFrame({ key, status: "unavailable" }); }
     }, 200);
     return () => { disposed = true; clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
@@ -13651,7 +13628,7 @@ const ViralClipStudio = ({
       // with the original source while its decoder catches up to an edit.
       if (reviewedSubject && !subjectIsCurrent) return;
       const pausedFrameIsCurrent = programmeVideo.paused && !programmeVideo.seeking && !renderedOutputUrl &&
-        frameCropMode === "speaker_track" && Math.abs(frameSoloOffset) <= .001 &&
+        ["off", "center", "speaker_track"].includes(frameCropMode) && Math.abs(frameSoloOffset) <= .001 &&
         !reviewedSubject && !alternateIsCurrent && !cachedAlternateIsCurrent &&
         pausedSourceFrame?.image && pausedSourceFrame.key === pausedStudioFrameKey(
           pausedStudioMappedFrameRequest(currentTimelineClip, Number(programmeVideo.currentTime),
@@ -19520,7 +19497,13 @@ const ViralClipStudio = ({
                             scenes={scenes}
                             zIndex={Math.max(...scenes.map(scene => compositionRank.get(scene.id) ?? 100))}
                             time={previewTimelineTime}
-                            getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}
+                            getTime={() => getPreviewTimelineTime(presentedFramePreview ? studioPresentedSourceTime(videoRef.current) : videoRef.current?.currentTime || 0)}
+                            getSourceVideo={() => ({ video: videoRef.current,
+                              sourceTime: studioPresentedSourceTime(videoRef.current),
+                              storagePath: currentTimelineClip?.sourceStoragePath || currentTimelineClip?.storagePath,
+                              contentHash: currentTimelineClip?.contentHash || currentTimelineClip?.sha256 })}
+                            playing={!isPreviewPaused}
+                            playbackRate={Number(videoRef.current?.playbackRate || previewSpeed || 1)}
                           />)}
                         </React.Suspense>
                       ) : null}

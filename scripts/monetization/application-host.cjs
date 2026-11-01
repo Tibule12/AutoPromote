@@ -303,7 +303,7 @@ app.use("/api", auth, (req, res, next) => {
   if (
     req.method !== "GET" &&
     !(req.path==='/media/studio-3d/preview' && require('../../src/services/studio3DLocal').configuration()) &&
-    !/^\/(?:credit-pilot\/|media\/(?:process|analyze|render-clip|studio-assets\/resolve|multicam\/uploads\/(?:start|complete|abort))$|content\/(?:upload(?:\/(?:source-file|readiness))?$|[^/]+\/promotion-schedules$|promotion-schedules\/[^/]+\/(?:resume|reschedule|pause)$)|users\/me\/accept-terms$|workspaces(?:\/|$))/.test(
+    !/^\/(?:credit-pilot\/|media\/(?:process|analyze|render-clip|studio-assets\/(?:resolve|source-frame)|multicam\/uploads\/(?:start|complete|abort))$|content\/(?:upload(?:\/(?:source-file|readiness))?$|[^/]+\/promotion-schedules$|promotion-schedules\/[^/]+\/(?:resume|reschedule|pause)$)|users\/me\/accept-terms$|workspaces(?:\/|$))/.test(
       req.path
     )
   )

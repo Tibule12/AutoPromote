@@ -12,13 +12,14 @@ const { createWriteStream } = require('node:fs');
 const { getStudioSourceBucket, resolveOwnedStudioVideoSource, sourceError } = require('./studioSourceService');
 const execute = promisify(execFile);
 const SAMPLER = 'studio-sequence-source-frame-v1';
+const TEXTURE_SAMPLER = 'studio-3d-texture-frame-v1';
 const MAX_SOURCE_BYTES = 128 * 1024 * 1024;
 const TTL = 2 * 60 * 1000;
 const sources = new Map();
 const activeOwners = new Set();
 
 function validateFrameRequest(input) {
-  const fields = ['storagePath', 'sourceContentHash', 'sourceGeneration', 'start', 'end', 'fps', 'frameIndex'];
+  const fields = ['storagePath', 'sourceContentHash', 'sourceGeneration', 'start', 'end', 'fps', 'frameIndex', 'sampling'];
   const hasHash = Object.hasOwn(input || {}, 'sourceContentHash');
   const hasGeneration = Object.hasOwn(input || {}, 'sourceGeneration');
   if (!input || Object.keys(input).some(key => !fields.includes(key)) ||
@@ -28,16 +29,23 @@ function validateFrameRequest(input) {
       ![input.start, input.end, input.fps].every(value => typeof value === 'number' && Number.isFinite(value)) ||
       input.start < 0 || input.start > 21600 || input.end <= input.start || input.end-input.start > 90 ||
       input.fps < 1 || input.fps > 120 || !Number.isSafeInteger(input.frameIndex) || input.frameIndex < 0 ||
+      (Object.hasOwn(input, 'sampling') && (input.sampling !== TEXTURE_SAMPLER || input.fps !== 30 || input.end-input.start > 10 ||
+        input.frameIndex >= Math.ceil(Number(((input.end-input.start)*input.fps).toFixed(8)))) ) ||
       input.frameIndex >= Math.ceil((input.end-input.start)*input.fps)) {
     throw sourceError(422, 'STUDIO_FRAME_INVALID', 'Choose a frame inside a saved source clip');
   }
   return input;
 }
 
-function sourceFrameArgs(file, { start, end, fps, frameIndex }) {
+function sourceFrameArgs(file, { start, end, fps, frameIndex, sampling }) {
+  // Match prepare_video_texture's PTS reset BEFORE CFR conversion. Sequence
+  // sampling deliberately retains its existing, different trim semantics.
+  const texture = sampling === TEXTURE_SAMPLER;
   return ['-nostdin', '-hide_banner', '-loglevel', 'error', '-threads', '2',
-    '-ss', String(start), '-i', file, '-t', String(end-start), '-filter_threads', '1',
-    '-vf', `fps=${fps},setpts=PTS-STARTPTS,select=eq(n\\,${frameIndex}),scale='min(1920,iw)':-2`,
+    '-ss', String(start), '-i', file, ...(texture ? [] : ['-t', String(end-start)]), '-filter_threads', '1',
+    '-vf', texture
+      ? `setpts=PTS-STARTPTS,fps=${fps}:start_time=0:round=near,select=eq(n\\,${frameIndex}),scale=1280:720:force_original_aspect_ratio=decrease`
+      : `fps=${fps},setpts=PTS-STARTPTS,select=eq(n\\,${frameIndex}),scale='min(1920,iw)':-2`,
     '-map', '0:v:0', '-an', '-frames:v', '1', '-threads', '2', '-c:v', 'png', '-f', 'image2pipe', 'pipe:1'];
 }
 
@@ -101,7 +109,7 @@ async function getOwnedSourceFrame({ ownerUid, input, signal }) {
     if (request.sourceContentHash && cached.hash !== request.sourceContentHash)
       throw sourceError(409, 'STUDIO_FRAME_SOURCE_CHANGED', 'The source bytes no longer match this project');
     const image = await decodeSourceFrame(cached.file, request, signal);
-    return { sampler: SAMPLER, sourceContentHash: cached.hash, sourceGeneration: owned.generation,
+    return { sampler: request.sampling || SAMPLER, sourceContentHash: cached.hash, sourceGeneration: owned.generation,
       start: request.start, end: request.end, fps: request.fps, frameIndex: request.frameIndex,
       imageContentHash: crypto.createHash('sha256').update(image).digest('hex'),
       image: image.toString('base64'), contentType: 'image/png' };

@@ -1,0 +1,50 @@
+{
+  "measurements": [
+    {
+      "time": 6.5,
+      "previous": {
+        "rgbRmse": 10.72072938882762,
+        "psnrDb": 27.526316933695227
+      },
+      "corrected": {
+        "rgbRmse": 7.328087760507133,
+        "psnrDb": 30.830990373442418
+      }
+    },
+    {
+      "time": 8.2,
+      "previous": {
+        "rgbRmse": 21.79643182046471,
+        "psnrDb": 21.363095541648907
+      },
+      "corrected": {
+        "rgbRmse": 6.326311868737772,
+        "psnrDb": 32.10779165748538
+      }
+    },
+    {
+      "time": 10.1,
+      "previous": {
+        "rgbRmse": 21.955623910431157,
+        "psnrDb": 21.299887950440333
+      },
+      "corrected": {
+        "rgbRmse": 6.389851895643896,
+        "psnrDb": 32.02098776522945
+      }
+    },
+    {
+      "time": 15.9,
+      "previous": {
+        "rgbRmse": 17.69104023880175,
+        "psnrDb": 23.1757362023907
+      },
+      "corrected": {
+        "rgbRmse": 6.545843444984763,
+        "psnrDb": 31.811491324626758
+      }
+    }
+  ],
+  "scope": "Resized whole-picture measurements, without a new or relaxed pass threshold.",
+  "wholePictureParityQualified": false
+}
