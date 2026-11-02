@@ -97,7 +97,7 @@
     "googleapis": "^160.0.0",
     "html2canvas": "^1.4.1",
     "ioredis": "^5.3.2",
-    "joi": "^18.2.5",
+    "joi": "^18.3.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.5.0",
     "node-fetch": "^2.7.0",
