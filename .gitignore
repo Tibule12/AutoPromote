@@ -186,11 +186,13 @@ reports/studio-background-captions-20261022/*
 # Native authenticated timeline/audio proof, media and isolated local App.
 reports/studio-linked-preview-20261021/*
 !reports/studio-linked-preview-20261021/README.md
+>>>>>>> origin/agent/product-knowledge-system-v1
 
 # Private authenticated background/caption runtime evidence and local builds.
 reports/studio-background-captions-20261021/*
 !reports/studio-background-captions-20261021/README.md
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 # Production welcome verification is source, not a local verify script.
 !frontend/scripts/verify-welcome-assets.js
@@ -225,6 +227,11 @@ reports/studio-retained-speed-20261023/*
 reports/studio-hook-templates-20261026/*
 !reports/studio-hook-templates-20261026/README.md
 =======
+=======
+# Private authenticated background/caption QA.
+reports/studio-background-captions-20261022/*
+!reports/studio-background-captions-20261022/README.md
+
 reports/studio-podcast-caption-finish-20261022/*
 !reports/studio-podcast-caption-finish-20261022/README.md
 
@@ -236,6 +243,18 @@ reports/studio-fringe-cpu-20261024/*
 reports/studio-realism-finish-20261024/*
 !reports/studio-realism-finish-20261024/README.md
 
+<<<<<<< HEAD
+=======
+reports/studio-source-detail-repair-20261024/*
+!reports/studio-source-detail-repair-20261024/README.md
+
+reports/studio-podcast-contact-cleanup-20261024/*
+!reports/studio-podcast-contact-cleanup-20261024/README.md
+
+reports/studio-background-naturalness-20261025/*
+!reports/studio-background-naturalness-20261025/README.md
+
+>>>>>>> origin/agent/product-knowledge-system-v1
 reports/studio-background-finish-20261025/*
 !reports/studio-background-finish-20261025/README.md
 

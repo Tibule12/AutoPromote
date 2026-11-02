@@ -1324,6 +1324,7 @@ function VideoEditor({
       // Let's pass smartCrop in both places to be safe if backend logic varies.
 
       let response;
+      let submissionWasUnacknowledged = false;
       for (let submissionAttempt = 0; submissionAttempt < 2; submissionAttempt += 1) {
         try {
           response = await creditFetch(
@@ -1459,6 +1460,7 @@ function VideoEditor({
             submissionError?.code === "RENDER_EMPTY_RESPONSE" ||
             submissionError?.message === "Failed to fetch";
           if (!retryable || submissionAttempt === 1 || abortRef.current) throw submissionError;
+          submissionWasUnacknowledged = true;
           setStatusMessage("Render service is slow. Retrying safely without another charge...");
           await waitForRenderRetry();
         }
@@ -1474,8 +1476,12 @@ function VideoEditor({
           backendMessage = errJson.detail || errJson.details || errJson.message || backendMessage;
           backendCode = errJson.code || "";
         } catch (_parseError) {}
+        // A retry can meet the worker started by the unacknowledged request.
+        // Its busy/unavailable response cannot disprove that first job. Keep
+        // the same owner/project request ID so normal recovery can find it.
         if ([400, 402, 403, 409, 422].includes(response.status) ||
-            ["STUDIO_RENDER_WORKER_UNAVAILABLE", "STUDIO_RENDER_WORKER_BUSY"].includes(backendCode)) {
+            (!submissionWasUnacknowledged &&
+              ["STUDIO_RENDER_WORKER_UNAVAILABLE", "STUDIO_RENDER_WORKER_BUSY"].includes(backendCode))) {
           clearViralRenderAttempt(user?.uid, renderRequestId, recoveryProjectId);
           viralRenderAttemptRef.current = null;
         }

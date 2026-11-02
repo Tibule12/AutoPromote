@@ -1255,6 +1255,48 @@
         "reports/studio-playhead-precision-20261024/README.md"
       ],
       "reason": "Document the existing decoder-backed playhead/readouts and source split/trim sampling. Keep native timing failures, inspector/filter and whole picture/sound limits explicit; no readiness promotion."
+    },
+    {
+      "feature_id": "studio.compositing",
+      "documentation_impact": [
+        "FEATURE",
+        "TASKS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/ViralClipStudio.js"
+      ],
+      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
+    },
+    {
+      "feature_id": "studio.subject_cutout",
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "documentation_impact": [
+        "FEATURE",
+        "TASKS"
+      ],
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/ViralClipStudio.js"
+      ],
+      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
+    },
+    {
+      "feature_id": "studio.timeline",
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "documentation_impact": [
+        "FEATURE",
+        "TASKS"
+      ],
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/ViralClipStudio.js"
+      ],
+      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
     }
   ]
 }

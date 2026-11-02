@@ -233,6 +233,27 @@ test.each(['completed','processing'])('CPU capacity after browser closure is rec
   }
 });
 
+test.each(['completed','processing'])('CPU capacity after browser closure is reconciled without replaying inference: %s',async(status)=>{
+  process.env.STUDIO_MODEL_VFX_URL='http://127.0.0.1:6199';process.env.STUDIO_MODEL_VFX_SECRET='s'.repeat(32);
+  const modelArtifactRef={artifactHash:'e'.repeat(64)},sourceSha256='b'.repeat(64),manifestSha256='f'.repeat(64);
+  objects.get(scene().sourceStoragePath).metadata.sha256=sourceSha256;
+  require('../src/services/studioModelCapabilityService').resolveSubjectMaskInputs.mockResolvedValue({artifactHash:modelArtifactRef.artifactHash,sourceSha256,manifestSha256});
+  axios.post.mockImplementation(async(_url,spec)=>({data:{jobId:spec.jobId}}));
+  const input={ownerUid,scene:scene(),modelArtifactRef};
+  const first=await createSubjectVfxPreview({...input,clientRequestId:'closed-browser-first'});
+  axios.get.mockImplementation(async url=>url.endsWith('/media')?{data:bytes}:{data:{jobId:first.jobId,ownerUid,
+    requestHash:job(first.jobId).requestHash,status,receipt:{...receipt(first.jobId),encoder:'libx264',
+      modelArtifactHash:modelArtifactRef.artifactHash,gpuCount:0,elapsed_seconds:1,
+      mask_manifest_sha256:manifestSha256,implementation_sha256:'a'.repeat(64)}}});
+  const next=createSubjectVfxPreview({...input,clientRequestId:'closed-browser-next'});
+  if(status==='completed'){
+    expect((await next).jobId).not.toBe(first.jobId);expect(job(first.jobId).status).toBe('completed');
+    expect(axios.post).toHaveBeenCalledTimes(2); // Exactly one new explicitly requested CPU job.
+  }else{
+    await expect(next).rejects.toMatchObject({statusCode:429});expect(axios.post).toHaveBeenCalledTimes(1);
+  }
+});
+
 test("owned completed preview resolves to the same source-bound export artifact after splitting", async () => {
   const { jobId } = await create();
   const preview = await finish(jobId);

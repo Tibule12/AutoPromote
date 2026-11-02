@@ -8759,6 +8759,2402 @@
           "kind": "NATIVE_REPORT"
         }
       ]
+    },
+    {
+      "feature_id": "studio.timeline",
+      "name": "Timeline",
+      "area": "Studio",
+      "summary": "Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.",
+      "purpose": "Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video occurrences",
+        "image/video/text layers",
+        "audio cues"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Import your owned footage in Media or open a saved project. Select a clip, text/image layer or audio cue on the timeline.",
+        "Use Cut and Reframe for the picture, Graphics and Motion for layers, Color for the finish, and Sound for the mix. Templates and reviewed Director edits remain editable in these same controls.",
+        "Save the project, reopen it and render the current revision. Watch the complete exported movie with sound before using it."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified. Timeline markers, the output-position control and playback time follow the programme decoder and the existing output time map. Split and source trim commands sample the decoder when clicked, including between ordinary UI updates. Finished-file source edits resolve the correct source occurrence and return to Live Edit. An edge cursor is rejected instead of reusing an earlier UI position.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "Some timeline operations and mixed retiming/layer/audio combinations remain partial. Review the actual export; live picture and sound can differ.",
+        "Each editing tool retains its documented limits. An available control does not certify every effect combination or clean automatic background replacement.",
+        "Detailed inspector values, active-layer filtering, key navigation and broader retimed/nested combinations still require separate qualification. A more responsive playhead does not establish full picture/sound synchronization or playback smoothness.",
+        "Playback latency during heavy work remains under review. Check the paused frame before detailed effect edits; a responsive cursor does not certify full live picture/sound accuracy."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "cuts_speed"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-25",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioProTimeline.js",
+          "anchor": "buildTimelineCaptionRegions",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"cuts_speed\"",
+          "kind": "READINESS"
+        },
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "CREATIVE_STUDIO_TOOLS",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioPlaybackClock.js",
+          "anchor": "createStudioPlaybackClock",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioPlaybackPosition.js",
+          "anchor": "useStudioPlayheadDisplay",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "reports/studio-playhead-precision-20261024/README.md",
+          "anchor": "# Studio playhead precision",
+          "kind": "NATIVE_REPORT"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.cut",
+      "name": "Split a clip",
+      "area": "Studio",
+      "summary": "Splits a canonical clip occurrence at the mapped output playhead; source ranges and linked material follow the shared edit transaction.",
+      "purpose": "Splits a canonical clip occurrence at the mapped output playhead; source ranges and linked material follow the shared edit transaction.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [
+        "studio.timeline"
+      ],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.2"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "cuts_speed"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioCommands.js",
+          "anchor": "validateStudioCommandBatch",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"cuts_speed\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.layers",
+      "name": "Editable layers",
+      "area": "Studio",
+      "summary": "Stores ordinary text, image and video overlays as editable canonical layers. Arbitrary nested global composition is still outside the qualified subset.",
+      "purpose": "Stores ordinary text, image and video overlays as editable canonical layers. Arbitrary nested global composition is still outside the qualified subset.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "ordinary text layers",
+        "image overlays",
+        "video overlays"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.layer.start",
+        "studio.layer.duration",
+        "studio.layer.width",
+        "studio.layer.height"
+      ],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.2"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "overlays"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioProjectDocument.js",
+          "anchor": "STUDIO_DOCUMENT_VERSION",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"overlays\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.keyframes",
+      "name": "Motion / Transform Keyframes",
+      "area": "Studio",
+      "summary": "Adds property keys to a selected ordinary layer, moves them in the timeline and interpolates poses. Retained evidence covers native controls, undo/redo, reopen and export; whole-stage agreement is still partial.",
+      "purpose": "Create deliberate editable movement and retain the same keys across manual editing, Director proposals, saving and final compilation.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "ordinary text layers",
+        "image overlays",
+        "video overlays"
+      ],
+      "requires": [
+        "studio.transforms",
+        "studio.timeline"
+      ],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.transform.x",
+        "studio.transform.y",
+        "studio.transform.scale",
+        "studio.transform.rotation",
+        "studio.transform.opacity",
+        "studio.transform.anchorx",
+        "studio.transform.anchory",
+        "studio.transform.cropx",
+        "studio.transform.cropy",
+        "studio.keyframe.time",
+        "studio.keyframe.easing"
+      ],
+      "workflow": [
+        "Select an ordinary editable layer and open Motion; set its initial pose.",
+        "Move the playhead and choose Add transform keyframe; change the next pose.",
+        "Expand native property lanes, move/nudge keys, adjust easing/curve and play the actual motion.",
+        "Undo/redo, save/reopen, render and inspect the current output. Static anchor geometry is not an animated property."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified. Main-video motion, crop, finish/adjustment and join effects follow the native decoded picture timestamp while playing. Paused scrubbing retains its existing exact-frame/native route. This bounded frame-clock repair does not establish whole audiovisual or pixel parity.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "No selected editable layer",
+          "resolution": "Select an ordinary layer before adding transform keys."
+        },
+        {
+          "condition": "Keyframe edits are locked",
+          "resolution": "Unlock the applicable property/layer in the normal controls before editing."
+        },
+        {
+          "condition": "Motion differs after export",
+          "resolution": "Check current keys/source binding and the documented preview/final limitations; inspect mapped frames in the actual movie."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.2"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [
+        {
+          "label": "Retained native edit and export evidence",
+          "kind": "RETAINED_PRIVATE_EVIDENCE",
+          "evidence_path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "qualification": "Private retained native lifecycle evidence. Not a public release, creative approval or whole-product qualification."
+        }
+      ],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "motion_graphics"
+      },
+      "review_state": "DOCUMENTATION_QUALIFIED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioAutomation.js",
+          "anchor": "STUDIO_EASINGS",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"motion_graphics\"",
+          "kind": "READINESS"
+        },
+        {
+          "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "kind": "NATIVE_REPORT"
+        },
+        {
+          "path": "reports/studio-picture-clock-20261025/README.md",
+          "anchor": "# Decoded picture clock for Studio effects",
+          "kind": "NATIVE_REPORT"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.easing",
+      "name": "Motion easing",
+      "area": "Studio",
+      "summary": "Controls interpolation using linear, ease-in, ease-out, ease-in-out, hold and bounded cubic curves. Curve handles change how motion accelerates between keys.",
+      "purpose": "Shape the acceleration or hold between native property poses.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "ordinary text layers",
+        "image overlays",
+        "video overlays"
+      ],
+      "requires": [
+        "studio.keyframes"
+      ],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.keyframe.easing",
+        "studio.keyframe.curve"
+      ],
+      "workflow": [
+        "Select an existing key or pose group for the intended ordinary layer.",
+        "Choose linear, ease-in, ease-out, ease-in-out, hold or custom curve; inspect the transition into that key.",
+        "For a custom curve, use bounded handles and play the movement; save/reopen and inspect final output."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "The shared curve contract allows Y overshoot -2–2, while some numeric inspector widgets restrict Y to 0–1.",
+        "The right-hand key supplies easing for the interval between keys.",
+        "This is native 2D property interpolation, distinct from legacy scene-level 3D easing."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [
+        {
+          "label": "Retained native edit and export evidence",
+          "kind": "RETAINED_PRIVATE_EVIDENCE",
+          "evidence_path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "qualification": "Private retained native lifecycle evidence. Not a public release, creative approval or whole-product qualification."
+        }
+      ],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "motion_graphics"
+      },
+      "review_state": "DOCUMENTATION_QUALIFIED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioAutomation.js",
+          "anchor": "STUDIO_EASINGS",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"motion_graphics\"",
+          "kind": "READINESS"
+        },
+        {
+          "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "kind": "NATIVE_REPORT"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.crop_reframe",
+      "name": "Crop and reframe",
+      "area": "Studio",
+      "summary": "Reframes a source or crops an overlay using the shared time map and existing renderer. Preserve subject framing and inspect source geometry at cuts.",
+      "purpose": "Reframes a source or crops an overlay using the shared time map and existing renderer. Preserve subject framing and inspect source geometry at cuts.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "reframing"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"reframing\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.titles",
+      "name": "Titles",
+      "area": "Studio",
+      "summary": "Places editable title text in ordinary layers with deterministic style, layout and timing. It is distinct from automatic speech transcription.",
+      "purpose": "Places editable title text in ordinary layers with deterministic style, layout and timing. It is distinct from automatic speech transcription.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "ordinary text layer"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.title.text",
+        "studio.title.scale",
+        "studio.title.color"
+      ],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "overlays"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"overlays\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.effects",
+      "name": "VFX and layer effects",
+      "area": "Studio",
+      "summary": "Applies the supported deterministic visual effects and source-bound subject scenes. Availability and final support depend on the specific effect.",
+      "purpose": "Applies the supported deterministic visual effects and source-bound subject scenes. Availability and final support depend on the specific effect.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "ordinary text layers",
+        "image overlays",
+        "video overlays"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.effect.blur",
+        "studio.effect.glow_radius",
+        "studio.effect.glow_intensity",
+        "studio.effect.layershadow_blur",
+        "studio.effect.layershadow_opacity",
+        "studio.effect.motionblur_samples",
+        "studio.effect.motionblur_shutter"
+      ],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "vfx"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "MotionInspector",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"vfx\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.compositing",
+      "name": "Compositing",
+      "area": "Studio",
+      "summary": "Combines editable layers and masks, including opt-in background image replacement in Composite. New footage needs its own reviewed subject mask; clean automatic replacement across arbitrary videos remains unqualified.",
+      "purpose": "Combines ordinary layers with supported blend modes and masks. Global stage order, arbitrary nesting and full preview/export agreement remain incomplete.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "ordinary text layers",
+        "image overlays",
+        "video overlays"
+      ],
+      "requires": [
+        "studio.layers"
+      ],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.composite.blend",
+        "studio.composite.background_edge_radius",
+        "studio.composite.background_decontaminate",
+        "studio.composite.source_detail_repair",
+        "studio.composite.edge_refinement_region",
+        "studio.composite.colour_treatment_paths",
+        "studio.composite.alpha_transparent",
+        "studio.composite.alpha_opaque",
+        "studio.composite.alpha_region"
+      ],
+      "workflow": [
+        "Open Studio → Composite and add effects to the selected owned video clip.",
+        "Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.",
+        "Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.",
+        "Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.",
+        "Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.",
+        "After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.",
+        "If removing an overlapping object exposes damaged rigid equipment, use Foreground holdout → Repair opaque detail from source. Set convex source/target quads, feather/end blend, optional clear_box and protect_paths. Default cleaned colour; source_color original and saturation 0–2 retain photographed opaque texture. Coordinates stay fixed in the source frame. Review the full moving shot and export.",
+        "For one coarse clothing edge, set Edge detail width above zero and use Edge refinement region points to limit the CPU edge solve to that source-frame region. Colour cleanup is a soft boundary guide there; explicit removal paths stay excluded and unrelated equipment alpha is retained. Render and inspect the whole moving shot.",
+        "For a translucent clothing fringe, adjust Transparent edge level and Opaque edge level before colour recovery, and use Edge opacity region points to limit the change. Defaults 0/1 retain the current soft matte; the opaque level must remain at least 0.05 higher. Render a new preview and inspect the full moving subject and selected objects."
+      ],
+      "preview_behavior": "Composite renders a processed subject-scene preview from the selected source and reviewed mask. Creator FX background placement remains a separate browser study. Changing a scene invalidates its previous preview; inspect the current processed movie.",
+      "render_behavior": "Export uses the saved layers, supported masks and reviewed processed subject scenes. Graphics are drawn at the chosen export resolution. Review the actual final movie; whole live-preview and final-output agreement remains unqualified.",
+      "limitations": [
+        "Image and title geometric masks support feather and inversion. Inspect their boundaries in the exported movie, especially with soft edges.",
+        "Geometric masks on the main video or video layers currently stop export. Real person/background separation uses Composite’s separately processed subject mask. Arbitrary nesting and global layer/effect order remain incomplete.",
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Background replacement is optional. Uploads accept PNG, JPEG or WebP up to 32 MB; a scene supports at most twelve effect layers.",
+        "A new video requires its own source-bound mask and available authorized model execution. A saved mask from another video cannot be transferred. An unavailable model service prevents creating a new mask.",
+        "Previous private podcast examples were rejected for appearance. Inspect the saved foreground mask and replacement image separately. Furniture contained in a replacement image remains behind the subject even when the old room is correctly removed; use replacement framing or choose an empty-room image to avoid extra chairs. Refine foreground selection is appropriate when the mask itself retains old-room pixels. Source-specific manual paths and support samples do not prove clean automatic replacement for other footage; inspect the complete moving preview and final movie.",
+        "Optional object holdouts and removal paths are advanced manual normalized source-frame geometry. They do not automatically identify furniture or microphones or track a hand-drawn shape through motion.",
+        "Opaque source-detail repair copies existing cleaned pixels from the same frame. It does not infer the hidden original object, automatically track geometry or repair an unselected object. A clean photographed sample is required; moving or articulated objects need separate timed corrections.",
+        "Local edge regions use manual fixed source-frame coordinates. They do not track or reconstruct objects; hard authored removal paths still take priority. Previous podcast movies remain owner-rejected while this correction is reviewed.",
+        "Foreground contrast uses the final visible foreground, including soft edge coverage. Removed background pixels do not set its brightness pivot. Use foreground exposure, saturation and contrast to match your chosen room, then inspect the moving preview and final movie.",
+        "Colour treatment paths apply the selected object saturation to additional fixed source-frame regions without retaining extra pixels. They do not change the cutout, restore missing objects or track motion. To keep or remove an object, edit its foreground selection; review the moving preview and final movie."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [
+        "studio.subject_cutout",
+        "studio.creator.background_replacement"
+      ],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [
+        "change my podcast background",
+        "upload my own background",
+        "keep furniture and microphones"
+      ],
+      "readiness_authority": {
+        "matrix_id": "compositing"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioBlendModes.js",
+          "anchor": "STUDIO_EXPORT_BLEND_MODES",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"compositing\"",
+          "kind": "READINESS"
+        },
+        {
+          "path": "frontend/src/components/studioRenderCompiler.js",
+          "anchor": "compileStudioCompositionForRender",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_layer_motion.py",
+          "anchor": "layer_clip_mask",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_text.py",
+          "anchor": "clip_box",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioMaskGeometry.js",
+          "anchor": "studioLayerMaskSvg",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioLayerMask.js",
+          "anchor": "StudioLayerMask",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Background choice",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.subject_cutout",
+      "name": "Subject segmentation",
+      "area": "Studio",
+      "summary": "Uses a real source-bound segmentation result to separate the selected subject across the supported scene range. Seed points and artifact review identify the subject.",
+      "purpose": "Uses a real source-bound segmentation result to separate the selected subject across the supported scene range. Seed points and artifact review identify the subject.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [
+        "system.model_runtime"
+      ],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.subject.range",
+        "studio.subject.seed_points",
+        "studio.subject.seed_labels"
+      ],
+      "workflow": [
+        "Open Studio → Composite, add the owned source clip and select the person with Subject point in the paused picture.",
+        "Add Background point marks to exclude unwanted areas; use later prompt frames/shot resets when the selected subject changes.",
+        "Optionally select additional objects in Subject mask. Leave those selections empty for people only.",
+        "Check current execution availability and authorization before creating the mask. Review the resulting moving mask before using it in an effect."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness.",
+        "People are selected with prompt points; this is not automatic detection of every person. Optional object selections do not guarantee clean thin equipment or hair.",
+        "Masks belong to their exact source and scene range. Creating a mask for new footage requires available authorized model execution. Manual example masks and contours cannot qualify another video."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [
+        "segment_subject"
+      ],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "segmentation"
+      },
+      "review_state": "DOCUMENTATION_QUALIFIED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "src/services/studioSubjectVfxService.js",
+          "anchor": "workerConfig",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"segmentation\"",
+          "kind": "READINESS"
+        },
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Subject point",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.audio",
+      "name": "Audio lanes and mixing",
+      "area": "Studio",
+      "summary": "Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX buses. Cues and gain keys remain editable in the project.",
+      "purpose": "Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX buses. Cues and gain keys remain editable in the project.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "audio cues",
+        "video with audio"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.2"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "audio"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "MotionInspector",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"audio\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.voiceover",
+      "name": "Voiceover takes",
+      "area": "Studio",
+      "summary": "Records or imports owned voice takes, places them on the timeline and edits cue timing. A microphone permission and durable owned source are needed for a reliable export.",
+      "purpose": "Records or imports owned voice takes, places them on the timeline and edits cue timing. A microphone permission and durable owned source are needed for a reliable export.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "audio cues",
+        "video with audio"
+      ],
+      "requires": [
+        "studio.audio",
+        "system.account"
+      ],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.voiceover.volume",
+        "studio.voiceover.duration"
+      ],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.1"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "voiceover_sfx"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioVoiceover.js",
+          "anchor": "voiceoverGain",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"voiceover_sfx\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.sfx",
+      "name": "Sound effects",
+      "area": "Studio",
+      "summary": "Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.",
+      "purpose": "Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "audio cues",
+        "video with audio"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.sfx.volume",
+        "studio.sfx.duration",
+        "studio.sfx.trim"
+      ],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.2"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "voiceover_sfx"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/motion/soundDesign.js",
+          "anchor": "DESIGN_SOUNDS",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"voiceover_sfx\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.audio_automation",
+      "name": "Audio gain keyframes",
+      "area": "Studio",
+      "summary": "Edits source-bus volume keys and interpolation alongside native cue gain. Retained timing and export receipts cover selected ducking and retimed sound cases.",
+      "purpose": "Edits source-bus volume keys and interpolation alongside native cue gain. Retained timing and export receipts cover selected ducking and retimed sound cases.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "audio cues",
+        "video with audio"
+      ],
+      "requires": [
+        "studio.audio"
+      ],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.audio.gain_key",
+        "studio.audio.automation_source"
+      ],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified. Original/master source gain and J/L-cut dialogue update from decoded frames without rendering the editor per frame. Source/occurrence checks reject stale clocks; buffering/seeking suspend dialogue and resume reanchors it. Frame-clock timing is separate from sample-exact whole-mix qualification. Short source-gain lookahead on the existing browser audio graph keeps a fade moving during a bounded editor stall; seeking, buffering and pause cancel/reanchor it. Music automation and overlapping fades follow the output audio clock. Ready imported cues use the final mixer’s linear sample mapping in the decoded preview route; their source controls remain editable. Prepared speech ducking retains its bounded CPU-verified gain samples. Native whole-mix startup/handoff and broad processed sound accuracy still need qualification. Equal envelope data no longer restarts running music ramps. Linked recorded-voice cuts retain their original fades through save, reopen and export; prepared speech shares the current decoder’s planned music handoff. Bounded mixed-bus samples pass, while continuous picture/sound transport and broad listening remain under review. Prepared-cut playback retains authored pacing and starts the decoded programme audio from an advancing video frame. Bounded native mixed audio remains continuous across the verified cut without per-cut reanchoring; picture startup and full audiovisual alignment remain unqualified. Decoded programme sound keeps its existing clock when video starts late. The preview catches the picture up; creator Pause and seek still override that recovery. Broader audiovisual timing remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness.",
+        "The verified continuous mixed-audio path uses muted source sound, prepared speech and decoded cues. Original sound, extracted/B-roll audio and decoder fallbacks still need broader parity checks."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [
+        {
+          "label": "Retained native edit and export evidence",
+          "kind": "RETAINED_PRIVATE_EVIDENCE",
+          "evidence_path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "qualification": "Private retained native lifecycle evidence. Not a public release, creative approval or whole-product qualification."
+        }
+      ],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "audio"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-24",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "MotionInspector",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"audio\"",
+          "kind": "READINESS"
+        },
+        {
+          "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "kind": "NATIVE_REPORT"
+        },
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "originalPreviewAudioMix",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "reports/studio-source-audio-clock-20261024/README.md",
+          "anchor": "# Source fades and dialogue playback clock",
+          "kind": "NATIVE_REPORT"
+        },
+        {
+          "path": "frontend/src/components/audio/studioSourceGainClock.js",
+          "anchor": "createStudioSourceGainClock",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioMusicGain.js",
+          "anchor": "createStudioMusicGain",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioCueBuffer.js",
+          "anchor": "projectStudioCueBuffer",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "reports/studio-transition-continuity-20261025/README.md",
+          "anchor": "# Native clip-transition audio continuity",
+          "kind": "NATIVE_REPORT"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.templates",
+      "name": "Apply a creative template",
+      "area": "Studio",
+      "summary": "Instantiates a pinned draft template into ordinary editable clips, layers, keyframes and audio. Retained signed-in local lifecycle evidence exists; public qualification and the showroom handoff remain incomplete.",
+      "purpose": "Instantiates a pinned draft template into ordinary editable clips, layers, keyframes and audio. Retained signed-in local lifecycle evidence exists; public qualification and the showroom handoff remain incomplete.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [
+        "studio.layers",
+        "studio.audio"
+      ],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Bind owned source footage, logo, copy and music in the existing template panel.",
+        "Bind optional sampled effects where the draft supports them. The podcast story draft takes owned real speech and keeps its voice track and music ducking editable.",
+        "Review the Director proposal or apply the exact selected version, then continue editing its native layers, keys, cuts and sound.",
+        "Save/reopen and inspect the finished export with its actual Studio timeline before release."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "The same pinned template instantiates ordinary native clips, title/source keyframes, finish settings and owned sound slots for manual or Director use. Inspect the actual movie produced by the existing AutoPromote renderer. Draft creative quality and broader product qualification remain separate.",
+      "limitations": [
+        "Draft versions are private creative iterations; public/showroom and professional qualification require actual finished-film review.",
+        "Stock inputs remain private slot bindings and are not distributed as a reusable stock library.",
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        },
+        {
+          "condition": "TEMPLATE_IDENTITY_MISMATCH",
+          "resolution": "The selected exact template definition is unavailable. Select an available pinned version; do not silently substitute a similar version."
+        },
+        {
+          "condition": "TEMPLATE_OWNED_MEDIA_REQUIRED",
+          "resolution": "Save an owned asset of the required slot type before binding the template."
+        },
+        {
+          "condition": "TEMPLATE_FOOTAGE_TOO_SHORT",
+          "resolution": "Choose footage with enough duration after its in-point for the template slot."
+        },
+        {
+          "condition": "CREATIVE_TEMPLATE_VERSION_UNAVAILABLE",
+          "resolution": "The exact requested shared template version cannot be resolved."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.2"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [
+        {
+          "label": "Retained native edit and export evidence",
+          "kind": "RETAINED_PRIVATE_EVIDENCE",
+          "evidence_path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "qualification": "Private retained native lifecycle evidence. Not a public release, creative approval or whole-product qualification."
+        },
+        {
+          "label": "Two native editorial launch films and editable Studio timelines",
+          "kind": "RETAINED_PRIVATE_EVIDENCE",
+          "evidence_path": "reports/model-capability-runtime-v1-20261009/EDITORIAL-LAUNCH-TEMPLATE-20261013.md",
+          "qualification": "Concrete private coffee/headphones films through one pinned draft template. No founder/public/hero or whole-product readiness approval."
+        }
+      ],
+      "aliases": [],
+      "readiness_authority": null,
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "config/creative-templates/registry.v1.json",
+          "anchor": "{",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "kind": "NATIVE_REPORT"
+        },
+        {
+          "path": "frontend/src/components/studioCreativeTemplate.js",
+          "anchor": "instantiateStudioCreativeTemplate",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioLaunchTemplatePanel.js",
+          "anchor": "StudioLaunchTemplatePanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "reports/model-capability-runtime-v1-20261009/EDITORIAL-LAUNCH-TEMPLATE-20261013.md",
+          "anchor": "# Editorial product launch",
+          "kind": "NATIVE_REPORT"
+        },
+        {
+          "path": "reports/model-capability-runtime-v1-20261009/TEMPLATE-VARIETY-20261014.md",
+          "anchor": "# Creative template variety — 14 October 2026",
+          "kind": "NATIVE_REPORT"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.preview",
+      "name": "Studio playback preview",
+      "area": "Studio",
+      "summary": "Shows the existing project programme with mapped source frames and sound. Retained fixes improve selected cases; whole-stage live playback, stalls and picture/sound agreement remain open.",
+      "purpose": "Shows the existing project programme with mapped source frames and sound. Retained fixes improve selected cases; whole-stage live playback, stalls and picture/sound agreement remain open.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "preview"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"preview\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.render",
+      "name": "Final deterministic render",
+      "area": "Studio",
+      "summary": "Compiles the canonical project into the existing deterministic final path. Output must match the current project revision and owned source evidence.",
+      "purpose": "Compiles the canonical project into the existing deterministic final path. Output must match the current project revision and owned source evidence.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [
+        "studio.revision"
+      ],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.2"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "final_render"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioRenderCompiler.js",
+          "anchor": "compileStudioOverlaysForRender",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"final_render\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.export",
+      "name": "Export and download",
+      "area": "Studio",
+      "summary": "Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.",
+      "purpose": "Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [
+        "studio.render",
+        "studio.revision"
+      ],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "export"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"export\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.revision",
+      "name": "Project revisions",
+      "area": "Studio",
+      "summary": "Preserves canonical revision and provenance for manual edits, Director proposals, artifact review and output binding. Stale proposals must be reviewed again.",
+      "purpose": "Preserves canonical revision and provenance for manual edits, Director proposals, artifact review and output binding. Stale proposals must be reviewed again.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        },
+        {
+          "condition": "RENDER_TIMELINE_MISMATCH",
+          "resolution": "The render clip count differs from the current canonical edit. Check the current revision and timeline before requesting a new export."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "brand_trailer_momentum_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "podcast_story_hook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "podcast_clip_proof_tiktok_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_youtube_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_instagram_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_linkedin_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_reddit_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "podcast_clip_proof_facebook_v1",
+          "version": "1.0.2"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "project_revisions"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-13",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioProjectDocument.js",
+          "anchor": "STUDIO_DOCUMENT_VERSION",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"project_revisions\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.media_ingest",
+      "name": "Media import",
+      "area": "Studio",
+      "summary": "Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.",
+      "purpose": "Imports supported owned video, image and audio into canonical assets. Decoding, source validation and ownership checks still apply.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [
+        "system.account"
+      ],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "media_ingest"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "src/services/studioSourceService.js",
+          "anchor": "resolveOwnedStudioSource",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"media_ingest\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "system.account",
+      "name": "Account and permissions",
+      "area": "Troubleshooting",
+      "summary": "An authenticated account, project ownership and applicable entitlements are checked by server-side workflows. A browser flag cannot grant project or model access.",
+      "purpose": "An authenticated account, project ownership and applicable entitlements are checked by server-side workflows. A browser flag cannot grant project or model access.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "An expired sign-in needs the existing authentication flow. Do not share passwords or tokens with support."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": null,
+      "review_state": "SOURCE_AUDITED",
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "src/services/studioSourceService.js",
+          "anchor": "resolveOwnedStudioSource",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "feature_id": "creative.showroom",
+      "name": "Public creative showroom",
+      "area": "Templates",
+      "summary": "The public catalogue has no qualified release or hero. The current welcome page has not yet become the required creative showroom.",
+      "purpose": "The public catalogue has no qualified release or hero. The current welcome page has not yet become the required creative showroom.",
+      "implementation_kind": "UNIMPLEMENTED",
+      "available_to": [
+        "unavailable as a qualified completed workflow"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open the relevant workspace with an owned source.",
+        "Review the result and its limitations before saving or exporting."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "No qualified final workflow exists for this feature.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": null,
+      "review_state": "SOURCE_AUDITED",
+      "status": "UNIMPLEMENTED",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "src/creativeTemplates/showcase.js",
+          "anchor": "validateMedia",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "feature_id": "publishing.connections",
+      "name": "Connected publishing platforms",
+      "area": "Publishing",
+      "summary": "Connects supported platform accounts through existing permissions. Displayed platform names are not proof every provider is qualified end-to-end.",
+      "purpose": "Connects supported platform accounts through existing permissions. Displayed platform names are not proof every provider is qualified end-to-end.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [
+        "system.account"
+      ],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open Connections while signed in and connect the intended platform account.",
+        "Open Publisher and review the account, Page or posting destination returned by the provider.",
+        "Resolve a provider reconnect or permission error before publishing."
+      ],
+      "preview_behavior": "Publisher shows the selected media with current account and destination information. A connected label alone does not confirm current posting permission.",
+      "render_behavior": "Connection checks do not render or generate media.",
+      "limitations": [
+        "Provider permissions, token health, account allowance and destination access apply.",
+        "The current provider must verify the posting identity; a stored connection alone is insufficient.",
+        "Six-platform external delivery has not been qualified by the connection checks."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": null,
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-13",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "src/routes/platformRoutes.js",
+          "anchor": "optionalPlatformStatusAuth(authMiddleware)",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/middlewares/platformStatusPolicy.js",
+          "anchor": "statusRequestCacheKey",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/services/redditService.js",
+          "anchor": "getOwnProfile",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/features/publishing/utils/publishingUtils.js",
+          "anchor": "facebookPublisherPages",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/server.js",
+          "anchor": "statusRequestCacheKey",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "feature_id": "publishing.schedule",
+      "name": "Scheduling",
+      "area": "Publishing",
+      "summary": "Schedules or reposts eligible content through the existing account-linked pipeline. External delivery depends on current connection and platform constraints.",
+      "purpose": "Schedules or reposts eligible content through the existing account-linked pipeline. External delivery depends on current connection and platform constraints.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [
+        "system.account"
+      ],
+      "optional_capabilities": [],
+      "controls": [
+        "publishing.queue.period",
+        "publishing.queue.load_more"
+      ],
+      "workflow": [
+        "Select an owned completed movie in Publisher and set the title and description.",
+        "Choose connected destinations, review platform-specific options and set a future date and time.",
+        "Review the exact destinations and timing, then choose Schedule posts.",
+        "Open Schedule and verify each requested platform has the intended pending schedule.",
+        "Use Queue period to review the next seven days or all schedules. Load another page when more entries remain."
+      ],
+      "preview_behavior": "Publisher previews the selected movie and review details; Queue displays pending owned schedules.",
+      "render_behavior": "Scheduling uses the selected completed movie. It does not rerender or allocate a generation worker.",
+      "limitations": [
+        "Provider permissions, destination access and account allowance apply.",
+        "An upload acknowledgement does not prove every schedule was created.",
+        "A pending schedule needs an operating scheduler and posting worker. Only a successful provider result confirms publication."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": null,
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-13",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/features/publishing/UnifiedPublisher.js",
+          "anchor": "PublisherReleaseWorkspace",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/services/viralOptimizationService.js",
+          "anchor": "shouldCreateInitialSchedule",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/promotionService.js",
+          "anchor": "processDueSchedules",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/UserDashboardTabs/SchedulesPanel.js",
+          "anchor": "groupSchedules",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/App.js",
+          "anchor": "const fetchMySchedules",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/services/publishingScheduleQuery.js",
+          "anchor": "ownedScheduleQuery",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
     }
   ],
   "controls": [
@@ -18699,6 +21095,744 @@
           "kind": "IMPLEMENTATION"
         }
       ]
+    },
+    {
+      "control_id": "studio.transform.x",
+      "label": "Position X",
+      "meaning": "Adjusts position x on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "field": "x",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "percent of stage",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "x",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.transform.y",
+      "label": "Position Y",
+      "meaning": "Adjusts position y on the selected ordinary layer. Anchor/crop affect the transform geometry.",
+      "feature_ids": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "field": "y",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "values": [],
+        "default": 50,
+        "default_known": true
+      },
+      "unit": "percent of stage",
+      "keyframeable": "SUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "PARTIAL",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.transforms",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "y",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.keyframe.time",
+      "label": "Keyframe time",
+      "meaning": "Places a property key on the programme clock; timeline nudges use the output frame grid.",
+      "feature_ids": [
+        "studio.keyframes"
+      ],
+      "field": "time",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": null,
+        "values": [],
+        "default": null,
+        "default_known": false
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "The current programme/layer range supplies the upper bound; no universal fixed duration is claimed."
+      ],
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioAutomation.js",
+          "anchor": "time",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.keyframe.easing",
+      "label": "Keyframe easing",
+      "meaning": "Selects the interpolation between property poses. Hold retains the prior value until the next key.",
+      "feature_ids": [
+        "studio.easing",
+        "studio.keyframes"
+      ],
+      "field": "easing",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "linear",
+          "ease_in",
+          "ease_out",
+          "ease_in_out",
+          "hold",
+          "bezier"
+        ],
+        "default": "ease_in_out",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.easing",
+        "studio.keyframes"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioAutomation.js",
+          "anchor": "easing",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.keyframe.curve",
+      "label": "Cubic curve handles",
+      "meaning": "Sets the bounded cubic interpolation curve; X handles stay 0–1 and Y handles may overshoot -2–2 in the shared contract.",
+      "feature_ids": [
+        "studio.easing"
+      ],
+      "field": "curve",
+      "constraints": {
+        "type": "array",
+        "minimum": null,
+        "maximum": null,
+        "values": [],
+        "default": [
+          0.33,
+          0,
+          0.67,
+          1
+        ],
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.easing"
+      ],
+      "limitations": [
+        "Array contains exactly four handles. Shared contract permits Y overshoot; some inspector widgets show narrower Y bounds."
+      ],
+      "status": "FUNCTIONAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioAutomation.js",
+          "anchor": "curve",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.composite.blend",
+      "label": "Layer blend mode",
+      "meaning": "Chooses how an ordinary overlay blends with the underlying image.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "blendMode",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "normal",
+          "multiply",
+          "screen",
+          "difference",
+          "overlay",
+          "soft-light",
+          "hard-light",
+          "color-dodge",
+          "luminosity"
+        ],
+        "default": "normal",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.compositing"
+      ],
+      "limitations": [
+        "Main programme video currently supports normal only; unsupported main-video modes are rejected at export."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioBlendModes.js",
+          "anchor": "blendMode",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.effect.blur",
+      "label": "Layer blur",
+      "meaning": "Adjusts the supported ordinary-layer layer blur. These controls are distinct from mask-scene glow.",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "field": "blur",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 30,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "blur",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.effect.glow_radius",
+      "label": "Glow radius",
+      "meaning": "Adjusts the supported ordinary-layer glow radius. These controls are distinct from mask-scene glow.",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "field": "glow.radius",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 60,
+        "values": [],
+        "default": 16,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "MotionInspector",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.effect.layershadow_blur",
+      "label": "Shadow blur",
+      "meaning": "Adjusts the supported ordinary-layer shadow blur. These controls are distinct from mask-scene glow.",
+      "feature_ids": [
+        "studio.effects"
+      ],
+      "field": "layerShadow.blur",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 80,
+        "values": [],
+        "default": 18,
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "ordinary layers"
+      ],
+      "dependencies": [
+        "studio.effects"
+      ],
+      "limitations": [
+        "Scope is the listed feature; do not transfer this range or support claim to another inspector."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "MotionInspector",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.composite.source_detail_repair",
+      "label": "Repair opaque detail from source",
+      "meaning": "Manually copies a clean opaque detail from the same source frame onto an authored target after matte cleanup. Optional cleanup removes damaged outlines; protection paths keep the actual fractional foreground in front of the restored detail.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "source_patches",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 16,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame corners; feather and end blending in source pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.",
+        "The default copies this frame’s cleaned source colour. Set source_color to original to retain photographed opaque equipment texture, with optional saturation 0–2; select clean source pixels so old-room colours are not copied. This does not reconstruct the hidden original, detect objects or track motion. Review every moving pose and the export.",
+        "New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality.",
+        "Protection paths place the existing foreground in front of the repaired detail using its actual alpha. Transparent padding does not punch a hole in the repair; soft accessory edges blend over it."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-25",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Repair opaque detail from source",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioSubjectVfxContract.js",
+          "anchor": "source_patches",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_vfx_plan.py",
+          "anchor": "source_patches",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.composite.edge_refinement_region",
+      "label": "Edge refinement region points",
+      "meaning": "Limits the CPU edge solve to an authored source-frame region. Colour rejection becomes a soft boundary guide inside it; explicit removal paths and boxes remain excluded. Alpha outside the region is unchanged.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "edge_polygon",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 64,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Set Edge detail width above zero first. Use 3–64 points forming a nonempty region; clear the field to refine the entire frame.",
+        "This manual region stays fixed in the source frame. Inspect the complete moving shot; it is not automatic tracking or object reconstruction.",
+        "The latest podcast correction remains under review. Broader footage and creative acceptance remain unqualified."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-24",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Edge refinement region points",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioSubjectVfxContract.js",
+          "anchor": "edge_polygon",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_vfx_plan.py",
+          "anchor": "edge_polygon",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.composite.colour_treatment_paths",
+      "label": "Colour treatment paths",
+      "meaning": "Apply the foreground holdout saturation to an additional region while keeping the existing cutout alpha. Use this to neutralise source lighting on retained equipment without restoring the old room.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "color_paths",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 32,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: 1–32 polygons with 3–64 points each, within source coordinates 0–1; [] removes the optional regions.",
+        "Only the existing object saturation treatment applies. These paths never enlarge the inclusion matte or change the source mask.",
+        "The regions stay fixed in source coordinates. They do not detect or track an object and do not prove clean replacement on arbitrary footage.",
+        "The three short room examples pass technical preview/export/reopen checks but remain owner-rejected for whole-shot realism. Colour-only paths fix a selection/colour separation defect; they do not establish a convincing professional background. Fixed geometry and these examples do not qualify arbitrary/longer footage."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-28",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Colour treatment paths",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioSubjectVfxContract.js",
+          "anchor": "color_paths",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_vfx_plan.py",
+          "anchor": "color_paths",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.composite.alpha_transparent",
+      "label": "Transparent edge level",
+      "meaning": "Sets the soft-matte value treated as transparent before foreground colour recovery. Raising it removes low-opacity residue in the selected region.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "alpha_levels[0]",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Transparent edge level",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioSubjectVfxContract.js",
+          "anchor": "alpha_levels",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_vfx_plan.py",
+          "anchor": "alpha_levels",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.composite.alpha_opaque",
+      "label": "Opaque edge level",
+      "meaning": "Sets the soft-matte value treated as opaque before foreground colour recovery. Lower it carefully when clothing edges are too translucent; fractional coverage remains between the two levels.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "alpha_levels[1]",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Opaque edge level",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioSubjectVfxContract.js",
+          "anchor": "alpha_levels",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_vfx_plan.py",
+          "anchor": "alpha_levels",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "control_id": "studio.composite.alpha_region",
+      "label": "Edge opacity region points",
+      "meaning": "Restricts edge-opacity levels to an authored source-frame polygon. Its boundary fades inward; alpha outside the region remains unchanged.",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "field": "alpha_polygon",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 64,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Use 3–64 normalized source-frame points forming a nonempty polygon. Clear the field to apply levels across the subject.",
+        "The polygon stays fixed in source coordinates and is not an automatically tracked selection. Explicit removed-background regions remain excluded.",
+        "Preview and full-film appearance still require moving review; the controls do not establish professional or universal replacement quality."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Edge opacity region points",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioSubjectVfxContract.js",
+          "anchor": "alpha_polygon",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_vfx_plan.py",
+          "anchor": "alpha_polygon",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
     }
   ],
   "tasks": [
@@ -19935,6 +23069,264 @@
         {
           "path": "frontend/src/components/ViralClipStudio.js",
           "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "task_id": "task.background_replace",
+      "title": "Replace a background",
+      "summary": "Optionally replace an owned video’s background image through Studio → Composite, using its own reviewed subject mask.",
+      "feature_ids": [
+        "studio.compositing",
+        "studio.subject_cutout",
+        "studio.revision",
+        "studio.export"
+      ],
+      "control_ids": [
+        "studio.composite.background_edge_radius",
+        "studio.composite.background_decontaminate"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Open Studio → Composite, choose Add effects to a clip and select your video occurrence. Keep original background remains the default.",
+          "feature_id": "studio.compositing",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Upload background image for your PNG, JPEG or WebP (up to 32 MB), or select an existing owned image under Background choice.",
+          "feature_id": "studio.compositing",
+          "control_ids": []
+        },
+        {
+          "instruction": "Select the person with Subject point on the paused source. Add Background point exclusions as needed. Leave optional object selections empty for people only, or select furniture and microphones individually. Remove an extra selection if it also keeps the old wall or floor, then add it again with tighter keep/remove points. Use Refine foreground selection and create a new mask when the selected silhouette is wrong; edge cleanup cannot correct a wrongly selected part of the room.",
+          "feature_id": "studio.subject_cutout",
+          "control_ids": []
+        },
+        {
+          "instruction": "Create and review a mask for this exact video/range using the available authorized model workflow, or explicitly reuse its valid owned mask. If model execution is unavailable, background selection alone cannot create a new cutout.",
+          "feature_id": "studio.subject_cutout",
+          "control_ids": []
+        },
+        {
+          "instruction": "Choose Clean background edges to add source-guided refinement without shrinking thin objects. Adjust Edge detail width (0–8 pixels) and Remove old background colour (0–1), then render a new preview and check movement. This cannot recover a missing object selection.",
+          "feature_id": "studio.compositing",
+          "control_ids": [
+            "studio.composite.background_edge_radius",
+            "studio.composite.background_decontaminate"
+          ]
+        },
+        {
+          "instruction": "Render preview and inspect the whole moving scene on bright and dark backgrounds. Check hair, shoulders, moving hands, seats, microphone rods, clamps and gaps. Use matte refinement and optional object holdouts for corrections; advanced paths are manual source-frame geometry.",
+          "feature_id": "studio.compositing",
+          "control_ids": []
+        },
+        {
+          "instruction": "Save the project and reopen it. After changing sources, masks or effect settings, regenerate and review the current preview before export.",
+          "feature_id": "studio.revision",
+          "control_ids": []
+        },
+        {
+          "instruction": "Export the current revision, then watch the complete movie with sound. A completed job or a still image does not establish clean edges throughout the video.",
+          "feature_id": "studio.export",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An editable source-bound background replacement in the normal Studio project, subject to available mask execution and visual review. Selecting Keep original background removes replacement layers and preserves the other scene settings.",
+      "limitations": [
+        "This is a partial development workflow. Broad ordinary-account availability and clean automatic replacement across arbitrary footage are not qualified.",
+        "The native Composite workflow uses real masks. Creator FX background placement is still a browser study and cannot substitute for a processed output.",
+        "The podcast example still has founder-rejected edge fringes and uses manual source-specific corrections. Do not reuse its mask or contours on another upload.",
+        "Holdout/removal paths require advanced manual source-frame geometry; they are not automatic object detection or tracking.",
+        "Replacing the room does not relight photographed people, restore missing furniture, or change the camera perspective."
+      ],
+      "aliases": [
+        "change podcast background",
+        "replace video background",
+        "upload my own room image",
+        "keep people and optional objects"
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-22",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Background choice",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Render subject preview",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "task_id": "task.cinematic_logo",
+      "title": "Create a cinematic logo reveal",
+      "summary": "Use owned branding and supported authored scene movement; no public-quality logo result is yet qualified.",
+      "feature_ids": [
+        "studio.export",
+        "creative.logo_brand",
+        "studio.three_d",
+        "studio.sfx"
+      ],
+      "control_ids": [
+        "studio.three_d.material",
+        "studio.three_d.focallength"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Import the owned logo and select a supported draft/preset.",
+          "feature_id": "creative.logo_brand",
+          "control_ids": []
+        },
+        {
+          "instruction": "Author ordinary layers or a bounded 3D scene; review unsupported final fields.",
+          "feature_id": "studio.three_d",
+          "control_ids": [
+            "studio.three_d.material",
+            "studio.three_d.focallength"
+          ]
+        },
+        {
+          "instruction": "Place deliberate sound cues and review the actual final movie.",
+          "feature_id": "studio.sfx",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+      ],
+      "aliases": [],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-12",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "task_id": "task.own_style",
+      "title": "Edit a video in your own style",
+      "summary": "Change ordinary clips, titles, framing, captions, motion, colour and sound manually in the same editable project used by templates and reviewed Director edits.",
+      "feature_ids": [
+        "studio.timeline",
+        "studio.cut",
+        "studio.trim",
+        "studio.layers",
+        "studio.transforms",
+        "studio.keyframes",
+        "studio.color",
+        "studio.captions",
+        "studio.audio",
+        "studio.compositing",
+        "studio.templates",
+        "studio.revision",
+        "studio.export"
+      ],
+      "control_ids": [],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Import your owned footage or apply an available shared template from Media. Templates author normal editable clips, layers, keys and audio; they do not lock your style.",
+          "feature_id": "studio.templates",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Cut for splits/trims and select the occurrence you want to change. Reframe changes aspect, position and zoom; review faces throughout the crop.",
+          "feature_id": "studio.cut",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Graphics for your own text, fonts, colours, images, position, size, opacity and timing. Edit caption words/timing and style in Captions.",
+          "feature_id": "studio.layers",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Motion for supported transform keys, easing and movement. Select the actual layer and inspect its entrance and exit. Some advanced 3D/Creator FX controls are placement studies; read their limits.",
+          "feature_id": "studio.keyframes",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Color to adjust the image finish. Composite provides optional subject/background treatment; keep the original background when replacement is unnecessary.",
+          "feature_id": "studio.color",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Sound for speech, music, voiceover, sound effects, levels and fades. Review the rendered mix; whole live-preview/final sound agreement remains unqualified.",
+          "feature_id": "studio.audio",
+          "control_ids": []
+        },
+        {
+          "instruction": "Save and reopen the project to retain your choices. Undo/Redo operates on the shared project. Keep an editable backup before major changes. Changing a processed scene requires a new reviewed preview.",
+          "feature_id": "studio.revision",
+          "control_ids": []
+        },
+        {
+          "instruction": "Render the current revision, then watch the full actual movie with sound. Check cuts, typography, moving boundaries and audio before using the result.",
+          "feature_id": "studio.export",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "Your own editable style and timing in the normal Studio project, with a reviewed export. No mandatory template or background replacement.",
+      "limitations": [
+        "Supported controls remain subject to their feature limits, account access and media ownership. This does not certify every tool or effect combination.",
+        "Whole predictive picture/sound parity, arbitrary nesting and broad ordinary-account model execution remain incomplete. Source-specific manual mask corrections do not generalize to new videos.",
+        "Technical records document private development work. They are not evidence that every feature is deployed or available in production.",
+        "Caption wording, timing and style can be edited manually. Automatic caption generation has its separate documented blocking defect; manual editing does not qualify automatic transcription."
+      ],
+      "aliases": [
+        "edit in my own preferred style",
+        "customize my video",
+        "manual video editing",
+        "change a template",
+        "what editing controls can I use"
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "CREATIVE_STUDIO_TOOLS",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+          "anchor": "Background choice",
           "kind": "IMPLEMENTATION"
         }
       ]
@@ -22330,6 +25722,121 @@
       "type": "editable_with",
       "from": "studio.voiceover",
       "to": "studio.voiceover.fade_out"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.subject_cutout",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.revision",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.cut",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.trim",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.layers",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.color",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.captions",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.audio",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.templates",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.revision",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.composite.source_detail_repair",
+      "from": "studio.compositing"
+    },
+    {
+      "type": "editable_with",
+      "from": "studio.compositing",
+      "to": "studio.composite.edge_refinement_region"
+    },
+    {
+      "type": "editable_with",
+      "from": "studio.compositing",
+      "to": "studio.composite.colour_treatment_paths"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.composite.alpha_transparent",
+      "from": "studio.compositing"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.composite.alpha_opaque",
+      "from": "studio.compositing"
+    },
+    {
+      "type": "editable_with",
+      "to": "studio.composite.alpha_region",
+      "from": "studio.compositing"
     }
   ],
   "template_bindings": [
@@ -22514,6 +26021,401 @@
         "studio.revision",
         "studio.cut"
       ]
+    },
+    {
+      "template_id": "brand_trailer_momentum_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "brand_trailer_momentum_v1",
+      "version": "1.0.1",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_story_hook_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut",
+        "studio.voiceover"
+      ]
+    },
+    {
+      "template_id": "podcast_story_hook_v1",
+      "version": "1.0.1",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut",
+        "studio.voiceover"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_tiktok_v1",
+      "version": "1.0.1",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_youtube_v1",
+      "version": "1.0.1",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_instagram_v1",
+      "version": "1.0.1",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_linkedin_v1",
+      "version": "1.0.1",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_reddit_v1",
+      "version": "1.0.1",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_facebook_v1",
+      "version": "1.0.1",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_tiktok_v1",
+      "version": "1.0.2",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_youtube_v1",
+      "version": "1.0.2",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_instagram_v1",
+      "version": "1.0.2",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_linkedin_v1",
+      "version": "1.0.2",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_reddit_v1",
+      "version": "1.0.2",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_facebook_v1",
+      "version": "1.0.2",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_tiktok_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_youtube_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_instagram_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_linkedin_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_reddit_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_clip_proof_facebook_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_set_reveal_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut",
+        "studio.compositing",
+        "studio.subject_cutout",
+        "studio.color"
+      ]
+    },
+    {
+      "template_id": "podcast_set_dialogue_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut",
+        "studio.compositing",
+        "studio.subject_cutout",
+        "studio.color"
+      ]
+    },
+    {
+      "template_id": "podcast_set_dialogue_v1",
+      "version": "1.1.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut",
+        "studio.compositing",
+        "studio.subject_cutout",
+        "studio.color"
+      ]
+    },
+    {
+      "template_id": "podcast_set_dialogue_v1",
+      "version": "1.1.1",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut",
+        "studio.compositing",
+        "studio.subject_cutout",
+        "studio.color"
+      ]
+    },
+    {
+      "template_id": "podcast_set_dialogue_v1",
+      "version": "1.2.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut",
+        "studio.compositing",
+        "studio.subject_cutout",
+        "studio.color"
+      ]
     }
   ],
   "contextual_help": [
@@ -22571,6 +26473,16 @@
     {
       "surface": "3D Motion help",
       "help_feature_id": "studio.three_d",
+      "control_ids": []
+    },
+    {
+      "surface": "Composite background replacement",
+      "help_feature_id": "studio.compositing",
+      "control_ids": []
+    },
+    {
+      "surface": "Studio editing guide",
+      "help_feature_id": "studio.timeline",
       "control_ids": []
     }
   ],
@@ -22788,6 +26700,61 @@
         {
           "path": "contracts/model-capabilities-v1.json",
           "anchor": "{",
+          "kind": "IMPLEMENTATION"
+        }
+      ],
+      "limitations": [
+        "This qualifies documentation against repository sources and retained evidence, not a new product execution or readiness promotion.",
+        "No GPU/camera/browser workflow was newly run for this documentation task."
+      ]
+    },
+    {
+      "feature_id": "studio.keyframes",
+      "scope": "Accurate source-backed feature, control, dependency, workflow and readiness documentation for this development snapshot.",
+      "review_kind": "DOCUMENTATION_SOURCE_AND_RETAINED_EVIDENCE",
+      "reviewed_at": "2026-10-12",
+      "feature_coverage": [
+        "studio.transforms",
+        "studio.keyframes",
+        "studio.easing"
+      ],
+      "control_coverage": [
+        "studio.transform.x",
+        "studio.transform.y",
+        "studio.transform.scale",
+        "studio.transform.rotation",
+        "studio.transform.opacity",
+        "studio.transform.anchorx",
+        "studio.transform.anchory",
+        "studio.transform.cropx",
+        "studio.transform.cropy",
+        "studio.keyframe.time",
+        "studio.keyframe.easing",
+        "studio.keyframe.curve"
+      ],
+      "task_coverage": [
+        "task.product_launch",
+        "task.director_manual"
+      ],
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/StudioAdvancedInspectors.js",
+          "anchor": "MotionInspector",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"motion_graphics\"",
+          "kind": "READINESS"
+        },
+        {
+          "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "kind": "NATIVE_REPORT"
+        },
+        {
+          "path": "frontend/src/components/studioAutomation.js",
+          "anchor": "STUDIO_EASINGS",
           "kind": "IMPLEMENTATION"
         }
       ],

@@ -379,7 +379,10 @@
               "type": "array",
               "maxItems": 7,
               "uniqueItems": true,
-              "items": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"}
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$"
+              }
             },
             "maskArtifactHash": {
               "type": "string",
