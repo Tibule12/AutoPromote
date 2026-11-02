@@ -8,6 +8,9 @@ import { layoutStudioAnimatedText, studioTextAnimatorPoses } from './studioTextA
 import { studioVectorUri } from './studioVectorShape';
 import { hasSoftStudioMask, studioLayerMaskSvg } from './studioMaskGeometry';
 
+const style = (node, field, value) => { if (node.style[field] !== value) node.style[field] = value; };
+const variable = (node, name, value) => { if (node.style.getPropertyValue(name) !== value) node.style.setProperty(name, value); };
+
 // Paint the existing native layer nodes on the programme's decoded clock.
 // Editing, history and persistence remain in the ordinary React document. No
 // React editor/subtree render, media seek or second animation engine per frame.
@@ -27,24 +30,27 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
     const stage = marker.current?.parentElement, current = latest.current;
     const programmeTime = current.mapTime(sourceTime);
     if (!stage || !Number.isFinite(programmeTime)) return;
-    for (const node of stage.querySelectorAll('[data-studio-layer-id]')) {
+    for (const node of (current.nodes ||= [...stage.querySelectorAll('[data-studio-layer-id]')])) {
       const layer = current.layers.get(node.dataset.studioLayerId);
       if (!layer) continue;
+      const start = Number(layer.startTime ?? layer.start_time);
+      const duration = Number(current.getDuration?.(layer) ?? layer.duration);
+      const active = !Number.isFinite(start) || !Number.isFinite(duration) ||
+        (programmeTime >= start && programmeTime < start + duration);
+      style(node, 'visibility', active ? 'visible' : 'hidden');
+      node.dataset.programmeTime = String(programmeTime);
+      if (!active) continue;
       const pose = buildMotionAutomationStyle(current.layerKeys.get(String(layer.id)), programmeTime, layer);
       const fullscreen = layer.bRollMode === 'fullscreen';
       const title = layer.type === 'text' && !fullscreen;
       const entrance = title ? titleAnimationPose(layer, programmeTime) : { x: 0, y: 0, scale: 1, opacity: 1 };
-      const start = Number(layer.startTime ?? layer.start_time);
-      const duration = Number(current.getDuration?.(layer) ?? layer.duration);
-      node.style.visibility = Number.isFinite(start) && Number.isFinite(duration) &&
-        (programmeTime < start || programmeTime >= start + duration) ? 'hidden' : 'visible';
-      node.style.left = fullscreen ? '0%' : `${pose.x + entrance.x}%`;
-      node.style.top = fullscreen ? '0%' : `${pose.y + entrance.y}%`;
-      node.style.opacity = String(pose.opacity * entrance.opacity);
-      node.style.setProperty('--title-scale', String(pose.scale * entrance.scale));
-      node.style.setProperty('--title-rotation', `${pose.rotation}deg`);
-      if (layer.type === 'image') node.style.setProperty('--layer-opacity', String(pose.opacity * entrance.opacity));
-      if (current.getClipPath) node.style.clipPath = current.getClipPath({ ...layer, cropX: pose.cropX, cropY: pose.cropY }) || '';
+      style(node, 'left', fullscreen ? '0%' : `${pose.x + entrance.x}%`);
+      style(node, 'top', fullscreen ? '0%' : `${pose.y + entrance.y}%`);
+      style(node, 'opacity', String(pose.opacity * entrance.opacity));
+      variable(node, '--title-scale', String(pose.scale * entrance.scale));
+      variable(node, '--title-rotation', `${pose.rotation}deg`);
+      if (layer.type === 'image') variable(node, '--layer-opacity', String(pose.opacity * entrance.opacity));
+      if (current.getClipPath) style(node, 'clipPath', current.getClipPath({ ...layer, cropX: pose.cropX, cropY: pose.cropY }) || '');
       if (hasSoftStudioMask(layer.mask) && node.clientWidth && node.clientHeight) {
         const svg = studioLayerMaskSvg(layer.mask, pose.cropX, pose.cropY, node.clientWidth, node.clientHeight,
           title ? 1 : (stage.clientHeight || 720) / 720);
@@ -52,8 +58,8 @@ export default function StudioProgrammeFrame({ clockRef, mapTime, time, enabled 
         node.style.maskImage = mask; node.style.webkitMaskImage = mask;
       }
       const plane = node.querySelector('[data-testid="studio-perspective-surface"]');
-      if (plane && layer.perspective) plane.style.transform = perspectiveCssMatrix(layer.perspective,
-        pose.perspectiveProgress, Math.max(1, plane.clientWidth), Math.max(1, plane.clientHeight));
+      if (plane && layer.perspective) style(plane, 'transform', perspectiveCssMatrix(layer.perspective,
+        pose.perspectiveProgress, Math.max(1, Number(plane.dataset.planeWidth)), Math.max(1, Number(plane.dataset.planeHeight))));
       if (layer.vectorShape) {
         const picture = node.querySelector('img'), uri = studioVectorUri(layer.vectorShape, pose);
         if (picture && picture.getAttribute('src') !== uri) picture.setAttribute('src', uri);

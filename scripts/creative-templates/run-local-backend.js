@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('../assert-local-studio-enabled.cjs');
 // Existing authenticated API for local CPU Studio QA. No auth/credit bypass,
 // cloud deployment or GPU allocation is introduced by this launcher.
 const fs = require('node:fs');

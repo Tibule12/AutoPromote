@@ -1,4 +1,5 @@
 // Owns fresh isolated emulators and the actual App build. No Firebase CLI login.
+require('../assert-local-studio-enabled.cjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -248,6 +249,7 @@ async function main() {
       REACT_APP_CREDITS_FIRESTORE_EMULATOR: `http://127.0.0.1:${firestorePort}`,
       REACT_APP_CREDITS_STORAGE_EMULATOR: `http://127.0.0.1:${storagePort}`,
       REACT_APP_WELCOME_STUDIO_PREVIEW: "true",
+      REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW: process.env.CREDITS_DEMO_PRESENTED_FRAME_PREVIEW === 'true' ? 'true' : 'false',
     };
     const config = {
       env,

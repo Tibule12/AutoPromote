@@ -1,4 +1,5 @@
 // Actual application routers, isolated demo Auth/Firestore/Storage, no cloud fallback.
+require('../assert-local-studio-enabled.cjs');
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");

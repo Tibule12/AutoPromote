@@ -6972,6 +6972,9 @@ const ViralClipStudio = ({
     return Math.min(1, energy);
   };
 
+  // Broader frame-driven composition remains a local diagnostic candidate
+  // until native throughput and moving picture/sound qualification pass.
+  const presentedFramePreview = process.env.REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW === 'true';
   const currentTimelineClip = timeline[activeTimelineIndex] || null;
   const subjectProgrammePreview = useMemo(() => renderedOutputUrl ? null :
     resolveSubjectVfxProgrammePreview(subjectVfxScenes,
@@ -12157,10 +12160,23 @@ const ViralClipStudio = ({
       setExportStatusLabel("Uploading edit layers...");
       const newOverlays = await Promise.all(
         exportEditState.overlays.map(async overlay => {
-          let fileToUpload = overlay.file;
+          let fileToUpload = overlay.file instanceof Blob ? overlay.file : null;
           let isNewBlob = false;
           let generatedExtension = "png";
           let finalOverlay = { ...overlay };
+
+          // Reopened native graphics can retain file metadata alongside a
+          // rehydrated blob URL. Upload the actual owned preview bytes rather
+          // than passing that plain metadata object to the source uploader.
+          if (!fileToUpload && overlay.isLocal && typeof overlay.src === "string" &&
+              overlay.src.startsWith("blob:")) {
+            const response = await fetch(overlay.src);
+            if (!response.ok) throw new Error(`The local artwork ${overlay.name || overlay.id} is unavailable. Restore or relink its source before exporting.`);
+            fileToUpload = await response.blob();
+            generatedExtension = fileToUpload.type === "image/jpeg" ? "jpg"
+              : fileToUpload.type.split("/")[1] || "bin";
+            isNewBlob = true;
+          }
 
           // Native raster effects survive backups as embedded pixels. Send
           // those pixels through the ordinary owned image uploader before
@@ -13485,7 +13501,7 @@ const ViralClipStudio = ({
     // decoded frame through the live editor's canvas and layout effects.
     if (renderedOutputUrl) return undefined;
 
-    let stopProgrammeFrames = null;
+    let stopProgrammeFrames = null, programmeCanvasRect = null;
     const paintProgrammeFrame = decodedSourceTime => {
       // CSS effects do not alter drawImage's decoded pixels. Use the actual
       // programme element, not the lagging Before comparison clock: a 100 ms
@@ -13495,7 +13511,7 @@ const ViralClipStudio = ({
       // Size the decoded programme to the visible inner frame. Measuring the
       // outer monitor here stretches an inset canvas and makes preview framing
       // diverge from the backend's scale/crop result.
-      const rect = canvas.getBoundingClientRect();
+      const rect = programmeCanvasRect || (programmeCanvasRect = canvas.getBoundingClientRect());
       if (rect.width < 1 || rect.height < 1) return;
       const pixelRatio = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
       const canvasWidth = Math.max(2, Math.round(rect.width * pixelRatio));
@@ -14042,6 +14058,7 @@ const ViralClipStudio = ({
     });
     const transport = phoneFrameRef.current?.parentElement?.querySelector(".preview-custom-controls");
     const resizeProgramme = () => {
+      programmeCanvasRect = canvas.getBoundingClientRect();
       if (phoneFrameRef.current) {
         phoneFrameRef.current.style.setProperty("--caption-programme-width",
           `${phoneFrameRef.current.clientWidth}px`);
@@ -14063,7 +14080,7 @@ const ViralClipStudio = ({
     if (phoneFrameRef.current) previewResizeObserver?.observe(phoneFrameRef.current);
     if (transport) previewResizeObserver?.observe(transport);
     resizeProgramme();
-    window.addEventListener("resize", paintProgrammeFrame);
+    window.addEventListener("resize", resizeProgramme);
     paintProgrammeFrame();
     if (!video.paused) startProgrammeLoop();
 
@@ -14081,7 +14098,7 @@ const ViralClipStudio = ({
         stackVideo?.removeEventListener("seeked", paintProgrammeFrame);
       });
       previewResizeObserver?.disconnect();
-      window.removeEventListener("resize", paintProgrammeFrame);
+      window.removeEventListener("resize", resizeProgramme);
       stopProgrammeFrames?.();
     };
   }, [
@@ -19383,13 +19400,14 @@ const ViralClipStudio = ({
                         </div>
                       ) : null}
                       <StudioProgrammeFrame clockRef={videoRef} mapTime={getPreviewTimelineTime}
-                        time={previewTimelineTime} enabled={!renderedOutputUrl} layers={overlays}
+                        time={previewTimelineTime} enabled={presentedFramePreview && !renderedOutputUrl} layers={overlays}
                         keyframes={previewMotionKeyframes} groups={effectiveCompoundClips}
                         programmeWidth={720 * previewAspectRatio} getDuration={getOverlayVisibleDuration}
                         getClipPath={getOverlayMaskClipPath}>
                         {compositionTime => (
                       <StudioGroupPreview compounds={effectiveCompoundClips} order={compositionIds}
-                        keyframes={previewMotionKeyframes} time={compositionTime}>
+                        keyframes={previewMotionKeyframes} time={compositionTime}
+                        getTime={presentedFramePreview ? undefined : () => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}>
                       {!renderedOutputUrl && motionScenes.length > 0 ? (
                         (Array.isArray(compositionOrder) ? motionScenes.map(scene => [scene]) : [motionScenes]).map(scenes => <MotionCanvas
                           key={Array.isArray(compositionOrder) ? scenes[0].id : "motion-stage"}
@@ -19427,6 +19445,9 @@ const ViralClipStudio = ({
                               ? o.startTime
                               : o.start_time;
                           if (overlayStart !== undefined && o.duration !== undefined) {
+                            if (!presentedFramePreview) return !!o.perspective ||
+                              (compositionTime >= Number(overlayStart) &&
+                               compositionTime < Number(overlayStart) + getOverlayVisibleDuration(o));
                             // Legacy CSS entrances start at mount. Preserve their
                             // original cue until that separate path is paired.
                             if (['image', 'video'].includes(o.type) && o.animation?.enter &&
@@ -19578,7 +19599,9 @@ const ViralClipStudio = ({
                             >
                               <StudioLayerMask mask={overlay.mask} cropX={overlayMotion.cropX}
                                 cropY={overlayMotion.cropY} title={isStyledTitle} stageRef={phoneFrameRef} />
-                              <StudioPerspectiveSurface value={overlay.perspective} progress={overlayMotion.perspectiveProgress ?? 100}>
+                              <StudioPerspectiveSurface value={overlay.perspective} progress={overlayMotion.perspectiveProgress ?? 100}
+                                clockRef={presentedFramePreview ? undefined : videoRef} mapTime={getPreviewTimelineTime}
+                                layer={overlay} keyframes={overlayKeys}>
                               {overlay.type === "text" ? (
                                 overlay.bRollPlaceholder ? (
                                   <div

@@ -6083,6 +6083,33 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(JSON.stringify(onSave.mock.calls[0][1])).not.toContain('data:image/');
   });
 
+  test("reopened local graphic metadata uploads the recovered blob pixels instead of its file descriptor", async () => {
+    const onSave = jest.fn(), source = { id: 'local-art-source', start: 0, end: 8, duration: 8 };
+    const src = 'blob:https://example.com/recovered-native-art';
+    const pixels = new Blob(['retained native image bytes'], { type: 'image/png' });
+    const previousFetch = global.fetch;
+    global.fetch = jest.fn((url, options) => url === src
+      ? Promise.resolve({ ok: true, blob: () => Promise.resolve(pixels) })
+      : previousFetch(url, options));
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[source]}
+      initialSavedProject={{ id: 'saved-local-art', name: 'Recovered local artwork', snapshot: {
+        orderedClips: [source], selectedClipId: source.id,
+        timeline: [{ ...source, sourceClipId: source.id, startRequest: 0, endRequest: 8, url: 'https://example.com/source.mp4' }],
+        overlays: [{ id: 'native-art', name: 'Evidence rule', type: 'image', src,
+          file: { name: 'rule.png', size: pixels.size, type: 'image/png' }, isLocal: true,
+          startTime: 2, duration: 2, x: 50, y: 50, width: 25, height: 1 }], addHook: false,
+      } }} onSave={onSave} onCancel={jest.fn()} />);
+    await screen.findByDisplayValue('Recovered local artwork');
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(uploadSourceFileViaBackend).toHaveBeenCalledWith(expect.objectContaining({
+      mediaType: 'image', file: pixels, fileName: expect.stringMatching(/\.png$/),
+    }));
+    expect(onSave.mock.calls[0][1]).toEqual([expect.objectContaining({
+      id: 'native-art', src: 'https://example.com/mock.mp4', isLocal: false, file: null,
+    })]);
+  });
+
   test("quick trim retimes motion and its linked sound and undo restores both", async () => {
     const commandSpy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
     const onSave = jest.fn(() => Promise.resolve());

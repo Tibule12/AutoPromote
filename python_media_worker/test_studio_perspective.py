@@ -79,3 +79,24 @@ def test_rounded_intermediate_timestamps_keep_the_last_declared_frame_without_le
     assert len(frames)==75
     assert frames[71,30,50,0]>200,'The last 24fps cue picture must retain its plane'
     assert frames[72,30,50,2]>200,'The plane must disappear at its exact declared end'
+
+@pytest.mark.parametrize('scale,progress,anchor,position,offset,blur', [
+    (1,0,(50,50),(50,50),(0,10),24),
+    (.62,75,(50,50),(65,46),(-13,9),24),
+    (.64,75,(50,50),(65,46),(9,-12),12),
+    (.73,32,(0,100),(18.125,59.375),(30,-20),40),
+    (.51,100,(100,0),(89.375,11.875),(-8,10),0),
+])
+def test_bounded_projected_video_shadow_matches_original_rotation_surface_exactly(
+        scale,progress,anchor,position,offset,blur):
+    rng=np.random.default_rng(842)
+    asset=Image.fromarray(rng.integers(0,256,(99,177,4),dtype=np.uint8))
+    overlay={'type':'video','width':100,'height':100,'frameShape':'round','borderRadius':16}
+    layer={'id':'plane','type':'video','perspective':PLANE,'anchor_x':anchor[0],'anchor_y':anchor[1],
+           'effects':{'shadow':{'enabled':True,'color':'#171820','opacity':.45,
+                                'blur':blur,'x':offset[0],'y':offset[1]}}}
+    pose={'x':position[0],'y':position[1],'scale':scale,'rotation':0,'opacity':.73,
+          'crop_x':0,'crop_y':0,'perspective_progress':progress}
+    bounded=_render_pose(asset,overlay,layer,pose,(320,180))
+    reference=_render_pose(asset,overlay,layer,pose,(320,180),reference_surface=True)
+    np.testing.assert_array_equal(bounded,reference)

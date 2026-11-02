@@ -1,3 +1,15 @@
+# Current delivery — Editorial V3, 31 October 2026
+
+[Watch the new native 16-second edit](</home/tibule12/Videos/The Video I Never Recorded - Editorial V3.mp4>) · [Complete review folder](</home/tibule12/Videos/The Video I Never Recorded - Editorial V3/>) · [Candid creative/technical feedback](editorial-v3-feedback.md).
+
+The rebuilt motion treatment is exported and verified at 720p, 24 fps, 384 pictures. Its raw comparison, original sources, editable project, actual authoring and complete matching Studio playback are delivered. **The full narrated minute and broad AE/Fusion-level qualification are not complete.** The exported file plays without dropped frames in the finished-player check, while the live editor still drops frames. Source/typography micro-timing and standalone media portability remain open. No new generation was purchased or production application deployed.
+
+# 31 October continuation — native timing work, creative edit unfinished
+
+The owner has clarified the target: advanced native motion graphics and compositing of the standard associated with After Effects and Fusion. [Current findings and exact limits](frame-clock-findings-20261031.md) record the experimental shared-frame repair, actual Studio tests and remaining display drops. The broader preview path stays disabled by default. **No new creative film or complete minute was delivered in this continuation.**
+
+Owner-authorized cleanup removed the earlier review MP4s. Historical movie links below are delivery records, not evidence those files still exist. After the owner explicitly allowed work to continue, the two exact original presenter takes were retrieved from their existing completed operations and restored in Videos without buying new generation. The current source remains 16 seconds and contains no clock dialogue.
+
 # Current recovery status — perspective revision, 60-second film unfinished
 
 The earlier flat 16-second edit is rejected by the owner. A new **16-second native perspective revision** is now exported from the actual updated Studio frontend and saved in [Videos](</home/tibule12/Videos/The Video I Never Recorded - Perspective Revision.mp4>). [Review folder](</home/tibule12/Videos/The Video I Never Recorded - Perspective Revision/>) includes its raw footage, synchronized comparison, native project and complete recorded playback.

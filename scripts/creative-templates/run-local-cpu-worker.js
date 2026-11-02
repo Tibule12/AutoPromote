@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('../assert-local-studio-enabled.cjs');
 // Local deterministic render worker. Never starts cloud infrastructure,
 // downloads a model, or logs credentials. Match the native local App origin.
 const fs = require('node:fs');

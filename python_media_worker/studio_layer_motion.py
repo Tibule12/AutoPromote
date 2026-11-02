@@ -179,7 +179,7 @@ def _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacit
     return projected
 
 
-def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
+def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, reference_surface=False):
     canvas_width, canvas_height = canvas_size
     fullscreen = str(_get(overlay, "bRollMode", _get(overlay, "b_roll_mode", ""))) == "fullscreen"
     if fullscreen:
@@ -256,15 +256,39 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         y = round(canvas_height * pose["y"] / 100 - anchor[1]) + round(anchor[1] - artwork.height * anchor_y)
         destination.alpha_composite(artwork, (x, y))
         return destination
-    transform_surface = Image.new("RGBA", (diagonal, diagonal))
+    surface_size, surface_origin, original_anchor = (diagonal, diagonal), (0, 0), anchor
+    surface_artwork_position = (round(anchor[0] - artwork.width * anchor_x),
+                                round(anchor[1] - artwork.height * anchor_y))
+    shadow = effects.get("shadow") or {}
+    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") in ("image", "video") else 1
+    # An unrotated projected video with only a drop shadow needs no square
+    # rotation canvas. Retain the old canvas origin and integer placement so
+    # this bounded allocation preserves the original pixels, including edges.
+    if (not reference_surface and (layer or {}).get('perspective') and
+            _get(overlay, "type") == "video" and abs(pose["rotation"]) <= .001 and
+            shadow.get("enabled") and not (effects.get("glow") or {}).get("enabled") and
+            finite(effects.get("blur"), 0) <= 0 and not effects.get("mask", {}).get("enabled") and
+            not pose.get("crop_x") and not pose.get("crop_y") and
+            all(clip_box.get(key, default) == default for key, default in
+                [("x", 0), ("y", 0), ("width", 1), ("height", 1)])):
+        padding = math.ceil(4 * max(0, finite(shadow.get("blur"), 18)) * effect_units) + 4
+        padding_x = padding + abs(round(finite(shadow.get("x"), 0) * effect_units))
+        padding_y = padding + abs(round(finite(shadow.get("y"), 10) * effect_units))
+        left, top = round(anchor[0] - artwork.width * anchor_x), round(anchor[1] - artwork.height * anchor_y)
+        origin_x, origin_y = max(0, left - padding_x), max(0, top - padding_y)
+        right, bottom = min(diagonal, left + artwork.width + padding_x), min(diagonal, top + artwork.height + padding_y)
+        surface_origin = (origin_x, origin_y)
+        surface_size = (right - origin_x, bottom - origin_y)
+        surface_artwork_position = (surface_artwork_position[0] - origin_x,
+                                    surface_artwork_position[1] - origin_y)
+        anchor = (anchor[0] - origin_x, anchor[1] - origin_y)
+    transform_surface = Image.new("RGBA", surface_size)
     transform_surface.alpha_composite(
         artwork,
-        (round(anchor[0] - artwork.width * anchor_x), round(anchor[1] - artwork.height * anchor_y)),
+        surface_artwork_position,
     )
     alpha = transform_surface.getchannel("A")
-    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") in ("image", "video") else 1
     composed = transform_surface
-    shadow = effects.get("shadow") or {}
     if shadow.get("enabled"):
         shadow_layer = _effect_layer(
             alpha,
@@ -321,8 +345,8 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         composed.putalpha(composed.getchannel("A").point(lambda value: round(value * opacity)))
 
     destination = Image.new("RGBA", canvas_size)
-    x = round(canvas_width * pose["x"] / 100 - anchor[0])
-    y = round(canvas_height * pose["y"] / 100 - anchor[1])
+    x = round(canvas_width * pose["x"] / 100 - original_anchor[0]) + surface_origin[0]
+    y = round(canvas_height * pose["y"] / 100 - original_anchor[1]) + surface_origin[1]
     destination.alpha_composite(composed, (x, y))
     return destination
 

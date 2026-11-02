@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('../assert-local-studio-enabled.cjs');
 // Serve the normal current-branch optimized React app over localhost's
 // separate IPv6 listener. Existing Storage CORS permits localhost:5000; the
 // historical IPv4 app is preserved. No fixture or auth bypass is introduced.
