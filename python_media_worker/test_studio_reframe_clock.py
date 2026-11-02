@@ -1,11 +1,13 @@
 """Actual fractional-cut sequence regression, without cloud/model imports."""
 import ast
 import asyncio
+import math
 import os
 from pathlib import Path
 import subprocess
 import pytest
 from python_media_worker.studio_reframe_clock import reframe_picture_segments
+from python_media_worker.viral_render_contract import build_studio_cfr_packet_args
 
 
 def test_fractional_cut_uses_one_shared_picture_boundary():
@@ -17,16 +19,16 @@ def test_fractional_cut_uses_one_shared_picture_boundary():
             reframe_picture_segments([], fps)
 
 
-@pytest.mark.parametrize('fps,cut', [(24, 2.218), (24, .05), (25, 2.218), (30, 2.218), (50, 2.218), (60, 2.218)])
+@pytest.mark.parametrize('fps,cut', [(24, 2.218), (24, .05), (25, 2.218), (30, 2.218), (50, 2.218), (60, 2.218), (60, 1/60), (60, 2/60)])
 def test_real_framing_split_retains_every_cfr_source_picture_once(tmp_path, fps, cut):
     source = Path(__file__).with_name('main_media_server.py')
     tree = ast.parse(source.read_text())
     functions = [n for n in tree.body if isinstance(n, ast.AsyncFunctionDef) and n.name == 'render_reframe_timeline_sequential']
     async def run(command, **_):
         subprocess.run(command[:1] + ['-v', 'error'] + command[1:], check=True, capture_output=True)
-    runtime = {'os': os, 'reframe_picture_segments': reframe_picture_segments, 'run_subprocess_async': run,
+    runtime = {'os': os, 'math': math, 'reframe_picture_segments': reframe_picture_segments, 'build_studio_cfr_packet_args': build_studio_cfr_packet_args, 'run_subprocess_async': run,
                'MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS': 20,
-               'plan_reframe_timeline_segments': lambda *_: [{'start': 0, 'end': cut, 'mode': 'center'}, {'start': cut, 'end': 4, 'mode': 'off'}],
+               'plan_reframe_timeline_segments': lambda *_, **__: [{'start': 0, 'end': cut, 'mode': 'center'}, {'start': cut, 'end': 4, 'mode': 'off'}],
                'build_reframe_segment_filter': lambda *_, **__: '[0:v]null[vout]',
                'build_viral_export_encode_args': lambda _: ['-c:v', 'libx264', '-threads', '1', '-crf', '0'],
                'resolve_viral_export_profile': lambda *_: {},

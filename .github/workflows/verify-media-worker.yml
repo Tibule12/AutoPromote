@@ -1,0 +1,28 @@
+name: Verify Media Worker Image
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - python_media_worker/**
+      - scripts/verify-media-worker-image.sh
+      - .github/workflows/deploy-media-worker.yml
+      - .github/workflows/verify-media-worker.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: CPU worker image and render contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install local fixture tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+      - name: Build image and verify CPU render without cloud credentials
+        run: bash scripts/verify-media-worker-image.sh
