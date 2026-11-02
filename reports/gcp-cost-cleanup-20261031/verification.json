@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-31T13:28:35.450037+00:00",
+  "retainedRevisionsUnchanged": true,
+  "retainedRevisionCount": 229,
+  "activeExecutions": 0,
+  "servicesConfigurationUnchanged": true,
+  "jobsConfigurationUnchanged": true,
+  "onlyPlannedDigestsRemoved": true,
+  "removedImageVersions": 8,
+  "remainingImageVersions": 83,
+  "allPreviouslyExistingResourceImagesPreserved": true,
+  "storageBeforeBytes": 90108914670,
+  "storageAfterBytes": 90108892180,
+  "confirmedStorageCounterReductionBytes": 22490,
+  "gcrCleanupOnlyBuildCache": true,
+  "thulaniRuntimeCleanupDryRun": true,
+  "budgetAmountPreserved": true,
+  "forecastAlertEnabled": true,
+  "noBudgetPubSubShutdown": true
+}

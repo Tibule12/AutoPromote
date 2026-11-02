@@ -1,0 +1,18 @@
+{
+  "deleteRules": [
+    {
+      "id": "delete-stale-build-cache-after-14-days",
+      "action": "DELETE",
+      "condition": {
+        "tagState": "ANY",
+        "packageNamePrefixes": [
+          "cam-combiner-worker/cache"
+        ],
+        "olderThan": "1209600s"
+      }
+    }
+  ],
+  "currentMatches": [],
+  "resourceReferences": 0,
+  "runtimeImageDeletion": false
+}

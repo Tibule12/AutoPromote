@@ -36,6 +36,7 @@ import { sendEmailVerification } from "firebase/auth";
 import { API_ENDPOINTS, API_BASE_URL, ENABLE_WOLF_HUNT } from "./config";
 import toast, { Toaster } from "react-hot-toast";
 import { cachedFetch, batchWithDelay, clearCache } from "./utils/requestCache";
+import { startVisiblePoller } from "./utils/visiblePoller";
 import { isSafeRedirectUrl } from "./utils/security";
 import {
   getActiveWorkspaceId,
@@ -639,20 +640,21 @@ const UserDashboard = ({
     document.documentElement?.classList?.add("dashboard-mode");
     document.body?.classList?.add("dashboard-mode");
 
-    // Poll notifications periodically so users see admin feedback promptly (mobile friendly)
-    // Reduce noise: Poll every 60s instead of 10s
-    let pollTimer = null;
-    const pollNotifications = async () => {
+    // Notification refreshes are UI work; hidden tabs must not keep reading Firestore.
+    const pollNotifications = async signal => {
       try {
         const currentUser = auth?.currentUser;
         if (!currentUser) return;
         // Do NOT force refresh token (pass false), use cached token to prevent rate limiting
         const token = await currentUser.getIdToken(false);
+        if (signal.aborted || document.hidden) return;
         const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS_LIST}?limit=10`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         });
         if (!res.ok) return;
         const json = await res.json();
+        if (signal.aborted || auth?.currentUser?.uid !== currentUser.uid) return;
         if (!json.notifications) return;
         const incoming = Array.isArray(json.notifications) ? json.notifications : [];
         const incomingUnread = incoming.filter(notification => !notification?.read);
@@ -711,22 +713,10 @@ const UserDashboard = ({
         // ignore polling errors
       }
     };
-    // Start a timer and also poll on visibility change to catch when mobile resumes
-    pollTimer = setInterval(pollNotifications, 60000); // 60s interval
-    const handleVisibility = () => {
-      if (!document.hidden) {
-        // Debounce visibility poll to avoid double-firing
-        if (!pollTimer) pollNotifications();
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    // initial poll
-    pollNotifications();
+    const stopNotificationPolling = startVisiblePoller(pollNotifications);
 
     return () => {
-      if (pollTimer) clearInterval(pollTimer);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      stopNotificationPolling();
       document.documentElement?.classList?.remove("dashboard-mode");
       document.body?.classList?.remove("dashboard-mode");
     };

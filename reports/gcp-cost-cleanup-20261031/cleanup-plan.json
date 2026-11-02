@@ -1,0 +1,109 @@
+{
+  "project": "autopromote-cc6d3",
+  "createdAt": "2026-10-31T13:19:18.323184+00:00",
+  "protectedResourceImageVersions": 70,
+  "candidates": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/dockerImages/cam-combiner-worker@sha256:a4186a6a89a3cf44725b414d738c0ffbadc0d0c8c359ff27d1906b0edffea033",
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:a4186a6a89a3cf44725b414d738c0ffbadc0d0c8c359ff27d1906b0edffea033",
+      "tags": [
+        "6d6bee8ab47be51fc38a4fd570a45195875e8cde"
+      ],
+      "imageSizeBytes": "903296274",
+      "uploadTime": "2026-08-22T12:47:33.819599Z",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "buildTime": "2026-08-22T12:46:26.923887481Z",
+      "updateTime": "2026-08-27T04:06:01.276815Z"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/dockerImages/cam-combiner-worker@sha256:79d2e76f1c3a3e1a299cd4bb3c2df8f77434eece2767c3e6a3c7456aac03a750",
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:79d2e76f1c3a3e1a299cd4bb3c2df8f77434eece2767c3e6a3c7456aac03a750",
+      "tags": [
+        "3e5e050b2c7592ddfb25fcecd902171a3c0e615f"
+      ],
+      "imageSizeBytes": "903292756",
+      "uploadTime": "2026-08-22T11:59:28.842943Z",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "buildTime": "2026-08-22T11:58:34.703487464Z",
+      "updateTime": "2026-08-22T12:47:39.877695Z"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/dockerImages/cam-combiner-worker@sha256:278c9d3736cc026ee0e6188aa69b9d7e75c3ff23ea49ff9c3a4aadbc2ac15046",
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:278c9d3736cc026ee0e6188aa69b9d7e75c3ff23ea49ff9c3a4aadbc2ac15046",
+      "tags": [
+        "deceb7e5390baab3069332e53e6eac3606b52e77"
+      ],
+      "imageSizeBytes": "903290343",
+      "uploadTime": "2026-08-22T10:29:18.666031Z",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "buildTime": "2026-08-22T10:28:06.139659166Z",
+      "updateTime": "2026-08-22T11:59:31.508799Z"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/dockerImages/cam-combiner-worker@sha256:b36fa75a10b68e8d077d8ad363bb81367a6ea738da36b889b494aa30dc011a2e",
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:b36fa75a10b68e8d077d8ad363bb81367a6ea738da36b889b494aa30dc011a2e",
+      "tags": [
+        "ed57d68b0efed4595fa49c70137ccaa567ae6c26"
+      ],
+      "imageSizeBytes": "903239697",
+      "uploadTime": "2026-08-13T20:19:58.300735Z",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "buildTime": "2026-08-13T20:19:05.951032384Z",
+      "updateTime": "2026-08-22T10:29:24.722959Z"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/dockerImages/cam-combiner-worker@sha256:f6f63c2f11f9e775ce3305d35ee3b3c7c1e6d95836bf3e23a3b806fc4481493f",
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:f6f63c2f11f9e775ce3305d35ee3b3c7c1e6d95836bf3e23a3b806fc4481493f",
+      "tags": [
+        "43448fb968916ac22f4d156da7def5f21dbcd7f6"
+      ],
+      "imageSizeBytes": "903235788",
+      "uploadTime": "2026-08-13T13:14:34.616911Z",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "buildTime": "2026-08-13T13:13:42.009255099Z",
+      "updateTime": "2026-08-13T20:20:01.268703Z"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/dockerImages/cam-combiner-worker@sha256:4f69bd169811dfab74438236359c28ed842242e3de453d9b5c4eaa64f8a8e759",
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:4f69bd169811dfab74438236359c28ed842242e3de453d9b5c4eaa64f8a8e759",
+      "tags": [
+        "582c0e6d53235521b82bef475b8330b98ece32ff"
+      ],
+      "imageSizeBytes": "903234082",
+      "uploadTime": "2026-08-13T13:05:12.962735Z",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "buildTime": "2026-08-13T13:03:58.700791974Z",
+      "updateTime": "2026-08-13T13:14:37.456383Z"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/dockerImages/cam-combiner-worker@sha256:da1a17649da6cb9d27be337d259911a12a43ba4dc84f2715ce10e0fde4193732",
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/cam-combiner-worker@sha256:da1a17649da6cb9d27be337d259911a12a43ba4dc84f2715ce10e0fde4193732",
+      "tags": [
+        "9ab789a309a3946702c94b496097276386ca2932"
+      ],
+      "imageSizeBytes": "903233755",
+      "uploadTime": "2026-08-13T12:56:37.510783Z",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "buildTime": "2026-08-13T12:55:32.225044923Z",
+      "updateTime": "2026-08-13T13:05:18.812111Z"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us/repositories/gcr.io/dockerImages/multicam-lipsync-repair@sha256:fb0ccc6696aa888af5a818dcce8d0a67c2efb7ff6f339be6b3b9460f5878d9a8",
+      "uri": "us-docker.pkg.dev/autopromote-cc6d3/gcr.io/multicam-lipsync-repair@sha256:fb0ccc6696aa888af5a818dcce8d0a67c2efb7ff6f339be6b3b9460f5878d9a8",
+      "imageSizeBytes": "333312165",
+      "uploadTime": "2026-08-22T12:31:57.448751Z",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "buildTime": "2026-08-22T12:31:52.880600799Z",
+      "updateTime": "2026-08-22T12:37:34.644399Z"
+    }
+  ],
+  "logicalImageBytes": 6656134860,
+  "exclusiveBlobBytesEstimate": 6007945554,
+  "conditions": [
+    "No retained service revision, job, execution, compute instance/template, function, Vertex model or endpoint reference",
+    "Full worker: five newer image versions retained, including both recent releases and current job image",
+    "All GPU/model/CPU workflow references and uncertain model/render rollback images preserved",
+    "Repair: only superseded untagged first build; latest tagged replacement retained",
+    "All candidates older than 60 days; no active build or execution"
+  ]
+}
