@@ -220,7 +220,8 @@ function validateDay(root, book, { requireSchedules = false, priorHashes = [] } 
         assert.equal(p.schedule.platform, p.platform);
         assert.equal(Date.parse(p.schedule.startTime), Date.parse(p.scheduledAt));
         assert.equal(p.schedule.frequency, "once");
-        assert(p.schedule.isActive || p.schedule.status === "completed");
+        // Queue records consumed once-only releases as executed. This is not provider-publication proof.
+        assert(p.schedule.isActive || ["completed", "executed"].includes(p.schedule.status));
       }
     }
   }

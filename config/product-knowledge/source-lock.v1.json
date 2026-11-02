@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "reviewer": "Codex",
-  "reason": "Reviewed unchanged Studio voice-mixer imports and clean Python reproduction; CI now installs pinned NumPy/Pillow before its real media tests, with no readiness promotion.",
-  "reviewed_at": "2026-10-21T19:35:42.070Z",
-  "catalog_sha256": "efa01082173309f97a2153f01091cd4bc6411cdcd45adc30affea65ae4326731",
+  "reviewer": "Codex daily Studio recovery 2026-10-28",
+  "reason": "Reviewed changed capability/parity matrix continuity against four native reviewed daily films and24 exact schedules, including preserved interrupted-job recovery. Session adds scoped evidence without catalogue, readiness, creative/showroom or production promotion; current catalogue and all other locked product sources remain unchanged.",
+  "reviewed_at": "2026-10-28T08:35:10.207Z",
+  "catalog_sha256": "d4f13ed74a66757e054b77a941ebd244bd26f945359cffcfa8fcd9e7db9abc6a",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -59,7 +59,7 @@
     },
     {
       "path": "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
-      "sha256": "7a16222cab1fe52da984597b7e6e3b928afadee7674e28625a09a5881dabea49"
+      "sha256": "9e8eb332e3abc071c8b5134ca823aa9ff3a029bea0d4a06367df72185713f90f"
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
@@ -191,11 +191,11 @@
     },
     {
       "path": "frontend/src/components/VideoEditor.js",
-      "sha256": "f81f83e076517ff9ea639defda452ff742793058a578caebebf63fbedbc6c694"
+      "sha256": "b24b63dd10d533b7d51e82c4f0847891a566b3639daf1fea55063b8a79b75dad"
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "61776286e009f9e2b113852d610253daabf651488e75a54eb0979f3807f1be54"
+      "sha256": "58a11ae2bf18c9e33248c9be04c18c7250694510047e532931661734b4be688f"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -239,7 +239,7 @@
     },
     {
       "path": "frontend/src/components/studioCommands.js",
-      "sha256": "53233cb2616e5e2352d11987b0c9531348b63c6d77af3c23e45bad9234102294"
+      "sha256": "f0e33918ebaede43f496fe9ee2e5d5a4fc19d64ca0079ad0d8a7272ceaba89df"
     },
     {
       "path": "frontend/src/components/studioCreatorRecipes.js",
@@ -315,7 +315,7 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "3ae058deb36f75f5db599620c8c7f5e3907f7a460b58ee5a56c38dfe41e3e4fc"
+      "sha256": "895c84b4e5c9efcfa70ac79a810a8233efcf78f86ee9442e9987b2a3af77eb47"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
@@ -343,7 +343,7 @@
     },
     {
       "path": "frontend/src/components/studioVoiceover.js",
-      "sha256": "4cc81e2add1aa018cfe4d08cbe5977b8bafaa00a2d91f451bdb9c6a90b198381"
+      "sha256": "17a9af28e13cb1e431ba457697096008fe0524dea55a735743f8ff3e4d035dae"
     },
     {
       "path": "frontend/src/components/threeD/studio3DModel.js",
@@ -390,8 +390,12 @@
       "sha256": "7738faa0ad81c53d5b9a937dca67fb4e8facf6b0b70c34ae68bc51dc8ca019fb"
     },
     {
+      "path": "python_media_worker/caption_transcription.py",
+      "sha256": "42fe47a770695f332adb2da464f65b9a66037a027f1f243acabc788ed3c1a9d0"
+    },
+    {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "939f1ae9dd425d7e92b1b12a113a94117f18ead2dca56786d63ecdb037756112"
+      "sha256": "721e34234267ff6b0f3b8ccef00dd8ef3706876c860f0d1b7c2aded082cb44c0"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -403,7 +407,7 @@
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
-      "sha256": "76671a323bd23ccffd06d50bc3f638b1dec769019ab3e5013f493eb8317be5a6"
+      "sha256": "5bd72ebe6a69e42bb12f8089b82b7d0df46b53c2c3d20a843f0618e5665ed26a"
     },
     {
       "path": "python_media_worker/studio_motion.py",
@@ -619,7 +623,7 @@
     },
     {
       "path": "src/services/studioSourceService.js",
-      "sha256": "51340a9ea0bd83937334739b6151f1e298131651321cec49eca30f06169c39a6"
+      "sha256": "db5fec57a4793947491793d26374d0d86fc32c68f56dfa3df0f2dc5bf3570bb8"
     },
     {
       "path": "src/services/studioSubjectVfxService.js",
@@ -639,11 +643,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "ad38b885490ecca49c00980e8eca892dd9b3d9fec7a2b6468c02ae6b64b08b12"
+      "sha256": "767a411641e12d880d179fe729537a00353d7394a36e132beb2ea217298eb271"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "7034f06c15b6b074db96b3fd03907e1ff55c76eb8bc7ab599cad94ababa8508f"
+      "sha256": "1307174e42383c81fa1bbd26cd7328fcc9255c8e49b90a84246119cf6c90de7d"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

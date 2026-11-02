@@ -60,6 +60,12 @@ test("the reviewed alternate full-frame angle moves with Director splits after a
   ]);
 });
 
+test("discrete framing selectors retain their right state without adding a camera interpolation flag", () => {
+  const keys = [{ time: 0, mode: "solo" }, { time: 2, mode: "stacked" }];
+  expect(rippleTimelineKeys(keys, 0, 3, { preserveRightState: true, markCut: false }))
+    .toEqual([{ time: 0, mode: "stacked" }]);
+});
+
 test("multi-gap reverse rippling accurately shifts items past multiple dead-air pauses", () => {
   const item = { id: "downstream", startTime: 10, duration: 4 };
   const gaps = [

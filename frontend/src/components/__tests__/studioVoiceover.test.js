@@ -120,6 +120,18 @@ test('trimmed mono voice PCM preserves zero fades and excludes stereo downmix gu
   expect(createVoiceoverPcmBuffer(context,{...decoded,numberOfChannels:2},take)).toBeNull();
 });
 
+test('overlapping voice fades multiply like the final FFmpeg chain, including a fade longer than the take', () => {
+  const context = { sampleRate: 8, createBuffer: (_channels, length) => {
+    const samples = new Float32Array(length); return { getChannelData: () => samples };
+  } };
+  const decoded = { sampleRate: 8, numberOfChannels: 1, length: 16,
+    getChannelData: () => new Float32Array(16).fill(1) };
+  const overlapping = createVoiceoverPcmBuffer(context, decoded, { duration: 1, fadeIn: 1, fadeOut: 1 });
+  expect(overlapping.getChannelData(0)[4]).toBeCloseTo(.25, 6);
+  const longer = createVoiceoverPcmBuffer(context, decoded, { duration: .5, fadeIn: 0, fadeOut: 1 });
+  expect([...longer.getChannelData(0)]).toEqual([1, .875, .75, .625]);
+});
+
 test('prepared voice PCM schedules its real trim on the shared clock without a second native audible route',async()=>{
   const connect=jest.fn(),disconnect=jest.fn(),start=jest.fn(),stop=jest.fn(),setValueAtTime=jest.fn();
   const createMediaElementSource=jest.fn(),close=jest.fn().mockResolvedValue();

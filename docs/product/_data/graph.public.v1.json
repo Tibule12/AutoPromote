@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.43",
+  "knowledge_version": "1.0.44",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -1495,6 +1495,11 @@
     },
     {
       "id": "publishing.analytics.release",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.captions.source_language",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -3764,6 +3769,11 @@
       "from": "publishing.analytics",
       "type": "editable_with",
       "to": "publishing.analytics.release"
+    },
+    {
+      "from": "studio.captions",
+      "type": "editable_with",
+      "to": "studio.captions.source_language"
     }
   ]
 }

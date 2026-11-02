@@ -39,6 +39,25 @@ def composition_layer(composition_plan, layer_id):
     return None
 
 
+def visible_text_layers(overlays, composition_plan):
+    """Do not discard a title before its canonical alpha keys are evaluated."""
+    result = []
+    for overlay in overlays:
+        if _get(overlay, "type") != "text":
+            continue
+        layer = composition_layer(composition_plan, _get(overlay, "id")) or {}
+        keys = [key for key in layer.get("motion_keyframes") or []
+                if key.get("property") == "opacity"]
+        if keys:
+            visible = any(finite(key.get("value"), 0) > 0 for key in keys)
+        else:
+            visible = finite((layer.get("base_transform") or {}).get("opacity"),
+                             finite(_get(overlay, "opacity", 1), 1)) > 0
+        if visible:
+            result.append(overlay)
+    return result
+
+
 def interpolate_layer_value(layer, property_name, time, fallback):
     keys = sorted(
         (

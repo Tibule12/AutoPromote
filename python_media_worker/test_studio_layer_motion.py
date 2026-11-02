@@ -9,6 +9,7 @@ from PIL import Image, ImageDraw
 
 from python_media_worker.studio_layer_motion import (
     composition_layer,
+    visible_text_layers,
     interpolate_layer_value,
     layer_clip_mask,
     layer_pose,
@@ -16,6 +17,36 @@ from python_media_worker.studio_layer_motion import (
     render_image_layer_motion,
     render_video_layer_motion,
 )
+
+
+def test_zero_base_text_keys_remain_visible_in_the_actual_motion_render(tmp_path):
+    overlay = {"id": "title", "type": "text", "opacity": 0,
+               "start_time": 0, "duration": 1, "width": 50, "height": 50}
+    layer = {"id": "title", "base_transform": {"opacity": 0}, "motion_keyframes": [
+        {"property": "opacity", "time": 0, "value": 0, "easing": "linear"},
+        {"property": "opacity", "time": .5, "value": 1, "easing": "linear"},
+    ]}
+    selected = visible_text_layers([overlay], {"layers": [layer]})
+    assert selected == [overlay]
+    source, output = tmp_path / "title.png", tmp_path / "title.mov"
+    Image.new("RGBA", (16, 16), "white").save(source)
+    render_image_layer_motion(source, output, selected[0], layer, 32, 32, 1, [], fps=4)
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
+                                  "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    frames = np.frombuffer(raw, np.uint8).reshape(4, 32, 32, 4)
+    assert frames[0, :, :, 3].max() == 0
+    assert frames[2, 16, 16, 3] == 255
+
+
+def test_text_selection_uses_canonical_alpha_keys_and_keeps_static_hidden_text_out():
+    overlays = [{"id": "hidden", "type": "text", "opacity": 0},
+                {"id": "keyed-off", "type": "text", "opacity": 1},
+                {"id": "visible", "type": "text", "opacity": 1},
+                {"id": "image", "type": "image", "opacity": 1}]
+    plan = {"layers": [{"id": "keyed-off", "motion_keyframes": [
+        {"property": "opacity", "time": 0, "value": 0},
+        {"property": "opacity", "time": 1, "value": 0}]}]}
+    assert [o["id"] for o in visible_text_layers(overlays, plan)] == ["visible"]
 
 
 def test_still_holds_reuse_one_raster_without_changing_encoded_pixels(tmp_path, monkeypatch):

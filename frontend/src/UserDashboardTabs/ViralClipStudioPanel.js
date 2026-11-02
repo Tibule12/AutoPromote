@@ -227,6 +227,7 @@ function ViralClipStudioPanel({
         size: incomingSource.size || uploadResult.size || 0,
         url: uploadResult.url,
         storagePath: uploadResult.storagePath || null,
+        ...(uploadResult.contentHash || uploadResult.sha256 ? {contentHash: uploadResult.contentHash || uploadResult.sha256} : {}),
         isRemote: true,
       });
       setSourceUploadProgress(100);

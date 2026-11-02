@@ -1,3 +1,4 @@
+const { captionTranscriptionOptions } = require("./services/captionTranscriptionOptions");
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
@@ -1503,6 +1504,9 @@ router.post(
   requireTesterEditingFeature("audioExtract"),
   async (req, res) => {
     try {
+      let speechOptions;
+      try { speechOptions = captionTranscriptionOptions(req.body); }
+      catch (error) { return res.status(400).json({ error: error.message }); }
       const userId = req.user.uid;
       const storagePath = String(req.body?.storage_path || req.body?.storagePath || "")
         .trim()
@@ -1557,11 +1561,7 @@ router.post(
         expires: Date.now() + 1000 * 60 * 60 * 2,
       });
       const job = await videoEditingService.startTranscriptionJob(url, userId, {
-        translateToEnglish: ["1", "true", "yes", "on"].includes(
-          String(req.body?.translate_to_english ?? req.body?.translateToEnglish ?? "")
-            .trim()
-            .toLowerCase()
-        ),
+        ...speechOptions,
       });
       return res.json({
         success: true,
@@ -1584,6 +1584,9 @@ router.post(
   upload.single("file"),
   async (req, res) => {
     try {
+      let speechOptions;
+      try { speechOptions = captionTranscriptionOptions(req.body); }
+      catch (error) { return res.status(400).json({ error: error.message }); }
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
       const userId = req.user.uid;
@@ -1617,8 +1620,7 @@ router.post(
         try {
           // Old sync: const segments = await videoEditingService.transcribeVideo(url);
           const job = await videoEditingService.startTranscriptionJob(url, userId, {
-            translateToEnglish:
-              String(req.body?.translate_to_english || "").toLowerCase() === "true",
+            ...speechOptions,
           });
           res.json({ success: true, jobId: job.jobId, message: "Transcription started" });
         } catch (err) {

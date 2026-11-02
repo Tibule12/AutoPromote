@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { SafeAudio } from "./SafeMedia";
-import { voiceoverDuration, voiceoverGain, voiceoverPcmEligible, voiceoverPcmKey,
+import { voiceoverDuration, voiceoverGain, voiceoverFadeGain, voiceoverPcmEligible, voiceoverPcmKey,
   createVoiceoverPcmBuffer } from "./studioVoiceover";
 import { interpolateAutomationValue } from "./studioAutomation";
 import { watchStudioAudioClock } from "./studioSourcePreview";
@@ -226,9 +226,7 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
           }
           return;
         }
-        const fade = Math.max(0, Math.min(1,
-          take.fadeIn > 0 ? elapsed / take.fadeIn : 1,
-          take.fadeOut > 0 ? (duration - elapsed) / take.fadeOut : 1));
+        const fade = voiceoverFadeGain(take, elapsed);
         audio.muted = muted;
         const automation = interpolateAutomationValue({ keyframes: automationKeyframes,
           property: "volume", time, fallback: 100 }) / 100;

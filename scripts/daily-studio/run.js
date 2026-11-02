@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawn, spawnSync } = require("node:child_process");
 const c = require("./contract");
+const { reservedMediaHashes } = require("./prior-media");
 const root = path.resolve(__dirname, "../..");
 const runtime = path.join(root, "reports/daily-studio");
 const args = process.argv.slice(2);
@@ -100,15 +101,7 @@ function previousHashes() {
     const file = path.join(runtime, name, "day.json");
     if (name >= date || !/^\d{4}-\d{2}-\d{2}$/.test(name) || !fs.existsSync(file)) continue;
     const old = read(file);
-    // Unpublished unfinished work may move to a later publication day. Retain
-    // deduplication for reviewed deliveries and every acknowledged/uncertain
-    // destination, rather than treating a saved source draft as publication.
-    for (const story of old.stories || []) {
-      if (story.status !== "REVIEWED") continue;
-      for (const hash of [story.movieSha256, story.recordingSha256]) if (hash) hashes.add(hash);
-    }
-    for (const post of old.posts || [])
-      if (post.mediaSha256) hashes.add(post.mediaSha256);
+    for (const hash of reservedMediaHashes(old)) hashes.add(hash);
   }
   return [...hashes];
 }

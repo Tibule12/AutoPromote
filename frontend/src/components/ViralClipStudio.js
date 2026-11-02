@@ -60,6 +60,7 @@ import { buildTimedScriptDraft } from "../utils/captionDrafts";
 import { buildTranscriptGroundedBRollSuggestions } from "./storyBeatPlanner";
 import StudioGeneratedBRollPanel from "./StudioGeneratedBRollPanel";
 import { applyCaptionBulkEdit } from "./studioCaptionBulkEdit";
+import { captionsForSource, mergeSourceCaptions, generatedCaptionId, captionForSourceWindow } from "./studioCaptionGeneration";
 import { getMediaAuthToken } from "../utils/mediaAuth";
 import { runStudioSourceShotJob } from "./studioAnalysisJobClient";
 import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from "../hooks/useCinematicEffects";
@@ -120,7 +121,7 @@ import {
 import SoundWaveform from "./motion/SoundWaveform";
 import MotionPanel from "./motion/MotionPanel";
 import MotionCanvas from "./motion/MotionCanvas";
-import { motionCues, cutMotion, normalizeMotion, generateSmartMotionBeats } from "./motion/motionModel";
+import { motionCues, normalizeMotion, generateSmartMotionBeats } from "./motion/motionModel";
 import Studio3DPanel from "./threeD/Studio3DPanel";
 import StudioSubjectVfxPanel from "./StudioSubjectVfxPanel";
 import { findUncoveredCaptionSpeechRanges, mapCaptionSilencesToProgramme } from "./studioCaptionCoverage";
@@ -132,7 +133,7 @@ import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { titleAnimationPose, normalizeStudioTitleText } from "./studioTitleLayout";
 import { studioMotionPropertiesForTarget, motionKeyAtPlayhead, motionKeyframeTolerance } from "./studioMotionProperties";
 import { validateSubjectVfxExport, resolveSubjectVfxProgrammePreview, subjectVfxRevision } from "./studioSubjectVfxContract";
-import { cutStudio3DScenes, normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
+import { normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
 import { SOUND_EFFECT_PRESETS, synthesizeEffect } from "./motion/soundDesign";
 import VideoScopes from "./VideoScopes";
 import {
@@ -148,8 +149,10 @@ import {
   mergeCreatorRecipe,
   findCreatorBeat,
 } from "./studioCreatorRecipes";
-import { rippleTimedItems, rippleTimelineKeys, applyStudioClipMetadata } from "./studioTimelineEdits";
-import { studioGroupTimingRows, editStudioGroupTiming, rippleStudioGroupTiming, clipStudioGroupMotionCues } from "./studioGroupTiming";
+import { studioMusicFadeGain } from "./studioAudioFades";
+import { applyStudioClipMetadata } from "./studioTimelineEdits";
+import { rippleStudioSnapshotLinkedTimeline, splitStudioOverlayAtProgrammeTime } from "./studioTrimTransaction";
+import { studioGroupTimingRows, editStudioGroupTiming, clipStudioGroupMotionCues } from "./studioGroupTiming";
 import { editStudioKeyframeSelection } from "./studioKeyframeSelection";
 import {
   reconcileStudioDocument,
@@ -2602,6 +2605,7 @@ const getCollisionSafePipPlacement = ({
 const ViralClipStudio = ({
   videoUrl,
   sourceStoragePath = null,
+  sourceContentHash = null,
   sourceName,
   clips,
   images = [],
@@ -2861,6 +2865,7 @@ const ViralClipStudio = ({
     isPrimary: true,
     storagePath: sourceStoragePath || "",
     sourceStoragePath: sourceStoragePath || "",
+    ...(sourceContentHash ? {contentHash: sourceContentHash} : {}),
     duration: Math.max(0, Number(clips?.[0]?.sourceDuration || clips?.[0]?.end || clips?.[0]?.duration || 0)),
     status: sourceStoragePath ? "ready" : "existing",
     progress: 100,
@@ -2957,9 +2962,14 @@ const ViralClipStudio = ({
     ));
   }, []);
   const [translateCaptionsToEnglish, setTranslateCaptionsToEnglish] = useState(false);
+  const [captionSourceLanguage, setCaptionSourceLanguage] = useState("auto");
   const [captionGenerationStatus, setCaptionGenerationStatus] = useState("idle");
   const [captionGenerationMessage, setCaptionGenerationMessage] = useState("");
   const captionGenerationInFlightRef = useRef(false);
+  const captionSegmentsRef = useRef(captionSegments);
+  captionSegmentsRef.current = captionSegments;
+  const captionOverrideRef = useRef(captionTextOverride);
+  captionOverrideRef.current = captionTextOverride;
   const [studioActionMessage, setStudioActionMessage] = useState(
     "Split preview is live. Edit on the right and compare the untouched source beside it."
   );
@@ -3093,6 +3103,7 @@ const ViralClipStudio = ({
       url: videoUrl,
       storagePath: sourceStoragePath || "",
       sourceStoragePath: sourceStoragePath || "",
+      ...(sourceContentHash ? {contentHash: sourceContentHash} : {}),
       duration: 0,
       startRequest: null,
       endRequest: null,
@@ -3372,7 +3383,7 @@ const ViralClipStudio = ({
     const musicTime = musicPreviewSourceRef.current && musicPreviewSourceStateRef.current
       ? musicBufferPosition(musicPreviewSourceStateRef.current, musicPreviewAudioContextRef.current.currentTime)
       : getPreviewMusicTime(programmeTime);
-    const fadeGain = getAudioFadeGain(musicTime, outputPlaybackDuration,
+    const fadeGain = studioMusicFadeGain(musicTime, outputPlaybackDuration,
       musicTrack?.fadeIn, musicTrack?.fadeOut);
     const automationGain = interpolateAutomationValue({ keyframes: audioKeyframes.music,
       property: "volume", time: programmeTime, fallback: 100 }) / 100;
@@ -3542,6 +3553,7 @@ const ViralClipStudio = ({
     captionCoverageMode,
     captionSegments,
     translateCaptionsToEnglish,
+    captionSourceLanguage,
     previewSpeed,
     pacingLevel,
     creativeIntent,
@@ -4141,6 +4153,7 @@ const ViralClipStudio = ({
       normalizeCaptionSegments(splitCaptionSegmentsForReadability(snapshot.captionSegments))
     );
     setTranslateCaptionsToEnglish(!!snapshot.translateCaptionsToEnglish);
+    setCaptionSourceLanguage(snapshot.captionSourceLanguage || "auto");
     setPreviewSpeed(Number(snapshot.previewSpeed ?? 1));
     setPacingLevel(snapshot.pacingLevel || "balanced");
     setCreativeIntent(snapshot.creativeIntent || "energy");
@@ -8483,19 +8496,7 @@ const ViralClipStudio = ({
       if (match) return match;
       const clipWindow = getTimelineClipWindow(clip);
       const clipSourceId = clip.sourceClipId || clip.id || null;
-      const isInsideClipWindow = segment =>
-        segment.end > clipWindow.start && segment.start < clipWindow.end;
-      const caption =
-        normalizedSegments.find(segment => {
-          if (
-            segment.sourceClipId &&
-            clipSourceId &&
-            String(segment.sourceClipId) !== String(clipSourceId)
-          ) {
-            return false;
-          }
-          return isInsideClipWindow(segment);
-        }) || normalizedSegments.find(isInsideClipWindow);
+      const caption = captionForSourceWindow(normalizedSegments, clipSourceId, clipWindow);
       if (!caption) return null;
       return {
         index,
@@ -8620,7 +8621,12 @@ const ViralClipStudio = ({
 
     const requestedTranslation = Boolean(translateToEnglish);
     const retainedSegments = normalizeCaptionSegments(captionSegments);
+    const retainedOverride = captionTextOverride;
+    const transcriptionProjectId = activeProjectIdRef.current;
     const activeSourceClip = sourceClip || currentTimelineClip;
+    const captionSourceClipId = activeSourceClip?.sourceClipId || activeSourceClip?.id || selectedClip?.id || "main";
+    const defaultCaptionSourceId = timeline.find(clip => clip.id === "main")?.sourceClipId || "main";
+    const targetBefore = JSON.stringify(captionsForSource(retainedSegments, captionSourceClipId, defaultCaptionSourceId));
 
     setCaptionGenerationStatus("processing");
     setCaptionGenerationMessage(
@@ -8651,6 +8657,7 @@ const ViralClipStudio = ({
         transcriptionBody = JSON.stringify({
           storage_path: trustedStoragePath,
           translate_to_english: requestedTranslation,
+          source_language: captionSourceLanguage,
         });
         setCaptionGenerationMessage(
           requestedTranslation
@@ -8682,6 +8689,7 @@ const ViralClipStudio = ({
           activeSourceClip?.file?.name || selectedClip?.file?.name || "viral-studio-source.mp4"
         );
         formData.append("translate_to_english", requestedTranslation ? "true" : "false");
+        formData.append("source_language", captionSourceLanguage);
         transcriptionUrl = `${API_BASE_URL}/api/media/transcribe`;
         transcriptionBody = formData;
         transcriptionHeaders = { Authorization: `Bearer ${token}` };
@@ -8778,8 +8786,6 @@ const ViralClipStudio = ({
         if (!completed) throw new Error("Caption transcription timed out. Please retry.");
       }
 
-      const captionSourceClipId =
-        activeSourceClip?.sourceClipId || activeSourceClip?.id || selectedClip?.id || null;
       const responseSegments = Array.isArray(payload?.segments) ? payload.segments : [];
       const languageMode = String(payload?.languageMode || payload?.language_mode || "")
         .trim()
@@ -8807,8 +8813,9 @@ const ViralClipStudio = ({
       );
       const nextSegments = normalizeCaptionSegments(
         splitCaptionSegmentsForReadability(safeResponseSegments)
-      ).map(segment => ({
+      ).map((segment, index) => ({
         ...segment,
+        id: generatedCaptionId(captionSourceClipId, segment.id, index),
         // Older workers might return words with a rejected quality status.
         // Never silently present those words as verified subtitles.
         ...(payload?.transcriptionQuality?.status === "rejected" ||
@@ -8852,7 +8859,13 @@ const ViralClipStudio = ({
         throw new Error("The caption service did not confirm an English translation.");
       }
 
-      setCaptionSegments(nextSegments);
+      if (activeProjectIdRef.current !== transcriptionProjectId) return false;
+      const currentSegments = normalizeCaptionSegments(captionSegmentsRef.current);
+      if (captionOverrideRef.current !== retainedOverride ||
+          JSON.stringify(captionsForSource(currentSegments, captionSourceClipId, defaultCaptionSourceId)) !== targetBefore) {
+        throw new Error("Captions for this source changed while speech was being processed. Your edits were kept; regenerate when ready.");
+      }
+      setCaptionSegments(previous => mergeSourceCaptions(previous, nextSegments, captionSourceClipId, defaultCaptionSourceId));
       setCaptionTextOverride("");
       setAutoCaptions(true);
       setComparisonMode("after");
@@ -8983,99 +8996,34 @@ const ViralClipStudio = ({
     setCutRangeEnd(null);
   };
 
-  const rippleLinkedTimeline = (from, to) => {
-    const retime = items => rippleTimedItems(items, from, to, () => createSecureId("retained-layer"));
-    setOverlays(retime);
-    setSoundEffects(retime);
-    setVoiceovers(retime);
-    setAdjustmentLayers(retime);
-    setMotionScenes(current => cutMotion(current, from, to));
-    setCompoundClips(current => rippleStudioGroupTiming(current, from, to));
-    setThreeDScenes(current => cutStudio3DScenes(current, from, to));
-    setMotionKeyframes(current => rippleTimelineKeys(current, from, to));
-    setSpeedKeyframes(current => rippleTimelineKeys(current, from, to));
-    setFinishKeyframes(current => rippleTimelineKeys(current, from, to));
-    setReframeKeyframes(current => rippleTimelineKeys(current, from, to, { preserveRightState: true }));
-    setReframeModeCuts(current => rippleTimelineKeys(current, from, to, { preserveRightState: true }));
-    setSpeakerFocusCuts(current => rippleTimelineKeys(current, from, to, { preserveRightState: true }));
-    setSpeakerStackFraming(current => ({ ...current, ...Object.fromEntries(["top", "bottom"].map(slot => [slot, {
-      ...current[slot],
-      keyframes: rippleTimelineKeys(current[slot].keyframes || [], from, to, { preserveRightState: true }),
-      ...(current[slot].sourceTimeOffsetKeyframes ? {
-        sourceTimeOffsetKeyframes: rippleTimelineKeys(current[slot].sourceTimeOffsetKeyframes, from, to, { preserveRightState: true }),
-      } : {}),
-      ...(current[slot].source_time_offset_keyframes ? {
-        source_time_offset_keyframes: rippleTimelineKeys(current[slot].source_time_offset_keyframes, from, to, { preserveRightState: true }),
-      } : {}),
-    }])) }));
-    setAudioKeyframes(current => Object.fromEntries(Object.entries(current).map(([bus, keys]) => [bus, rippleTimelineKeys(keys, from, to)])));
-  };
-
-  const rippleLinkedTimelineMultiGaps = (gaps) => {
-    if (!Array.isArray(gaps) || !gaps.length) return;
-    const sortedGaps = [...gaps]
-      .filter(g => Number.isFinite(g?.from) && Number.isFinite(g?.to) && g.to > g.from)
-      .sort((a, b) => b.from - a.from);
+  const rippleLinkedTimelineMultiGaps = gaps => {
+    const sortedGaps = (gaps || []).filter(gap => Number.isFinite(gap?.from) &&
+      Number.isFinite(gap?.to) && gap.from >= 0 && gap.to > gap.from).sort((a, b) => b.from - a.from);
     if (!sortedGaps.length) return;
-
-    const retime = items => {
-      let current = items || [];
-      for (const gap of sortedGaps) {
-        current = rippleTimedItems(current, gap.from, gap.to, () => createSecureId("retained-layer"));
-      }
-      return current;
-    };
-
-    const retimeKeys = keys => {
-      let current = keys || [];
-      for (const gap of sortedGaps) {
-        current = rippleTimelineKeys(current, gap.from, gap.to);
-      }
-      return current;
-    };
-
-    setOverlays(retime);
-    setSoundEffects(retime);
-    setVoiceovers(retime);
-    setAdjustmentLayers(retime);
-    setMotionScenes(current => {
-      let res = current || [];
-      for (const gap of sortedGaps) {
-        res = cutMotion(res, gap.from, gap.to);
-      }
-      return res;
-    });
-    setThreeDScenes(current => sortedGaps.reduce((items, gap) => cutStudio3DScenes(items, gap.from, gap.to), current));
-    setMotionKeyframes(retimeKeys);
-    setSpeedKeyframes(retimeKeys);
-    setFinishKeyframes(retimeKeys);
-    setReframeKeyframes(current => sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), current));
-    setReframeModeCuts(current => sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), current));
-    setSpeakerFocusCuts(current => sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), current));
-    setSpeakerStackFraming(current => {
-      const next = { ...current };
-      for (const slot of ["top", "bottom"]) {
-        if (next[slot]) {
-          next[slot] = {
-            ...next[slot],
-            keyframes: sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), next[slot]?.keyframes || []),
-            ...(next[slot]?.sourceTimeOffsetKeyframes ? {
-              sourceTimeOffsetKeyframes: sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), next[slot].sourceTimeOffsetKeyframes),
-            } : {}),
-            ...(next[slot]?.source_time_offset_keyframes ? {
-              source_time_offset_keyframes: sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), next[slot].source_time_offset_keyframes),
-            } : {}),
-          };
-        }
-      }
-      return next;
-    });
-    setAudioKeyframes(current =>
-      Object.fromEntries(
-        Object.entries(current || {}).map(([bus, keys]) => [bus, retimeKeys(keys)])
-      )
-    );
+    // Script cuts, silence removal, manual trims and Director use one linked
+    // edit transaction. Group gates/order and continuation keys move together.
+    const transactionId = createSecureId("ripple");
+    const next = sortedGaps.reduce((snapshot, gap) => rippleStudioSnapshotLinkedTimeline(snapshot,
+      { fromTick: secondsToTicks(gap.from), toTick: secondsToTicks(gap.to) }, transactionId), getEditorSnapshot());
+    setOverlays(next.overlays);
+    setSoundEffects(next.soundEffects);
+    setVoiceovers(next.voiceovers);
+    setAdjustmentLayers(next.adjustmentLayers);
+    setMotionScenes(next.motionScenes);
+    setCompoundClips(next.compoundClips);
+    setCompositionOrder(Array.isArray(next.compositionOrder) ? next.compositionOrder : null);
+    setThreeDScenes(next.threeDScenes);
+    setMotionKeyframes(next.motionKeyframes);
+    setSpeedKeyframes(next.speedKeyframes);
+    setFinishKeyframes(next.finishKeyframes);
+    setReframeKeyframes(next.reframeKeyframes);
+    setReframeModeCuts(next.reframeModeCuts);
+    setSpeakerFocusCuts(next.speakerFocusCuts);
+    setSpeakerStackFraming(next.speakerStackFraming);
+    setAudioKeyframes(next.audioKeyframes);
   };
+
+  const rippleLinkedTimeline = (from, to) => rippleLinkedTimelineMultiGaps([{ from, to }]);
 
   const removePendingCutRange = () => {
     if (!normalizedPendingCutRange || !currentTimelineClip) return;
@@ -9178,27 +9126,13 @@ const ViralClipStudio = ({
             appliedTimelineSignature: null,
           };
 
-          const firstPartDuration = currentPlayhead - overlayStart;
-          const secondPartDuration = overlayEnd - currentPlayhead;
-          const sourceStart = Number(activeOverlay.sourceStartTime || 0);
-
-          const leftOverlay = {
-            ...activeOverlay,
-            duration: firstPartDuration,
-          };
-
-          const rightOverlay = {
-            ...activeOverlay,
-            id: createSecureId("broll-split"),
-            startTime: currentPlayhead,
-            duration: secondPartDuration,
-            sourceStartTime: sourceStart + firstPartDuration,
-          };
-
-          setOverlays(prev =>
-            prev.map(item => (item.id === activeOverlay.id ? leftOverlay : item)).concat(rightOverlay)
-          );
-          setActiveOverlayId(rightOverlay.id);
+          const rightId = createSecureId("broll-split");
+          const next = splitStudioOverlayAtProgrammeTime(cutHistoryBaseline, activeOverlay.id, currentPlayhead, rightId);
+          setOverlays(next.overlays);
+          setCompoundClips(next.compoundClips);
+          setCompositionOrder(Array.isArray(next.compositionOrder) ? next.compositionOrder : null);
+          setMotionKeyframes(next.motionKeyframes);
+          setActiveOverlayId(rightId);
           setStudioActionMessage(`B-roll split at ${formatPreviewTimePrecise(currentPlayhead)} into 2 clips!`);
           return;
         }
@@ -9295,6 +9229,7 @@ const ViralClipStudio = ({
     const next = result.snapshot;
     studioDocumentRef.current = result.document;
     setTimeline(next.timeline);
+    setCompoundClips(next.compoundClips || []);
     setOverlays(next.overlays);
     setSoundEffects(next.soundEffects);
     setVoiceovers(next.voiceovers);
@@ -15255,7 +15190,7 @@ const ViralClipStudio = ({
         36000,
         0
       );
-      const fadeGain = getAudioFadeGain(
+      const fadeGain = studioMusicFadeGain(
         getPreviewMusicTime(previewTimelineTime),
         outputPlaybackDuration,
         musicTrack?.fadeIn,
@@ -15613,7 +15548,7 @@ const ViralClipStudio = ({
         36000,
         0
       );
-      const fadeGain = getAudioFadeGain(
+      const fadeGain = studioMusicFadeGain(
         getPreviewMusicTime(previewTimelineTime),
         outputPlaybackDuration,
         musicTrack?.fadeIn,
@@ -15660,7 +15595,7 @@ const ViralClipStudio = ({
         36000,
         0
       );
-      const fadeGain = getAudioFadeGain(
+      const fadeGain = studioMusicFadeGain(
         musicPreviewSourceRef.current && musicPreviewSourceStateRef.current
           ? musicBufferPosition(musicPreviewSourceStateRef.current, musicPreviewAudioContextRef.current.currentTime)
           : getPreviewMusicTime(previewTimelineTime),
@@ -16373,6 +16308,7 @@ const ViralClipStudio = ({
       url: asset.url,
       storagePath: asset.storagePath,
       sourceStoragePath: asset.storagePath,
+      contentHash: asset.contentHash || null,
       duration,
       startRequest: 0,
       endRequest: duration > 0 ? duration : null,
@@ -16529,6 +16465,7 @@ const ViralClipStudio = ({
         url: uploaded.url,
         storagePath: uploaded.storagePath,
         sourceStoragePath: uploaded.storagePath,
+        ...(uploaded.contentHash || uploaded.sha256 ? {contentHash: uploaded.contentHash || uploaded.sha256} : {}),
         file: null,
         isLocal: false,
         duration: measuredDuration,
@@ -17305,7 +17242,7 @@ const ViralClipStudio = ({
     const previewTimelineTime = video
       ? clampAudioControl(getPreviewTimelineTime(video.currentTime || 0), 0, 36000, 0)
       : 0;
-    const fadeGain = getAudioFadeGain(
+    const fadeGain = studioMusicFadeGain(
       previewTimelineTime,
       outputTimelineDuration,
       musicTrack?.fadeIn,
@@ -23290,6 +23227,22 @@ const ViralClipStudio = ({
                     />
                   </label>
 
+                  <label className="inspector-field">
+                    <span>Speech language</span>
+                    <select aria-label="Speech language" value={captionSourceLanguage}
+                      disabled={captionGenerationStatus === "processing" || isExporting}
+                      onChange={event => setCaptionSourceLanguage(event.target.value)}>
+                      <option value="auto">Automatic detection</option>
+                      <option value="en">English</option>
+                      <option value="af">Afrikaans</option>
+                      <option value="za-mixed">South African languages / mixed English</option>
+                      <option value="xh">isiXhosa</option><option value="zu">isiZulu</option>
+                      <option value="st">Sesotho</option><option value="tn">Setswana</option>
+                      <option value="ts">Xitsonga</option><option value="nr">isiNdebele</option>
+                      <option value="ve">Tshivenda</option>
+                    </select>
+                    <small>Choose the spoken language if detection misses words. Changing this keeps your current captions; regenerate when ready.</small>
+                  </label>
                   <div className="caption-transcript-actions">
                     <button
                       type="button"
@@ -23306,6 +23259,9 @@ const ViralClipStudio = ({
                           ? "Regenerate speech captions"
                           : "Generate speech captions"}
                     </button>
+                    <small aria-label="Caption speech source">
+                      Speech source: {currentTimelineClip?.name || selectedClip?.name || "Selected video"}
+                    </small>
                     <small>
                       Creates editable, timestamped lines from clear speech. For songs or choirs,
                       import an SRT/VTT subtitle file or type lyrics below.

@@ -346,6 +346,40 @@ describe("owned Studio project sources", () => {
     expect(deductCredits).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["uploads/images/1793088750886_overlay.png", "image/png"],
+    ["uploads/audios/1793088753156_music.wav", "audio/wav"],
+  ])("reopens backend-uploaded backup media %s only for its metadata owner", async (storagePath, contentType) => {
+    putVideo(storagePath, "owner-1", { contentType });
+    const valid = await request(buildApp()).post("/api/media/studio-assets/resolve").send({ storagePath });
+    expect(valid.statusCode).toBe(200);
+    expect(valid.body.storagePath).toBe(storagePath);
+    expect(valid.body.generation).toBe("12");
+    putVideo(storagePath, "attacker", { contentType });
+    const foreign = await request(buildApp()).post("/api/media/studio-assets/resolve").send({ storagePath });
+    expect(foreign.statusCode).toBe(403);
+    expect(foreign.body.code).toBe("STUDIO_SOURCE_FORBIDDEN");
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+  });
+
+  it("keeps backend media restore bounded by MIME, path and video-only render rules", async () => {
+    putVideo("uploads/images/1793088750886_page.html", "owner-1", { contentType: "text/html" });
+    const executable = await request(buildApp()).post("/api/media/studio-assets/resolve")
+      .send({ storagePath: "uploads/images/1793088750886_page.html" });
+    expect(executable.statusCode).toBe(422);
+    putVideo("uploads/images/attacker/logo.png", "owner-1", { contentType: "image/png" });
+    const nested = await request(buildApp()).post("/api/media/studio-assets/resolve")
+      .send({ storagePath: "uploads/images/attacker/logo.png" });
+    expect(nested.statusCode).toBe(403);
+    const { resolveOwnedStudioVideoSource } = require("../services/studioSourceService");
+    await expect(resolveOwnedStudioVideoSource({
+      storagePath: "uploads/images/1793088750886_logo.png", userId: "owner-1",
+    })).rejects.toMatchObject({ statusCode: 403 });
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+  });
+
   it("does not import another user's Cam Combiner master", async () => {
     mockDocs.set("master-1", {
       userId: "attacker",

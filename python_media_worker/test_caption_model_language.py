@@ -27,6 +27,24 @@ class CaptionModelLanguageTests(unittest.TestCase):
     def test_standard_whisper_models_keep_language_detection(self):
         self.assertFalse(self.runtime["transcription_model_has_unmapped_languages"]("large-v3-turbo"))
 
+    def test_empty_vocabulary_hint_never_seeds_a_whitespace_decoder_prompt(self):
+        for hint, expected in [("", None), ("  ", None), ("Lisakhanya Mdoda.", "Lisakhanya Mdoda.")]:
+            with self.subTest(hint=hint):
+                captured = {}
+                def transcribe(*args, **kwargs):
+                    captured.update(kwargs)
+                    return [], types.SimpleNamespace(language="en", language_probability=.9, duration=2)
+                self.runtime.update({
+                    "normalize_transcription_language": lambda v: None,
+                    "get_transcription_engine": lambda: "faster",
+                    "build_transcription_prompt": lambda v: v.strip(),
+                    "get_faster_whisper_model": lambda **kw: types.SimpleNamespace(transcribe=transcribe),
+                    "env_flag": lambda *a, **kw: False,
+                    "whisper": None,
+                })
+                self.runtime["transcribe_with_hints"]("test.wav", prompt_hint=hint, model_name="digiphyte/swivuriso-turbo")
+                self.assertEqual(captured["initial_prompt"], expected)
+
     def test_decoder_token_cannot_become_a_spoken_language_label(self):
         for model_name, expected in [("digiphyte/swivuriso-turbo", None), ("large-v3-turbo", "en")]:
             with self.subTest(model=model_name):

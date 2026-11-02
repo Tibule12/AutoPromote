@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.43",
+  "knowledge_version": "1.0.44",
   "product_version": "1.2.0",
   "release_channel": "development",
   "updated_at": "2026-10-21",
@@ -909,8 +909,8 @@
       "feature_id": "studio.captions",
       "name": "Captions and transcription",
       "area": "Studio",
-      "summary": "Caption controls and reviewed phrase rendering exist, but the retained automatic-word workflow has a repetition defect. Treat automatic word output as broken until that path is repaired and requalified.",
-      "purpose": "Caption controls and reviewed phrase rendering exist, but the retained automatic-word workflow has a repetition defect. Treat automatic word output as broken until that path is repaired and requalified.",
+      "summary": "Creates editable timed speech captions with a source-language choice. The empty-hint repetition defect is repaired on the retained mixed-speech clip; mixed-language wording and broad automatic-caption quality remain unqualified.",
+      "purpose": "Generate timed speech drafts, correct wording and speaker/language labels, and retain editable caption styles in the shared Studio project.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
@@ -921,15 +921,21 @@
       ],
       "requires": [],
       "optional_capabilities": [],
-      "controls": [],
+      "controls": [
+        "studio.captions.source_language"
+      ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
+        "Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.",
+        "Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.",
+        "Check Speech source beside Generate before requesting captions. It identifies the video currently selected on the timeline; each source keeps its own editable caption lines."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review; the prior broad automatic-caption qualification remains open.",
+        "Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed."
       ],
       "common_errors": [
         {
@@ -938,11 +944,11 @@
         },
         {
           "condition": "Generate and review captions before rendering.",
-          "resolution": "There are no editable caption phrases for the requested burn-in. Automatic words remain BROKEN. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export."
+          "resolution": "There are no editable caption phrases for the requested burn-in. Automatic wording still needs review. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export."
         },
         {
           "condition": "Review every flagged caption line before rendering.",
-          "resolution": "Approve or correct each flagged phrase and timestamp in Captions. Automatic words remain BROKEN; this is a reviewed-phrase workaround, not repaired automatic transcription."
+          "resolution": "Approve or correct each flagged phrase and timestamp in Captions. Correct all flagged wording and timing; the repaired repetition trigger does not establish accuracy across all speech."
         }
       ],
       "related_features": [],
@@ -955,7 +961,7 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "BROKEN",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -1260,7 +1266,8 @@
         "Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.",
         "Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.",
         "Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.",
-        "Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation."
+        "Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.",
+        "After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot."
       ],
       "preview_behavior": "Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.",
       "render_behavior": "The shared compiler carries group mask/blend decisions and transform keys into the existing CPU compositor. The ordinary geometric matte rasterizer clips assembled local child alpha before transform/opacity; registered request-owned matte scratch is cleaned after the render. RGB blend color weights the blend result by backdrop alpha, preserving foreground color over transparent isolated parents. Group and child blending share the existing leaf compositor and inverse programme clock. Static/Normal paths retain previous pixels. Source/source-VFX/generated-caption stages remain separate; inspect the exact final movie.",
@@ -17103,6 +17110,65 @@
           "kind": "IMPLEMENTATION"
         }
       ]
+    },
+    {
+      "control_id": "studio.captions.source_language",
+      "label": "Speech language",
+      "meaning": "Selects the speech recognizer and source language for the next automatic caption request. Does not relabel or replace existing lines.",
+      "feature_ids": [
+        "studio.captions"
+      ],
+      "field": "captionSourceLanguage",
+      "constraints": {
+        "type": "enum",
+        "minimum": null,
+        "maximum": null,
+        "values": [
+          "auto",
+          "en",
+          "af",
+          "za-mixed",
+          "xh",
+          "zu",
+          "st",
+          "tn",
+          "ts",
+          "nr",
+          "ve"
+        ],
+        "default": "auto",
+        "default_known": true
+      },
+      "unit": "none",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "PARTIAL",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video with speech"
+      ],
+      "dependencies": [
+        "studio.captions"
+      ],
+      "limitations": [
+        "Model wording is an editable review draft; changing this preference does not translate existing captions."
+      ],
+      "status": "PARTIAL",
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "Speech language",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/caption_transcription.py",
+          "anchor": "def caption_transcription_options",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
     }
   ],
   "tasks": [
@@ -17854,18 +17920,32 @@
     {
       "task_id": "task.captions_correct",
       "title": "Create captions and correct transcription",
-      "summary": "Automatic words are currently broken; use reviewed phrase correction and inspect the actual final subset.",
+      "summary": "Choose the speech language, generate editable timed lines and review uncertain words before export.",
       "feature_ids": [
         "studio.captions"
       ],
-      "control_ids": [],
+      "control_ids": [
+        "studio.captions.source_language"
+      ],
       "prerequisites": [
         "system.account"
       ],
       "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
         {
-          "instruction": "Review source transcription and correct the selected phrase rather than trusting repeated automatic words.",
+          "instruction": "Select the timeline clip whose speech you want. In Captions, check that Speech source names that file.",
+          "feature_id": "studio.captions",
+          "control_ids": []
+        },
+        {
+          "instruction": "Choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer. Then generate or regenerate speech captions; the other clips’ lines remain unchanged.",
+          "feature_id": "studio.captions",
+          "control_ids": [
+            "studio.captions.source_language"
+          ]
+        },
+        {
+          "instruction": "Review the editable transcript lines. Correct words, in/out times, speaker and language; adjust placement and the caption style controls. Flagged automatic wording remains a draft until you review it.",
           "feature_id": "studio.captions",
           "control_ids": []
         },
@@ -17881,11 +17961,11 @@
       ],
       "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
       "limitations": [
-        "The automatic-word repetition defect remains open. A successful reviewed phrase render does not qualify automatic captions."
+        "The empty-hint repetition trigger is repaired on retained speech, but code-switched wording still needs correction. Broad automatic transcription, all caption styles and full preview/export parity are not qualified."
       ],
       "aliases": [],
       "status": "BROKEN",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-22",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -20584,6 +20664,11 @@
       "type": "editable_with",
       "from": "publishing.analytics",
       "to": "publishing.analytics.release"
+    },
+    {
+      "from": "studio.captions",
+      "to": "studio.captions.source_language",
+      "type": "editable_with"
     }
   ],
   "template_bindings": [

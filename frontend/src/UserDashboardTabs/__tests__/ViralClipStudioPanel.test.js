@@ -56,6 +56,7 @@ describe("ViralClipStudioPanel", () => {
     uploadSourceFileViaBackend.mockResolvedValue({
       url: "https://storage.example/source.mp4",
       storagePath: "uploads/videos/user/source.mp4",
+      contentHash: "a".repeat(64),
       size: 5,
     });
   });
@@ -178,6 +179,7 @@ describe("ViralClipStudioPanel", () => {
         url: "https://storage.example/source.mp4",
         storagePath: "uploads/videos/user/source.mp4",
         isRemote: true,
+        contentHash: "a".repeat(64),
         openStudio: true,
       })
     );

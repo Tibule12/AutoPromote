@@ -12,6 +12,8 @@ import {
 } from "../studioProjectDocument";
 import { secondsToTicks } from "../studioTime";
 import { mapOutputTickToProgrammeTick } from "../studioTime";
+import { compileStudioCompositionForRender } from "../studioRenderCompiler";
+import { interpolateAutomationValue } from "../studioAutomation";
 
 const sourceSnapshot = () => ({
   orderedClips: [{ id: "source", start: 0, end: 20 }],
@@ -46,6 +48,63 @@ const split = (id = "main", at = 8, left = "left", right = "right") => ({
   newOccurrenceIds: { left, right },
 });
 
+test("a source trim ripples nested group gates and retains the same canonical render after reopen and undo", () => {
+  const snapshot = { ...sourceSnapshot(), compositionOrder: ["title"],
+    overlays: [{ id: "title", type: "text", text: "Keep this edit", startTime: 0, duration: 10 }],
+    compoundClips: [
+      { id: "inner", kind: "graphic_group", name: "Inner", layerIds: ["title"], timing: { startTime: 1, duration: 8 } },
+      { id: "outer", kind: "graphic_group", name: "Outer", layerIds: ["inner"], timing: { startTime: 0, duration: 10 } },
+    ],
+  };
+  const document = adaptStudioSnapshotToDocument({ snapshot, projectId: "project" });
+  const command = batch(document, [{ type: "trim_clip", target: { occurrenceId: "main" },
+    keep: { space: "source", startTick: secondsToTicks(3), endTick: secondsToTicks(20) } }]);
+  const result = runStudioCommandOnSnapshot({ snapshot: { ...snapshot, studioDocument: document }, projectId: "project", batch: command });
+  expect(result.snapshot.compoundClips.map(group => group.timing)).toEqual([
+    { startTime: 0, duration: 6 }, { startTime: 0, duration: 7 },
+  ]);
+  const direct = executeStudioCommandBatch(document, command).document;
+  expect(direct).toEqual(result.document);
+  expect(compileStudioCompositionForRender(JSON.parse(JSON.stringify(direct))).groups.map(group => group.timing))
+    .toEqual(result.snapshot.compoundClips.map(group => group.timing));
+  const undone = undoStudioCommandBatch(direct, { baseRevision: direct.revision,
+    actor: { type: "human", id: "test-editor" }, idempotencyKey: "undo-group-trim" }).document;
+  expect(undone.editGraph).toEqual(document.editGraph);
+  expect(snapshot.compoundClips[0].timing).toEqual({ startTime: 1, duration: 8 });
+});
+
+test("a ripple through a grouped animated layer gives both surviving pieces their group, order and keys", () => {
+  const snapshot = { ...sourceSnapshot(),
+    timeline: [{ ...sourceSnapshot().timeline[0], id: "first", endRequest: 5 },
+      { ...sourceSnapshot().timeline[0], id: "second", startRequest: 5 }],
+    compositionOrder: ["title", "deleted", "other"],
+    overlays: [{ id: "title", type: "text", text: "Move", startTime: 1, duration: 10 },
+      { id: "deleted", type: "text", text: "Remove", startTime: 5, duration: 2 },
+      { id: "other", type: "text", text: "Stay", startTime: 12, duration: 2 }],
+    compoundClips: [{ id: "intro", kind: "graphic_group", name: "Intro", layerIds: ["title", "deleted"],
+      timing: { startTime: 1, duration: 10 }, mask: { enabled: true, shape: "ellipse" } }],
+    motionKeyframes: [{ id: "start", targetId: "title", property: "x", time: 1, value: 10, easing: "linear" },
+      { id: "end", targetId: "title", property: "x", time: 11, value: 90, easing: "linear" },
+      { id: "removed-key", targetId: "deleted", property: "x", time: 5, value: 50 }],
+  };
+  const document = adaptStudioSnapshotToDocument({ snapshot, projectId: "project" });
+  const result = runStudioCommandOnSnapshot({ snapshot: { ...snapshot, studioDocument: document }, projectId: "project",
+    batch: batch(document, [{ type: "trim_clip", target: { occurrenceId: "second" },
+      keep: { space: "source", startTick: secondsToTicks(7), endTick: secondsToTicks(20) } }]) });
+  const pieces = result.snapshot.overlays.filter(layer => layer.text === "Move");
+  expect(pieces).toHaveLength(2);
+  expect(result.snapshot.compoundClips[0].layerIds).toEqual(pieces.map(layer => layer.id));
+  expect(result.snapshot.compositionOrder).toEqual([...pieces.map(layer => layer.id), "other"]);
+  expect(result.snapshot.motionKeyframes.some(key => key.targetId === "deleted")).toBe(false);
+  for (const piece of pieces) expect(result.snapshot.motionKeyframes.some(key => key.targetId === piece.id)).toBe(true);
+  for (const [piece, sourceTime, editedTime] of [[pieces[0], 3, 3], [pieces[1], 7, 5], [pieces[1], 9, 7]]) {
+    const evaluate = (keys, time) => interpolateAutomationValue({ keyframes: keys, property: "x", time });
+    expect(evaluate(result.snapshot.motionKeyframes.filter(key => key.targetId === piece.id), editedTime))
+      .toBeCloseTo(evaluate(snapshot.motionKeyframes.filter(key => key.targetId === "title"), sourceTime), 6);
+  }
+  expect(() => compileStudioCompositionForRender(result.document)).not.toThrow();
+});
+
 test("AI actor requires the explicit Director capability gate", () => {
   const document = adaptStudioSnapshotToDocument({
     snapshot: sourceSnapshot(), projectId: "project",
@@ -58,6 +117,21 @@ test("AI actor requires the explicit Director capability gate", () => {
     range: { space: "source", startTick: 0, endTick: 90_000 }, lockId: "lock-1" }] };
   expect(() => dryRunStudioCommandBatch(document, blocked))
     .toThrow(/not released/);
+});
+
+test("reordered paint layers allocate the same continuation identities in the editor and headless executor", () => {
+  const snapshot = { ...sourceSnapshot(),
+    timeline: [{ ...sourceSnapshot().timeline[0], id: "first", endRequest: 5 },
+      { ...sourceSnapshot().timeline[0], id: "second", startRequest: 5 }],
+    overlays: ["z", "a"].map(id => ({ id, type: "text", text: id, startTime: 0, duration: 12 })),
+    compositionOrder: ["a", "z"],
+  };
+  const document = adaptStudioSnapshotToDocument({ snapshot, projectId: "project" });
+  const command = batch(document, [{ type: "trim_clip", target: { occurrenceId: "second" },
+    keep: { space: "source", startTick: secondsToTicks(7), endTick: secondsToTicks(20) } }]);
+  const result = runStudioCommandOnSnapshot({ snapshot: { ...snapshot, studioDocument: document }, projectId: "project", batch: command });
+  expect(result.document).toEqual(executeStudioCommandBatch(document, command).document);
+  expect(compileStudioCompositionForRender(result.document).order).toEqual(result.snapshot.compositionOrder);
 });
 
 test("dry run reports read/write sets without mutating the project", () => {

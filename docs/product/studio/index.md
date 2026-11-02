@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.43 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.44 • 2026-10-21
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -385,7 +385,9 @@ Reframes a source or crops an overlay using the shared time map and existing ren
 
 ID: `studio.captions` • **BROKEN** • DETERMINISTIC
 
-Caption controls and reviewed phrase rendering exist, but the retained automatic-word workflow has a repetition defect. Treat automatic word output as broken until that path is repaired and requalified.
+Creates editable timed speech captions with a source-language choice. The empty-hint repetition defect is repaired on the retained mixed-speech clip; mixed-language wording and broad automatic-caption quality remain unqualified.
+
+**Purpose:** Generate timed speech drafts, correct wording and speaker/language labels, and retain editable caption styles in the shared Studio project.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
@@ -397,8 +399,10 @@ Caption controls and reviewed phrase rendering exist, but the retained automatic
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.
+2. Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.
+3. Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.
+4. Check Speech source beside Generate before requesting captions. It identifies the video currently selected on the timeline; each source keeps its own editable caption lines.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -407,14 +411,16 @@ Caption controls and reviewed phrase rendering exist, but the retained automatic
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review; the prior broad automatic-caption qualification remains open.
+- Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed.
 
 **Common errors**
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
-- Generate and review captions before rendering.: There are no editable caption phrases for the requested burn-in. Automatic words remain BROKEN. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export.
-- Review every flagged caption line before rendering.: Approve or correct each flagged phrase and timestamp in Captions. Automatic words remain BROKEN; this is a reviewed-phrase workaround, not repaired automatic transcription.
+- Generate and review captions before rendering.: There are no editable caption phrases for the requested burn-in. Automatic wording still needs review. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export.
+- Review every flagged caption line before rendering.: Approve or correct each flagged phrase and timestamp in Captions. Correct all flagged wording and timing; the repaired repetition trigger does not establish accuracy across all speech.
 
-**Controls:** No source-qualified editable control is recorded.
+**Controls:** [Speech language](../control-reference/index.md#studio-captions-source_language)
 
 **Guides:** [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Create captions and correct transcription](../task-guides/task-captions_correct.md)
 
@@ -574,6 +580,7 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 10. Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.
 11. Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.
 12. Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.
+13. After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot.
 
 **Preview:** Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.
 
