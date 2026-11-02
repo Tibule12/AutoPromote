@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Integrated current source branches with preserved security and retired products; reconciled crop-limited subject controls, native template recovery and exact source references; no readiness promotion.",
-  "reviewed_at": "2026-11-02T17:16:43.257Z",
+  "reason": "Final integration source review: explicit perspective-key grouping, retained native template versions, source-bound compositor and security/retirement compatibility; no product readiness promotion.",
+  "reviewed_at": "2026-11-02T17:23:02.962Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -187,7 +187,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "ff45e40a78dbb0484dd82b5d7bac3aae6a2c2657f2a66846a0dc61b0886aa527"
+      "sha256": "be74f56fb945d9f60edb9f486c8e785a5a188795c6e18fd668f62ebed25b86b6"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
