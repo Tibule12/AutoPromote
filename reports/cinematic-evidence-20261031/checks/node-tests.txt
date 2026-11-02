@@ -1,0 +1,16 @@
+✔ scene compiles real source surfaces, camera poses, lights, material and audio on the programme clock (4.843374ms)
+✔ each exposed camera, material, text and timing parameter reaches the graph (8.461735ms)
+✔ unsupported versions, unknown controls and unsafe text fail closed (1.690955ms)
+✔ missing narration cannot be represented as grounded evidence (0.928793ms)
+✔ Director produces the same editable scene semantics as manual controls (2.380871ms)
+✔ manifest hash ignores object key insertion order and changes with render content (1.133067ms)
+/tmp/cinematic-server-test-33AHvv/playlist.m3u8: Invalid data found when processing input
+✔ real local media registration, HTTP origin boundary, source validation, wall timeout and process-group cancellation (3701.041401ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3842.871344

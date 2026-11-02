@@ -88,6 +88,17 @@ test("background edge cleanup preserves soft alpha by default and remains editab
   expect(saved.scene.effects[2]).toMatchObject({edge_radius:2,decontaminate:.6});
   expect(global.fetch).not.toHaveBeenCalled();
 });
+
+test("replacement without a saved mask names the required step before any render request", async () => {
+  const current=scene();
+  current.effects.push({id:"room",type:"background_replace",start:0,end:6,asset_id:"set-1",
+    asset_sha256:"c".repeat(64),blur:0,exposure:0,saturation:1});
+  render(<Harness initialScene={current} />);
+  fireEvent.click(screen.getByRole("button",{name:"Render subject preview",exact:true}));
+  await screen.findByText("Create a subject mask first, then render the replacement preview.");
+  expect(global.fetch).not.toHaveBeenCalled();
+  expect(JSON.parse(screen.getByTestId("saved").textContent)[0].scene).toEqual(current);
+});
 afterEach(() => {
   delete global.fetch;
 });

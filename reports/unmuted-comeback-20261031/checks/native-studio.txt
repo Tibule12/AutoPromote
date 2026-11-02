@@ -1,0 +1,5 @@
+portrait native full Studio worker job b48132956e0c5128bf0d2da11d6da87af7c8ed0c25291e80d1a10c303724bacf
+portrait completed verified worker output 7d4249e8739d06a664b3b01f2428d90e536a641bc45375d1cd1b2bacd613f04c
+landscape native full Studio worker job 298bcc6fac9940833a38fcb0d82c390bff2ee76f37732c0c4840761dd120a435
+landscape completed verified worker output cf485ef176e4f4b6499feebaba96c11a14341df42d21df3b920adf7950193822
+Both real native Studio exports, downloads, title revisions, exact recovery and complete playback passed

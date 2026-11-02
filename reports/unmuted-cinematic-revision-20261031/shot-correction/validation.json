@@ -1,0 +1,23 @@
+{
+  "studioContract": {
+    "exitCode": 0,
+    "output": "{\n  \"valid\": true,\n  \"capabilities\": 29,\n  \"counts\": {\n    \"UNIMPLEMENTED\": 2,\n    \"BROKEN\": 1,\n    \"PARTIAL\": 9,\n    \"FUNCTIONAL\": 17,\n    \"PRO-READY\": 0,\n    \"PRODUCTION-READY\": 0\n  },\n  \"combinations\": 13,\n  \"parityChecks\": 17,\n  \"presentFixtures\": 4,\n  \"newCapabilityExecutions\": 0,\n  \"note\": \"Record validation only; no browser, provider or GPU execution.\"\n}\n"
+  },
+  "diffWhitespace": {
+    "exitCode": 0,
+    "output": ""
+  },
+  "shotScriptsSyntax": {
+    "exitCode": 0,
+    "output": ""
+  },
+  "recordingScriptSyntax": {
+    "exitCode": 0,
+    "output": ""
+  },
+  "protectedFileHashesMatch": true,
+  "visualGatePassed": false,
+  "readinessPromoted": false,
+  "noNewTestsAdded": true,
+  "finalRejectedMovieHashMatches": true
+}

@@ -85,7 +85,6 @@ async function createSubjectVfxPreview({ ownerUid, scene: input, clientRequestId
     ownerUid,scene,modelArtifactRef,sourceSha256:sha256,sourceGeneration:generation}):null;
   let replacementAssets=[];
   if(scene.effects.some(effect=>effect.type==='background_replace')) {
-    if(!modelArtifactRef)throw error(422,'Create a saved subject mask before replacing the background.');
     const artifact=await require('./studioModelCapabilityService').ownedModelArtifact({uid:ownerUid,artifactHash:modelArtifactRef.artifactHash});
     replacementAssets=await resolveSubjectReplacementAssets({ownerUid,projectId:artifact.projectId,scene});
   }

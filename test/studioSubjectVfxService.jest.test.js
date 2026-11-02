@@ -140,6 +140,20 @@ afterEach(() => {
   delete process.env.STUDIO_MODEL_VFX_SECRET;
 });
 
+test("replacement without a saved mask rejects before worker routing, source access or job creation", async () => {
+  delete process.env.STUDIO_NVIDIA_VFX_URL;
+  delete process.env.STUDIO_NVIDIA_VFX_SECRET;
+  const current=scene();
+  current.effects.push({id:"room",type:"background_replace",start:0,end:6,
+    asset_id:"owned-room",asset_sha256:"c".repeat(64),blur:0,exposure:0,saturation:1});
+  await expect(createSubjectVfxPreview({ownerUid,scene:current,clientRequestId:"replace-without-mask"}))
+    .rejects.toMatchObject({statusCode:422,message:"Create a saved subject mask before replacing the background."});
+  expect(admin.firestore).not.toHaveBeenCalled();
+  expect(admin.storage).not.toHaveBeenCalled();
+  expect(axios.post).not.toHaveBeenCalled();
+  expect(documents.size).toBe(0);
+});
+
 test("verified model masks create a real CPU preview job and use the unchanged owned export contract", async () => {
   process.env.STUDIO_MODEL_VFX_URL = "http://127.0.0.1:6199";
   process.env.STUDIO_MODEL_VFX_SECRET = "s".repeat(32);

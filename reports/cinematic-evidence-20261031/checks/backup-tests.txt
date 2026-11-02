@@ -1,0 +1,15 @@
+
+> autopromote-frontend@1.0.0 test
+> react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/__tests__/studioProjectBackupMedia.test.js
+
+PASS src/components/__tests__/studioProjectBackupMedia.test.js
+  ✓ backup round trip preserves exact local video, artwork and narration bytes and history (25 ms)
+  ✓ existing owned-media backups retain their remote identities without packaging access state (2 ms)
+  ✓ invalid local references and oversized packages are rejected (46 ms)
+  ✓ current-project backup succeeds when an older saved version exceeds the limit, preserving that version locally (37 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        1.166 s, estimated 2 s
+Ran all test suites within paths "src/components/__tests__/studioProjectBackupMedia.test.js".

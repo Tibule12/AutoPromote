@@ -1,0 +1,2 @@
+[BABEL] Note: The code generator has deoptimised the styling of /home/tibule12/Projects/AutoPromte/AutoPromote-cinematic-evidence-20261031/frontend/src/components/ViralClipStudio.js as it exceeds the max of 500KB.
+Built actual Studio editor in /home/tibule12/Projects/AutoPromte/AutoPromote-cinematic-evidence-20261031/reports/cinematic-evidence-20261031/local-app

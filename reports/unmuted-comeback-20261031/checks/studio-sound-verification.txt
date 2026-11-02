@@ -1,0 +1,48 @@
+{
+  "actualBrowserCapture": true,
+  "audioIncluded": true,
+  "parts": [
+    {
+      "format": "portrait",
+      "audioStreamCapturedFromActualMonitor": true,
+      "captureRms": 0.1071553452274183,
+      "alignedSpeechCorrelation": 0.9973179933877157,
+      "captureAudioLeadSamplesAt16kHz": 7848,
+      "clockDifferenceMilliseconds": 13.138532638549805,
+      "completeMonitorPlayback": true,
+      "speakersMuted": true,
+      "externalSoundtrackSubstituted": false
+    },
+    {
+      "format": "landscape",
+      "audioStreamCapturedFromActualMonitor": true,
+      "captureRms": 0.10723452453444969,
+      "alignedSpeechCorrelation": 0.9836176236558178,
+      "captureAudioLeadSamplesAt16kHz": 7677,
+      "clockDifferenceMilliseconds": 1.8296241760253906,
+      "completeMonitorPlayback": true,
+      "speakersMuted": true,
+      "externalSoundtrackSubstituted": false
+    }
+  ],
+  "probe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "58.062663"
+    }
+  },
+  "freshHumanListening": false,
+  "note": "The browser/device stays muted; the recording captures the monitor's live decoded audio stream."
+}

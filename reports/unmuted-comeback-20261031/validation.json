@@ -1,0 +1,349 @@
+{
+  "date": "2026-10-31",
+  "status": "NATIVE_PRIVATE_PODCAST_FILMS_DELIVERED_CREATIVE_LISTENING_OPEN",
+  "report": "reports/unmuted-comeback-20261031/README.md",
+  "branch": "feat/unmuted-comeback-20261031",
+  "sourceSha256": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+  "sourceUnchanged": true,
+  "deliveryDirectory": "/home/tibule12/Videos/Unmuted Podcast - Comeback Trailer - 20261031",
+  "duration": 27.466666666666665,
+  "frames": 824,
+  "fps": 30,
+  "captionLines": 23,
+  "nativeBrowser": {
+    "headless": true,
+    "muted": true,
+    "actualEditor": "frontend/src/components/ViralClipStudio.js",
+    "renderer": "ordinary production Studio worker with denied external I/O",
+    "external": [],
+    "browserErrors": [],
+    "results": [
+      {
+        "format": "portrait",
+        "jobId": "b48132956e0c5128bf0d2da11d6da87af7c8ed0c25291e80d1a10c303724bacf",
+        "sha256": "7d4249e8739d06a664b3b01f2428d90e536a641bc45375d1cd1b2bacd613f04c",
+        "coldReopen": true,
+        "nativeTitleReposition": true,
+        "completePlayback": true,
+        "nativeDownload": true
+      },
+      {
+        "format": "landscape",
+        "jobId": "298bcc6fac9940833a38fcb0d82c390bff2ee76f37732c0c4840761dd120a435",
+        "sha256": "cf485ef176e4f4b6499feebaba96c11a14341df42d21df3b920adf7950193822",
+        "coldReopen": true,
+        "nativeTitleReposition": true,
+        "completePlayback": true,
+        "nativeDownload": true
+      }
+    ]
+  },
+  "media": {
+    "portrait": {
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_type": "video",
+            "width": 720,
+            "height": 1280,
+            "r_frame_rate": "30/1",
+            "duration": "27.466667",
+            "nb_read_frames": "824"
+          },
+          {
+            "codec_type": "audio",
+            "r_frame_rate": "0/0",
+            "duration": "27.466000",
+            "nb_read_frames": "1288"
+          }
+        ],
+        "format": {
+          "duration": "27.466667"
+        }
+      },
+      "sha256": "7d4249e8739d06a664b3b01f2428d90e536a641bc45375d1cd1b2bacd613f04c",
+      "bytes": 11448031
+    },
+    "landscape": {
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "r_frame_rate": "30/1",
+            "duration": "27.466667",
+            "nb_read_frames": "824"
+          },
+          {
+            "codec_type": "audio",
+            "r_frame_rate": "0/0",
+            "duration": "27.466000",
+            "nb_read_frames": "1288"
+          }
+        ],
+        "format": {
+          "duration": "27.466667"
+        }
+      },
+      "sha256": "cf485ef176e4f4b6499feebaba96c11a14341df42d21df3b920adf7950193822",
+      "bytes": 8156075
+    }
+  },
+  "audio": [
+    {
+      "format": "portrait",
+      "decodedSamples": 1318912,
+      "referenceSamples": 1318912,
+      "sampleRate": 48000,
+      "bestLagSamples": -16,
+      "bestLagMs": -0.3333333333333333,
+      "zeroOffsetCorrelation": 0.6593744600625615,
+      "freshHumanListening": false,
+      "note": "Measured against the same original source cuts, including the native closing L-cut; voice repair changes waveform."
+    },
+    {
+      "format": "landscape",
+      "decodedSamples": 1318912,
+      "referenceSamples": 1318912,
+      "sampleRate": 48000,
+      "bestLagSamples": -16,
+      "bestLagMs": -0.3333333333333333,
+      "zeroOffsetCorrelation": 0.6593744600625615,
+      "freshHumanListening": false,
+      "note": "Measured against the same original source cuts, including the native closing L-cut; voice repair changes waveform."
+    }
+  ],
+  "checks": {
+    "node": 12,
+    "canonicalCompilerSequence": 52,
+    "mountedEditorSelected": 4,
+    "focusedTotal": 68,
+    "fullEditorSuite": "NOT_RERUN"
+  },
+  "productionDataAccess": false,
+  "paidModelOrGpu": false,
+  "deployed": false,
+  "published": false,
+  "readinessPromoted": false,
+  "creativeApproval": false,
+  "freshHumanListening": false,
+  "remaining": [
+    "Owner listening/wording and creative acceptance",
+    "Portable local source packaging/relinking",
+    "Normal customer/cloud dispatch and tenant-owned receipt qualification",
+    "Whole authoring picture/sound/colour/edge parity",
+    "Shared S02/S04/S03 backlog"
+  ],
+  "nextTask": "Retain both native films and exact saved states; incorporate owner feedback and select substantive interview highlights from the longer original.",
+  "artifacts": {
+    "reports/unmuted-comeback-20261031/review/Authoring and Full Studio Playback.mp4": {
+      "bytes": 33675759,
+      "sha256": "06c923a4f42db79a9cd1ee2aaec48d2d07d5adb501c233084966fbafc7df9575"
+    },
+    "reports/unmuted-comeback-20261031/review/Raw vs Finished Trailer.mp4": {
+      "bytes": 6223859,
+      "sha256": "7af4c0979ca6409ca9ee527055d15a701538629aae8535de11df10bbd8d2c20f"
+    },
+    "reports/unmuted-comeback-20261031/review/Unmuted - We Are Back - landscape.mp4": {
+      "bytes": 8156075,
+      "sha256": "cf485ef176e4f4b6499feebaba96c11a14341df42d21df3b920adf7950193822"
+    },
+    "reports/unmuted-comeback-20261031/review/Unmuted - We Are Back - portrait.mp4": {
+      "bytes": 11448031,
+      "sha256": "7d4249e8739d06a664b3b01f2428d90e536a641bc45375d1cd1b2bacd613f04c"
+    },
+    "reports/unmuted-comeback-20261031/review/audio-measurements.json": {
+      "bytes": 805,
+      "sha256": "9ae804e4d833823c4f7686d471976b7033f660921ec9a1979156eb159edcfd28"
+    },
+    "reports/unmuted-comeback-20261031/review/landscape-editable-project.json": {
+      "bytes": 160317,
+      "sha256": "3f993426e1d75bf8a5b199f221aa1514698a3657a53f4e6d685edb6e72280db4"
+    },
+    "reports/unmuted-comeback-20261031/review/landscape-native-render.json": {
+      "bytes": 6329,
+      "sha256": "c9c5ba3bc40eb8f263ad499b60a6388be9c5f9453f0ad9e2451aa40cfbd9b1ee"
+    },
+    "reports/unmuted-comeback-20261031/review/media-proof.json": {
+      "bytes": 1238,
+      "sha256": "ac3f64b5697ea19832b1aa47ef57d9eeda8cf904f37d43f05612e90b354ab187"
+    },
+    "reports/unmuted-comeback-20261031/review/native-verification.json": {
+      "bytes": 904,
+      "sha256": "90f0d1d9b460e726c5ccfaf0a651fe6adf9fa9b2adf95f9132f20c9646617ae5"
+    },
+    "reports/unmuted-comeback-20261031/review/portrait-editable-project.json": {
+      "bytes": 161931,
+      "sha256": "d80a74b187d0b02acf550bfa62c47e41880dbc343b897270b89c7e1c8e6c8663"
+    },
+    "reports/unmuted-comeback-20261031/review/portrait-media-proof.json": {
+      "bytes": 394,
+      "sha256": "5034ddc770682281ec725783c002ac134e081976dc7fe3560cf2d7dc592ad969"
+    },
+    "reports/unmuted-comeback-20261031/review/portrait-native-render.json": {
+      "bytes": 6331,
+      "sha256": "4b6aba712e489d827e9d90dee82414b0efbf1942714dee0c29ad1efb930fb859"
+    },
+    "reports/unmuted-comeback-20261031/checks/canonical-regression.txt": {
+      "bytes": 935,
+      "sha256": "5749722149a70681cda56abb9c7ed045ad2e3f868d8e89f453bd54b5876748db"
+    },
+    "reports/unmuted-comeback-20261031/checks/compiler.txt": {
+      "bytes": 67,
+      "sha256": "075736a8f955867d00faaaf3686a2a5f5847cb70b64c7725d5ef220d7fb4cf37"
+    },
+    "reports/unmuted-comeback-20261031/checks/continuity.txt": {
+      "bytes": 364,
+      "sha256": "e475615ce029a2759d213ab26187158181fb272c7c3ebcc4f05816622c842a61"
+    },
+    "reports/unmuted-comeback-20261031/checks/editor-regression.txt": {
+      "bytes": 13887,
+      "sha256": "b1a59563948725de24a0ff4020df8fab09b2b548d801872500d7a72150beed6a"
+    },
+    "reports/unmuted-comeback-20261031/checks/landscape-v1.txt": {
+      "bytes": 13150,
+      "sha256": "8b6d004ad33ed2768df89d232160a3ed60a38876c42914d74663003e02f25296"
+    },
+    "reports/unmuted-comeback-20261031/checks/landscape-v2.txt": {
+      "bytes": 14597,
+      "sha256": "88723c277b324e2bb55ed17d33a83b02f132350991beca9ea190310de62f27e8"
+    },
+    "reports/unmuted-comeback-20261031/checks/native-studio.txt": {
+      "bytes": 529,
+      "sha256": "1eac8b5a48513ea8fdf13e5d4e499acb3e656c78e877093304cd1e3b76cb2c85"
+    },
+    "reports/unmuted-comeback-20261031/checks/node-tests.txt": {
+      "bytes": 1490,
+      "sha256": "ea1e49a5b46531536cd263bef5ddeceb7e9f4a8ed1a4098a60b22de5ead86f87"
+    },
+    "reports/unmuted-comeback-20261031/checks/portrait-v1.txt": {
+      "bytes": 14463,
+      "sha256": "34126dfda437d609475da21ea22ab6c0b1d1b5aa458d57aff374d65d2e9e69a4"
+    },
+    "reports/unmuted-comeback-20261031/checks/portrait-v2.txt": {
+      "bytes": 16115,
+      "sha256": "75c3afdf25c20d70ec497e0d73ec9a62193e93d66b39d2fdd6ed97e09698c96c"
+    },
+    "reports/unmuted-comeback-20261031/checks/studio-build.txt": {
+      "bytes": 465,
+      "sha256": "ab21481cd9614f2f15cd2b884068c04e066f932d8a89c7cfd70cbc793d5e38bc"
+    },
+    "reports/unmuted-comeback-20261031/review/Studio Playback with Sound.mp4": {
+      "bytes": 12102366,
+      "sha256": "35d69accd2a2ccde6057d0782cfaac075235aef979821332db5b84a742b7cf4c"
+    },
+    "reports/unmuted-comeback-20261031/review/studio-sound-capture.json": {
+      "bytes": 47885,
+      "sha256": "dcdc411fd0dc68ece693f316b645435f65d847f978954c704c0eb0b9261d44b4"
+    },
+    "reports/unmuted-comeback-20261031/review/studio-sound-verification.json": {
+      "bytes": 1346,
+      "sha256": "5d115f6d9657f15a2cefebf14a1b3781c4f83288c529cca3cc048e5c0bc2453e"
+    },
+    "reports/unmuted-comeback-20261031/review/studio-with-sound-frame.png": {
+      "bytes": 1365922,
+      "sha256": "265fe57eb1105d33fb48384c1f1de622f40d147bde48a0157ce18185972ec736"
+    },
+    "reports/unmuted-comeback-20261031/checks/studio-sound-capture.txt": {
+      "bytes": 355,
+      "sha256": "0a4ffa8ebd69be55783f8cfe8502fec0f3f2ee3be04e11b6bade1fc4c2f2a239"
+    },
+    "reports/unmuted-comeback-20261031/checks/studio-sound-verification.txt": {
+      "bytes": 1347,
+      "sha256": "f12aff78f819bcf8bd52d4c1b14b8d18d5dc5e728020930fa83e2dcaf5d29ce8"
+    }
+  },
+  "deliveryFiles": {
+    "01 - We Are Back - Portrait.mp4": {
+      "bytes": 11448031,
+      "sha256": "7d4249e8739d06a664b3b01f2428d90e536a641bc45375d1cd1b2bacd613f04c"
+    },
+    "02 - We Are Back - Landscape.mp4": {
+      "bytes": 8156075,
+      "sha256": "cf485ef176e4f4b6499feebaba96c11a14341df42d21df3b920adf7950193822"
+    },
+    "03 - Raw vs Finished Trailer.mp4": {
+      "bytes": 6223859,
+      "sha256": "7af4c0979ca6409ca9ee527055d15a701538629aae8535de11df10bbd8d2c20f"
+    },
+    "04 - Studio Playback with Sound.mp4": {
+      "bytes": 12102366,
+      "sha256": "35d69accd2a2ccde6057d0782cfaac075235aef979821332db5b84a742b7cf4c"
+    },
+    "05 - Original Silent Authoring Recording.mp4": {
+      "bytes": 33675759,
+      "sha256": "06c923a4f42db79a9cd1ee2aaec48d2d07d5adb501c233084966fbafc7df9575"
+    },
+    "Landscape - Editable Studio Project.json": {
+      "bytes": 160317,
+      "sha256": "3f993426e1d75bf8a5b199f221aa1514698a3657a53f4e6d685edb6e72280db4"
+    },
+    "Portrait - Editable Studio Project.json": {
+      "bytes": 161931,
+      "sha256": "d80a74b187d0b02acf550bfa62c47e41880dbc343b897270b89c7e1c8e6c8663"
+    },
+    "README.txt": {
+      "bytes": 898,
+      "sha256": "59e378c9c3a01d958cb3dd419ad76f97e5bba11848995379a769a3c05c12c168"
+    }
+  },
+  "studioRecordingSoundCorrection": {
+    "reason": "Initial screen capture/encode omitted audio",
+    "output": "/home/tibule12/Videos/Unmuted Podcast - Comeback Trailer - 20261031/04 - Studio Playback with Sound.mp4",
+    "sha256": "35d69accd2a2ccde6057d0782cfaac075235aef979821332db5b84a742b7cf4c",
+    "proof": {
+      "actualBrowserCapture": true,
+      "audioIncluded": true,
+      "parts": [
+        {
+          "format": "portrait",
+          "audioStreamCapturedFromActualMonitor": true,
+          "captureRms": 0.1071553452274183,
+          "alignedSpeechCorrelation": 0.9973179933877157,
+          "captureAudioLeadSamplesAt16kHz": 7848,
+          "clockDifferenceMilliseconds": 13.138532638549805,
+          "completeMonitorPlayback": true,
+          "speakersMuted": true,
+          "externalSoundtrackSubstituted": false
+        },
+        {
+          "format": "landscape",
+          "audioStreamCapturedFromActualMonitor": true,
+          "captureRms": 0.10723452453444969,
+          "alignedSpeechCorrelation": 0.9836176236558178,
+          "captureAudioLeadSamplesAt16kHz": 7677,
+          "clockDifferenceMilliseconds": 1.8296241760253906,
+          "completeMonitorPlayback": true,
+          "speakersMuted": true,
+          "externalSoundtrackSubstituted": false
+        }
+      ],
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "58.062663"
+        }
+      },
+      "freshHumanListening": false,
+      "note": "The browser/device stays muted; the recording captures the monitor's live decoded audio stream."
+    },
+    "source": "Actual playing Studio monitor captureStream audio; no substituted soundtrack",
+    "preservedSilentOriginal": "/home/tibule12/Videos/Unmuted Podcast - Comeback Trailer - 20261031/05 - Original Silent Authoring Recording.mp4",
+    "newRenderJobs": 0
+  }
+}
