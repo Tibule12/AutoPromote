@@ -30,7 +30,7 @@
     "svgo": "2.8.4",
     "webpack-dev-server": "5.2.6",
     "http-proxy-middleware": "$http-proxy-middleware",
-    "glob": "^11.1.0",
+    "glob": "^14.0.2",
     "js-yaml": "4.3.2",
     "node-forge": "1.4.2",
     "serialize-javascript": "^7.1.4",
