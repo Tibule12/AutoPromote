@@ -1697,6 +1697,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
 
   await toolRail.getByRole("button", { name: "Reframe", exact: true }).click();
   await expect(inspector.getByTestId("auto-reframe-inspector")).toBeVisible();
+  await inspector.getByTestId("auto-reframe-toggle").check();
   await expect(inspector.getByTestId("auto-reframe-toggle")).toBeChecked();
   await inspector.getByTestId("auto-reframe-toggle").click();
   await expect(inspector.getByTestId("auto-reframe-toggle")).not.toBeChecked();
@@ -2911,10 +2912,14 @@ test("records the complete frontend-first creator feature tour without rendering
     if (["reaction_freeze", "reaction_punch"].includes(id)) {
       await pausePreview(page);
       await seekOutput(page, 1.2);
-      const graphics = page.getByTestId(/pro-graphics-clip-/);
-      const before = await graphics.count();
+      await expect(programme).toHaveJSProperty("seeking", false);
+      const frozenLayers = page.getByRole("button", { name: "Select Micro-freeze layer", exact: true });
+      const before = await frozenLayers.count();
       await button.click();
-      await expect(graphics).toHaveCount(before + 1);
+      await expect(frozenLayers).toHaveCount(before + 1);
+      const addedLayer = frozenLayers.last().locator("xpath=ancestor::div[contains(@class,'pro-layer-row')]");
+      expect(Number(await addedLayer.getAttribute("data-effective-start"))).toBeCloseTo(1.2, 1);
+      expect(Number(await addedLayer.getAttribute("data-effective-end"))).toBeGreaterThan(1.2);
       await expect(page.getByTestId("studio-creator-preview-layer")).toHaveCount(0);
       await expect(page.getByText("Freeze picture added to the editable timeline. Undo restores the complete edit.", { exact: true })).toBeVisible();
     } else {
