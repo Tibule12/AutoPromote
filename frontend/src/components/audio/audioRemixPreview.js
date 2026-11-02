@@ -183,12 +183,18 @@ export function applyStudioMediaGain(media, value) {
   return gain <= 1;
 }
 
-export async function updateAudioRemixPreview(media, value, bypass = false) {
+export async function updateAudioRemixPreview(media, value, bypass = false, { playbackRate = 1 } = {}) {
   if (!media) return false;
   const remix = normalizeAudioRemix(value);
   const active = remix.enabled && !bypass;
 
-  media.playbackRate = active ? remix.speed : 1;
+  // Pacing owns the untreated programme clock. Resetting a prepared decoder
+  // to 1x and then restoring its authored rate can restart its native clock
+  // exactly while a cut is being promoted.
+  const fallbackRate = Number.isFinite(Number(playbackRate))
+    ? Math.max(.25, Math.min(4, Number(playbackRate))) : 1;
+  const rate = active ? remix.speed : fallbackRate;
+  if (media.playbackRate !== rate) media.playbackRate = rate;
   media.preservesPitch = active ? remix.keepPitch : true;
   media.mozPreservesPitch = media.preservesPitch;
   media.webkitPreservesPitch = media.preservesPitch;

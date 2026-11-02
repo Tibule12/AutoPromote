@@ -245,6 +245,27 @@ describe("ViralClipStudio timeline sequencing", () => {
     return video;
   };
 
+  const decodedFrames = () => {
+    const prototype = HTMLVideoElement.prototype;
+    const previous = ["requestVideoFrameCallback", "cancelVideoFrameCallback"]
+      .map(key => [key, Object.getOwnPropertyDescriptor(prototype, key)]);
+    const callbacks = new Map(); let id = 0;
+    Object.defineProperty(prototype, "requestVideoFrameCallback", { configurable: true,
+      value(callback) { callbacks.set(++id, { video: this, callback }); return id; } });
+    Object.defineProperty(prototype, "cancelVideoFrameCallback", { configurable: true,
+      value(handle) { callbacks.delete(handle); } });
+    return {
+      frame(video) {
+        for (const [handle, row] of [...callbacks]) if (row.video === video) {
+          callbacks.delete(handle); row.callback(performance.now(), { mediaTime: video.currentTime });
+        }
+      },
+      restore() { for (const [key, descriptor] of previous) {
+        if (descriptor) Object.defineProperty(prototype, key, descriptor); else delete prototype[key];
+      } },
+    };
+  };
+
   test("an existing finished URL cannot hide recovery actions that still need attention", () => {
     mountNativePreview({ renderedOutput: { url: 'https://example.com/finished.mp4' },
       renderRecoveryNeedsAttention: true,
@@ -362,6 +383,65 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(video.paused).toBe(false);
   });
 
+  test("main-picture motion and transitions follow the decoded frame while React time trails", async () => {
+    const priorRequest = HTMLVideoElement.prototype.requestVideoFrameCallback;
+    const priorCancel = HTMLVideoElement.prototype.cancelVideoFrameCallback;
+    const frames = new Map(); let nextId = 0;
+    HTMLVideoElement.prototype.requestVideoFrameCallback = function(callback) {
+      frames.set(++nextId, { video: this, callback }); return nextId;
+    };
+    HTMLVideoElement.prototype.cancelVideoFrameCallback = id => frames.delete(id);
+    const context = { save: jest.fn(), restore: jest.fn(), fillRect: jest.fn(), drawImage: jest.fn(),
+      translate: jest.fn(), rotate: jest.fn(), scale: jest.fn(), setTransform: jest.fn(),
+      beginPath: jest.fn(), moveTo: jest.fn(), lineTo: jest.fn(), closePath: jest.fn(),
+      clip: jest.fn(), quadraticCurveTo: jest.fn() };
+    let editor;
+    try {
+      const source = { id: 'picture', start: 2, end: 8, duration: 6, sourceDuration: 12 };
+      editor = mountNativePreview({ initialSavedProject: { id: 'picture-clock', name: 'Picture clock', snapshot: {
+        orderedClips: [source], selectedClipId: 'picture', previewSpeed: 1, addHook: false,
+        mainTransform: { id: 'main-video', name: 'Main video', type: 'video',
+          x: 50, y: 50, scale: 1, rotation: 0, opacity: 1 },
+        timeline: [{ ...source, sourceClipId: 'picture', startRequest: 2, endRequest: 8,
+          transitionIn: 'soft_dip', transitionDuration: .35, url: 'https://example.com/source.mp4' }],
+        motionKeyframes: [
+          { id: 'scale-in', targetId: 'main-video', property: 'scale', time: 0, value: 1, easing: 'linear' },
+          { id: 'scale-out', targetId: 'main-video', property: 'scale', time: 1, value: 2, easing: 'linear' },
+          { id: 'turn-in', targetId: 'main-video', property: 'rotation', time: 0, value: 0, easing: 'linear' },
+          { id: 'turn-out', targetId: 'main-video', property: 'rotation', time: 1, value: 90, easing: 'linear' },
+        ],
+      } } });
+      await screen.findByDisplayValue('Picture clock');
+      const video = screen.getByTestId('studio-after-video');
+      Object.defineProperties(video, { readyState: { configurable: true, value: 4 },
+        currentSrc: { configurable: true, get: () => video.src },
+        videoWidth: { configurable: true, value: 640 }, videoHeight: { configurable: true, value: 360 },
+        paused: { configurable: true, value: false }, seeking: { configurable: true, value: false },
+        currentTime: { configurable: true, writable: true, value: 2.02 } });
+      const canvas = screen.getByTestId('studio-program-canvas');
+      canvas.getContext = jest.fn(() => context);
+      canvas.getBoundingClientRect = () => ({ width: 640, height: 360 });
+      fireEvent.play(video);
+      context.rotate.mockClear(); context.scale.mockClear();
+      act(() => {
+        const callbacks = [...frames].filter(([, row]) => row.video === video);
+        callbacks.forEach(([id, row]) => { frames.delete(id); row.callback(0, { mediaTime: 2.175 }); });
+      });
+      expect(canvas.studioProgrammeFrameReceipt.sourceTime).toBe(2.175);
+      expect(canvas.studioProgrammeFrameReceipt.programmeTime).toBeCloseTo(.175, 8);
+      expect(context.rotate.mock.calls.at(-1)[0]).toBeCloseTo(.175 * Math.PI / 2, 8);
+      expect(context.scale.mock.calls.at(-1)[0]).toBeCloseTo(1.175, 8);
+      expect(context.scale.mock.calls.at(-1)[1]).toBeCloseTo(1.175, 8);
+      expect(Number(canvas.dataset.joinOpacity)).toBeCloseTo(.5, 8);
+    } finally {
+      editor?.unmount();
+      if (priorRequest) HTMLVideoElement.prototype.requestVideoFrameCallback = priorRequest;
+      else delete HTMLVideoElement.prototype.requestVideoFrameCallback;
+      if (priorCancel) HTMLVideoElement.prototype.cancelVideoFrameCallback = priorCancel;
+      else delete HTMLVideoElement.prototype.cancelVideoFrameCallback;
+    }
+  });
+
   test("native source EOF loops a full-length clip while user-paused EOF stays paused", () => {
     const { video } = mountNativePreview({
       clips: [{ id: "full", start: 0, end: 12, duration: 12 }],
@@ -417,7 +497,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
-  test("a native shot boundary promotes and starts the prepared decoder before the boundary event returns", () => {
+  test.each(['playing', 'paused'])("a prepared native cut waits for its playback clock and respects a later %s request", async outcome => {
     mountNativePreview({ importedCameraMaster: {
       id: 'prepared-next', name: 'Next source', duration: 4,
       url: 'https://example.com/prepared-next.mp4', storagePath: 'studio/sources/prepared-next.mp4',
@@ -447,22 +527,24 @@ describe("ViralClipStudio timeline sequencing", () => {
       paused: { configurable: true, get: () => paused },
       duration: { configurable: true, value: 4 },
     });
-    next.play = jest.fn(() => { paused = false; next.currentTime += .03; return Promise.resolve(); });
+    let playing;
+    next.play = jest.fn(() => { paused = false; return new Promise(resolve => { playing = resolve; }); });
     next.pause = jest.fn(() => { paused = true; });
     fireEvent.click(screen.getByRole('button', { name: 'Play comparison', exact: true }));
-    let observed;
-    video.addEventListener('timeupdate', () => {
-      observed = { active: screen.getByTestId('studio-after-video'), playing: !paused,
-        starts: next.play.mock.calls.length };
-    }, { once: true });
     video.currentTime = 8; fireEvent.timeUpdate(video);
-    expect(observed.active).toBe(next);
-    expect(observed.playing).toBe(true);
-    expect(observed.starts).toBeGreaterThan(0);
-    // The prepared source advances during the editor commit. Promotion must
-    // retain that clock, not seek back to zero and accumulate per-cut drift.
-    expect(next.currentTime).toBe(.03);
+    expect(screen.getByTestId('studio-after-video')).toBe(video);
+    expect(next.play).toHaveBeenCalled();
     expect(video.paused).toBe(true);
+    if (outcome === 'paused') fireEvent.click(screen.getByRole('button', { name: 'Pause comparison', exact: true }));
+    await act(async () => { next.currentTime = .03; playing(); });
+    if (outcome === 'paused') {
+      expect(screen.getByTestId('studio-after-video')).toBe(video);
+      expect(next.paused).toBe(true);
+    } else {
+      expect(screen.getByTestId('studio-after-video')).toBe(next);
+      expect(next.currentTime).toBe(.03);
+      expect(next.paused).toBe(false);
+    }
   });
 
   test.each(['off','speech'])("a prepared native cut keeps music and an overlapping cue on one audio clock and Pause stops both: %s", async duckMode => {
@@ -514,8 +596,8 @@ describe("ViralClipStudio timeline sequencing", () => {
       fireEvent.change(screen.getByTestId('background-sound-input'), {
         target: { files: [new File(['song'], 'cut-song.mp3', { type: 'audio/mpeg' })] },
       });
-      if (duckMode === 'off') fireEvent.click(screen.getByRole('checkbox', { name: /Duck under speech/i }));
-      else fireEvent.click(screen.getByRole('checkbox', { name: /Keep original audio/i }));
+      if (duckMode !== 'speech') fireEvent.click(screen.getByRole('checkbox', { name: /Duck under speech/i }));
+      fireEvent.click(screen.getByRole('checkbox', { name: /Keep original audio/i }));
       await waitFor(() => expect(context.decodeAudioData).toHaveBeenCalled());
       const constructorsAfterMusic = window.AudioContext.mock.calls.length;
       fireEvent.timeUpdate(video);
@@ -541,6 +623,14 @@ describe("ViralClipStudio timeline sequencing", () => {
       next.pause = jest.fn(() => { const changed = !nextPaused; nextPaused = true;
         if (changed) next.dispatchEvent(new Event('pause')); });
       fireEvent.click(screen.getByRole('button', { name: 'Play comparison', exact: true }));
+      // The native play request is not an advancing decoder clock yet.
+      await waitFor(() => expect(video.paused).toBe(false));
+      expect(sources.some(source => source.buffer?.duration === 30 && source.start.mock.calls.length)).toBe(false);
+      act(() => {
+        const callbacks = [...decodedFrames.get(video).values()];
+        decodedFrames.delete(video);
+        callbacks.forEach(callback => callback(0,{mediaTime:7.5}));
+      });
       await waitFor(() => expect(sources.some(source => source.start.mock.calls.length)).toBe(true));
       const running = sources.find(source => source.buffer?.duration === 30);
       const cue = sources.find(source => source.buffer?.duration === 2), count = sources.length;
@@ -566,7 +656,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         decodedFrames.delete(video);
         callbacks.forEach(callback => callback(0,{mediaTime:8}));
       });
-      expect(screen.getByTestId('studio-after-video')).toBe(next);
+      await waitFor(() => expect(screen.getByTestId('studio-after-video')).toBe(next));
       expect(sources).toHaveLength(count);
       expect(running.stop).not.toHaveBeenCalled();
       expect(cue.stop).not.toHaveBeenCalled();
@@ -574,10 +664,35 @@ describe("ViralClipStudio timeline sequencing", () => {
       fireEvent.play(next);
       expect(sources).toHaveLength(count);
       expect(running.stop).not.toHaveBeenCalled();
-      // A genuine source-clock discontinuity reanchors the song and its still
-      // audible overlap together. Do not restart only the music bed.
+      // A late silent picture catches the existing audio clock smoothly;
+      // its source position and the saved pacing are never rewritten.
+      context.currentTime = .825; next.currentTime = .1;
+      fireEvent.timeUpdate(next);
+      expect(next.currentTime).toBe(.1);
+      expect(next.playbackRate).toBe(1.25);
+      expect(running.stop).not.toHaveBeenCalled(); expect(cue.stop).not.toHaveBeenCalled();
+      next.currentTime = .315; fireEvent.timeUpdate(next);
+      expect(next.playbackRate).toBe(1);
+      expect(sources).toHaveLength(count);
+      // A leading silent decoder also converges without skipping sound.
       next.currentTime = .5; context.currentTime = .825;
       fireEvent.timeUpdate(next);
+      expect(next.playbackRate).toBe(.75);
+      expect(sources).toHaveLength(count);
+      expect(running.stop).not.toHaveBeenCalled(); expect(cue.stop).not.toHaveBeenCalled();
+      // An actual user seek is a discontinuity. Native seeking suspends the
+      // old buses immediately; the ready decoded frame anchors the new ones.
+      Object.defineProperty(next, 'seeking', { configurable: true, value: true });
+      fireEvent.seeking(next);
+      expect(running.stop).toHaveBeenLastCalledWith(undefined);
+      expect(cue.stop).toHaveBeenLastCalledWith(undefined);
+      Object.defineProperty(next, 'seeking', { configurable: true, value: false });
+      fireEvent.seeked(next);
+      act(() => {
+        const callbacks = [...decodedFrames.get(next).values()];
+        decodedFrames.delete(next);
+        callbacks.forEach(callback => callback(0,{mediaTime:.5}));
+      });
       await waitFor(() => expect(sources.filter(source => source.buffer?.duration === 30)).toHaveLength(2));
       const resumedSong = sources.filter(source => source.buffer?.duration === 30).at(-1);
       const resumedCue = sources.filter(source => source.buffer?.duration === 2).at(-1);
@@ -588,14 +703,14 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(resumedSong.start.mock.calls[0][1]).toBeCloseTo(6.51);
       expect(resumedCue.start.mock.calls[0][0]).toBeCloseTo(.835);
       expect(resumedCue.start.mock.calls[0][1]).toBeCloseTo(1.01);
-      expect(running.stop).toHaveBeenLastCalledWith(expect.closeTo(.835));
-      expect(cue.stop).toHaveBeenLastCalledWith(expect.closeTo(.835));
-      expect(running.disconnect).not.toHaveBeenCalled();
-      expect(cue.disconnect).not.toHaveBeenCalled();
+      expect(running.stop).toHaveBeenLastCalledWith(undefined);
+      expect(cue.stop).toHaveBeenLastCalledWith(undefined);
+      expect(running.disconnect).toHaveBeenCalled();
+      expect(cue.disconnect).toHaveBeenCalled();
       fireEvent.click(screen.getByRole('button', { name: 'Pause comparison', exact: true }));
       expect(resumedSong.stop).toHaveBeenCalled();
       expect(resumedCue.stop).toHaveBeenCalled();
-      expect(running.stop).toHaveBeenLastCalledWith();
+      expect(running.stop).toHaveBeenLastCalledWith(undefined);
       expect(running.disconnect).toHaveBeenCalled();
       expect(cue.stop).toHaveBeenLastCalledWith(undefined);
       expect(cue.disconnect).toHaveBeenCalled();
@@ -782,6 +897,131 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(video.__audioRemixGraph.trackGain.gain.value).toBe(.25);
       expect(context.createMediaElementSource).toHaveBeenCalledTimes(1);
     } finally { editor?.unmount(); window.AudioContext = previousContext; }
+  });
+
+  test.each(["originalAudio", "masterPodcast"])("decoded frames advance %s fades without coarse timeupdate or an editor render", async bus => {
+    const previousContext = window.AudioContext;
+    window.AudioContext = jest.fn(() => gainTestContext());
+    const frames = decodedFrames(); let editor;
+    const source = { id: "a", start: 0, end: 12, duration: 12 };
+    const snapshot = { orderedClips: [source], selectedClipId: source.id,
+      timeline: [{ ...source, url: "https://example.com/source.mp4", startRequest: 0, endRequest: 12 }],
+      overlays: [], addHook: false, audioKeyframes: { [bus]: [
+        { id: "quiet", time: 0, property: "volume", value: 20, easing: "linear" },
+        { id: "loud", time: 2, property: "volume", value: 180, easing: "linear" },
+      ] } };
+    try {
+      editor = mountNativePreview({ clips: [source], initialSavedProject: { id: "frame-gain", name: "Frame gain", snapshot } });
+      await screen.findByDisplayValue("Frame gain");
+      const { video } = editor; video.currentTime = 0; fireEvent.seeked(video); fireEvent.timeUpdate(video);
+      fireEvent.click(screen.getByRole("button", { name: "Play comparison", exact: true }));
+      await waitFor(() => expect(video.paused).toBe(false));
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBeCloseTo(.2);
+      for (const [time, expected] of [[.5, .6], [1, 1], [1.5, 1.4]]) {
+        video.currentTime = time; act(() => frames.frame(video));
+        expect(video.__audioRemixGraph.trackGain.gain.value).toBeCloseTo(expected);
+      }
+      // Audio gain follows the decoded clock directly, without rendering the
+      // whole editor just to update an AudioParam on each picture frame.
+      Object.defineProperty(video, "currentSrc", { configurable: true, value: "https://example.com/old.mp4" });
+      video.currentTime = 2; act(() => frames.frame(video));
+      expect(video.__audioRemixGraph.trackGain.gain.value).toBeCloseTo(1.4);
+    } finally { editor?.unmount(); frames.restore(); window.AudioContext = previousContext; }
+  });
+
+  test("split samples the decoder between coarse timeupdates", () => {
+    const spy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
+    const editor = mountNativePreview();
+    try {
+      // Last UI state is source5/programme3. No timeupdate or frame follows.
+      editor.video.currentTime = 6.25;
+      fireEvent.click(screen.getByTestId("timeline-quick-split"));
+      const command = spy.mock.calls.at(-1)?.[0]?.batch.operations[0];
+      expect(spy.mock.results.at(-1).type).toBe('return');
+      expect(command.type).toBe('split_clip');
+      expect(command.at).toEqual({ space: 'source', ticks: secondsToTicks(6.25) });
+    } finally { editor.unmount(); spy.mockRestore(); }
+  });
+
+  test.each(['start', 'end'])("trim %s samples the decoder between coarse timeupdates", edge => {
+    const spy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
+    const editor = mountNativePreview();
+    try {
+      editor.video.currentTime = 6.25;
+      fireEvent.click(screen.getByTestId(`pro-quick-trim-${edge}`));
+      const command = spy.mock.calls.at(-1)?.[0]?.batch.operations[0];
+      expect(spy.mock.results.at(-1).type).toBe('return');
+      expect(command.type).toBe('trim_clip');
+      expect(command.keep[edge === 'start' ? 'startTick' : 'endTick']).toBe(secondsToTicks(6.25));
+    } finally { editor.unmount(); spy.mockRestore(); }
+  });
+
+  test.each(['split', 'start', 'end'])("%s rejects an edge cursor instead of cutting at stale UI time", action => {
+    const spy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
+    const editor = mountNativePreview();
+    try {
+      editor.video.currentTime = action === 'start' ? 2.01 : action === 'end' ? 8 : 7.99;
+      fireEvent.click(screen.getByTestId(action === 'split' ? 'pro-quick-split' : `pro-quick-trim-${action}`));
+      expect(spy).not.toHaveBeenCalled();
+    } finally { editor.unmount(); spy.mockRestore(); }
+  });
+
+  test.each(['split', 'start', 'end'])("finished-file %s maps output time to the correct repeated source occurrence", async action => {
+    const spy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
+    const rows = [{ id: 'a', start: 10, end: 14, duration: 4, sourceDuration: 30 },
+      { id: 'b', start: 20, end: 24, duration: 4, sourceDuration: 30 }];
+    const snapshot = { orderedClips: rows, selectedClipId: 'a', previewSpeed: 2, addHook: false,
+      timeline: rows.map(row => ({ ...row, url: 'https://example.com/source.mp4',
+        startRequest: row.start, endRequest: row.end })), overlays: [] };
+    const editor = mountNativePreview({ clips: rows,
+      initialSavedProject: { id: 'finished-cut', name: 'Finished cut', snapshot } });
+    try {
+      await screen.findByDisplayValue('Finished cut');
+      editor.rerender(<ViralClipStudio {...editor.props} renderedOutput={{ url: 'https://example.com/finished.mp4' }} />);
+      fireEvent.loadedMetadata(editor.video); fireEvent.loadedData(editor.video);
+      editor.video.currentTime = 3;
+      fireEvent.seeked(editor.video);
+      fireEvent.click(screen.getByTestId(action === 'split' ? 'pro-quick-split' : `pro-quick-trim-${action}`));
+      const command = spy.mock.calls.at(-1)?.[0]?.batch.operations[0];
+      expect(spy.mock.results.at(-1)?.type).toBe('return');
+      expect(command?.target).toEqual({ occurrenceId: 'b' });
+      const applied = spy.mock.results.at(-1).value.snapshot.timeline;
+      expect(applied[0]).toMatchObject({ id: 'a', startRequest: 10, endRequest: 14 });
+      expect(applied).toHaveLength(action === 'split' ? 3 : 2);
+      if(action === 'split') expect(command.at.ticks).toBe(secondsToTicks(22));
+      else expect(command.keep[action === 'start' ? 'startTick' : 'endTick']).toBe(secondsToTicks(22));
+    } finally { editor.unmount(); spy.mockRestore(); }
+  });
+
+  test("decoded J-cut audio starts between timeupdates and pauses through buffering and seeking", async () => {
+    const frames = decodedFrames(); let editor;
+    const first = { id: "a", start: 0, end: 6, duration: 6 };
+    const second = { id: "b", start: 6, end: 12, duration: 6 };
+    const snapshot = { orderedClips: [first, second], selectedClipId: "a", overlays: [], addHook: false,
+      timeline: [{ ...first, url: "https://example.com/source.mp4", startRequest: 0, endRequest: 6 },
+        { ...second, url: "https://example.com/incoming.mp4", startRequest: 6, endRequest: 12, audioTrimOffsetStart: -.8 }],
+      audioKeyframes: { originalAudio: [{ id: "volume", time: 0, property: "volume", value: 40 }] } };
+    try {
+      editor = mountNativePreview({ clips: snapshot.orderedClips,
+        initialSavedProject: { id: "frame-j-cut", name: "Frame J-cut", snapshot } });
+      await screen.findByDisplayValue("Frame J-cut");
+      const { video } = editor; video.currentTime = 5; fireEvent.seeked(video); fireEvent.timeUpdate(video);
+      fireEvent.click(screen.getByRole("button", { name: "Play comparison", exact: true }));
+      await waitFor(() => expect(video.paused).toBe(false));
+      video.currentTime = 5.3; act(() => frames.frame(video));
+      const proxy = document.createElement.mock.results.map(result => result.value)
+        .find(element => element?.tagName === "AUDIO" && element.src === "https://example.com/incoming.mp4" && element.play.mock.calls.length);
+      expect(proxy).toBeDefined(); expect(proxy.currentTime).toBeCloseTo(5.3); expect(proxy.volume).toBeCloseTo(.4);
+      proxy.pause.mockClear(); fireEvent.waiting(video); expect(proxy.pause).toHaveBeenCalled();
+      proxy.play.mockClear(); act(() => frames.frame(video)); fireEvent.timeUpdate(video);
+      expect(proxy.play).not.toHaveBeenCalled();
+      fireEvent.playing(video); expect(proxy.play).toHaveBeenCalled();
+      proxy.pause.mockClear(); fireEvent.seeking(video); expect(proxy.pause).toHaveBeenCalled();
+      proxy.play.mockClear(); act(() => frames.frame(video)); expect(proxy.play).not.toHaveBeenCalled();
+      fireEvent.seeked(video); expect(proxy.play).toHaveBeenCalled();
+      editor.unmount(); editor = null; proxy.play.mockClear(); act(() => frames.frame(video));
+      expect(proxy.play).not.toHaveBeenCalled();
+    } finally { editor?.unmount(); frames.restore(); }
   });
 
   test("B-roll gain automation survives unrelated inspector renders", async () => {
@@ -1113,7 +1353,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(Number(screen.getByRole('slider', { name: 'Edited output position' }).max)).toBe(7);
   });
 
-  test.each(['off', 'speech'])("retimed music retains its tempo and seeks through the canonical output clock: %s", async duckMode => {
+  test.each(['off', 'speech', 'automation', 'late', 'startup'])("retimed music retains its tempo and seeks through the canonical output clock: %s", async duckMode => {
     const previousContext = window.AudioContext;
     const previousRaf = window.requestAnimationFrame;
     const previousCancelRaf = window.cancelAnimationFrame;
@@ -1127,6 +1367,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     const decoded = { duration: 30, sampleRate: 48000, length: 48000,
       numberOfChannels: 2, getChannelData: () => new Float32Array(48000) };
     const decode = jest.fn(() => Promise.resolve(decoded));
+    const frames = duckMode === 'startup' ? decodedFrames() : null;
     window.AudioContext = jest.fn(() => { const context = {
       state: 'running', currentTime: 0, destination: {}, decodeAudioData: decode,
       createAnalyser: () => ({ frequencyBinCount: 18, getByteFrequencyData: data => data.fill(0),
@@ -1138,6 +1379,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         linearRampToValueAtTime: jest.fn() }, connect: jest.fn(), disconnect: jest.fn() };
         gains.push(node); return node; },
       createBufferSource: () => {
+        if(duckMode==='late') context.currentTime+=.02;
         const source = { context, playbackRate: { value: 1 }, connect: jest.fn(),
           disconnect: jest.fn(), start: starts, stop: jest.fn() };
         sources.push(source); return source;
@@ -1148,10 +1390,22 @@ describe("ViralClipStudio timeline sequencing", () => {
       json: () => Promise.resolve({}) });
     try {
       const { video, unmount } = mountNativePreview();
+      if (frames) {
+        const play = video.play;
+        video.play = jest.fn(() => {
+          const result = play();
+          // A decoder can already advance before its first frame callback.
+          // The creator requested programme 3s, not this later timestamp.
+          video.currentTime += .1;
+          video.dispatchEvent(new Event('playing'));
+          return result;
+        });
+      }
       fireEvent.change(screen.getByTestId('background-sound-input'), {
         target: { files: [new File(['song'], 'test-song.mp3', { type: 'audio/mpeg' })] },
       });
       if (duckMode === 'off') fireEvent.click(screen.getByRole('checkbox', { name: /Duck under speech/i }));
+      if (frames) fireEvent.click(screen.getAllByLabelText(/^Mute Original Audio$/i)[0]);
       const music = screen.getByTestId('background-sound-preview');
       let musicPaused = true;
       Object.defineProperties(music, {
@@ -1163,9 +1417,23 @@ describe("ViralClipStudio timeline sequencing", () => {
       music.pause = jest.fn(() => { musicPaused = true; });
       await waitFor(() => expect(decode).toHaveBeenCalled());
       fireEvent.click(screen.getByRole('button', { name: 'Play comparison', exact: true }));
+      if (frames) {
+        await waitFor(() => expect(video.play).toHaveBeenCalled());
+        act(() => frames.frame(video));
+      }
       await waitFor(() => expect(starts).toHaveBeenCalled());
       expect(musicPaused).toBe(true);
-      expect(starts.mock.calls.at(-1)[1]).toBeCloseTo(3.01);
+      expect(starts.mock.calls.at(-1)[1]).toBeCloseTo(frames ? 3 : 3.01);
+      if (frames) {
+        expect(starts).toHaveBeenCalledTimes(1);
+        fireEvent.click(screen.getByRole('button', { name: 'Pause comparison', exact: true }));
+        fireEvent.playing(video);
+        act(() => frames.frame(video));
+        expect(starts).toHaveBeenCalledTimes(1);
+        expect(sources.at(-1).stop).toHaveBeenCalled();
+        unmount(); return;
+      }
+      if(duckMode==='late') expect(starts.mock.calls.at(-1)[0]).toBeGreaterThan(sources.at(-1).context.currentTime);
 
       fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' }))
         .getByRole('button', { name: 'Pacing', exact: true }));
@@ -1176,9 +1444,28 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(sources.every(source => source.playbackRate.value === 1)).toBe(true);
       expect(music.playbackRate).toBe(1);
       expect(musicPaused).toBe(true);
+      if(duckMode==='late') {
+        expect(starts.mock.calls.at(-1)[0]).toBeGreaterThan(sources.at(-1).context.currentTime);
+        unmount();return;
+      }
       fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' }))
         .getByRole('button', { name: 'Sound', exact: true }));
       const beforeFade = starts.mock.calls.length;
+      if (duckMode === 'automation') {
+        fireEvent.change(screen.getByLabelText('Automation source'), { target: { value: 'music' } });
+        fireEvent.click(screen.getByRole('button', { name: /Add volume keyframe at/i }));
+        fireEvent.change(screen.getByLabelText('music keyframe time'), { target: { value: '0' } });
+        fireEvent.change(screen.getByLabelText('music volume at 0.00 seconds'), { target: { value: '20' } });
+        fireEvent.click(screen.getByRole('button', { name: /Add volume keyframe at/i }));
+        fireEvent.change(screen.getAllByLabelText('music keyframe time')[1], { target: { value: '6' } });
+        fireEvent.change(screen.getByLabelText('music volume at 6.00 seconds'), { target: { value: '180' } });
+        for (const easing of screen.getAllByLabelText('music volume keyframe easing'))
+          fireEvent.change(easing, { target: { value: 'linear' } });
+        expect(gains.some(node => node.gain.linearRampToValueAtTime.mock.calls.some(([value, time]) =>
+          Math.abs(value-1.8)<1e-6 && Math.abs(time-1.5)<1e-6))).toBe(true);
+        expect(starts.mock.calls.length).toBe(beforeFade);
+        unmount(); return;
+      }
       fireEvent.change(screen.getByRole('slider', { name: 'Music fade out' }), { target: { value: '1' } });
       expect(starts.mock.calls.length).toBe(beforeFade);
       // Buffer starts at output1.5s. It is now at2.8s, while the decoded
@@ -1189,19 +1476,60 @@ describe("ViralClipStudio timeline sequencing", () => {
       if (duckMode === 'speech') act(() => duckFrame());
       const configuredGain = Number(screen.getByRole('slider', { name: /Background volume/ }).value) / 100;
       const musicGain = sources.at(-1).connect.mock.calls[0][0];
-      expect(musicGain.gain.value).toBeCloseTo(configuredGain * .2, 3);
-      if (duckMode === 'off') expect(musicGain.gain.linearRampToValueAtTime).toHaveBeenLastCalledWith(0, 1.5);
+      expect(musicGain.gain.value).toBeCloseTo(configuredGain, 3);
+      const releaseGain = musicGain.connect.mock.calls[0][0].connect.mock.calls[0][0];
+      expect(releaseGain.gain.linearRampToValueAtTime.mock.calls.at(-1)[0]).toBe(0);
+      expect(releaseGain.gain.linearRampToValueAtTime.mock.calls.at(-1)[1]).toBeCloseTo(1.5, 12);
       const backgroundFader = screen.getByRole('slider', { name: /Background volume/ });
       fireEvent.change(backgroundFader, { target: { value: '1' } });
-      await waitFor(() => expect(musicGain.gain.value).toBeCloseTo(.01*.2, 4));
+      await waitFor(() => expect(musicGain.gain.value).toBeCloseTo(.01, 4));
       fireEvent.change(backgroundFader, { target: { value: '0' } });
       await waitFor(() => expect(musicGain.gain.value).toBe(0));
       expect(starts.mock.calls.length).toBe(beforeFade);
       fireEvent.click(screen.getByRole('button', { name: 'Pause comparison', exact: true }));
       expect(musicPaused).toBe(true);
       unmount();
-    } finally { window.AudioContext = previousContext;
+    } finally { frames?.restore(); window.AudioContext = previousContext;
       window.requestAnimationFrame = previousRaf; window.cancelAnimationFrame = previousCancelRaf; }
+  });
+
+  test("a successfully renewed source can recover again after its next access failure", async () => {
+    let renewals = 0;
+    global.fetch.mockImplementation(url => String(url).endsWith('/studio-assets/resolve')
+      ? Promise.resolve({ ok: true, json: async () => ({ url: `https://example.com/renewed-${++renewals}.mp4` }) })
+      : Promise.resolve({ ok: true, json: async () => ({}) }));
+    const { video } = mountNativePreview({ sourceStoragePath: 'studio/sources/test-user/source.mp4' });
+    fireEvent.error(video);
+    fireEvent.error(video);
+    await waitFor(() => expect(video.src).toBe('https://example.com/renewed-1.mp4'));
+    expect(renewals).toBe(1);
+    fireEvent.loadStart(video);
+    fireEvent.loadedMetadata(video);
+    fireEvent.loadedData(video);
+    expect(video.currentTime).toBe(5);
+    fireEvent.error(video);
+    await waitFor(() => expect(video.src).toBe('https://example.com/renewed-2.mp4'));
+    expect(renewals).toBe(2);
+    expect(video.currentTime).toBe(5);
+  });
+
+  test("source access renews before expiry and a failed renewal does not spin", async () => {
+    jest.useFakeTimers();
+    let editor;
+    let renewals = 0;
+    global.fetch.mockImplementation(url => String(url).endsWith('/studio-assets/resolve')
+      ? (++renewals, Promise.resolve({ ok: false, json: async () => ({ message: 'Temporarily unavailable' }) }))
+      : Promise.resolve({ ok: true, json: async () => ({}) }));
+    try {
+      const expiry = Math.floor(Date.now() / 1000) + 61;
+      editor = mountNativePreview({ sourceStoragePath: 'studio/sources/test-user/source.mp4',
+        videoUrl: `https://storage.googleapis.com/owned/source.mp4?GoogleAccessId=owner&Signature=sig&Expires=${expiry}` });
+      expect(renewals).toBe(0);
+      await act(async () => { jest.advanceTimersByTime(1200); });
+      expect(renewals).toBe(1);
+      await act(async () => { jest.advanceTimersByTime(120000); });
+      expect(renewals).toBe(1);
+    } finally { editor?.unmount(); jest.useRealTimers(); }
   });
 
   test("duplicate refresh completes in its own project and Pause stays usable while links load", async () => {
@@ -1546,6 +1874,8 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByTestId("reframe-follow-subject"));
     expect(screen.getByTestId("reframe-aspect-4-5")).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByTestId("add-reframe-keyframe"));
+    fireEvent.click(screen.getByLabelText("Manual framing corrections").querySelector("button"));
+    expect(screen.getByLabelText("Manual frame horizontal position")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Manual frame horizontal position"), {
       target: { value: "62" },
     });
@@ -6625,6 +6955,38 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(within(panel).getByTestId("studio-director-review-open")).toHaveTextContent("Review again");
     expect(global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/studio/director/reviews"))).toBe(false);
     expect(onDirectorReview).not.toHaveBeenCalled();
+  });
+
+  test("face analysis renews an owned source instead of fetching its saved access URL", async () => {
+    const originalFlag = process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS;
+    delete process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS;
+    const fallback = global.fetch.getMockImplementation();
+    global.fetch.mockImplementation((url, ...args) => {
+      if (String(url).endsWith("/studio-assets/resolve")) return Promise.resolve({ ok: true,
+        json: async () => ({ url: "https://example.com/renewed-speech.mp4" }) });
+      if (String(url) === "https://example.com/renewed-speech.mp4") return Promise.resolve({ ok: true,
+        blob: async () => new Blob(["recording"], { type: "video/mp4" }) });
+      if (String(url).endsWith("/track-studio-faces")) return Promise.resolve({ ok: true,
+        json: async () => ({ tracks: { solo: { coverage: 1, keyframes: [
+          { time: 0, x: 35, y: 45 }, { time: 20, x: 38, y: 45 },
+        ] } } }) });
+      return fallback(url, ...args);
+    });
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/expired-speech.mp4"
+        sourceStoragePath="studio/sources/test-user/speech.mp4"
+        clips={[{ id: "main", start: 0, end: 20, duration: 20,
+          url: "https://example.com/expired-speech.mp4" }]}
+        onSave={jest.fn()} onCancel={jest.fn()} />);
+      fireEvent.click(screen.getByTestId("preview-quick-track-speaker"));
+      fireEvent.click(screen.getByTestId("analyze-speaker-faces"));
+      await screen.findByText(/Face-follow draft applied/i);
+      expect(global.fetch.mock.calls.some(([url]) => String(url) === "https://example.com/renewed-speech.mp4")).toBe(true);
+      expect(global.fetch.mock.calls.some(([url]) => String(url) === "https://example.com/expired-speech.mp4")).toBe(false);
+    } finally {
+      if (originalFlag === undefined) delete process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS;
+      else process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS = originalFlag;
+    }
   });
 
   test("source-shot analysis uses the queued job path when enabled", async () => {

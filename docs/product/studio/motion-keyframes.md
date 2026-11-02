@@ -1,6 +1,6 @@
 # Motion / Transform Keyframes
 
-Development documentation • product 1.2.0 • knowledge 1.0.48 • 2026-10-24
+Development documentation • product 1.2.0 • knowledge 1.0.55 • 2026-10-26
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -76,7 +76,7 @@ Edit property keys, spatial position handles and value/velocity graphs on the sa
 12. Editing motion keys while viewing a completed movie switches After to Live Edit. The prior download remains available through Export; it is not presented as an updated movie.
 13. For paired position keys, select the layer in Motion → Transform keyframes, place the playhead in the interval and choose Curve path. Drag or arrow-nudge the amber handles; release commits once and Escape cancels. Straighten path retains its endpoints. Check the changed route before export.
 
-**Preview:** Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.
+**Preview:** Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified. Main-video motion, crop, finish/adjustment and join effects follow the native decoded picture timestamp while playing. Paused scrubbing retains its existing exact-frame/native route. This bounded frame-clock repair does not establish whole audiovisual or pixel parity.
 
 **Final render:** Uses the existing shared compiler/compositor and interpolation expressions where supported. Group keys retain canonical target ownership and are projected into the group composition plan; output time maps back to the programme clock. Inspect the actual exported movie; the status does not certify every combination.
 

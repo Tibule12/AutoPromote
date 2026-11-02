@@ -1,6 +1,6 @@
 # Use a creative template
 
-Development documentation • product 1.2.0 • knowledge 1.0.48 • 2026-10-24
+Development documentation • product 1.2.0 • knowledge 1.0.55 • 2026-10-26
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -27,7 +27,7 @@ Resolve an exact draft version and bind customer-owned inputs into the shared ca
 
 - studio.export — **PARTIAL**: Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
 - creative.shared_templates — **PARTIAL**: One exact versioned definition instantiates an editable canonical project for Studio and Director; approved output may later supply the welcome showroom.
-- studio.templates — **PARTIAL**: Instantiates a pinned draft template into ordinary editable clips, layers, keyframes and audio. Retained signed-in local lifecycle evidence exists; public qualification and the showroom handoff remain incomplete.
+- studio.templates — **PARTIAL**: Builds an editable footage-led opening from a pinned template. Six development hook families cover podcast, interview, cinematic, story, motion type and creator demonstrations, each with two cut arrangements. Creative approval and broad preview/final qualification remain open.
 - studio.persistence — **FUNCTIONAL**: Saves canonical project assets, occurrences, layers, keys and audio; reopening restores editable state. Temporary or expired sources require owned source repair.
 
 ## Result and limitations

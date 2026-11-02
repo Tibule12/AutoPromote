@@ -9,6 +9,8 @@ import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import StudioLaunchTemplatePanel from "./StudioLaunchTemplatePanel";
 import ProductHelpButton from "./ProductHelpButton";
+import { studioSourceLeaseRefreshDelay } from "./studioSourceAccess";
+import { createStudioSourceGainClock } from "./audio/studioSourceGainClock";
 import StudioLayerMask from "./StudioLayerMask";
 import { studioMediaEffectFilter } from "./studioMediaEffects";
 import { studioLayerEntries, moveStudioLayer, orderStudioCollection } from "./studioLayerOrder";
@@ -26,10 +28,10 @@ import { buildStudioLogoMotion } from './studioLogoMotion';
 import { editStudioPositionPose, editStudioSpatialPath } from './studioMotionEditing';
 import StudioGroupPreview from "./StudioGroupPreview";
 import { hasSoftStudioMask } from "./studioMaskGeometry";
-import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
-import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity } from "./studioMusicBufferClock";
+import { primeStudioSourceVideo, startStudioPreparedCut, watchStudioProgrammeFrames, studioProgrammePictureTime, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, pausedStudioMappedFrameRequest, pausedStudioFrameKey, studioPausedFrameReceiptMatches } from "./studioSourcePreview";
+import { musicBufferNeedsResync, musicBufferPosition, prepareStudioMusicPlayback, studioMusicBufferIdentity, studioPictureRateCorrection } from "./studioMusicBufferClock";
 import { loadStudioVoiceBus, scheduleStudioPreparedDuck } from './studioPreparedVoiceBus';
-import { studioCueSourceKey, createStudioCueBuffer, prepareStudioCuePlayback, prepareStudioBuiltInCue } from "./studioCueBuffer";
+import { studioCueSourceKey, prepareStudioDecodedCue, prepareStudioCuePlayback, prepareStudioBuiltInCue } from "./studioCueBuffer";
 import {
   MAX_STUDIO_ANGLES,
   createStudioAngleGroup,
@@ -71,6 +73,9 @@ import { parseColorCube, buildAdvancedColorCube, applyColorCube, hasAdvancedGrad
 import { soloTrackingCoordinates, reprojectDetectedReframeKeys } from "./studioTrackingCoordinates";
 import { interpolateReframeKeyframes } from "./studioReframeInterpolation";
 import StudioProTimeline from "./StudioProTimeline";
+import { createStudioPlaybackClock } from "./studioPlaybackClock";
+import { createStudioMusicGain } from "./studioMusicGain";
+import { StudioPlaybackTime, StudioPlaybackRange, useStudioPlayheadDisplay } from "./StudioPlaybackPosition";
 import {
   generateSmartZoomKeyframes,
   createSinglePunchKeyframes,
@@ -172,8 +177,8 @@ import { describeStudioDirectorReview } from "./studioDirectorReviewDiff";
 import { postStudioDirectorReviewDecision } from "./studioDirectorReviewClient";
 import { registerStudioDirectorProjectRevision } from "./studioDirectorProjectRevisionClient";
 import { buildSourceShotDirectorSplitRequest } from "./studioDirectorEvidenceProposals";
-import { secondsToTicks, ticksToSeconds, mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick } from "./studioTime";
-import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan } from "./studioCueGain";
+import { secondsToTicks, ticksToSeconds, mapOutputTickToProgrammeTick, mapProgrammeTickToOutputTick, mapStudioContinuousSeconds } from "./studioTime";
+import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan, studioOutputCueStart } from "./studioCueGain";
 import { bindStudioAudioSource, bindStudioAudioSources, studioUploadedAudioBinding } from "./studioAudioSourceBindings";
 import {
   assertStudioExportTimelineMatchesDocument,
@@ -2639,6 +2644,8 @@ const ViralClipStudio = ({
   const [overlays, setOverlays] = useState([]);
   const [activeOverlayId, setActiveOverlayId] = useState(null);
   const [videoTime, setVideoTime] = useState(0);
+  const playbackDisplayClock = useMemo(() => createStudioPlaybackClock(), []);
+  const compactPlaybackRef = useRef(null);
   const [programmeMediaAspectRatio, setProgrammeMediaAspectRatio] = useState(16 / 9);
   const [videoFit, setVideoFit] = useState("cover");
   const [safeFaceFraming, setSafeFaceFraming] = useState(false);
@@ -2788,6 +2795,7 @@ const ViralClipStudio = ({
   const timelineResizeRef = useRef(null);
   const [previewDockSide, setPreviewDockSide] = useState("center");
   const [projectRailExpanded, setProjectRailExpanded] = useState(false);
+  const [hookLibraryRequest, setHookLibraryRequest] = useState(0);
   const [projectRailTab, setProjectRailTab] = useState("media");
   const [timelineEditTool, setTimelineEditTool] = useState("select");
   const [timelineSnapping, setTimelineSnapping] = useState(true);
@@ -3166,6 +3174,7 @@ const ViralClipStudio = ({
   const musicPreviewObjectUrlRef = useRef(null);
   const musicPreviewAudioContextRef = useRef(null);
   const musicPreviewGainNodeRef = useRef(null);
+  const musicPreviewEnvelopeRef = useRef(null);
   const musicPreviewDuckGainNodeRef = useRef(null);
   const preparedVoiceBusRef = useRef(null);
   const preparedSpeechDuckRef = useRef(null);
@@ -3180,6 +3189,10 @@ const ViralClipStudio = ({
   const programmeMusicRouteRef = useRef({ sourceUrl: "", decoded: false });
   const isolatedMusicPreviewIntentRef = useRef(false);
   const musicPreviewSourceRef = useRef(null);
+  const musicDecoderClockReadyRef = useRef(new WeakMap());
+  const musicPlaybackStartRef = useRef(null);
+  const musicPreparedHandoffRef = useRef(null);
+  const programmeClockIdentityRef = useRef('');
   const musicPreviewSourceStateRef = useRef({ offset: 0, playbackRate: 1 });
   const backgroundSoundPreviewSuppressedRef = useRef(false);
   const overlayMediaRefsRef = useRef(new Map());
@@ -3212,6 +3225,21 @@ const ViralClipStudio = ({
   const previewPlaybackStartRef = useRef(0);
   const previewPlaybackPreparingRef = useRef(null);
   const preparedCutHandoffRef = useRef(null);
+  const currentMusicHandoff = video => {
+    const item = musicPreparedHandoffRef.current;
+    return item && item.video === video && item.source === musicPreviewSourceRef.current &&
+      item.project === activeProjectIdRef.current && item.seek === programmeSeekIntentRef.current.version &&
+      item.mapKey === programmeClockIdentityRef.current && item.url === video?.currentSrc ? item : null;
+  };
+  const currentMusicStart = video => {
+    const item = musicPlaybackStartRef.current;
+    return item && item.video === video && item.project === activeProjectIdRef.current &&
+      item.request === previewPlaybackStartRef.current && previewPlaybackIntentRef.current &&
+      item.seek === programmeSeekIntentRef.current.version && item.mapKey === programmeClockIdentityRef.current &&
+      item.url === video?.currentSrc && item.sourceKey === musicPreviewBufferUrlRef.current ? item : null;
+  };
+  const isProgrammeAudioHandoff = video => previewPlaybackIntentRef.current &&
+    preparedCutHandoffRef.current?.from === video;
   const retiringMusicSourcesRef = useRef(new Set());
   const previewWindowRef = useRef(null);
   const programmeSeekIntentRef = useRef({ version: 0 });
@@ -3302,6 +3330,7 @@ const ViralClipStudio = ({
     musicPreviewStartVersionRef.current++;
     const deferred = Number.isFinite(stopAt) && stopAt > musicPreviewAudioContextRef.current?.currentTime;
     if (!deferred) {
+      musicPreviewEnvelopeRef.current?.stop();
       retiringMusicSourcesRef.current.forEach(source => { try { source.stop(); source.disconnect(); } catch (_) {} });
       retiringMusicSourcesRef.current.clear();
     }
@@ -3344,10 +3373,10 @@ const ViralClipStudio = ({
 
     if (!musicPreviewAudioContextRef.current) {
       const audioContext = soundEffectAudioContextRef.current || new AudioContextCtor();
-      const gainNode = audioContext.createGain();
-      const duckGainNode = audioContext.createGain();
-      gainNode.connect(duckGainNode);
+      const envelope = createStudioMusicGain(audioContext);
+      const gainNode = envelope.input, duckGainNode = envelope.output;
       duckGainNode.connect(audioContext.destination);
+      musicPreviewEnvelopeRef.current = envelope;
       musicPreviewAudioContextRef.current = audioContext;
       musicPreviewGainNodeRef.current = gainNode;
       musicPreviewDuckGainNodeRef.current = duckGainNode;
@@ -3369,7 +3398,10 @@ const ViralClipStudio = ({
         const contextTime = musicPreviewAudioContextRef.current.currentTime;
         const when = Math.max(contextTime, musicClock.startedAt);
         const old = preparedSpeechDuckSourceRef.current;
-        if (old) { try { old.stop(); } catch (_) {} old.disconnect(); }
+        if (old) {
+          old.addEventListener?.('ended',()=>old.disconnect(),{once:true});
+          try { old.stop(when); } catch (_) { old.disconnect(); }
+        }
         preparedSpeechDuckSourceRef.current = scheduleStudioPreparedDuck(musicPreviewAudioContextRef.current,
           musicPreviewDuckGainNodeRef.current.gain, preparedDuck, { when, offset: musicBufferPosition(musicClock, when) });
         if (preparedSpeechDuckSourceRef.current) preparedSpeechDuckClockRef.current = identity;
@@ -3388,7 +3420,19 @@ const ViralClipStudio = ({
       musicTrack?.fadeIn, musicTrack?.fadeOut);
     const automationGain = interpolateAutomationValue({ keyframes: audioKeyframes.music,
       property: "volume", time: programmeTime, fallback: 100 }) / 100;
-    const baseGain = clampAudioControl(effectiveVol, 0, 0.6, 0.15) * previewGain * automationGain * constantMusicDuckGain(musicTrack);
+    const faderGain = clampAudioControl(effectiveVol, 0, 0.6, 0.15) * previewGain * constantMusicDuckGain(musicTrack);
+    if (!musicClock && musicPreviewEnvelopeRef.current?.scheduled) {
+      // Before the decoded source starts, do not leave legacy fade events on
+      // the fader: the independent attack/release stages would apply them twice.
+      gainNode.gain.cancelScheduledValues(musicPreviewAudioContextRef.current.currentTime);
+      if (gainNode.gain.value !== faderGain) gainNode.gain.value = faderGain;
+      return;
+    }
+    if (musicClock && musicPreviewEnvelopeRef.current?.sync({ state: musicClock,
+      timeMap: previewOutputTimeMap, duration: outputPlaybackDuration,
+      fadeIn: musicTrack?.fadeIn, fadeOut: musicTrack?.fadeOut,
+      keyframes: audioKeyframes.music, baseGain: faderGain })) return;
+    const baseGain = faderGain * automationGain;
     const parameter = gainNode.gain;
     const contextTime = musicPreviewAudioContextRef.current.currentTime;
     const fadeIn = Math.max(0, Number(musicTrack?.fadeIn || 0));
@@ -3433,25 +3477,35 @@ const ViralClipStudio = ({
     const window = getTimelineClipWindow(clip);
     if (!isStudioSourceClockCurrent(video, { activeVideo: videoRef.current, url: clip?.url,
       start: window.start, end: window.end, hasNext: activeTimelineIndex < timeline.length - 1 })) return;
-    const programmeTime = getPreviewTimelineTime(video.currentTime || 0);
+    syncMusicPreviewGain(getPreviewTimelineTime(video.currentTime || 0));
+    preparedVoiceBusRef.current?.stage?.();
+    const source = audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    const loop = musicTrack?.loop !== false;
+    source.loop = loop;
+    source.playbackRate.value = Number.isFinite(Number(playbackRate)) ? Number(playbackRate) : 1;
+    source.connect(musicPreviewGainNodeRef.current);
+
+    // Source/graph setup can consume an audio quantum under editor load.
+    // Read the picture and context anchor only after that work is complete.
+    const requestedStart = currentMusicStart(video);
+    const programmeTime = requestedStart?.ready ? requestedStart.programmeTime
+      : getPreviewTimelineTime(video.currentTime || 0);
     // Schedule beyond the current audio quantum. A timestamp that has already
     // passed starts immediately but leaves a false song/cue phase anchor.
-    const startedAt = audioContext.currentTime + .01;
-    targetOffset = getPreviewMusicTime(programmeTime) + .01;
+    const contextTime = audioContext.currentTime;
+    const contextRate = Number(audioContext.sampleRate || audioBuffer.sampleRate || 48000);
+    const startedAt = Math.round((contextTime + .01) * contextRate) / contextRate;
+    // Play/Resume starts at the creator's paused position. Waiting for the
+    // first decoded callback and then reading currentTime skips the opening
+    // sound. Drift resyncs retain their advancing native-clock anchor.
+    targetOffset = getPreviewMusicTime(programmeTime) + (requestedStart?.ready ? 0 : startedAt - contextTime);
     // BufferSource rounds offsets to a decoded sample. Keep the shared music/
     // cue clock anchored to that actual sample, especially for noisy whooshes.
     const decodedSampleRate = Number(audioBuffer.sampleRate || audioContext.sampleRate);
     if (Number.isFinite(decodedSampleRate) && decodedSampleRate > 0)
       targetOffset = Math.round(targetOffset * decodedSampleRate) / decodedSampleRate;
-    const loop = musicTrack?.loop !== false;
-    if (!loop && targetOffset >= audioBuffer.duration) return;
-    syncMusicPreviewGain(programmeTime);
-
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.loop = loop;
-    source.playbackRate.value = Number.isFinite(Number(playbackRate)) ? Number(playbackRate) : 1;
-    source.connect(musicPreviewGainNodeRef.current);
+    if (!loop && targetOffset >= audioBuffer.duration) { source.disconnect(); return; }
     stopMusicPreviewBufferPlayback(startedAt);
     musicPreviewSourceRef.current = source;
     musicPreviewSourceStateRef.current = {
@@ -3460,6 +3514,13 @@ const ViralClipStudio = ({
       startedAt,
       sourceKey,
     };
+    musicPlaybackStartRef.current = null;
+    musicPreparedHandoffRef.current = {
+      video, source, project: activeProjectIdRef.current, seek: programmeSeekIntentRef.current.version,
+      mapKey: programmeClockIdentityRef.current, url: video.currentSrc,
+      catchUp: 1,
+    };
+    preparedVoiceBusRef.current?.sync?.();
     source.start(startedAt, loop ? targetOffset % Math.max(audioBuffer.duration, 0.001) : targetOffset);
     syncMusicPreviewGain(programmeTime);
     // A picture stall/cut can require a new song anchor. Overlapping cues must
@@ -4999,8 +5060,12 @@ const ViralClipStudio = ({
   const pauseSynchronizedPreview = () => {
     previewPlaybackStartRef.current += 1;
     previewPlaybackPreparingRef.current = null;
+    preparedCutHandoffRef.current?.cancel?.();
     preparedCutHandoffRef.current = null;
+    musicPreparedHandoffRef.current = null;
+    musicPlaybackStartRef.current = null;
     previewPlaybackIntentRef.current = false;
+    preparedVoiceBusRef.current?.pause?.();
     setIsPreviewPaused(true);
     videoRef.current?.pause();
     beforeVideoRef.current?.pause();
@@ -6041,6 +6106,12 @@ const ViralClipStudio = ({
   };
 
   const seekLiveEditTimelineItem = (outputTime, toolId, overlayId = null) => {
+    // Framing marks request a paused seek without changing the inspector.
+    // Keep those options distinct from the tool ID used by ordinary clips.
+    if (toolId && typeof toolId === "object") {
+      if (toolId.play === false) pauseSynchronizedPreview();
+      toolId = null;
+    }
     const duration = Math.max(0, getTimelineDuration());
     const boundedOutputTime = clampNumber(outputTime, 0, duration || Number(outputTime || 0), 0);
 
@@ -6388,6 +6459,7 @@ const ViralClipStudio = ({
     })),
   }), [timeline, previewSpeed, speedKeyframes]);
   soundEffectGainTimeMapRef.current = previewOutputTimeMap;
+  programmeClockIdentityRef.current = JSON.stringify(previewOutputTimeMap);
   // The renderer lays the music bed over the finished output clock at 1x.
   // Picture ramps change its seek position/fade window, not its tempo or pitch.
   const getPreviewMusicTime = programmeTime => ticksToSeconds(mapProgrammeTickToOutputTick(
@@ -6641,6 +6713,7 @@ const ViralClipStudio = ({
       buffer = audioContext.createBuffer(1, samples.length, audioContext.sampleRate);
       buffer.getChannelData(0).set(samples);
     }
+    const projected = timelinePlayback && buffer.studioOutputCue;
     let startAt = audioContext.currentTime;
     if (timelinePlayback && musicPreviewSourceRef.current &&
         audioContext === musicPreviewAudioContextRef.current && !isolatedMusicPreviewIntentRef.current) {
@@ -6657,16 +6730,28 @@ const ViralClipStudio = ({
       const plan = studioCueStartPlan({ contextTime: startAt,
         programmeTime: Number(effect.startTime || 0) + sourceOffset,
         cueStart: Number(effect.startTime || 0), duration: fullDuration,
-        outputTimeMap: previewOutputTimeMap });
+        outputTimeMap: previewOutputTimeMap,
+        lookahead: projected ? Math.min(90,outputPlaybackDuration) : .08 });
       if (!plan) { gain.disconnect(); return false; }
       startAt = plan.when;
       sourceOffset = plan.offset;
       cueStartPlan = plan;
     }
+    let gainProgrammeStart=Number(effect.startTime || 0) + sourceOffset;
+    if (projected) {
+      const plan=studioOutputCueStart({contextTime:audioContext.currentTime,sampleRate:audioContext.sampleRate,
+        cue:projected,musicState:musicPreviewSourceRef.current && musicPreviewSourceStateRef.current});
+      if (plan) {
+        startAt=plan.when;sourceOffset=plan.offset;cueStartPlan=null;
+        gainProgrammeStart=mapStudioContinuousSeconds(previewOutputTimeMap,
+          projected.firstFrame/audioContext.sampleRate+sourceOffset,'output');
+      }
+      else { gain.disconnect(); return false; }
+    }
     gain.gain.setValueAtTime(volume, startAt);
     const scheduledGain = timelinePlayback && scheduleStudioCueGain({
       param: gain.gain, contextTime: startAt,
-      programmeStart: Number(effect.startTime || 0) + sourceOffset,
+      programmeStart: gainProgrammeStart,
       programmeEnd: Number(effect.startTime || 0) + fullDuration,
       outputTimeMap: previewOutputTimeMap, keyframes: audioKeyframes.sfx,
       baseGain: clampAudioControl(effect.volume, 0, 1, 0.8) *
@@ -6674,10 +6759,10 @@ const ViralClipStudio = ({
     });
     const source = registerNode(audioContext.createBufferSource());
     source.buffer = buffer;
-    source.playbackRate.setValueAtTime(rate, startAt);
-    const scheduledRate = timelinePlayback && scheduleStudioCueRate({ param: source.playbackRate,
+    source.playbackRate.setValueAtTime(projected ? 1 : rate, startAt);
+    const scheduledRate = !!projected || (timelinePlayback && scheduleStudioCueRate({ param: source.playbackRate,
       contextTime: startAt, programmeStart: Number(effect.startTime || 0) + sourceOffset,
-      programmeEnd: Number(effect.startTime || 0) + fullDuration, outputTimeMap: previewOutputTimeMap });
+      programmeEnd: Number(effect.startTime || 0) + fullDuration, outputTimeMap: previewOutputTimeMap }));
     source.connect(gain);
     if (cueStartPlan) {
       const readyPlan = advanceStudioCueStartPlan(cueStartPlan, audioContext.currentTime,
@@ -7110,12 +7195,22 @@ const ViralClipStudio = ({
       timelineAudioPoolRef.current.forEach(audio => audio.pause());
       return;
     }
+    const splitSequence = buildAudioSplitSequence(timeline);
+    const clip = timeline[activeTimelineIndex];
+    const window = getTimelineClipWindow(clip);
+    let suspended = false;
+    const pauseSplitAudio = () => timelineAudioPoolRef.current.forEach(audio => audio.pause());
 
     const syncSplitAudioPlayback = () => {
+      if (suspended || !isStudioSourceClockCurrent(video, { activeVideo: videoRef.current,
+        url: clip?.url, start: window.start, end: window.end,
+        hasNext: activeTimelineIndex < timeline.length - 1 })) {
+        pauseSplitAudio(); return;
+      }
       const globalTime = getPreviewTimelineTime(video.currentTime || 0);
-      const splitSequence = buildAudioSplitSequence(timeline);
       const activeProxies = calculateAudioProxyState(globalTime, splitSequence, activeTimelineIndex);
       const activeProxyIds = new Set(activeProxies.map(p => p.id));
+      const mix = originalPreviewAudioMix(globalTime);
 
       timelineAudioPoolRef.current.forEach((audio, id) => {
         if (!activeProxyIds.has(id) && !audio.paused) {
@@ -7132,10 +7227,13 @@ const ViralClipStudio = ({
           applySafeMediaSource(audio, proxy.url);
           timelineAudioPoolRef.current.set(proxy.id, audio);
         }
-        if (Math.abs(audio.currentTime - proxy.sourceSeekTime) > 0.15) {
+        // A renewed owned URL must replace the expired lease in this existing
+        // proxy too. A paused/resumed proxy starts at the current source anchor.
+        const source = getSafeMediaSource(proxy.url);
+        if (audio.src !== source) applySafeMediaSource(audio, source);
+        if (Math.abs(audio.currentTime - proxy.sourceSeekTime) > (audio.paused ? .001 : .15)) {
           audio.currentTime = proxy.sourceSeekTime;
         }
-        const mix = originalPreviewAudioMix(globalTime);
         audio.muted = mix.muted;
         applyPreviewMediaGain(audio, mix.gain * proxy.volume);
         audio.playbackRate = video.playbackRate || 1;
@@ -7147,23 +7245,38 @@ const ViralClipStudio = ({
         }
       });
     };
+    const suspendSplitAudio = () => { suspended = true; pauseSplitAudio(); };
+    const resumeSplitAudio = () => { suspended = false; syncSplitAudioPlayback(); };
 
     const videoEl = videoRef.current;
     videoEl.addEventListener("timeupdate", syncSplitAudioPlayback);
     videoEl.addEventListener("pause", syncSplitAudioPlayback);
-    videoEl.addEventListener("seeking", syncSplitAudioPlayback);
-    videoEl.addEventListener("seeked", syncSplitAudioPlayback);
+    videoEl.addEventListener("seeking", suspendSplitAudio);
+    videoEl.addEventListener("seeked", resumeSplitAudio);
+    videoEl.addEventListener("waiting", suspendSplitAudio);
+    videoEl.addEventListener("playing", resumeSplitAudio);
+    videoEl.addEventListener("emptied", suspendSplitAudio);
+    videoEl.addEventListener("error", suspendSplitAudio);
+    videoEl.addEventListener("ended", suspendSplitAudio);
     videoEl.addEventListener("play", syncSplitAudioPlayback);
     videoEl.addEventListener("ratechange", syncSplitAudioPlayback);
+    const stopFrameClock = watchStudioAudioClock(video, syncSplitAudioPlayback);
     syncSplitAudioPlayback();
 
     return () => {
+      stopFrameClock();
       videoEl.removeEventListener("timeupdate", syncSplitAudioPlayback);
       videoEl.removeEventListener("pause", syncSplitAudioPlayback);
-      videoEl.removeEventListener("seeking", syncSplitAudioPlayback);
-      videoEl.removeEventListener("seeked", syncSplitAudioPlayback);
+      videoEl.removeEventListener("seeking", suspendSplitAudio);
+      videoEl.removeEventListener("seeked", resumeSplitAudio);
+      videoEl.removeEventListener("waiting", suspendSplitAudio);
+      videoEl.removeEventListener("playing", resumeSplitAudio);
+      videoEl.removeEventListener("emptied", suspendSplitAudio);
+      videoEl.removeEventListener("error", suspendSplitAudio);
+      videoEl.removeEventListener("ended", suspendSplitAudio);
       videoEl.removeEventListener("play", syncSplitAudioPlayback);
       videoEl.removeEventListener("ratechange", syncSplitAudioPlayback);
+      pauseSplitAudio();
     };
   }, [timeline, activeTimelineIndex, previewMuted, previewVolume, muteOriginalAudio,
     extractedAudio, overlays, trackStates, audioKeyframes.originalAudio, audioKeyframes.masterPodcast,
@@ -7633,8 +7746,11 @@ const ViralClipStudio = ({
       (frame?.sourceTimeOffsetKeyframes || frame?.source_time_offset_keyframes || []).some(key =>
         Math.abs(Number(key.offsetSeconds ?? key.offset_seconds ?? key.value ?? 0)) > .001)));
   const activeReframePosition = interpolateReframeKeyframes(reframeKeyframes, previewTimelineTime);
+  // Older saved templates omit mark IDs. Resolve their inspector selection
+  // without rewriting the saved graph until the creator actually edits a mark.
+  const reframeCorrectionId = (keyframe, index) => keyframe.id || `legacy-frame:${index}:${keyframe.time}`;
   const activeReframeKeyframe =
-    reframeKeyframes.find(keyframe => keyframe.id === activeReframeKeyframeId) || null;
+    reframeKeyframes.find((keyframe, index) => reframeCorrectionId(keyframe, index) === activeReframeKeyframeId) || null;
   useEffect(() => {
     const [width, height] = reframeAspect.split(":").map(Number);
     setReframeKeyframes(current => {
@@ -7913,6 +8029,13 @@ const ViralClipStudio = ({
     videoRef.current = next;
     if (previous && previous !== next) { previous.pause(); previous.muted = true; }
   }, [activeProgrammeSlot]);
+  useStudioPlayheadDisplay(compactPlaybackRef, playbackDisplayClock, liveTimelineDuration);
+  const readPlayheadProgrammeTime = () => playbackDisplayClock.read()?.programmeTime ?? previewTimelineTime;
+  const readSourceEditPosition = () => renderedOutputUrl
+    ? resolveOutputTimelinePosition(readPlayheadProgrammeTime())
+    : { clip: currentTimelineClip, index: activeTimelineIndex,
+        sourceTime: playbackDisplayClock.read()?.sourceTime ?? videoTime };
+
   const previewProgrammePosition = renderedOutputUrl
     ? "center center"
     : activeSideBySideOverlay
@@ -7924,9 +8047,10 @@ const ViralClipStudio = ({
             ? "center center"
           : "center center"
         : safeObjectPosition;
-  const previewProgrammeFilter = renderedOutputUrl
+  const previewProgrammeBaseFilter = renderedOutputUrl
     ? "none"
-    : `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})${finishFilter ? ` ${finishFilter}` : ""}`;
+    : `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})`;
+  const previewProgrammeFilter = `${previewProgrammeBaseFilter}${finishFilter ? ` ${finishFilter}` : ""}`;
   const liveTimelineEditCount =
     Number(addHook) +
     Number(creativeEffectsEnabled) +
@@ -8093,6 +8217,15 @@ const ViralClipStudio = ({
           for (const effect of soundEffects.filter(effect => effect.builtIn && effect.enabled !== false))
             prepareStudioBuiltInCue(cueContext,{ ...effect,duration:getSoundEffectDuration(effect) },
               soundEffectBuiltInBuffersRef.current,expectedProject);
+          // Finish imported cue projection while the picture is paused. PCM
+          // allocation on its play event can consume the voice/music lead.
+          const projectedMap=addMusic && musicPreviewBufferRef.current &&
+            musicPreviewBufferUrlRef.current===effectiveMusicPreviewUrl ? previewOutputTimeMap : null;
+          for(const effect of soundEffects.filter(effect=>!effect.builtIn && effect.enabled!==false)) {
+            const route=soundEffectDecodedSourcesRef.current.get(studioCueSourceKey(expectedProject,effect));
+            if(route) prepareStudioDecodedCue(cueContext,route,
+              {...effect,duration:getSoundEffectDuration(effect)},projectedMap);
+          }
         }
         const suspended = [...new Set(contexts)].filter(context => context?.state === "suspended");
         if (suspended.length) {
@@ -8124,6 +8257,12 @@ const ViralClipStudio = ({
       setIsBackgroundSoundPreviewing(false);
       previewPlaybackIntentRef.current = true;
       setIsPreviewPaused(false);
+      musicPlaybackStartRef.current = !renderedOutputUrl && addMusic && programmeMusicRouteRef.current.decoded
+        ? { video, project: activeProjectIdRef.current, request: playRequest,
+            seek: programmeSeekIntentRef.current.version, mapKey: programmeClockIdentityRef.current,
+            url: video.currentSrc, sourceKey: musicPreviewBufferUrlRef.current,
+            programmeTime: getPreviewTimelineTime(video.currentTime || 0), ready: false }
+        : null;
       safePlayMediaElement(video);
     } else {
       pauseSynchronizedPreview();
@@ -8157,7 +8296,7 @@ const ViralClipStudio = ({
   const recordReframeModeAtPlayhead = mode => {
     // A rounded-up millisecond is after a fractional paused source frame.
     // Start the decision on this frame, rather than waiting for playback.
-    const time = Math.floor(Math.max(0, previewTimelineTime) * 1000) / 1000;
+    const time = Math.floor(Math.max(0, readPlayheadProgrammeTime()) * 1000) / 1000;
     setReframeModeCuts(current => {
       const normalized = normalizeReframeModeCuts(current);
       const baseline =
@@ -8262,7 +8401,7 @@ const ViralClipStudio = ({
           throw new Error("Source timing is still loading. Try camera-cut analysis again shortly.");
         }
       }
-      const source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      let source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
       const durableStoragePath = currentTimelineClip?.sourceStoragePath ||
         currentTimelineClip?.storagePath ||
         (currentTimelineClip?.id === "main" ? sourceStoragePath : null);
@@ -8273,6 +8412,12 @@ const ViralClipStudio = ({
       const file = currentTimelineClip?.file || selectedClip?.file;
       let blob = useDurableSource ? null : (file instanceof Blob ? file : null);
       if (!useDurableSource && !blob) {
+        if (durableStoragePath) {
+          const renewed = await refreshSourceUrlByPath(durableStoragePath, projectId);
+          if (generation !== faceTrackingGeneration.current) return;
+          if (!renewed) throw new Error("Saved source could not be reopened for analysis.");
+          source = getSafeMediaSource(renewed);
+        }
         const response = await fetch(source);
         if (!response.ok) throw new Error("Source video could not be read.");
         blob = await response.blob();
@@ -9185,7 +9330,7 @@ const ViralClipStudio = ({
         const overlayStart = Number(activeOverlay.startTime ?? activeOverlay.start_time ?? 0);
         const overlayDuration = Number(activeOverlay.duration || 3);
         const overlayEnd = overlayStart + overlayDuration;
-        const currentPlayhead = Number(previewTimelineTime || 0);
+        const currentPlayhead = Number(readPlayheadProgrammeTime() || 0);
 
         if (currentPlayhead > overlayStart + 0.15 && currentPlayhead < overlayEnd - 0.15) {
           const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
@@ -9209,15 +9354,14 @@ const ViralClipStudio = ({
       }
     }
 
-    if (!currentTimelineClip) return;
-    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const sourcePosition = readSourceEditPosition();
+    const clipAtPlayhead = sourcePosition?.clip;
+    if (!clipAtPlayhead) return;
+    const sourceWindow = getTimelineClipWindow(clipAtPlayhead);
     const localDuration = Number(sourceWindow.duration || 0);
     const clipStart = Number(sourceWindow.start || 0);
-    const currentVideoTime = Number(videoTime || 0);
-    let splitPoint = currentVideoTime - clipStart;
-    if (splitPoint <= 0.2 || splitPoint >= localDuration - 0.2) {
-      splitPoint = Number(previewClipTime || 0);
-    }
+    const currentVideoTime = Number(sourcePosition.sourceTime || 0);
+    const splitPoint = currentVideoTime - clipStart;
     if (splitPoint <= 0.2 || splitPoint >= localDuration - 0.2) {
       setStudioActionMessage("Move the playhead inside the clip (at least 0.2s from edges) to split.");
       return;
@@ -9252,7 +9396,7 @@ const ViralClipStudio = ({
           actor: { type: "human", id: "viral-studio-ui" },
           operations: [{
             type: "split_clip",
-            target: { occurrenceId: String(currentTimelineClip.id) },
+            target: { occurrenceId: String(clipAtPlayhead.id) },
             at: { space: "source", ticks: splitTick },
             newOccurrenceIds: {
               left: createSecureId("split-left"),
@@ -9269,7 +9413,8 @@ const ViralClipStudio = ({
       setStudioActionMessage(error.message || "Clip could not be split.");
       return;
     }
-    setActiveTimelineIndex(activeTimelineIndex + 1);
+    setActiveTimelineIndex(sourcePosition.index + 1);
+    if (renderedOutputUrl) { pauseSynchronizedPreview(); setPreviewFinishedFile(false); }
     setStudioActionMessage(`Clip split at ${formatPreviewTimePrecise(splitPoint)}! You now have 2 independent clips.`);
   };
 
@@ -9486,14 +9631,13 @@ const ViralClipStudio = ({
 
   const trimClipStartToPlayhead = () => {
     if (!allowTimelineTimingEdit("video")) return;
-    if (!currentTimelineClip) return;
-    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const sourcePosition = readSourceEditPosition();
+    const clipAtPlayhead = sourcePosition?.clip;
+    if (!clipAtPlayhead) return;
+    const sourceWindow = getTimelineClipWindow(clipAtPlayhead);
     const clipStart = Number(sourceWindow.start || 0);
-    const currentVideoTime = Number(videoTime || 0);
-    let localTime = currentVideoTime - clipStart;
-    if (localTime <= 0.1 || localTime >= Number(sourceWindow.duration || 0) - 0.2) {
-      localTime = Number(previewClipTime || 0);
-    }
+    const currentVideoTime = Number(sourcePosition.sourceTime || 0);
+    const localTime = currentVideoTime - clipStart;
     if (localTime <= 0.1 || localTime >= Number(sourceWindow.duration || 0) - 0.2) {
       setStudioActionMessage("Move playhead to where you want the clip to start.");
       return;
@@ -9521,7 +9665,7 @@ const ViralClipStudio = ({
           actor: { type: "human", id: "viral-studio-ui" },
           operations: [{
             type: "trim_clip",
-            target: { occurrenceId: String(currentTimelineClip.id) },
+            target: { occurrenceId: String(clipAtPlayhead.id) },
             keep: {
               space: "source",
               startTick: secondsToTicks(clipStart + localTime),
@@ -9531,6 +9675,10 @@ const ViralClipStudio = ({
         },
       });
       applyLinkedCommandSnapshot(result);
+      if (renderedOutputUrl) {
+        pauseSynchronizedPreview(); setPreviewFinishedFile(false);
+        setActiveTimelineIndex(sourcePosition.index);
+      }
     } catch (error) {
       pendingHistoryBaselineRef.current = null;
       cutHistoryTransactionRef.current = null;
@@ -9542,14 +9690,13 @@ const ViralClipStudio = ({
 
   const trimClipEndToPlayhead = () => {
     if (!allowTimelineTimingEdit("video")) return;
-    if (!currentTimelineClip) return;
-    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const sourcePosition = readSourceEditPosition();
+    const clipAtPlayhead = sourcePosition?.clip;
+    if (!clipAtPlayhead) return;
+    const sourceWindow = getTimelineClipWindow(clipAtPlayhead);
     const clipStart = Number(sourceWindow.start || 0);
-    const currentVideoTime = Number(videoTime || 0);
-    let localTime = currentVideoTime - clipStart;
-    if (localTime <= 0.2 || localTime >= Number(sourceWindow.duration || 0) - 0.000001) {
-      localTime = Number(previewClipTime || 0);
-    }
+    const currentVideoTime = Number(sourcePosition.sourceTime || 0);
+    const localTime = currentVideoTime - clipStart;
     if (localTime <= 0.2 || localTime >= Number(sourceWindow.duration || 0) - 0.000001) {
       setStudioActionMessage("Move playhead to where you want the clip to end.");
       return;
@@ -9577,7 +9724,7 @@ const ViralClipStudio = ({
           actor: { type: "human", id: "viral-studio-ui" },
           operations: [{
             type: "trim_clip",
-            target: { occurrenceId: String(currentTimelineClip.id) },
+            target: { occurrenceId: String(clipAtPlayhead.id) },
             keep: {
               space: "source",
               startTick: secondsToTicks(clipStart),
@@ -9587,6 +9734,10 @@ const ViralClipStudio = ({
         },
       });
       applyLinkedCommandSnapshot(result);
+      if (renderedOutputUrl) {
+        pauseSynchronizedPreview(); setPreviewFinishedFile(false);
+        setActiveTimelineIndex(sourcePosition.index);
+      }
     } catch (error) {
       pendingHistoryBaselineRef.current = null;
       cutHistoryTransactionRef.current = null;
@@ -10015,8 +10166,8 @@ const ViralClipStudio = ({
     }
     if (!allowTimelineTimingEdit(motionKeyframeTrack(target.id))) return;
     const resolved = timelineSnapping
-      ? resolveMagneticTimelineTime(previewTimelineTime)
-      : { time: previewTimelineTime, snapped: false };
+      ? resolveMagneticTimelineTime(readPlayheadProgrammeTime())
+      : { time: readPlayheadProgrammeTime(), snapped: false };
     const values = buildMotionAutomationStyle(
       motionKeyframes.filter(key => key.targetId === target.id), resolved.time, target
     );
@@ -10124,7 +10275,7 @@ const ViralClipStudio = ({
     if (!toggle && !Number.isFinite(Number(requestedValue))) return;
     // The visible playhead is the authoring location. Beat snapping remains a
     // gesture aid, rather than silently moving a value edit to a different pose.
-    const time = Number(previewTimelineTime || 0);
+    const time = Number(readPlayheadProgrammeTime() || 0);
     const tolerance = motionKeyframeTolerance(exportSettings.fps, previewSpeed);
     const keys = motionKeyframes.filter(key => key.targetId === targetId && key.property === property);
     const existing = motionKeyAtPlayhead(keys, targetId, property, time, tolerance);
@@ -10193,7 +10344,7 @@ const ViralClipStudio = ({
       appliedTimelineSignature: null,
     };
 
-    const currentT = Number(previewTimelineTime || 0);
+    const currentT = Number(readPlayheadProgrammeTime() || 0);
 
     if (isPlayheadPunched) {
       const zones = extractPunchZonesFromKeyframes(motionKeyframes);
@@ -10636,8 +10787,8 @@ const ViralClipStudio = ({
     const source = audioAutomationSource;
     if (!allowTimelineTimingEdit(source)) return;
     const resolved = timelineSnapping
-      ? resolveMagneticTimelineTime(previewTimelineTime)
-      : { time: previewTimelineTime, snapped: false };
+      ? resolveMagneticTimelineTime(readPlayheadProgrammeTime())
+      : { time: readPlayheadProgrammeTime(), snapped: false };
     // Bus automation multiplies the existing clip/track fader. A new key
     // preserves the envelope here; copying the fader would apply it twice.
     const currentValue = Math.round(interpolateAutomationValue({
@@ -10672,8 +10823,8 @@ const ViralClipStudio = ({
 
   const addSpeedKeyframeAtPlayhead = () => {
     const resolved = timelineSnapping
-      ? resolveMagneticTimelineTime(previewTimelineTime)
-      : { time: previewTimelineTime };
+      ? resolveMagneticTimelineTime(readPlayheadProgrammeTime())
+      : { time: readPlayheadProgrammeTime() };
     setSpeedKeyframes(current =>
       upsertAutomationKeyframe(current, {
         id: createSecureId("speed-key"),
@@ -10690,7 +10841,7 @@ const ViralClipStudio = ({
   };
 
   const addAdjustmentLayer = () => {
-    const startTime = clampNumber(previewTimelineTime, 0, liveTimelineDuration, 0);
+    const startTime = clampNumber(readPlayheadProgrammeTime(), 0, liveTimelineDuration, 0);
     setAdjustmentLayers(current => [
       ...current,
       {
@@ -10871,7 +11022,7 @@ const ViralClipStudio = ({
   };
 
   const addFinishKeyframeAtPlayhead = () => {
-    const resolved = resolveMagneticTimelineTime(previewTimelineTime);
+    const resolved = resolveMagneticTimelineTime(readPlayheadProgrammeTime());
     setFinishKeyframes(current => upsertFinishKeyframe(current, resolved.time, finishFx));
     setStudioActionMessage(
       resolved.snapped
@@ -10893,7 +11044,7 @@ const ViralClipStudio = ({
   };
 
   const addReframeKeyframeAtPlayhead = () => {
-    const time = Number(previewTimelineTime || 0);
+    const time = Number(readPlayheadProgrammeTime() || 0);
     const currentPosition = interpolateReframeKeyframes(reframeKeyframes, time);
     const existing = reframeKeyframes.find(
       keyframe => Math.abs(Number(keyframe.time) - time) < 0.08
@@ -10906,7 +11057,7 @@ const ViralClipStudio = ({
       y: clampNumber(currentPosition.y, 8, 92, 50),
     };
     setReframeKeyframes(current =>
-      [...current.filter(item => item.id !== id), keyframe].sort(
+      [...current.filter(item => item !== existing && item.id !== id), keyframe].sort(
         (left, right) => Number(left.time) - Number(right.time)
       )
     );
@@ -10919,10 +11070,11 @@ const ViralClipStudio = ({
   const updateActiveReframeKeyframe = updates => {
     if (!activeReframeKeyframeId) return;
     setReframeKeyframes(current =>
-      current.map(keyframe =>
-        keyframe.id === activeReframeKeyframeId
+      current.map((keyframe, index) =>
+        reframeCorrectionId(keyframe, index) === activeReframeKeyframeId
           ? {
               ...keyframe,
+              id: keyframe.id || activeReframeKeyframeId,
               ...updates,
               ...(("x" in updates || "y" in updates) ? { sourceFocus: null } : {}),
               x: clampNumber(updates.x ?? keyframe.x, 5, 95, 50),
@@ -10936,7 +11088,7 @@ const ViralClipStudio = ({
   const removeActiveReframeKeyframe = () => {
     if (!activeReframeKeyframeId) return;
     setReframeKeyframes(current =>
-      current.filter(keyframe => keyframe.id !== activeReframeKeyframeId)
+      current.filter((keyframe, index) => reframeCorrectionId(keyframe, index) !== activeReframeKeyframeId)
     );
     setActiveReframeKeyframeId(null);
     setStudioActionMessage(
@@ -10959,7 +11111,7 @@ const ViralClipStudio = ({
 
   const addSpeakerFocusCutAtPlayhead = slot => {
     if (!["top", "bottom"].includes(slot)) return;
-    const time = Math.max(0, Number(previewTimelineTime || 0));
+    const time = Math.max(0, Number(readPlayheadProgrammeTime() || 0));
     const roundedTime = Number(time.toFixed(3));
     const existing = speakerFocusCuts.find(cut => Math.abs(Number(cut.time) - time) < 0.08);
     const nextCut = {
@@ -11301,8 +11453,10 @@ const ViralClipStudio = ({
       const tick = secondsToTicks(Math.max(0, outputTime));
       const segment = previewOutputTimeMap.find(item => tick >= item.programmeRange.startTick &&
         tick < item.programmeRange.endTick) || previewOutputTimeMap.at(-1);
-      const rate = segment ? segment.rateNumerator / segment.rateDenominator : previewSpeed;
-      video.playbackRate = clampNumber(rate, 0.25, 4, 1);
+      const rate = (segment ? segment.rateNumerator / segment.rateDenominator : previewSpeed) *
+        (currentMusicHandoff(video)?.catchUp || 1);
+      const boundedRate = clampNumber(rate, 0.25, 4, 1);
+      if (video.playbackRate !== boundedRate) video.playbackRate = boundedRate;
     };
     syncAutomationRate();
     video.addEventListener("timeupdate", syncAutomationRate);
@@ -11774,14 +11928,28 @@ const ViralClipStudio = ({
   }, [addMusic, musicSearchMode, effectiveMusicPreviewUrl, currentMusicLabel]);
 
   useEffect(() => {
+    const path = currentTimelineClip?.sourceStoragePath || currentTimelineClip?.storagePath;
+    const delay = studioSourceLeaseRefreshDelay(currentTimelineClip?.url);
+    if (renderedOutputUrl || !path || delay === null || attemptedSourceRefreshRef.current.has(path)) return undefined;
+    const expectedProject = activeProjectIdRef.current;
+    const timer = setTimeout(() => {
+      if (activeProjectIdRef.current !== expectedProject || attemptedSourceRefreshRef.current.has(path)) return;
+      attemptedSourceRefreshRef.current.add(path);
+      void refreshSourceUrlByPath(path, expectedProject);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [projectId, activeTimelineIndex, currentTimelineClip?.url,
+    currentTimelineClip?.sourceStoragePath, currentTimelineClip?.storagePath, renderedOutputUrl, isAfterPreviewReady]);
+
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return undefined;
     if (audioRemix.enabled && !renderedOutputUrl) {
       void updateAudioRemixPreview(video, audioRemix, audioRemixBypass);
       return subscribeAudioRemixMeter(video, setAudioRemixMeter);
     } else {
-      void updateAudioRemixPreview(video, { ...audioRemix, enabled: false }, true);
-      video.playbackRate = renderedOutputUrl ? 1 : previewSpeed;
+      void updateAudioRemixPreview(video, { ...audioRemix, enabled: false }, true,
+        { playbackRate: renderedOutputUrl ? 1 : video.playbackRate });
       video.preservesPitch = true;
       video.mozPreservesPitch = true;
       video.webkitPreservesPitch = true;
@@ -13566,16 +13734,35 @@ const ViralClipStudio = ({
           preparedCutHandoffRef.current = ready && previewPlaybackIntentRef.current
             ? { from: video, to: nextVideo } : null;
           boundaryPending = true;
-          // Start the prepared decoder before the expensive editor commit.
-          // Waiting until layout effects run leaves the picture clock paused
-          // while the continuous song/cues advance through every hard cut.
-          if (preparedCutHandoffRef.current) safePlayMediaElement(nextVideo);
-          video.pause();
-          // Native frame/media events occur outside React's commit. Promote
-          // the already prepared decoder now instead of leaving a paused
-          // programme visible until a later batched render/passive effect.
-          try { flushSync(() => setActiveTimelineIndex(nextIndex)); }
-          finally { preparedCutHandoffRef.current = null; }
+          const handoff = preparedCutHandoffRef.current;
+          if (handoff) {
+            const project = activeProjectIdRef.current, seek = programmeSeekIntentRef.current.version;
+            video.pause();
+            handoff.cancel = startStudioPreparedCut({
+              play: () => safePlayMediaElement(nextVideo),
+              isCurrent: () => preparedCutHandoffRef.current === handoff && previewPlaybackIntentRef.current &&
+                video === videoRef.current && project === activeProjectIdRef.current &&
+                seek === programmeSeekIntentRef.current.version,
+              stop: () => {
+                if (preparedCutHandoffRef.current === handoff) preparedCutHandoffRef.current = null;
+                boundaryPending = false;
+                if (nextVideo !== videoRef.current) nextVideo.pause();
+              },
+              commit: playing => {
+                if (!playing) { preparedCutHandoffRef.current = null; stopMusicPreviewBufferPlayback(); }
+                else if (musicPreviewSourceRef.current) musicPreparedHandoffRef.current = {
+                  video: nextVideo, source: musicPreviewSourceRef.current, project, seek,
+                  mapKey: programmeClockIdentityRef.current, url: nextVideo.currentSrc,
+                  catchUp: 1,
+                };
+                try { flushSync(() => setActiveTimelineIndex(nextIndex)); }
+                finally { if (preparedCutHandoffRef.current === handoff) preparedCutHandoffRef.current = null; }
+              },
+            });
+          } else {
+            video.pause();
+            flushSync(() => setActiveTimelineIndex(nextIndex));
+          }
         } else {
           // Sequence finished: Loop back to START of the sequence (Clip 1 / Main Video)
           if (activeTimelineIndex === 0) {
@@ -13600,6 +13787,8 @@ const ViralClipStudio = ({
       onBoundary: mediaTime => handleTimeUpdate({ type: "frame-boundary", mediaTime }),
     });
     return () => {
+      const handoff = preparedCutHandoffRef.current;
+      if (handoff?.from === video) handoff.cancel?.();
       stopBoundaryWatch();
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("timeupdate", handleTimeUpdate);
@@ -13631,10 +13820,15 @@ const ViralClipStudio = ({
         applySafeMediaSource(standby, null);
         continue;
       }
-      cleanups.push(primeStudioSourceVideo(standby, { url: next.url, start: getTimelineClipWindow(next).start }));
+      const tick = secondsToTicks(getTimelineOffsetForIndex(activeTimelineIndex + ahead));
+      const segment = previewOutputTimeMap.find(item => tick >= item.programmeRange.startTick &&
+        tick < item.programmeRange.endTick) || previewOutputTimeMap.at(-1);
+      cleanups.push(primeStudioSourceVideo(standby, { url: next.url, start: getTimelineClipWindow(next).start,
+        playbackRate: segment ? segment.rateNumerator / segment.rateDenominator : previewSpeed }));
     }
     return () => cleanups.forEach(cleanup => cleanup());
-  }, [timeline, activeTimelineIndex, activeProgrammeSlot, sourceSequenceDoubleBuffer, isWorkflowPaused]);
+  }, [timeline, activeTimelineIndex, activeProgrammeSlot, sourceSequenceDoubleBuffer, isWorkflowPaused,
+    previewOutputTimeMap, previewSpeed]);
 
   // Effect: Switch video Source when activeTimelineIndex changes OR Jump when selecting a viral clip
   useLayoutEffect(() => {
@@ -13720,6 +13914,19 @@ const ViralClipStudio = ({
     }
     return () => removePendingSourceSeek?.();
   }, [activeTimelineIndex, timeline, selectedClip, isDragging, renderedOutputUrl]);
+
+  useLayoutEffect(() => playbackDisplayClock.bind(videoRef.current, {
+    url: renderedOutputUrl || currentTimelineClip?.url,
+    start: Number(currentTimelineWindow.start || 0),
+    end: Number(currentTimelineWindow.end || 0),
+    programmeStart: currentTimelineOffset,
+    timeMap: previewOutputTimeMap,
+    renderedOutput: Boolean(renderedOutputUrl),
+  }), [playbackDisplayClock, activeProgrammeSlot, currentTimelineClip, renderedOutputUrl,
+    currentTimelineWindow.start, currentTimelineWindow.end, currentTimelineOffset, previewOutputTimeMap]);
+  // Re-read after an expensive editor commit, so it cannot restore an older
+  // display position while the native decoder/audio kept advancing.
+  useLayoutEffect(() => { playbackDisplayClock.sync(); });
 
   useEffect(() => {
     const programme = videoRef.current, subject = subjectProgrammeVideoRef.current;
@@ -13847,11 +14054,25 @@ const ViralClipStudio = ({
       const pausedClockIsCurrent = pausedRequest && pausedSourceFrame.key === pausedStudioFrameKey(pausedRequest);
       const sampledSourceTime = pausedClockIsCurrent
         ? pausedRequest.start + pausedRequest.frameIndex / pausedRequest.fps
-        : Number(programmeVideo.currentTime || 0);
+        : studioProgrammePictureTime(programmeVideo);
       // Crop/finish automation was applied to this input picture before final
       // retiming. Evaluate it on that picture's sampled clock, rather than
       // the fractional seek position between it and the next source frame.
       const frameOutputTime = getPreviewTimelineTime(sampledSourceTime);
+      const frameMotion = buildMotionAutomationStyle(
+        previewMotionKeyframes.filter(key => key.targetId === "main-video"), frameOutputTime, mainTransform);
+      const frameFinish = finishFx.precisionGrade ? finishFx : interpolateFinishKeyframes(
+        finishFx, finishKeyframes, frameOutputTime);
+      const frameFinishFilter = finishPreviewIsLive && !frameFinish.precisionGrade
+        ? buildCinematicCssFilter(frameFinish) : "";
+      const frameFinishZoom = finishPreviewIsLive ? Math.max(1, Number(frameFinish.zoom || 1)) : 1;
+      const frameAdjustmentGrades = finishPreviewIsLive ? adjustmentLayers
+        .filter(layer => frameOutputTime >= Number(layer.startTime || 0) &&
+          frameOutputTime < Number(layer.startTime || 0) + Number(layer.duration || 0))
+        .map(layer => layer.effects?.color).filter(Boolean) : [];
+      // Transient readout for frame diagnostics; never persisted in the edit.
+      canvas.studioProgrammeFrameReceipt = { sourceTime: sampledSourceTime,
+        programmeTime: frameOutputTime, clipId: currentTimelineClip?.id };
       const frameCropMode = resolveReframeModeAtTime(
         reframeModeCuts, frameOutputTime, smartCrop ? smartCropMode : "off"
       );
@@ -13938,7 +14159,7 @@ const ViralClipStudio = ({
         context.restore();
       }
       context.save();
-      context.filter = previewProgrammeFilter;
+      context.filter = `${previewProgrammeBaseFilter}${frameFinishFilter ? ` ${frameFinishFilter}` : ""}`;
       const currentDirectorAngle = directorModeActive ? directorAngles[activeDirectorAngle] : null;
       const timelineDirectorZoom = normalizeReframeModeCuts(reframeModeCuts).reduce(
         (zoom, cut) => cut.time <= frameOutputTime ? Number(cut.zoom || 1) : zoom,
@@ -13949,23 +14170,23 @@ const ViralClipStudio = ({
         : timelineDirectorZoom;
       const programmeScale = (renderedOutputUrl || activeSideBySideOverlay
         ? 1
-        : hookVisualScale * smartCropBackgroundScale * finishZoom * mainMotionAutomation.scale) * directorZoom;
+        : hookVisualScale * smartCropBackgroundScale * frameFinishZoom * frameMotion.scale) * directorZoom;
       const translateX = renderedOutputUrl || activeSideBySideOverlay
         ? 0
-        : ((mainMotionAutomation.x - 50) / 100) * canvasWidth;
+        : ((frameMotion.x - 50) / 100) * canvasWidth;
       const translateY = renderedOutputUrl || activeSideBySideOverlay
         ? 0
-        : ((mainMotionAutomation.y - 50) / 100) * canvasHeight;
+        : ((frameMotion.y - 50) / 100) * canvasHeight;
       const rotation = renderedOutputUrl || activeSideBySideOverlay
         ? 0
-        : (mainMotionAutomation.rotation * Math.PI) / 180;
+        : (frameMotion.rotation * Math.PI) / 180;
       context.translate(canvasWidth / 2 + translateX, canvasHeight / 2 + translateY);
       context.rotate(rotation);
       context.scale(programmeScale, programmeScale);
       context.translate(-canvasWidth / 2, -canvasHeight / 2);
       context.globalAlpha = renderedOutputUrl
         ? 1
-        : hookPrimaryVideoOpacity * mainMotionAutomation.opacity;
+        : hookPrimaryVideoOpacity * frameMotion.opacity;
       const isDualCamStackLive =
         (isDualCamShowEveryone || (frameCropMode === "group_stack" && speakerStackIsReady)) &&
         !renderedOutputUrl &&
@@ -14288,7 +14509,7 @@ const ViralClipStudio = ({
       const joinWindow = getTimelineClipWindow(currentTimelineClip);
       const joinFade = studioJoinFade({
         duration: joinWindow.duration,
-        localTime: (pausedFrameIsCurrent ? sampledSourceTime : Number(programmeVideo.currentTime || 0)) - Number(joinWindow.start || 0),
+        localTime: sampledSourceTime - Number(joinWindow.start || 0),
         transitionIn: currentTimelineClip?.transitionIn,
         transitionOut: currentTimelineClip?.transitionOut,
         transitionDuration: currentTimelineClip?.transitionDuration,
@@ -14313,7 +14534,7 @@ const ViralClipStudio = ({
         if (finishPreviewIsLive && advancedColorCube) applyColorCube(pixels.data, advancedColorCube);
         context.putImageData(pixels, 0, 0);
       }
-      for (const grade of activeAdjustmentGrades) {
+      for (const grade of frameAdjustmentGrades) {
         if (grade.precisionGrade) {
           const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
           applyPrecisionGrade(pixels.data, buildPrecisionGrade(grade));
@@ -14333,6 +14554,7 @@ const ViralClipStudio = ({
           context.restore();
         }
       }
+      playbackDisplayClock.sync();
     };
     const startProgrammeLoop = () => {
       if (!stopProgrammeFrames) stopProgrammeFrames = watchStudioProgrammeFrames(video, paintProgrammeFrame);
@@ -14428,6 +14650,12 @@ const ViralClipStudio = ({
     subjectProgrammePreview,
     previewProgrammeFit,
     previewProgrammeFilter,
+    previewProgrammeBaseFilter,
+    previewMotionKeyframes,
+    mainTransform,
+    finishFx,
+    finishKeyframes,
+    adjustmentLayers,
     precisionPreviewGrade,
     activeAdjustmentGrades,
     advancedColorCube,
@@ -14685,15 +14913,51 @@ const ViralClipStudio = ({
     renderedOutputUrl,
   ]);
 
-  // ── B-Roll overlay audio ducking ──
+  // Original/source automation and overlay ducking follow the native decoded
+  // clock directly. Rendering the whole editor on every frame is unnecessary
+  // audio work and would delay the same source/clip handoff being monitored.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
-    const mix = originalPreviewAudioMix(previewTimelineTime);
-    if (video.muted !== mix.muted) video.muted = mix.muted;
-    applyPreviewMediaGain(video, mix.gain);
+    const gainClock = createStudioSourceGainClock(video);
+    const clip = timeline[activeTimelineIndex];
+    const window = getTimelineClipWindow(clip);
+    let suspended = false;
+    const syncGain = () => {
+      if (video !== videoRef.current) return;
+      const time = video.paused ? previewTimelineTime : getPreviewTimelineTime(video.currentTime);
+      const mix = originalPreviewAudioMix(time);
+      if (video.muted !== mix.muted) video.muted = mix.muted;
+      const rate = Number(video.playbackRate) || 1;
+      const automated = !renderedOutputUrl && !suspended &&
+        Boolean(audioKeyframes.originalAudio?.length || audioKeyframes.masterPodcast?.length || overlays.length);
+      if (!gainClock.sync({ automated, duration: Math.max(0, (window.end - video.currentTime) / rate),
+        gainAtOffset: offset => offset === 0 ? mix.gain : originalPreviewAudioMix(
+          getPreviewTimelineTime(video.currentTime + offset * rate)).gain })) {
+        setStudioActionMessage("Browser audio processing is unavailable; this preview is limited to 100% volume.");
+      }
+    };
+    const suspend = () => { suspended = true; gainClock.stop(); };
+    const resume = () => { suspended = false; syncGain(); };
+    const events = ["play", "pause", "timeupdate", "ratechange", "loadeddata"];
+    events.forEach(event => video.addEventListener(event, syncGain));
+    for (const event of ["waiting", "seeking", "emptied", "error"]) video.addEventListener(event, suspend);
+    for (const event of ["playing", "seeked"]) video.addEventListener(event, resume);
+    const stopFrameClock = !renderedOutputUrl ? watchStudioAudioClock(video, () => {
+      if (isStudioSourceClockCurrent(video, { activeVideo: videoRef.current, url: clip?.url,
+        start: window.start, end: window.end, hasNext: activeTimelineIndex < timeline.length - 1 })) syncGain();
+    }) : () => {};
+    syncGain();
+    return () => {
+      stopFrameClock();
+      gainClock.stop();
+      events.forEach(event => video.removeEventListener(event, syncGain));
+      for (const event of ["waiting", "seeking", "emptied", "error"]) video.removeEventListener(event, suspend);
+      for (const event of ["playing", "seeked"]) video.removeEventListener(event, resume);
+    };
   }, [
+    activeTimelineIndex,
+    timeline,
     previewTimelineTime,
     overlays,
     previewMuted,
@@ -15163,6 +15427,8 @@ const ViralClipStudio = ({
     let buffering = video?.readyState < 3;
     const syncMusicPreview = () => {
       if (!video || video !== videoRef.current || !effectiveMusicPreviewUrl) return;
+      const cutClock = currentMusicHandoff(video);
+      if (isProgrammeAudioHandoff(video)) return;
 
       if (backgroundSoundPreviewSuppressedRef.current) {
         stopMusicPreviewBufferPlayback();
@@ -15190,8 +15456,13 @@ const ViralClipStudio = ({
               start: window.start, end: window.end, hasNext: activeTimelineIndex < timeline.length - 1 }) ||
             (musicTrack?.loop === false && musicTime >= musicPreviewBufferRef.current.duration)) {
           stopMusicPreviewBufferPlayback();
+          musicDecoderClockReadyRef.current.delete(video);
           return;
         }
+        // An explicit Play/Resume pins its paused position and waits for
+        // native playing/canplay. Other starts still need a decoded clock.
+        if (!musicPreviewSourceRef.current && typeof video.requestVideoFrameCallback === 'function' &&
+            !currentMusicStart(video)?.ready && musicDecoderClockReadyRef.current.get(video) !== video.currentSrc) return;
         if (musicPreviewSourceRef.current) musicPreviewSourceRef.current.loop = musicTrack?.loop !== false;
         syncMusicPreviewGain(previewTimelineTime);
         // During synchronous promotion, the prepared decoder's play request
@@ -15208,6 +15479,35 @@ const ViralClipStudio = ({
             programmeTime: musicTime, playbackRate: 1,
             sourceKey: musicPreviewBufferUrlRef.current,
           }));
+
+        const canFollowAudio = muteOriginalAudio && !extractedAudio?.url &&
+          !overlays.some(item => item.useOverlayAudio) &&
+          (!voiceovers.some(take => take.enabled !== false) || preparedVoiceBusRef.current?.canFollowMusicClock?.()) &&
+          soundEffects.every(effect => effect.enabled === false || effect.builtIn || effect.kind === 'voiceover' ||
+            (programmeSoundEffectRoutesRef.current.get(effect.id) && prepareStudioDecodedCue(
+              soundEffectAudioContextRef.current, programmeSoundEffectRoutesRef.current.get(effect.id),
+              effect, soundEffectGainTimeMapRef.current)?.studioOutputCue));
+        if (cutClock && cutClock.catchUp !== 1 && !canFollowAudio) {
+          video.playbackRate = clampNumber(video.playbackRate / cutClock.catchUp, .25, 4, 1);
+          cutClock.catchUp = 1;
+        }
+        if (cutClock && canFollowAudio && previewPlaybackIntentRef.current && musicPreviewSourceRef.current) {
+          const drift = musicBufferPosition(musicPreviewSourceStateRef.current,
+            musicPreviewAudioContextRef.current.currentTime) - musicTime;
+          // Keep decoded sound continuous while a silent picture converges.
+          // Startup can lead the audio just as a prepared cut can trail it.
+          const correction = studioPictureRateCorrection(drift, cutClock.catchUp);
+          if (correction !== 1 || cutClock.catchUp !== 1) {
+            cutClock.catchUp = correction;
+            const tick = secondsToTicks(previewTimelineTime);
+            const segment = previewOutputTimeMap.find(item => tick >= item.programmeRange.startTick &&
+              tick < item.programmeRange.endTick) || previewOutputTimeMap.at(-1);
+            const rate = (segment ? segment.rateNumerator / segment.rateDenominator : previewSpeed) * cutClock.catchUp;
+            const boundedRate = clampNumber(rate, .25, 4, 1);
+            if (video.playbackRate !== boundedRate) video.playbackRate = boundedRate;
+            return;
+          }
+        }
 
         if (needsResync) {
           startMusicPreviewBufferPlayback(musicTime, 1).catch(error => {
@@ -15233,6 +15533,7 @@ const ViralClipStudio = ({
       const fadeGain = studioMusicFadeGain(
         getPreviewMusicTime(previewTimelineTime),
         outputPlaybackDuration,
+    muteOriginalAudio, voiceovers, overlays, extractedAudio,
         musicTrack?.fadeIn,
         musicTrack?.fadeOut
       );
@@ -15293,13 +15594,19 @@ const ViralClipStudio = ({
       // A prepared hard cut is a picture handoff, not a programme pause.
       // Keep the same decoded bed through its synchronous commit. Waiting,
       // seeking, operator Pause and an unprepared next source still stop it.
-      const handoff = preparedCutHandoffRef.current;
-      if (previewPlaybackIntentRef.current && handoff?.from === video) return;
+      if (isProgrammeAudioHandoff(video)) return;
+      musicPlaybackStartRef.current = null;
+      musicDecoderClockReadyRef.current.delete(video);
       stopMusicPreviewBufferPlayback();
       music?.pause();
     };
     const waitForSource = () => { buffering = true; pauseMusicPreview(); };
-    const sourceReady = () => { buffering = false; syncMusicPreview(); };
+    const sourceReady = () => {
+      buffering = false;
+      const start = currentMusicStart(video);
+      if (start) start.ready = true;
+      syncMusicPreview();
+    };
 
     if (video) {
       video.addEventListener("play", syncMusicPreview);
@@ -15326,6 +15633,7 @@ const ViralClipStudio = ({
           const window = getTimelineClipWindow(clip);
           if (isStudioSourceClockCurrent(video, { activeVideo: videoRef.current, url: clip?.url,
             start: window.start, end: window.end, hasNext: activeTimelineIndex < timeline.length - 1 })) {
+            musicDecoderClockReadyRef.current.set(video, video.currentSrc);
             syncMusicPreview();
           }
         }) : () => {};
@@ -15384,7 +15692,7 @@ const ViralClipStudio = ({
     if (!video || renderedOutputUrl) return undefined;
 
     const pauseTimelineEffects = () => {
-      if (previewPlaybackIntentRef.current && preparedCutHandoffRef.current?.from === video) return;
+      if (isProgrammeAudioHandoff(video)) return;
       soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
       stopSynthesizedSoundEffects();
       triggeredSoundEffectsRef.current.clear();
@@ -15392,6 +15700,7 @@ const ViralClipStudio = ({
 
     const syncSoundEffects = () => {
       if (video !== videoRef.current) return;
+      if (addMusic && programmeMusicRouteRef.current.decoded && !musicPreviewSourceRef.current) return;
       const clip = timeline[activeTimelineIndex];
       const window = getTimelineClipWindow(clip);
       // An outgoing decoder can present a frame past its trim before React
@@ -15423,6 +15732,7 @@ const ViralClipStudio = ({
           contextTime: soundEffectAudioContextRef.current?.currentTime || 0,
           programmeTime: outputTime, cueStart: start, duration,
           outputTimeMap: soundEffectGainTimeMapRef.current,
+          lookahead: decoded && musicPreviewSourceRef.current ? Math.min(90,outputPlaybackDuration) : .08,
         });
         const isActive =
           isStudioAudioTrackAudible(trackStates, "sfx") &&
@@ -15467,14 +15777,10 @@ const ViralClipStudio = ({
           if (!triggeredSoundEffectsRef.current.has(effect.id)) {
             let cueBuffer = null;
             if (decoded) {
-              const key = JSON.stringify([effect.trimStart, duration, effect.fadeIn, effect.fadeOut]);
-              cueBuffer = decoded.cues.get(key);
-              if (!cueBuffer) {
-                cueBuffer = createStudioCueBuffer(ensureSoundEffectAudioContext(), decoded.decoded, effect);
-                if (!cueBuffer) return;
-                if (decoded.cues.size >= 8) decoded.cues.clear();
-                decoded.cues.set(key, cueBuffer);
-              }
+              const outputProjection=musicPreviewSourceRef.current && musicPreviewSourceStateRef.current;
+              cueBuffer=prepareStudioDecodedCue(ensureSoundEffectAudioContext(),decoded,
+                {...effect,duration},outputProjection ? soundEffectGainTimeMapRef.current : null);
+              if(!cueBuffer) return;
             }
             triggeredSoundEffectsRef.current.add(effect.id);
             void playBuiltInSoundEffect(
@@ -17146,7 +17452,7 @@ const ViralClipStudio = ({
 
   const placeOverlayAtPlayhead = overlay => {
     if (!overlay) return;
-    const magneticPlayhead = resolveMagneticTimelineTime(previewTimelineTime);
+    const magneticPlayhead = resolveMagneticTimelineTime(readPlayheadProgrammeTime());
     const playhead = clampNumber(magneticPlayhead.time, 0, liveTimelineDuration, 0);
     updateOverlayTimeRange(overlay.id, playhead, overlay.duration || 3);
     setActiveOverlayId(overlay.id);
@@ -17853,6 +18159,7 @@ const ViralClipStudio = ({
   return createPortal(
     <div className="viral-studio-overlay ap-dashboard-redesign">
       <StudioVoiceoverPreview ref={preparedVoiceBusRef} takes={voiceovers} videoRef={videoRef}
+        isHandoffPending={isProgrammeAudioHandoff}
         getTimelineTime={getSoundEffectProgrammeTime} activeClip={activeTimelineIndex}
         getAudioContext={ensureSoundEffectAudioContext}
         projectId={projectId} outputTimeMap={previewOutputTimeMap}
@@ -17878,7 +18185,9 @@ const ViralClipStudio = ({
         getOutputPlan={(context, programmeTime) => {
           const state = musicPreviewSourceRef.current && musicPreviewSourceStateRef.current;
           if (addMusic && programmeMusicRouteRef.current.decoded && !state) return null;
-          const when = Math.max(context.currentTime + .01, state?.startedAt || 0);
+          const rate = Number(context.sampleRate || 48000);
+          const now=context.currentTime;
+          const when = Math.round((state?.startedAt>now?state.startedAt:now+.01) * rate) / rate;
           const offset = state ? musicBufferPosition(state, when) : getPreviewMusicTime(programmeTime) + .01;
           return { when, offset: Math.round(offset*context.sampleRate)/context.sampleRate };
         }}
@@ -18667,7 +18976,7 @@ const ViralClipStudio = ({
                   </button>
                 ))}
               </details>
-              <StudioLaunchTemplatePanel projectId={projectId} media={projectMedia} instance={creativeTemplateInstance} onApply={snapshot => {
+              <StudioLaunchTemplatePanel hookLibraryRequest={hookLibraryRequest} projectId={projectId} media={projectMedia} instance={creativeTemplateInstance} sourceCaptions={captionSegments} onApply={snapshot => {
                 // A new authored graph must immediately stop displaying the
                 // preceding finished movie, including recovery still in flight.
                 onEditInvalidated?.();
@@ -18679,7 +18988,7 @@ const ViralClipStudio = ({
                 setProjectSaveState("unsaved");
                 setComparisonMode("after");
                 setTimelineDockExpanded(true);
-                setStudioActionMessage("Cinematic launch applied as editable clips, titles, keyframes and sound.");
+                setStudioActionMessage("Template applied as editable clips, captions, motion and sound.");
               }} />
             </section>
 
@@ -19020,6 +19329,13 @@ const ViralClipStudio = ({
                       onLoadedData={event => {
                         const media = event.currentTarget;
                         if (media !== videoRef.current) return;
+                        // A successfully loaded replacement starts a new access
+                        // lease. A future expiry must be allowed to recover too.
+                        const path = currentTimelineClip?.sourceStoragePath || currentTimelineClip?.storagePath;
+                        if (!renderedOutputUrl && path && media.readyState >= 2 &&
+                            media.currentSrc === getSafeMediaSource(currentTimelineClip?.url)) {
+                          attemptedSourceRefreshRef.current.delete(path);
+                        }
                         if (media.videoWidth > 0 && media.videoHeight > 0)
                           setProgrammeMediaAspectRatio(media.videoWidth / media.videoHeight);
                         setIsAfterPreviewReady(true);
@@ -20009,7 +20325,8 @@ const ViralClipStudio = ({
                         >
                           {isPreviewPaused ? "▶" : "❚❚"}
                         </button>
-                        <input
+                        <StudioPlaybackRange
+                          clock={playbackDisplayClock}
                           className="preview-playhead-range"
                           type="range"
                           min={0}
@@ -20031,7 +20348,7 @@ const ViralClipStudio = ({
                           aria-label="Edited output position"
                         />
                         <span className="preview-timecode">
-                          {formatPreviewTimePrecise(previewPlaybackTime)} /{" "}
+                          <StudioPlaybackTime clock={playbackDisplayClock} fallback={previewPlaybackTime} format={formatPreviewTimePrecise} /> /{" "}
                           {formatPreviewTimePrecise(outputPlaybackDuration)}
                         </span>
                         <div className="preview-audio-controls" aria-label="Preview audio monitoring">
@@ -20202,13 +20519,14 @@ const ViralClipStudio = ({
                 </div>
                 <div
                   className="studio-compact-timeline"
+                  ref={compactPlaybackRef}
                   aria-label="After preview edit timeline"
                   data-testid="live-edit-timeline"
                 >
                   <div className="compact-timeline-head">
                     <div>
                       <strong>Live edit timeline</strong>
-                      <span>{formatPreviewTimePrecise(previewPlaybackTime)} / </span>
+                      <span><StudioPlaybackTime clock={playbackDisplayClock} fallback={previewPlaybackTime} format={formatPreviewTimePrecise} /> / </span>
                       <span data-testid="timeline-output-time">
                         {formatPreviewTimePrecise(outputPlaybackDuration)}
                       </span>
@@ -22179,6 +22497,10 @@ const ViralClipStudio = ({
 
               {studioInspectorTab === "hook" ? (
                 <div className="clip-inspector-body" role="tabpanel">
+                  <button type="button" className="mini-toggle-btn" onClick={() => {
+                    setProjectRailExpanded(true); setProjectRailTab("media"); setHookLibraryRequest(value => value + 1);
+                  }}>Browse story-driven hooks</button>
+                  <p className="inspector-preset-note">Assemble footage, reactions and sound into a podcast, interview, story or cinematic opening.</p>
                   <div className="inspector-heading-row">
                     <div>
                       <span className="panel-kicker">Opening moment</span>
@@ -23097,10 +23419,10 @@ const ViralClipStudio = ({
                         {reframeKeyframes.map((keyframe, index) => (
                           <button
                             type="button"
-                            key={keyframe.id}
-                            className={activeReframeKeyframeId === keyframe.id ? "is-active" : ""}
+                            key={reframeCorrectionId(keyframe, index)}
+                            className={activeReframeKeyframeId === reframeCorrectionId(keyframe, index) ? "is-active" : ""}
                             onClick={() => {
-                              setActiveReframeKeyframeId(keyframe.id);
+                              setActiveReframeKeyframeId(reframeCorrectionId(keyframe, index));
                               seekLiveEditTimelineItem(keyframe.time, { play: false });
                             }}
                           >
@@ -29687,6 +30009,7 @@ const ViralClipStudio = ({
               <span />
             </div>
             <StudioProTimeline
+              playbackClock={playbackDisplayClock}
               duration={liveTimelineDuration}
               playbackRate={previewSpeed}
               playhead={previewTimelineTime}
@@ -29824,8 +30147,8 @@ const ViralClipStudio = ({
               onSelectTool={toolId => toolId && selectCreativeTool(toolId)}
               onSplit={splitCurrentClipAtPlayhead}
               splitLocked={Boolean(selectedGroupClip || trackStates[activeOverlay ? (activeOverlay.bRollMode ? "broll" : "graphics") : "video"]?.locked)}
-              onTrimStart={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-start', previewTimelineTime) : trimClipStartToPlayhead}
-              onTrimEnd={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-end', previewTimelineTime) : trimClipEndToPlayhead}
+              onTrimStart={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-start', readPlayheadProgrammeTime()) : trimClipStartToPlayhead}
+              onTrimEnd={selectedGroupClip ? () => editGroupClipTiming(selectedGroupId, 'trim-end', readPlayheadProgrammeTime()) : trimClipEndToPlayhead}
               trimLocked={selectedGroupClip ? selectedGroupClip.locked : Boolean(trackStates.video?.locked)}
               deleteLocked={selectedGroupClip ? selectedGroupClip.locked : Boolean(trackStates.video?.locked)}
               onDelete={selectedGroupClip ? () => deleteGroupClip(selectedGroupId) : deleteActiveTimelineClip}

@@ -1,0 +1,50 @@
+import React from 'react';
+import { webcrypto } from 'crypto';
+import { render,screen,fireEvent,waitFor } from '@testing-library/react';
+import StudioLaunchTemplatePanel from '../StudioLaunchTemplatePanel';
+import { STUDIO_CREATIVE_TEMPLATES, studioTemplateReference } from '../studioCreativeTemplate';
+jest.mock('../../firebaseClient',()=>({auth:{currentUser:{uid:'hook-owner',getIdToken:async()=> 'test-token'}}}));
+jest.mock('../ProductHelpButton',()=>()=>null);
+const asset=(id)=>({id,name:id,mediaType:'video',ownerUid:'hook-owner',url:`https://example.com/${id}.mp4`,
+ storagePath:`studio/sources/hook-owner/${id}.mp4`,contentHash:'a'.repeat(64),duration:120});
+beforeEach(()=>{Object.defineProperty(globalThis,'crypto',{configurable:true,value:webcrypto});});
+test('the normal template panel creates a different editable hook variation with the selected source focus',async()=>{
+ const apply=jest.fn();render(<StudioLaunchTemplatePanel projectId="panel-hook" media={[asset('source'),asset('reaction')]} onApply={apply}/>);
+ fireEvent.click(screen.getByTestId('launch-template-panel').querySelector('summary'));
+ fireEvent.change(screen.getByLabelText('Creative template'),{target:{value:'podcast_cold_open_v1@1.0.0'}});
+ expect(screen.getByLabelText('Opening context')).toHaveValue('BEFORE THE PUNCHLINE');
+ expect(screen.queryByLabelText('Launch headline')).not.toBeInTheDocument();
+ for(const role of ['statementFootage','reactionFootage','questionFootage'])fireEvent.change(screen.getByLabelText(`Select ${role}`),{target:{value:role==='reactionFootage'?'reaction':'source'}});
+ expect(screen.getByLabelText('statementFootage Focus X')).toHaveValue(67);
+ fireEvent.change(screen.getByLabelText('statementFootage Focus X'),{target:{value:'24'}});
+ fireEvent.change(screen.getByLabelText('Hook variation'),{target:{value:'alternate'}});
+ fireEvent.click(screen.getByRole('button',{name:'Apply hook template'}));
+ await waitFor(()=>expect(apply).toHaveBeenCalledTimes(1));
+ const snapshot=apply.mock.calls[0][0];expect(snapshot.timeline[0].sourceClipId).toBe('source');
+ expect(snapshot.timeline[0].duration).toBe(4.5);expect(snapshot.reframeKeyframes.at(-1).x).toBe(24);
+ expect(snapshot.creativeTemplateInstance.variationId).toBe('alternate');
+ expect(snapshot.muteOriginalAudio).toBe(false);expect(snapshot.studioDocument.clipOccurrences).toHaveLength(3);
+});
+test('Director prepares the same hook for review and never applies it without the explicit apply action',async()=>{
+ const apply=jest.fn();render(<StudioLaunchTemplatePanel projectId="director-hook" media={[asset('video')]} onApply={apply}/>);
+ fireEvent.click(screen.getByTestId('launch-template-panel').querySelector('summary'));
+ fireEvent.change(screen.getByLabelText('Creative template'),{target:{value:'kinetic_pressure_v1@1.0.0'}});
+ for(const role of ['actionFootage','detailFootage'])fireEvent.change(screen.getByLabelText(`Select ${role}`),{target:{value:'video'}});
+ fireEvent.click(screen.getByRole('button',{name:'Director: prepare hook'}));
+ const button=await screen.findByRole('button',{name:'Apply Director hook'});expect(apply).not.toHaveBeenCalled();
+ fireEvent.click(button);expect(apply).toHaveBeenCalledTimes(1);
+ expect(apply.mock.calls[0][0].overlays.filter(layer=>layer.name.startsWith('word-'))).toHaveLength(5);
+});
+test('reopening a hook retains source captions once per asset and switching projects clears unrelated speech',async()=>{
+ const apply=jest.fn(),video=asset('speech'),template=STUDIO_CREATIVE_TEMPLATES.find(t=>t.templateId==='podcast_cold_open_v1');
+ const wording=Object.fromEntries(Object.entries(template.executionDefinition.inputPresentation).map(([key,value])=>[key,value.default]));
+ const instance={templateRef:await studioTemplateReference(template),aspect:'9:16',variationId:'signature',bindings:{...wording,...Object.fromEntries(['statementFootage','reactionFootage','questionFootage'].map(role=>[role,{assetId:video.id,contentHash:video.contentHash}]))}};
+ const cues=[{sourceClipId:video.id,start:1,end:2,text:'Reviewed source speech',speaker:'guest',language:'en',textReviewed:true}];
+ const view=render(<StudioLaunchTemplatePanel projectId="restore-hook" media={[video]} instance={instance} sourceCaptions={cues} onApply={apply}/>);
+ fireEvent.click(screen.getByTestId('launch-template-panel').querySelector('summary'));
+ fireEvent.click(screen.getByRole('button',{name:'Apply hook template'}));await waitFor(()=>expect(apply).toHaveBeenCalledTimes(1));
+ expect(apply.mock.calls[0][0].captionSegments).toHaveLength(1);expect(apply.mock.calls[0][0].captionSegments[0].text).toBe(cues[0].text);
+ const other=asset('other-speech'),next={...instance,bindings:{...wording,...Object.fromEntries(['statementFootage','reactionFootage','questionFootage'].map(role=>[role,{assetId:other.id,contentHash:other.contentHash}]))}};
+ view.rerender(<StudioLaunchTemplatePanel projectId="another-hook" media={[other]} instance={next} sourceCaptions={[]} onApply={apply}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Apply hook template'}));await waitFor(()=>expect(apply).toHaveBeenCalledTimes(2));expect(apply.mock.calls[1][0].captionSegments).toHaveLength(0);
+});

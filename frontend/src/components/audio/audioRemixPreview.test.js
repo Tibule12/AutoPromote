@@ -6,6 +6,19 @@ describe("Studio native media bus gain", () => {
   const previousContext = window.AudioContext;
   afterEach(() => { window.AudioContext = previousContext; });
 
+  test("an untreated prepared decoder retains its pacing rate without native rate resets", async () => {
+    const video = document.createElement("video");
+    let rate = 2;
+    const writeRate = jest.fn(value => { rate = value; });
+    Object.defineProperty(video, "playbackRate", { configurable: true,
+      get: () => rate, set: writeRate });
+    await updateAudioRemixPreview(video, DEFAULT_AUDIO_REMIX, true, { playbackRate: 2 });
+    expect(video.playbackRate).toBe(2);
+    expect(writeRate).not.toHaveBeenCalled();
+    await updateAudioRemixPreview(video, DEFAULT_AUDIO_REMIX, true, { playbackRate: .5 });
+    expect(writeRate.mock.calls).toEqual([[.5]]);
+  });
+
   test("boosts through one neutral graph, resets attenuation, and stays independent of remix output", async () => {
     const context = gainTestContext();
     window.AudioContext = jest.fn(() => context);

@@ -9049,6 +9049,7 @@ def plan_reframe_timeline_segments(
     speaker_order_cuts=None,
     solo_keyframes=None,
     fallback_mode="speaker_track",
+    minimum_segment_duration=.02,
 ):
     """Resolve the reviewed reframe state into independently renderable intervals.
 
@@ -9131,7 +9132,7 @@ def plan_reframe_timeline_segments(
     boundaries = sorted(set(normalized) | set(order_by_time) | {0.0, duration})
     specs = []
     for start, end in zip(boundaries, boundaries[1:]):
-        if end-start < .02:
+        if end-start < minimum_segment_duration:
             continue
         local_split = {
             "divider_percent": (split_framing or {}).get(
@@ -9287,11 +9288,24 @@ async def render_reframe_timeline_sequential(
     solo_zoom=1,
     fallback_mode="speaker_track",
     job_id="reframe",
+    delivery_fps=None,
 ):
     """Render long reviewed timelines with bounded memory and preserve source audio."""
+    if delivery_fps is not None:
+        fps = float(delivery_fps)
+        if not math.isfinite(fps) or fps < 1 or fps > 120:
+            raise ValueError("Timed framing requires a valid delivery frame rate")
+        duration = round(duration * fps) / fps
+        # Assign each global delivery frame to exactly one camera interval.
+        # Independently rounding short encodes accumulates duplicate frames.
+        def on_frame(cut):
+            return {**cut, "time": math.ceil(float(cut.get("time", 0)) * fps - 1e-6) / fps}
+        timeline_cuts = [on_frame(cut) for cut in timeline_cuts or []]
+        speaker_order_cuts = [on_frame(cut) for cut in speaker_order_cuts or []]
     specs = plan_reframe_timeline_segments(
         duration, timeline_cuts, split_framing, speaker_order_cuts,
         solo_keyframes, fallback_mode,
+        minimum_segment_duration=.5 / fps if delivery_fps is not None else .02,
     )
     segment_paths = []
     work_dir = os.path.dirname(os.path.abspath(output_path))
@@ -9317,14 +9331,28 @@ async def render_reframe_timeline_sequential(
                 command.extend([
                     "-ss", f"{segment['start'] + active_offsets[0]:.6f}", "-i", source_path,
                 ])
+            graph = build_reframe_segment_filter(
+                src_width, src_height, target_width, target_height, segment, solo_zoom,
+                alternate_input_label="[1:v]" if active_offsets else None,
+            )
+            if delivery_fps is not None:
+                graph = graph.replace("[0:v]", "[clocked]")
+                clock = f"[0:v]fps={fps:g},setpts=PTS-STARTPTS[clocked];"
+                if active_offsets:
+                    graph = graph.replace("[1:v]", "[alternate_clocked]")
+                    clock += f"[1:v]fps={fps:g},setpts=PTS-STARTPTS[alternate_clocked];"
+                graph = clock + graph
             command.extend([
                 "-t", f"{segment['end']-segment['start']:.6f}",
-                "-filter_complex", build_reframe_segment_filter(
-                    src_width, src_height, target_width, target_height, segment, solo_zoom,
-                    alternate_input_label="[1:v]" if active_offsets else None,
-                ),
+                "-filter_complex", graph,
                 "-map", "[vout]", "-an",
+                *(["-frames:v", str(round((segment['end']-segment['start']) * fps))]
+                  if delivery_fps is not None else []),
                 *build_viral_export_encode_args(resolve_viral_export_profile({}, target_width, target_height)),
+                # Camera intervals can be one frame long. Avoid reordered DTS
+                # crossing concat boundaries and erasing their display time.
+                *(["-bf", "0", "-video_track_timescale", "90000"]
+                  if delivery_fps is not None else []),
                 "-movflags", "+faststart", "-y", segment_path,
             ])
             await run_subprocess_async(
@@ -32352,6 +32380,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         solo_zoom=finish_reframe_plan.get("zoom", 1),
                         fallback_mode=crop_mode,
                         job_id=job_id,
+                        delivery_fps=resolve_viral_export_profile(request.output_settings or {},
+                            reframe_target_width, reframe_target_height)["fps"],
                     )
                     working_path = cropped_path
                 elif crop_mode == "group_stack":

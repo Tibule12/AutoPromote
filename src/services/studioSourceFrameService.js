@@ -82,7 +82,7 @@ async function getOwnedSourceFrame({ ownerUid, input, signal }) {
       cached = { folder, file, size: owned.size, used: Date.now(), refs: 0 };
       cached.ready = (async () => {
         try {
-          const object = getStudioSourceBucket(owned.kind).file(owned.storagePath, { generation: owned.generation });
+          const object = getStudioSourceBucket(owned.kind, owned.bucketName).file(owned.storagePath, { generation: owned.generation });
           await pipeline(object.createReadStream({ validation: 'crc32c', decompress: false }),
             createWriteStream(file, { mode: 0o600 }), { signal: AbortSignal.timeout(30000) });
           const bytes = await fs.readFile(file);

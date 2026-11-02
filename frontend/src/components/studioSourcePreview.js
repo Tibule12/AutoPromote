@@ -171,19 +171,43 @@ export function watchStudioAudioClock(video, onFrame) {
 // source at the display's 60/120 Hz repeats expensive draw/filter work without
 // adding motion. Paused edits and layout changes still paint through their
 // ordinary events; older browsers retain the animation-frame fallback.
-export function watchStudioProgrammeFrames(video, paint) {
+const programmePictures = new WeakMap();
+export function studioProgrammePictureTime(video) {
+  const picture = video && programmePictures.get(video);
+  const source = video?.currentSrc || video?.src;
+  if (picture && !video.paused && !video.seeking && video.readyState >= 2 &&
+      picture.source === source) return picture.mediaTime;
+  return Math.max(0, Number(video?.currentTime) || 0);
+}
+
+export function watchStudioProgrammeFrames(video, paint, { decodedFrames = true } = {}) {
   let frame, disposed = false;
-  const decoded = typeof video?.requestVideoFrameCallback === 'function';
+  const decoded = decodedFrames && typeof video?.requestVideoFrameCallback === 'function';
+  const source = video?.currentSrc || video?.src;
+  const invalidate = () => programmePictures.delete(video);
+  const resetEvents = ['seeking', 'emptied', 'loadstart', 'play'];
+  if (decoded) resetEvents.forEach(event => video.addEventListener?.(event, invalidate));
   const request = callback => decoded
     ? video.requestVideoFrameCallback(callback) : window.requestAnimationFrame(callback);
-  const tick = () => {
+  const tick = (_now, metadata) => {
     if (disposed) return;
-    if (!video.paused && !video.ended && !video.seeking && video.readyState >= 2) paint();
+    const sourceIsCurrent = !decoded || (video.currentSrc || video.src) === source;
+    if (sourceIsCurrent && !video.paused && !video.ended && !video.seeking && video.readyState >= 2) {
+      if (decoded && Number.isFinite(metadata?.mediaTime) && metadata.mediaTime >= 0)
+        programmePictures.set(video, { source, mediaTime: metadata.mediaTime });
+      paint();
+    }
     if (!disposed && !video.paused && !video.ended) frame = request(tick);
   };
   if (video && !video.paused && !video.ended) frame = request(tick);
   return () => {
     disposed = true;
+    if (decoded) {
+      resetEvents.forEach(event => video.removeEventListener?.(event, invalidate));
+      // An inspector/time readout can replace this subscription between
+      // frames. Retain its last real picture; native seek/load/play events
+      // invalidate it, and the WeakMap never retains an unmounted decoder.
+    }
     if (frame !== undefined) {
       if (decoded) video.cancelVideoFrameCallback(frame);
       else window.cancelAnimationFrame(frame);
@@ -233,7 +257,7 @@ export function watchStudioClipBoundary(video, { end, enabled, onBoundary }) {
 // Prepare only the existing inactive native programme element. Cancellation
 // removes its pending seek listener; it must not clear a decoder just promoted
 // to the active programme. Source ownership/identity remains the original URL.
-export function primeStudioSourceVideo(video, { url, start }) {
+export function primeStudioSourceVideo(video, { url, start, playbackRate }) {
   const source = getSafeMediaSource(url);
   if (!video || !source) return () => {};
   const seek = () => {
@@ -242,7 +266,28 @@ export function primeStudioSourceVideo(video, { url, start }) {
     if (Math.abs(video.currentTime - time) > .001) video.currentTime = time;
   };
   video.pause(); video.muted = true; video.preload = 'auto';
+  if (Number.isFinite(playbackRate)) {
+    const rate = Math.max(.25, Math.min(4, playbackRate));
+    if (video.playbackRate !== rate) video.playbackRate = rate;
+  }
   video.addEventListener('loadedmetadata', seek);
   applySafeMediaSource(video, source); seek();
   return () => video.removeEventListener('loadedmetadata', seek);
+}
+
+// A play request sets paused=false before the native clock actually starts.
+// Let its promise settle before an expensive editor commit. Otherwise that
+// commit delays playback startup while the shared audio thread keeps running.
+export function startStudioPreparedCut({ play, isCurrent, commit, stop, timeoutMs = 500 }) {
+  let done = false;
+  const finish = playing => {
+    if (done) return;
+    done = true; clearTimeout(timer);
+    if (!isCurrent()) { stop(); return; }
+    commit(playing === true);
+  };
+  const timer = setTimeout(() => finish(false), timeoutMs);
+  try { Promise.resolve(play()).then(finish, () => finish(false)); }
+  catch (_) { finish(false); }
+  return () => { if (!done) { done = true; clearTimeout(timer); stop(); } };
 }

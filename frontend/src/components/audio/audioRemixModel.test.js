@@ -7,6 +7,16 @@ import {
 } from "./audioRemixModel";
 
 describe("audioRemixModel", () => {
+  test.each(AUDIO_REMIX_PRESETS)("$name retains its selected identity through edits and export", preset => {
+    const selected = applyAudioRemixPreset(preset.id);
+    expect(selected.preset).toBe(preset.id);
+    expect(selected.speed).toBe(preset.speed);
+    const edited = patchAudioRemix(selected, { outputGain: -2 });
+    expect(edited.preset).toBe(preset.id);
+    expect(normalizeAudioRemix(edited).preset).toBe(preset.id);
+    expect(audioRemixForRender(edited).preset).toBe(preset.id);
+  });
+
   test("offers the ten Studio remix presets", () => {
     expect(AUDIO_REMIX_PRESETS.map(item => item.name)).toEqual([
       "Slowed + Reverb",

@@ -10,7 +10,7 @@ import { studioVoiceBusRequest } from './studioPreparedVoiceBus';
 // Kept outside the inspector: changing tools must never unmount an audible take.
 export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, getTimelineTime, activeClip,
   muted, volume, automationKeyframes = [], renderedOutputUrl, onError, onAnalyser, getAudioContext,
-  projectId, outputTimeMap, loadPreparedBus, getOutputPlan, onPreparedDucking, onPreparation, preparedDucking }, ref) {
+  projectId, outputTimeMap, loadPreparedBus, getOutputPlan, onPreparedDucking, onPreparation, preparedDucking, isHandoffPending }, ref) {
   const elements = useRef(new Map());
   const latest = useRef();
   const bus = useRef(null);
@@ -22,16 +22,41 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
   const requestKey = preparedInput ? JSON.stringify(preparedInput) : '';
   const [prepared, setPrepared] = useState(null);
   const pending = useRef(null), preparedPlaying = useRef(null), preparedSync = useRef(null);
+  const retiringPrepared = useRef(new Set());
+  const stagedPrepared = useRef(null), preparedValue = useRef(null), stagePrepared = useRef(null);
+  preparedValue.current=prepared;
   const currentRequest = useRef(requestKey); currentRequest.current = requestKey;
-  latest.current = { getTimelineTime, onError, onAnalyser, getAudioContext, loadPreparedBus, getOutputPlan, onPreparedDucking, onPreparation };
-  const stopPrepared = () => {
+  latest.current = { getTimelineTime, onError, onAnalyser, getAudioContext, loadPreparedBus, getOutputPlan, onPreparedDucking, onPreparation, muted, volume, isHandoffPending };
+  const releasePrepared = current => {
+    if(current.released) return;
+    current.released=true;current.source.disconnect();current.gain.disconnect();
+  };
+  const stopPrepared = stopAt => {
+    const deferred=Number.isFinite(stopAt) && stopAt>(bus.current?.context.currentTime ?? Infinity);
+    if(!deferred) {
+      for(const retired of retiringPrepared.current) {
+        try { retired.source.stop(); } catch (_) {}
+        releasePrepared(retired);
+      }
+      retiringPrepared.current.clear();
+      if(stagedPrepared.current) { releasePrepared(stagedPrepared.current);stagedPrepared.current=null; }
+    }
     const current = preparedPlaying.current;
     if (!current) return;
     preparedPlaying.current = null;
-    try { current.source.stop(); } catch (_) { /* Already stopped. */ }
-    current.source.disconnect(); current.gain.disconnect();
+    try { current.source.stop(deferred ? stopAt : undefined); } catch (_) { /* Already stopped. */ }
+    if(deferred && !current.ended) {
+      retiringPrepared.current.add(current);
+    } else releasePrepared(current);
   };
   useImperativeHandle(ref, () => ({ prepare: () => pending.current,
+    canFollowMusicClock: () => Boolean(preparedValue.current && preparedValue.current.requestKey === currentRequest.current),
+    stage: () => stagePrepared.current?.(),
+    pause: () => {
+      stopPrepared();
+      elements.current.forEach(audio => audio.pause());
+      [...playing.current.keys()].forEach(stopPcm); pinned.current.clear();
+    },
     sync: () => preparedSync.current?.() }), []);
   const ensureBus = () => {
     if (bus.current) return bus.current;
@@ -43,6 +68,16 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
     analyser.connect(context.destination); bus.current = { context, analyser, ownsContext: !shared };
     latest.current.onAnalyser?.(analyser);
     return bus.current;
+  };
+  stagePrepared.current=()=>{
+    const value=preparedValue.current;
+    if(!value || value.requestKey!==currentRequest.current) return;
+    if(stagedPrepared.current?.key===value.key) return;
+    if(stagedPrepared.current) releasePrepared(stagedPrepared.current);
+    const context=ensureBus().context,source=context.createBufferSource(),gain=context.createGain();
+    source.buffer=value.buffer;source.studioVoiceoverId='prepared-voice-bus';
+    gain.gain.value=0;source.connect(gain);gain.connect(bus.current.analyser);
+    stagedPrepared.current={source,gain,key:value.key,context};
   };
   const stopPcm = id => {
     const current = playing.current.get(id);
@@ -80,6 +115,7 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
     pending.current = latest.current.loadPreparedBus(input, ensureBus().context, controller.signal).then(value => {
       if (controller.signal.aborted || currentRequest.current !== requestKey) return;
       const bound = { ...value, requestKey };
+      preparedValue.current=bound;
       setPrepared(bound); latest.current.onPreparedDucking?.(input.ducking.enabled ? bound : null);
       latest.current.onPreparation?.('ready');
     });
@@ -95,31 +131,45 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
     if (!requestKey || !video || renderedOutputUrl || !prepared || prepared.requestKey !== requestKey) {
       stopPrepared(); return undefined;
     }
-    let buffering = video.readyState < 3;
-    const sync = () => {
-      if (video !== videoRef.current) return;
-      if (buffering || video.paused || video.seeking || video.readyState < 2) { stopPrepared(); return; }
+    let buffering = video.readyState < 3,observedVideo=video;
+    const sync = event => {
+      const activeVideo=videoRef.current,value=preparedValue.current;
+      if(event?.currentTarget && event.currentTarget!==activeVideo) return;
+      if(!value || value.requestKey!==currentRequest.current) {stopPrepared();return;}
+      if(activeVideo!==observedVideo) {observedVideo=activeVideo;buffering=activeVideo?.readyState<3;}
+      if (latest.current.isHandoffPending?.(activeVideo)) {
+        const gain = latest.current.muted ? 0 : voiceoverGain(latest.current.volume);
+        if (preparedPlaying.current) preparedPlaying.current.gain.gain.value = gain;
+        for (const retired of retiringPrepared.current) retired.gain.gain.value = gain;
+        return;
+      }
+      if (!activeVideo || buffering || activeVideo.paused || activeVideo.seeking || activeVideo.readyState < 2) { stopPrepared(); return; }
       const context = ensureBus().context;
-      const plan = latest.current.getOutputPlan?.(context, latest.current.getTimelineTime(video.currentTime || 0));
-      if (!plan || plan.offset >= prepared.buffer.duration) return;
+      const plan = latest.current.getOutputPlan?.(context, latest.current.getTimelineTime(activeVideo.currentTime || 0));
+      if (!plan || plan.offset >= value.buffer.duration) return;
       let current = preparedPlaying.current;
-      if (current && (current.key !== prepared.key ||
+      if (current && (current.key !== value.key ||
           Math.abs(current.offset+Math.max(0, plan.when-current.when)-plan.offset) > .08)) {
-        stopPrepared(); current = null;
+        stopPrepared(plan.when); current = null;
       }
       if (!current) {
-        const source = context.createBufferSource(), gain = context.createGain();
-        source.buffer = prepared.buffer; source.studioVoiceoverId = 'prepared-voice-bus';
-        source.connect(gain); gain.connect(bus.current.analyser);
-        current = { source, gain, key: prepared.key, when: plan.when, offset: plan.offset };
+        if(stagedPrepared.current?.key!==value.key) stagePrepared.current();
+        const {source,gain}=stagedPrepared.current;stagedPrepared.current=null;
+        current = { source, gain, key: value.key, when: plan.when, offset: plan.offset };
+        const started=current;
+        source.addEventListener?.('ended',()=>{
+          started.ended=true;retiringPrepared.current.delete(started);releasePrepared(started);
+        },{once:true});
         preparedPlaying.current = current;
+        gain.gain.value=latest.current.muted?0:voiceoverGain(latest.current.volume);
         source.start(plan.when, plan.offset);
         context.resume()?.catch(() => {});
       }
-      current.gain.gain.value = muted ? 0 : voiceoverGain(volume);
+      current.gain.gain.value = latest.current.muted ? 0 : voiceoverGain(latest.current.volume);
+      for(const retired of retiringPrepared.current) retired.gain.gain.value=current.gain.gain.value;
     };
-    const waiting = () => { buffering = true; stopPrepared(); };
-    const ready = () => { buffering = false; sync(); };
+    const waiting = () => { if(video!==videoRef.current || latest.current.isHandoffPending?.(video))return;buffering = true; stopPrepared(); };
+    const ready = () => { if(video!==videoRef.current)return;buffering = false; sync(); };
     video.addEventListener('waiting', waiting); video.addEventListener('playing', ready); video.addEventListener('canplay', ready);
     const events = ['play', 'pause', 'seeking', 'seeked', 'timeupdate', 'studio-audio-clock-resync'];
     events.forEach(event => video.addEventListener(event, sync));
@@ -128,7 +178,8 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
     return () => { stopClock(); events.forEach(event => video.removeEventListener(event, sync));
       video.removeEventListener('waiting', waiting); video.removeEventListener('playing', ready); video.removeEventListener('canplay', ready);
       preparedSync.current = null;
-      if (!videoRef.current || videoRef.current.paused || videoRef.current.seeking) stopPrepared(); };
+      if ((!videoRef.current || videoRef.current.paused || videoRef.current.seeking) &&
+          !latest.current.isHandoffPending?.(videoRef.current)) stopPrepared(); };
   }, [prepared, requestKey, activeClip, muted, volume, renderedOutputUrl]);
   useEffect(() => {
     const abort = new AbortController();
@@ -182,7 +233,7 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
         const buffer = voiceoverPcmEligible(take, outputTimeMap) && buffers.current.get(key);
         const pcmPlan = buffer && studioCueStartPlan({ contextTime: bus.current.context.currentTime,
           programmeTime: time, cueStart: Number(take.startTime || 0), duration, outputTimeMap });
-        if (video.paused || video.seeking || video.readyState < 2 || take.enabled === false ||
+        if (((video.paused || video.seeking) && !latest.current.isHandoffPending?.(video)) || video.readyState < 2 || take.enabled === false ||
             (elapsed < 0 && !pcmPlan) || elapsed >= duration) {
           audio.pause(); stopPcm(take.id); pinned.current.delete(take.id); return;
         }
@@ -261,9 +312,11 @@ export default forwardRef(function StudioVoiceoverPreview({ takes, videoRef, get
       mounted.forEach(audio => {
         readyEvents.forEach(event => audio.removeEventListener(event, sync));
         const current = videoRef.current;
-        if (!current || current.paused || current.seeking || ![...elements.current.values()].includes(audio)) audio.pause();
+        if (((!current || current.paused || current.seeking) && !latest.current.isHandoffPending?.(current)) ||
+            ![...elements.current.values()].includes(audio)) audio.pause();
       });
-      if (!videoRef.current || videoRef.current.paused || videoRef.current.seeking) pause();
+      if ((!videoRef.current || videoRef.current.paused || videoRef.current.seeking) &&
+          !latest.current.isHandoffPending?.(videoRef.current)) pause();
       syncLatest.current = null;
     };
   }, [takes, videoRef, activeClip, muted, volume, automationKeyframes, renderedOutputUrl, projectId, outputTimeMap, requestKey]);

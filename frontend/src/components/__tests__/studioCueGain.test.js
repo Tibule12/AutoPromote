@@ -1,8 +1,16 @@
-import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan } from '../studioCueGain';
+import { advanceStudioCueStartPlan, scheduleStudioCueGain, scheduleStudioCueRate, studioCueProgrammeTime, studioCueStartPlan, studioOutputCueStart } from '../studioCueGain';
 import { buildStudioOutputTimeMap } from '../studioProjectDocument';
 
 const key = (time, value, easing='linear', curve) => ({time,value,property:'volume',easing,curve});
 const map = rate => buildStudioOutputTimeMap({durationTick:900000,fallbackSpeed:rate});
+test('output PCM cues start and seek on integer music sample anchors without resampling their rate again',()=>{
+ const cue={firstFrame:36000,endFrame:42000},musicState={startedAt:10.922,offset:841/48000};
+ const future=studioOutputCueStart({contextTime:11.5,sampleRate:48000,cue,musicState});
+ expect(Math.round(future.when*48000)).toBe(559415);expect(future.offset).toBe(0);
+ const resumed=studioOutputCueStart({contextTime:11.7,sampleRate:48000,cue,musicState});
+ expect(Math.round(resumed.when*48000)-559415).toBe(Math.round(resumed.offset*48000));
+ expect(studioOutputCueStart({contextTime:12,sampleRate:48000,cue,musicState})).toBeNull();
+});
 const setup = options => {
   const param = { cancelScheduledValues:jest.fn(),setValueAtTime:jest.fn(),linearRampToValueAtTime:jest.fn() };
   const result = scheduleStudioCueGain({param,contextTime:20,programmeStart:0,programmeEnd:2,

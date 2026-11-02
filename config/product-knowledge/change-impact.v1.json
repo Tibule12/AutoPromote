@@ -1121,6 +1121,37 @@
         "frontend/src/components/audio/audioRemixPreview.js"
       ],
       "reason": "Knowledge 1.0.48 source review: native media boosts use a post-effects gain node instead of invalid HTML volume, original source keys override the master fallback as in export, dialogue wings follow original-track controls, inspector changes retain B-roll gain automation, and finished-video monitoring bypasses authored source gain and additional sources. Existing readiness and broader mixed-picture/sound limitations are retained."
+    },
+    {
+      "feature_id": "studio.audio_automation",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/audio/audioRemixPreview.js",
+        "reports/studio-source-audio-clock-20261024/README.md"
+      ],
+      "reason": "Decoded source gain/dialogue clock, stale occurrence guards and wait/seek suspension qualified in scoped tests and a native CPU flow. Retain full-mix, UI clock, listening, colour/edge, latency and formal readiness limits."
+    },
+    {
+      "feature_id": "studio.timeline",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/StudioProTimeline.js",
+        "frontend/src/components/studioPlaybackClock.js",
+        "frontend/src/components/StudioPlaybackPosition.js",
+        "reports/studio-playhead-precision-20261024/README.md"
+      ],
+      "reason": "Document the existing decoder-backed playhead/readouts and source split/trim sampling. Keep native timing failures, inspector/filter and whole picture/sound limits explicit; no readiness promotion."
     }
   ]
 }

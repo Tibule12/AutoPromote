@@ -22,6 +22,16 @@ export function studioCueStartPlan({ contextTime, programmeTime, cueStart, durat
     programmeStart: cueStart + offset };
 }
 
+export function studioOutputCueStart({ contextTime, sampleRate, cue, musicState }) {
+  if (!cue || !musicState || !Number.isFinite(sampleRate) || sampleRate<=0) return null;
+  const anchor=Math.round(musicState.startedAt*sampleRate)-Math.round(musicState.offset*sampleRate);
+  const first=anchor+cue.firstFrame;
+  const whenFrame=Math.max(first,Math.round((contextTime+.01)*sampleRate));
+  const offsetFrame=whenFrame-first;
+  return offsetFrame>=cue.endFrame-cue.firstFrame ? null :
+    {when:whenFrame/sampleRate,offset:offsetFrame/sampleRate};
+}
+
 // Parameter scheduling can cross an audio quantum even with prepared PCM.
 // A start in the past begins immediately; advance its source offset by that
 // elapsed output time so it still shares the song's sample phase.

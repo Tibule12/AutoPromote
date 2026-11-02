@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final source review includes native finished-monitor recovery/full playback, source/master live PCM, B-roll inspector regression and explicit remaining Studio precision limits.",
-  "reviewed_at": "2026-10-24T08:05:47.740Z",
-  "catalog_sha256": "8274c84b3ff871ef5db1e2890b8ef24a5a6ae22774d08fc4a6ef9ca282197e27",
+  "reason": "Final delivery evidence and scoped QA cleanup; original installed runtime preserved",
+  "reviewed_at": "2026-10-26T21:54:49.310Z",
+  "catalog_sha256": "a49a4be7b242a2386779dadea35c0c9900570b16dfc7b7dc5cd198bb204162c0",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
-      "sha256": "098abf6c08f1a9ffe700ce19ffd27b9ba0ad5cf58408a607e11c5d7659512210"
+      "sha256": "7dd4f0c38b0f64dcc84cf396e1d34379020ce067f70db57d1784fa82c5e36d2b"
     },
     {
       "path": "config/model-runtime/registry.v1.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "1d97fa1d8259571492abce8db388da338a72335c6ecb3d17c927f8cfbe1a388b"
+      "sha256": "f0b917694ad1df8cc1cd106605a25b254e762daa1fc88c6e9cd1e77a174b3dce"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -32,6 +32,10 @@
     {
       "path": "contracts/product-knowledge-v1.schema.json",
       "sha256": "5645aeb4644e9ecfca139b504fb993469039b9dc9401204d9709575ff1f3ec5a"
+    },
+    {
+      "path": "docs/STUDIO-HOOK-TEMPLATES.md",
+      "sha256": "1ebc4c380b63fc10440ca4f64f0b94e2175105659d749fdd9febe4366dc62fcc"
     },
     {
       "path": "frontend/src/App.js",
@@ -174,8 +178,12 @@
       "sha256": "be52c7815cd13d80aa0731aea8e95688a981dffff83eed7f021b314564ab87cf"
     },
     {
+      "path": "frontend/src/components/StudioPlaybackPosition.js",
+      "sha256": "943c514d0926f6af2a2e7f8d9d351eb215cadf0ea428804ce2db8dafaa64a374"
+    },
+    {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "a0fe4f8e6fc3d18e70577452c835aaaacfe32aaad19fc9af4ab604f726fa0329"
+      "sha256": "49ff0b16c0070c3bc552f940d2d46fe4363a3f21b427f1c4c71209a1cd70fe06"
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
@@ -195,11 +203,15 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "090cee507d3f394cb5d8af156ab6628e07d3a8372182725181900460a986570a"
+      "sha256": "bbb9e397d807d4e12e9d0068ed65a19e8e7570e41424185ddb3aac8e3d0421b8"
     },
     {
       "path": "frontend/src/components/audio/audioRemixPreview.js",
-      "sha256": "18ab5cedfc4bcf7b30a09ae41cc7219142669f1eb00876020b83393e604437c9"
+      "sha256": "0cb00c18f7a7281e3b6a371aab3fa139faf609700132e52dbf85c774effa88ce"
+    },
+    {
+      "path": "frontend/src/components/audio/studioSourceGainClock.js",
+      "sha256": "6dd64146da0ea6e03bb583beabe333805b9f1c4b042ec499d14686768d8562c7"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -250,6 +262,10 @@
       "sha256": "2b4af60280c282515496dd70a073cdbda43f16fe76c8867d38aff8a973247d4e"
     },
     {
+      "path": "frontend/src/components/studioCueBuffer.js",
+      "sha256": "5b635f2adc7da8c125cd17e56ec91cccba7fdc8e6cc2bfe80ece3e9b1e3ff02f"
+    },
+    {
       "path": "frontend/src/components/studioDirectorEvidenceProposals.js",
       "sha256": "1a20d9393f2fa9c68262d5a4f1149b8adaed66f2c2764ca673f86f6352c8b005"
     },
@@ -268,6 +284,10 @@
     {
       "path": "frontend/src/components/studioGroups.js",
       "sha256": "6a6bd48f43dad807431007956ff3697c0509913ca2c8e74e331e592abd1ca784"
+    },
+    {
+      "path": "frontend/src/components/studioHookTemplate.js",
+      "sha256": "5d681bb10027633e99f0a3c566a483447e9b8634991b277027cfdf1d6c48d7bc"
     },
     {
       "path": "frontend/src/components/studioKeyframeSelection.js",
@@ -318,6 +338,14 @@
       "sha256": "b9f6a7df2b488c17268350e22f997b0e03884070a6de5a48701995813aa0dfb9"
     },
     {
+      "path": "frontend/src/components/studioMusicGain.js",
+      "sha256": "2dd409faddc2d5b22a1a134d0aaf433545a332200ebe35d64402771e1a5c37b8"
+    },
+    {
+      "path": "frontend/src/components/studioPlaybackClock.js",
+      "sha256": "f01da1918e476bd6f63487086c3e88839f0f0ce2ab134f40cf733e6e66721de2"
+    },
+    {
       "path": "frontend/src/components/studioProjectDocument.js",
       "sha256": "1e6cc4fa8ed343f00e0f503a25f8a8e6c63f9dac07b7c16c4fa06c34273b21b1"
     },
@@ -327,7 +355,7 @@
     },
     {
       "path": "frontend/src/components/studioSourcePreview.js",
-      "sha256": "77473868f0709dd49395206761136c46a3353b12c596554b42f1542fdf4a214c"
+      "sha256": "985ca2c475e08f754e62fc981d6a128b185e434098386b13ebb6c7947f26a57f"
     },
     {
       "path": "frontend/src/components/studioSubjectVfxContract.js",
@@ -403,11 +431,11 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "9e4d097e9b3fafea67c7066a192ec376d22eca1be0bc5bf2a558142710c31694"
+      "sha256": "23f83fec86f81308c9303de6940d18ecd0a5716aa191ba18860cbcd0bfdcd12a"
     },
     {
       "path": "python_media_worker/studio_audio.py",
-      "sha256": "586e0e7b18e1c93f308b4099279d64a4af6941def578a43de52aa163ee5546a8"
+      "sha256": "8ce75a92e6e77e4db1f79c39d87b8679088c3ead4f1500721e8346b09000fa2e"
     },
     {
       "path": "python_media_worker/studio_composition.py",
@@ -450,6 +478,14 @@
       "sha256": "b3bece0fe3f653ef88368b3013fbe96ccfd13ed953efa3342fb89eb20186374b"
     },
     {
+      "path": "reports/studio-audio-start-20261026/README.md",
+      "sha256": "425906029d80d5a9a6998e501b0b873f5d712fb66c64eabb88677ceea6eaa0db"
+    },
+    {
+      "path": "reports/studio-hook-templates-20261026/README.md",
+      "sha256": "1b165f53baf983e191d50b00215f89b5450d33e081b1d5e7a7f6cd688f5f9ab6"
+    },
+    {
       "path": "reports/studio-logo-design-20261018/README.md",
       "sha256": "06e3804d90a19930b59ed14422b99c4db135b7706bc0ce394852bf169c670266"
     },
@@ -458,12 +494,28 @@
       "sha256": "669d2f2a2cd780b80c5d598004d3bb8f5e0e827fa94518ac53157a20831e41a1"
     },
     {
+      "path": "reports/studio-mixed-audio-20261025/README.md",
+      "sha256": "be3e0b6379a8d0e6b6b81c8862ac88744d63979c87778d81d30c771f8f5ace84"
+    },
+    {
+      "path": "reports/studio-picture-clock-20261025/README.md",
+      "sha256": "fde900c8d48b22ea01c049e0765e723f40720ada57276badab6f65b6ae9d4c01"
+    },
+    {
+      "path": "reports/studio-playhead-precision-20261024/README.md",
+      "sha256": "fa77d3b27c14ba713f880ec109cda1bb97e7fa236b7c8dcb10374a4ebb9b4ba8"
+    },
+    {
       "path": "reports/studio-preview-gain-20261024/README.md",
       "sha256": "de7fc9ce2b81767f1b8be04cec79168566c525785da1b3d77890e252c30b9605"
     },
     {
       "path": "reports/studio-professional-group-workflow-20261014/README.md",
       "sha256": "aeff96b2daa31071a68a663aee2e7ba8020487096ebcbaeb66646a7f19690080"
+    },
+    {
+      "path": "reports/studio-source-audio-clock-20261024/README.md",
+      "sha256": "2c22061f64eaeeaeab1785c556da8a4c5ae8ddaaca29e21089480f59033a127f"
     },
     {
       "path": "reports/studio-source-parity-repair-20261015/README.md",
@@ -476,6 +528,10 @@
     {
       "path": "reports/studio-text-choreography-20261018/README.md",
       "sha256": "b0ed3d996bd5925eea4deb3602098655b4c4a4453364418f58fe70069b079db4"
+    },
+    {
+      "path": "reports/studio-transition-continuity-20261025/README.md",
+      "sha256": "675b625f28550d24131746e460e6b75adb76e3b208222548ffc889bdc9c33a4e"
     },
     {
       "path": "reports/studio-ui-controls-20261021/README.md",
@@ -635,15 +691,15 @@
     },
     {
       "path": "src/services/studioSourceFrameService.js",
-      "sha256": "d364154b6673e8620f7c1217b1494187ce67c0ba1e3a242820fb14bdc89e55f3"
+      "sha256": "ba848724831838592d06c7e4018bd98f11901a704c54e63f43fae3f1528d513d"
     },
     {
       "path": "src/services/studioSourceService.js",
-      "sha256": "51340a9ea0bd83937334739b6151f1e298131651321cec49eca30f06169c39a6"
+      "sha256": "62bcb1bf8f321b3f396a1e1534e980de51c938e3cdb4468faf0d994f68488353"
     },
     {
       "path": "src/services/studioSubjectVfxService.js",
-      "sha256": "e55cfeade85722ff79b924263f6007e742b372d7b5ab403840fbc81bea64737b"
+      "sha256": "d57ff70fe3e51ef6cccca4ff595f756db536381cbadc8e36e44949eaac076b8a"
     },
     {
       "path": "src/services/uploadAllowance.js",
@@ -659,11 +715,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "711e0697540922965e4228cfdef34e6993e6400689dba78afb5b59608534f764"
+      "sha256": "c2eafc5b0d5f0f6c3ea7e0abaf4b9ff0200a5bd55bfa82122f72af726850c772"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "fe8a6275918ca758f041a6a76f159c1e53dd3a258002f927844e4b2200bf5f99"
+      "sha256": "bdea19f8afaf4d6dc6496e80838ba4446475f3334a9382bd0f3c346befad651a"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

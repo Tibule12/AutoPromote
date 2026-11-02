@@ -51,13 +51,15 @@ test('ducking automation follows the same sample offset and future start as the 
   const param = { cancelScheduledValues: jest.fn(), setValueAtTime: jest.fn() };
   const buffer = { duration: 1.5 };
   const source = { connect: jest.fn(), start: jest.fn() };
-  const context = { currentTime: 10, createBufferSource: () => source };
+  const context = { currentTime: 10, sampleRate: 48000, createBufferSource: () => source };
   const prepared = { sampleRate: 4, duckBuffer: buffer };
   expect(scheduleStudioPreparedDuck(context, param, prepared, { offset: .5, when: 10.01 })).toBe(source);
   expect(param.cancelScheduledValues).toHaveBeenCalledWith(10);
   expect(param.setValueAtTime).toHaveBeenCalledWith(0, 10);
   expect(source.buffer).toBe(buffer); expect(source.connect).toHaveBeenCalledWith(param);
   expect(source.start).toHaveBeenCalledWith(10.01, .5);
+  scheduleStudioPreparedDuck(context, param, prepared, {offset:.500007,when:10.010007});
+  expect(source.start).toHaveBeenLastCalledWith(10.01,.5);
 });
 
 test('the production voice component plays one prepared retimed bus; cut, mute, waiting and Pause retain transport authority', async () => {
@@ -75,26 +77,57 @@ test('the production voice component plays one prepared retimed bus; cut, mute, 
       start: jest.fn(), stop: jest.fn() }; sources.push(node); return node; } };
   window.AudioContext = jest.fn(() => context);
   const buffer = { duration: 2 }, loaded = { key: 'correct-processed-bus', buffer };
+  let reanchor=0, handoff=false;
   const props = { takes: [take], projectId: 'project', outputTimeMap: map, videoRef: { current: video },
+    isHandoffPending: () => handoff,
     getTimelineTime: time => time, getAudioContext: () => context, getOutputPlan: () => ({ when: context.currentTime+.01,
-      offset: .5+context.currentTime-20 }), loadPreparedBus: jest.fn(async () => loaded), muted: false, volume: .4 };
-  let editor;
+      offset: .5+context.currentTime-20+reanchor }), loadPreparedBus: jest.fn(async () => loaded), muted: false, volume: .4 };
+  let editor;const handle=React.createRef();
   try {
-    editor = render(<StudioVoiceoverPreview {...props} />);
+    editor = render(<StudioVoiceoverPreview {...props} ref={handle} />);
     await waitFor(() => expect(sources).toHaveLength(1));
     expect(sources[0].buffer).toBe(buffer);
     expect(sources[0].start).toHaveBeenCalledWith(20.01, .5);
     expect(sources[0].playbackRate.value).toBe(1);
     expect(sources[0].connect.mock.calls[0][0].gain.value).toBe(.4);
     expect(play).not.toHaveBeenCalled(); // Never double the recorded speech.
+    handoff=true;
+    Object.defineProperty(video, 'paused', { configurable: true, value: true });
+    fireEvent.pause(video); fireEvent.waiting(video);
+    Object.defineProperty(video, 'seeking', { configurable: true, value: true });
+    fireEvent.seeking(video);
+    expect(sources[0].stop).not.toHaveBeenCalled();
+    editor.rerender(<StudioVoiceoverPreview {...props} ref={handle} muted />);
+    expect(sources[0].stop).not.toHaveBeenCalled();
+    expect(sources[0].connect.mock.calls[0][0].gain.value).toBe(0);
+    editor.rerender(<StudioVoiceoverPreview {...props} ref={handle} />);
+    expect(sources[0].stop).not.toHaveBeenCalled();
+    Object.defineProperty(video, 'seeking', { configurable: true, value: false });
+    handoff=false;
+    Object.defineProperty(video, 'paused', { configurable: true, value: false });
+    fireEvent.playing(video); expect(sources).toHaveLength(1);
     context.currentTime = 20.1;
-    editor.rerender(<StudioVoiceoverPreview {...props} activeClip={1} muted />);
+    editor.rerender(<StudioVoiceoverPreview {...props} ref={handle} activeClip={1} muted />);
     expect(sources).toHaveLength(1);
     expect(sources[0].connect.mock.calls[0][0].gain.value).toBe(0);
-    fireEvent.waiting(video); expect(sources[0].stop).toHaveBeenCalledTimes(1);
-    fireEvent.playing(video); expect(sources).toHaveLength(2);
+    act(()=>handle.current.stage());expect(sources).toHaveLength(2);
+    expect(sources[1].start).not.toHaveBeenCalled();
+    const nextVideo=document.createElement('video');
+    Object.defineProperties(nextVideo,{paused:{value:false},readyState:{value:4},seeking:{value:false}});
+    props.videoRef.current=nextVideo;reanchor=.2;
+    fireEvent.timeUpdate(video);expect(sources[1].start).not.toHaveBeenCalled();
+    act(()=>handle.current.sync());expect(sources).toHaveLength(2);
+    expect(sources[0].stop.mock.calls[0][0]).toBeCloseTo(20.11,12);
+    expect(sources[0].disconnect).not.toHaveBeenCalled();
+    expect(sources[1].start.mock.calls[0][1]).toBeCloseTo(.8);
+    props.videoRef.current=video;
+    fireEvent.waiting(video); expect(sources[0].stop).toHaveBeenCalledTimes(2);
+    expect(sources[1].stop).toHaveBeenCalledTimes(1);
+    fireEvent.playing(video); expect(sources).toHaveLength(3);
     Object.defineProperty(video, 'paused', { configurable: true, value: true });
-    fireEvent.pause(video); expect(sources[1].stop).toHaveBeenCalledTimes(1);
+    // The picture can already be paused during a prepared handoff. Explicit
+    // Pause must stop speech even if the native element emits no new event.
+    act(() => handle.current.pause()); expect(sources[2].stop).toHaveBeenCalledTimes(1);
   } finally { editor?.unmount(); window.AudioContext = previous; play.mockRestore(); pause.mockRestore(); }
 });
 
