@@ -1818,8 +1818,9 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
     name: "Translate captions to English",
   });
   await expect(translateToEnglish).not.toBeChecked();
+  // Enabling an empty caption preview generates its transcript automatically.
+  // Do not issue a redundant manual generation before checking translation.
   await inspector.getByRole("checkbox", { name: "Preview captions" }).check();
-  await page.getByTestId("generate-live-transcript").click();
   await expect(inspector.getByText(/spoken languages preserved automatically/i)).toBeVisible();
   await expect(inspector.getByRole("textbox", { name: "Caption 1 text" })).toHaveValue(
     /Greetings! This is Unmuted/i
@@ -2909,14 +2910,16 @@ test("records the complete frontend-first creator feature tour without rendering
   const showDemo = async (id, hold = 620, expand = true) => {
     const button = workbench.getByTestId(`creator-demo-${id}`);
     await button.scrollIntoViewIfNeeded();
-    if (["reaction_freeze", "reaction_punch"].includes(id)) {
+    if (["reaction_freeze", "reaction_punch", "micro_freeze", "emoji"].includes(id)) {
       await pausePreview(page);
       await seekOutput(page, 1.2);
       await expect(programme).toHaveJSProperty("seeking", false);
       const showTimeline = page.getByRole("button", { name: "Show timeline", exact: true });
       if (await showTimeline.isVisible()) await showTimeline.click();
       await expect(page.getByTestId("studio-pro-timeline")).toBeVisible();
-      const frozenLayers = page.getByRole("button", { name: "Select Micro-freeze layer", exact: true });
+      await page.getByRole("button", { name: "Composition layers", exact: true }).click();
+      const label = id === "emoji" ? "Reaction emoji" : "Micro-freeze";
+      const frozenLayers = page.getByRole("button", { name: `Select ${label} layer`, exact: true });
       const before = await frozenLayers.count();
       await button.click();
       await expect(frozenLayers).toHaveCount(before + 1);
@@ -2924,7 +2927,42 @@ test("records the complete frontend-first creator feature tour without rendering
       expect(Number(await addedLayer.getAttribute("data-effective-start"))).toBeCloseTo(1.2, 1);
       expect(Number(await addedLayer.getAttribute("data-effective-end"))).toBeGreaterThan(1.2);
       await expect(page.getByTestId("studio-creator-preview-layer")).toHaveCount(0);
-      await expect(page.getByText("Freeze picture added to the editable timeline. Undo restores the complete edit.", { exact: true })).toBeVisible();
+      await expect(page.getByText(`${id === "emoji" ? "Reaction emoji" : "Freeze picture"} added to the editable timeline. Undo restores the complete edit.`, { exact: true })).toBeVisible();
+      await page.getByRole("button", { name: "Sequence tracks", exact: true }).click();
+    } else if (["meme", "stabilization"].includes(id)) {
+      await button.click();
+      const destination = id === "meme" ? "B-roll" : "Cut";
+      await expect(toolRail.getByRole("button", { name: destination, exact: true })).toHaveAttribute("aria-pressed", "true");
+      await expect(inspector).toBeVisible();
+      await page.waitForTimeout(hold);
+      await toolRail.getByRole("button", { name: "Creator FX", exact: true }).click();
+      return;
+    } else if (id === "shake") {
+      await pausePreview(page);
+      await seekOutput(page, 1.2);
+      await button.click();
+      await expect(page.getByText("Impact shake added to the editable timeline. Undo restores the complete edit.", { exact: true })).toBeVisible();
+      await expect(page.getByTestId("studio-creator-preview-layer")).toHaveCount(0);
+      const showKeys = page.getByRole("button", { name: "Show motion keyframes", exact: true });
+      if (await showKeys.isVisible()) await showKeys.click();
+      const expandKeys = page.getByRole("button", { name: "Expand Source video keyframes", exact: true });
+      if (await expandKeys.isVisible()) await expandKeys.click();
+      await expect.poll(() => page.locator("[data-key-id]").count()).toBeGreaterThanOrEqual(18);
+      await page.getByRole("button", { name: "Hide motion keyframes", exact: true }).click();
+    } else if (id === "transition") {
+      // Apply to a real source cut rather than an exploratory browser overlay.
+      const sourceClips = page.locator(".pro-sequence-clip");
+      if (await sourceClips.count() === 1) {
+        await sourceClips.first().locator(".pro-sequence-body").click();
+        await seekOutput(page, 3);
+        await page.getByTestId("pro-quick-split").click();
+        await expect(sourceClips).toHaveCount(2);
+        await toolRail.getByRole("button", { name: "Creator FX", exact: true }).click();
+      }
+      await seekOutput(page, 1.2);
+      await button.click();
+      await expect(page.getByText("Cut transition added to the editable timeline. Undo restores the complete edit.", { exact: true })).toBeVisible();
+      await expect(page.getByTestId("studio-creator-preview-layer")).toHaveCount(0);
     } else {
       await button.click();
       await expect(page.getByTestId("studio-creator-preview-layer")).toHaveAttribute(
@@ -3195,7 +3233,10 @@ test("records the complete frontend-first creator feature tour without rendering
   await pausePreview(page);
 
   // SECTION 12 — clean programme playback in the full-screen monitor.
-  await workbench.getByTestId("creator-clear-preview").click();
+  // Native timeline edits have already cleared the exploratory preview.
+  const clearPreview = workbench.getByTestId("creator-clear-preview");
+  if (await clearPreview.isEnabled()) await clearPreview.click();
+  await expect(page.getByTestId("studio-creator-preview-layer")).toHaveCount(0);
   await toolRail.getByRole("button", { name: "Reframe", exact: true }).click();
   await inspector.getByTestId("reframe-aspect-16-9").click();
   await inspector.getByTestId("reframe-preserve-frame").click();
