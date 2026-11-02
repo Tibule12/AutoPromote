@@ -46,7 +46,7 @@ async function sourceIdentity(ownerUid, scene) {
     storagePath: scene.sourceStoragePath,
     userId: ownerUid,
   });
-  const sourceBucket = getStudioSourceBucket(source.kind);
+  const sourceBucket = getStudioSourceBucket(source.kind, source.bucketName);
   const [metadata] = await sourceBucket.file(source.storagePath).getMetadata();
   if (metadata.metadata?.ownerUid !== ownerUid || Number(metadata.size) !== source.size)
     throw error(

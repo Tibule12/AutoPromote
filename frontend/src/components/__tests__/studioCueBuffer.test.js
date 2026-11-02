@@ -1,4 +1,46 @@
-import { studioCueSourceKey, createStudioCueBuffer, prepareStudioCuePlayback, prepareStudioBuiltInCue } from '../studioCueBuffer';
+import { studioCueSourceKey, createStudioCueBuffer, projectStudioCueBuffer, prepareStudioDecodedCue, prepareStudioCuePlayback, prepareStudioBuiltInCue } from '../studioCueBuffer';
+import { buildStudioOutputTimeMap } from '../studioProjectDocument';
+
+test('retimed imported cues use the worker linear sample clock across a fractional rate boundary',()=>{
+ const sr=48000,context={sampleRate:sr,createBuffer:(channels,length,sampleRate)=>{
+  const data=Array.from({length:channels},()=>new Float32Array(length));
+  return {length,numberOfChannels:channels,sampleRate,duration:length/sampleRate,getChannelData:i=>data[i]};
+ }};
+ const source=context.createBuffer(2,12000,sr);
+ for(let i=0;i<source.length;i++){source.getChannelData(0)[i]=.2*Math.sin(i*.19);source.getChannelData(1)[i]=-.1*Math.cos(i*.31)}
+ const map=buildStudioOutputTimeMap({durationTick:90000,fallbackSpeed:1,
+  programmeSpeedKeys:[{atProgrammeTick:0,rate:1,easing:'hold'},{atProgrammeTick:45015,rate:2,easing:'hold'}]});
+ const cue=projectStudioCueBuffer(context,source,{startTime:.4,duration:.25},map);
+ const first=cue.studioOutputCue.firstFrame;
+ for(let i=0;i<cue.length;i++){
+  const time=(first+i)/sr,programme=time<.5001666666666666?time:.5001666666666666+(time-.5001666666666666)*2;
+  const at=(programme-.4)*sr,left=Math.floor(at),fraction=at-left;
+  const expected=at<0||at>source.length-1?0:source.getChannelData(0)[left]+(source.getChannelData(0)[Math.min(left+1,source.length-1)]-source.getChannelData(0)[left])*fraction;
+  expect(cue.getChannelData(0)[i]).toBeCloseTo(expected,6);
+ }
+ expect(cue.studioOutputCue.outputTimeMap).toBe(map);
+});
+
+test('cue output projection rejects oversized PCM and unsupported channel layouts',()=>{
+ const context={sampleRate:96000,createBuffer:()=>{throw Error('Unexpected allocation')}};
+ const map=[{programmeRange:{startTick:0,endTick:1800000},outputRange:{startTick:0,endTick:18000000},rateNumerator:1,rateDenominator:10}];
+ expect(projectStudioCueBuffer(context,{length:100,numberOfChannels:3},{duration:1},map)).toBeNull();
+ expect(projectStudioCueBuffer(context,{length:720000,numberOfChannels:2},{duration:15},map)).toBeNull();
+});
+
+test('paused preparation reuses the projected PCM at Play and fader edits do not allocate another cue',()=>{
+ const sr=48000,context={sampleRate:sr,createBuffer:jest.fn((channels,length,sampleRate)=>{
+  const data=Array.from({length:channels},()=>new Float32Array(length));
+  return {length,numberOfChannels:channels,sampleRate,duration:length/sampleRate,getChannelData:i=>data[i]};
+ })};
+ const route={decoded:context.createBuffer(2,12000,sr),cues:new Map()},effect={startTime:1.5,duration:.25,trimStart:0,fadeIn:0,fadeOut:0};
+ const map=buildStudioOutputTimeMap({durationTick:540000,fallbackSpeed:2});
+ const prepared=prepareStudioDecodedCue(context,route,effect,map),count=context.createBuffer.mock.calls.length;
+ expect(prepareStudioDecodedCue(context,route,{...effect,volume:.1},map)).toBe(prepared);
+ expect(context.createBuffer).toHaveBeenCalledTimes(count);
+ expect(prepared.duration).toBe(.125);
+ expect(prepareStudioDecodedCue(context,route,{...effect,startTime:2},map)).not.toBe(prepared);
+});
 
 test('built-in attacks are prepared once before Play and only changed PCM inputs require another buffer',()=>{
   const context={sampleRate:48000,createBuffer:jest.fn((_channels,length,sampleRate)=>{

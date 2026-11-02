@@ -2,6 +2,7 @@ import React from "react";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioSequenceClip from './StudioSequenceClip';
 import { normalizeSplitAudioClip } from './studioAudioSplit';
+import { StudioTimelinePosition, useStudioPlayheadDisplay } from "./StudioPlaybackPosition";
 import StudioControlMenu from "./StudioControlMenu";
 import StudioGroupTimelineClip from "./StudioGroupTimelineClip";
 import StudioKeyframeActions from "./StudioKeyframeActions";
@@ -828,6 +829,7 @@ export default function StudioProTimeline({
   duration,
   playbackRate = 1,
   playhead,
+  playbackClock,
   zoom,
   onZoomChange,
   editTool,
@@ -996,7 +998,7 @@ export default function StudioProTimeline({
   const copyKeys = () => setCopiedMotionKeys(JSON.parse(JSON.stringify(chosenKeys)));
   const pasteKeys = () => {
     const result = onEditMotionKeyframes?.(chosenKeys.map(key => key.id), 'paste', {
-      value: Number(playhead || 0), clipboard: copiedMotionKeys, ...(pasteTargetId ? { pasteTargetId } : {}),
+      value: Number(playbackClock?.read()?.programmeTime ?? playhead ?? 0), clipboard: copiedMotionKeys, ...(pasteTargetId ? { pasteTargetId } : {}),
     });
     if (!Array.isArray(result)) return;
     setSelectedMotionKeys(new Set(result));
@@ -1016,6 +1018,8 @@ export default function StudioProTimeline({
     return key.time + delta;
   };
   const safeZoom = Math.max(1, Math.min(32, Number(zoom || 1)));
+  const clockDisplayRef = React.useRef(null);
+  useStudioPlayheadDisplay(clockDisplayRef, playbackClock, safeDuration);
   const playheadRef = React.useRef(0);
   playheadRef.current = Number(playhead || 0);
   React.useLayoutEffect(() => {
@@ -1066,9 +1070,6 @@ export default function StudioProTimeline({
                 ? "Multi-Camera"
                 : "Reframe off",
     }));
-  const activeFraming = framingItems.find(
-    cut => Number(playhead || 0) >= cut.time && Number(playhead || 0) < cut.time + cut.duration
-  );
   const sourceSequence = (timelineSegments || []).reduce((sequence, item, index) => {
     const start = Number(item.startRequest ?? item.start_time ?? item.start ?? 0);
     const end = Number(item.endRequest ?? item.end_time ?? item.end);
@@ -1253,7 +1254,7 @@ export default function StudioProTimeline({
   };
 
   return (
-    <section className={`studio-pro-timeline${layerView ? ' is-layer-view' : ''}`} data-testid="studio-pro-timeline" onKeyDown={event => {
+    <section ref={clockDisplayRef} className={`studio-pro-timeline${layerView ? ' is-layer-view' : ''}`} data-testid="studio-pro-timeline" onKeyDown={event => {
       if (!showMotionKeys || !onEditMotionKeyframes || !(event.ctrlKey || event.metaKey) ||
           event.target.closest('input,select,textarea,[contenteditable="true"]')) return;
       if (event.key.toLowerCase() === 'c' && chosenKeys.length) {
@@ -2082,12 +2083,8 @@ export default function StudioProTimeline({
         <span>{editTool} tool</span>
         <span>{snapping ? "Magnetic snapping" : "Free movement"}</span>
         <span>{linkedSelection ? "Audio/video linked" : "Audio/video independent"}</span>
-        <strong data-testid="pro-current-edit">
-          {timecode(playhead / displayRate)}
-          {activeFraming
-            ? ` · ${activeFraming.name} · ${timecode(activeFraming.time / displayRate)}–${timecode((activeFraming.time + activeFraming.duration) / displayRate)}`
-            : ""}
-        </strong>
+        <StudioTimelinePosition clock={playbackClock} playhead={playhead} displayRate={displayRate}
+          framingItems={framingItems} format={timecode} />
       </footer>
     </section>
   );

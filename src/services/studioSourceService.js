@@ -33,14 +33,20 @@ const getStudioSourcePathKind = (storagePath, userId, allowMedia = false) => {
   return null;
 };
 
-const getStudioSourceBucket = kind => {
-  if (kind === "durable_studio" || kind === "legacy_studio") {
-    const bucketName = String(
-      process.env.MULTICAM_INGEST_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || ""
-    ).replace(/^gs:\/\//, "").replace(/\/$/, "");
-    return bucketName ? admin.storage().bucket(bucketName) : admin.storage().bucket();
+const bucketName = value => String(value || "").trim().replace(/^gs:\/\//, "").replace(/\/$/, "");
+const getStudioSourceBucket = (kind, resolvedBucketName) => {
+  const studio = kind === "durable_studio" || kind === "legacy_studio";
+  const preferred = studio
+    ? bucketName(process.env.MULTICAM_INGEST_BUCKET || process.env.FIREBASE_STORAGE_BUCKET)
+    : "";
+  if (resolvedBucketName) {
+    const allowed = [preferred, bucketName(process.env.FIREBASE_STORAGE_BUCKET),
+      admin.storage().bucket().name].filter(Boolean);
+    if (!allowed.includes(resolvedBucketName))
+      throw sourceError(403, "STUDIO_SOURCE_FORBIDDEN", "Choose a video uploaded to your Studio project");
+    return admin.storage().bucket(resolvedBucketName);
   }
-  return admin.storage().bucket();
+  return preferred ? admin.storage().bucket(preferred) : admin.storage().bucket();
 };
 
 async function resolveOwnedStudioSource({ storagePath, userId, signRead = true }, allowMedia) {
@@ -50,16 +56,30 @@ async function resolveOwnedStudioSource({ storagePath, userId, signRead = true }
     throw sourceError(403, "STUDIO_SOURCE_FORBIDDEN", "Choose a video uploaded to your Studio project");
   }
 
-  const file = getStudioSourceBucket(kind).file(path);
-  let metadata;
-  try {
-    [metadata] = await file.getMetadata();
-  } catch (error) {
-    if (Number(error?.code || error?.statusCode) === 404) {
-      throw sourceError(404, "STUDIO_SOURCE_MISSING", "A Studio source is missing. Upload it again before exporting");
-    }
-    throw sourceError(503, "STUDIO_SOURCE_UNAVAILABLE", "Could not check a Studio source. Try again shortly");
+  const preferredBucket = getStudioSourceBucket(kind);
+  const buckets = [preferredBucket];
+  // Older Studio projects retain object paths from the main bucket. Moving
+  // new uploads to a dedicated ingest bucket must not strand those sources.
+  if ((kind === "durable_studio" || kind === "legacy_studio") && process.env.MULTICAM_INGEST_BUCKET) {
+    const mainName = bucketName(process.env.FIREBASE_STORAGE_BUCKET);
+    const mainBucket = mainName ? admin.storage().bucket(mainName) : admin.storage().bucket();
+    if (mainBucket.name !== preferredBucket.name) buckets.push(mainBucket);
   }
+  let file, metadata, resolvedBucket;
+  for (const candidate of buckets) {
+    const candidateFile = candidate.file(path);
+    try {
+      [metadata] = await candidateFile.getMetadata();
+      file = candidateFile;
+      resolvedBucket = candidate.name || candidateFile.bucket?.name;
+      break;
+    } catch (error) {
+      if (Number(error?.code || error?.statusCode) !== 404)
+        throw sourceError(503, "STUDIO_SOURCE_UNAVAILABLE", "Could not check a Studio source. Try again shortly");
+    }
+  }
+  if (!metadata)
+    throw sourceError(404, "STUDIO_SOURCE_MISSING", "A Studio source is missing. Upload it again before exporting");
 
   const custom = metadata?.metadata || {};
   if (custom.ownerUid !== userId) {
@@ -91,14 +111,14 @@ async function resolveOwnedStudioSource({ storagePath, userId, signRead = true }
 
   // Local deterministic decoding needs the owned object/generation, not a
   // remotely signed URL. Keep the same authorization checks in both paths.
-  if (!signRead) return { storagePath: path, size, contentType, kind, generation: metadata.generation };
+  if (!signRead) return { storagePath: path, size, contentType, kind, generation: metadata.generation, ...(resolvedBucket ? { bucketName: resolvedBucket } : {}) };
 
   try {
     const [signedUrl] = await file.getSignedUrl({
       action: "read",
       expires: Date.now() + SIGNED_READ_HOURS * 60 * 60 * 1000,
     });
-    return { storagePath: path, signedUrl, size, contentType, kind, generation: metadata.generation };
+    return { storagePath: path, signedUrl, size, contentType, kind, generation: metadata.generation, ...(resolvedBucket ? { bucketName: resolvedBucket } : {}) };
   } catch (_error) {
     throw sourceError(503, "STUDIO_SOURCE_UNAVAILABLE", "Could not prepare a Studio source. Try again shortly");
   }

@@ -1,6 +1,8 @@
 // Ripple edits use the retained programme clock; captions remain source-timed
 // and are remapped separately by mapCaptionSegmentsToTimeline.
-export const rippleTimedItems = (items, from, to, createId) => {
+import { retainStudioVoiceoverFade } from "./studioAudioFades";
+
+export const rippleTimedItems = (items, from, to, createId, { preserveVoiceFade = false } = {}) => {
   if (!(to > from)) return items;
   const removed = to - from;
   return items.flatMap(item => {
@@ -11,7 +13,9 @@ export const rippleTimedItems = (items, from, to, createId) => {
     if (end <= from) return [item];
     if (start >= to) return [{ ...item, startTime: start - removed }];
     const pieces = [];
-    if (start < from) pieces.push({ ...item, duration: from - start });
+    if (start < from) pieces.push({ ...item, duration: from - start,
+      ...(preserveVoiceFade ? retainStudioVoiceoverFade(item, 0) : {}),
+    });
     if (end > to) {
       const skipped = to - start;
       pieces.push({
@@ -22,9 +26,10 @@ export const rippleTimedItems = (items, from, to, createId) => {
         ...(item.type === "video"
           ? { sourceStartTime: Number(item.sourceStartTime || 0) + skipped }
           : {}),
-        ...(item.trimStart !== undefined
+        ...(item.trimStart !== undefined || preserveVoiceFade
           ? { trimStart: Number(item.trimStart || 0) + skipped }
           : {}),
+        ...(preserveVoiceFade ? retainStudioVoiceoverFade(item, skipped) : {}),
       });
     }
     return pieces;

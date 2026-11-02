@@ -161,7 +161,7 @@ def build_volume_filter(items, duration, speed_plan=None):
     segments = []
     for left, right in zip(points, points[1:]):
         slope = (right["value"]-left["value"])/max(.000001, right["time"]-left["time"])
-        segment = f"{left['value']:.6f}+({slope:.8f})*(t-{left['time']:.6f})"
+        segment = f"{left['value']:.6f}+({slope:.8f})*((n/s)-{left['time']:.17g})"
         if right["easing"] == "hold":
             segment = f"{left['value']:.6f}"
         segments.append(segment)
@@ -174,11 +174,11 @@ def build_volume_filter(items, duration, speed_plan=None):
             return segments[first]
         middle = (first + last) // 2
         boundary = points[middle + 1]['time']
-        return (f"if(lt(t,{boundary:.6f}),{select_segment(first, middle)},"
+        return (f"if(lt(n/s,{boundary:.17g}),{select_segment(first, middle)},"
                 f"{select_segment(middle + 1, last)})")
     expression = select_segment(0, len(segments) - 1)
-    expression = f"if(lt(t,{points[0]['time']:.6f}),{points[0]['value']:.6f},{expression})"
-    # WAV decoder blocks can span 20–40ms. Evaluate the envelope on small
-    # unpadded blocks so sharp editable fades do not trail their authored time.
-    # p=0 retains the exact final sample count instead of extending the tail.
-    return f"asetnsamples=n=64:p=0,volume='{expression}':eval=frame", points
+    expression = f"if(lt(n/s,{points[0]['time']:.17g}),{points[0]['value']:.6f},{expression})"
+    # A frame-evaluated volume still holds the gain for a whole decoder block,
+    # even after splitting it into 64-sample chunks. Evaluate this same bounded
+    # envelope at each sample; preserve channel layout, length and Hold edges.
+    return f"aeval=exprs='val(ch)*({expression})':c=same", points

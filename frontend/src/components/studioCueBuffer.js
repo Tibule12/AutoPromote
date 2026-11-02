@@ -1,4 +1,5 @@
 import { synthesizeEffect } from './motion/soundDesign';
+import { mapStudioContinuousSeconds } from './studioTime';
 
 // Generate cue PCM before the transport clock starts. Synthesizing a whoosh
 // on its play event can consume its attack while the picture/music advance.
@@ -72,4 +73,55 @@ export function createStudioCueBuffer(context, decoded, effect) {
     }
   }
   return buffer;
+}
+
+// write_sound_mix samples imported/SFX PCM with linear interpolation on the
+// canonical output clock. Browser playbackRate uses a different resampler and
+// k-rate changes, so even a correctly timed 2x cue can have a different phase.
+// Project those same source samples once; transport plays this transient PCM
+// at 1x. Authored source trim, timing, fades and editable bus gain stay intact.
+export function projectStudioCueBuffer(context, source, effect, outputTimeMap) {
+  const rate=Number(context?.sampleRate), channels=Number(source?.numberOfChannels);
+  if (!outputTimeMap?.length || outputTimeMap.length>4096 || !Number.isFinite(rate) ||
+      !(source?.length>0) || !(channels>=1 && channels<=2)) return null;
+  const programmeStart=Math.max(0,Number(effect.startTime)||0);
+  const programmeEnd=programmeStart+Math.max(.05,Math.min(15,Number(effect.duration)||2));
+  const firstFrame=Math.ceil(mapStudioContinuousSeconds(outputTimeMap,programmeStart,'programme')*rate);
+  const endFrame=Math.ceil(mapStudioContinuousSeconds(outputTimeMap,programmeEnd,'programme')*rate);
+  const count=endFrame-firstFrame;
+  if (!(count>0 && count<=4000000)) return null;
+  const buffer=context.createBuffer(channels,count,rate);
+  let segmentIndex=0, outputStart=0;
+  const segments=outputTimeMap.map(segment=>{
+    const start=segment.programmeRange.startTick/90000,end=segment.programmeRange.endTick/90000;
+    const speed=segment.rateNumerator/segment.rateDenominator;
+    const result={start,end,speed,outputStart,outputEnd:outputStart+(end-start)/speed};
+    outputStart=result.outputEnd;return result;
+  });
+  const inputs=Array.from({length:channels},(_,i)=>source.getChannelData(i));
+  const outputs=Array.from({length:channels},(_,i)=>buffer.getChannelData(i));
+  for(let i=0;i<count;i++) {
+    const time=(firstFrame+i)/rate;
+    while(segmentIndex<segments.length-1 && time>=segments[segmentIndex].outputEnd) segmentIndex++;
+    const segment=segments[segmentIndex];
+    const position=(segment.start+(time-segment.outputStart)*segment.speed-programmeStart)*rate;
+    if(position<0 || position>source.length-1) continue;
+    const left=Math.floor(position),fraction=position-left,right=Math.min(source.length-1,left+1);
+    for(let channel=0;channel<channels;channel++)
+      outputs[channel][i]=inputs[channel][left]+(inputs[channel][right]-inputs[channel][left])*fraction;
+  }
+  buffer.studioOutputCue={firstFrame,endFrame,outputTimeMap};
+  return buffer;
+}
+
+export function prepareStudioDecodedCue(context, route, effect, outputTimeMap) {
+  if (!route?.decoded || !route.cues) return null;
+  const key=JSON.stringify([effect.trimStart,effect.duration,effect.fadeIn,effect.fadeOut,
+    outputTimeMap && effect.startTime,outputTimeMap || null]);
+  if(route.cues.has(key)) return route.cues.get(key);
+  let buffer=createStudioCueBuffer(context,route.decoded,effect);
+  if(!buffer) return null;
+  if(outputTimeMap) buffer=projectStudioCueBuffer(context,buffer,effect,outputTimeMap) || buffer;
+  if(route.cues.size>=8) route.cues.clear();
+  route.cues.set(key,buffer);return buffer;
 }

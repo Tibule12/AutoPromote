@@ -12,7 +12,8 @@ export const voiceoverTrackAudible = states => isStudioAudioTrackAudible(states,
 // Final speech uses sequential FFmpeg afade filters. Their gains multiply;
 // a fade longer than a take starts at zero, rather than ending prematurely.
 export function voiceoverFadeGain(take, elapsed) {
-  return studioAudioFadeGain(elapsed, voiceoverDuration(take), take.fadeIn, take.fadeOut);
+  return studioAudioFadeGain(elapsed + Math.max(0, finite(take.fadeOffset, 0)),
+    finite(take.fadeDuration, voiceoverDuration(take)), take.fadeIn, take.fadeOut);
 }
 
 // Native media time-stretching remains necessary for retimed speech. Short
@@ -46,6 +47,8 @@ export function voiceoverPcmKey(projectId, take) {
     voiceoverDuration(take),
     take.fadeIn || 0,
     take.fadeOut || 0,
+    take.fadeOffset || 0,
+    take.fadeDuration ?? voiceoverDuration(take),
   ]);
 }
 
@@ -110,6 +113,7 @@ export async function uploadVoiceoversForRender(takes, { upload, token, audible 
           volume: voiceoverGain(take.volume),
           fadeIn: Math.max(0, finite(take.fadeIn, 0)),
           fadeOut: Math.max(0, finite(take.fadeOut, 0)),
+          ...(take.fadeDuration !== undefined ? { fadeOffset: take.fadeOffset, fadeDuration: take.fadeDuration } : {}),
           enabled: true,
         };
       })
