@@ -101,9 +101,12 @@ test("3D renderer cannot be advertised as a production GPU, native 1080p or univ
 
 test("every normalized 3D scene field has an explicit parity classification", () => {
   const scene = normalizeStudio3DScene(createStudio3DScene("neon_logo", 1, "parity"));
-  expect(Object.keys(STUDIO_3D_FIELD_PARITY).sort()).toEqual(
-    [...Object.keys(scene), "renderedOpacity"].sort()
-  );
+  const video = normalizeStudio3DScene({ ...scene, assetType: "video", assetSourceStart: 2,
+    assetAspect: 16 / 9, assetContentHash: "a".repeat(64) });
+  const objects = normalizeStudio3DScene(createStudio3DScene("object_scene", 1, "object-parity"));
+  const fields = new Set([scene, video, objects].flatMap(item => Object.keys(item)));
+  fields.add("renderedOpacity");
+  expect(Object.keys(STUDIO_3D_FIELD_PARITY).sort()).toEqual([...fields].sort());
   for (const parity of Object.values(STUDIO_3D_FIELD_PARITY)) {
     expect(["exact", "approximate", "unsupported"]).toContain(parity.status);
     expect(parity.reason.length).toBeGreaterThan(12);

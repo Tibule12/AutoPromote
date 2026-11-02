@@ -11,7 +11,8 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 // the running renderer always receives the original in-memory options.
 function encodeStudioJobOptions(options) {
   const bytes = Buffer.from(JSON.stringify(options));
-  if (bytes.length <= INLINE_BYTES || options?.renderViral !== true) return { options };
+  const denseGrade = Array.isArray(options?.viralData?.grade?.data) && options.viralData.grade.data.length >= 1024;
+  if ((bytes.length <= INLINE_BYTES && !denseGrade) || options?.renderViral !== true) return { options };
   if (bytes.length > MAX_BYTES) throw Error('Studio job options exceed the 4 MiB archive limit.');
   const data = gzipSync(bytes);
   if (data.length > MAX_ARCHIVE_BYTES) throw Error('Studio job options exceed the 768 KiB compressed archive limit.');
@@ -25,6 +26,16 @@ function encodeStudioJobOptions(options) {
 
 function decodeStudioJobOptions(record) {
   const archive = record?.optionsArchive;
+  if (!archive && record?.optionsPayloadEncoding !== undefined) {
+    if (record.optionsPayloadEncoding !== 'gzip-json-v1' || !Buffer.isBuffer(record.optionsPayload) ||
+        record.optionsPayload.length > MAX_ARCHIVE_BYTES || !/^[a-f0-9]{64}$/.test(record.optionsPayloadSha256 || ''))
+      throw Error('Invalid persisted Studio render settings.');
+    const raw = gunzipSync(record.optionsPayload, { maxOutputLength: 8 * 1024 * 1024 });
+    if (hash(raw) !== record.optionsPayloadSha256) throw Error('Persisted Studio render settings changed.');
+    const options = JSON.parse(raw.toString('utf8'));
+    if (options?.renderViral !== true) throw Error('Invalid persisted Studio render kind.');
+    return options;
+  }
   if (!archive) return record?.options;
   if (archive.encoding !== 'gzip-json-v1' || !Number.isSafeInteger(archive.bytes) ||
       archive.bytes < 1 || archive.bytes > MAX_BYTES || !/^[a-f0-9]{64}$/.test(archive.sha256 || '') ||

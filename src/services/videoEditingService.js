@@ -7,7 +7,7 @@ const { captionTranscriptionOptions } = require("./captionTranscriptionOptions")
 const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
 const fs = require("fs");
-const { encodeStudioJobOptions } = require('./studioJobOptions');
+const { encodeStudioJobOptions, decodeStudioJobOptions } = require('./studioJobOptions');
 const { isTransientWorkerOutput, persistWorkerOutput, persistWorkerBucketOutput } = require("./studioWorkerOutputService");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 const { deductCredits, refundCredits } = require("../creditSystem");
@@ -134,6 +134,7 @@ function getMulticamExpiryIso(fromMs = Date.now()) {
 const { v4: uuidv4 } = require("uuid");
 
 class VideoEditingService {
+  static readProcessingOptions(record) { return decodeStudioJobOptions(record); }
   async assertRenderWorkerReady() {
     require("./unifiedCredits/application").assertApplicationTransport(MEDIA_WORKER_URL);
     try {

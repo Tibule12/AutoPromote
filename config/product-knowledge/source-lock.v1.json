@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Hardened media URL sinks, local preview request rates/path confinement and owner-prefix matching; canonical freeze/hold checks preserve current native behavior; no readiness promotion.",
-  "reviewed_at": "2026-11-02T17:39:10.026Z",
+  "reason": "Integration review preserves dense-grade job archives and legacy decode compatibility, optional 3D field parity and product retirement; no financial or readiness changes.",
+  "reviewed_at": "2026-11-02T17:42:34.153Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {

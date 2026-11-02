@@ -101,12 +101,17 @@ describe("video editing viral render attempt claim", () => {
     await service.startProcessingJob("https://example.com/source.mp4",options,"owner-1",attempt);
     const stored=mockDocs.get(attempt.jobId);
     expect(stored.options).toEqual({renderViral:true,viralData:{brand_watermark:{text:"AutoPromote"}}});
-    expect(stored.optionsPayloadEncoding).toBe("gzip-json-v1");
-    expect(Buffer.isBuffer(stored.optionsPayload)).toBe(true);
+    expect(stored.optionsArchive.encoding).toBe("gzip-json-v1");
+    expect(Buffer.isBuffer(stored.optionsArchive.data)).toBe(true);
     expect(VideoEditingService.readProcessingOptions(stored)).toEqual(options);
     expect(service.processJobBackground.mock.calls[0][2]).toBe(options);
-    expect(()=>VideoEditingService.readProcessingOptions({...stored,optionsPayloadSha256:"0".repeat(64)})).toThrow(/changed/);
+    expect(()=>VideoEditingService.readProcessingOptions({...stored,optionsArchive:{...stored.optionsArchive,sha256:"0".repeat(64)}})).toThrow(/identity mismatch/);
     expect(VideoEditingService.readProcessingOptions({options:{legacy:true}})).toEqual({legacy:true});
+    const bytes=Buffer.from(JSON.stringify(options)), legacy={optionsPayloadEncoding:'gzip-json-v1',
+      optionsPayload:require('node:zlib').gzipSync(bytes),
+      optionsPayloadSha256:require('node:crypto').createHash('sha256').update(bytes).digest('hex')};
+    expect(VideoEditingService.readProcessingOptions(legacy)).toEqual(options);
+    expect(()=>VideoEditingService.readProcessingOptions({...legacy,optionsPayloadSha256:'0'.repeat(64)})).toThrow(/changed/);
   });
 
   it("refunds a charged viral job when the background worker fails", async () => {
