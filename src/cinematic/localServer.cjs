@@ -37,25 +37,30 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
   const versions = { blender: fs.existsSync(blender) ? execFileSync(blender, ["--version"], { encoding: "utf8", timeout: 10000 }).split("\n")[0] : "unavailable",
     ffmpeg: execFileSync("ffmpeg", ["-version"], { encoding: "utf8", timeout: 10000 }).split("\n")[0] };
   const gpuProbe = spawnSync("nvidia-smi", ["--query-gpu=name,memory.total", "--format=csv,noheader"], { encoding: "utf8", timeout: 2000 });
+  const localGraphics = process.env.CINEMATIC_LOCAL_GRAPHICS === "eevee";
+  const renderer = localGraphics ? "blender_eevee_local" : "blender_cycles_cpu";
   const gpu = { probe: "local_nvidia_smi", detected: gpuProbe.status === 0 ? gpuProbe.stdout.trim().split("\n").filter(Boolean) : [],
-    selected: false, reason: "This adapter enforces CPU execution; cloud/GPU dispatch is disabled" };
-  const capabilities = () => ({ version: 1, renderer: "blender_cycles_cpu", available: versions.blender !== "unavailable", versions,
-    execution: "local_cpu", gpuEnabled: false, cpuThreads: threads, maxSeconds, maxDuration: 10,
+    selected: localGraphics, reason: localGraphics ? "Explicit local graphics execution on this computer; no cloud dispatch" : "CPU execution; cloud dispatch disabled" };
+  const capabilities = () => ({ version: 1, renderer, available: versions.blender !== "unavailable", versions,
+    execution: localGraphics ? "local_graphics" : "local_cpu", gpuEnabled: localGraphics, cpuThreads: threads, maxSeconds, maxDuration: 10,
     cpu: { architecture: os.arch(), logicalCores: os.availableParallelism(), threadLimit: threads }, gpu,
     profiles: PROFILES, programmeAvailable: !!programmeRuntime, programmeRuntime,
     programmeProfile: { width: 1280, height: 720, fps: 24, maxDuration: 60 },
     externalCharges: 0, currency: "USD", cloudEnabled: false });
   function register(file, name) {
     const stat = fs.statSync(file);
-    if (!stat.isFile() || stat.size < 1 || stat.size > 128 * 1024 ** 2) throw new Error("Local media must be 1 byte–128 MB");
+    if (!stat.isFile() || stat.size < 1 || stat.size > 512 * 1024 ** 2) throw new Error("Local media exceeds 512 MB");
     const id = hash(fs.readFileSync(file));
     const target = path.join(directory, "assets", id + ".media");
     const probe = JSON.parse(execFileSync("ffprobe", ["-v", "error", "-protocol_whitelist", "file,pipe", "-format_whitelist", "mov,matroska,webm,avi,mpegts",
-      "-show_entries", "format=duration:stream=codec_type,width,height", "-of", "json", file], { encoding: "utf8", timeout: 15000, maxBuffer: 1024 ** 2 }));
+      "-show_entries", "format=duration:stream=codec_type,codec_name,pix_fmt,width,height", "-of", "json", file], { encoding: "utf8", timeout: 15000, maxBuffer: 1024 ** 2 }));
     const video = probe.streams.find(stream => stream.codec_type === "video");
     const duration = Number(probe.format.duration);
     if (!video || !Number.isFinite(duration) || duration < 4 || duration > 86400 || video.width * video.height > 3840 * 2160)
       throw new Error("Unsupported video; use a 4s–24h video up to UHD");
+    if (stat.size > 128 * 1024 ** 2 && !(video.codec_name === "qtrle" && video.pix_fmt === "argb" &&
+        duration <= 30 && video.width <= 1280 && video.height <= 720))
+      throw new Error("Only bounded lossless alpha video may exceed 128 MB");
     if (!fs.existsSync(target)) fs.copyFileSync(file, target, fs.constants.COPYFILE_EXCL);
     const asset = { id, name: String(name || path.basename(file)).replace(/[<>\x00-\x1f]/g, "").slice(0, 120), duration,
       width: video.width, height: video.height, hasAudio: probe.streams.some(stream => stream.codec_type === "audio"), bytes: stat.size };
@@ -101,7 +106,7 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
       if (offset + scene.duration > asset.duration + .001) throw new Error(`${role} source is too short for this duration/offset`);
       media[role] = { ...asset, offset };
     }
-    const identity = { version: 1, graph, quality, profile: PROFILES[quality], fps: 24,
+    const identity = { version: 1, graph, quality, profile: { ...PROFILES[quality], ...(localGraphics ? { samples: 16 } : {}) }, renderer, fps: 24,
       assetHashes: Object.fromEntries(Object.entries(media).map(([role, asset]) => [role, asset.id])),
       builderHash: hash(fs.readFileSync(builder)), runnerHash: hash(fs.readFileSync(runner)), fontHash: hash(fs.readFileSync(font)), versions,
       disclosure: scene.cinematic.content.disclosure, threads };
@@ -163,6 +168,8 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
     const child = spawn(interpreter, [executable, path.join(work, "manifest.json")], { cwd: work, detached: true,
       env: { PATH: process.env.PATH, LANG: "C.UTF-8", HOME: work, OMP_NUM_THREADS: String(threads),
         CUDA_VISIBLE_DEVICES: "", HIP_VISIBLE_DEVICES: "", OPENBLAS_NUM_THREADS: "1",VIDEO_ENCODER:"libx264",
+        ...(identity.renderer === "blender_eevee_local" ? { __NV_PRIME_RENDER_OFFLOAD: "1", __GLX_VENDOR_LIBRARY_NAME: "nvidia",
+          __EGL_VENDOR_LIBRARY_FILENAMES: "/usr/share/glvnd/egl_vendor.d/10_nvidia.json", XDG_CACHE_HOME: path.join(directory, "graphics-cache") } : {}),
         FIREBASE_STATUS_UPDATES_ENABLED:"false",HF_HUB_OFFLINE:"1",HF_HUB_DISABLE_TELEMETRY:"1" }, stdio: ["ignore", "pipe", "pipe"] });
     const log = fs.createWriteStream(path.join(work, "worker.log"));
     let buffer = "", ended = false;
@@ -234,7 +241,7 @@ function createLocalEngine({ directory, blender, maxSeconds = 3600, threads = 4 
     plan: intent => planCinematicIntent(intent, assets()) };
 }
 
-async function body(req, limit = 128 * 1024 ** 2) {
+async function body(req, limit = 512 * 1024 ** 2) {
   const chunks = []; let size = 0;
   for await (const chunk of req) { size += chunk.length; if (size > limit) throw new Error("Request too large"); chunks.push(chunk); }
   return Buffer.concat(chunks);
@@ -315,7 +322,7 @@ if (require.main === module) {
   const port = Number(process.env.CINEMATIC_PORT || 6341);
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid loopback port");
   const server = createLocalServer(engine, { port, build: path.join(ROOT, "reports/cinematic-evidence-20261031/local-app") });
-  server.listen(port, "127.0.0.1", () => console.log(`Local Studio: http://127.0.0.1:${port} | CPU only | external cost $0`));
+  server.listen(port, "127.0.0.1", () => console.log(`Local Studio: http://127.0.0.1:${port} | ${engine.capabilities().renderer} | external cost $0`));
   for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => { engine.shutdown(); server.close(() => process.exit(0)); });
 }
 module.exports = { createLocalEngine, createLocalServer, stable, hash };

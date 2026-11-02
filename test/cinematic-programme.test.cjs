@@ -29,11 +29,14 @@ test("local programme uses actual canonical cuts, Inter title compositor, source
     const media = engine.register(source), state = snapshot(media);
     state.overlays = [{ id: "ordinary-title", type: "text", text: "CANONICAL TITLE", startTime: 1, duration: 2,
       x: 50, y: 50, width: 70, fontFamily: "Inter", color: "#ffffff", fontWeight: 900 }];
+    state.soundEffects = [{ id: "native-reveal", builtIn: true, kind: "sfx", tone: "cinematic_hit",
+      startTime: 1, duration: .7, volume: .1, fadeIn: .01, fadeOut: .15 }];
     const d = document(state), job = engine.submitProgramme(d);
     for (let i = 0; i < 240 && !["completed", "failed", "cancelled"].includes(engine.status(job.id).status); i++) await wait(150);
     const done = engine.status(job.id);
     assert.equal(done.status, "completed", done.error);
     assert.equal(done.receipt.frames, 96); assert.equal(done.receipt.duration, 4);
+    assert.equal(done.receipt.nativeSoundCues[0].tone, "cinematic_hit");
     assert.equal(done.receipt.embeddedSceneAudioMixed, false);
     assert.equal(done.receipt.audioSource, "original_programme_bus");
     assert.equal(done.receipt.probe.streams.filter(s => s.codec_type === "audio").length, 1);

@@ -1,4 +1,4 @@
-import { createCinematicParameters } from "./cinematicContract";
+import { createCinematicParameters, PODCAST_PRESET } from "./cinematicContract";
 import { normalizeStudio3DScene, studio3DSceneRevision } from "./studio3DModel";
 import { adaptStudioSnapshotToDocument, projectStudioEditableStateToSnapshot, validateStudioProjectDocument } from "../studioProjectDocument";
 
@@ -29,4 +29,17 @@ test("canonical project save/reopen preserves the complete editable cinematic sc
   expect(reopened.threeDScenes[0].cinematic).toEqual(scene.cinematic);
   expect(reopened.threeDScenes[0].sceneType).toBe("cinematic_evidence");
   expect(reopened.threeDScenes[1].template).toBe("cinematic_title");
+});
+
+test("podcast set design and dialogue-timed reveals survive canonical projection", () => {
+  const scene = normalizeStudio3DScene({ id: "podcast", sceneType: "cinematic_evidence", startTime: 0,
+    duration: 8, cinematic: createCinematicParameters("a".repeat(64), "b".repeat(64), PODCAST_PRESET) });
+  const snapshot = { timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 8, duration: 8 }],
+    selectedClip: { id: "main", start: 0, end: 8 }, orderedClips: [], overlays: [], motionScenes: [],
+    threeDScenes: [scene], captionSegments: [], soundEffects: [], voiceovers: [], motionKeyframes: [],
+    finishKeyframes: [], speedKeyframes: [], audioKeyframes: [], reframeKeyframes: [], exportSettings: {}, projectMedia: [], trackStates: {} };
+  const document = adaptStudioSnapshotToDocument({ snapshot, projectId: "podcast-set" });
+  const reopened = projectStudioEditableStateToSnapshot(JSON.parse(JSON.stringify(document)), snapshot);
+  expect(reopened.threeDScenes[0].cinematic).toEqual(scene.cinematic);
+  expect(reopened.threeDScenes[0].template).toBe(PODCAST_PRESET);
 });

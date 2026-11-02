@@ -67,8 +67,8 @@ export function normalizeStudio3DScene(raw = {}) {
     const duration = Math.round(between(raw.duration, 4, 10, 8) * 24) / 24;
     return {
       version: 1, sceneType: "cinematic_evidence", id: clean(raw.id, 100),
-      name: "Cinematic evidence", text: raw.cinematic?.content?.headline || "Cinematic evidence",
-      template: "evidence_stage_v1", startTime, duration, endTime: startTime + duration,
+      name: raw.cinematic?.preset === "podcast_stage_v1" ? "Cinematic podcast set" : "Cinematic evidence", text: raw.cinematic?.content?.headline || "Cinematic evidence",
+      template: raw.cinematic?.preset === "podcast_stage_v1" ? "podcast_stage_v1" : "evidence_stage_v1", startTime, duration, endTime: startTime + duration,
       enabled: raw.enabled !== false, layerOrder: between(raw.layerOrder, 0, 100, 50),
       primaryColor: "#f4b969", keyframes: [],
       cinematic: JSON.parse(JSON.stringify(raw.cinematic || {})),

@@ -6,7 +6,9 @@ const fs=require("node:fs"),path=require("node:path"),assert=require("node:asser
 const {spawn}=require("node:child_process");
 const ROOT=path.resolve(__dirname,"../.."),report=path.join(ROOT,"reports/unmuted-comeback-20261031"),base="http://127.0.0.1:6341";
 function encode(args){return new Promise((resolve,reject)=>{const child=spawn("ffmpeg",args,{stdio:["ignore","ignore","pipe"]});let error="";child.stderr.on("data",b=>error+=b);child.on("error",reject);child.on("close",code=>code?reject(Error(error.slice(-2000))):resolve());});}
-async function capture(page,format){
+async function capture(page,format,options={}){
+ const report=options.report||path.join(ROOT,"reports/unmuted-comeback-20261031");
+ const endTime=options.endTime??27.4;
  const folder=path.join(report,"private-local",`live-audio-${format}-${Date.now()}`);fs.mkdirSync(folder,{recursive:true});
  const cdp=await page.context().newCDPSession(page),frames=[];
  let bytes=0,failure;
@@ -36,9 +38,15 @@ async function capture(page,format){
  await cdp.send("Page.startScreencast",{format:"jpeg",quality:78,maxWidth:1680,maxHeight:1050,everyNthFrame:2});
  // A paused compositor may not paint until the next actual UI change.
  // Establish the screen clock with real seeks before starting sound/playback.
- await page.getByLabel("Edited output position",{exact:true}).fill("0.1");
+ const seekControl=page.getByLabel("Edited output position",{exact:true});
+ // Native keyboard steps use the input's own frame grid. Chrome can reject a
+ // decimal fill for repeating 24fps fractions as a malformed range value.
+ await seekControl.focus();
+ await seekControl.press("Home");
+ await seekControl.press("ArrowRight");
+ await seekControl.press("ArrowRight");
  await page.waitForTimeout(150);
- await page.getByLabel("Edited output position",{exact:true}).fill("0");
+ await seekControl.press("Home");
  for(let i=0;i<30&&!frames.length;i++)await page.waitForTimeout(100);
  assert(frames.length,"The real Studio UI must paint before recording playback audio");
  await page.waitForTimeout(200);
@@ -46,12 +54,12 @@ async function capture(page,format){
  await page.waitForTimeout(350);
  await page.getByRole("button",{name:"Play edited preview",exact:true}).click();
  const playback=[];
- for(let i=0;i<80;i++){
+ for(let i=0;i<Math.ceil((endTime+10)/.4);i++){
   await page.waitForTimeout(400);
   const sample=await page.evaluate(()=>{const c=window.__studioAudioCapture;return{epoch:(performance.timeOrigin+performance.now())/1000,mediaTime:c.video.currentTime,maximumMediaTime:c.maximumMediaTime,paused:c.video.paused,ended:c.video.ended,sourceUrl:c.video.src};});
-  playback.push(sample);if(sample.maximumMediaTime>27.4)break;
+  playback.push(sample);if(sample.maximumMediaTime>endTime)break;
  }
- assert(playback.some(p=>p.maximumMediaTime>27.4),"The recorded Studio playback must reach the end");
+ assert(playback.some(p=>p.maximumMediaTime>endTime),"The recorded Studio playback must reach the end");
  // At EOF Studio can switch its button to Play between a locator count and
  // click. Stop the captured media directly; this is recording transport only.
  await page.evaluate(()=>window.__studioAudioCapture.video.pause());
@@ -99,4 +107,5 @@ async function main(){
   console.log("Actual Studio recording now includes captured live monitor audio",output);
  }finally{await context.close();}
 }
-main().catch(error=>{console.error(error.stack||error);process.exitCode=1;});
+if(require.main===module)main().catch(error=>{console.error(error.stack||error);process.exitCode=1;});
+module.exports={capture};

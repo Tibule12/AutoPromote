@@ -39,16 +39,18 @@ def render(manifest_path):
     resource.setrlimit(resource.RLIMIT_AS, (12 * 1024**3, 12 * 1024**3))
     os.environ.update({"OMP_NUM_THREADS": str(spec["threads"]), "OPENBLAS_NUM_THREADS": "1", "CUDA_VISIBLE_DEVICES": "", "HIP_VISIBLE_DEVICES": ""})
     count = round(duration * fps)
-    for role in ("presenter", "evidence"):
+    roles = ("presenter",) if spec["graph"].get("preset") == "podcast_stage_v1" else ("presenter", "evidence")
+    for role in roles:
         asset = spec["assets"][role]
         if asset["duration"] + .001 < duration + asset["offset"]:
             raise ValueError(f"{role} source ends before the requested scene")
         folder = work / role
         folder.mkdir(exist_ok=True)
         emit(status="preparing", progress=.02 if role == "presenter" else .05)
+        transparent = spec["graph"].get("preset") == "podcast_stage_v1" and role == "presenter"
         run(["ffmpeg", "-nostdin", "-v", "error", "-threads", "2", "-ss", str(asset["offset"]), "-i", asset["path"],
-             "-an", "-vf", f"fps={fps},scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2",
-             "-frames:v", str(count), "-threads", "2", "-y", str(folder / "%06d.png")], 120)
+             "-an", "-vf", f"fps={fps},format=rgba,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color={'black@0' if transparent else 'black'}",
+             "-frames:v", str(count), "-threads", "2", "-compression_level", "1", "-y", str(folder / "%06d.png")], 120)
         if len(list(folder.glob("*.png"))) != count:
             raise ValueError("Incomplete source decode; no held/fabricated tail frames")
     (work / "frames").mkdir(exist_ok=True)
@@ -62,7 +64,7 @@ def render(manifest_path):
     if len(list((work / "frames").glob("*.png"))) != count:
         raise ValueError("Incomplete Blender render")
     emit(status="assembling", progress=.92)
-    presenter = spec["assets"]["presenter"]
+    presenter = spec["assets"]["evidence" if spec["graph"].get("preset") == "podcast_stage_v1" else "presenter"]
     (work / "disclosure.txt").write_text(spec["disclosure"])
     font_size = round(profile["height"] * .025)
     filter_text = (f"drawbox=x=0:y=ih-{font_size*3}:w=iw:h={font_size*3}:color=black@0.72:t=fill,"
@@ -70,7 +72,7 @@ def render(manifest_path):
                    f"fontcolor=white:fontsize={font_size}:x=(w-tw)/2:y=h-{font_size*2},format=yuv420p")
     command = ["ffmpeg", "-nostdin", "-v", "error", "-threads", "2", "-framerate", str(fps), "-i", str(work / "frames" / "%04d.png"),
                "-ss", str(presenter["offset"]), "-i", presenter["path"], "-map", "0:v:0", "-map", "1:a:0?",
-               "-vf", filter_text, "-af", "atrim=duration=" + str(duration) + ",asetpts=PTS-STARTPTS",
+               "-vf", "format=yuv420p" if spec["graph"].get("preset") == "podcast_stage_v1" else filter_text, "-af", "atrim=duration=" + str(duration) + ",asetpts=PTS-STARTPTS",
                "-c:v", "libx264", "-threads", "2", "-preset", "medium", "-crf", "18", "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
                "-t", str(duration), "-movflags", "+faststart", "-y", str(work / "movie.mp4")]
     run(command, 120)
@@ -80,9 +82,9 @@ def render(manifest_path):
     if int(video["nb_read_frames"]) != count:
         raise ValueError("Final frame count does not match the scene")
     run(["ffmpeg", "-nostdin", "-v", "error", "-i", str(work / "movie.mp4"), "-f", "null", "-"], 120)
-    receipt = {"version": 1, "manifestId": spec["manifestId"], "renderer": "blender_cycles_cpu", "frames": count,
+    receipt = {"version": 1, "manifestId": spec["manifestId"], "renderer": spec.get("renderer", "blender_cycles_cpu"), "frames": count,
                "fps": fps, "duration": duration, "width": profile["width"], "height": profile["height"], "probe": probe,
-               "cost": {"externalCharges": 0, "currency": "USD", "execution": "local_cpu"}}
+               "cost": {"externalCharges": 0, "currency": "USD", "execution": "local_graphics" if spec.get("renderer") == "blender_eevee_local" else "local_cpu"}}
     (work / "receipt.json").write_text(json.dumps(receipt, indent=2))
     # Retain source sequences referenced by the editable .blend; remove render scratch.
     import shutil

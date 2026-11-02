@@ -344,6 +344,42 @@ def test_fine_alpha_recovers_a_soft_edge_and_removes_old_background_colour(sourc
         with pytest.raises(ValueError):validate_plan(invalid,cache)
 
 
+def test_fine_alpha_keeps_selected_thin_metal_and_open_ring(source_cache):
+    source,directory,_=source_cache
+    mask=Image.new('L',(128,72))
+    draw=ImageDraw.Draw(mask)
+    draw.rectangle((12,12,49,59),fill=255)
+    draw.rectangle((49,40,112,41),fill=255)
+    draw.ellipse((80,10,102,32),outline=255,width=2)
+    values=np.array(mask)
+    manifest=json.loads((directory/'manifest.json').read_text())
+    for row in manifest['frames']:
+        mask.save(directory/row['file']);row['sha256']=sha256(directory/row['file'])
+        row.update(mask_geometry(values))
+    (directory/'manifest.json').write_text(json.dumps(manifest))
+    cache=CachedSubjectMatte(directory,source)
+    immutable=(directory/'matte_0001.png').read_bytes()
+    pixels=np.full((72,128,3),200,np.uint8)
+    pixels[values>0]=[175,175,175]
+    pixels[12:60,12:50]=[20,70,130]
+    effect={'id':'edge','type':'foreground_refine','start':0,'end':1,'choke':0,'feather':0,
+        'recover_box':[0,0,0,0],'recover_hue':0,'hue_tolerance':0,'saturation_min':1,
+        'detail_box':[0,0,0,0],'dark_max':0,'clear_box':[0,0,0,0],
+        'reject_hue':0,'reject_tolerance':0,'reject_saturation':1,'reject_value':1,
+        'edge_radius':4,'decontaminate':1}
+    command=plan(cache);command['effects']=[effect]
+    _,refined=VfxFrameRenderer(command,cache)._prepare_foreground(Image.fromarray(pixels),mask,[effect],128,72)
+    output=np.array(refined)
+    # Explicitly selected microphone rails and jewellery must not be erased
+    # simply because their widths are smaller than the cleanup radius.
+    assert np.all(output[40:42,55:108]>=250)
+    ring=values[10:33,80:103]>0
+    assert np.mean(output[10:33,80:103][ring]>=200)>.85
+    assert np.all(output[19:24,88:95]==0), 'Jewellery holes must remain open'
+    assert np.all(output[20:50,20:40]==255)
+    assert (directory/'matte_0001.png').read_bytes()==immutable
+
+
 def test_edge_colour_cleanup_preserves_saved_fractional_alpha(source_cache, tmp_path):
     source, directory, cache = source_cache
     values = np.broadcast_to(np.rint(np.clip((np.arange(128)-59)/10, 0, 1)*255).astype(np.uint8), (72, 128)).copy()

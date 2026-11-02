@@ -1,0 +1,43 @@
+{
+  "implementationAndSourceChecks": {
+    "frontend/src/components/threeD/StudioCinematicPanel.js": true,
+    "frontend/src/components/threeD/StudioCinematicPanel.test.js": true,
+    "frontend/src/components/threeD/cinematicContract.js": true,
+    "frontend/src/components/threeD/studio3DModel.js": true,
+    "frontend/src/components/threeD/studioCinematic.test.js": true,
+    "python_media_worker/studio_cinematic_programme.py": true,
+    "scripts/cinematic/build-local-studio.cjs": true,
+    "scripts/cinematic/localStudio.jsx": true,
+    "scripts/cinematic/record-podcast-with-audio.cjs": true,
+    "src/cinematic/localServer.cjs": true,
+    "src/cinematic/programmePlan.cjs": true,
+    "src/generated/studioDirectorReplayKernel.cjs": true,
+    "studio_3d_renderer/cinematic_local.py": true,
+    "studio_3d_renderer/cinematic_scene.py": true,
+    "test/cinematic-programme.test.cjs": true,
+    "source-video": true
+  },
+  "allMatch": true,
+  "studioRecordingDecode": true,
+  "studioRecordingProbe": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1680,
+        "height": 1050
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "3.631000"
+    }
+  },
+  "scope": "Only source-bound shot scripts, assets and documentation added; existing application implementation bytes unchanged from this session baseline"
+}

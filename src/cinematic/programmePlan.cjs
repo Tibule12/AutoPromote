@@ -35,10 +35,13 @@ function compileLocalProgramme(document, { asset, rendered }) {
   const unsupported = ["addHook", "silenceRemoval", "removeWatermark", "creativeEffectsEnabled", "autoCaptions", "enhanceQuality", "splitExportEnabled"];
   if (unsupported.some(key => state[key]) || state.stabilization?.enabled || state.podcastVisualizer?.enabled || state.mainFrame?.enabled)
     reject("hooks, captions, source effects and split exports need the ordinary worker; disable them for local assembly");
-  if ([state.adjustmentLayers, state.subjectVfxScenes, state.finishKeyframes, state.voiceovers, state.soundEffects].some(items => items?.length)
+  if ([state.adjustmentLayers, state.subjectVfxScenes, state.finishKeyframes, state.voiceovers].some(items => items?.length)
       || Object.values(state.audioKeyframes || {}).some(items => items?.length)
       || state.addMusic || state.musicTrack || state.audioRemix?.enabled || state.extractedAudio)
     reject("additional audio, adjustment and subject tracks need the ordinary worker");
+  const soundEffects = state.soundEffects || [];
+  if (soundEffects.length > 32 || soundEffects.some(cue => !cue.builtIn || cue.kind === "voiceover" || cue.url))
+    reject("local programme sound accepts up to 32 native built-in cues; uploaded audio needs the ordinary worker");
   const neutral = { exposureStops: 0, lift: 0, gamma: 1, gain: 1, tint: 0, brightness: 1, contrast: 1,
     saturation: 1, temperature: 0, sharpness: 0, vignette: 0, blur: 0, zoom: 1, filmGrain: 0,
     chromaticAberration: 0, vhsTracking: 0, lightLeak: 0, letterbox: 0, fadeIn: 0, fadeOut: 0 };
@@ -52,7 +55,7 @@ function compileLocalProgramme(document, { asset, rendered }) {
       || main?.motion_keyframes?.length || main?.perspective || main?.blend_mode !== "normal"
       || main?.effects?.mask?.enabled || main?.effects?.blur || main?.effects?.glow?.enabled || main?.effects?.shadow?.enabled || main?.effects?.motion_blur?.enabled)
     reject("source transform/effects need the ordinary worker");
-  if (Object.entries(state.trackStates || {}).some(([key, value]) => value?.solo || (key !== "originalAudio" && (value?.muted || value?.visible === false))))
+  if (Object.entries(state.trackStates || {}).some(([key, value]) => value?.solo || (!["originalAudio", "sfx"].includes(key) && (value?.muted || value?.visible === false))))
     reject("hidden or solo graphic tracks need explicit local routing support");
   const cuts = segments.map((segment, index) => {
     const occurrence = document.clipOccurrences[index];
@@ -94,6 +97,7 @@ function compileLocalProgramme(document, { asset, rendered }) {
   const order = composition.order || [...overlays.map(layer => layer.id), ...state.motionScenes.map(scene => scene.id), ...scenes.map(scene => scene.id)];
   const plan = { version: 1, duration, fps: 24, cuts, scenes, overlays, motionScenes: state.motionScenes,
     composition: { ...composition, order }, audioRestoration: state.audioRestoration,
+    soundEffects: state.trackStates?.sfx?.muted ? [] : soundEffects,
     muteAudio: !!state.muteOriginalAudio || !!state.trackStates?.originalAudio?.muted,
     sourceFit: state.videoFit === "contain" || !state.smartCrop || state.smartCropMode === "off" ? "contain" : "cover" };
   return { plan, documentHash: sha(stable(document)) };

@@ -10,8 +10,10 @@ const frontendRequire = createRequire(path.join(ROOT, "frontend/package.json"));
 const webpack = frontendRequire("webpack");
 const output = path.join(ROOT, "reports/cinematic-evidence-20261031/local-app");
 const isolation = path.join(__dirname, "localFirebase.js");
+const port = Number(process.env.CINEMATIC_PORT || 6341);
+if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid isolated Studio port");
 const flags = {
-  NODE_ENV: "production", REACT_APP_API_URL: "http://127.0.0.1:6341",
+  NODE_ENV: "production", REACT_APP_API_URL: `http://127.0.0.1:${port}`,
   REACT_APP_CINEMATIC_LOCAL: "true", REACT_APP_E2E_AUTH_BYPASS: "false",
   REACT_APP_WELCOME_STUDIO_PREVIEW: "false", REACT_APP_CREDITS_PILOT: "false",
 };

@@ -334,6 +334,16 @@ class VfxFrameRenderer:
             kernel=cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*radius+1,)*2)
             inside=cv2.erode(opaque,kernel)>0 if radius else np.asarray(alpha)==255
             outside=cv2.dilate(opaque,kernel)==0 if radius else np.asarray(alpha)==0
+            if radius:
+                # Erosion alone supplies no foreground seed for a selected
+                # microphone rail or earring narrower than the cleanup band.
+                # The colour solver can then erase it as background. Preserve
+                # confident medial pixels of those already-selected details;
+                # this cannot add an object absent from the source matte.
+                distance=cv2.distanceTransform(opaque,cv2.DIST_L2,3)
+                nearby=cv2.dilate(distance,np.ones((3,3),np.uint8))
+                thin_core=(distance>0)&(distance<=radius)&(distance>=nearby-1e-4)&(np.asarray(alpha)>=224)
+                inside|=thin_core
             if not inside.any() or not outside.any():raise ValueError("Fine alpha needs both foreground and background seeds")
             trimap=np.full(opaque.shape,.5,dtype=np.float64)
             trimap[inside]=1;trimap[outside]=0

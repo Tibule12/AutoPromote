@@ -15,9 +15,16 @@ function LocalStudio() {
     asset?[{id:"main",start:0,end:Math.min(8,asset.duration),duration:Math.min(8,asset.duration),sourceClipId:asset.id,contentHash:asset.id}]:[],[asset,project]);
   useEffect(() => {
     Promise.all([fetch("/api/cinematic/assets").then(response => response.json()), listViralStudioProjects()])
-      .then(([result, projects]) => {
+      .then(async ([result, projects]) => {
         const requested=new URLSearchParams(window.location.search).get("project");
-        const selected=projects.find(item=>item.id===requested)||projects[0]||null;
+        let selected=projects.find(item=>item.id===requested)||null;
+        // An explicitly requested local review may be opened in a fresh browser
+        // without sharing the QA browser profile or touching an account session.
+        if(requested&&!selected){
+          const response=await fetch("/review-project.json");
+          if(response.ok){const candidate=await response.json();if(candidate.id===requested&&candidate.snapshot?.studioDocument)selected=candidate;}
+        }
+        selected=selected||projects[0]||null;
         const hash=selected?.snapshot?.timeline?.[0]?.contentHash;
         setAsset(result.assets.find(item=>item.id===hash)||result.assets[0]);setProject(selected);
       })
@@ -25,7 +32,7 @@ function LocalStudio() {
   }, []);
   return <>
     <header style={{ padding: "10px 20px", color: "#e9edf4", background: "#101923", font: "13px sans-serif", borderBottom: "1px solid #425265" }}>
-      AutoPromote Studio · isolated cinematic development · local CPU · external cost $0 · Firebase and billing disabled
+      AutoPromote Studio · isolated cinematic development · local rendering · external cost $0 · Firebase and billing disabled
       {sceneReview && <span> · {sceneReview.label}</span>}
       {sceneReview && <a style={{color:"#e7c68c",marginLeft:16}} href={sceneReview.url} download="autopromote-programme.mp4">Download finished programme</a>}
     </header>

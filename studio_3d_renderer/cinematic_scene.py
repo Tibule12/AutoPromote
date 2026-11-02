@@ -143,6 +143,87 @@ def sample(keys, time):
     return Vector(keys[-1]["position"]), Vector(keys[-1]["target"])
 
 
+def podcast_stage(graph, work, font, chassis):
+    """Physical set around an ordinary alpha-video surface; no fabricated person geometry."""
+    warm = material("Walnut acoustic fins", graph["materials"]["chassis"]["color"], .5, .08)
+    stone = material("Dark acoustic stone", "#192126", .78)
+    bronze = material("Brushed bronze", "#9c7550", .3, .72)
+    amber = material("Warm practical strips", "#ffb763", emission=3)
+    blue = material("Cool practical strips", "#65bacb", emission=1.8)
+    ivory = material("Editorial ivory", "#f6e8cf", emission=.9)
+    box("Architectural acoustic wall", (0, 3.6, 3), (18, .25, 6), stone, bevel=0)
+    for i in range(31):
+        x = -6 + i * .4
+        box("Walnut depth fin", (x, 2.75 + .12 * math.cos(i * .55), 2.7), (.12, .45, 5.4), warm, bevel=.02)
+    # Set pieces are at distinct depths, so a moving perspective camera resolves
+    # parallax and occlusion instead of simulating perspective with a flat panel.
+    for x in [-3.25, 3.65]:
+        box("Foreground architectural column", (x, -1.6, 2.6), (.24, .65, 5.2), warm)
+        box("Column edge practical", (x - .1, -1.95, 2.6), (.025, .018, 4.9), amber, bevel=.004)
+    for x in [-3.5, .15, 4.2]:
+        box("Wall practical", (x, 2.4, 2.8), (.028, .025, 4.6), blue if x < 0 else amber, bevel=.004)
+    box("Raised podcast platform", (-.8, .55, .06), (8.4, 4.6, .12), chassis, bevel=.07)
+    box("Platform bronze reveal", (-.8, -1.77, .085), (8.4, .018, .025), amber, bevel=.003)
+    content = next(node for node in graph["nodes"] if node["type"] == "podcast_typography")
+    label = text("Dimensional show identity", content["brand"], (.65, 1.2, 3.05), .55, ivory, font)
+    label.data.extrude = .035
+    label.data.bevel_depth = .004
+    text("Podcast context", "THE CONVERSATION CONTINUES", (.7, 1.19, 2.58), .12, ivory, font)
+    cards = []
+    words = [v.strip() for v in content["tagline"].split(".") if v.strip()]
+    if not words:
+        words = [content["tagline"]]
+    for i, word in enumerate(words[:3]):
+        root = bpy.data.objects.new("Editorial word " + str(i), None)
+        bpy.context.collection.objects.link(root)
+        root.location = (1.9, .5 + i * .18, 2.1 - i * .45)
+        root.rotation_euler.z = math.radians(-7 + i * 3)
+        box("Floating bronze type rail", (0, .018, 0), (2.5, .065, .36), chassis, root)
+        box("Rail warm edge", (-1.22, -.028, 0), (.022, .012, .32), amber, root, .003)
+        title = text("Editable word " + str(i), word, (-1.05, -.03, 0), .225, ivory, font, root)
+        title.data.extrude = .012
+        cards.append(root)
+    headline = text("Story statement", content["headline"], (.7, .85, .47), .22, ivory, font)
+    headline.data.extrude = .02
+    # Foreground desk grounds the seated crop and naturally hides its source edge.
+    box("Podcast console", (-1.15, -.3, .35), (3.65, .78, .16), warm, bevel=.06)
+    box("Console front reveal", (-1.15, -.705, .31), (3.55, .028, .06), bronze, bevel=.008)
+    box("Set microphone mount", (.24, -.07, .83), (.05, .06, .9), chassis, bevel=.012)
+    box("Microphone console clamp", (.24, -.07, .47), (.19, .2, .08), bronze, bevel=.016)
+    node = next(node for node in graph["nodes"] if node["id"] == "presenter")
+    bpy.ops.mesh.primitive_plane_add(size=2)
+    surface = bpy.context.object
+    surface.name = "Source-bound presenter alpha surface"
+    surface.location = node["position"]
+    surface.rotation_euler = (math.pi / 2, 0, math.radians(node["yaw"]))
+    surface.scale = (node["width"] / 2, node["height"] / 2, 1)
+    mat = bpy.data.materials.new("Source foreground + alpha")
+    mat.use_nodes = True
+    # One composited cutout plane: continuous alpha avoids stochastic hair and
+    # edge noise in the local raster renderer. Physical set depth stays intact.
+    mat.surface_render_method = "BLENDED"
+    nodes = mat.node_tree.nodes
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputMaterial")
+    texture = nodes.new("ShaderNodeTexImage")
+    texture.image = bpy.data.images.load(str(work / "presenter" / "000001.png"))
+    texture.image.source = "SEQUENCE"
+    texture.image_user.frame_start = 1
+    texture.image_user.frame_duration = bpy.context.scene.frame_end
+    texture.image_user.use_auto_refresh = True
+    emission = nodes.new("ShaderNodeEmission")
+    emission.inputs["Strength"].default_value = .95
+    transparent = nodes.new("ShaderNodeBsdfTransparent")
+    mix = nodes.new("ShaderNodeMixShader")
+    mat.node_tree.links.new(texture.outputs["Color"], emission.inputs["Color"])
+    mat.node_tree.links.new(texture.outputs["Alpha"], mix.inputs[0])
+    mat.node_tree.links.new(transparent.outputs[0], mix.inputs[1])
+    mat.node_tree.links.new(emission.outputs[0], mix.inputs[2])
+    mat.node_tree.links.new(mix.outputs[0], output.inputs[0])
+    surface.data.materials.append(mat)
+    return cards
+
+
 def build(manifest, work):
     graph = manifest["graph"]
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -151,6 +232,10 @@ def build(manifest, work):
     scene.cycles.device = "CPU"
     scene.cycles.samples = manifest["profile"]["samples"]
     scene.cycles.use_denoising = True
+    local_graphics = manifest.get("renderer") == "blender_eevee_local"
+    if local_graphics:
+        scene.render.engine = "BLENDER_EEVEE_NEXT"
+        scene.eevee.taa_render_samples = manifest["profile"]["samples"]
     scene.cycles.seed = 17
     scene.cycles.use_animated_seed = False
     scene.render.threads_mode = "FIXED"
@@ -178,13 +263,15 @@ def build(manifest, work):
     cyan = material("Presenter edge", "#76b6c9", emission=.6)
     dark = material("Dial enamel", "#101a24", .55, .1)
     box("Stage floor", (0, 1, -.13), (200, 200, .2), ground, bevel=0)
-    box("Back wall", (0, 4, 3.5), (24, .25, 7), material("Wall", "#101722", .8), bevel=0)
+    podcast = graph.get("preset") == "podcast_stage_v1"
+    if not podcast:
+        box("Back wall", (0, 4, 3.5), (24, .25, 7), material("Wall", "#101722", .8), bevel=0)
     # Architectural depth, lit surfaces and cast shadows; no CSS perspective.
-    for x in range(-6, 7, 2):
+    for x in ([] if podcast else range(-6, 7, 2)):
         box("Wall reveal", (x, 3.84, 3.5), (.018, .03, 7), chassis, bevel=0)
     roots = {}
     for node in graph["nodes"]:
-        if node["type"] == "video_surface":
+        if node["type"] == "video_surface" and not podcast:
             roots[node["id"]] = movie_surface(node, work / node["id"], chassis, cyan if node["id"] == "presenter" else amber)
             # Slender supports visibly anchor the screens and cast grounded shadows.
             box(node["id"] + " pedestal", (node["position"][0], node["position"][1] + .15, .55), (.08, .1, 1.1), chassis)
@@ -192,28 +279,34 @@ def build(manifest, work):
         elif node["type"] == "area_light":
             light = bpy.data.lights.new(node["id"], "AREA")
             light.energy = node["energy"]
+            if podcast:
+                light.use_shadow_jitter = False
             light.shape = "DISK"
             light.size = 5
             obj = bpy.data.objects.new(node["id"], light)
             bpy.context.collection.objects.link(obj)
             obj.location = node["position"]
             obj.rotation_euler = (Vector((0, .4, 1.6)) - obj.location).to_track_quat("-Z", "Y").to_euler()
-    evidence = roots["evidence"]
+    if podcast:
+        cards = podcast_stage(graph, work, font, chassis)
+    evidence = roots.get("evidence")
     overlay = bpy.data.objects.new("Editable evidence assembly", None)
     bpy.context.collection.objects.link(overlay)
     overlay.parent = evidence
     # Opaque inset is physical geometry; clock hands are in front and occlude correctly.
     overlay.location = (0, -.025, 0)
-    box("Clock backing", (0, -.028, -.02), (2.9, .018, 1.28), material("Evidence backing", "#0d1823", emission=.15), overlay)
-    content = next(n for n in graph["nodes"] if n["type"] == "forensic_callouts")
-    text("Sequence label", "EVIDENCE   /   01", (-1.5, -.09, 1.14), .105, amber, font, evidence)
-    text("Headline", content["headline"], (-1.43, -.1, .78), .145, white, font, overlay)
-    readings = next(n for n in graph["nodes"] if n["type"] == "clock_reconstruction")["readings"]
-    clock(overlay, -.75, readings[0], "READING A", (white, amber, dark), font)
-    clock(overlay, .75, readings[1], "READING B", (white, amber, dark), font)
-    box("Callout separator", (0, -.11, .05), (.008, .006, .64), amber, overlay, 0)
-    callout = text("Mismatch callout", content["callout"], (0, -.11, -.73), .105, amber, font, overlay, "CENTER")
-    text("Presenter label", "ORIGINAL PRESENTER", (-1.68, -.08, -1.16), .095, white, font, roots["presenter"])
+    callout = None
+    if not podcast:
+        box("Clock backing", (0, -.028, -.02), (2.9, .018, 1.28), material("Evidence backing", "#0d1823", emission=.15), overlay)
+        content = next(n for n in graph["nodes"] if n["type"] == "forensic_callouts")
+        text("Sequence label", "EVIDENCE   /   01", (-1.5, -.09, 1.14), .105, amber, font, evidence)
+        text("Headline", content["headline"], (-1.43, -.1, .78), .145, white, font, overlay)
+        readings = next(n for n in graph["nodes"] if n["type"] == "clock_reconstruction")["readings"]
+        clock(overlay, -.75, readings[0], "READING A", (white, amber, dark), font)
+        clock(overlay, .75, readings[1], "READING B", (white, amber, dark), font)
+        box("Callout separator", (0, -.11, .05), (.008, .006, .64), amber, overlay, 0)
+        callout = text("Mismatch callout", content["callout"], (0, -.11, -.73), .105, amber, font, overlay, "CENTER")
+        text("Presenter label", "ORIGINAL PRESENTER", (-1.68, -.08, -1.16), .095, white, font, roots["presenter"])
     camera_node = next(n for n in graph["nodes"] if n["type"] == "perspective_camera")
     camera_data = bpy.data.cameras.new("Programme camera")
     camera_data.lens = camera_node["focalLength"]
@@ -232,6 +325,15 @@ def build(manifest, work):
         camera.rotation_euler = (target - position).to_track_quat("-Z", "Y").to_euler()
         camera.keyframe_insert("location", frame=frame)
         camera.keyframe_insert("rotation_euler", frame=frame)
+        if podcast:
+            for i, card in enumerate(cards):
+                cue = graph["typographyTiming"][i] if i < len(graph.get("typographyTiming", [])) else .5 + i * .1
+                reveal = smoother((progress - cue) / .07)
+                card.location.x = 1.9 + (1 - reveal) * .5
+                card.keyframe_insert("location", frame=frame)
+                card.scale = (max(.001, reveal),) * 3
+                card.keyframe_insert("scale", frame=frame)
+            continue
         reveal = smoother((progress - .13) / .12)
         evidence.location.z = 2.35 - (1 - reveal) * .7
         evidence.scale = (max(.001, reveal),) * 3
@@ -242,7 +344,7 @@ def build(manifest, work):
         overlay.keyframe_insert("scale", frame=frame)
         callout.scale = (max(.001, smoother((progress - .43) / .08)),) * 3
         callout.keyframe_insert("scale", frame=frame)
-    for obj in (camera, evidence, overlay, callout):
+    for obj in ([camera] + cards if podcast else [camera, evidence, overlay, callout]):
         if obj.animation_data:
             for fc in obj.animation_data.action.fcurves:
                 for key in fc.keyframe_points:

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { createCinematicParameters, validateCinematicScene, planCinematicIntent } from "./cinematicContract";
+import { PRESET, PODCAST_PRESET, createCinematicParameters, validateCinematicScene, planCinematicIntent } from "./cinematicContract";
 import { normalizeStudio3DScene, studio3DSceneRevision } from "./studio3DModel";
 import "./studioCinematic.css";
 
@@ -49,13 +49,13 @@ export default function StudioCinematicPanel({ scenes, onChange, focusId, onSele
       const start = Math.min(Math.max(0, Number(playhead) || 0), Math.max(0, duration - 4));
       const length = Math.min(8, duration - start, assets[0]?.duration || 8);
       if (length < 4) throw new Error("A cinematic scene needs at least four seconds on the timeline");
-      const cinematic = createCinematicParameters(assets[0]?.id || "");
-      const next = normalizeStudio3DScene(useDirector ? planCinematicIntent({ version: 1,
+      const cinematic = createCinematicParameters(assets[0]?.id || "", assets[0]?.id || "", useDirector === "podcast" ? PODCAST_PRESET : PRESET);
+      const next = normalizeStudio3DScene(useDirector === true ? planCinematicIntent({ version: 1,
         action: "reconstruct_clock_and_return", presenterId: assets[0]?.id, evidenceId: assets[0]?.id,
         startTime: start, duration: length, content: cinematic.content }, assets, makeId()).scene :
         { id: makeId(), sceneType: "cinematic_evidence", startTime: start, duration: length, cinematic });
       onChange([...scenes, next]); onSelect(next.id); onUseLandscape?.(); onSeek?.(start); setError("");
-      setState({ status: useDirector ? "Validated Director plan added" : "Editable scene added" });
+      setState({ status: useDirector === true ? "Validated Director plan added" : "Editable scene added" });
     } catch (err) { setError(err.message); }
   };
   const upload = async file => {
@@ -63,7 +63,7 @@ export default function StudioCinematicPanel({ scenes, onChange, focusId, onSele
     setError(""); setState({ status: "Importing local media" });
     try {
       if (!cinematicLocalEnabled()) throw new Error("Local worker unavailable");
-      if (file.size > 128 * 1024 ** 2) throw new Error("Use a local source smaller than 128 MB");
+      if (file.size > 512 * 1024 ** 2) throw new Error("Use a local source smaller than 512 MB");
       const response = await fetch("/api/cinematic/assets", { method: "POST", headers: {
         "Content-Type": "application/octet-stream", "X-File-Name": encodeURIComponent(file.name) }, body: file });
       const asset = await response.json(); if (!response.ok) throw new Error(asset.error);
@@ -103,26 +103,31 @@ export default function StudioCinematicPanel({ scenes, onChange, focusId, onSele
     try { if (active.current) setState(await cinematicRequest(`jobs/${active.current}`, null, "DELETE")); }
     catch (err) { setError(err.message); }
   };
-  const numeric = (label, section, field, min, max, step = .01) => <label key={field}><span>{label}</span>
-    <input type="number" value={scene.cinematic[section][field]} min={min} max={max} step={step}
-      onChange={event => { if (event.target.value !== "") edit(section, field, Number(event.target.value)); }} /></label>;
+  const numeric = (label, section, field, min, max, step = .01, displayScale = 1) => <label key={field}><span>{label}</span>
+    <input type="number" value={scene.cinematic[section][field] * displayScale} min={min} max={max} step={step}
+      onChange={event => { if (event.target.value !== "") edit(section, field, Number(event.target.value) / displayScale); }} /></label>;
   const revision = scene ? studio3DSceneRevision(scene) : "";
   const readyExport = scene?.localExport?.revision === revision ? scene.localExport : null;
   const readyPreview = scene?.hqPreviewRevision === revision && scene.hqPreviewUrl;
   return <section className="studio-cinematic" aria-label="Cinematic evidence scene">
-    <div className="cinematic-heading"><span>BLENDER · LOCAL CPU</span><h3>Cinematic evidence</h3></div>
-    <p>A physical 3D stage, moving video displays, reconstructed clock readings and a camera return. The scene remains editable on your Studio timeline.</p>
+    <div className="cinematic-heading"><span>CINEMATIC SCENES</span><h3>Camera & set</h3></div>
+    <p>A lit 3D podcast set or an evidence scene. Camera, materials, lighting and typography stay editable on the timeline. A podcast cutout source needs an existing alpha channel.</p>
     {!cinematicLocalEnabled() ? <p role="note">Local preview only in this milestone. Start the isolated cinematic Studio with <code>node scripts/cinematic/build-local-studio.cjs</code> and <code>node src/cinematic/localServer.cjs /path/to/video.mp4</code>. Cloud execution is unavailable.</p> : <>
-      <p className="cinematic-cost">External cost $0 · CPU only · maximum 10 seconds · {capabilities?.maxSeconds || 3600}s processing limit</p>
-      <label className="cinematic-upload">Import local video (up to 128 MB)<input type="file" accept="video/*" disabled={busy} onChange={event => { upload(event.target.files?.[0]); event.target.value = ""; }} /></label>
+      <p className="cinematic-cost">External cost $0 · {capabilities?.execution === "local_graphics" ? "This computer’s graphics" : "Local CPU"} · maximum 10 seconds · {capabilities?.maxSeconds || 3600}s processing limit</p>
+      <label className="cinematic-upload">Import local video (128 MB, or 512 MB for a short lossless alpha clip)<input type="file" accept="video/*" disabled={busy} onChange={event => { upload(event.target.files?.[0]); event.target.value = ""; }} /></label>
       <div className="cinematic-actions"><button type="button" disabled={busy || !assets.length} onClick={() => add(false)}>Add cinematic scene</button>
+        <button type="button" disabled={busy || !assets.length} onClick={() => add("podcast")}>Add podcast set</button>
         <button type="button" disabled={busy || !assets.length} onClick={() => add(true)}>Apply Director clock plan</button></div>
     </>}
     {cinematics.length > 0 && <label>Scene<select aria-label="Cinematic scene" value={scene.id} onChange={event => onSelect(event.target.value)}>
       {cinematics.map(item => <option key={item.id} value={item.id}>{item.text} · {item.startTime.toFixed(2)}s</option>)}
     </select></label>}
     {scene && <>
-      <fieldset disabled={busy}><legend>Evidence stage preset · v1</legend>
+      <fieldset disabled={busy}><legend>Scene preset · v1</legend>
+        <label>Set design<select aria-label="Set design" value={scene.cinematic.preset} onChange={event => {
+          const next = createCinematicParameters(scene.cinematic.sources.presenter, scene.cinematic.sources.evidence, event.target.value);
+          updateScene({ cinematic: { ...scene.cinematic, preset: next.preset, content: next.content, timing: next.timing, cueMode: next.cueMode } });
+        }}><option value={PRESET}>Evidence stage</option><option value={PODCAST_PRESET}>Podcast architecture</option></select></label>
         <div className="cinematic-fields">{["presenter", "evidence"].map(role => <label key={role}><span>{role === "presenter" ? "Presenter source" : "Evidence source"}</span>
           <select value={scene.cinematic.sources[role]} onChange={event => edit("sources", role, event.target.value)}><option value="">Choose local media</option>
             {assets.map(asset => <option key={asset.id} value={asset.id}>{asset.name} · {asset.duration.toFixed(2)}s</option>)}</select></label>)}
@@ -132,21 +137,24 @@ export default function StudioCinematicPanel({ scenes, onChange, focusId, onSele
           {numeric("Evidence in (s)", "sources", "evidenceOffset", 0, 86400)}
           {numeric("Focal length (mm)", "camera", "focalLength", 32, 65, 1)}
           {numeric("Camera push", "camera", "pushIn", 0, 1, .05)}
-          {numeric("Screen yaw (°)", "camera", "screenYaw", -22, 0, 1)}
+          {scene.cinematic.preset === PODCAST_PRESET ? numeric("Presenter yaw (°)", "camera", "screenYaw", -5.5, 0, .25, .25) : numeric("Screen yaw (°)", "camera", "screenYaw", -22, 0, 1)}
           {numeric("Push starts (fraction)", "timing", "pushAt", .18, .35)}
           {numeric("Hold until (fraction)", "timing", "holdUntil", .55, .72)}
           {numeric("Return by (fraction)", "timing", "returnAt", .82, .94)}
+          {scene.cinematic.preset === PODCAST_PRESET && ["wordA", "wordB", "wordC"].map((field, i) => numeric(`Word ${i+1} reveal (fraction)`, "timing", field, 0, .95))}
           {numeric("Key light (W)", "lighting", "key", 100, 2000, 50)}
           {numeric("Fill light (W)", "lighting", "fill", 50, 1500, 50)}
           {numeric("Frame roughness", "material", "roughness", .1, .9, .05)}
           {numeric("Frame metallic", "material", "metallic", 0, 1, .05)}
           <label><span>Frame colour</span><input type="color" value={scene.cinematic.material.color} onChange={event => edit("material", "color", event.target.value)} /></label>
-          {[["Headline", "headline", 36], ["Forensic callout", "callout", 40], ["Clock A", "clockA", 8], ["Clock B", "clockB", 8]].map(([label, field, max]) => <label key={field}><span>{label}</span>
+          {(scene.cinematic.preset === PODCAST_PRESET ? [["Show name", "brand", 20], ["Headline", "headline", 36], ["Tagline", "tagline", 40]] :
+            [["Headline", "headline", 36], ["Forensic callout", "callout", 40], ["Clock A", "clockA", 8], ["Clock B", "clockB", 8]]).map(([label, field, max]) => <label key={field}><span>{label}</span>
             <input value={scene.cinematic.content[field]} maxLength={max} onChange={event => edit("content", field, event.target.value)} /></label>)}
           <label><input type="checkbox" checked={scene.enabled} onChange={event => updateScene({ enabled: event.target.checked })} />Scene enabled</label>
         </div>
       </fieldset>
-      <p role="note">16:9 evidence stage. {scene.cinematic.content.disclosure}. These readings are illustrative; no matching clock narration is claimed.</p>
+      <p role="note">{scene.cinematic.preset === PODCAST_PRESET ? "16:9 podcast set. Select prepared alpha video to replace its room; ordinary opaque video retains its background." :
+        `16:9 evidence stage. ${scene.cinematic.content.disclosure}. These readings are illustrative; no matching clock narration is claimed.`}</p>
       <p>{readyExport ? "Current 720p scene export ready." : readyPreview ? "Current 360p scene preview ready." : "Preview needs rendering for this revision."} Preview uses the same Blender scene and source clock as export; it is processed video, not real-time 3D.</p>
       <div className="cinematic-actions"><button type="button" disabled={busy || !capabilities?.available} onClick={() => render("preview")}>Render scene preview · 360p</button>
         <button type="button" disabled={busy || !capabilities?.available} onClick={() => render("export")}>Render scene export · 720p</button>

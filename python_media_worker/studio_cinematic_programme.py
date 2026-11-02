@@ -17,7 +17,7 @@ from studio_composition import (blend_layer_block, connect_grouped_layer_blocks,
 from studio_layer_motion import composition_layer, render_image_layer_motion
 from studio_rendered_scene import rendered_scene_block
 from studio_text import render_title_asset
-from viral_motion_graphics import generate_transparent_motion_overlay
+from viral_motion_graphics import generate_transparent_motion_overlay, validate_design, write_sound_mix
 from viral_render_contract import build_studio_audio_delivery_filter
 
 
@@ -125,7 +125,20 @@ def render(manifest_path):
     filters.extend(graphic_filters)
     audio, audio_settings = build_dialogue_filter(plan.get("audioRestoration"))
     audio = ",".join(filter(None, (audio, "volume=0" if plan["muteAudio"] else "", build_studio_audio_delivery_filter(duration))))
-    filters.append(f"[speech]{audio}[sound];")
+    cues = plan.get("soundEffects", [])
+    if cues:
+        if any(not cue.get("builtIn") or cue.get("url") or cue.get("kind") == "voiceover" for cue in cues):
+            raise ValueError("Local sound accepts native built-in cues only")
+        _, reviewed = validate_design(None, cues)
+        sound_path = scratch / "native-sound-design.wav"
+        write_sound_mix(sound_path, reviewed, duration,
+                        [{"start_time": 0, "end_time": duration, "rate": 1}], {}, channels=2)
+        inputs.extend(["-i", str(sound_path)])
+        filters.append(f"[speech]{audio}[dialogue];")
+        filters.append(f"[dialogue][{index}:a]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,"
+                       "alimiter=limit=0.891251:level=disabled:latency=1[sound];")
+    else:
+        filters.append(f"[speech]{audio}[sound];")
     # Cuts already have a fixed frame grid. Rebase concat's microsecond clock
     # without running a second EOF-rounding frame-rate conversion.
     filters.append(f"[{picture}]settb=1/{fps},setpts=N,format=yuv420p[picture]")
@@ -148,7 +161,7 @@ def render(manifest_path):
                "documentHash": spec["documentHash"], "frames": frames, "fps": fps, "duration": duration,
                "width": width, "height": height, "probe": probe, "sourceCuts": plan["cuts"],
                "sceneInputs": plan["scenes"], "audioRestoration": audio_settings,
-               "audioSource": "original_programme_bus", "embeddedSceneAudioMixed": False,
+               "audioSource": "original_programme_bus", "embeddedSceneAudioMixed": False, "nativeSoundCues": cues,
                "cost": {"externalCharges": 0, "currency": "USD", "execution": "local_cpu"}}
     (work / "receipt.json").write_text(json.dumps(receipt, indent=2))
     shutil.rmtree(scratch)

@@ -128,7 +128,7 @@
   },
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-21T19:28:46.375062Z",
+  "updatedAt": "2026-10-31",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -15700,6 +15700,188 @@
       "recordingSoundProof": "reports/unmuted-comeback-20261031/review/studio-sound-verification.json",
       "recordingSoundSha256": "35d69accd2a2ccde6057d0782cfaac075235aef979821332db5b84a742b7cf4c",
       "originalSilentRecordingPreserved": true
+    },
+    "creativeReviewStatus": "OWNER_REJECTED_TOO_BASIC",
+    "ownerFeedbackReport": "reports/unmuted-podcast-quality-review-20261031/README.md"
+  },
+  "unmutedComebackQualityReview20261031": {
+    "date": "2026-10-31",
+    "status": "OWNER_REJECTED_CREATIVE_QUALITY",
+    "report": "reports/unmuted-podcast-quality-review-20261031/README.md",
+    "creativeApproval": false,
+    "readinessPromoted": false,
+    "previousTechnicalChecksRetained": true,
+    "newRender": false,
+    "remaining": [
+      "Author a substantively stronger treatment through native Studio after creative direction is clear",
+      "Include editable project, genuine Studio timeline recording with sound and actual output comparison",
+      "Retain shared S02/S04/S03 qualification blockers"
+    ]
+  },
+  "unmutedCinematicRevision20261031": {
+    "date": "2026-10-31",
+    "status": "OWNER_REJECTED_CREATIVE_QUALITY",
+    "report": "reports/unmuted-cinematic-revision-20261031/README.md",
+    "duration": 16.291666666666668,
+    "fps": 24,
+    "frames": 391,
+    "scenePreset": "podcast_stage_v1",
+    "native3DSceneExports": 2,
+    "nativeProgrammeExport": true,
+    "nativeSoundCues": 10,
+    "sourceSpeechLagMilliseconds": 0,
+    "actualStudioMonitorAudio": true,
+    "studioAudioClockDifferenceMs": 11.330604553222656,
+    "freshBrowserNativeCheckpoint": true,
+    "focusedChecks": 21,
+    "sourceMatte": "Private source-specific preprocessing; imported alpha video, not native automatic matting",
+    "renderer": "Local EEVEE on existing Quadro M1200; default CPU path preserved",
+    "cloudJobs": 0,
+    "paidModelCalls": 0,
+    "productionDataAccess": false,
+    "deployed": false,
+    "published": false,
+    "readinessPromoted": false,
+    "creativeApproval": false,
+    "wholePreviewFinalParity": false,
+    "remaining": [
+      "Resolve coherent scale, camera perspective, lighting, contact and complete equipment in the actual composite",
+      "Choose camera and graphic actions that serve the spoken passage",
+      "Review the actual moving output against those requirements; reject visible failures before presenting it",
+      "Shared S02/S04/S03 qualification remains open"
+    ],
+    "professionalCreativeQualification": false,
+    "ownerRejection": "reports/unmuted-cinematic-revision-20261031/owner-rejection.json"
+  },
+  "unmutedShotCorrection20261031": {
+    "date": "2026-10-31",
+    "status": "CORRECTED_SHOT_RENDERED_VISUAL_GATE_FAILED",
+    "report": "reports/unmuted-cinematic-revision-20261031/shot-correction/README.md",
+    "rejectedProgrammeInterval": [
+      4,
+      7
+    ],
+    "frames": 72,
+    "fps": 24,
+    "duration": 3,
+    "width": 1280,
+    "height": 720,
+    "wholeVideoRendered": false,
+    "engineExpansion": false,
+    "applicationImplementationChanged": false,
+    "existingImplementationAndSourceHashesMatched": 16,
+    "studioPlayback": {
+      "flattenedImportedMovie": true,
+      "nativeCheckpoint": true,
+      "screenFrames": 78,
+      "maximumMediaTime": 2.959609,
+      "liveMonitorAudio": true,
+      "externalRequests": 0,
+      "pageExceptions": 0
+    },
+    "remaining": [
+      "Soft/uneven moving ear and earring matte; thin jewellery and edge colour recovery are incomplete",
+      "Baked magenta source rim not coherently motivated by set lighting",
+      "Alpha/emission person plane has no normals/geometry for physical relighting, body shadows or genuine orbital views",
+      "Underlying person softness versus 3D set and simple repetitive set/type remain visually apparent"
+    ],
+    "creativeApproval": false,
+    "professionalCreativeQualification": false,
+    "readinessPromoted": false,
+    "wholePreviewFinalParity": false,
+    "paidCalls": 0,
+    "cloudJobs": 0,
+    "productionDataAccess": false
+  },
+  "unmutedDetailRefinement20261031": {
+    "date": "2026-10-31",
+    "status": "OWNER_REJECTED_MOTION_AND_EQUIPMENT",
+    "report": "reports/unmuted-cinematic-revision-20261031/shot-correction/detail-refinement.md",
+    "frames": 72,
+    "fps": 24,
+    "duration": 3,
+    "sourceInterval": [
+      22.458333333333332,
+      25.458333333333332
+    ],
+    "wholeVideoRendered": false,
+    "engineExpansion": false,
+    "existingCompositeThinSelectionFix": true,
+    "missingMaskPreflightFix": true,
+    "focusedTests": 91,
+    "actualEncodedFrameReview": true,
+    "authenticatedNativePreview": false,
+    "localNativeModelAndForegroundRenderer": true,
+    "professionalQualification": false,
+    "creativeApproval": false,
+    "readinessPromoted": false,
+    "wholePreviewFinalParity": false,
+    "cloudJobs": 0,
+    "modelDownloads": 0,
+    "productionDataAccess": false,
+    "remaining": [
+      "Moving matte/equipment failures: incompatible fabricated post and retained television-bezel fragment; earlier sparse review insufficient",
+      "Original source compression and soft fine detail",
+      "Architectural set/type remain designed; no source-camera calibration, true new angle or full-body contact/shadow qualification"
+    ]
+  },
+  "unmutedMotionRepair20261031": {
+    "date": "2026-10-31",
+    "status": "OWNER_REJECTED_COMPOSITING_QUALITY",
+    "report": "reports/unmuted-cinematic-revision-20261031/shot-correction/motion-revision.md",
+    "artifact": "reports/unmuted-cinematic-revision-20261031/shot-correction/shot-review.json",
+    "frames": 72,
+    "fps": 24,
+    "duration": 3,
+    "sourceInterval": [
+      22.458333333333332,
+      25.458333333333332
+    ],
+    "all72EncodedFramesReviewed": true,
+    "reviewRegions": [
+      "equipment",
+      "face/shoulder edges",
+      "hands/torso"
+    ],
+    "existingCpuTemporalSegmentation": true,
+    "sourceSpecificManualRefinement": true,
+    "inventedMicrophoneSupportRemoved": true,
+    "originalOccludedStandOutsideFrame": true,
+    "fullVisibleStandReconstruction": false,
+    "actualStudioPlaybackOfImportedMovie": true,
+    "authenticatedNativeSubjectPreview": false,
+    "retainedFocusedApplicationTests": 91,
+    "wholeVideoRendered": false,
+    "engineExpansion": false,
+    "professionalQualification": false,
+    "creativeApproval": false,
+    "readinessPromoted": false,
+    "wholePreviewFinalParity": false,
+    "cloudJobs": 0,
+    "modelDownloads": 0,
+    "productionDataAccess": false,
+    "remaining": [
+      "Source-soft fine detail at magnification",
+      "Original post occluded by plants; full visible stand is not reconstructed",
+      "Recorded 2D foreground cannot establish new side views, physical body relighting or full-body shadows",
+      "Authenticated ordinary-account subject-mask authoring remains outside this local evidence"
+    ],
+    "ownerReviewDate": "2026-11-01",
+    "visualGatePassed": false,
+    "ownerRejectionReasons": [
+      "Person reads as a cutout against a synthetic slatted room",
+      "Source and replacement lighting/texture/detail do not convincingly belong together",
+      "Shoulder and jewellery edges remain visibly processed",
+      "Moving the original stand outside frame avoided rather than completed its repair"
+    ],
+    "followupFirstFrameProof": {
+      "date": "2026-11-01",
+      "status": "FIRST_FRAME_PROOFS_VISUALLY_REJECTED",
+      "report": "reports/unmuted-cinematic-revision-20261031/shot-correction/source-matched-first-frame-review.json",
+      "motionRenderStarted": false,
+      "engineExpansion": false,
+      "professionalQualification": false,
+      "nextTask": "Correct fine source-bound trimaps/roto and match the replacement scene convincingly before another motion render"
     }
   }
 }

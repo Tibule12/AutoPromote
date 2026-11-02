@@ -1,6 +1,7 @@
 /* Shared browser/local-worker contract. No network, filesystem or provider calls. */
 const VERSION = 1;
 const PRESET = "evidence_stage_v1";
+const PODCAST_PRESET = "podcast_stage_v1";
 const ID = /^[a-f0-9]{64}$/;
 const finite = (v, min, max, name) => {
   if (typeof v !== "number" || !Number.isFinite(v) || v < min || v > max)
@@ -17,22 +18,24 @@ const text = (v, max, name) => {
     throw new Error(`Invalid cinematic ${name}`);
   return v;
 };
-function createCinematicParameters(presenter = "", evidence = presenter) {
+function createCinematicParameters(presenter = "", evidence = presenter, preset = PRESET) {
+  const podcast = preset === PODCAST_PRESET;
   return {
-    version: VERSION, preset: PRESET,
+    version: VERSION, preset,
     sources: { presenter, evidence, presenterOffset: 0, evidenceOffset: 0 },
     camera: { focalLength: 42, pushIn: 1, screenYaw: -12 },
-    material: { color: "#122230", roughness: 0.26, metallic: 0.7 },
+    material: { color: podcast ? "#624332" : "#122230", roughness: 0.26, metallic: 0.7 },
     lighting: { key: 850, fill: 500 },
-    content: { headline: "THE CLOCK DISCREPANCY", callout: "COMPARE THE TWO READINGS",
+    content: podcast ? { brand: "UNMUTED", headline: "UNTOLD STORIES", tagline: "DEEP. RAW. AUTHENTIC.",
+      disclosure: "UNMUTED PODCAST" } : { headline: "THE CLOCK DISCREPANCY", callout: "COMPARE THE TWO READINGS",
       clockA: "02:17:36", clockB: "02:19:04", disclosure: "LOCAL TEST CUE · ILLUSTRATIVE READINGS" },
-    timing: { pushAt: 0.24, holdUntil: 0.67, returnAt: 0.86 },
-    cueMode: "local_test",
+    timing: podcast ? { pushAt: .24, holdUntil: .67, returnAt: .86, wordA: .62, wordB: .74, wordC: .8 } : { pushAt: 0.24, holdUntil: 0.67, returnAt: 0.86 },
+    cueMode: podcast ? "editorial" : "local_test",
   };
 }
 function validateCinematicParameters(value, { allowUnbound = false } = {}) {
   exact(value, ["version", "preset", "sources", "camera", "material", "lighting", "content", "timing", "cueMode"], "scene");
-  if (value.version !== VERSION || value.preset !== PRESET) throw new Error("Unsupported cinematic scene version or preset");
+  if (value.version !== VERSION || ![PRESET, PODCAST_PRESET].includes(value.preset)) throw new Error("Unsupported cinematic scene version or preset");
   exact(value.sources, ["presenter", "evidence", "presenterOffset", "evidenceOffset"], "sources");
   for (const field of ["presenter", "evidence"])
     if (!(allowUnbound && value.sources[field] === "") && !ID.test(value.sources[field])) throw new Error(`Select a local ${field} asset`);
@@ -46,16 +49,24 @@ function validateCinematicParameters(value, { allowUnbound = false } = {}) {
   finite(value.material.roughness, 0.1, 0.9, "roughness"); finite(value.material.metallic, 0, 1, "metallic");
   exact(value.lighting, ["key", "fill"], "lighting");
   finite(value.lighting.key, 100, 2000, "key light"); finite(value.lighting.fill, 50, 1500, "fill light");
-  exact(value.content, ["headline", "callout", "clockA", "clockB", "disclosure"], "content");
-  text(value.content.headline, 36, "headline"); text(value.content.callout, 40, "callout");
-  text(value.content.disclosure, 64, "disclosure");
-  for (const name of ["clockA", "clockB"]) if (!/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(value.content[name])) throw new Error("Clock readings must be HH:MM:SS");
-  // Narration-driven timing is deliberately not accepted without transcript grounding.
-  if (value.cueMode !== "local_test" || !value.content.disclosure.startsWith("LOCAL TEST CUE"))
-    throw new Error("This milestone requires an explicit LOCAL TEST CUE disclosure");
-  exact(value.timing, ["pushAt", "holdUntil", "returnAt"], "timing");
+  if (value.preset === PODCAST_PRESET) {
+    exact(value.content, ["brand", "headline", "tagline", "disclosure"], "podcast content");
+    for (const [name, length] of [["brand", 20], ["headline", 36], ["tagline", 40], ["disclosure", 64]])
+      text(value.content[name], length, name);
+    if (value.cueMode !== "editorial") throw new Error("Podcast stage requires editorial cues");
+  } else {
+    exact(value.content, ["headline", "callout", "clockA", "clockB", "disclosure"], "content");
+    text(value.content.headline, 36, "headline"); text(value.content.callout, 40, "callout");
+    text(value.content.disclosure, 64, "disclosure");
+    for (const name of ["clockA", "clockB"]) if (!/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(value.content[name])) throw new Error("Clock readings must be HH:MM:SS");
+    if (value.cueMode !== "local_test" || !value.content.disclosure.startsWith("LOCAL TEST CUE"))
+      throw new Error("This milestone requires an explicit LOCAL TEST CUE disclosure");
+  }
+  exact(value.timing, value.preset === PODCAST_PRESET ? ["pushAt", "holdUntil", "returnAt", "wordA", "wordB", "wordC"] : ["pushAt", "holdUntil", "returnAt"], "timing");
   finite(value.timing.pushAt, .18, .35, "push time"); finite(value.timing.holdUntil, .55, .72, "hold time");
   finite(value.timing.returnAt, .82, .94, "return time");
+  if (value.preset === PODCAST_PRESET)
+    for (const field of ["wordA", "wordB", "wordC"]) finite(value.timing[field], 0, .95, field);
   return JSON.parse(JSON.stringify(value));
 }
 function validateCinematicScene(scene, options) {
@@ -74,6 +85,26 @@ function buildCinematicGraph(scene) {
   const close = [1.65, -5.15, 2.9], closeTarget = [1.55, .45, 2.3];
   const push = p.camera.pushIn;
   const blend = (a, b) => a.map((v, i) => v + (b[i] - v) * push);
+  if (p.preset === PODCAST_PRESET) {
+    const home = [-.6, -7.8, 2.35], target = [-.3, .4, 1.9];
+    const across = [1.15, -6.8, 2.5], acrossTarget = [.25, .8, 2.05];
+    return { version: VERSION, units: "metres", timeSpace: "scene_seconds", duration,
+      programmeStart: scene.startTime, preset: PODCAST_PRESET,
+      typographyTiming: [p.timing.wordA, p.timing.wordB, p.timing.wordC],
+      nodes: [
+        { id: "presenter", type: "video_surface", surfaceStyle: "cutout", assetId: p.sources.presenter,
+          offset: p.sources.presenterOffset, position: [-1.1, 0, 1.52], width: 5.4, height: 3.0375, yaw: p.camera.screenYaw / 4 },
+        { id: "podcast-type", type: "podcast_typography", ...p.content },
+        { id: "camera", type: "perspective_camera", focalLength: p.camera.focalLength,
+          keyframes: [pose(0, home, target), pose(p.timing.pushAt, home, target),
+            pose(p.timing.holdUntil, blend(home, across), blend(target, acrossTarget)),
+            pose(p.timing.returnAt, blend(home, [.15, -7.2, 2.2]), target),
+            pose(1, blend(home, [.15, -7.2, 2.2]), target)] },
+        { id: "key", type: "area_light", energy: p.lighting.key, position: [-3, -3, 6] },
+        { id: "fill", type: "area_light", energy: p.lighting.fill, position: [4, 1, 4] },
+      ], materials: { chassis: p.material }, transparency: "opaque_stage",
+      audio: { sourceId: p.sources.evidence, offset: p.sources.evidenceOffset, gain: 1 } };
+  }
   return { version: VERSION, units: "metres", timeSpace: "scene_seconds", duration,
     programmeStart: scene.startTime, preset: PRESET,
     nodes: [
@@ -114,5 +145,5 @@ function planCinematicIntent(intent, assets, id = "director-evidence") {
     renderRequirements: { renderer: "blender_cycles_cpu", fps: 24, localOnly: true, externalCost: 0 },
     limitations: ["Local test cues; narration grounding unavailable", "Opaque 16:9 scene; no arbitrary graph authoring"] };
 }
-module.exports = { VERSION, PRESET, createCinematicParameters, validateCinematicParameters,
+module.exports = { VERSION, PRESET, PODCAST_PRESET, createCinematicParameters, validateCinematicParameters,
   validateCinematicScene, buildCinematicGraph, planCinematicIntent };

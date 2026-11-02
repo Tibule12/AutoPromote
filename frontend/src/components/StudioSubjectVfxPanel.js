@@ -358,6 +358,8 @@ export default function StudioSubjectVfxPanel({
         throw new Error(
           "Save or upload this source to your Studio project before rendering subject effects."
         );
+      if (!recoveryOnly && !ready && scene.effects.some(effect => effect.type === "background_replace") && !item.modelArtifactRef)
+        throw new Error("Create a subject mask first, then render the replacement preview.");
     } catch (error) {
       setMessage(error.message);
       return;
