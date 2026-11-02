@@ -25070,7 +25070,7 @@ const ViralClipStudio = ({
                       try { validateStudioPerspectiveLayer(candidate, value ? motionKeyframes.filter(k=>k.targetId===candidate.id) : [],
                         effectiveCompoundClips.some(g=>g.layerIds?.includes(candidate.id))); }
                       catch (error) { setStudioActionMessage(error.message); return; }
-                      if (!value) setMotionKeyframes(current=>current.filter(k=>k.targetId!==candidate.id||k.property!=='perspectiveProgress'&&!/^planeCorner/.test(k.property)));
+                      if (!value) setMotionKeyframes(current=>current.filter(k=>k.targetId!==candidate.id||(k.property!=='perspectiveProgress'&&!/^planeCorner/.test(k.property))));
                     }
                     if (compositeInspectorTarget.id === "main-video") {
                       setMainTransform(current => ({ ...current, [field]: value }));
