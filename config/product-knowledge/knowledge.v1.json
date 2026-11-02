@@ -8545,6 +8545,220 @@
           "kind": "NATIVE_REPORT"
         }
       ]
+    },
+    {
+      "feature_id": "studio.captions",
+      "name": "Captions and transcription",
+      "area": "Studio",
+      "summary": "Creates editable timed speech captions with a source-language choice. The empty-hint repetition defect is repaired on the retained mixed-speech clip; mixed-language wording and broad automatic-caption quality remain unqualified.",
+      "purpose": "Generate timed speech drafts, correct wording and speaker/language labels, and retain editable caption styles in the shared Studio project.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video with speech",
+        "reviewed transcript phrases"
+      ],
+      "requires": [],
+      "optional_capabilities": [],
+      "controls": [
+        "studio.captions.source_language"
+      ],
+      "workflow": [
+        "Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
+        "Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.",
+        "Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.",
+        "Check Speech source beside Generate before requesting captions. It identifies the video currently selected on the timeline; each source keeps its own editable caption lines."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Speech language is a source preference, not detected-language evidence. Code-switched wording still needs review; the prior broad automatic-caption qualification remains open.",
+        "Automatic English translation is unavailable for the explicit South African language choices. Import reviewed English subtitles when needed."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        },
+        {
+          "condition": "Generate and review captions before rendering.",
+          "resolution": "There are no editable caption phrases for the requested burn-in. Automatic wording still needs review. Use the caption guide to prepare and manually review editable phrases before relying on a captioned export."
+        },
+        {
+          "condition": "Review every flagged caption line before rendering.",
+          "resolution": "Approve or correct each flagged phrase and timestamp in Captions. Correct all flagged wording and timing; the repaired repetition trigger does not establish accuracy across all speech."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "captions"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "BROKEN",
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"captions\"",
+          "kind": "READINESS"
+        }
+      ]
+    },
+    {
+      "feature_id": "studio.compositing",
+      "name": "Compositing",
+      "area": "Studio",
+      "summary": "Combines ordinary layers and animated graphic groups with shared order, static masks, alpha-aware blending and editable group clip timing. Broad preview/export picture and sound agreement remains incomplete.",
+      "purpose": "Compose editable graphic hierarchies while preserving child-local edits, timing and property animation through the shared preview and render path.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "ordinary text layers",
+        "image overlays",
+        "video overlays"
+      ],
+      "requires": [
+        "studio.layers"
+      ],
+      "optional_capabilities": [
+        "studio.keyframes"
+      ],
+      "controls": [
+        "studio.composite.blend",
+        "studio.geometric_mask.path",
+        "studio.geometric_mask.radius",
+        "studio.composite.layer_order",
+        "studio.composite.group_x",
+        "studio.composite.group_y",
+        "studio.composite.group_scale",
+        "studio.composite.group_rotation",
+        "studio.composite.group_opacity",
+        "studio.composite.group_mask_enabled",
+        "studio.composite.group_mask_shape",
+        "studio.composite.group_mask_feather",
+        "studio.composite.group_mask_inverted",
+        "studio.group_clip.move",
+        "studio.group_clip.in",
+        "studio.group_clip.out"
+      ],
+      "workflow": [
+        "Select an owned image or ordinary title in Studio Composite.",
+        "Enable its geometric mask and choose rectangle, ellipse or polygon.",
+        "For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.",
+        "For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.",
+        "Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.",
+        "To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.",
+        "Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.",
+        "Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom Bézier curve in Composite.",
+        "Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.",
+        "Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.",
+        "Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.",
+        "Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.",
+        "After refining a saved mask, set Edge detail width to 0 to retain its refined edges. Use Remove old background colour for pale residue, render the preview and inspect the whole moving shot."
+      ],
+      "preview_behavior": "Full-canvas nested wrappers evaluate existing canonical motion keys on the shared preview clock, preserve child edits and apply a shared SVG geometric mask before the group transform/opacity. CSS group isolation retains the sibling backdrop for group and child blending. One native Multiply/Screen nested image/two-motion edit with 16 group keys has four scoped geometry and image-interior color pairs; whole glyph/alpha/raster/picture/sound and broad modes/media remain unqualified.",
+      "render_behavior": "The shared compiler carries group mask/blend decisions and transform keys into the existing CPU compositor. The ordinary geometric matte rasterizer clips assembled local child alpha before transform/opacity; registered request-owned matte scratch is cleaned after the render. RGB blend color weights the blend result by backdrop alpha, preserving foreground color over transparent isolated parents. Group and child blending share the existing leaf compositor and inverse programme clock. Static/Normal paths retain previous pixels. Source/source-VFX/generated-caption stages remain separate; inspect the exact final movie.",
+      "limitations": [
+        "Rectangle, ellipse and percentage-polygon image masks and crop animation have scoped native/export boundary evidence. This is deterministic geometry, not AI subject segmentation.",
+        "Group masks and blending are implemented as static decisions; path/radius/feather/inversion/blend animation, broader feather/inversion/modes/media, animated video-layer masks and full alpha/text/effect-order parity remain incomplete.",
+        "This dated development snapshot does not establish professional or production readiness.",
+        "Editable percentage-polygon paths and rectangle radius use the canonical mask object. This adds no animated path, neural segmentation, mask expansion or video-mask support.",
+        "The bounded inverted-polygon/shadow/glow/blur image stack passes four sampled colour pairs with transform/opacity keys. The ellipse stack retains a strict raster failure, and historical landscape edge failures remain open.",
+        "The layer stack has native image/title/two-motion history, cold reopen, exports and scoped visible-image occlusion evidence. Actual owned 3D cross-family export, whole motion/title raster, large/deeper stacks and full raster remain unqualified. Source footage/source VFX and generated captions retain their separate programme stages.",
+        "One native nested image/two-motion edit uses a feathered inner polygon/Multiply and outer rounded-rectangle/Screen while preserving all 16 group keys and child poses/keys. Controls/history/reset/lock/cold/export/full timeline playback and four geometry/image-interior RGB pairs pass; decoded source-tone audio is unchanged. All eight non-Normal modes pass actual FFmpeg transparent/partial/opaque-backdrop fixtures, not every native mode/media/stack. Graphic-group clip bars own descendant starts/keys and visibility; source-occurrence attachment/remapping, group split/duplicate and editable group anchor remain unsupported. Grouped timeline drag order uses Composite. Actual owned 3D/video/deeper groups, native retiming, broader curves/grouped drag/deletion and continuous/full picture/sound remain unqualified. Worker Bézier expressions approximate 32 samples; the browser solves the curve."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [],
+      "model_capabilities": [],
+      "examples": [],
+      "aliases": [],
+      "readiness_authority": {
+        "matrix_id": "compositing"
+      },
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-14",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/studioBlendModes.js",
+          "anchor": "STUDIO_EXPORT_BLEND_MODES",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "test/e2e/studio-capability-matrix.json",
+          "anchor": "\"id\": \"compositing\"",
+          "kind": "READINESS"
+        },
+        {
+          "path": "frontend/src/components/studioRenderCompiler.js",
+          "anchor": "compileStudioCompositionForRender",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioGroupInspector.js",
+          "anchor": "function StudioGroupInspector",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioGroupPreview.js",
+          "anchor": "function StudioGroupPreview",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "python_media_worker/studio_composition.py",
+          "anchor": "def connect_grouped_layer_blocks",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioMaskGeometry.js",
+          "anchor": "studioLayerMaskSvg",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/studioGroupTiming.js",
+          "anchor": "editStudioGroupTiming",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioGroupTimelineClip.js",
+          "anchor": "StudioGroupTimelineClip",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/StudioGroupTimingInspector.js",
+          "anchor": "StudioGroupTimingInspector",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "reports/studio-professional-group-workflow-20261014/README.md",
+          "anchor": "# Professional timeline workflow",
+          "kind": "NATIVE_REPORT"
+        }
+      ]
     }
   ],
   "controls": [
@@ -19662,6 +19876,65 @@
         {
           "path": "frontend/src/components/StudioGeneratedBRollPanel.js",
           "anchor": "StudioGeneratedBRollPanel",
+          "kind": "IMPLEMENTATION"
+        }
+      ]
+    },
+    {
+      "task_id": "task.captions_correct",
+      "title": "Create captions and correct transcription",
+      "summary": "Choose the speech language, generate editable timed lines and review uncertain words before export.",
+      "feature_ids": [
+        "studio.captions"
+      ],
+      "control_ids": [
+        "studio.captions.source_language"
+      ],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Select the timeline clip whose speech you want. In Captions, check that Speech source names that file.",
+          "feature_id": "studio.captions",
+          "control_ids": []
+        },
+        {
+          "instruction": "Choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer. Then generate or regenerate speech captions; the other clips’ lines remain unchanged.",
+          "feature_id": "studio.captions",
+          "control_ids": [
+            "studio.captions.source_language"
+          ]
+        },
+        {
+          "instruction": "Review the editable transcript lines. Correct words, in/out times, speaker and language; adjust placement and the caption style controls. Flagged automatic wording remains a draft until you review it.",
+          "feature_id": "studio.captions",
+          "control_ids": []
+        },
+        {
+          "instruction": "Inspect the current phrase at mapped source times in preview and final export.",
+          "feature_id": "studio.captions",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "limitations": [
+        "The empty-hint repetition trigger is repaired on retained speech, but code-switched wording still needs correction. Broad automatic transcription, all caption styles and full preview/export parity are not qualified."
+      ],
+      "aliases": [],
+      "status": "BROKEN",
+      "updated_at": "2026-10-22",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "frontend/src/components/ViralClipStudio.js",
+          "anchor": "/* eslint-disable no-unused-vars, no-control-regex */",
           "kind": "IMPLEMENTATION"
         }
       ]

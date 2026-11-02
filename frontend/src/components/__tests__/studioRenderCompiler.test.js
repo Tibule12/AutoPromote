@@ -60,6 +60,15 @@ test("an invalid saved polygon is rejected before render submission", () => {
   expect(() => compileStudioCompositionForRender(document)).toThrow(/Mask polygon path/);
 });
 
+test("an invalid saved polygon is rejected before render submission", () => {
+  const document = adaptStudioSnapshotToDocument({ projectId: "invalid-polygon", snapshot: {
+    orderedClips: [{ id: "source", start: 0, end: 2 }], selectedClipId: "source",
+    timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 2 }],
+    overlays: [{ id: "image", type: "image", mask: { enabled: true, shape: "polygon", path: "polygon(1% 2%)" } }],
+  } });
+  expect(() => compileStudioCompositionForRender(document)).toThrow(/Mask polygon path/);
+});
+
 test("canonical programme timeline agrees with worker timing for duplicate source occurrences", () => {
   const document = adaptStudioSnapshotToDocument({
     projectId: "project",

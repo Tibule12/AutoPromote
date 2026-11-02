@@ -1,0 +1,79 @@
+{
+  "checkedAt": "2026-10-21T20:01:25.551Z",
+  "baseline": "http://localhost:5006/",
+  "candidate": "http://localhost:5000/",
+  "headless": true,
+  "muted": true,
+  "mockedResponses": false,
+  "matchingWelcomeContent": true,
+  "checks": [
+    {
+      "name": "baseline",
+      "width": 1440,
+      "height": 1000,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "candidate",
+      "width": 1440,
+      "height": 1000,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "baseline",
+      "width": 390,
+      "height": 844,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "candidate",
+      "width": 390,
+      "height": 844,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "baseline",
+      "width": 360,
+      "height": 800,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "candidate",
+      "width": 360,
+      "height": 800,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "baseline",
+      "width": 1200,
+      "height": 900,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "candidate",
+      "width": 1200,
+      "height": 900,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    }
+  ],
+  "authenticated": {
+    "realSavedLogin": true,
+    "questions": 3,
+    "savedSessionUnchanged": true,
+    "savedProjectRecordsUnchanged": 0
+  },
+  "browserErrors": [],
+  "apiWrites": [
+    "/api/product-assistance/ask",
+    "/api/product-assistance/ask",
+    "/api/product-assistance/ask"
+  ]
+}
