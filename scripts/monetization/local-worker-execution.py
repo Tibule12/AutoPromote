@@ -14,13 +14,42 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+# Match the ordinary worker entrypoint's module directory for its deferred
+# native compositors as well as imports performed during initial startup.
+sys.path.insert(0, str(ROOT / 'python_media_worker'))
 record = json.loads(Path(sys.argv[1]).read_text())
 directory = Path(record["directory"])
 started = time.monotonic()
 if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
     raise RuntimeError("Explicit demo runtime required")
-resource.setrlimit(resource.RLIMIT_CPU, (120, 120))
-resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024**2, 20 * 1024**2))
+# Keep ten CPU minutes for ordinary demos. The measured minute-long masked
+# graphics/3D stack exhausted that bound during final compositing; allow a
+# finite twenty CPU minutes for that explicitly identified local combination.
+# The provider's thirty-minute wall ceiling and production limits are unchanged.
+def local_render_cpu_ceiling(body, env):
+    default = 1200 if body.get('threeDGraphics') else 600
+    value = env.get('CREDITS_LOCAL_RENDER_CPU_SECONDS', str(default))
+    if not str(value).isdecimal() or not 600 <= int(value) <= 1200:
+        raise ValueError('Local CPU rendering requires a finite 600–1200 second ceiling')
+    return int(value)
+
+
+cpu_ceiling = local_render_cpu_ceiling(record.get('body', {}), os.environ)
+resource.setrlimit(resource.RLIMIT_CPU, (cpu_ceiling, cpu_ceiling))
+# Native full-frame transparency intermediates can exceed a source MP4's size.
+# Keep a finite per-file ceiling for this demo-only CPU process; production
+# execution settings and the separately bounded source-download sizes do not
+# inherit this local limit.
+def local_render_file_ceiling(body, env):
+    default = 750 if body.get('threeDGraphics') else 128
+    value = env.get('CREDITS_LOCAL_RENDER_FILE_MIB', str(default))
+    if not str(value).isdecimal() or not 128 <= int(value) <= 750:
+        raise ValueError('Local render files require a finite 128–750 MiB ceiling')
+    return int(value) * 1024**2
+
+
+file_ceiling = local_render_file_ceiling(record.get('body', {}), os.environ)
+resource.setrlimit(resource.RLIMIT_FSIZE, (file_ceiling, file_ceiling))
 connect = socket.socket.connect
 
 
@@ -68,6 +97,19 @@ def process_telemetry(job_id, data, **kwargs):
     (directory / "progress.json").write_text(json.dumps({"jobId": job_id, "progress": data}, default=str))
     return True
 worker.update_firestore_job = process_telemetry
+# Observe real intermediate timing before the canonical renderer removes its
+# temporary files. This demo-only trace does not alter commands or validation.
+canonical_subprocess = worker.run_subprocess_async
+stage_timing = []
+async def traced_subprocess(command, *args, **kwargs):
+    result = await canonical_subprocess(command, *args, **kwargs)
+    if command and str(command[0]).endswith("ffmpeg"):
+        candidate = Path(str(command[-1]))
+        if candidate.is_file() and candidate.suffix in (".mp4", ".ts", ".m4a"):
+            stage_timing.append({"file": candidate.name, "media": worker.probe_media_stream_summary(str(candidate))})
+            (directory / "stage-timing.json").write_text(json.dumps(stage_timing))
+    return result
+worker.run_subprocess_async = traced_subprocess
 # The canonical renderer still runs. Its transport returns a local artifact URI;
 # the Node service verifies/copies real bytes into the private Storage emulator.
 uploaded = []

@@ -230,7 +230,8 @@ async function downloadCompleted(page, name, record, result, metadata) {
     // FFmpeg's encoder stop rounds this fractional duration to the nearest
     // delivery frame. A separate real-FFmpeg clock reproduction confirms it;
     // still require the exact count and the existing one-frame duration bound.
-    height, fps, frames: Math.round(duration * fps) });
+    height, fps, frames: Math.round(duration * fps),
+    audio: process.env.STUDIO_QA_EXPECT_AUDIO !== 'false' });
   const outputSha256 = hash(fs.readFileSync(output));
   const serverOutputSha256 = result.result?.outputSha256;
   assert.equal(outputSha256, serverOutputSha256, 'Downloaded bytes differ from the owned completed job');

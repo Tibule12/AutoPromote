@@ -30,6 +30,17 @@ export function normalizeSplitAudioClip(clip, clipIndex = 0, outputStart = 0) {
     0.04,
     Number.isFinite(end) && end > start ? end - start : Number(clip?.duration) || 0.04
   );
+  if (clip.audioDetached === true) {
+    const audioStart = Number(clip.audioSourceStart), audioEnd = Number(clip.audioSourceEnd),
+      programmeStart = Number(clip.audioProgrammeStart);
+    if (![audioStart, audioEnd, programmeStart].every(Number.isFinite) || audioStart < 0 || audioEnd <= audioStart || programmeStart < 0)
+      throw Error('Detached audio needs a valid source range and programme position.');
+    return { ...clip, index: clipIndex, outputStart, videoDuration,
+      audioTimelineStart: programmeStart, audioTimelineDuration: audioEnd - audioStart,
+      audioTrimOffsetStart: programmeStart - outputStart,
+      audioTrimOffsetEnd: programmeStart + audioEnd - audioStart - outputStart - videoDuration,
+      hasJCut: programmeStart < outputStart, hasLCut: programmeStart + audioEnd - audioStart > outputStart + videoDuration };
+  }
 
   // audioTrimOffsetStart is negative for J-cut (audio starts earlier than video)
   const rawStartOffset = Number(clip?.audioTrimOffsetStart || 0);
@@ -37,11 +48,12 @@ export function normalizeSplitAudioClip(clip, clipIndex = 0, outputStart = 0) {
   const rawEndOffset = Number(clip?.audioTrimOffsetEnd || 0);
 
   // Clamp start offset: cannot start earlier than timeline 0, and max pre-lap 3.0s
-  const maxPreLap = Math.min(3.0, outputStart);
+  const maxPreLap = Math.min(3.0, outputStart, start);
   const aStartOffset = Math.max(-maxPreLap, Math.min(1.0, rawStartOffset));
 
   // Clamp end offset: max trail 3.0s
-  const aEndOffset = Math.max(-1.0, Math.min(3.0, rawEndOffset));
+  const availableTail = Number(clip.sourceDuration) > 0 ? Math.max(0, Number(clip.sourceDuration) - end) : 3;
+  const aEndOffset = Math.max(aStartOffset - videoDuration + 0.001, Math.min(3.0, availableTail, rawEndOffset));
 
   const audioTimelineStart = Math.max(0, outputStart + aStartOffset);
   const audioTimelineDuration = Math.max(0.05, videoDuration - aStartOffset + aEndOffset);
@@ -146,10 +158,11 @@ export function calculateAudioProxyState(globalTime, splitClips = [], activeVide
     // L-Cut trail phase: outgoing clip's audio continues after its video ended
     const isLCutTrail = clip.index < activeVideoIndex && globalTime >= clip.outputStart + clip.videoDuration;
 
-    if (isJCutPreLap || isLCutTrail) {
+    if (isJCutPreLap || isLCutTrail || clip.audioDetached) {
       const sourceStart = Number(clip.startRequest ?? clip.start_time ?? clip.start ?? 0);
       const elapsedInAudio = globalTime - clip.audioTimelineStart;
-      const sourceSeekTime = Math.max(0, sourceStart + clip.audioTrimOffsetStart + elapsedInAudio);
+      const sourceSeekTime = clip.audioDetached ? Number(clip.audioSourceStart) + elapsedInAudio
+        : Math.max(0, sourceStart + clip.audioTrimOffsetStart + elapsedInAudio);
 
       activeProxies.push({
         id: clip.id || `audio-proxy-${clip.index}`,

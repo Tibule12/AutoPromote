@@ -18,6 +18,15 @@ function WorkbenchHarness() {
 }
 
 describe("StudioCreatorWorkbench frontend proof controls", () => {
+  test.each(["emoji", "micro_freeze", "shake", "transition"])("%s uses the editable project callback", effect => {
+    const onApplyEffect = jest.fn(), onChange = jest.fn();
+    render(<StudioCreatorWorkbench value={{...DEFAULT_CREATOR_PREVIEW, section: "effects"}}
+      onChange={onChange} onApplyEffect={onApplyEffect} />);
+    fireEvent.click(screen.getByTestId(`creator-demo-${effect}`));
+    expect(onApplyEffect).toHaveBeenCalledWith(effect);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   test("adds the selected zoom amount as timeline automation, without a second CSS preview", () => {
     const onChange = jest.fn();
     const onApplyMotionPreset = jest.fn();

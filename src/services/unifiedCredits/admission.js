@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const { assertSandbox } = require("./runtime");
 const { fail, integer, OPERATIONS } = require("./policy");
+const { compactWorkflowDescriptor } = require('./workflowDescriptor');
 const key = (...args) => crypto.createHash("sha256").update(JSON.stringify(args)).digest("hex");
 
 // Adapter contract for server-owned source metadata. Not mounted on production.
@@ -95,7 +96,7 @@ function createAdmission({ db, service, now = Date.now }) {
           enforcedMaxSeconds: data.enforcedMaxSeconds,
           resourceClass: data.resourceClass,
           destinations: q.destinations.slice().sort(),
-          ...(data.workflowInput ? { workflowInput: data.workflowInput } : {}),
+          ...(data.workflowInput ? { workflowInput: compactWorkflowDescriptor(data.workflowInput) } : {}),
         },
       });
     },

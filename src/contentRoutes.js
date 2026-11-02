@@ -570,7 +570,7 @@ router.post(
         "untitled"
       );
       const safeFileName = sanitizeUploadFileName(rawFileName);
-      const storagePath = `uploads/${mediaType}s/${Date.now()}_${safeFileName}`;
+      const storagePath = `uploads/${mediaType}s/${userId}/${crypto.randomUUID()}_${safeFileName}`;
       const downloadToken = crypto.randomUUID();
       const bucket = admin.storage().bucket();
       const contentType = normalizeSingleStringInput(
@@ -708,6 +708,7 @@ function rateLimitMiddleware(limit = 10, windowMs = 60000) {
     }
     rateLimitMap.set(key, entry);
     if (entry.count > limit) {
+      res.set('Retry-After', String(Math.max(1,Math.ceil((entry.start+windowMs-now)/1000))));
       return res.status(429).json({ error: "Rate limit exceeded. Please try again later." });
     }
     next();

@@ -7,6 +7,7 @@ const { promisify } = require("node:util");
 const { assertSandbox } = require("./runtime");
 const { fail } = require("./policy");
 const { digest, canonical } = require("./workerVerification");
+const { compactWorkflowDescriptor } = require('./workflowDescriptor');
 const execute = promisify(execFile);
 
 // Actual emulator objects, owner checks and byte hashes. No production bucket
@@ -148,9 +149,15 @@ function createSourceGateway({
         : requestBody;
       const primary = await sourceFor(uid, lookupBody, route);
       const sources = [primary];
-      for (const segment of requestBody.options?.viralData?.timeline_segments || []) {
-        if (segment.sourceStoragePath && segment.sourceStoragePath !== primary.storagePath)
+      const studio = requestBody.options?.viralData;
+      const declared = [...(studio?.timeline_segments || []),
+        ...(studio?.overlays || []).filter(layer => layer.type === 'video')];
+      const seen = new Set([primary.storagePath]);
+      for (const segment of declared) {
+        if (segment.sourceStoragePath && !seen.has(segment.sourceStoragePath)) {
           sources.push(await describe(uid, segment.sourceStoragePath));
+          seen.add(segment.sourceStoragePath);
+        }
       }
       const dir = await fs.mkdtemp(path.join(os.tmpdir(), "credit-source-probe-"));
       let duration;
@@ -198,7 +205,7 @@ function createSourceGateway({
         objectGeneration: primary.objectGeneration,
         enforcedMaxSeconds: 120,
         allowedDestinations: destinations || [],
-        workflowInput: {
+        workflowInput: compactWorkflowDescriptor({
           requestBody,
           route,
           sources,
@@ -208,7 +215,7 @@ function createSourceGateway({
               ? destinations.length
               : 1,
           ...(scheduleId ? { scheduleId } : {}),
-        },
+        }),
       };
       await db
         .collection("credits_v2_inputs")

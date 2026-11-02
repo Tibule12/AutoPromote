@@ -1,0 +1,125 @@
+{
+  "message": "Cannot read properties of undefined (reading 'length')",
+  "stack": "TypeError: Cannot read properties of undefined (reading 'length')\n    at main (/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031/test/e2e/playwright/verify-studio-keyframe-stamp.cjs:127:38)",
+  "results": [
+    {
+      "check": "Parented rotation key retains local -45 degrees and visible world pose",
+      "before": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(1, 0, 0, 1, -77.1562, -85.1328)",
+        "rotation": "0deg",
+        "scale": "1",
+        "opacity": "1"
+      },
+      "after": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(1, 0, 0, 1, -77.1562, -85.1328)",
+        "rotation": "0deg",
+        "scale": "1",
+        "opacity": "1"
+      }
+    },
+    {
+      "check": "Parenting plus spin applies the driver once when stamping",
+      "before": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(0, 1, -1, 0, -77.1562, -85.1328)",
+        "rotation": "90deg",
+        "scale": "1",
+        "opacity": "1"
+      },
+      "after": {
+        "top": "50%",
+        "left": "50%",
+        "transform": "matrix(0, 1, -1, 0, -77.1562, -85.1328)",
+        "rotation": "90deg",
+        "scale": "1",
+        "opacity": "1"
+      }
+    }
+  ],
+  "errors": [],
+  "blocked": [],
+  "apiRequests": [],
+  "state": {
+    "video": [
+      {
+        "time": 2.5,
+        "seeking": false,
+        "paused": true,
+        "readyState": 4
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      },
+      {
+        "time": 0,
+        "seeking": false,
+        "paused": true,
+        "readyState": 0
+      }
+    ],
+    "slider": "2.5",
+    "body": "ng, Mattes, Drivers & Node Graph\nOpen Comp & Rig Dock\nOpen Speed / Value Graph\nOpen Signal Node Flow\nAUTOPROMOTE NODE FLOW\n+ Null Controller\n+ Kinetic Title\n+ Vector Shape\n+ Polygon / Ellipse Mask\n+ Glow & Soft Blur\n+ Adjustment Grade\n⚡ Smart Flow Rigs (1-Click)...\n[RIG] Null-Parented Callout Rig\n[MATTE] Alpha Matte Title Stencil\n[LUMA] Luma Glow Spotlight\n[GRADE] Cinema Grade + Halation\nAuto-Layout\n−\n95%\n+\nMainIn\n1\n2\nProgramme Source\nOut\nMainXf\n1\n2\n⏻\nScale 1.00x\nIn\nOut\nColorGrade\n1\n2\n⏻\nContrast 1%\nIn\nOut\nFinishFX\n1\n2\n⏻\nGrain 0 · Chroma 0\nIn\nOut\nNull Rig 1\n1\n2\n⏻\nTransform Rig\nOut\nEllipse Matte Sour\n1\n2\nimage In\nOut\nXf_1\n1\n2\n⏻\n50,50% · 1.00x\nIn\nMask\nParent\nOut\nEllipseMask\n1\n2\n⏻\nFeather 0px\nOut\nMerge_1\n1\n2\n⏻\nOver\nBG\nFG\nMask\nOut\nCyan Fill Plate\n1\n2\nimage In\nOut\nXf_2\n1\n2\n⏻\n50,50% · 1.00x\nIn\nMask\nParent\nOut\nMerge_2\n1\n2\n⏻\nOver\nBG\nFG\nMask\nOut\nMediaOut\n1\n2\nCanonical Render Out\nIn\n[1] MediaOut (FINAL COMP)\n[2] Off\nVIEWER [1]\nGrade: On · Overlays: 2\nClick [2] on any node (or press 2) to compare node signals side-by-side.\nMediaOut\nMEDIAOUT\nTip: Click output port Out then click Parent or Mask to wire hierarchy & mattes live.\n✓\n\nProject checkpoint saved. Earlier versions remain restorable.\n\nTimeline\nComp & Rig\nSpeed / Value Graph\nSignal Node Flow\nSynced 1:1 with canonical Studio project & FFmpeg render compiler\nAUTOPROMOTE COMP & RIG\nDope Sheet\nValue Graph\nSpeed Graph\n+ Null Rig\n+ Adjustment Grade (0)\nHide Shy\nBake Rig → Keys\n#\nSWITCHES\nLAYER\nPARENT (WHIP)\nTRACK MATTE\nMODE\nDRIVERS\n0\nV\nBASE\nMain Programme\nRoot Stage\n—\nnormal\n1\n👁\nS\nH\n🔒\nM\nMED\nEllipse Matte Source\n◎\nNone\n0. Main Programme\nCyan Fill Plate\n[Null] Null Rig 1\nNone\nAlpha\nAlpha Inv\nLuma\nLuma Inv\nNo Src\nnormal\nmultiply\nscreen\ndifference\noverlay\nsoft-light\nhard-light\ncolor-dodge\nluminosity\n+ Driver\n2\n👁\nS\nH\n🔒\nM\nMED\nCyan Fill Plate\n◎\nNone\n0. Main Programme\nEllipse Matte Source\n[Null] Null Rig 1\nNone\nAlpha\nAlpha Inv\nLuma\nLuma Inv\nNo Src\nnormal\nmultiply\nscreen\ndifference\noverlay\nsoft-light\nhard-light\ncolor-dodge\nluminosity\nROTATION:SPI\n3\n👁\nS\nH\n🔒\nM\nNULL\nNull Rig 1\n◎\nNone\n0. Main Programme\nEllipse Matte Source\nCyan Fill Plate\nTransform Rig\n—\n+ Driver\nAutoPromote Motion Driver · Cyan Fill Plate\nPos X\nPos Y\nScale\nRotate\nOpacity\nManual Keyframes Only\nHandheld Wiggle\nInertial Spring\nRhythm Pulse\nContinuous Spin\nKeyframe Loop\nBeat Pump\nVelocity (45/s)\nPos X\nPos Y\nScale\nRotate\nOpacity\n◆ + Key @ 2.50s\nDelete Key\n0.0s\n1.5s\n3.0s\n4.5s\n6.0s\nCurve Feel:\nWhip Snap\nCinema Settle\nElastic Pop\nSmooth S-Curve\nDramatic Ramp\nHold Cut"
+  }
+}

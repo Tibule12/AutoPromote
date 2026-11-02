@@ -1,6 +1,14 @@
 import { interpolateAutomationValue, sortAutomationKeyframes } from "./studioAutomation";
 import { secondsToTicks, ticksToSeconds } from "./studioTime";
 
+export const buildCreatorShakeRecipe = ({time,duration,intensity=62}) => {
+  const start=Math.max(0,Number(time)||0),span=Math.min(.5,Math.max(0,duration-start));
+  if(span<.1)return [];
+  const amount=Math.max(0,Math.min(100,Number(intensity)||0))/100;
+  return [0,1,-.8,.55,-.3,0].map((phase,index)=>({time:start+span*index/5,
+    value:phase*amount*2,easing:'linear'}));
+};
+
 // Recipes are ordinary, editable timeline keys. No parallel CSS effect runs.
 export const buildCreatorMotionRecipe = ({ preset, time, duration, zoom = 1.34 }) => {
   const start = Math.max(0, Math.min(Number(duration) || 0, Number(time) || 0));

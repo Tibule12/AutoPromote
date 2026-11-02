@@ -56,6 +56,22 @@ export const AUDIO_REMIX_PRESETS = [
     keepPitch: false,
   },
   {
+    id: "chipmunk",
+    name: "Chipmunk",
+    icon: "🐿",
+    description: "Playful high voice, original timing",
+    speed: 1,
+    pitch: 12,
+    bass: -3,
+    clarity: 2,
+    air: 3,
+    reverb: 0,
+    intensity: 100,
+    keepPitch: false,
+    contentType: "auto",
+    target: "voice",
+  },
+  {
     id: "amapiano_space",
     name: "Amapiano Space",
     icon: "♬",
@@ -204,7 +220,7 @@ export function normalizeAudioRemix(value = {}) {
 
 export function applyAudioRemixPreset(id) {
   const preset = AUDIO_REMIX_PRESETS.find(item => item.id === id) || AUDIO_REMIX_PRESETS[0];
-  return normalizeAudioRemix({ ...preset, enabled: true });
+  return normalizeAudioRemix({ ...preset, preset: preset.id, enabled: true });
 }
 
 export function patchAudioRemix(current, patch) {

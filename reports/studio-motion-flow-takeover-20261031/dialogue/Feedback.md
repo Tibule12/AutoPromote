@@ -1,0 +1,19 @@
+# Dialogue opening revision — unapproved
+
+This revision follows the words actually present in the two retained takes. The earlier Evidence Reconstruction film fails creative review: oversized clocks, disconnected callout geometry, tiny labels and an evidence comparison unsupported by the dialogue. That movie and its exact project remain intact.
+
+The new 15.75-second edit keeps a clean presenter opening, moves the same source moment into a shallow projected recording plane at “video,” reveals “NEVER / SAID” on those words, then develops FACE / VOICE / ROOM beside the unobscured presenter. The voice contour is editable geometry measured from the actual second take. It is not live audio analysis or voice identification. All evaluated animation, typography, masks, perspective and stroke motion belong to the ordinary native Studio project. No clocks appear.
+
+Creative verdict: clearer hierarchy and better dialogue motivation, but still a restrained 2D opening study with one projected video plane. It does not establish the requested cinematic minute, professional 3D scene/camera/light work, continuous character/voice performance or AE/Fusion-level breadth. The camera and microphone position are limited by the retained footage; the second source remains visibly sharper. Human acting, listening and lip-sync acceptance are unqualified. The original J/L source mix remains preserved and still needs perceptual judgement.
+
+The native movie is 1280×720, 24fps, 378 picture frames / 15.75 seconds, with stereo AAC. Its SHA-256 is `4954de6e6b991eb3b9fe3022af3418edfaea08e877cb46a4464a244d0b87415e`. Raw and edited decoded audio have identical sample counts and correlate 1.0 per channel. Full native Studio finished-file playback reaches the end in 15.861 wall seconds with 378 decoded, zero dropped and zero corrupted frames in this pass. That measured finished-file pass does not establish all live preview performance.
+
+The editable graph reaches programme 15.668 seconds at observer 16.078 seconds, with 318 sampled canvas updates over the full 16.440-second observation. It is not qualified as real-time 24fps preview. The strict thin-waveform pair fails IoU at 0.649 despite boundary p95 of 1px. The threshold remains IoU ≥0.95 and p95 ≤2px; no whole-picture parity claim is made.
+
+Two real alpha intermediate exports failed at the local 20MiB file limit. They remain recorded. The shared alpha encoder now uses lossless PNG-in-MOV; a real 720p alpha-gradient pixel regression and the 71 layer/vector/text/perspective checks pass. The isolated local harness uses a finite 128MiB per-file ceiling, ten CPU minutes per process and thirty minutes maximum wall time. Production limits are unchanged. The successful CPU run used 111.908 wall seconds, 266.926 aggregate CPU seconds and about 1.44GiB peak RSS. CPU latency remains material.
+
+A separate live SVG fit defect was reproduced: Stretch displayed a 62px-wide contour in a 280px image. The inner SVG now lets the image element control fit; nine actual browser contain/cover/stretch cases agree with the raster reference within one pixel. The old stretch failures remain in the test report. Fourteen vector frontend regressions pass, as does the strict optimized isolated App build and eight anonymous welcome viewport checks. These checks do not approve the film creatively.
+
+The portable project embeds the exact two working videos and three artwork inputs. Independent normal Studio restore verifies exact canonical decisions and all five byte hashes. Original untouched 1080p takes remain in the parent folder. The side-by-side file is static comparison packaging of two native outputs; it creates no evaluated effects.
+
+No paid model/GPU call, production data change, push, merge or deployment occurred. The missing clock narration and the complete 60-second opening remain unfinished. Formal Studio readiness is unchanged.

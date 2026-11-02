@@ -7,12 +7,13 @@ import {
 } from "./audioRemixModel";
 
 describe("audioRemixModel", () => {
-  test("offers the ten Studio remix presets", () => {
+  test("offers the Studio remix presets including Chipmunk", () => {
     expect(AUDIO_REMIX_PRESETS.map(item => item.name)).toEqual([
       "Slowed + Reverb",
       "Sped Up",
       "Deep Voice",
       "Nightcore",
+      "Chipmunk",
       "Amapiano Space",
       "Warm Vocal",
       "Bass Boost",
@@ -20,6 +21,21 @@ describe("audioRemixModel", () => {
       "Telephone",
       "8D Spatial",
     ]);
+  });
+
+  test("Chipmunk raises the voice an octave without changing picture timing", () => {
+    const preset = applyAudioRemixPreset("chipmunk");
+    expect(audioRemixForRender(JSON.parse(JSON.stringify(preset)))).toMatchObject({
+      enabled: true, preset: "chipmunk", speed: 1, pitch_semitones: 12,
+      intensity: 1, keep_pitch: false, reverb_mix: 0, target: "voice", content_type: "auto",
+    });
+    expect(audioRemixForRender(patchAudioRemix(preset, { keepPitch: true })).pitch_semitones).toBe(0);
+  });
+
+  test.each(AUDIO_REMIX_PRESETS)("$name retains its identity through editing and saving", preset => {
+    const selected = applyAudioRemixPreset(preset.id);
+    expect(selected.preset).toBe(preset.id);
+    expect(audioRemixForRender(patchAudioRemix(selected, { outputGain: -1 })).preset).toBe(preset.id);
   });
 
   test("selecting and editing a preset produces a bounded render contract", () => {

@@ -1,0 +1,187 @@
+{
+  "format": "autopromote-scene-actions",
+  "version": 1,
+  "projectId": "viral-project-5be72287-c09e-4ec1-9a75-0c008037b4c5",
+  "baseRevision": 7,
+  "name": "Preserve full presenter framing",
+  "actions": [
+    {
+      "type": "remove_keys",
+      "targetId": "main-video",
+      "property": "x"
+    },
+    {
+      "type": "keys",
+      "targetId": "main-video",
+      "keys": [
+        {
+          "property": "x",
+          "time": 0,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.08,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 8.7,
+          "value": 51,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 13.95,
+          "value": 51,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "x",
+          "time": 14.7,
+          "value": 50,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "type": "remove_keys",
+      "targetId": "main-video",
+      "property": "scale"
+    },
+    {
+      "type": "keys",
+      "targetId": "main-video",
+      "keys": [
+        {
+          "property": "scale",
+          "time": 0,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 1.9,
+          "value": 1.025,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 2.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 7.4,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.08,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 8.7,
+          "value": 1.025,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 13.95,
+          "value": 1.025,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "scale",
+          "time": 14.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "projectId": "viral-project-6b11eb33-f22d-4989-8ccc-0a255bd05a19",
+  "projectHash": "c8fe175814b82bc3399c0d7496ae7ad77356cdfddce760da1c583daee8ae4ff7",
+  "outputSha256": "1b08aa63e181f64199eaa21fefc8722a88c5b9bb5031800ac6f65dbd7fe73c67",
+  "submittedJobId": "viral_ccf43cdcef024aaae39c21c4c0dea5ef4891997f7ed7e9f2c88aba2cd5eb3fe1",
+  "normalAuthenticatedReceiptRestore": true,
+  "actualNativeDownload": true,
+  "technical": {
+    "passed": true,
+    "sha256": "1b08aa63e181f64199eaa21fefc8722a88c5b9bb5031800ac6f65dbd7fe73c67",
+    "bytes": 4439815,
+    "seconds": 15.76,
+    "video": {
+      "width": 1280,
+      "height": 720,
+      "codec": "h264",
+      "fps": "24/1",
+      "duration": "15.750000",
+      "frameCount": 378,
+      "pixelFormat": "yuv420p",
+      "encoder": "Lavc60.31.102 libx264"
+    },
+    "audio": {
+      "codec": "aac",
+      "channels": 2,
+      "sampleRate": "48000",
+      "duration": "15.760000"
+    },
+    "independentFullDecode": true,
+    "decodedAudio": {
+      "samples": 756736,
+      "sampleRate": 48000,
+      "seconds": 15.765333333333333,
+      "toleranceSeconds": 0.04466666666666667,
+      "passed": true
+    },
+    "contactSheet": "reports/studio-motion-flow-takeover-20261031/cinematic/native-motion-flow/final.mp4.frames.jpg",
+    "scope": "Technical only. Pixel and listening review are separate required evidence."
+  }
+}

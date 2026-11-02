@@ -44,6 +44,8 @@ async function main() {
         "CREDITS_JAVA_BIN",
         "CREDITS_FIRESTORE_JAR",
         "CREDITS_PYTHON_BIN",
+        "STUDIO_3D_LOCAL_CPU",
+        "STUDIO_3D_BLENDER_BIN",
         "K_SERVICE",
         "FUNCTION_TARGET",
         "RENDER_SERVICE_ID",
@@ -200,6 +202,9 @@ async function main() {
         process.env.CREDITS_PYTHON_BIN || path.resolve(root, "../AutoPromote/.venv/bin/python"),
       env,
       apiOrigin: origin,
+      timeoutMs: Number(process.env.CREDITS_LOCAL_RENDER_TIMEOUT_MS || 120000),
+      maxArtifactBytes: Number(process.env.CREDITS_LOCAL_MAX_ARTIFACT_BYTES || 20 * 1024 * 1024),
+      maxRequestBytes: Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 512 * 1024),
     });
     env.MEDIA_WORKER_URL = env.LOCAL_MEDIA_WORKER_URL = worker.origin;
     const policy = {

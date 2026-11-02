@@ -1,0 +1,70 @@
+{
+  "checkedAt": "2026-11-01T19:59:35.865Z",
+  "baseline": "http://127.0.0.1:43927",
+  "candidate": "http://127.0.0.1:36469",
+  "headless": true,
+  "muted": true,
+  "mockedResponses": false,
+  "matchingWelcomeContent": true,
+  "checks": [
+    {
+      "name": "baseline",
+      "width": 1440,
+      "height": 1000,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "candidate",
+      "width": 1440,
+      "height": 1000,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "baseline",
+      "width": 390,
+      "height": 844,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "candidate",
+      "width": 390,
+      "height": 844,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "baseline",
+      "width": 360,
+      "height": 800,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "candidate",
+      "width": 360,
+      "height": 800,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "baseline",
+      "width": 1200,
+      "height": 900,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    },
+    {
+      "name": "candidate",
+      "width": 1200,
+      "height": 900,
+      "welcomeWorkflowVisible": true,
+      "noOverflow": true
+    }
+  ],
+  "authenticated": null,
+  "browserErrors": [],
+  "apiWrites": []
+}

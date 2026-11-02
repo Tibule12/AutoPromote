@@ -2,13 +2,13 @@
 import math
 import re
 
-TEMPLATES = {"cinematic_title", "neon_logo", "chrome_lyric", "audio_reactive_text", "floating_callout", "impact_explosion", "speaker_intro", "comparison_card"}
+TEMPLATES = {"cinematic_title", "neon_logo", "chrome_lyric", "audio_reactive_text", "floating_callout", "impact_explosion", "speaker_intro", "comparison_card", "media_plane"}
 MATERIALS = {"chrome", "glass", "neon", "gold", "matte", "holographic"}
 ANIMATIONS = {"dolly", "orbit", "burst", "pulse", "float", "slide", "fade"}
 HOLDS = {"still", "float", "pulse", "orbit"}
 EXITS = {"fade", "dolly", "spin", "burst"}
 EASINGS = {"ease_out", "ease_in_out", "spring", "linear"}
-SCENE_KEYS = {"version", "id", "template", "name", "text", "secondary", "startTime", "duration", "endTime", "layerOrder", "assetUrl", "assetStoragePath", "assetName", "fontFamily", "fontWeight", "textAlign", "lineSpacing", "material", "primaryColor", "secondaryColor", "glowColor", "extrusionDepth", "bevel", "x", "y", "z", "scale", "rotationX", "rotationY", "rotationZ", "entrance", "hold", "exit", "easing", "intensity", "audioReactiveIntensity", "cameraMotion", "focalLength", "lightDirection", "lightColor", "lightIntensity", "shadows", "reflections", "bloom", "background", "enabled", "quality", "hqPreviewUrl", "hqPreviewRevision", "hqPreviewJobId", "keyframes"}
+SCENE_KEYS = {"version", "id", "template", "name", "text", "secondary", "startTime", "duration", "endTime", "layerOrder", "assetUrl", "assetStoragePath", "assetName", "assetType", "assetSourceStart", "assetAspect", "assetContentHash", "fontFamily", "fontWeight", "textAlign", "lineSpacing", "material", "primaryColor", "secondaryColor", "glowColor", "extrusionDepth", "bevel", "x", "y", "z", "scale", "rotationX", "rotationY", "rotationZ", "entrance", "hold", "exit", "easing", "intensity", "audioReactiveIntensity", "cameraMotion", "focalLength", "lightDirection", "lightColor", "lightIntensity", "shadows", "reflections", "bloom", "background", "enabled", "quality", "hqPreviewUrl", "hqPreviewRevision", "hqPreviewJobId", "keyframes"}
 KEYFRAME_FIELDS = {"x", "y", "z", "scale", "rotationX", "rotationY", "rotationZ"}
 ROOT_KEYS = {"version", "scene", "width", "height", "fps", "duration", "mode", "ownerUid"}
 COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
@@ -98,10 +98,21 @@ def validate_spec(spec):
             low, high = bounds[field]
             _number(values.get(field), f"keyframe {field}", low, high)
     asset_path = scene.get("assetStoragePath", "")
+    video = scene.get('assetType') == 'video'
+    if 'assetType' in scene and not video:
+        raise ValueError('Invalid assetType')
+    if video:
+        _number(scene.get('assetSourceStart'), 'assetSourceStart', 0, 86400)
+        _number(scene.get('assetAspect'), 'assetAspect', .25, 4)
+        if not asset_path or not re.fullmatch(r'[a-f0-9]{64}', scene.get('assetContentHash', '')):
+            raise ValueError('Invalid video texture hash or source')
+    elif any(k in scene for k in ('assetSourceStart', 'assetAspect', 'assetContentHash')):
+        raise ValueError('Invalid image texture fields')
     if asset_path:
         _text(asset_path, "assetStoragePath", 512)
         prefix = f"temp_studio_3d/{spec['ownerUid']}/"
-        if not asset_path.startswith(prefix) or not re.fullmatch(r"[A-Za-z0-9_-]{8,100}/asset\.(png|jpg|webp)", asset_path[len(prefix):]) or ".." in asset_path:
+        suffix = r'asset\.mp4' if video else r'asset\.(png|jpg|webp)'
+        if not asset_path.startswith(prefix) or not re.fullmatch(r'[A-Za-z0-9_-]{8,100}/'+suffix, asset_path[len(prefix):]) or ".." in asset_path:
             raise ValueError("Asset must be staged in the isolated 3D bucket")
     if scene.get("assetUrl") and not asset_path:
         raise ValueError("A browser-only asset cannot be rendered")

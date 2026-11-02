@@ -24,9 +24,12 @@ const getStudioSourcePathKind = (storagePath, userId, allowMedia = false) => {
   if (storagePath.startsWith(`uploads/videos/${userId}/`)) return "user_upload";
   if (allowMedia && ["images", "audios"].some(type => storagePath.startsWith(`uploads/${type}/${userId}/`)))
     return "user_upload";
-  // The backend's older raw upload route omitted the UID from its object name.
-  // Its immutable ownerUid metadata is still checked below.
+  // The backend's older raw upload route omitted the UID for all media types.
+  // Accept only one filename component; immutable ownerUid, MIME, size and
+  // expiry checks below still authorize every read. Images/audio never enter
+  // video-only consumers through this compatibility path.
   if (/^uploads\/videos\/[^/]+$/.test(storagePath)) return "legacy_upload";
+  if (allowMedia && /^uploads\/(?:images|audios)\/[^/]+$/.test(storagePath)) return "legacy_upload";
   return null;
 };
 

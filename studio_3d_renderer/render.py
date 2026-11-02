@@ -11,10 +11,12 @@ import tempfile
 import time
 
 from spec import validate_spec
+from scene_motion import delivery_frame_count
 
 JOB_ID = re.compile(r"^[A-Za-z0-9_-]{8,100}$")
 IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}
 MAX_ASSET_BYTES = 5 * 1024 * 1024
+MAX_VIDEO_BYTES = 50 * 1024 * 1024
 
 
 def emit(event, **details):
@@ -39,18 +41,51 @@ def is_image_file(path, content_type):
             or (content_type == "image/webp" and header.startswith(b"RIFF") and header[8:12] == b"WEBP"))
 
 
+def prepare_video_texture(spec, asset_file, root):
+    """Decode the requested source interval once onto the scene delivery grid."""
+    asset=Path(asset_file)
+    if not 0<asset.stat().st_size<=MAX_VIDEO_BYTES or hashlib.sha256(asset.read_bytes()).hexdigest()!=spec['scene']['assetContentHash']:
+        raise ValueError('Invalid video texture content hash or size')
+    info=json.loads(run(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(asset)],timeout=30))
+    video=next((s for s in info['streams'] if s['codec_type']=='video'),None)
+    scene=spec['scene']
+    if (not video or video['codec_name']!='h264' or video['width']*video['height']>8192**2
+            or abs(video['width']/video['height']-scene['assetAspect'])>.002
+            or float(video.get('duration') or info['format']['duration'])+.001<scene['assetSourceStart']+spec['duration']):
+        raise ValueError('Invalid video texture format, dimensions or source range')
+    frames=Path(root)/'texture';frames.mkdir(mode=0o700)
+    count=delivery_frame_count(spec)
+    run(['ffmpeg','-v','error','-y','-threads','2','-ss',str(scene['assetSourceStart']),'-i',str(asset),
+         '-vf',f"setpts=PTS-STARTPTS,fps={spec['fps']}:start_time=0:round=near,scale=1280:720:force_original_aspect_ratio=decrease",
+         '-frames:v',str(count),'-threads','2','-start_number','1',str(frames/'texture_%04d.png')],timeout=180)
+    if len(list(frames.glob('texture_*.png')))!=count:
+        raise ValueError('Video texture interval has incomplete decoded frame coverage')
+    return frames/'texture_0001.png'
+
+
 def render_files(spec, temp_dir, asset_file=None):
     root = Path(temp_dir)
     frames = root / "frames"
     frames.mkdir(mode=0o700)
     spec_file = root / "spec.json"
     spec_file.write_text(json.dumps(spec, sort_keys=True), encoding="utf-8")
-    command = ["blender", "-b", "--factory-startup", "-noaudio", "--python-exit-code", "1", "--python", str(Path(__file__).with_name("blender_scene.py")), "--", str(spec_file), str(frames)]
+    if spec.get('scene',{}).get('assetType')=='video':
+        if not asset_file:raise ValueError('Video texture requires its owned source bytes')
+        asset_file=prepare_video_texture(spec,asset_file,root)
+    command = [os.environ.get('STUDIO_3D_BLENDER_BIN','blender'), "-b", "--factory-startup", "-noaudio", '-t', '2', "--python-exit-code", "1", "--python", str(Path(__file__).with_name("blender_scene.py")), "--", str(spec_file), str(frames)]
     if asset_file:
         command.append(str(asset_file))
-    emit("blender_start", width=spec["width"], height=spec["height"], fps=spec["fps"], duration=spec["duration"])
-    blender_log = run(command)
-    expected_count = math.ceil(spec['duration'] * spec['fps'])
+    planar=(os.environ.get('STUDIO_3D_NATIVE_PLANAR')=='1' and spec.get('scene',{}).get('template')=='media_plane' and spec['scene'].get('assetType')=='video'
+        and not spec['scene']['text'].strip() and not spec['scene']['secondary'].strip() and spec['scene']['bloom']==0)
+    if planar:
+        from plane_scene import render_plane_scene
+        emit('native_plane_start',width=spec['width'],height=spec['height'],fps=spec['fps'],duration=spec['duration'])
+        render_plane_scene(spec,asset_file,frames)
+        blender_log=json.dumps(dict(event='render_device',engine='AUTOPROMOTE_PLANAR',backend='CPU',devices=[],gpu_verified=False))
+    else:
+        emit("blender_start", width=spec["width"], height=spec["height"], fps=spec["fps"], duration=spec["duration"])
+        blender_log = run(command)
+    expected_count = delivery_frame_count(spec)
     expected_names = {f'frame_{index:04d}.png' for index in range(expected_count)}
     if {p.name for p in frames.glob('frame_*.png')} != expected_names:
         raise RuntimeError('Blender did not render the complete requested frame sequence')
@@ -109,11 +144,12 @@ def run_cloud_job(job_id):
             if asset_path:
                 blob = bucket.blob(asset_path)
                 blob.reload()
-                if blob.size > MAX_ASSET_BYTES or blob.content_type not in IMAGE_TYPES:
+                video=spec['scene'].get('assetType')=='video'
+                if blob.size > (MAX_VIDEO_BYTES if video else MAX_ASSET_BYTES) or blob.content_type not in ({'video/mp4'} if video else IMAGE_TYPES):
                     raise ValueError("Invalid asset metadata")
                 asset_file = Path(temp) / "asset"
                 blob.download_to_filename(str(asset_file))
-                if asset_file.stat().st_size > MAX_ASSET_BYTES or not is_image_file(asset_file, blob.content_type):
+                if not video and (asset_file.stat().st_size > MAX_ASSET_BYTES or not is_image_file(asset_file, blob.content_type)):
                     raise ValueError("Invalid asset content")
             preview, overlay = render_files(spec, temp, asset_file)
             prefix = f"temp_studio_3d/{spec['ownerUid']}/{job_id}"

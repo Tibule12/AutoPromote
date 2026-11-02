@@ -15,11 +15,13 @@ import numpy as np
 from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFilter, ImageOps
 
 try:
+    from .studio_perspective import project_media, validate_perspective_layer, validate_perspective
     from .studio_vector_shape import rasterize_vector_shape, validate_vector_trim
     from .studio_motion import automation_segment_value, finite
     from .viral_motion_graphics import edit_clock
     from .viral_render_contract import map_timeline_time
 except ImportError:
+    from studio_perspective import project_media, validate_perspective_layer, validate_perspective
     from studio_vector_shape import rasterize_vector_shape, validate_vector_trim
     from studio_motion import automation_segment_value, finite
     from viral_motion_graphics import edit_clock
@@ -66,6 +68,11 @@ def interpolate_layer_value(layer, property_name, time, fallback):
 def layer_pose(layer, overlay, time):
     base = (layer or {}).get("base_transform") or {}
     return {
+        **({'mask_path': animated_mask_path(layer,time)} if ((layer or {}).get('effects') or {}).get('mask',{}).get('shape')=='polygon' else {}),
+        **({'perspective_progress': max(0,min(100,interpolate_layer_value(layer,'perspectiveProgress',time,base.get('perspective_progress',100)))),
+            'perspective':{**validate_perspective(layer['perspective']),'corners':[
+                [interpolate_layer_value(layer,f'planeCorner{i}{axis}',time,p[j]) for j,axis in enumerate(('X','Y'))]
+                for i,p in enumerate(validate_perspective(layer['perspective'])['corners'])]}} if (layer or {}).get('perspective') else {}),
         **({"text_progress": max(0, min(100, interpolate_layer_value(layer, "textProgress", time, base.get("text_progress", 100))))} if (layer or {}).get("text_animator") else {}),
         "x": interpolate_layer_value(layer, "x", time, base.get("x", _get(overlay, "x", 50))),
         "y": interpolate_layer_value(layer, "y", time, base.get("y", _get(overlay, "y", 50))),
@@ -79,6 +86,44 @@ def layer_pose(layer, overlay, time):
                 ('stroke_end', 'strokeEnd', 100, 0, 100), ('stroke_offset', 'strokeOffset', 0, -1000, 1000)]}
            if (layer or {}).get('vector_shape') is not None else {}),
     }
+
+
+def validate_mask_animation(layer):
+    keys=[key for key in (layer or {}).get('motion_keyframes') or [] if str(key.get('property','')).startswith('maskPoint')]
+    if not keys:return
+    mask=((layer or {}).get('effects') or {}).get('mask') or {}
+    if mask.get('shape')!='polygon' or layer.get('type') not in {'image','video'}:
+        raise ValueError('Mask point animation requires an ordinary media polygon')
+    points=_mask_points(mask)
+    for key in keys:
+        prop=re.fullmatch(r'maskPoint(\d{1,2})(X|Y)',str(key.get('property','')))
+        value,time=key.get('value'),key.get('time')
+        if (not prop or int(prop[1])>=len(points) or isinstance(value,bool) or not isinstance(value,(int,float))
+                or not math.isfinite(value) or not -100<=value<=200 or isinstance(time,bool)
+                or not isinstance(time,(int,float)) or not math.isfinite(time) or time<0):
+            raise ValueError('Invalid animated mask point channel, time or coordinate')
+
+
+def _mask_points(mask):
+    path=str(mask.get('path') or 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)')
+    match=re.fullmatch(r'polygon\((.{1,2048})\)',path.strip())
+    points=[]
+    for pair in match[1].split(',') if match else []:
+        point=re.fullmatch(r'\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*',pair)
+        if not point:raise ValueError('Mask points require finite percentage coordinates')
+        points.append([float(point[1]),float(point[2])])
+    if not 3<=len(points)<=64:raise ValueError('Mask polygon requires 3–64 points')
+    return points
+
+
+def animated_mask_path(layer,time):
+    mask=((layer or {}).get('effects') or {}).get('mask') or {}
+    points=_mask_points(mask)
+    result=[]
+    for index,point in enumerate(points):
+        values=[interpolate_layer_value(layer,f'maskPoint{index}{axis}',time,point[j]) for j,axis in enumerate(['X','Y'])]
+        result.append(f'{values[0]:.8f}% {values[1]:.8f}%')
+    return 'polygon('+', '.join(result)+')'
 
 
 def layer_clip_mask(size, mask, crop_x=0, crop_y=0, feather_scale=1):
@@ -176,7 +221,14 @@ def _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacit
     return projected
 
 
-def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
+def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, reference_surface=False):
+    region=((layer or {}).get('perspective') or {}).get('sourceRect')
+    if region is not None:
+        validate_perspective(layer['perspective'])
+    if pose.get('mask_path') is not None:
+        effects={**((layer or {}).get('effects') or {})}
+        effects['mask']={**(effects.get('mask') or {}),'path':pose['mask_path']}
+        layer={**layer,'effects':effects}
     canvas_width, canvas_height = canvas_size
     fullscreen = str(_get(overlay, "bRollMode", _get(overlay, "b_roll_mode", ""))) == "fullscreen"
     if fullscreen:
@@ -188,7 +240,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     height_percent = max(.1, min(1000 if _get(overlay, "type") == "text" else 100, finite(_get(overlay, "height", 35), 35)))
     box_width = canvas_width if fullscreen else max(2, round(canvas_width * width_percent / 100 * pose["scale"]))
     box_height = canvas_height if fullscreen else max(2, round(canvas_height * height_percent / 100 * pose["scale"]))
-    fit = "cover" if fullscreen else str(_get(overlay, "mediaFit", _get(overlay, "media_fit", "contain")) or "contain").lower()
+    fit = "stretch" if region is not None else "cover" if fullscreen else str(_get(overlay, "mediaFit", _get(overlay, "media_fit", "contain")) or "contain").lower()
     source_ratio, box_ratio = asset.width / asset.height, box_width / box_height
     if fit == "stretch":
         target_width, target_height = box_width, box_height
@@ -221,6 +273,10 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
             frame_mask = layer_clip_mask(artwork.size, {"enabled": True, "shape": "rectangle", "radius": radius})
             artwork.putalpha(ImageChops.multiply(artwork.getchannel("A"), frame_mask))
 
+    if (layer or {}).get('perspective'):
+        if fullscreen:
+            raise ValueError('Perspective is available on ordinary inset media planes')
+        artwork = project_media(artwork,pose.get('perspective',layer['perspective']),pose['perspective_progress'])
     anchor_x = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_x", 50), 50))) / 100
     anchor_y = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_y", 50), 50))) / 100
     diagonal = max(8, math.ceil(math.hypot(artwork.width, artwork.height) * 2.1))
@@ -249,15 +305,69 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         y = round(canvas_height * pose["y"] / 100 - anchor[1]) + round(anchor[1] - artwork.height * anchor_y)
         destination.alpha_composite(artwork, (x, y))
         return destination
-    transform_surface = Image.new("RGBA", (diagonal, diagonal))
+    if (not reference_surface and abs(pose["rotation"]) > .001
+            and not (effects.get("shadow") or {}).get("enabled")
+            and not (effects.get("glow") or {}).get("enabled")
+            and finite(effects.get("blur"), 0) <= 0
+            and all(clip_box.get(key, default) == default for key, default in
+                    [("x", 0), ("y", 0), ("width", 1), ("height", 1)])):
+        clip = layer_clip_mask(artwork.size, effects.get("mask") or {}, pose.get("crop_x", 0),
+                               pose.get("crop_y", 0), canvas_height / 720 * pose["scale"])
+        if clip is not None:
+            artwork.putalpha(ImageChops.multiply(artwork.getchannel("A"), clip))
+        # Preserve Pillow rotate's inverse matrix, its rounded local placement
+        # and final canvas offset. Sample only the delivery canvas rather than
+        # a mostly empty diagonal square for every shutter sample.
+        angle = math.radians(pose["rotation"] % 360)
+        c, s = round(math.cos(angle), 15), round(math.sin(angle), 15)
+        ax, ay = anchor
+        left, top = round(ax-artwork.width*anchor_x), round(ay-artwork.height*anchor_y)
+        x, y = round(canvas_width*pose["x"]/100-ax), round(canvas_height*pose["y"]/100-ay)
+        padding = 4
+        padded = Image.new('RGBA', (artwork.width+2*padding, artwork.height+2*padding))
+        padded.alpha_composite(artwork, (padding,padding))
+        matrix = (c, s, ax-c*ax-s*ay-c*x-s*y-left+padding,
+                  -s, c, ay+s*ax-c*ay+s*x-c*y-top+padding)
+        warped = padded.transform(canvas_size, Image.Transform.AFFINE, matrix, Image.Resampling.BICUBIC)
+        opacity = max(0, min(1, pose["opacity"] * sample_opacity))
+        if opacity < 1:
+            warped.putalpha(warped.getchannel("A").point(lambda value: round(value*opacity)))
+        destination = Image.new('RGBA', canvas_size)
+        destination.alpha_composite(warped)
+        return destination
+    surface_size, surface_origin, original_anchor = (diagonal, diagonal), (0, 0), anchor
+    surface_artwork_position = (round(anchor[0] - artwork.width * anchor_x),
+                                round(anchor[1] - artwork.height * anchor_y))
+    shadow = effects.get("shadow") or {}
+    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") in ("image", "video") else 1
+    # An unrotated projected video with only a drop shadow needs no square
+    # rotation canvas. Retain the old canvas origin and integer placement so
+    # this bounded allocation preserves the original pixels, including edges.
+    if (not reference_surface and (layer or {}).get('perspective') and
+            _get(overlay, "type") == "video" and
+            shadow.get("enabled") and not (effects.get("glow") or {}).get("enabled") and
+            finite(effects.get("blur"), 0) <= 0 and not effects.get("mask", {}).get("enabled") and
+            not pose.get("crop_x") and not pose.get("crop_y") and
+            all(clip_box.get(key, default) == default for key, default in
+                [("x", 0), ("y", 0), ("width", 1), ("height", 1)])):
+        padding = math.ceil(4 * max(0, finite(shadow.get("blur"), 18)) * effect_units) + 4
+        padding_x = padding + abs(round(finite(shadow.get("x"), 0) * effect_units))
+        padding_y = padding + abs(round(finite(shadow.get("y"), 10) * effect_units))
+        left, top = round(anchor[0] - artwork.width * anchor_x), round(anchor[1] - artwork.height * anchor_y)
+        origin_x, origin_y = max(0, left - padding_x), max(0, top - padding_y)
+        right, bottom = min(diagonal, left + artwork.width + padding_x), min(diagonal, top + artwork.height + padding_y)
+        surface_origin = (origin_x, origin_y)
+        surface_size = (right - origin_x, bottom - origin_y)
+        surface_artwork_position = (surface_artwork_position[0] - origin_x,
+                                    surface_artwork_position[1] - origin_y)
+        anchor = (anchor[0] - origin_x, anchor[1] - origin_y)
+    transform_surface = Image.new("RGBA", surface_size)
     transform_surface.alpha_composite(
         artwork,
-        (round(anchor[0] - artwork.width * anchor_x), round(anchor[1] - artwork.height * anchor_y)),
+        surface_artwork_position,
     )
     alpha = transform_surface.getchannel("A")
-    effect_units = canvas_height / 720 * pose["scale"] if _get(overlay, "type") in ("image", "video") else 1
     composed = transform_surface
-    shadow = effects.get("shadow") or {}
     if shadow.get("enabled"):
         shadow_layer = _effect_layer(
             alpha,
@@ -304,6 +414,18 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         # Native clip-path clips the filtered group in its local box; rotating
         # only the artwork first incorrectly leaves shadows outside the mask.
         composed.putalpha(ImageChops.multiply(composed.getchannel("A"), matte))
+    if abs(pose["rotation"]) > .001 and surface_origin != (0, 0):
+        angle = math.radians(pose['rotation'] % 360)
+        c,s = round(math.cos(angle),15),round(math.sin(angle),15)
+        ax,ay = anchor
+        x = round(canvas_width*pose['x']/100-original_anchor[0])+surface_origin[0]
+        y = round(canvas_height*pose['y']/100-original_anchor[1])+surface_origin[1]
+        composed = composed.transform(canvas_size,Image.Transform.AFFINE,
+            (c,s,ax-c*ax-s*ay-c*x-s*y,-s,c,ay+s*ax-c*ay+s*x-c*y),Image.Resampling.BICUBIC)
+        opacity=max(0,min(1,pose['opacity']*sample_opacity))
+        if opacity<1:composed.putalpha(composed.getchannel('A').point(lambda value:round(value*opacity)))
+        destination=Image.new('RGBA',canvas_size);destination.alpha_composite(composed)
+        return destination
     if abs(pose["rotation"]) > .001:
         composed = composed.rotate(-pose["rotation"], Image.Resampling.BICUBIC, center=anchor)
     # Native CSS opacity applies after filtering the entire layer. Fading only
@@ -314,8 +436,8 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         composed.putalpha(composed.getchannel("A").point(lambda value: round(value * opacity)))
 
     destination = Image.new("RGBA", canvas_size)
-    x = round(canvas_width * pose["x"] / 100 - anchor[0])
-    y = round(canvas_height * pose["y"] / 100 - anchor[1])
+    x = round(canvas_width * pose["x"] / 100 - original_anchor[0]) + surface_origin[0]
+    y = round(canvas_height * pose["y"] / 100 - original_anchor[1]) + surface_origin[1]
     destination.alpha_composite(composed, (x, y))
     return destination
 
@@ -334,27 +456,49 @@ def layer_output_window(overlay, output_duration, speed_plan):
     return output_start, clip_duration, normalized_speed_plan
 
 
+def layer_picture_window(overlay, output_duration, speed_plan, fps):
+    start, duration, plan = layer_output_window(overlay, output_duration, speed_plan)
+    first = math.ceil(start * fps - 1e-7)
+    end = min(round(output_duration * fps), math.ceil((start + duration) * fps - 1e-7))
+    return first / fps, max(0, end - first), first / fps - start, plan
+
+
 def render_image_layer_motion(asset_path, output_path, overlay, layer, width, height,
                               output_duration, speed_plan, fps=30, *, frame_source=None, title_animator=None):
     """Render canonical media poses; a video supplies decoded frames to this same compositor."""
     # The owned image remains the ordinary import/ownership reference. Editable
     # contour decisions, rather than its original cached PNG, author the result.
     vector_shape = (layer or {}).get('vector_shape')
+    validate_perspective_layer(layer or {})
     validate_vector_trim(layer or {})
+    validate_mask_animation(layer or {})
     if vector_shape is not None and frame_source is not None:
         raise ValueError('Vector artwork cannot replace a decoded video source')
     asset = (None if vector_shape is not None else
              Image.open(asset_path).convert("RGBA")) if frame_source is None else None
     if asset is not None and asset.width * asset.height > 8192 * 8192:
         raise ValueError("Logo/image layer exceeds the 8192px safety limit")
-    output_start, clip_duration, normalized_speed_plan = layer_output_window(overlay, output_duration, speed_plan)
+    output_start, frame_count, _, normalized_speed_plan = layer_picture_window(overlay, output_duration, speed_plan, fps)
+    clip_duration = frame_count / fps
+    if not frame_count:
+        raise ValueError("Layer cue contains no delivery picture")
     motion_blur = ((layer or {}).get("effects") or {}).get("motion_blur") or {}
     samples = max(1, min(8, int(finite(motion_blur.get("samples"), 1)))) if motion_blur.get("enabled") else 1
     shutter = max(0, min(1, finite(motion_blur.get("shutter"), .5)))
+    encoding = (["-filter_complex", "[0:v]split=2[color][a];[a]alphaextract[alpha]",
+                 "-map", "[color]", "-map", "[alpha]",
+                 "-c:v:0", "ffv1", "-level:v:0", "3", "-pix_fmt:v:0", "bgr0",
+                 "-c:v:1", "ffv1", "-level:v:1", "3", "-pix_fmt:v:1", "gray", "-f", "matroska"]
+                # Full-frame alpha gradients compress poorly as qtrle and can
+                # exhaust bounded local intermediate storage. PNG-in-MOV
+                # retains the exact RGBA frames and the existing single-stream
+                # compositor contract, including fractional cue timestamps.
+                if (layer or {}).get('perspective') else ["-c:v", "png", "-pred", "mixed",
+                    "-compression_level", "1", "-pix_fmt", "rgba", "-f", "mov"])
     command = [
         "ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba",
         "-s", f"{width}x{height}", "-r", str(fps), "-i", "pipe:0", "-an",
-        "-c:v", "qtrle", "-threads", "2", "-f", "mov", str(output_path),
+        *encoding, "-threads", "2", str(output_path),
     ]
     with tempfile.TemporaryFile() as log:
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log)
@@ -365,7 +509,7 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
         held_pose = held_sample_opacity = held_raster = None
         vector_trim = text_progress = None
         try:
-            for frame_index in range(math.ceil(clip_duration * fps)):
+            for frame_index in range(frame_count):
                 if frame_source is not None:
                     asset = frame_source(frame_index)
                 absolute_output = output_start + frame_index / fps
@@ -406,7 +550,11 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
                         if frame_source is None:
                             held_pose, held_sample_opacity, held_raster = pose, sample_opacity, raster
                     frame.alpha_composite(raster)
-                process.stdin.write(frame.tobytes())
+                try:
+                    process.stdin.write(frame.tobytes())
+                except BrokenPipeError as error:
+                    process.wait(timeout=10); log.seek(0)
+                    raise RuntimeError(f'Layer encoder stopped ({process.returncode}): '+log.read().decode(errors='replace')[-1200:]) from error
             process.stdin.close()
             if process.wait(timeout=1800):
                 log.seek(0)
@@ -434,11 +582,10 @@ def render_video_layer_motion(asset_path, output_path, overlay, layer, width, he
     source_width, source_height = int(stream["width"]), int(stream["height"])
     if min(source_width, source_height) <= 0 or source_width * source_height > 8192 * 8192:
         raise ValueError("Video layer exceeds the 8192px safety limit")
-    _, duration, _ = layer_output_window(overlay, output_duration, speed_plan)
-    frame_count = math.ceil(duration * fps)
+    _, frame_count, phase, _ = layer_picture_window(overlay, output_duration, speed_plan, fps)
     frame_bytes = source_width * source_height * 4
     command = ["ffmpeg", "-nostdin", "-v", "error", "-threads", "2", "-i", str(asset_path),
-               "-an", "-vf", f"fps={fps}", "-frames:v", str(frame_count),
+               "-an", "-vf", f"setpts=PTS-STARTPTS-{phase:.9f}/TB,fps={fps}:start_time=0:round=up", "-frames:v", str(frame_count),
                "-f", "rawvideo", "-pix_fmt", "rgba", "pipe:1"]
     with tempfile.TemporaryFile() as log:
         decoder = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=log)

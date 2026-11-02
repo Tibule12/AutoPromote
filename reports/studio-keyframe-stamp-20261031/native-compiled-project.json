@@ -1,0 +1,988 @@
+{
+  "projectId": "motionflow-seed-project",
+  "projectName": "Keyframe local pose regression 20261031",
+  "revision": 7,
+  "studioDocument": {
+    "schemaVersion": 1,
+    "projectId": "motionflow-seed-project",
+    "revision": 7,
+    "clock": {
+      "ticksPerSecond": 90000,
+      "interval": "half_open"
+    },
+    "output": {
+      "aspectRatio": "9:16",
+      "requestedResolution": "1080p",
+      "frameRate": {
+        "numerator": 24,
+        "denominator": 1
+      },
+      "codec": "h264",
+      "audioCodec": "aac",
+      "audioSampleRate": null,
+      "audioSampleRatePolicy": "worker_selected"
+    },
+    "assets": [
+      {
+        "assetId": "source:fixture-range",
+        "sourceId": "fixture-range",
+        "identityState": "legacy_reference_unverified"
+      }
+    ],
+    "clipOccurrences": [
+      {
+        "occurrenceId": "seg-1",
+        "assetId": "source:fixture-range",
+        "sourceRange": {
+          "space": "source",
+          "startTick": 0,
+          "endTick": 540000
+        },
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 540000
+        },
+        "timeMapId": "map:seg-1",
+        "parameterSchemaVersion": 1,
+        "parameters": {
+          "name": "AutoPromote Motion & Flow clip",
+          "duration": 6
+        },
+        "playback": {
+          "direction": "forward",
+          "freeze": false,
+          "rate": {
+            "numerator": 1,
+            "denominator": 1
+          }
+        }
+      }
+    ],
+    "timeMaps": [
+      {
+        "timeMapId": "map:seg-1",
+        "occurrenceId": "seg-1",
+        "segments": [
+          {
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 540000
+            },
+            "clipLocalRange": {
+              "space": "clip_local",
+              "startTick": 0,
+              "endTick": 540000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 540000
+            },
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            },
+            "direction": "forward",
+            "freeze": false
+          }
+        ]
+      }
+    ],
+    "layers": [
+      {
+        "layerId": "matte-plate",
+        "type": "b_roll",
+        "legacyType": "image",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 540000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "name": "Ellipse Matte Source",
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "stretch",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 36,
+          "height": 22,
+          "rotation": 0,
+          "scale": 1,
+          "startTime": 0,
+          "duration": 6,
+          "bRollMode": "pip",
+          "mask": {
+            "enabled": true,
+            "shape": "ellipse",
+            "feather": 0,
+            "invert": false
+          }
+        }
+      },
+      {
+        "layerId": "fill-cyan",
+        "type": "b_roll",
+        "legacyType": "image",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 540000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "name": "Cyan Fill Plate",
+          "shadow": "none",
+          "frameShape": "edge",
+          "borderRadius": 0,
+          "mediaFit": "stretch",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 58,
+          "height": 36,
+          "rotation": -45,
+          "scale": 1,
+          "startTime": 0,
+          "duration": 6,
+          "bRollMode": "pip",
+          "parentId": "null-rig-1793446588301",
+          "motionDrivers": {
+            "rotation": {
+              "type": "spin",
+              "enabled": true,
+              "ratePerSecond": 45
+            }
+          }
+        }
+      },
+      {
+        "layerId": "null-rig-1793446588301",
+        "type": "title",
+        "legacyType": "text",
+        "legacyCollection": "overlays",
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 450000
+        },
+        "compositionStage": "worker_overlay",
+        "parameterSchemaVersion": 3,
+        "parameters": {
+          "name": "Null Rig 1",
+          "anchorX": 50,
+          "anchorY": 50,
+          "blendMode": "normal",
+          "text": "",
+          "opacity": 1,
+          "x": 50,
+          "y": 50,
+          "width": 16,
+          "height": 16,
+          "rotation": 0,
+          "scale": 1,
+          "startTime": 0,
+          "duration": 5,
+          "isNullRig": true
+        }
+      }
+    ],
+    "linkedTiming": {
+      "cues": {
+        "soundEffects": [],
+        "voiceovers": [],
+        "adjustmentLayers": []
+      },
+      "keys": {
+        "motionKeyframes": [
+          {
+            "atProgrammeTick": 0,
+            "parameters": {
+              "easing": "bezier",
+              "id": "kf-null-rig-1793446588301-rotation-1793446589401",
+              "targetId": "null-rig-1793446588301",
+              "property": "rotation",
+              "value": 45,
+              "curve": [
+                0.22,
+                1,
+                0.36,
+                1
+              ]
+            }
+          },
+          {
+            "atProgrammeTick": 112500,
+            "parameters": {
+              "easing": "bezier",
+              "id": "kf-fill-cyan-rotation-1793446594166",
+              "targetId": "fill-cyan",
+              "property": "rotation",
+              "value": -45,
+              "curve": [
+                0.22,
+                1,
+                0.36,
+                1
+              ]
+            }
+          },
+          {
+            "atProgrammeTick": 180000,
+            "parameters": {
+              "easing": "bezier",
+              "id": "kf-fill-cyan-rotation-1793446597200",
+              "targetId": "fill-cyan",
+              "property": "rotation",
+              "value": -45,
+              "curve": [
+                0.22,
+                1,
+                0.36,
+                1
+              ]
+            }
+          }
+        ],
+        "finishKeyframes": [],
+        "reframeKeyframes": [],
+        "reframeModeCuts": [],
+        "speakerFocusCuts": [],
+        "audioKeyframes.originalAudio": [],
+        "audioKeyframes.masterPodcast": [],
+        "audioKeyframes.voiceover": [],
+        "audioKeyframes.music": [],
+        "audioKeyframes.broll": [],
+        "audioKeyframes.sfx": []
+      }
+    },
+    "audioGraph": {
+      "legacySnapshotRef": "audioRemix",
+      "parameterSchemaVersion": 1,
+      "settings": {
+        "addMusic": false,
+        "musicSelection": "upbeat_pop.mp3",
+        "musicSearchMode": false,
+        "safeSearch": true,
+        "musicVolume": 0.15,
+        "musicDucking": true,
+        "musicDuckingStrength": 0.35,
+        "muteOriginalAudio": false,
+        "audioRemix": {
+          "version": 1,
+          "enabled": false,
+          "preset": "slowed_reverb",
+          "speed": 0.82,
+          "pitch": -3,
+          "bass": 8,
+          "clarity": 2,
+          "air": 1,
+          "reverb": 68,
+          "intensity": 75,
+          "keepPitch": false,
+          "contentType": "auto",
+          "target": "master",
+          "outputGain": 0,
+          "levelMatch": true,
+          "quality": "studio"
+        },
+        "audioRestoration": {
+          "preset": "natural",
+          "voiceIsolation": false,
+          "denoise": 22,
+          "deEsser": 18,
+          "humFrequency": 50,
+          "compressor": 35,
+          "limiter": -1,
+          "loudness": -14,
+          "eq": {
+            "low": 0,
+            "mid": 0,
+            "high": 0
+          }
+        },
+        "audioAutomationSource": "originalAudio"
+      },
+      "music": null,
+      "routes": [
+        {
+          "trackId": "video",
+          "state": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        },
+        {
+          "trackId": "adjustment",
+          "state": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        },
+        {
+          "trackId": "graphics",
+          "state": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        },
+        {
+          "trackId": "broll",
+          "state": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        },
+        {
+          "trackId": "captions",
+          "state": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        },
+        {
+          "trackId": "originalAudio",
+          "state": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        },
+        {
+          "trackId": "voiceover",
+          "state": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        },
+        {
+          "trackId": "music",
+          "state": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        },
+        {
+          "trackId": "sfx",
+          "state": {
+            "visible": true,
+            "locked": false,
+            "muted": false,
+            "solo": false
+          }
+        }
+      ],
+      "routing": {
+        "muteOriginalAudio": false,
+        "musicDucking": true,
+        "musicDuckingStrength": 0.35,
+        "musicTrackId": null
+      }
+    },
+    "visualGraph": {
+      "parameterSchemaVersion": 1,
+      "settings": {
+        "mainTransform": {
+          "id": "main-video",
+          "name": "Main video",
+          "type": "video",
+          "x": 50,
+          "y": 50,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "cropX": 0,
+          "cropY": 0
+        },
+        "finishFx": {
+          "precisionGrade": false,
+          "exposureStops": 0,
+          "lift": 0,
+          "gamma": 1,
+          "gain": 1,
+          "tint": 0,
+          "preset": null,
+          "brightness": 1,
+          "contrast": 1,
+          "saturation": 1,
+          "temperature": 0,
+          "sharpness": 0,
+          "vignette": 0,
+          "blur": 0,
+          "blurMode": "edge",
+          "blurStart": -1,
+          "blurEnd": -1,
+          "zoom": 1,
+          "zoomAnchor": "center",
+          "overlayType": "",
+          "overlayOpacity": 0.4,
+          "overlayColor": "#000000",
+          "filmGrain": 0,
+          "chromaticAberration": 0,
+          "vhsTracking": 0,
+          "lightLeak": 0,
+          "letterbox": 0,
+          "fadeIn": 0,
+          "fadeOut": 0
+        },
+        "mainFrame": {
+          "insetPercent": 0,
+          "radiusPercent": 6,
+          "background": "studio_black",
+          "enabled": false
+        },
+        "advancedColor": {
+          "lutName": "",
+          "lutFile": null,
+          "lutIntensity": 100,
+          "curve": {
+            "shadows": 0,
+            "midtones": 0,
+            "highlights": 0
+          },
+          "hsl": {
+            "hue": 0,
+            "saturation": 0,
+            "luminance": 0
+          }
+        },
+        "podcastVisualizer": {
+          "enabled": false,
+          "mode": "wave",
+          "color": "#72f7ff",
+          "intensity": 0.75,
+          "position": "bottom"
+        },
+        "videoFit": "cover",
+        "safeFaceFraming": false,
+        "faceAnchorPreset": "center",
+        "autoCaptions": false,
+        "captionStyle": "bold_pop",
+        "captionPosition": "bottom_center",
+        "captionScale": 1,
+        "captionTextOverride": "",
+        "translateCaptionsToEnglish": false,
+        "smartCrop": false,
+        "smartCropMode": "speaker_track",
+        "reframeAspect": "9:16",
+        "speakerTrackZoom": 1,
+        "speakerStackFraming": {
+          "dividerPercent": 50,
+          "gapPercent": 1.2,
+          "cardGapPercent": 2.5,
+          "roundedCards": true,
+          "cardInsetPercent": 2.5,
+          "cardRadiusPercent": 8,
+          "secondaryXPercent": 80,
+          "secondaryYPercent": 20,
+          "secondarySizePercent": 30,
+          "top": {
+            "x": 50,
+            "y": 50,
+            "zoom": 1
+          },
+          "bottom": {
+            "x": 50,
+            "y": 50,
+            "zoom": 1
+          },
+          "third": {
+            "x": 50,
+            "y": 50,
+            "zoom": 1
+          },
+          "fourth": {
+            "x": 50,
+            "y": 50,
+            "zoom": 1
+          }
+        },
+        "speakerStackSourceIds": {
+          "top": null,
+          "bottom": null,
+          "third": null,
+          "fourth": null
+        },
+        "speakerStackOffsets": {
+          "top": 0,
+          "bottom": 0,
+          "third": 0,
+          "fourth": 0
+        },
+        "speakerStackCameraCount": 2,
+        "speakerStackLayout": "stack_2",
+        "speakerStackSyncConfirmed": false,
+        "exportSettings": {
+          "resolution": "1080p",
+          "fps": "24",
+          "codec": "h264",
+          "quality": "high",
+          "videoBitrate": "auto",
+          "targetFileSizeMb": "",
+          "audioCodec": "aac",
+          "audioBitrate": "192",
+          "colorSpace": "rec709"
+        },
+        "stabilization": {
+          "enabled": false,
+          "strength": 35,
+          "crop": "adaptive",
+          "rollingShutter": false
+        },
+        "enhanceQuality": false,
+        "beatSnapEnabled": true,
+        "creativeIntent": "energy",
+        "creativeEffectsEnabled": false,
+        "creativePreset": "auto_story",
+        "creativeIntensity": "bold",
+        "pacingLevel": "balanced",
+        "nodeFlow": {
+          "version": 1,
+          "viewerA": "MediaOut",
+          "viewerB": null,
+          "splitPosition": 50,
+          "positions": {},
+          "bypassed": {}
+        },
+        "hideShyLayers": false
+      },
+      "cameraSources": []
+    },
+    "editGraph": {
+      "parameterSchemaVersion": 1,
+      "settings": {
+        "creativeTemplateInstance": null,
+        "captionCoverageMode": "full",
+        "contentProfile": "auto",
+        "joinTransition": "auto",
+        "joinTransitionDuration": 0.18,
+        "silenceRemoval": false,
+        "silenceThreshold": -35,
+        "minSilenceDuration": 0.75,
+        "silencePreview": null,
+        "removeWatermark": false,
+        "watermarkMode": "adaptive",
+        "brandWatermark": false,
+        "manualWatermarkRegions": [],
+        "addHook": false,
+        "hookText": "THIS CHANGES FAST",
+        "hookTemplate": "blur_reveal",
+        "hookIntroSeconds": 3,
+        "hookStartTime": 0.8,
+        "hookEndTime": 3.8,
+        "hookBlurBackground": true,
+        "hookDarkOverlay": true,
+        "hookFreezeFrame": false,
+        "hookZoomScale": 1.08,
+        "hookTextAnimation": "slide-up",
+        "hookFocusPoint": {
+          "x": 50,
+          "y": 42
+        },
+        "bRollCadence": "balanced",
+        "bRollGenerationJobId": "",
+        "compoundClips": [],
+        "creatorPreview": {
+          "enabled": true,
+          "section": "reactions",
+          "activeDemo": "",
+          "intensity": 62,
+          "duration": 0.8,
+          "zoom": 1.34,
+          "x": 78,
+          "y": 68,
+          "color": "#ffcb67",
+          "accent": "#7457ff",
+          "text": "THIS CHANGED EVERYTHING",
+          "name": "",
+          "role": "",
+          "entity": "",
+          "emoji": "🤯",
+          "rank": 3,
+          "tracking": false,
+          "maskShape": "person",
+          "transition": "whip",
+          "introStyle": "cinematic",
+          "reactionMode": "instant",
+          "comparisonLeft": "",
+          "comparisonRight": ""
+        },
+        "splitExportEnabled": false,
+        "splitExportHooks": [],
+        "proxySettings": {
+          "enabled": true,
+          "resolution": "720p",
+          "codec": "h264",
+          "status": "source_ready"
+        }
+      },
+      "media": [],
+      "sources": [
+        {
+          "id": "fixture-range",
+          "name": "AutoPromote Motion & Flow clip",
+          "duration": 6
+        }
+      ],
+      "musicMix": null,
+      "hookBinding": null,
+      "angleGroups": [],
+      "extractedAudio": null
+    },
+    "constraints": {
+      "locks": []
+    },
+    "styleRef": null,
+    "analysisRefs": [],
+    "projectIntelligenceRefs": [],
+    "programmeSpeedKeys": [],
+    "fallbackSpeed": 1,
+    "outputTimeMap": [
+      {
+        "programmeRange": {
+          "space": "programme",
+          "startTick": 0,
+          "endTick": 540000
+        },
+        "outputRange": {
+          "space": "output",
+          "startTick": 0,
+          "endTick": 540000
+        },
+        "rateNumerator": 1000000,
+        "rateDenominator": 1000000
+      }
+    ],
+    "journal": [],
+    "idempotency": {},
+    "directorReviewJournal": [],
+    "compatibility": {
+      "legacySnapshotVersion": 1,
+      "projection": "clip_occurrences_canonical_other_fields_legacy",
+      "editableStateVersion": 1,
+      "visualStateVersion": 1,
+      "editStateVersion": 1,
+      "layerComposition": "separate_worker_stages"
+    }
+  },
+  "renderRequest": {
+    "video_url": "http://127.0.0.1:5043/motionflow-source.mp4",
+    "start_time": 0,
+    "end_time": 6,
+    "overlays": [
+      {
+        "id": "matte-plate",
+        "type": "image",
+        "src": "http://127.0.0.1:5043/motionflow-matte-plate.png",
+        "name": "Ellipse Matte Source",
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 36,
+        "height": 22,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 6,
+        "bRollMode": "pip",
+        "mask": {
+          "enabled": true,
+          "shape": "ellipse",
+          "feather": 0,
+          "invert": false
+        },
+        "start_time": 0
+      },
+      {
+        "id": "fill-cyan",
+        "type": "image",
+        "src": "http://127.0.0.1:5043/motionflow-fill-cyan.png",
+        "name": "Cyan Fill Plate",
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 50,
+        "y": 50,
+        "width": 58,
+        "height": 36,
+        "rotation": 0,
+        "scale": 1,
+        "startTime": 0,
+        "duration": 6,
+        "bRollMode": "pip",
+        "parentId": "null-rig-1793446588301",
+        "motionDrivers": {
+          "rotation": {
+            "type": "spin",
+            "enabled": true,
+            "ratePerSecond": 45
+          }
+        },
+        "start_time": 0
+      }
+    ],
+    "auto_captions": false,
+    "timeline_segments": [
+      {
+        "id": "main",
+        "url": "http://127.0.0.1:5043/motionflow-source.mp4",
+        "start_time": 0,
+        "end_time": 6,
+        "duration": 6
+      }
+    ],
+    "background_audio": null,
+    "hook_focus_point": null,
+    "cover_frame": null,
+    "thumbnail_frame": null,
+    "professional_cleanup": false,
+    "finish_plan": {
+      "color_cube": null,
+      "main_frame": {
+        "enabled": false,
+        "shape": "round",
+        "inset_percent": 0,
+        "border_radius_percent": 6,
+        "background": "studio_black"
+      },
+      "color": {
+        "preset": null,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "brightness": 1,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "precisionGrade": false
+      },
+      "motion": {
+        "zoom": 1,
+        "zoom_anchor": "center",
+        "base_scale": 1,
+        "scale_keyframes": [],
+        "base_transform": {
+          "x": 50,
+          "y": 50,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "crop_x": 0,
+          "crop_y": 0
+        },
+        "keyframes": []
+      },
+      "texture": {
+        "film_grain": 0,
+        "chromatic_aberration": 0,
+        "vhs_tracking": 0,
+        "light_leak": 0
+      },
+      "visualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom",
+        "source": "original_speech"
+      },
+      "keyframes": []
+    },
+    "composition_plan": {
+      "version": 1,
+      "coordinate_space": "canvas_percent",
+      "preview_timebase": "output_timeline_seconds",
+      "layers": [
+        {
+          "id": "main-video",
+          "name": "Main video",
+          "type": "video",
+          "blend_mode": "normal",
+          "base_transform": {
+            "x": 50,
+            "y": 50,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "crop_x": 0,
+            "crop_y": 0
+          },
+          "anchor_x": 50,
+          "anchor_y": 50,
+          "effects": {
+            "mask": {
+              "enabled": false
+            },
+            "blur": 0,
+            "glow": {
+              "enabled": false,
+              "color": "#8b5cf6",
+              "radius": 0,
+              "intensity": 0
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 0,
+              "opacity": 0,
+              "x": 0,
+              "y": 0
+            },
+            "motion_blur": {
+              "enabled": false,
+              "samples": 1,
+              "shutter": 0
+            }
+          },
+          "motion_keyframes": []
+        },
+        {
+          "id": "matte-plate",
+          "name": "Ellipse Matte Source",
+          "type": "image",
+          "blend_mode": "normal",
+          "base_transform": {
+            "x": 50,
+            "y": 50,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "crop_x": 0,
+            "crop_y": 0
+          },
+          "anchor_x": 50,
+          "anchor_y": 50,
+          "effects": {
+            "mask": {
+              "enabled": true,
+              "shape": "ellipse",
+              "feather": 0,
+              "invert": false
+            },
+            "blur": 0,
+            "glow": {
+              "enabled": false,
+              "color": "#8b5cf6",
+              "radius": 0,
+              "intensity": 0
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 0,
+              "opacity": 0,
+              "x": 0,
+              "y": 0
+            },
+            "motion_blur": {
+              "enabled": false,
+              "samples": 1,
+              "shutter": 0
+            }
+          },
+          "motion_keyframes": []
+        },
+        {
+          "id": "fill-cyan",
+          "name": "Cyan Fill Plate",
+          "type": "image",
+          "blend_mode": "normal",
+          "base_transform": {
+            "x": 50,
+            "y": 50,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "crop_x": 0,
+            "crop_y": 0
+          },
+          "anchor_x": 50,
+          "anchor_y": 50,
+          "effects": {
+            "mask": {
+              "enabled": false
+            },
+            "blur": 0,
+            "glow": {
+              "enabled": false,
+              "color": "#8b5cf6",
+              "radius": 0,
+              "intensity": 0
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 0,
+              "opacity": 0,
+              "x": 0,
+              "y": 0
+            },
+            "motion_blur": {
+              "enabled": false,
+              "samples": 1,
+              "shutter": 0
+            }
+          },
+          "motion_keyframes": [
+            {
+              "id": "baked-fill-cyan-rotation-0",
+              "property": "rotation",
+              "time": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-rotation-1",
+              "property": "rotation",
+              "time": 6,
+              "value": 270,
+              "easing": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "smart_crop": false,
+    "brand_watermark": false,
+    "output_settings": {
+      "width": 360,
+      "height": 640,
+      "fps": 24,
+      "aspectRatio": "9:16"
+    }
+  }
+}

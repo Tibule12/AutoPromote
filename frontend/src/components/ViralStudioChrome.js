@@ -20,6 +20,12 @@ export const VIRAL_STUDIO_WORKSPACE_MODES = [
     shortLabel: "Signature",
     helper: "Advanced transformation tuning with the same safe project state.",
   },
+  {
+    id: "fxflow",
+    label: "Motion & Flow",
+    shortLabel: "FX Flow",
+    helper: "AutoPromote layer rigging, Motion Drivers, Speed/Value Graphs and Signal Node Flow.",
+  },
 ];
 
 const QUICK_TOOL_IDS = new Set(["moments", "hook", "captions", "broll", "export"]);
@@ -194,6 +200,7 @@ const INSPECTOR_TABS = [
   { id: "titles", label: "Graphics", icon: "T" },
   { id: "motion", label: "Motion", icon: "◆" },
   { id: "composite", label: "Composite", icon: "◫" },
+  { id: "flow", label: "Node Flow", icon: "☍" },
   { id: "creatorfx", label: "Creator FX", icon: "✺" },
   { id: "pacing", label: "Pacing", icon: "≋" },
   { id: "broll", label: "B-roll", icon: "▣" },

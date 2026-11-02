@@ -21,7 +21,7 @@ export const PUNCH_SCALES = [
 
 export const PUNCH_STYLES = [
   { id: "punch", label: "Fast Punch", desc: "0.12s dynamic snappy zoom-in" },
-  { id: "snap", label: "Instant Cut", desc: "Hard frame cut like DaVinci/Premiere" },
+  { id: "snap", label: "Instant Cut", desc: "Instant hard frame cut with zero tweening" },
   { id: "smooth", label: "Cinematic Ease", desc: "0.28s smooth push-in" },
 ];
 

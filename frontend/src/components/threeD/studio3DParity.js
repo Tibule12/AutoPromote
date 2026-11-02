@@ -9,6 +9,8 @@ const add = (names, status, reason) =>
   });
 
 add("version id name assetName", "exact", "Version/identity/display metadata; no visual claim.");
+add('assetType assetSourceStart assetAspect assetContentHash', 'approximate',
+  'Owned video bytes and source-in are verified; browser decoded seeks and Blender delivery-grid texture samples need paired moving-frame qualification.');
 add(
   "startTime duration endTime enabled",
   "exact",

@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "scope": "Actual worker pose evaluator consuming the native UI-authored canonical compiler output; numeric pose checks, no pixel parity or MP4 export claim",
+  "compiledProjectSha256": "6b8966fc97f1c0159b9eebd492f4e26fe513bd0d93516ccc0f937c76ac35cfe5",
+  "checks": [
+    {
+      "time": 0,
+      "expectedRotation": 0,
+      "workerRotation": 0.0
+    },
+    {
+      "time": 0.5,
+      "expectedRotation": 22.5,
+      "workerRotation": 22.5
+    },
+    {
+      "time": 1.25,
+      "expectedRotation": 56.25,
+      "workerRotation": 56.25
+    },
+    {
+      "time": 2,
+      "expectedRotation": 90,
+      "workerRotation": 90.0
+    },
+    {
+      "time": 2.5,
+      "expectedRotation": 112.5,
+      "workerRotation": 112.5
+    },
+    {
+      "time": 4,
+      "expectedRotation": 180,
+      "workerRotation": 180.0
+    }
+  ]
+}

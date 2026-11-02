@@ -15,7 +15,28 @@ from python_media_worker.studio_layer_motion import (
     _render_pose,
     render_image_layer_motion,
     render_video_layer_motion,
+    validate_mask_animation,
 )
+
+def test_polygon_point_keys_use_the_existing_curve_on_changing_video_pixels(tmp_path):
+    source,output=tmp_path/'source.mov',tmp_path/'point-keys.mov'
+    subprocess.run(['ffmpeg','-nostdin','-v','error','-y','-f','lavfi','-i',
+        'testsrc2=s=80x80:r=10:d=1','-c:v','qtrle',str(source)],check=True)
+    overlay={'type':'video','start_time':0,'duration':1,'width':100,'height':100,'frameShape':'edge','mediaFit':'stretch'}
+    layer={'id':'roto','type':'video','base_transform':{'x':50,'y':50,'scale':1,'opacity':1},
+      'effects':{'mask':{'enabled':True,'shape':'polygon','path':'polygon(10% 10%, 90% 10%, 50% 90%)','feather':0}},
+      'motion_keyframes':[{'property':'maskPoint0X','time':0,'value':10,'easing':'linear'},
+        {'property':'maskPoint0X','time':.9,'value':60,'easing':'linear'}]}
+    validate_mask_animation(layer)
+    assert '35.00000000% 10.00000000%' in layer_pose(layer,overlay,.45)['mask_path']
+    render_video_layer_motion(source,output,overlay,layer,80,80,1,[],fps=10)
+    raw=subprocess.check_output(['ffmpeg','-v','error','-i',str(output),'-pix_fmt','rgba','-f','rawvideo','-'])
+    frames=np.frombuffer(raw,np.uint8).reshape(-1,80,80,4)
+    assert len(frames)==10
+    assert frames[0,12,16,3]>250 and frames[8,12,16,3]<5
+    assert not np.array_equal(frames[0,35:45,40,:3],frames[8,35:45,40,:3])
+    for extra in [{'property':'maskPoint3X'},{'property':'maskPoint0Z'},{'value':float('nan')},{'time':-1}]:
+        with pytest.raises(ValueError):validate_mask_animation({**layer,'motion_keyframes':[{**layer['motion_keyframes'][0],**extra}]})
 
 
 def test_still_holds_reuse_one_raster_without_changing_encoded_pixels(tmp_path, monkeypatch):
@@ -43,6 +64,30 @@ def test_still_holds_reuse_one_raster_without_changing_encoded_pixels(tmp_path, 
         expected = original(asset, overlay, layer, layer_pose(layer, overlay, index / 8), (64, 48))
         np.testing.assert_array_equal(frame, np.asarray(expected))
     assert len(calls) == 2, "Each distinct held pose is rasterized once"
+
+
+def test_large_alpha_gradient_retains_exact_pixels_with_bounded_intermediate(tmp_path):
+    source, output = tmp_path / 'gradient.png', tmp_path / 'gradient.mov'
+    # Alpha and colour both vary: dropping alpha or quantizing RGB cannot pass.
+    pixels = np.zeros((720, 1280, 4), dtype=np.uint8)
+    ramp = np.arange(1280, dtype=np.uint16) * 255 // 1279
+    pixels[:, :, 0] = ramp
+    pixels[:, :, 1] = 47
+    pixels[:, :, 2] = 113
+    pixels[:, :, 3] = 255-ramp
+    Image.fromarray(pixels).save(source)
+    overlay = {'type': 'image', 'start_time': 0, 'duration': 1,
+               'width': 100, 'height': 100, 'mediaFit': 'stretch', 'frameShape': 'edge'}
+    layer = {'base_transform': {'x': 50, 'y': 50, 'scale': 1, 'opacity': 1}}
+    render_image_layer_motion(source, output, overlay, layer, 1280, 720, 1, [], fps=24)
+    raw = subprocess.check_output(['ffmpeg', '-v', 'error', '-i', str(output),
+        '-f', 'rawvideo', '-pix_fmt', 'rgba', '-'])
+    decoded = np.frombuffer(raw, np.uint8).reshape(24, 720, 1280, 4)
+    expected = np.asarray(_render_pose(Image.open(source).convert('RGBA'), overlay,
+        layer, layer_pose(layer, overlay, 0), (1280, 720)))
+    for frame in decoded:
+        np.testing.assert_array_equal(frame, expected)
+    assert output.stat().st_size < 2 * 1024**2
 
 
 def test_changing_decoded_frames_never_reuse_still_raster(tmp_path, monkeypatch):
@@ -96,6 +141,34 @@ def test_moving_video_uses_canonical_position_scale_opacity_and_changing_source_
     assert source.read_bytes() == original
 
 
+@pytest.mark.parametrize("inverted", [False, True])
+def test_native_moving_video_keeps_feathered_mask_and_changing_pixels(tmp_path, inverted):
+    source, output = tmp_path / "colour.mov", tmp_path / "masked.mov"
+    subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y",
+        "-f", "lavfi", "-i", "color=c=red:s=64x64:r=10:d=0.3",
+        "-f", "lavfi", "-i", "color=c=blue:s=64x64:r=10:d=0.3",
+        "-filter_complex", "[0:v][1:v]concat=n=2:v=1:a=0[v]", "-map", "[v]",
+        "-c:v", "qtrle", str(source)], check=True)
+    original = source.read_bytes()
+    overlay = {"type": "video", "start_time": 0, "duration": .6,
+        "width": 80, "height": 80, "frameShape": "edge", "mediaFit": "contain"}
+    layer = {"base_transform": {"x": 50, "y": 50, "scale": 1, "opacity": 1},
+        "effects": {"mask": {"enabled": True, "shape": "ellipse", "feather": 4, "inverted": inverted}}}
+    receipt = render_video_layer_motion(source, output, overlay, layer, 128, 128, .6, [], fps=10)
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
+        "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    frames = np.frombuffer(raw, np.uint8).reshape(-1, 128, 128, 4)
+    assert len(frames) == 6 and receipt["duration"] == .6
+    center, corner = frames[0, 64, 64, 3], frames[0, 28, 28, 3]
+    assert (center < 5 and corner > 200) if inverted else (center > 250 and corner < 20)
+    alpha = frames[0, ..., 3]
+    assert ((alpha > 0) & (alpha < 255)).any(), "Feather must survive video decoding/encoding"
+    visible = alpha > 200
+    assert frames[0, ..., 0][visible].mean() > 200
+    assert frames[3, ..., 2][visible].mean() > 200, "The mask must retain changing video, not a poster"
+    assert source.read_bytes() == original
+
+
 def test_video_layer_maps_its_cue_and_pose_to_the_retained_speed_clock(tmp_path):
     source, output = tmp_path / "prepared.mov", tmp_path / "motion.mov"
     subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "lavfi", "-i",
@@ -104,7 +177,7 @@ def test_video_layer_maps_its_cue_and_pose_to_the_retained_speed_clock(tmp_path)
         {"type": "video", "start_time": .5, "duration": .5, "width": 20, "height": 20},
         {"motion_keyframes": [{"property": "opacity", "time": .5, "value": .5}]},
         80, 80, .75, [{"start_time": 0, "end_time": 1.5, "rate": 2}], fps=10)
-    assert receipt["start_time"] == .25 and receipt["duration"] == .25
+    assert receipt["start_time"] == .3 and receipt["duration"] == .2
     raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
         "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
     assert np.frombuffer(raw, np.uint8).reshape(-1, 80, 80, 4)[..., 3].max() == 128
@@ -318,7 +391,8 @@ def test_real_logo_layer_render_preserves_alpha_and_moves_across_canvas():
         info = json.loads(subprocess.check_output([
             "ffprobe", "-v", "error", "-show_streams", "-of", "json", str(output),
         ]))
-        assert info["streams"][0]["pix_fmt"] == "argb"
+        assert info["streams"][0]["codec_name"] == "png"
+        assert info["streams"][0]["pix_fmt"] == "rgba"
         raw = subprocess.check_output([
             "ffmpeg", "-v", "error", "-i", str(output), "-f", "rawvideo", "-pix_fmt", "rgba", "-",
         ])
@@ -344,9 +418,37 @@ def test_layer_render_uses_identity_clock_without_speed_segments():
             [],
             fps=10,
         )
-        assert receipt["start_time"] == .25
+        assert receipt["start_time"] == .3
         assert receipt["duration"] == .5
         assert output.exists()
+
+
+def test_fractional_layer_cue_samples_pose_on_the_delivery_grid(tmp_path, monkeypatch):
+    from python_media_worker import studio_layer_motion as motion
+    source, output = tmp_path / 'cue.png', tmp_path / 'cue.mov'
+    Image.new('RGBA', (8, 8), 'white').save(source)
+    times = []
+    original = motion.layer_pose
+    def observe(layer, overlay, time):
+        times.append(time)
+        return original(layer, overlay, time)
+    monkeypatch.setattr(motion, 'layer_pose', observe)
+    receipt = motion.render_image_layer_motion(source, output,
+        {'start_time': .15, 'duration': .5, 'width': 10, 'height': 10},
+        {'base_transform': {'x': 50, 'y': 50, 'scale': 1, 'opacity': 1}}, 32, 32, 1, [], fps=24)
+    np.testing.assert_allclose(times, np.arange(4, 16)/24, atol=1e-9)
+    assert receipt['start_time'] == 4/24
+
+
+@pytest.mark.parametrize('angle', [-17, -.8, .35, 13, 90])
+def test_bounded_rotation_preserves_the_original_transparent_surface_pixels(angle):
+    source = Image.fromarray(np.random.default_rng(217).integers(0, 256, (31, 91, 4), dtype=np.uint8))
+    overlay = {'type':'image','width':86,'height':29,'frameShape':'edge'}
+    layer = {'anchor_x':23,'anchor_y':67}
+    pose = {'x':45.3,'y':58.1,'scale':1.03,'rotation':angle,'opacity':.73,'crop_x':0,'crop_y':0}
+    bounded = np.asarray(_render_pose(source,overlay,layer,pose,(320,180),.28))
+    reference = np.asarray(_render_pose(source,overlay,layer,pose,(320,180),.28,reference_surface=True))
+    np.testing.assert_array_equal(bounded,reference)
 
 
 def test_fullscreen_image_covers_stage_despite_inactive_pip_keys_and_retains_opacity():

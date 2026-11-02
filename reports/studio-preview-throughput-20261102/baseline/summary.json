@@ -1,0 +1,249 @@
+{
+  "complete": false,
+  "elapsedSeconds": 242.407,
+  "terminal": {
+    "ms": 242861.09999999404,
+    "programme": null,
+    "videos": [
+      {
+        "slot": "studio-after-video",
+        "source": "/api/credit-pilot/object/bb704da02180396b7868fa22584a4cce8bc7963ce7788d9e98746e7068248aa5",
+        "time": 36,
+        "paused": true,
+        "seeking": false,
+        "ready": 4,
+        "ended": true,
+        "rate": 1,
+        "decoded": 868,
+        "dropped": 4
+      },
+      {
+        "slot": "studio-next-video",
+        "source": "/",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0
+      },
+      {
+        "slot": "studio-later-video",
+        "source": "/",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0
+      }
+    ]
+  },
+  "longTasks": {
+    "count": 35,
+    "seconds": 41.087,
+    "longestMs": 1387
+  },
+  "functions": [
+    {
+      "seconds": 191.033552,
+      "name": "(idle)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 6.446271,
+      "name": "(program)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 3.490549,
+      "name": "",
+      "column": 1068607,
+      "snippet": ".sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){const i=e=>{cons"
+    },
+    {
+      "seconds": 3.291593,
+      "name": "",
+      "column": 1068607,
+      "snippet": ".sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){const i=e=>{cons"
+    },
+    {
+      "seconds": 3.177294,
+      "name": "",
+      "column": 1068607,
+      "snippet": ".sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){const i=e=>{cons"
+    },
+    {
+      "seconds": 3.157767,
+      "name": "",
+      "column": 1068607,
+      "snippet": ".sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){const i=e=>{cons"
+    },
+    {
+      "seconds": 2.508112,
+      "name": "",
+      "column": 1067562,
+      "snippet": "ve progress must be between 0 and 100.\");!function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[],n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:100;const r=t.filter(e=>/^planeCorner/.test(e.property));if(!r.length)return;if(100!="
+    },
+    {
+      "seconds": 2.467227,
+      "name": "",
+      "column": 1067562,
+      "snippet": "ve progress must be between 0 and 100.\");!function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[],n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:100;const r=t.filter(e=>/^planeCorner/.test(e.property));if(!r.length)return;if(100!="
+    },
+    {
+      "seconds": 2.357653,
+      "name": "",
+      "column": 1067562,
+      "snippet": "ve progress must be between 0 and 100.\");!function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[],n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:100;const r=t.filter(e=>/^planeCorner/.test(e.property));if(!r.length)return;if(100!="
+    },
+    {
+      "seconds": 2.336295,
+      "name": "",
+      "column": 1067562,
+      "snippet": "ve progress must be between 0 and 100.\");!function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[],n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:100;const r=t.filter(e=>/^planeCorner/.test(e.property));if(!r.length)return;if(100!="
+    },
+    {
+      "seconds": 1.775496,
+      "name": "getByteFrequencyData",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.085992,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 1.062528,
+      "name": "xg",
+      "column": 1092689,
+      "snippet": "return{...r,...JSON.parse(JSON.stringify(e))}},xg=e=>JSON.stringify(e,(e,t)=>t&&\"object\"===typeof t&&!Array.isArray(t)?Object.fromEntries(Object.keys(t).sort().map(e=>[e,t[e]])):t),Qg=(e,t)=>{const n=new Error(t);throw n.code=e,n},wg=[\"version\",\"name\",\"seconda"
+    },
+    {
+      "seconds": 1.02046,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 1.004993,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.987281,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.899164,
+      "name": "",
+      "column": 1092709,
+      "snippet": "parse(JSON.stringify(e))}},xg=e=>JSON.stringify(e,(e,t)=>t&&\"object\"===typeof t&&!Array.isArray(t)?Object.fromEntries(Object.keys(t).sort().map(e=>[e,t[e]])):t),Qg=(e,t)=>{const n=new Error(t);throw n.code=e,n},wg=[\"version\",\"name\",\"secondary\",\"endTime\",\"asset"
+    },
+    {
+      "seconds": 0.87101,
+      "name": "(garbage collector)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.615348,
+      "name": "querySelectorAll",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.473783,
+      "name": "Pg",
+      "column": 1098376,
+      "snippet": "yframes\",\"reframeModeCuts\",\"speakerFocusCuts\"],Pg=e=>{const t=Number(e.time),{time:n,...r}=e;return{atProgrammeTick:Number.isFinite(t)&&t>=0?(0,FA.n0)(t):null,parameters:JSON.parse(JSON.stringify(r))}},Ug=e=>{const t=Object.fromEntries(Hg.map(t=>[t,(e[t]||[])."
+    },
+    {
+      "seconds": 0.461699,
+      "name": "",
+      "column": 1068607,
+      "snippet": ".sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){const i=e=>{cons"
+    },
+    {
+      "seconds": 0.422403,
+      "name": "",
+      "column": 1068607,
+      "snippet": ".sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){const i=e=>{cons"
+    },
+    {
+      "seconds": 0.391064,
+      "name": "querySelector",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.374148,
+      "name": "",
+      "column": 1068249,
+      "snippet": "e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.value;const o=i[i.indexOf(a)-1];return\"hold\"===a.eas"
+    },
+    {
+      "seconds": 0.361436,
+      "name": "",
+      "column": 1068607,
+      "snippet": ".sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){const i=e=>{cons"
+    },
+    {
+      "seconds": 0.351019,
+      "name": "",
+      "column": 1068249,
+      "snippet": "e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.value;const o=i[i.indexOf(a)-1];return\"hold\"===a.eas"
+    },
+    {
+      "seconds": 0.335836,
+      "name": "",
+      "column": 1068607,
+      "snippet": ".sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){const i=e=>{cons"
+    },
+    {
+      "seconds": 0.330995,
+      "name": "",
+      "column": 1067562,
+      "snippet": "ve progress must be between 0 and 100.\");!function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[],n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:100;const r=t.filter(e=>/^planeCorner/.test(e.property));if(!r.length)return;if(100!="
+    },
+    {
+      "seconds": 0.315461,
+      "name": "",
+      "column": 1068249,
+      "snippet": "e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.value;const o=i[i.indexOf(a)-1];return\"hold\"===a.eas"
+    },
+    {
+      "seconds": 0.305238,
+      "name": "",
+      "column": 1067562,
+      "snippet": "ve progress must be between 0 and 100.\");!function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[],n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:100;const r=t.filter(e=>/^planeCorner/.test(e.property));if(!r.length)return;if(100!="
+    }
+  ],
+  "transitions": [
+    {
+      "seconds": 0.5015,
+      "programme": null,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/bb704da02180396b7868fa22584a4cce8bc7963ce7788d9e98746e7068248aa5",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 4,
+      "ended": false,
+      "rate": 1,
+      "decoded": 8,
+      "dropped": 0
+    }
+  ]
+}

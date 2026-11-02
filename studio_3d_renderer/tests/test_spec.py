@@ -91,3 +91,14 @@ def test_accepts_bounded_pose_keyframes_and_rejects_injection_fields():
     unsafe["scene"]["keyframes"][0]["command"] = "$(touch /tmp/pwned)"
     with pytest.raises(ValueError):
         validate_spec(unsafe)
+
+
+def test_video_texture_staging_rejects_forged_sources_and_incomplete_fields():
+    spec=sample_spec();spec['scene'].update(assetType='video',assetSourceStart=2.5,assetAspect=16/9,
+        assetContentHash='a'*64,assetStoragePath='temp_studio_3d/qa_user_123/12345678-job/asset.mp4')
+    assert validate_spec(spec) is spec
+    for patch in [dict(assetContentHash='x'+'a'*64),dict(assetSourceStart=-1),dict(assetAspect=0),
+                  dict(assetStoragePath='temp_studio_3d/other/12345678-job/asset.mp4'),
+                  dict(assetStoragePath='temp_studio_3d/qa_user_123/12345678-job/asset.png')]:
+        bad=copy.deepcopy(spec);bad['scene'].update(patch)
+        with pytest.raises(ValueError):validate_spec(bad)

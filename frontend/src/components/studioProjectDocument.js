@@ -12,6 +12,14 @@ import { studioLayerEntries } from "./studioLayerOrder";
 import { validateSpatialCurve } from "./studioAutomation";
 import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
+import { validateStudioPerspectiveLayer } from './studioPerspective';
+import { validateStudioMaskAnimation } from './studioMaskGeometry';
+import {
+  validateStudioMotionDrivers,
+  validateStudioParentGraph,
+  validateStudioTrackMattes,
+} from "./studioCompRigging";
+import { validateStudioNodeFlow } from "./studioNodeFlow";
 
 import {
   STUDIO_EDIT_SETTING_FIELDS, STUDIO_SOURCE_DECISION_FIELDS,
@@ -68,6 +76,7 @@ const assetReference = clip => {
 
 const LAYER_PARAMETER_FIELDS = [
   "version", "name", "secondary", "endTime", "assetStoragePath", "assetName",
+  "assetType", "assetSourceStart", "assetAspect", "assetContentHash",
   "sourceStoragePath", "storagePath", "sourceClipId", "contentHash", "sha256",
   "hqPreviewRevision", "hqPreviewJobId",
   "textAlign", "lineSpacing", "primaryColor", "secondaryColor",
@@ -77,6 +86,7 @@ const LAYER_PARAMETER_FIELDS = [
   "bloom", "background",
   "bg", "anchorX", "anchorY", "blendMode", "glow", "layerShadow", "motionBlur",
   "cropX", "cropY", "blur", "sourceDuration", "aspectRatio",
+  "perspective", "perspectiveProgress",
   "isCaption",
   "shadow", "strokeWidth", "strokeColor",
   "frameShape", "frame_shape", "borderRadius", "border_radius", "mediaFit", "media_fit",
@@ -171,6 +181,7 @@ const VISUAL_SETTING_FIELDS = [
   "speakerStackCameraCount", "speakerStackLayout", "speakerStackSyncConfirmed",
   "exportSettings", "stabilization", "enhanceQuality", "beatSnapEnabled",
   "creativeIntent", "creativeEffectsEnabled", "creativePreset", "creativeIntensity", "pacingLevel",
+  "nodeFlow", "hideShyLayers",
 ];
 const CAMERA_SOURCE_FIELDS = [
   "id", "name", "duration", "sourceClipId", "sourceMediaId", "sourceStoragePath",
@@ -488,6 +499,17 @@ export const projectStudioEditableStateToSnapshot = (document, transportSnapshot
         delete transport[key];
       const path = item.assetStoragePath || item.sourceStoragePath || item.storagePath;
       const oldPath = old?.assetStoragePath || old?.sourceStoragePath || old?.storagePath;
+      // The initial video-texture snapshots predate canonical ownership of
+      // these four fields. Migrate only an intact, same-source legacy video;
+      // the version marker prevents resurrecting later canonical deletions.
+      const videoFields=['assetType','assetSourceStart','assetAspect','assetContentHash'];
+      if(collection==='threeDScenes' && document.compatibility?.videoTextureFieldsVersion!==1 &&
+        videoFields.every(key=>item[key]===undefined) && path===oldPath && String(path).startsWith('studio/sources/') &&
+        old?.assetType==='video' && /^[a-f0-9]{64}$/.test(old.assetContentHash||'') &&
+        Number.isFinite(old.assetSourceStart) && old.assetSourceStart>=0 &&
+        Number.isFinite(old.assetAspect) && old.assetAspect>=.25 && old.assetAspect<=4){
+        for(const key of videoFields)transport[key]=old[key];
+      }
       const hash = item.contentHash || item.sha256;
       const oldHash = old?.contentHash || old?.sha256;
       if ((path && path !== oldPath) || (hash && hash !== oldHash)) {
@@ -810,6 +832,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       editableStateVersion: 1,
       visualStateVersion: 1,
       editStateVersion: 1,
+      ...((snapshot.threeDScenes || []).some(scene=>scene.assetType==='video') || previousDocument?.compatibility?.videoTextureFieldsVersion===1
+        ? {videoTextureFieldsVersion:1} : {}),
       layerComposition: Array.isArray(snapshot.compositionOrder) ? "ordered_flat_layers" : "separate_worker_stages",
     },
   };
@@ -932,11 +956,30 @@ export const validateStudioProjectDocument = document => {
     ...(document.linkedTiming?.keys?.motionKeyframes || []).map(key => ({ ...key.parameters,
       time: key.atProgrammeTick === null ? NaN : ticksToSeconds(key.atProgrammeTick) }))];
   (document.layers || []).forEach(layer => {
+    validateStudioMaskAnimation({...layer.parameters,type:layer.legacyType},vectorMotionKeys.filter(key=>key.targetId===layer.layerId));
+    validateStudioPerspectiveLayer({ ...layer.parameters, id: layer.layerId, type: layer.legacyType },
+      vectorMotionKeys.filter(key => key.targetId === layer.layerId),
+      (document.editGraph?.settings?.compoundClips || []).some(group => group.layerIds?.includes(layer.layerId)));
     validateStudioTextAnimation({ ...layer.parameters, type: layer.legacyType }, vectorMotionKeys.filter(key => key.targetId === layer.layerId));
     if (layer.parameters?.vectorShape !== undefined) validateStudioVectorShape(layer.parameters.vectorShape);
     validateStudioVectorTrim(layer.parameters || {}, vectorMotionKeys
       .filter(key => key.targetId === layer.layerId));
+    validateStudioMotionDrivers(layer.parameters || {});
   });
+  if (document.visualGraph?.settings?.mainTransform) {
+    validateStudioMotionDrivers(document.visualGraph.settings.mainTransform);
+  }
+  validateStudioNodeFlow(document.visualGraph?.settings?.nodeFlow);
+  const docOverlayParams = (document.layers || [])
+    .filter(layer => layer.legacyCollection === "overlays" && !layer.parameters?.isCaption)
+    .map(layer => ({ ...layer.parameters, id: layer.layerId, type: layer.legacyType }));
+  validateStudioParentGraph(docOverlayParams, document.visualGraph?.settings?.mainTransform || null);
+  validateStudioTrackMattes(
+    docOverlayParams,
+    (document.layers || [])
+      .filter(layer => layer.type === "three_d" && layer.parameters?.enabled === false)
+      .map(layer => layer.layerId)
+  );
   const validParameters = (parameters, fields) => parameters &&
     typeof parameters === "object" && !Array.isArray(parameters) &&
     Object.keys(parameters).every(key => fields.includes(key));

@@ -1,0 +1,17 @@
+{
+  "status": "LOCAL_RECOGNITION_ESTIMATES",
+  "sourceWordTimes": "source-word-times.json",
+  "clockGraphics": 0,
+  "voiceContour": {
+    "source": "presenter-2.mp4",
+    "start": 1.7,
+    "end": 3.32,
+    "bins": 48,
+    "measurement": "RMS amplitude per equal time bin, normalized; not voice identification"
+  },
+  "programmeSourceOffset": 7.751333333333333,
+  "limits": [
+    "Word estimates have not received human listening approval",
+    "Not the missing spoken-minute source"
+  ]
+}

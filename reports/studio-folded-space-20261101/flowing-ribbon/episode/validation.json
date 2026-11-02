@@ -1,0 +1,114 @@
+{
+  "nativeExport": {
+    "seconds": 36.0,
+    "frames": 864,
+    "fps": 24,
+    "width": 1280,
+    "height": 720,
+    "audioCodec": "aac",
+    "audioChannels": 2,
+    "audioSampleRate": "48000",
+    "fullDecode": true,
+    "sha256": "b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734"
+  },
+  "normalDemoAuth": true,
+  "nativeColdReopenAndEdit": {
+    "nativeColdReopen": true,
+    "nativeCornerEditUndo": true,
+    "nativeSourceRegionEditUndoRedo": true,
+    "exactRestored": true,
+    "keys": 10968,
+    "layerCount": 49
+  },
+  "unsupportedCombinedTrajectory": {
+    "invalidCombinedTrajectoryRefusedBeforeMutation": true,
+    "exactProjectPreserved": true,
+    "normalDemoAuth": true
+  },
+  "actualSourceSharing": {
+    "mode": "Motion & Flow selected through native UI",
+    "normalDemoAuth": true,
+    "samples": [
+      {
+        "programmeTime": 22.5,
+        "visiblePieces": 10,
+        "sharedPieces": 10,
+        "independentOwners": 0,
+        "sourceTimes": [
+          2.5
+        ]
+      },
+      {
+        "programmeTime": 25.0,
+        "visiblePieces": 20,
+        "sharedPieces": 18,
+        "independentOwners": 2,
+        "sourceTimes": [
+          1,
+          5
+        ]
+      },
+      {
+        "programmeTime": 26.0,
+        "visiblePieces": 20,
+        "sharedPieces": 18,
+        "independentOwners": 2,
+        "sourceTimes": [
+          2,
+          6
+        ]
+      },
+      {
+        "programmeTime": 27.916666666666664,
+        "visiblePieces": 20,
+        "sharedPieces": 18,
+        "independentOwners": 2,
+        "sourceTimes": [
+          3.916666,
+          7.916666
+        ]
+      }
+    ],
+    "wholePictureParityQualified": false
+  },
+  "pairedFrames": 19,
+  "minSsim": 0.854544074816987,
+  "minPsnr": 25.851763619260204,
+  "liveProgrammeEnd": 36,
+  "liveWallSeconds": 128.49,
+  "finishedMediaEnd": 36,
+  "finishedWallSeconds": 39.499,
+  "captures": {
+    "live": {
+      "seconds": 133.7979998588562,
+      "frames": 1638,
+      "rawBytes": 186799311,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture"
+    },
+    "finished": {
+      "seconds": 38.29200005531311,
+      "frames": 429,
+      "rawBytes": 59533812,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture"
+    }
+  },
+  "liveRealtimeQualified": false,
+  "wholePictureParityQualified": false,
+  "humanListeningApproved": false,
+  "creativeProfessionalStandardMet": false,
+  "publicShowroomQualified": false,
+  "readinessPromotion": false,
+  "tests": {
+    "frontendScoped": 57,
+    "workerScoped": 29,
+    "archiveBoundaries": 4,
+    "serviceQueueUnit": 2
+  },
+  "nativeExports": 1,
+  "paidCalls": 0,
+  "productionWrites": false
+}

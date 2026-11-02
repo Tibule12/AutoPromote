@@ -3,6 +3,32 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import StudioProTimeline, {buildTimelineCaptionRegions} from "../StudioProTimeline";
 import { motionKeyAtPlayhead, motionKeyframeTolerance } from "../studioMotionProperties";
 
+test('Razor cuts at the clicked programme time without first seeking or cutting locked tracks', () => {
+  const cut = jest.fn(), seek = jest.fn();
+  const props = { duration: 10, editTool: 'razor', onRazorCut: cut, onSeek: seek,
+    timelineSegments: [{ id: 'main', name: 'Source', startRequest: 10, endRequest: 20 }], trackStates: {} };
+  const { rerender } = render(<StudioProTimeline {...props} />);
+  let clip = screen.getByTestId('pro-video-clip-1');
+  clip.parentElement.getBoundingClientRect = () => ({ left: 100, width: 500 });
+  fireEvent.click(clip, { clientX: 275, detail: 1 });
+  expect(cut).toHaveBeenLastCalledWith(3.5, null);
+  expect(seek).not.toHaveBeenCalled();
+  rerender(<StudioProTimeline {...props} trackStates={{ video: { locked: true } }} />);
+  fireEvent.click(screen.getByTestId('pro-video-clip-1'), { clientX: 300, detail: 1 });
+  expect(cut).toHaveBeenCalledTimes(1);
+});
+
+test.each(['tracks', 'layers'])('Razor cuts the clicked graphic in %s view', view => {
+  const cut = jest.fn();
+  render(<StudioProTimeline duration={10} editTool="razor" onRazorCut={cut} defaultView={view}
+    trackStates={{}} overlays={[{ id: 'title', type: 'text', name: 'Title', startTime: 1, duration: 8 }]} />);
+  const clip = view === 'layers' ? screen.getByRole('button', { name: 'Select Title layer clip' })
+    : screen.getByTestId('pro-graphics-clip-1');
+  clip.closest('.pro-track-lane').getBoundingClientRect = () => ({ left: 100, width: 500 });
+  fireEvent.click(clip, { clientX: 275, detail: 1 });
+  expect(cut).toHaveBeenCalledWith(3.5, 'title');
+});
+
 test('group property rows share key gestures and expose translation/scale bounds without media crop', () => {
   const toggle=jest.fn(),update=jest.fn(),select=jest.fn();
   render(<StudioProTimeline duration={3} playhead={1} trackStates={{}} onToggleMotionPropertyKeyframe={toggle}

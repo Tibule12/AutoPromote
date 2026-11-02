@@ -33,13 +33,22 @@ test("image masks and crop keys survive the canonical composition boundary witho
   expect(compileStudioCompositionForRender(document).layers.find(item => item.id === "image").effects.mask.shape).toBe("polygon");
 });
 
-test("unimplemented geometric video masks stop compilation rather than dropping customer decisions", () => {
+test("ordinary video masks retain their real geometry in the native composition", () => {
   const document = adaptStudioSnapshotToDocument({ projectId: "video-mask", snapshot: {
     orderedClips: [{ id: "source", start: 0, end: 2 }], selectedClipId: "source",
     timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 2 }],
     overlays: [{ id: "video", type: "video", x: 50, y: 50, mask: { enabled: true, feather: 20 } }],
   } });
-  expect(() => compileStudioCompositionForRender(document)).toThrow(/Geometric masks/);
+  expect(compileStudioCompositionForRender(document).layers.find(layer=>layer.id==='video').effects.mask).toMatchObject({enabled:true,feather:20});
+});
+
+test('main source geometric masks remain gated independently of ordinary moving media',()=>{
+  const document=adaptStudioSnapshotToDocument({projectId:'main-mask',snapshot:{
+    orderedClips:[{id:'source',start:0,end:2}],selectedClipId:'source',
+    timeline:[{id:'main',sourceClipId:'source',startRequest:0,endRequest:2}],overlays:[],
+    mainTransform:{id:'main-video',mask:{enabled:true,shape:'ellipse',feather:2}},
+  }});
+  expect(()=>compileStudioCompositionForRender(document)).toThrow(/ordinary media layer/);
 });
 
 test("an invalid saved polygon is rejected before render submission", () => {

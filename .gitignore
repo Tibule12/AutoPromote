@@ -194,3 +194,12 @@ reports/studio-background-captions-20261021/*
 
 # Reviewed native welcome release media must ship with the frontend.
 !frontend/public/welcome/2026-10-21/*
+
+# Private native cinematic proofs, owned media links and transient recordings.
+reports/studio-cinematic-episode-20261101/*
+!reports/studio-cinematic-episode-20261101/README.md
+!reports/studio-cinematic-episode-20261101/control-contract.md
+!reports/studio-cinematic-episode-20261101/episode-plan-template.json
+!reports/studio-cinematic-episode-20261101/advanced-typography-plan.json
+!reports/studio-cinematic-episode-20261101/advanced-tracked-plan.json
+!reports/studio-cinematic-episode-20261101/advanced-composite-plan.json

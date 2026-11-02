@@ -5,6 +5,8 @@ import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import studioFont from "./helvetiker_bold.typeface.json";
 import { normalizeStudio3DScene, studio3DPose } from "./studio3DModel";
 import { studio3DCameraProjection } from "./studio3DProjection";
+import { studio3DFrameSample, studio3DTextureFrameRequest, studio3DCanShareVideo } from "./studio3DSampling";
+import { loadStudioSourceFrame } from "../studioSourceFrameClient";
 import "./studio3D.css";
 
 const font = new FontLoader().parse(studioFont);
@@ -88,6 +90,7 @@ function materialFor(scene) {
 }
 
 function textMesh(text, scene, size, material) {
+  if (!String(text || '').trim()) return new THREE.Mesh(new THREE.PlaneGeometry(0,0),material);
   const geometry = new TextGeometry(text || " ", {
     font, size, depth: scene.extrusionDepth,
     curveSegments: 5, bevelEnabled: scene.bevel > 0,
@@ -207,28 +210,74 @@ function makeGroup(scene) {
     object.userData.baseScale = object.scale.clone();
   });
   if (scene.assetUrl) {
-    new THREE.TextureLoader().load(scene.assetUrl, texture => {
+    const attach = texture => {
       texture.colorSpace = THREE.SRGBColorSpace;
-      const art = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
-      art.position.set(0, 1.38, 0.18);
+      const video = scene.assetType === 'video';
+      const art = new THREE.Mesh(new THREE.PlaneGeometry(video ? 6.8 : 1.8, video ? 6.8/scene.assetAspect : 1.8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: true, side: THREE.DoubleSide, toneMapped: !video }));
+      art.position.set(0, scene.template==='media_plane'?0:1.38, 0.18);
       group.add(art);
-    }, undefined, () => {});
+      if (video) group.userData.videoAsset.art = art;
+    };
+    if (scene.assetType === 'video') {
+      const video = document.createElement('video');
+      video.crossOrigin='anonymous';video.muted=true;video.volume=0;video.playsInline=true;video.preload='auto';
+      video.src=scene.assetUrl;
+      const texture=new THREE.VideoTexture(video);
+      group.userData.videoAsset={video,texture};
+      attach(texture);
+    } else new THREE.TextureLoader().load(scene.assetUrl, attach, undefined, () => {});
   }
   return group;
 }
 
 // This canvas is an edit proxy. HQ Blender frames use the same bounded scene
 // model and timeline clock, but not the browser's light/geometry budget.
-export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLevel = 0, zIndex }) {
+export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSourceVideo, playing = false, playbackRate = 1, audioLevel = 0, zIndex }) {
   const hostRef = useRef(null);
   const clockRef = useRef(getTime);
   const levelRef = useRef(audioLevel);
   const timeRef = useRef(time);
+  const playbackRef = useRef({ playing, playbackRate });
+  const sourceVideoRef = useRef(getSourceVideo);
+  const pausedFramesRef = useRef({});
   const [webglFailed, setWebglFailed] = useState(false);
   clockRef.current = getTime;
   levelRef.current = audioLevel;
   timeRef.current = time;
+  playbackRef.current = { playing, playbackRate };
+  sourceVideoRef.current = getSourceVideo;
   const signature = JSON.stringify(scenes);
+  const textureRequests = playing ? [] : scenes.map(scene => ({ id: scene.id, request: studio3DTextureFrameRequest(scene, time) }))
+    .filter(item => item.request);
+  const textureRequestKey = JSON.stringify(textureRequests);
+
+  useEffect(() => {
+    const requests = JSON.parse(textureRequestKey);
+    pausedFramesRef.current = Object.fromEntries(requests.map(item => [item.id,
+      { key: JSON.stringify(item.request), status: 'loading' }]));
+    if (!requests.length) return undefined;
+    const controller = new AbortController();
+    const deadline = setTimeout(() => {
+      for (const { id, request } of requests) pausedFramesRef.current[id] = { key: JSON.stringify(request), status: 'unavailable' };
+      controller.abort();
+    }, 30000);
+    // Share the existing owner-bounded source decoder, including during a
+    // programme seek. Superseded seeks cannot paint an older texture.
+    const timer = setTimeout(async () => {
+      for (const { id, request } of requests) {
+        try {
+          const frame = await loadStudioSourceFrame(request, controller.signal);
+          if (controller.signal.aborted) return;
+          pausedFramesRef.current[id] = { ...frame, key: JSON.stringify(request), status: 'accurate' };
+        } catch (_) {
+          if (controller.signal.aborted) return;
+          pausedFramesRef.current[id] = { key: JSON.stringify(request), status: 'unavailable' };
+        }
+      }
+      clearTimeout(deadline);
+    }, 300);
+    return () => { clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
+  }, [textureRequestKey]);
 
   useEffect(() => {
     if (!scenes.length || !hostRef.current) return undefined;
@@ -276,23 +325,98 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
         camera.updateProjectionMatrix();
       }
       const playhead = clockRef.current?.() ?? timeRef.current;
+      // Play the silent texture continuously during transport. Re-seeking on
+      // every animation frame prevents its decoder from presenting smoothly.
+      // Paused inspection instead consumes the exact native raw texture frame.
+      let textureChanged=false;
+      for (const {scene,group} of objects) {
+        const asset=group.userData.videoAsset;if(!asset)continue;
+        const sample=studio3DFrameSample(scene,playhead);
+        const video=asset.video,local=playhead-scene.startTime;
+        const transport=playbackRef.current;
+        const running=transport.playing && !!sample;
+        const now=performance.now();
+        const shared=running?sourceVideoRef.current?.():null;
+        if(studio3DCanShareVideo(scene,playhead,shared)){
+          video.pause();
+          if(asset.sharedVideo!==shared.video){
+            asset.sharedTexture?.dispose();asset.sharedVideo=shared.video;
+            asset.sharedTexture=new THREE.VideoTexture(shared.video);
+            asset.sharedTexture.colorSpace=THREE.SRGBColorSpace;
+          }
+          if(asset.art.material.map!==asset.sharedTexture){asset.art.material.map=asset.sharedTexture;textureChanged=true;}
+          host.dataset.sceneFrameIndex=String(sample.frameIndex);
+          host.dataset.textureSampling='shared-decoded';host.dataset.textureFrameIndex='';
+          host.dataset.textureSourceTime=String(shared.sourceTime);
+          host.dataset.textureTransport=shared.video.paused?'paused':'playing';
+          host.dataset.textureSeeking='false';
+          asset.running=false;asset.lastPlayhead=playhead;
+          continue;
+        }
+        const target=scene.assetSourceStart+Math.max(0,Math.min(scene.duration,running?local:(sample?.localTime??local)));
+        if(!running)video.pause();
+        const request=!running&&sample?studio3DTextureFrameRequest(scene,playhead):null;
+        const frame=request?pausedFramesRef.current[scene.id]:null;
+        const exact=frame?.status==='accurate'&&frame.key===JSON.stringify(request)?frame:null;
+        if(exact){
+          if(asset.pausedImage!==exact.image){
+            asset.pausedTexture?.dispose();
+            asset.pausedTexture=new THREE.Texture(exact.image);
+            asset.pausedTexture.colorSpace=THREE.SRGBColorSpace;
+            asset.pausedTexture.generateMipmaps=false;
+            asset.pausedTexture.minFilter=THREE.LinearFilter;
+            asset.pausedTexture.needsUpdate=true;
+            asset.pausedImage=exact.image;
+            textureChanged=true;
+          }
+          if(asset.art.material.map!==asset.pausedTexture){asset.art.material.map=asset.pausedTexture;textureChanged=true;}
+        }else{
+          if(asset.art.material.map!==asset.texture){asset.art.material.map=asset.texture;textureChanged=true;}
+          const jumped=asset.lastPlayhead!==undefined&&Math.abs(playhead-asset.lastPlayhead)>.5;
+          // Allow a seek to settle and the silent decoder to run before a
+          // further drift correction. Per-RAF seeks otherwise starve decoding.
+          const canCorrect=!running||!asset.running||jumped||now-(asset.lastSeekAt??-Infinity)>=750;
+          if(sample&&video.readyState>=1&&!video.seeking&&canCorrect&&Math.abs(video.currentTime-target)>(running ? .12 : 1/120)){
+            video.currentTime=target;asset.lastSeekAt=now;
+          }
+          if(running){
+            video.playbackRate=Math.max(.1,Math.min(4,Number(transport.playbackRate)||1));
+            if(video.paused&&!video.seeking&&!asset.playPending){
+              asset.playPending=true;video.play().catch(()=>{}).finally(()=>{asset.playPending=false;});
+            }
+          }
+        }
+        if(sample){
+          host.dataset.sceneFrameIndex=String(sample.frameIndex);
+          host.dataset.textureSampling=exact?'accurate-paused':frame?.status==='loading'?'loading':'native';
+          host.dataset.textureFrameIndex=exact?String(exact.receipt.frameIndex):'';
+          host.dataset.textureSourceTime=String(video.currentTime);
+          host.dataset.textureTransport=video.paused?'paused':'playing';
+          host.dataset.textureSeeking=String(video.seeking);
+        }
+        if(!video.seeking && video.readyState>=2 && asset.presentedTime!==video.currentTime){
+          asset.presentedTime=video.currentTime;asset.texture.needsUpdate=true;textureChanged=true;
+        }
+        asset.running=running;asset.lastPlayhead=playhead;
+      }
       const reactive = objects.some(({ scene }) => scene.audioReactiveIntensity > 0);
       const audio = reactive ? levelRef.current : 0;
-      if (!resized && playhead === lastPlayhead && audio === lastAudioLevel) return;
+      if (!resized && !textureChanged && playhead === lastPlayhead && audio === lastAudioLevel) return;
       lastPlayhead = playhead;
       lastAudioLevel = audio;
       for (const { scene, group } of objects) {
-        const pose = studio3DPose(scene, playhead);
+        const sample = studio3DFrameSample(scene, playhead);
+        const pose = sample && studio3DPose(scene, sample.programmeTime);
         group.visible = Boolean(pose);
         if (!pose) continue;
         if (scene.template === "neon_logo") {
           const portrait = height > width;
-          animateLogo(group, scene, playhead - scene.startTime, portrait);
+          animateLogo(group, scene, sample.localTime, portrait);
         }
         const sound = 1 + Math.min(1, levelRef.current) * scene.audioReactiveIntensity * 0.25;
         group.position.set(pose.x, pose.y, pose.z);
         group.scale.setScalar(pose.scale * sound);
-        group.rotation.set(pose.rotationX * Math.PI / 180, pose.rotationY * Math.PI / 180, pose.rotationZ * Math.PI / 180);
+        group.rotation.set(pose.rotationX * Math.PI / 180, pose.rotationY * Math.PI / 180, pose.rotationZ * Math.PI / 180, 'ZYX');
         group.traverse(child => {
           if (child.isMesh && child.material?.transparent) {
             if (child.material.userData.baseOpacity === undefined) child.material.userData.baseOpacity = child.material.opacity;
@@ -302,7 +426,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
         key.color.set(scene.lightColor);
         key.intensity = scene.lightIntensity / 2;
         key.position.set(Math.sin(scene.lightDirection * Math.PI / 180) * 6, 5, 8);
-        const projection = studio3DCameraProjection(scene, width / height, playhead - scene.startTime);
+        const projection = studio3DCameraProjection(scene, width / height, sample.localTime);
         camera.fov = projection.verticalFov;
         camera.position.set(projection.x, 0, projection.distance);
         camera.updateProjectionMatrix();
@@ -313,6 +437,8 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
     return () => {
       cancelAnimationFrame(raf);
       world.traverse(object => {
+        const asset=object.userData?.videoAsset;
+        if(asset){asset.video.pause();asset.video.removeAttribute('src');asset.video.load();asset.texture.dispose();asset.pausedTexture?.dispose();asset.sharedTexture?.dispose();}
         object.geometry?.dispose?.();
         const materials = Array.isArray(object.material) ? object.material : [object.material];
         materials.forEach(material => { material?.map?.dispose?.(); material?.dispose?.(); });

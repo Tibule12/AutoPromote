@@ -1,0 +1,4873 @@
+{
+  "projectId": "motionflow-seed-project",
+  "projectName": "AutoPromote Motion Flow Parity 20261031",
+  "revision": 22,
+  "studioDocumentSha256": "c6d184b9eae1ecff15baf618645fc31676ee17d4794ad2d3da9ed376b1bebc7c",
+  "renderRequest": {
+    "video_url": "http://127.0.0.1:5027/motionflow-source.mp4",
+    "start_time": 0,
+    "end_time": 6,
+    "overlays": [
+      {
+        "id": "matte-plate",
+        "type": "image",
+        "src": "http://127.0.0.1:5027/motionflow-matte-plate.png",
+        "name": "Ellipse Matte Source",
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 38,
+        "y": 51.55215170529817,
+        "width": 36,
+        "height": 22,
+        "rotation": 0,
+        "scale": 0.85,
+        "startTime": 0,
+        "duration": 6,
+        "bRollMode": "pip",
+        "mask": {
+          "enabled": true,
+          "shape": "ellipse",
+          "feather": 0,
+          "invert": false
+        },
+        "parentId": "null-rig-1793445808952",
+        "start_time": 0
+      },
+      {
+        "id": "fill-cyan",
+        "type": "image",
+        "src": "http://127.0.0.1:5027/motionflow-fill-cyan.png",
+        "name": "Cyan Fill Plate",
+        "shadow": "none",
+        "frameShape": "edge",
+        "borderRadius": 0,
+        "mediaFit": "stretch",
+        "opacity": 1,
+        "x": 38,
+        "y": 51.55215170529817,
+        "width": 58,
+        "height": 36,
+        "rotation": 0,
+        "scale": 0.85,
+        "startTime": 0,
+        "duration": 6,
+        "bRollMode": "pip",
+        "parentId": "null-rig-1793445808952",
+        "trackMatte": {
+          "mode": "alpha",
+          "sourceLayerId": "matte-plate"
+        },
+        "start_time": 0
+      }
+    ],
+    "auto_captions": false,
+    "timeline_segments": [
+      {
+        "id": "main",
+        "url": "http://127.0.0.1:5027/motionflow-source.mp4",
+        "start_time": 0,
+        "end_time": 6,
+        "duration": 6
+      }
+    ],
+    "background_audio": null,
+    "hook_focus_point": null,
+    "cover_frame": null,
+    "thumbnail_frame": null,
+    "professional_cleanup": false,
+    "finish_plan": {
+      "color_cube": null,
+      "main_frame": {
+        "enabled": false,
+        "shape": "round",
+        "inset_percent": 0,
+        "border_radius_percent": 6,
+        "background": "studio_black"
+      },
+      "color": {
+        "preset": null,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "brightness": 1,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "precisionGrade": false
+      },
+      "motion": {
+        "zoom": 1,
+        "zoom_anchor": "center",
+        "base_scale": 1,
+        "scale_keyframes": [],
+        "base_transform": {
+          "x": 50,
+          "y": 50,
+          "scale": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "crop_x": 0,
+          "crop_y": 0
+        },
+        "keyframes": []
+      },
+      "texture": {
+        "film_grain": 0,
+        "chromatic_aberration": 0,
+        "vhs_tracking": 0,
+        "light_leak": 0
+      },
+      "visualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom",
+        "source": "original_speech"
+      },
+      "keyframes": []
+    },
+    "composition_plan": {
+      "version": 1,
+      "coordinate_space": "canvas_percent",
+      "preview_timebase": "output_timeline_seconds",
+      "order": [
+        "matte-plate",
+        "fill-cyan"
+      ],
+      "layers": [
+        {
+          "id": "main-video",
+          "name": "Main video",
+          "type": "video",
+          "blend_mode": "normal",
+          "base_transform": {
+            "x": 50,
+            "y": 50,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "crop_x": 0,
+            "crop_y": 0
+          },
+          "anchor_x": 50,
+          "anchor_y": 50,
+          "effects": {
+            "mask": {
+              "enabled": false
+            },
+            "blur": 0,
+            "glow": {
+              "enabled": false,
+              "color": "#8b5cf6",
+              "radius": 0,
+              "intensity": 0
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 0,
+              "opacity": 0,
+              "x": 0,
+              "y": 0
+            },
+            "motion_blur": {
+              "enabled": false,
+              "samples": 1,
+              "shutter": 0
+            }
+          },
+          "motion_keyframes": []
+        },
+        {
+          "id": "matte-plate",
+          "name": "Ellipse Matte Source",
+          "type": "image",
+          "blend_mode": "normal",
+          "base_transform": {
+            "x": 38,
+            "y": 51.55215170529817,
+            "scale": 0.85,
+            "rotation": 0,
+            "opacity": 1,
+            "crop_x": 0,
+            "crop_y": 0
+          },
+          "anchor_x": 50,
+          "anchor_y": 50,
+          "effects": {
+            "mask": {
+              "enabled": true,
+              "shape": "ellipse",
+              "feather": 0,
+              "invert": false
+            },
+            "blur": 0,
+            "glow": {
+              "enabled": false,
+              "color": "#8b5cf6",
+              "radius": 0,
+              "intensity": 0
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 0,
+              "opacity": 0,
+              "x": 0,
+              "y": 0
+            },
+            "motion_blur": {
+              "enabled": false,
+              "samples": 1,
+              "shutter": 0
+            }
+          },
+          "motion_keyframes": [
+            {
+              "id": "baked-matte-plate-x-0",
+              "property": "x",
+              "time": 0,
+              "value": 38,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-1",
+              "property": "x",
+              "time": 0.033333,
+              "value": 40.829546,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-2",
+              "property": "x",
+              "time": 0.066667,
+              "value": 43.481748,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-3",
+              "property": "x",
+              "time": 0.1,
+              "value": 45.932172,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-4",
+              "property": "x",
+              "time": 0.133333,
+              "value": 48.16262,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-5",
+              "property": "x",
+              "time": 0.166667,
+              "value": 50.163245,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-6",
+              "property": "x",
+              "time": 0.2,
+              "value": 51.933387,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-7",
+              "property": "x",
+              "time": 0.233333,
+              "value": 53.480886,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-8",
+              "property": "x",
+              "time": 0.266667,
+              "value": 54.820222,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-9",
+              "property": "x",
+              "time": 0.3,
+              "value": 55.970149,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-10",
+              "property": "x",
+              "time": 0.333333,
+              "value": 56.951416,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-11",
+              "property": "x",
+              "time": 0.366667,
+              "value": 57.784946,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-12",
+              "property": "x",
+              "time": 0.4,
+              "value": 58.490618,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-13",
+              "property": "x",
+              "time": 0.433333,
+              "value": 59.086559,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-14",
+              "property": "x",
+              "time": 0.466667,
+              "value": 59.588859,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-15",
+              "property": "x",
+              "time": 0.5,
+              "value": 60.011524,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-16",
+              "property": "x",
+              "time": 0.533333,
+              "value": 60.366609,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-17",
+              "property": "x",
+              "time": 0.566667,
+              "value": 60.664398,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-18",
+              "property": "x",
+              "time": 0.6,
+              "value": 60.913627,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-19",
+              "property": "x",
+              "time": 0.633333,
+              "value": 61.121703,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-20",
+              "property": "x",
+              "time": 0.7,
+              "value": 61.438525,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-21",
+              "property": "x",
+              "time": 0.733333,
+              "value": 61.557097,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-22",
+              "property": "x",
+              "time": 0.8,
+              "value": 61.733846,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-23",
+              "property": "x",
+              "time": 0.9,
+              "value": 61.89027,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-24",
+              "property": "x",
+              "time": 1.033333,
+              "value": 61.977816,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-25",
+              "property": "x",
+              "time": 1.233333,
+              "value": 61.999992,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-26",
+              "property": "x",
+              "time": 1.266667,
+              "value": 39.435248,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-27",
+              "property": "x",
+              "time": 1.3,
+              "value": 42.179454,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-28",
+              "property": "x",
+              "time": 1.333333,
+              "value": 44.733495,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-29",
+              "property": "x",
+              "time": 1.366667,
+              "value": 47.075723,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-30",
+              "property": "x",
+              "time": 1.4,
+              "value": 49.191915,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-31",
+              "property": "x",
+              "time": 1.433333,
+              "value": 51.076818,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-32",
+              "property": "x",
+              "time": 1.466667,
+              "value": 52.734191,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-33",
+              "property": "x",
+              "time": 1.5,
+              "value": 54.175473,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-34",
+              "property": "x",
+              "time": 1.533333,
+              "value": 55.417587,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-35",
+              "property": "x",
+              "time": 1.566667,
+              "value": 56.480543,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-36",
+              "property": "x",
+              "time": 1.6,
+              "value": 57.38537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-37",
+              "property": "x",
+              "time": 1.633333,
+              "value": 58.152586,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-38",
+              "property": "x",
+              "time": 1.666667,
+              "value": 58.80125,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-39",
+              "property": "x",
+              "time": 1.7,
+              "value": 59.348491,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-40",
+              "property": "x",
+              "time": 1.733333,
+              "value": 59.809349,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-41",
+              "property": "x",
+              "time": 1.766667,
+              "value": 60.196833,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-42",
+              "property": "x",
+              "time": 1.8,
+              "value": 60.522086,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-43",
+              "property": "x",
+              "time": 1.833333,
+              "value": 60.794591,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-44",
+              "property": "x",
+              "time": 1.866667,
+              "value": 61.022393,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-45",
+              "property": "x",
+              "time": 1.933333,
+              "value": 61.370107,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-46",
+              "property": "x",
+              "time": 1.966667,
+              "value": 61.500689,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-47",
+              "property": "x",
+              "time": 2.033333,
+              "value": 61.696207,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-48",
+              "property": "x",
+              "time": 2.133333,
+              "value": 61.871128,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-49",
+              "property": "x",
+              "time": 2.266667,
+              "value": 61.971758,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-50",
+              "property": "x",
+              "time": 2.466667,
+              "value": 61.999934,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-51",
+              "property": "x",
+              "time": 2.5,
+              "value": 38,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-52",
+              "property": "x",
+              "time": 2.533333,
+              "value": 40.829546,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-53",
+              "property": "x",
+              "time": 2.566667,
+              "value": 43.481748,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-54",
+              "property": "x",
+              "time": 2.6,
+              "value": 45.932172,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-55",
+              "property": "x",
+              "time": 2.633333,
+              "value": 48.16262,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-56",
+              "property": "x",
+              "time": 2.666667,
+              "value": 50.163245,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-57",
+              "property": "x",
+              "time": 2.7,
+              "value": 51.933387,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-58",
+              "property": "x",
+              "time": 2.733333,
+              "value": 53.480886,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-59",
+              "property": "x",
+              "time": 2.766667,
+              "value": 54.820222,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-60",
+              "property": "x",
+              "time": 2.8,
+              "value": 55.970149,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-61",
+              "property": "x",
+              "time": 2.833333,
+              "value": 56.951416,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-62",
+              "property": "x",
+              "time": 2.866667,
+              "value": 57.784946,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-63",
+              "property": "x",
+              "time": 2.9,
+              "value": 58.490618,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-64",
+              "property": "x",
+              "time": 2.933333,
+              "value": 59.086559,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-65",
+              "property": "x",
+              "time": 2.966667,
+              "value": 59.588859,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-66",
+              "property": "x",
+              "time": 3,
+              "value": 60.011524,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-67",
+              "property": "x",
+              "time": 3.033333,
+              "value": 60.366609,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-68",
+              "property": "x",
+              "time": 3.066667,
+              "value": 60.664398,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-69",
+              "property": "x",
+              "time": 3.1,
+              "value": 60.913627,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-70",
+              "property": "x",
+              "time": 3.166667,
+              "value": 61.294896,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-71",
+              "property": "x",
+              "time": 3.233333,
+              "value": 61.557097,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-72",
+              "property": "x",
+              "time": 3.3,
+              "value": 61.733846,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-73",
+              "property": "x",
+              "time": 3.366667,
+              "value": 61.849537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-74",
+              "property": "x",
+              "time": 3.466667,
+              "value": 61.946375,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-75",
+              "property": "x",
+              "time": 3.566667,
+              "value": 61.987054,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-76",
+              "property": "x",
+              "time": 3.733333,
+              "value": 61.999992,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-77",
+              "property": "x",
+              "time": 3.766667,
+              "value": 39.435248,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-78",
+              "property": "x",
+              "time": 3.8,
+              "value": 42.179454,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-79",
+              "property": "x",
+              "time": 3.833333,
+              "value": 44.733495,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-80",
+              "property": "x",
+              "time": 3.866667,
+              "value": 47.075723,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-81",
+              "property": "x",
+              "time": 3.9,
+              "value": 49.191915,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-82",
+              "property": "x",
+              "time": 3.933333,
+              "value": 51.076818,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-83",
+              "property": "x",
+              "time": 3.966667,
+              "value": 52.734191,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-84",
+              "property": "x",
+              "time": 4,
+              "value": 54.175473,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-85",
+              "property": "x",
+              "time": 4.033333,
+              "value": 55.417587,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-86",
+              "property": "x",
+              "time": 4.066667,
+              "value": 56.480543,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-87",
+              "property": "x",
+              "time": 4.1,
+              "value": 57.38537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-88",
+              "property": "x",
+              "time": 4.133333,
+              "value": 58.152586,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-89",
+              "property": "x",
+              "time": 4.166667,
+              "value": 58.80125,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-90",
+              "property": "x",
+              "time": 4.2,
+              "value": 59.348491,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-91",
+              "property": "x",
+              "time": 4.233333,
+              "value": 59.809349,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-92",
+              "property": "x",
+              "time": 4.266667,
+              "value": 60.196833,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-93",
+              "property": "x",
+              "time": 4.3,
+              "value": 60.522086,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-94",
+              "property": "x",
+              "time": 4.333333,
+              "value": 60.794591,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-95",
+              "property": "x",
+              "time": 4.366667,
+              "value": 61.022393,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-96",
+              "property": "x",
+              "time": 4.433333,
+              "value": 61.370107,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-97",
+              "property": "x",
+              "time": 4.466667,
+              "value": 61.500689,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-98",
+              "property": "x",
+              "time": 4.533333,
+              "value": 61.696207,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-99",
+              "property": "x",
+              "time": 4.633333,
+              "value": 61.871128,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-100",
+              "property": "x",
+              "time": 4.766667,
+              "value": 61.971758,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-101",
+              "property": "x",
+              "time": 4.966667,
+              "value": 61.999934,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-102",
+              "property": "x",
+              "time": 5,
+              "value": 38,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-103",
+              "property": "x",
+              "time": 5.033333,
+              "value": 40.829546,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-104",
+              "property": "x",
+              "time": 5.066667,
+              "value": 43.481748,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-105",
+              "property": "x",
+              "time": 5.1,
+              "value": 45.932172,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-106",
+              "property": "x",
+              "time": 5.133333,
+              "value": 48.16262,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-107",
+              "property": "x",
+              "time": 5.166667,
+              "value": 50.163245,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-108",
+              "property": "x",
+              "time": 5.2,
+              "value": 51.933387,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-109",
+              "property": "x",
+              "time": 5.233333,
+              "value": 53.480886,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-110",
+              "property": "x",
+              "time": 5.266667,
+              "value": 54.820222,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-111",
+              "property": "x",
+              "time": 5.3,
+              "value": 55.970149,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-112",
+              "property": "x",
+              "time": 5.333333,
+              "value": 56.951416,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-113",
+              "property": "x",
+              "time": 5.366667,
+              "value": 57.784946,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-114",
+              "property": "x",
+              "time": 5.4,
+              "value": 58.490618,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-115",
+              "property": "x",
+              "time": 5.433333,
+              "value": 59.086559,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-116",
+              "property": "x",
+              "time": 5.466667,
+              "value": 59.588859,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-117",
+              "property": "x",
+              "time": 5.5,
+              "value": 60.011524,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-118",
+              "property": "x",
+              "time": 5.533333,
+              "value": 60.366609,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-119",
+              "property": "x",
+              "time": 5.566667,
+              "value": 60.664398,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-120",
+              "property": "x",
+              "time": 5.6,
+              "value": 60.913627,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-121",
+              "property": "x",
+              "time": 5.666667,
+              "value": 61.294896,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-122",
+              "property": "x",
+              "time": 5.7,
+              "value": 61.438525,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-123",
+              "property": "x",
+              "time": 5.766667,
+              "value": 61.654449,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-124",
+              "property": "x",
+              "time": 5.866667,
+              "value": 61.849537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-x-125",
+              "property": "x",
+              "time": 6,
+              "value": 61.964586,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-0",
+              "property": "y",
+              "time": 0,
+              "value": 51.552152,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-1",
+              "property": "y",
+              "time": 0.033333,
+              "value": 51.84127,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-2",
+              "property": "y",
+              "time": 0.066667,
+              "value": 52.086971,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-3",
+              "property": "y",
+              "time": 0.1,
+              "value": 51.685018,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-4",
+              "property": "y",
+              "time": 0.133333,
+              "value": 50.524403,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-5",
+              "property": "y",
+              "time": 0.166667,
+              "value": 49.607786,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-6",
+              "property": "y",
+              "time": 0.2,
+              "value": 49.714508,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-7",
+              "property": "y",
+              "time": 0.233333,
+              "value": 50.148557,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-8",
+              "property": "y",
+              "time": 0.266667,
+              "value": 49.679042,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-9",
+              "property": "y",
+              "time": 0.3,
+              "value": 48.367539,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-10",
+              "property": "y",
+              "time": 0.333333,
+              "value": 47.52456,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-11",
+              "property": "y",
+              "time": 0.366667,
+              "value": 47.907858,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-12",
+              "property": "y",
+              "time": 0.4,
+              "value": 48.921914,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-13",
+              "property": "y",
+              "time": 0.433333,
+              "value": 49.845135,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-14",
+              "property": "y",
+              "time": 0.466667,
+              "value": 50.881573,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-15",
+              "property": "y",
+              "time": 0.5,
+              "value": 52.313438,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-16",
+              "property": "y",
+              "time": 0.533333,
+              "value": 53.33233,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-17",
+              "property": "y",
+              "time": 0.566667,
+              "value": 52.772308,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-18",
+              "property": "y",
+              "time": 0.6,
+              "value": 50.835229,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-19",
+              "property": "y",
+              "time": 0.633333,
+              "value": 49.086081,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-20",
+              "property": "y",
+              "time": 0.666667,
+              "value": 48.553173,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-21",
+              "property": "y",
+              "time": 0.7,
+              "value": 48.692122,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-22",
+              "property": "y",
+              "time": 0.733333,
+              "value": 48.607496,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-23",
+              "property": "y",
+              "time": 0.766667,
+              "value": 48.455241,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-24",
+              "property": "y",
+              "time": 0.8,
+              "value": 48.878096,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-25",
+              "property": "y",
+              "time": 0.833333,
+              "value": 49.638722,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-26",
+              "property": "y",
+              "time": 0.866667,
+              "value": 49.878188,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-27",
+              "property": "y",
+              "time": 0.9,
+              "value": 49.627139,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-28",
+              "property": "y",
+              "time": 0.933333,
+              "value": 49.978652,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-29",
+              "property": "y",
+              "time": 1,
+              "value": 52.8096,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-30",
+              "property": "y",
+              "time": 1.033333,
+              "value": 52.81582,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-31",
+              "property": "y",
+              "time": 1.066667,
+              "value": 51.521899,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-32",
+              "property": "y",
+              "time": 1.1,
+              "value": 50.078975,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-33",
+              "property": "y",
+              "time": 1.166667,
+              "value": 48.011988,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-34",
+              "property": "y",
+              "time": 1.2,
+              "value": 47.103647,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-35",
+              "property": "y",
+              "time": 1.233333,
+              "value": 47.220147,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-36",
+              "property": "y",
+              "time": 1.266667,
+              "value": 48.748922,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-37",
+              "property": "y",
+              "time": 1.3,
+              "value": 50.568358,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-38",
+              "property": "y",
+              "time": 1.333333,
+              "value": 51.271057,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-39",
+              "property": "y",
+              "time": 1.366667,
+              "value": 50.91786,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-40",
+              "property": "y",
+              "time": 1.4,
+              "value": 50.715179,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-41",
+              "property": "y",
+              "time": 1.433333,
+              "value": 51.169191,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-42",
+              "property": "y",
+              "time": 1.466667,
+              "value": 51.538264,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-43",
+              "property": "y",
+              "time": 1.5,
+              "value": 51.227184,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-44",
+              "property": "y",
+              "time": 1.533333,
+              "value": 50.709962,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-45",
+              "property": "y",
+              "time": 1.566667,
+              "value": 50.52012,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-46",
+              "property": "y",
+              "time": 1.6,
+              "value": 50.143296,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-47",
+              "property": "y",
+              "time": 1.633333,
+              "value": 48.840667,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-48",
+              "property": "y",
+              "time": 1.666667,
+              "value": 47.18097,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-49",
+              "property": "y",
+              "time": 1.7,
+              "value": 46.698045,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-50",
+              "property": "y",
+              "time": 1.733333,
+              "value": 47.95282,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-51",
+              "property": "y",
+              "time": 1.766667,
+              "value": 49.839893,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-52",
+              "property": "y",
+              "time": 1.8,
+              "value": 51.114906,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-53",
+              "property": "y",
+              "time": 1.833333,
+              "value": 51.766383,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-54",
+              "property": "y",
+              "time": 1.866667,
+              "value": 52.304915,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-55",
+              "property": "y",
+              "time": 1.9,
+              "value": 52.454011,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-56",
+              "property": "y",
+              "time": 1.933333,
+              "value": 51.556614,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-57",
+              "property": "y",
+              "time": 1.966667,
+              "value": 49.997703,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-58",
+              "property": "y",
+              "time": 2,
+              "value": 49.101177,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-59",
+              "property": "y",
+              "time": 2.033333,
+              "value": 49.380295,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-60",
+              "property": "y",
+              "time": 2.066667,
+              "value": 49.805423,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-61",
+              "property": "y",
+              "time": 2.1,
+              "value": 49.312356,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-62",
+              "property": "y",
+              "time": 2.133333,
+              "value": 48.31066,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-63",
+              "property": "y",
+              "time": 2.166667,
+              "value": 47.971447,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-64",
+              "property": "y",
+              "time": 2.2,
+              "value": 48.536289,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-65",
+              "property": "y",
+              "time": 2.233333,
+              "value": 49.275395,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-66",
+              "property": "y",
+              "time": 2.266667,
+              "value": 49.918141,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-67",
+              "property": "y",
+              "time": 2.3,
+              "value": 51.014948,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-68",
+              "property": "y",
+              "time": 2.333333,
+              "value": 52.590159,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-69",
+              "property": "y",
+              "time": 2.366667,
+              "value": 53.436653,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-70",
+              "property": "y",
+              "time": 2.4,
+              "value": 52.508054,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-71",
+              "property": "y",
+              "time": 2.433333,
+              "value": 50.441782,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-72",
+              "property": "y",
+              "time": 2.466667,
+              "value": 48.845267,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-73",
+              "property": "y",
+              "time": 2.5,
+              "value": 48.35163,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-74",
+              "property": "y",
+              "time": 2.533333,
+              "value": 48.277141,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-75",
+              "property": "y",
+              "time": 2.566667,
+              "value": 48.126743,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-76",
+              "property": "y",
+              "time": 2.6,
+              "value": 48.373459,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-77",
+              "property": "y",
+              "time": 2.633333,
+              "value": 49.345171,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-78",
+              "property": "y",
+              "time": 2.666667,
+              "value": 50.273843,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-79",
+              "property": "y",
+              "time": 2.7,
+              "value": 50.295576,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-80",
+              "property": "y",
+              "time": 2.733333,
+              "value": 49.878713,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-81",
+              "property": "y",
+              "time": 2.766667,
+              "value": 50.2638,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-82",
+              "property": "y",
+              "time": 2.8,
+              "value": 51.598035,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-83",
+              "property": "y",
+              "time": 2.833333,
+              "value": 52.59739,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-84",
+              "property": "y",
+              "time": 2.866667,
+              "value": 52.267313,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-85",
+              "property": "y",
+              "time": 2.9,
+              "value": 51.076721,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-86",
+              "property": "y",
+              "time": 2.933333,
+              "value": 49.96012,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-87",
+              "property": "y",
+              "time": 2.966667,
+              "value": 48.965117,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-88",
+              "property": "y",
+              "time": 3,
+              "value": 47.729502,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-89",
+              "property": "y",
+              "time": 3.033333,
+              "value": 46.787308,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-90",
+              "property": "y",
+              "time": 3.066667,
+              "value": 47.25379,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-91",
+              "property": "y",
+              "time": 3.1,
+              "value": 49.137868,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-92",
+              "property": "y",
+              "time": 3.133333,
+              "value": 50.969832,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-93",
+              "property": "y",
+              "time": 3.166667,
+              "value": 51.541199,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-94",
+              "property": "y",
+              "time": 3.2,
+              "value": 51.260178,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-95",
+              "property": "y",
+              "time": 3.233333,
+              "value": 51.194996,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-96",
+              "property": "y",
+              "time": 3.266667,
+              "value": 51.426208,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-97",
+              "property": "y",
+              "time": 3.3,
+              "value": 51.232051,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-98",
+              "property": "y",
+              "time": 3.333333,
+              "value": 50.553843,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-99",
+              "property": "y",
+              "time": 3.366667,
+              "value": 50.172,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-100",
+              "property": "y",
+              "time": 3.4,
+              "value": 50.288888,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-101",
+              "property": "y",
+              "time": 3.433333,
+              "value": 49.977243,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-102",
+              "property": "y",
+              "time": 3.466667,
+              "value": 48.620975,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-103",
+              "property": "y",
+              "time": 3.5,
+              "value": 47.157578,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-104",
+              "property": "y",
+              "time": 3.533333,
+              "value": 47.052971,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-105",
+              "property": "y",
+              "time": 3.566667,
+              "value": 48.426975,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-106",
+              "property": "y",
+              "time": 3.6,
+              "value": 50.073088,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-107",
+              "property": "y",
+              "time": 3.633333,
+              "value": 51.173401,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-108",
+              "property": "y",
+              "time": 3.666667,
+              "value": 51.997828,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-109",
+              "property": "y",
+              "time": 3.7,
+              "value": 52.73039,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-110",
+              "property": "y",
+              "time": 3.733333,
+              "value": 52.662404,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-111",
+              "property": "y",
+              "time": 3.766667,
+              "value": 51.280568,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-112",
+              "property": "y",
+              "time": 3.8,
+              "value": 49.476544,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-113",
+              "property": "y",
+              "time": 3.833333,
+              "value": 48.691176,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-114",
+              "property": "y",
+              "time": 3.9,
+              "value": 49.41129,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-115",
+              "property": "y",
+              "time": 3.933333,
+              "value": 48.971538,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-116",
+              "property": "y",
+              "time": 3.966667,
+              "value": 48.409946,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-117",
+              "property": "y",
+              "time": 4,
+              "value": 48.560221,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-118",
+              "property": "y",
+              "time": 4.033333,
+              "value": 49.166908,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-119",
+              "property": "y",
+              "time": 4.1,
+              "value": 49.996206,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-120",
+              "property": "y",
+              "time": 4.133333,
+              "value": 51.181762,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-121",
+              "property": "y",
+              "time": 4.166667,
+              "value": 52.782738,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-122",
+              "property": "y",
+              "time": 4.2,
+              "value": 53.34215,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-123",
+              "property": "y",
+              "time": 4.233333,
+              "value": 52.110985,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-124",
+              "property": "y",
+              "time": 4.266667,
+              "value": 50.084813,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-125",
+              "property": "y",
+              "time": 4.3,
+              "value": 48.697355,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-126",
+              "property": "y",
+              "time": 4.333333,
+              "value": 48.163677,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-127",
+              "property": "y",
+              "time": 4.366667,
+              "value": 47.848441,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-128",
+              "property": "y",
+              "time": 4.4,
+              "value": 47.737262,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-129",
+              "property": "y",
+              "time": 4.433333,
+              "value": 48.458537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-130",
+              "property": "y",
+              "time": 4.466667,
+              "value": 49.88752,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-131",
+              "property": "y",
+              "time": 4.5,
+              "value": 50.84316,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-132",
+              "property": "y",
+              "time": 4.533333,
+              "value": 50.647069,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-133",
+              "property": "y",
+              "time": 4.566667,
+              "value": 50.164925,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-134",
+              "property": "y",
+              "time": 4.6,
+              "value": 50.581361,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-135",
+              "property": "y",
+              "time": 4.633333,
+              "value": 51.67973,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-136",
+              "property": "y",
+              "time": 4.666667,
+              "value": 52.20054,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-137",
+              "property": "y",
+              "time": 4.7,
+              "value": 51.634568,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-138",
+              "property": "y",
+              "time": 4.733333,
+              "value": 50.682108,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-139",
+              "property": "y",
+              "time": 4.766667,
+              "value": 49.889062,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-140",
+              "property": "y",
+              "time": 4.8,
+              "value": 48.881672,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-141",
+              "property": "y",
+              "time": 4.833333,
+              "value": 47.467812,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-142",
+              "property": "y",
+              "time": 4.866667,
+              "value": 46.627859,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-143",
+              "property": "y",
+              "time": 4.9,
+              "value": 47.468783,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-144",
+              "property": "y",
+              "time": 4.933333,
+              "value": 49.560122,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-145",
+              "property": "y",
+              "time": 4.966667,
+              "value": 51.273561,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-146",
+              "property": "y",
+              "time": 5,
+              "value": 51.749198,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-147",
+              "property": "y",
+              "time": 5.033333,
+              "value": 51.627795,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-148",
+              "property": "y",
+              "time": 5.066667,
+              "value": 51.658252,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-149",
+              "property": "y",
+              "time": 5.1,
+              "value": 51.545396,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-150",
+              "property": "y",
+              "time": 5.133333,
+              "value": 50.785123,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-151",
+              "property": "y",
+              "time": 5.166667,
+              "value": 49.87606,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-152",
+              "property": "y",
+              "time": 5.2,
+              "value": 49.711734,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-153",
+              "property": "y",
+              "time": 5.233333,
+              "value": 50.067526,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-154",
+              "property": "y",
+              "time": 5.266667,
+              "value": 49.758403,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-155",
+              "property": "y",
+              "time": 5.3,
+              "value": 48.440717,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-156",
+              "property": "y",
+              "time": 5.333333,
+              "value": 47.312371,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-157",
+              "property": "y",
+              "time": 5.366667,
+              "value": 47.567281,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-158",
+              "property": "y",
+              "time": 5.433333,
+              "value": 50.225868,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-159",
+              "property": "y",
+              "time": 5.466667,
+              "value": 51.209684,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-160",
+              "property": "y",
+              "time": 5.5,
+              "value": 52.242093,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-161",
+              "property": "y",
+              "time": 5.533333,
+              "value": 53.069199,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-162",
+              "property": "y",
+              "time": 5.566667,
+              "value": 52.687851,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-163",
+              "property": "y",
+              "time": 5.6,
+              "value": 50.896431,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-164",
+              "property": "y",
+              "time": 5.633333,
+              "value": 49.012154,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-165",
+              "property": "y",
+              "time": 5.666667,
+              "value": 48.379578,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-166",
+              "property": "y",
+              "time": 5.7,
+              "value": 48.763899,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-167",
+              "property": "y",
+              "time": 5.733333,
+              "value": 48.982137,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-168",
+              "property": "y",
+              "time": 5.766667,
+              "value": 48.704982,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-169",
+              "property": "y",
+              "time": 5.8,
+              "value": 48.674717,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-170",
+              "property": "y",
+              "time": 5.833333,
+              "value": 49.23905,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-171",
+              "property": "y",
+              "time": 5.866667,
+              "value": 49.751961,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-172",
+              "property": "y",
+              "time": 5.9,
+              "value": 49.803382,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-173",
+              "property": "y",
+              "time": 5.933333,
+              "value": 50.10431,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-174",
+              "property": "y",
+              "time": 5.966667,
+              "value": 51.362247,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-y-175",
+              "property": "y",
+              "time": 6,
+              "value": 52.846187,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-0",
+              "property": "scale",
+              "time": 0,
+              "value": 0.85,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-1",
+              "property": "scale",
+              "time": 0.1,
+              "value": 0.891596,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-2",
+              "property": "scale",
+              "time": 0.166667,
+              "value": 0.917783,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-3",
+              "property": "scale",
+              "time": 0.266667,
+              "value": 0.954435,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-4",
+              "property": "scale",
+              "time": 0.333333,
+              "value": 0.976974,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-5",
+              "property": "scale",
+              "time": 0.433333,
+              "value": 1.007786,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-6",
+              "property": "scale",
+              "time": 0.5,
+              "value": 1.026298,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-7",
+              "property": "scale",
+              "time": 0.566667,
+              "value": 1.043204,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-8",
+              "property": "scale",
+              "time": 0.666667,
+              "value": 1.065663,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-9",
+              "property": "scale",
+              "time": 0.733333,
+              "value": 1.078813,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-10",
+              "property": "scale",
+              "time": 0.833333,
+              "value": 1.096041,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-11",
+              "property": "scale",
+              "time": 0.9,
+              "value": 1.106011,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-12",
+              "property": "scale",
+              "time": 1,
+              "value": 1.118959,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-13",
+              "property": "scale",
+              "time": 1.1,
+              "value": 1.129802,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-14",
+              "property": "scale",
+              "time": 1.2,
+              "value": 1.138853,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-15",
+              "property": "scale",
+              "time": 1.3,
+              "value": 1.146392,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-16",
+              "property": "scale",
+              "time": 1.433333,
+              "value": 1.154501,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-17",
+              "property": "scale",
+              "time": 1.666667,
+              "value": 1.16461,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-18",
+              "property": "scale",
+              "time": 1.9,
+              "value": 1.171053,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-19",
+              "property": "scale",
+              "time": 2.166667,
+              "value": 1.175502,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-20",
+              "property": "scale",
+              "time": 2.5,
+              "value": 1.178382,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-21",
+              "property": "scale",
+              "time": 3.166667,
+              "value": 1.179955,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-scale-22",
+              "property": "scale",
+              "time": 6,
+              "value": 1.18,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-rotation-0",
+              "property": "rotation",
+              "time": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-matte-plate-rotation-1",
+              "property": "rotation",
+              "time": 6,
+              "value": 270,
+              "easing": "linear"
+            }
+          ]
+        },
+        {
+          "id": "fill-cyan",
+          "name": "Cyan Fill Plate",
+          "type": "image",
+          "track_matte": {
+            "mode": "alpha",
+            "source_layer_id": "matte-plate"
+          },
+          "blend_mode": "normal",
+          "base_transform": {
+            "x": 38,
+            "y": 51.55215170529817,
+            "scale": 0.85,
+            "rotation": 0,
+            "opacity": 1,
+            "crop_x": 0,
+            "crop_y": 0
+          },
+          "anchor_x": 50,
+          "anchor_y": 50,
+          "effects": {
+            "mask": {
+              "enabled": false
+            },
+            "blur": 0,
+            "glow": {
+              "enabled": false,
+              "color": "#8b5cf6",
+              "radius": 0,
+              "intensity": 0
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 0,
+              "opacity": 0,
+              "x": 0,
+              "y": 0
+            },
+            "motion_blur": {
+              "enabled": false,
+              "samples": 1,
+              "shutter": 0
+            }
+          },
+          "motion_keyframes": [
+            {
+              "id": "baked-fill-cyan-x-0",
+              "property": "x",
+              "time": 0,
+              "value": 38,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-1",
+              "property": "x",
+              "time": 0.033333,
+              "value": 40.829546,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-2",
+              "property": "x",
+              "time": 0.066667,
+              "value": 43.481748,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-3",
+              "property": "x",
+              "time": 0.1,
+              "value": 45.932172,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-4",
+              "property": "x",
+              "time": 0.133333,
+              "value": 48.16262,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-5",
+              "property": "x",
+              "time": 0.166667,
+              "value": 50.163245,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-6",
+              "property": "x",
+              "time": 0.2,
+              "value": 51.933387,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-7",
+              "property": "x",
+              "time": 0.233333,
+              "value": 53.480886,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-8",
+              "property": "x",
+              "time": 0.266667,
+              "value": 54.820222,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-9",
+              "property": "x",
+              "time": 0.3,
+              "value": 55.970149,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-10",
+              "property": "x",
+              "time": 0.333333,
+              "value": 56.951416,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-11",
+              "property": "x",
+              "time": 0.366667,
+              "value": 57.784946,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-12",
+              "property": "x",
+              "time": 0.4,
+              "value": 58.490618,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-13",
+              "property": "x",
+              "time": 0.433333,
+              "value": 59.086559,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-14",
+              "property": "x",
+              "time": 0.466667,
+              "value": 59.588859,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-15",
+              "property": "x",
+              "time": 0.5,
+              "value": 60.011524,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-16",
+              "property": "x",
+              "time": 0.533333,
+              "value": 60.366609,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-17",
+              "property": "x",
+              "time": 0.566667,
+              "value": 60.664398,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-18",
+              "property": "x",
+              "time": 0.6,
+              "value": 60.913627,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-19",
+              "property": "x",
+              "time": 0.633333,
+              "value": 61.121703,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-20",
+              "property": "x",
+              "time": 0.7,
+              "value": 61.438525,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-21",
+              "property": "x",
+              "time": 0.733333,
+              "value": 61.557097,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-22",
+              "property": "x",
+              "time": 0.8,
+              "value": 61.733846,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-23",
+              "property": "x",
+              "time": 0.9,
+              "value": 61.89027,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-24",
+              "property": "x",
+              "time": 1.033333,
+              "value": 61.977816,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-25",
+              "property": "x",
+              "time": 1.233333,
+              "value": 61.999992,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-26",
+              "property": "x",
+              "time": 1.266667,
+              "value": 39.435248,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-27",
+              "property": "x",
+              "time": 1.3,
+              "value": 42.179454,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-28",
+              "property": "x",
+              "time": 1.333333,
+              "value": 44.733495,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-29",
+              "property": "x",
+              "time": 1.366667,
+              "value": 47.075723,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-30",
+              "property": "x",
+              "time": 1.4,
+              "value": 49.191915,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-31",
+              "property": "x",
+              "time": 1.433333,
+              "value": 51.076818,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-32",
+              "property": "x",
+              "time": 1.466667,
+              "value": 52.734191,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-33",
+              "property": "x",
+              "time": 1.5,
+              "value": 54.175473,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-34",
+              "property": "x",
+              "time": 1.533333,
+              "value": 55.417587,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-35",
+              "property": "x",
+              "time": 1.566667,
+              "value": 56.480543,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-36",
+              "property": "x",
+              "time": 1.6,
+              "value": 57.38537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-37",
+              "property": "x",
+              "time": 1.633333,
+              "value": 58.152586,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-38",
+              "property": "x",
+              "time": 1.666667,
+              "value": 58.80125,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-39",
+              "property": "x",
+              "time": 1.7,
+              "value": 59.348491,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-40",
+              "property": "x",
+              "time": 1.733333,
+              "value": 59.809349,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-41",
+              "property": "x",
+              "time": 1.766667,
+              "value": 60.196833,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-42",
+              "property": "x",
+              "time": 1.8,
+              "value": 60.522086,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-43",
+              "property": "x",
+              "time": 1.833333,
+              "value": 60.794591,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-44",
+              "property": "x",
+              "time": 1.866667,
+              "value": 61.022393,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-45",
+              "property": "x",
+              "time": 1.933333,
+              "value": 61.370107,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-46",
+              "property": "x",
+              "time": 1.966667,
+              "value": 61.500689,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-47",
+              "property": "x",
+              "time": 2.033333,
+              "value": 61.696207,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-48",
+              "property": "x",
+              "time": 2.133333,
+              "value": 61.871128,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-49",
+              "property": "x",
+              "time": 2.266667,
+              "value": 61.971758,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-50",
+              "property": "x",
+              "time": 2.466667,
+              "value": 61.999934,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-51",
+              "property": "x",
+              "time": 2.5,
+              "value": 38,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-52",
+              "property": "x",
+              "time": 2.533333,
+              "value": 40.829546,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-53",
+              "property": "x",
+              "time": 2.566667,
+              "value": 43.481748,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-54",
+              "property": "x",
+              "time": 2.6,
+              "value": 45.932172,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-55",
+              "property": "x",
+              "time": 2.633333,
+              "value": 48.16262,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-56",
+              "property": "x",
+              "time": 2.666667,
+              "value": 50.163245,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-57",
+              "property": "x",
+              "time": 2.7,
+              "value": 51.933387,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-58",
+              "property": "x",
+              "time": 2.733333,
+              "value": 53.480886,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-59",
+              "property": "x",
+              "time": 2.766667,
+              "value": 54.820222,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-60",
+              "property": "x",
+              "time": 2.8,
+              "value": 55.970149,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-61",
+              "property": "x",
+              "time": 2.833333,
+              "value": 56.951416,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-62",
+              "property": "x",
+              "time": 2.866667,
+              "value": 57.784946,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-63",
+              "property": "x",
+              "time": 2.9,
+              "value": 58.490618,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-64",
+              "property": "x",
+              "time": 2.933333,
+              "value": 59.086559,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-65",
+              "property": "x",
+              "time": 2.966667,
+              "value": 59.588859,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-66",
+              "property": "x",
+              "time": 3,
+              "value": 60.011524,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-67",
+              "property": "x",
+              "time": 3.033333,
+              "value": 60.366609,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-68",
+              "property": "x",
+              "time": 3.066667,
+              "value": 60.664398,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-69",
+              "property": "x",
+              "time": 3.1,
+              "value": 60.913627,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-70",
+              "property": "x",
+              "time": 3.166667,
+              "value": 61.294896,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-71",
+              "property": "x",
+              "time": 3.233333,
+              "value": 61.557097,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-72",
+              "property": "x",
+              "time": 3.3,
+              "value": 61.733846,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-73",
+              "property": "x",
+              "time": 3.366667,
+              "value": 61.849537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-74",
+              "property": "x",
+              "time": 3.466667,
+              "value": 61.946375,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-75",
+              "property": "x",
+              "time": 3.566667,
+              "value": 61.987054,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-76",
+              "property": "x",
+              "time": 3.733333,
+              "value": 61.999992,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-77",
+              "property": "x",
+              "time": 3.766667,
+              "value": 39.435248,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-78",
+              "property": "x",
+              "time": 3.8,
+              "value": 42.179454,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-79",
+              "property": "x",
+              "time": 3.833333,
+              "value": 44.733495,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-80",
+              "property": "x",
+              "time": 3.866667,
+              "value": 47.075723,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-81",
+              "property": "x",
+              "time": 3.9,
+              "value": 49.191915,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-82",
+              "property": "x",
+              "time": 3.933333,
+              "value": 51.076818,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-83",
+              "property": "x",
+              "time": 3.966667,
+              "value": 52.734191,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-84",
+              "property": "x",
+              "time": 4,
+              "value": 54.175473,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-85",
+              "property": "x",
+              "time": 4.033333,
+              "value": 55.417587,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-86",
+              "property": "x",
+              "time": 4.066667,
+              "value": 56.480543,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-87",
+              "property": "x",
+              "time": 4.1,
+              "value": 57.38537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-88",
+              "property": "x",
+              "time": 4.133333,
+              "value": 58.152586,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-89",
+              "property": "x",
+              "time": 4.166667,
+              "value": 58.80125,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-90",
+              "property": "x",
+              "time": 4.2,
+              "value": 59.348491,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-91",
+              "property": "x",
+              "time": 4.233333,
+              "value": 59.809349,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-92",
+              "property": "x",
+              "time": 4.266667,
+              "value": 60.196833,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-93",
+              "property": "x",
+              "time": 4.3,
+              "value": 60.522086,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-94",
+              "property": "x",
+              "time": 4.333333,
+              "value": 60.794591,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-95",
+              "property": "x",
+              "time": 4.366667,
+              "value": 61.022393,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-96",
+              "property": "x",
+              "time": 4.433333,
+              "value": 61.370107,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-97",
+              "property": "x",
+              "time": 4.466667,
+              "value": 61.500689,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-98",
+              "property": "x",
+              "time": 4.533333,
+              "value": 61.696207,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-99",
+              "property": "x",
+              "time": 4.633333,
+              "value": 61.871128,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-100",
+              "property": "x",
+              "time": 4.766667,
+              "value": 61.971758,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-101",
+              "property": "x",
+              "time": 4.966667,
+              "value": 61.999934,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-102",
+              "property": "x",
+              "time": 5,
+              "value": 38,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-103",
+              "property": "x",
+              "time": 5.033333,
+              "value": 40.829546,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-104",
+              "property": "x",
+              "time": 5.066667,
+              "value": 43.481748,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-105",
+              "property": "x",
+              "time": 5.1,
+              "value": 45.932172,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-106",
+              "property": "x",
+              "time": 5.133333,
+              "value": 48.16262,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-107",
+              "property": "x",
+              "time": 5.166667,
+              "value": 50.163245,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-108",
+              "property": "x",
+              "time": 5.2,
+              "value": 51.933387,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-109",
+              "property": "x",
+              "time": 5.233333,
+              "value": 53.480886,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-110",
+              "property": "x",
+              "time": 5.266667,
+              "value": 54.820222,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-111",
+              "property": "x",
+              "time": 5.3,
+              "value": 55.970149,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-112",
+              "property": "x",
+              "time": 5.333333,
+              "value": 56.951416,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-113",
+              "property": "x",
+              "time": 5.366667,
+              "value": 57.784946,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-114",
+              "property": "x",
+              "time": 5.4,
+              "value": 58.490618,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-115",
+              "property": "x",
+              "time": 5.433333,
+              "value": 59.086559,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-116",
+              "property": "x",
+              "time": 5.466667,
+              "value": 59.588859,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-117",
+              "property": "x",
+              "time": 5.5,
+              "value": 60.011524,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-118",
+              "property": "x",
+              "time": 5.533333,
+              "value": 60.366609,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-119",
+              "property": "x",
+              "time": 5.566667,
+              "value": 60.664398,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-120",
+              "property": "x",
+              "time": 5.6,
+              "value": 60.913627,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-121",
+              "property": "x",
+              "time": 5.666667,
+              "value": 61.294896,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-122",
+              "property": "x",
+              "time": 5.7,
+              "value": 61.438525,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-123",
+              "property": "x",
+              "time": 5.766667,
+              "value": 61.654449,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-124",
+              "property": "x",
+              "time": 5.866667,
+              "value": 61.849537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-x-125",
+              "property": "x",
+              "time": 6,
+              "value": 61.964586,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-0",
+              "property": "y",
+              "time": 0,
+              "value": 51.552152,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-1",
+              "property": "y",
+              "time": 0.033333,
+              "value": 51.84127,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-2",
+              "property": "y",
+              "time": 0.066667,
+              "value": 52.086971,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-3",
+              "property": "y",
+              "time": 0.1,
+              "value": 51.685018,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-4",
+              "property": "y",
+              "time": 0.133333,
+              "value": 50.524403,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-5",
+              "property": "y",
+              "time": 0.166667,
+              "value": 49.607786,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-6",
+              "property": "y",
+              "time": 0.2,
+              "value": 49.714508,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-7",
+              "property": "y",
+              "time": 0.233333,
+              "value": 50.148557,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-8",
+              "property": "y",
+              "time": 0.266667,
+              "value": 49.679042,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-9",
+              "property": "y",
+              "time": 0.3,
+              "value": 48.367539,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-10",
+              "property": "y",
+              "time": 0.333333,
+              "value": 47.52456,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-11",
+              "property": "y",
+              "time": 0.366667,
+              "value": 47.907858,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-12",
+              "property": "y",
+              "time": 0.4,
+              "value": 48.921914,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-13",
+              "property": "y",
+              "time": 0.433333,
+              "value": 49.845135,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-14",
+              "property": "y",
+              "time": 0.466667,
+              "value": 50.881573,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-15",
+              "property": "y",
+              "time": 0.5,
+              "value": 52.313438,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-16",
+              "property": "y",
+              "time": 0.533333,
+              "value": 53.33233,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-17",
+              "property": "y",
+              "time": 0.566667,
+              "value": 52.772308,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-18",
+              "property": "y",
+              "time": 0.6,
+              "value": 50.835229,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-19",
+              "property": "y",
+              "time": 0.633333,
+              "value": 49.086081,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-20",
+              "property": "y",
+              "time": 0.666667,
+              "value": 48.553173,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-21",
+              "property": "y",
+              "time": 0.7,
+              "value": 48.692122,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-22",
+              "property": "y",
+              "time": 0.733333,
+              "value": 48.607496,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-23",
+              "property": "y",
+              "time": 0.766667,
+              "value": 48.455241,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-24",
+              "property": "y",
+              "time": 0.8,
+              "value": 48.878096,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-25",
+              "property": "y",
+              "time": 0.833333,
+              "value": 49.638722,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-26",
+              "property": "y",
+              "time": 0.866667,
+              "value": 49.878188,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-27",
+              "property": "y",
+              "time": 0.9,
+              "value": 49.627139,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-28",
+              "property": "y",
+              "time": 0.933333,
+              "value": 49.978652,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-29",
+              "property": "y",
+              "time": 1,
+              "value": 52.8096,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-30",
+              "property": "y",
+              "time": 1.033333,
+              "value": 52.81582,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-31",
+              "property": "y",
+              "time": 1.066667,
+              "value": 51.521899,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-32",
+              "property": "y",
+              "time": 1.1,
+              "value": 50.078975,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-33",
+              "property": "y",
+              "time": 1.166667,
+              "value": 48.011988,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-34",
+              "property": "y",
+              "time": 1.2,
+              "value": 47.103647,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-35",
+              "property": "y",
+              "time": 1.233333,
+              "value": 47.220147,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-36",
+              "property": "y",
+              "time": 1.266667,
+              "value": 48.748922,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-37",
+              "property": "y",
+              "time": 1.3,
+              "value": 50.568358,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-38",
+              "property": "y",
+              "time": 1.333333,
+              "value": 51.271057,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-39",
+              "property": "y",
+              "time": 1.366667,
+              "value": 50.91786,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-40",
+              "property": "y",
+              "time": 1.4,
+              "value": 50.715179,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-41",
+              "property": "y",
+              "time": 1.433333,
+              "value": 51.169191,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-42",
+              "property": "y",
+              "time": 1.466667,
+              "value": 51.538264,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-43",
+              "property": "y",
+              "time": 1.5,
+              "value": 51.227184,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-44",
+              "property": "y",
+              "time": 1.533333,
+              "value": 50.709962,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-45",
+              "property": "y",
+              "time": 1.566667,
+              "value": 50.52012,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-46",
+              "property": "y",
+              "time": 1.6,
+              "value": 50.143296,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-47",
+              "property": "y",
+              "time": 1.633333,
+              "value": 48.840667,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-48",
+              "property": "y",
+              "time": 1.666667,
+              "value": 47.18097,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-49",
+              "property": "y",
+              "time": 1.7,
+              "value": 46.698045,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-50",
+              "property": "y",
+              "time": 1.733333,
+              "value": 47.95282,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-51",
+              "property": "y",
+              "time": 1.766667,
+              "value": 49.839893,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-52",
+              "property": "y",
+              "time": 1.8,
+              "value": 51.114906,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-53",
+              "property": "y",
+              "time": 1.833333,
+              "value": 51.766383,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-54",
+              "property": "y",
+              "time": 1.866667,
+              "value": 52.304915,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-55",
+              "property": "y",
+              "time": 1.9,
+              "value": 52.454011,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-56",
+              "property": "y",
+              "time": 1.933333,
+              "value": 51.556614,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-57",
+              "property": "y",
+              "time": 1.966667,
+              "value": 49.997703,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-58",
+              "property": "y",
+              "time": 2,
+              "value": 49.101177,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-59",
+              "property": "y",
+              "time": 2.033333,
+              "value": 49.380295,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-60",
+              "property": "y",
+              "time": 2.066667,
+              "value": 49.805423,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-61",
+              "property": "y",
+              "time": 2.1,
+              "value": 49.312356,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-62",
+              "property": "y",
+              "time": 2.133333,
+              "value": 48.31066,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-63",
+              "property": "y",
+              "time": 2.166667,
+              "value": 47.971447,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-64",
+              "property": "y",
+              "time": 2.2,
+              "value": 48.536289,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-65",
+              "property": "y",
+              "time": 2.233333,
+              "value": 49.275395,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-66",
+              "property": "y",
+              "time": 2.266667,
+              "value": 49.918141,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-67",
+              "property": "y",
+              "time": 2.3,
+              "value": 51.014948,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-68",
+              "property": "y",
+              "time": 2.333333,
+              "value": 52.590159,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-69",
+              "property": "y",
+              "time": 2.366667,
+              "value": 53.436653,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-70",
+              "property": "y",
+              "time": 2.4,
+              "value": 52.508054,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-71",
+              "property": "y",
+              "time": 2.433333,
+              "value": 50.441782,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-72",
+              "property": "y",
+              "time": 2.466667,
+              "value": 48.845267,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-73",
+              "property": "y",
+              "time": 2.5,
+              "value": 48.35163,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-74",
+              "property": "y",
+              "time": 2.533333,
+              "value": 48.277141,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-75",
+              "property": "y",
+              "time": 2.566667,
+              "value": 48.126743,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-76",
+              "property": "y",
+              "time": 2.6,
+              "value": 48.373459,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-77",
+              "property": "y",
+              "time": 2.633333,
+              "value": 49.345171,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-78",
+              "property": "y",
+              "time": 2.666667,
+              "value": 50.273843,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-79",
+              "property": "y",
+              "time": 2.7,
+              "value": 50.295576,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-80",
+              "property": "y",
+              "time": 2.733333,
+              "value": 49.878713,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-81",
+              "property": "y",
+              "time": 2.766667,
+              "value": 50.2638,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-82",
+              "property": "y",
+              "time": 2.8,
+              "value": 51.598035,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-83",
+              "property": "y",
+              "time": 2.833333,
+              "value": 52.59739,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-84",
+              "property": "y",
+              "time": 2.866667,
+              "value": 52.267313,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-85",
+              "property": "y",
+              "time": 2.9,
+              "value": 51.076721,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-86",
+              "property": "y",
+              "time": 2.933333,
+              "value": 49.96012,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-87",
+              "property": "y",
+              "time": 2.966667,
+              "value": 48.965117,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-88",
+              "property": "y",
+              "time": 3,
+              "value": 47.729502,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-89",
+              "property": "y",
+              "time": 3.033333,
+              "value": 46.787308,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-90",
+              "property": "y",
+              "time": 3.066667,
+              "value": 47.25379,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-91",
+              "property": "y",
+              "time": 3.1,
+              "value": 49.137868,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-92",
+              "property": "y",
+              "time": 3.133333,
+              "value": 50.969832,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-93",
+              "property": "y",
+              "time": 3.166667,
+              "value": 51.541199,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-94",
+              "property": "y",
+              "time": 3.2,
+              "value": 51.260178,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-95",
+              "property": "y",
+              "time": 3.233333,
+              "value": 51.194996,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-96",
+              "property": "y",
+              "time": 3.266667,
+              "value": 51.426208,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-97",
+              "property": "y",
+              "time": 3.3,
+              "value": 51.232051,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-98",
+              "property": "y",
+              "time": 3.333333,
+              "value": 50.553843,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-99",
+              "property": "y",
+              "time": 3.366667,
+              "value": 50.172,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-100",
+              "property": "y",
+              "time": 3.4,
+              "value": 50.288888,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-101",
+              "property": "y",
+              "time": 3.433333,
+              "value": 49.977243,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-102",
+              "property": "y",
+              "time": 3.466667,
+              "value": 48.620975,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-103",
+              "property": "y",
+              "time": 3.5,
+              "value": 47.157578,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-104",
+              "property": "y",
+              "time": 3.533333,
+              "value": 47.052971,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-105",
+              "property": "y",
+              "time": 3.566667,
+              "value": 48.426975,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-106",
+              "property": "y",
+              "time": 3.6,
+              "value": 50.073088,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-107",
+              "property": "y",
+              "time": 3.633333,
+              "value": 51.173401,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-108",
+              "property": "y",
+              "time": 3.666667,
+              "value": 51.997828,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-109",
+              "property": "y",
+              "time": 3.7,
+              "value": 52.73039,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-110",
+              "property": "y",
+              "time": 3.733333,
+              "value": 52.662404,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-111",
+              "property": "y",
+              "time": 3.766667,
+              "value": 51.280568,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-112",
+              "property": "y",
+              "time": 3.8,
+              "value": 49.476544,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-113",
+              "property": "y",
+              "time": 3.833333,
+              "value": 48.691176,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-114",
+              "property": "y",
+              "time": 3.9,
+              "value": 49.41129,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-115",
+              "property": "y",
+              "time": 3.933333,
+              "value": 48.971538,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-116",
+              "property": "y",
+              "time": 3.966667,
+              "value": 48.409946,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-117",
+              "property": "y",
+              "time": 4,
+              "value": 48.560221,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-118",
+              "property": "y",
+              "time": 4.033333,
+              "value": 49.166908,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-119",
+              "property": "y",
+              "time": 4.1,
+              "value": 49.996206,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-120",
+              "property": "y",
+              "time": 4.133333,
+              "value": 51.181762,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-121",
+              "property": "y",
+              "time": 4.166667,
+              "value": 52.782738,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-122",
+              "property": "y",
+              "time": 4.2,
+              "value": 53.34215,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-123",
+              "property": "y",
+              "time": 4.233333,
+              "value": 52.110985,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-124",
+              "property": "y",
+              "time": 4.266667,
+              "value": 50.084813,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-125",
+              "property": "y",
+              "time": 4.3,
+              "value": 48.697355,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-126",
+              "property": "y",
+              "time": 4.333333,
+              "value": 48.163677,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-127",
+              "property": "y",
+              "time": 4.366667,
+              "value": 47.848441,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-128",
+              "property": "y",
+              "time": 4.4,
+              "value": 47.737262,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-129",
+              "property": "y",
+              "time": 4.433333,
+              "value": 48.458537,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-130",
+              "property": "y",
+              "time": 4.466667,
+              "value": 49.88752,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-131",
+              "property": "y",
+              "time": 4.5,
+              "value": 50.84316,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-132",
+              "property": "y",
+              "time": 4.533333,
+              "value": 50.647069,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-133",
+              "property": "y",
+              "time": 4.566667,
+              "value": 50.164925,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-134",
+              "property": "y",
+              "time": 4.6,
+              "value": 50.581361,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-135",
+              "property": "y",
+              "time": 4.633333,
+              "value": 51.67973,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-136",
+              "property": "y",
+              "time": 4.666667,
+              "value": 52.20054,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-137",
+              "property": "y",
+              "time": 4.7,
+              "value": 51.634568,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-138",
+              "property": "y",
+              "time": 4.733333,
+              "value": 50.682108,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-139",
+              "property": "y",
+              "time": 4.766667,
+              "value": 49.889062,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-140",
+              "property": "y",
+              "time": 4.8,
+              "value": 48.881672,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-141",
+              "property": "y",
+              "time": 4.833333,
+              "value": 47.467812,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-142",
+              "property": "y",
+              "time": 4.866667,
+              "value": 46.627859,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-143",
+              "property": "y",
+              "time": 4.9,
+              "value": 47.468783,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-144",
+              "property": "y",
+              "time": 4.933333,
+              "value": 49.560122,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-145",
+              "property": "y",
+              "time": 4.966667,
+              "value": 51.273561,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-146",
+              "property": "y",
+              "time": 5,
+              "value": 51.749198,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-147",
+              "property": "y",
+              "time": 5.033333,
+              "value": 51.627795,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-148",
+              "property": "y",
+              "time": 5.066667,
+              "value": 51.658252,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-149",
+              "property": "y",
+              "time": 5.1,
+              "value": 51.545396,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-150",
+              "property": "y",
+              "time": 5.133333,
+              "value": 50.785123,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-151",
+              "property": "y",
+              "time": 5.166667,
+              "value": 49.87606,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-152",
+              "property": "y",
+              "time": 5.2,
+              "value": 49.711734,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-153",
+              "property": "y",
+              "time": 5.233333,
+              "value": 50.067526,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-154",
+              "property": "y",
+              "time": 5.266667,
+              "value": 49.758403,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-155",
+              "property": "y",
+              "time": 5.3,
+              "value": 48.440717,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-156",
+              "property": "y",
+              "time": 5.333333,
+              "value": 47.312371,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-157",
+              "property": "y",
+              "time": 5.366667,
+              "value": 47.567281,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-158",
+              "property": "y",
+              "time": 5.433333,
+              "value": 50.225868,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-159",
+              "property": "y",
+              "time": 5.466667,
+              "value": 51.209684,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-160",
+              "property": "y",
+              "time": 5.5,
+              "value": 52.242093,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-161",
+              "property": "y",
+              "time": 5.533333,
+              "value": 53.069199,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-162",
+              "property": "y",
+              "time": 5.566667,
+              "value": 52.687851,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-163",
+              "property": "y",
+              "time": 5.6,
+              "value": 50.896431,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-164",
+              "property": "y",
+              "time": 5.633333,
+              "value": 49.012154,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-165",
+              "property": "y",
+              "time": 5.666667,
+              "value": 48.379578,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-166",
+              "property": "y",
+              "time": 5.7,
+              "value": 48.763899,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-167",
+              "property": "y",
+              "time": 5.733333,
+              "value": 48.982137,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-168",
+              "property": "y",
+              "time": 5.766667,
+              "value": 48.704982,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-169",
+              "property": "y",
+              "time": 5.8,
+              "value": 48.674717,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-170",
+              "property": "y",
+              "time": 5.833333,
+              "value": 49.23905,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-171",
+              "property": "y",
+              "time": 5.866667,
+              "value": 49.751961,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-172",
+              "property": "y",
+              "time": 5.9,
+              "value": 49.803382,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-173",
+              "property": "y",
+              "time": 5.933333,
+              "value": 50.10431,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-174",
+              "property": "y",
+              "time": 5.966667,
+              "value": 51.362247,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-y-175",
+              "property": "y",
+              "time": 6,
+              "value": 52.846187,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-0",
+              "property": "scale",
+              "time": 0,
+              "value": 0.85,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-1",
+              "property": "scale",
+              "time": 0.1,
+              "value": 0.891596,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-2",
+              "property": "scale",
+              "time": 0.166667,
+              "value": 0.917783,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-3",
+              "property": "scale",
+              "time": 0.266667,
+              "value": 0.954435,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-4",
+              "property": "scale",
+              "time": 0.333333,
+              "value": 0.976974,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-5",
+              "property": "scale",
+              "time": 0.433333,
+              "value": 1.007786,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-6",
+              "property": "scale",
+              "time": 0.5,
+              "value": 1.026298,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-7",
+              "property": "scale",
+              "time": 0.566667,
+              "value": 1.043204,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-8",
+              "property": "scale",
+              "time": 0.666667,
+              "value": 1.065663,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-9",
+              "property": "scale",
+              "time": 0.733333,
+              "value": 1.078813,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-10",
+              "property": "scale",
+              "time": 0.833333,
+              "value": 1.096041,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-11",
+              "property": "scale",
+              "time": 0.9,
+              "value": 1.106011,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-12",
+              "property": "scale",
+              "time": 1,
+              "value": 1.118959,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-13",
+              "property": "scale",
+              "time": 1.1,
+              "value": 1.129802,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-14",
+              "property": "scale",
+              "time": 1.2,
+              "value": 1.138853,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-15",
+              "property": "scale",
+              "time": 1.3,
+              "value": 1.146392,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-16",
+              "property": "scale",
+              "time": 1.433333,
+              "value": 1.154501,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-17",
+              "property": "scale",
+              "time": 1.666667,
+              "value": 1.16461,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-18",
+              "property": "scale",
+              "time": 1.9,
+              "value": 1.171053,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-19",
+              "property": "scale",
+              "time": 2.166667,
+              "value": 1.175502,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-20",
+              "property": "scale",
+              "time": 2.5,
+              "value": 1.178382,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-21",
+              "property": "scale",
+              "time": 3.166667,
+              "value": 1.179955,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-scale-22",
+              "property": "scale",
+              "time": 6,
+              "value": 1.18,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-rotation-0",
+              "property": "rotation",
+              "time": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "id": "baked-fill-cyan-rotation-1",
+              "property": "rotation",
+              "time": 6,
+              "value": 270,
+              "easing": "linear"
+            }
+          ]
+        }
+      ]
+    },
+    "smart_crop": false,
+    "brand_watermark": false,
+    "output_settings": {
+      "width": 360,
+      "height": 640,
+      "fps": 24,
+      "aspectRatio": "9:16"
+    }
+  }
+}

@@ -1,0 +1,369 @@
+{
+  "complete": true,
+  "elapsedSeconds": 56.587,
+  "terminal": {
+    "ms": 57160,
+    "programme": 35.958332999999996,
+    "videos": [
+      {
+        "slot": "studio-later-video",
+        "source": "/api/credit-pilot/object/b9129f6fff0bf3b15d83a452ce6452d18d7417f71d7df4e377698d6a82bb22a9",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0,
+        "audioGraph": true,
+        "audioContextState": "running"
+      },
+      {
+        "slot": "studio-after-video",
+        "source": "/api/credit-pilot/object/770b2eafad2beb7649d2802e2376a27dd449ae213c9a713695c8eb5890fcd7e0",
+        "time": 11.958333,
+        "paused": true,
+        "seeking": false,
+        "ready": 4,
+        "ended": true,
+        "rate": 1,
+        "decoded": 426,
+        "dropped": 45,
+        "audioGraph": true,
+        "audioContextState": "running"
+      },
+      {
+        "slot": "studio-next-video",
+        "source": "/api/credit-pilot/object/4cd8e4267da97d886ffb0d28ba27723b661c35a58d98be09e2993cbd95734174",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0,
+        "audioGraph": true,
+        "audioContextState": "running"
+      }
+    ]
+  },
+  "longTasks": {
+    "count": 144,
+    "seconds": 17.757,
+    "longestMs": 1026
+  },
+  "functions": [
+    {
+      "seconds": 17.000877,
+      "name": "(idle)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 7.105175,
+      "name": "(program)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 5.820457,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.882864,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.780729,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.653761,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.540571,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.533702,
+      "name": "",
+      "column": 1732716,
+      "snippet": "e.transform}))],Mt=_t.filter(e=>!K||e.id===K).map(e=>({id:e.id,layer:e,keys:(V||[]).filter(t=>t.targetId===e.id)})),It=(V||[]).filter(e=>yt.has(e.id)),Bt=(V||[]).find(e=>e.id===gt)||It.at(-1),Rt=_t.find(e=>e.id===(null===Bt||void 0===Bt?void 0:Bt.targetId)),Lt"
+    },
+    {
+      "seconds": 0.828548,
+      "name": "(garbage collector)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.796448,
+      "name": "",
+      "column": 1732757,
+      "snippet": "==K).map(e=>({id:e.id,layer:e,keys:(V||[]).filter(t=>t.targetId===e.id)})),It=(V||[]).filter(e=>yt.has(e.id)),Bt=(V||[]).find(e=>e.id===gt)||It.at(-1),Rt=_t.find(e=>e.id===(null===Bt||void 0===Bt?void 0:Bt.targetId)),Lt=e=>{if(\"main-video\"===e.targetId)return\""
+    },
+    {
+      "seconds": 0.763772,
+      "name": "",
+      "column": 2429065,
+      "snippet": "ve||e>=Number(n)&&e<Number(n)+qE(t)));var r}).map((t,n)=>{var r,i,a,o,s,l,c,d,u,h,p,m;const A=\"text\"!==t.type||t.isCaption||t.bRollMode?Dj(t.text):gA(t.text),f=\"fullscreen\"===t.bRollMode,g=[\"video\",\"image\"].includes(t.type),v=Zj(t.frameShape,t.bRollMode),y=(e="
+    },
+    {
+      "seconds": 0.608995,
+      "name": "",
+      "column": 2429569,
+      "snippet": "0$/,\"\")}%`:\"0\"})(t),b=t.animation||{},x=Ao.filter(e=>String(e.targetId)===String(t.id)),Q=Boolean(t.parentId)||cf(t),w=g&&(x.length>0||Q),S=!b.enter||w||Q?\"\":`broll-anim-${b.enter}`,k=Q?sf(t,Nt,Ao,e,Oo):LA(x,e,t),C=t.vectorShape?ng(t.vectorShape,k):(0,Im.HI)(t"
+    },
+    {
+      "seconds": 0.58901,
+      "name": "",
+      "column": 2428261,
+      "snippet": "ong\",{children:\"Smart pacing\"})]}):null,Nt.filter(t=>{if(!function(e,t){let n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:[];return!(!e.bRollMode&&e.clipId)||!!t&&(e.clipId===t.id||!n.some(t=>t.id===e.clipId)&&e.clipId===t.sourceClipId)}(t,Hd[Pd],Hd"
+    },
+    {
+      "seconds": 0.488633,
+      "name": "get clientWidth",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.402599,
+      "name": "",
+      "column": 2428875,
+      "snippet": "!==(r=t.animation)&&void 0!==r&&r.enter&&!Ao.some(e=>String(e.targetId)===String(t.id))?e>=Number(n)&&e<Number(n)+qE(t):\"video\"!==t.type||e>=Number(n)-.5&&e<Number(n)+qE(t)+.25:!!t.perspective||e>=Number(n)&&e<Number(n)+qE(t)));var r}).map((t,n)=>{var r,i,a,o,"
+    },
+    {
+      "seconds": 0.3674,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.317883,
+      "name": "querySelectorAll",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.250308,
+      "name": "up",
+      "column": 2099395,
+      "snippet": "tries(e).map(e=>{let[t,n]=e;return[t,dp(n)]})),up=e=>JSON.stringify(e,(e,t)=>\"undefined\"!==typeof Blob&&t instanceof Blob?{__mediaType:\"undefined\"!==typeof File&&t instanceof File?\"File\":\"Blob\",name:t.name||\"\",size:t.size,type:t.type,lastModified:t.lastModifie"
+    },
+    {
+      "seconds": 0.245367,
+      "name": "drawImage",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.203472,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.202152,
+      "name": "",
+      "column": 1142763,
+      "snippet": "(o.id)}}function mv(e,t,n){const r=(t||[]).filter(t=>t.targetId===e.id);return Object.fromEntries(Object.entries(uv).map(t=>{var i,a;let[o,[s,l]]=t;return[o,Math.max(s,Math.min(l,RA({keyframes:r,property:o,time:n,fallback:null!==(i=null===(a=e.transform)||void"
+    },
+    {
+      "seconds": 0.183177,
+      "name": "xg",
+      "column": 1092865,
+      "snippet": "return{...r,...JSON.parse(JSON.stringify(e))}},xg=e=>JSON.stringify(e,(e,t)=>t&&\"object\"===typeof t&&!Array.isArray(t)?Object.fromEntries(Object.keys(t).sort().map(e=>[e,t[e]])):t),Qg=(e,t)=>{const n=new Error(t);throw n.code=e,n},wg=[\"version\",\"name\",\"seconda"
+    },
+    {
+      "seconds": 0.172976,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.170886,
+      "name": "CN",
+      "column": 2083073,
+      "snippet": "|0))<i+o+n}(e,t)))||d(SN[s.length%SN.length])},CN=e=>{var t,n,r,a,o,s,l,c,d,u,h,p,m,A,f,g,v,y,b,x,Q,w,S,k,C,j,E,N,T,_,M,I,B,R,L,H,F,P,U,V,O,D,$,Z,z,K,W,q,G,Y,J,X,ee,te,ne,re,ie,ae,oe,se,le,ce,de,ue,he,pe,me,Ae,fe,ge,ve,ye,be,xe,Qe,we,Se,ke,Ce,je,Ee,Ne,Te,_e,Me"
+    },
+    {
+      "seconds": 0.1679,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.167879,
+      "name": "get clientWidth",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.167484,
+      "name": "getByteFrequencyData",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.162651,
+      "name": "",
+      "column": 1119815,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.160948,
+      "name": "querySelectorAll",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 0.150845,
+      "name": "",
+      "column": 1092885,
+      "snippet": "parse(JSON.stringify(e))}},xg=e=>JSON.stringify(e,(e,t)=>t&&\"object\"===typeof t&&!Array.isArray(t)?Object.fromEntries(Object.keys(t).sort().map(e=>[e,t[e]])):t),Qg=(e,t)=>{const n=new Error(t);throw n.code=e,n},wg=[\"version\",\"name\",\"secondary\",\"endTime\",\"asset"
+    }
+  ],
+  "transitions": [
+    {
+      "seconds": 0.5152000000029803,
+      "programme": null,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9996a7c60201de4eacc13bfb03a3d34f8e3592384a973b036d32cb6bed486de",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0,
+      "audioGraph": true,
+      "audioContextState": "running"
+    },
+    {
+      "seconds": 14.49879999999702,
+      "programme": 4.625,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/5436e92ef71040bceee4cf2d34198da811cc52984c210a75b53eef9ccb60c6ab",
+      "time": 0.677615,
+      "paused": false,
+      "seeking": false,
+      "ready": 4,
+      "ended": false,
+      "rate": 1,
+      "decoded": 37,
+      "dropped": 12,
+      "audioGraph": true,
+      "audioContextState": "running"
+    },
+    {
+      "seconds": 16.55779999999702,
+      "programme": 6.689588,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9996a7c60201de4eacc13bfb03a3d34f8e3592384a973b036d32cb6bed486de",
+      "time": 4.719868,
+      "paused": false,
+      "seeking": false,
+      "ready": 4,
+      "ended": false,
+      "rate": 1,
+      "decoded": 121,
+      "dropped": 13,
+      "audioGraph": true,
+      "audioContextState": "running"
+    },
+    {
+      "seconds": 20.54290000000596,
+      "programme": 10.590553,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/597ee9c989bddb021346c2ed41abe15b214f1669d7ba866d5478f48acb77a7ef",
+      "time": 0.623734,
+      "paused": false,
+      "seeking": false,
+      "ready": 4,
+      "ended": false,
+      "rate": 1,
+      "decoded": 19,
+      "dropped": 11,
+      "audioGraph": true,
+      "audioContextState": "running"
+    },
+    {
+      "seconds": 26.72790000000596,
+      "programme": 16.681791,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9129f6fff0bf3b15d83a452ce6452d18d7417f71d7df4e377698d6a82bb22a9",
+      "time": 0.71707,
+      "paused": false,
+      "seeking": false,
+      "ready": 4,
+      "ended": false,
+      "rate": 1,
+      "decoded": 22,
+      "dropped": 13,
+      "audioGraph": true,
+      "audioContextState": "running"
+    },
+    {
+      "seconds": 30.78190000000596,
+      "programme": 20,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/4cd8e4267da97d886ffb0d28ba27723b661c35a58d98be09e2993cbd95734174",
+      "time": 0,
+      "paused": false,
+      "seeking": false,
+      "ready": 4,
+      "ended": false,
+      "rate": 1,
+      "decoded": 4,
+      "dropped": 0,
+      "audioGraph": true,
+      "audioContextState": "running"
+    },
+    {
+      "seconds": 36.62920000000298,
+      "programme": 24,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9129f6fff0bf3b15d83a452ce6452d18d7417f71d7df4e377698d6a82bb22a9",
+      "time": 4,
+      "paused": false,
+      "seeking": false,
+      "ready": 4,
+      "ended": false,
+      "rate": 1,
+      "decoded": 100,
+      "dropped": 0,
+      "audioGraph": true,
+      "audioContextState": "running"
+    },
+    {
+      "seconds": 44.97629999999702,
+      "programme": 28,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/770b2eafad2beb7649d2802e2376a27dd449ae213c9a713695c8eb5890fcd7e0",
+      "time": 4,
+      "paused": false,
+      "seeking": false,
+      "ready": 4,
+      "ended": false,
+      "rate": 1,
+      "decoded": 100,
+      "dropped": 0,
+      "audioGraph": true,
+      "audioContextState": "running"
+    }
+  ]
+}

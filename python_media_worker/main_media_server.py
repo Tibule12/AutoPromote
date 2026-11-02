@@ -27,9 +27,13 @@ import cv2  # OpenCV (Phase 1)
 try:
     from .studio_render_scratch import studio_render_scratch_directory
     from .studio_ffmpeg_limits import bounded_studio_ffmpeg_command
+    from .studio_ffmpeg_transport import ffmpeg_filter_scripts
+    from .studio_reframe_clock import reframe_picture_segments
 except ImportError:
     from studio_render_scratch import studio_render_scratch_directory
     from studio_ffmpeg_limits import bounded_studio_ffmpeg_command
+    from studio_ffmpeg_transport import ffmpeg_filter_scripts
+    from studio_reframe_clock import reframe_picture_segments
 try:
     from .caption_transcription import caption_transcription_options
 except ImportError:
@@ -4166,7 +4170,7 @@ def build_hook_filter_chain(
     outro_end = hook_end + 0.45
     normalized_template = str(template or "blur_reveal").strip().lower()
     normalized_animation = str(text_animation or "slide_up").strip().lower().replace("-", "_")
-    zoom_delta = max(0.0, min(float(zoom_scale or 1.08), 1.14) - 1.0)
+    zoom_delta = max(0.0, min(float(zoom_scale or 1.08), 1.30) - 1.0)
     progress_expr = f"max(0\\,min(1\\,(t-{hook_start:.2f})/{max(intro, 0.01):.2f}))"
     intro_text_expr = f"max(0\\,min(1\\,(t-{hook_start:.2f})/0.35))"
     fade_expr = f"if(lte(t\\,{hook_end:.2f})\\,1\\,max(0\\,1-((t-{hook_end:.2f})/0.45)))"
@@ -4175,7 +4179,10 @@ def build_hook_filter_chain(
     filters = []
 
     if zoom_delta > 0.001:
-        zoom_expr = f"(1+{zoom_delta:.4f}*{progress_expr})"
+        # Release the opening push with the title. Previously the progress
+        # stayed at one, silently magnifying every remaining frame.
+        release_expr = f"max(0\\,min(1\\,({outro_end:.2f}-t)/0.45))"
+        zoom_expr = f"(1+{zoom_delta:.4f}*{progress_expr}*{release_expr})"
         filters.append(
             f"scale=w={width_val}*{zoom_expr}:h={height_val}*{zoom_expr}:eval=frame,crop={width_val}:{height_val}:(iw-{width_val})/2:(ih-{height_val})/2"
         )
@@ -8741,6 +8748,14 @@ def studio_sequence_canvas_dimensions(width, height, reframe):
     return width, height
 
 
+def studio_sequence_delivery_dimensions(width, height, output_settings):
+    """Avoid oversized temporary video when delivery explicitly downsizes it."""
+    profile = resolve_viral_export_profile(output_settings, width, height)
+    if profile["width"] < width and profile["height"] < height:
+        return profile["width"], profile["height"]
+    return width, height
+
+
 def build_studio_sequence_video_filters(normalize_filter, fps, source_framing=False):
     # Framing keys are evaluated on the delivery clock, after resetting a
     # trimmed source's first timestamp. Resampling an already-cropped 30fps
@@ -9283,12 +9298,15 @@ async def render_reframe_timeline_sequential(
     solo_zoom=1,
     fallback_mode="speaker_track",
     job_id="reframe",
+    programme_fps=None,
 ):
     """Render long reviewed timelines with bounded memory and preserve source audio."""
     specs = plan_reframe_timeline_segments(
         duration, timeline_cuts, split_framing, speaker_order_cuts,
         solo_keyframes, fallback_mode,
     )
+    if programme_fps is not None:
+        specs = reframe_picture_segments(specs, programme_fps)
     segment_paths = []
     work_dir = os.path.dirname(os.path.abspath(output_path))
     concat_path = os.path.join(work_dir, f"{job_id}_reframe_concat.txt")
@@ -9307,11 +9325,11 @@ async def render_reframe_timeline_sequential(
             if len(active_offsets) > 1:
                 raise ValueError("A source split supports one alternate full-frame angle per segment")
             command = [
-                "ffmpeg", "-ss", f"{segment['start']:.6f}", "-i", source_path,
+                "ffmpeg", "-ss", f"{segment['start']:.9f}", "-i", source_path,
             ]
             if active_offsets:
                 command.extend([
-                    "-ss", f"{segment['start'] + active_offsets[0]:.6f}", "-i", source_path,
+                    "-ss", f"{segment['start'] + active_offsets[0]:.9f}", "-i", source_path,
                 ])
             command.extend([
                 "-t", f"{segment['end']-segment['start']:.6f}",
@@ -9323,6 +9341,8 @@ async def render_reframe_timeline_sequential(
                 *build_viral_export_encode_args(resolve_viral_export_profile({}, target_width, target_height)),
                 "-movflags", "+faststart", "-y", segment_path,
             ])
+            if programme_fps is not None:
+                command[-1:-1] = ['-frames:v', str(segment['frame_count']), '-fps_mode', 'passthrough']
             await run_subprocess_async(
                 command, check=True, job_context=job_id,
                 timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
@@ -12444,6 +12464,25 @@ async def run_queued_heavy_job(job_id, feature, coroutine_factory):
             })
 
 async def run_subprocess_async(
+    cmd,
+    check=True,
+    stdout=None,
+    stderr=None,
+    text=False,
+    job_context=None,
+    timeout_seconds=None,
+):
+    # The same canonical graph can exceed Linux's per-argument byte limit.
+    # FFmpeg's native script transport keeps that graph exact and cleans up on
+    # success, launch failure, timeout and cancellation.
+    with ffmpeg_filter_scripts(cmd) as prepared:
+        return await _run_subprocess_async_prepared(
+            prepared, check=check, stdout=stdout, stderr=stderr, text=text,
+            job_context=job_context, timeout_seconds=timeout_seconds,
+        )
+
+
+async def _run_subprocess_async_prepared(
     cmd,
     check=True,
     stdout=None,
@@ -30993,6 +31032,10 @@ class ViralTimelineSegment(BaseModel):
     transition_duration: Optional[float] = None
     audioTrimOffsetStart: float = 0.0
     audioTrimOffsetEnd: float = 0.0
+    audioDetached: bool = False
+    audioSourceStart: Optional[float] = None
+    audioSourceEnd: Optional[float] = None
+    audioProgrammeStart: Optional[float] = None
 
 class ViralSpeedSegment(BaseModel):
     id: Optional[Union[str, int]] = None
@@ -31155,7 +31198,10 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
         f"saturation={saturation_value}:eval=frame",
     ]
     if color.get("precisionGrade"):
-        from studio_precision_grade import build_precision_grade_filter
+        try:
+            from .studio_precision_grade import build_precision_grade_filter
+        except ImportError:
+            from studio_precision_grade import build_precision_grade_filter
         filters = [build_precision_grade_filter(color)]
     if abs(warmth) > 0.005 and not color.get("precisionGrade"):
         red_shift = warmth * 0.035
@@ -31198,11 +31244,15 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
 
 def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
     """Apply actual timed grade layers on the same clock as the editor timeline."""
+    try:
+        from .studio_adjustment_grade import adjustment_grade_filter
+    except ImportError:
+        from studio_adjustment_grade import adjustment_grade_filter
     duration = max(0.04, float(duration or 0))
     active_layers = []
     boundaries = {0.0, duration}
     for layer in layers or []:
-        if not isinstance(layer, dict):
+        if not isinstance(layer, dict) or layer.get("enabled") is False:
             continue
         start = max(0.0, float(layer.get("startTime", layer.get("start_time", 0)) or 0))
         end = min(duration, start + max(0.0, float(layer.get("duration", 0) or 0)))
@@ -31211,12 +31261,7 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
         effects = layer.get("effects") or {}
         if effects.get("blendMode", "normal") != "normal" or float(effects.get("opacity", 1)) != 1:
             raise ValueError("Timed color adjustment supports normal blend at full opacity only")
-        grade = build_studio_finish_filter({
-            "enabled": True,
-            "color": effects.get("color") or {},
-            "texture": effects.get("texture") or {},
-        })
-        active_layers.append((start, end, grade))
+        active_layers.append((start, end, effects))
         boundaries.update((start, end))
     if not active_layers:
         return ""
@@ -31227,7 +31272,8 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
     parts = [base, f"[finish_base]split={len(intervals)}{inputs}"]
     outputs = []
     for index, (start, end) in enumerate(intervals):
-        grades = [grade for layer_start, layer_end, grade in active_layers
+        grades = [adjustment_grade_filter(effects, build_studio_finish_filter, f"adj{index}_{j}_")
+                  for j, (layer_start, layer_end, effects) in enumerate(active_layers)
                   if layer_start <= start + 1e-6 and layer_end >= end - 1e-6]
         output = f"[finish_{index}_out]"
         parts.append(
@@ -31242,11 +31288,15 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
 
 def plan_studio_adjustment_segments(layers, duration, max_segment_duration=30.0):
     """Return bounded Finish Rack intervals and their active grade filters."""
+    try:
+        from .studio_adjustment_grade import adjustment_grade_filter
+    except ImportError:
+        from studio_adjustment_grade import adjustment_grade_filter
     duration = max(0.04, float(duration or 0))
     active_layers = []
     boundaries = {0.0, duration}
     for layer in layers or []:
-        if not isinstance(layer, dict):
+        if not isinstance(layer, dict) or layer.get("enabled") is False:
             continue
         start = max(0.0, float(layer.get("startTime", layer.get("start_time", 0)) or 0))
         end = min(duration, start + max(0.0, float(layer.get("duration", 0) or 0)))
@@ -31255,12 +31305,7 @@ def plan_studio_adjustment_segments(layers, duration, max_segment_duration=30.0)
         effects = layer.get("effects") or {}
         if effects.get("blendMode", "normal") != "normal" or float(effects.get("opacity", 1)) != 1:
             raise ValueError("Timed color adjustment supports normal blend at full opacity only")
-        grade = build_studio_finish_filter({
-            "enabled": True,
-            "color": effects.get("color") or {},
-            "texture": effects.get("texture") or {},
-        })
-        active_layers.append((start, end, grade))
+        active_layers.append((start, end, effects))
         boundaries.update((start, end))
     if not active_layers:
         return []
@@ -31270,7 +31315,8 @@ def plan_studio_adjustment_segments(layers, duration, max_segment_duration=30.0)
         if interval_end - interval_start < 0.02:
             continue
         grades = [
-            grade for layer_start, layer_end, grade in active_layers
+            adjustment_grade_filter(effects, build_studio_finish_filter, f"adj{j}_")
+            for j, (layer_start, layer_end, effects) in enumerate(active_layers)
             if layer_start <= interval_start + 1e-6 and layer_end >= interval_end - 1e-6
         ]
         start = interval_start
@@ -31295,33 +31341,50 @@ async def render_studio_finish_timeline_sequential(
         raise ValueError("A sequential Finish Rack render needs at least one timed adjustment")
     work_dir = os.path.dirname(os.path.abspath(output_path))
     segment_paths = []
-    joined_transport_path = os.path.join(work_dir, f"{job_id}_finish_joined.ts")
+    concat_path = os.path.join(work_dir, f"{job_id}_finish.ffconcat")
+    picture = next((stream for stream in probe_media_stream_summary(source_path).get("streams", [])
+                    if stream.get("codec_type") == "video"), {})
+    numerator, denominator = str(picture.get("avg_frame_rate") or "0/1").split("/")
+    fps = float(numerator) / float(denominator)
+    if not math.isfinite(fps) or fps <= 0:
+        raise ValueError("Timed grade requires a verified picture frame rate")
+    total_frames = max(1, round(float(duration) * fps))
     try:
         for index, segment in enumerate(specs):
-            segment_path = os.path.join(work_dir, f"{job_id}_finish_{index:03d}.ts")
+            start_frame = min(total_frames, math.ceil(segment["start"] * fps - 1e-6))
+            end_frame = min(total_frames, math.ceil(segment["end"] * fps - 1e-6))
+            frame_count = end_frame - start_frame
+            if frame_count <= 0:
+                continue
+            start_time = start_frame / fps
+            segment_path = os.path.join(work_dir, f"{job_id}_finish_{index:03d}.mp4")
             segment_paths.append(segment_path)
-            filters = [part for part in [base_filter, *segment["grades"], "format=yuv420p", "setsar=1"] if part]
+            # Grade/motion expressions evaluate programme time, while each
+            # encoded segment starts at zero. Quantize shared boundaries once
+            # so neighbouring sections cannot drop or duplicate a frame.
+            filters = [part for part in [f"setpts=PTS-STARTPTS+{start_time:.9f}/TB",
+                       base_filter, *segment["grades"], "setpts=PTS-STARTPTS",
+                       "format=yuv420p", "setsar=1"] if part]
             await run_subprocess_async([
-                "ffmpeg", "-ss", f"{segment['start']:.6f}", "-i", source_path,
-                "-t", f"{segment['end']-segment['start']:.6f}",
+                "ffmpeg", "-ss", f"{start_time:.9f}", "-i", source_path,
+                "-t", f"{frame_count/fps:.9f}", "-frames:v", str(frame_count),
                 "-vf", ",".join(filters), "-an",
                 # This is encoded again by the final caption/delivery graph.
                 # Veryfast keeps the intermediate compact enough for Cloud
                 # Run's memory-backed filesystem while preserving CRF 19.
                 "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
-                "-pix_fmt", "yuv420p", "-f", "mpegts", "-y", segment_path,
+                "-pix_fmt", "yuv420p", "-fps_mode", "passthrough", "-y", segment_path,
             ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
-            # MPEG-TS is safely byte-concatenable. Fold each completed interval
-            # into one transport stream and delete it immediately so a long
-            # grade never retains dozens of standalone media files.
-            with open(segment_path, "rb") as segment_file, open(
-                joined_transport_path, "ab"
-            ) as joined_file:
-                shutil.copyfileobj(segment_file, joined_file, length=1024 * 1024)
-            os.remove(segment_path)
+        # The concat demuxer rebases every segment's packet timestamps. Binary
+        # concatenation of reset MPEG-TS timestamps lost B-frames at grade cuts.
+        with open(concat_path, "w") as concat_file:
+            concat_file.write("ffconcat version 1.0\n")
+            for segment_path in segment_paths:
+                escaped = segment_path.replace("'", "'\\''")
+                concat_file.write(f"file '{escaped}'\n")
         finish_has_audio = has_audio_stream(source_path)
         concat_command = [
-            "ffmpeg", "-fflags", "+genpts", "-i", joined_transport_path,
+            "ffmpeg", "-f", "concat", "-safe", "0", "-i", concat_path,
             "-i", source_path, "-map", "0:v:0",
         ]
         if finish_has_audio:
@@ -31337,7 +31400,7 @@ async def render_studio_finish_timeline_sequential(
             timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
         )
     finally:
-        for temporary_path in [*segment_paths, joined_transport_path]:
+        for temporary_path in [*segment_paths, concat_path]:
             try:
                 os.remove(temporary_path)
             except FileNotFoundError:
@@ -31663,8 +31726,8 @@ async def render_viral_clip(request: RenderViralRequest):
         normalize_audio_remix(getattr(request, "audio_remix", None) or getattr(request, "audioRemix", None))
         for layer in (request.composition_plan or {}).get("layers") or []:
             mask = (layer.get("effects") or {}).get("mask") or {}
-            if mask.get("enabled") and (layer.get("id") == "main-video" or layer.get("type") == "video"):
-                raise ValueError("Geometric masks currently export on image and ordinary title layers. Use the reviewed subject-mask workflow for source video.")
+            if mask.get("enabled") and layer.get("id") == "main-video":
+                raise ValueError("Use an ordinary media layer or the reviewed subject-mask workflow for the main source video.")
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if request.async_mode:
@@ -31863,8 +31926,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         )
 
         if normalized_segments:
+            try:
+                from .studio_sequence_audio import sequence_audio_window
+            except ImportError:
+                from studio_sequence_audio import sequence_audio_window
             segment_paths = []
             segment_audio_paths = []
+            segment_audio_windows = []
+            sequence_source_durations = {}
             # Exact URL identity is private to this job; repeated occurrences
             # share one materialized source, never another owner's/job's cache.
             sequence_source_paths = {request.video_url: input_path}
@@ -31888,6 +31957,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             if source_framing:
                 timeline_canvas_width, timeline_canvas_height = get_reframe_output_dimensions(
                     sequence_reframe.get("aspect") or "9:16")
+            timeline_canvas_width, timeline_canvas_height = studio_sequence_delivery_dimensions(
+                timeline_canvas_width, timeline_canvas_height, request.output_settings)
             programme_segment_start = 0.0
             # Author fractional cuts on the selected delivery clock. At 30fps
             # a .75s cut becomes 23 frames, accumulating an extra frame across
@@ -31951,24 +32022,46 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 # following clip's timestamps stretch the exported sequence.
                 video_filters = build_studio_sequence_video_filters(
                     normalize_vf, selected_timeline_fps, source_framing)
+                try:
+                    from .studio_sequence_video import sequence_picture_window
+                except ImportError:
+                    from studio_sequence_video import sequence_picture_window
+                picture = next((stream for stream in probe_media_stream_summary(segment_picture_path).get("streams", [])
+                                if stream.get("codec_type") == "video"), {})
+                rate_n, rate_d = str(picture.get("avg_frame_rate") or "0/1").split("/")
+                source_fps = float(rate_n) / float(rate_d)
+                if not math.isfinite(source_fps) or source_fps <= 0:
+                    raise ValueError("Sequence requires a verified source picture frame rate")
+                picture_window = sequence_picture_window(programme_segment_start-segment_duration,
+                    segment_duration, programme_duration, segment_picture_start, source_fps, selected_timeline_fps)
+                if source_framing:
+                    normalize_vf = build_reviewed_reframe_filter(sequence_framing_keys,
+                        timeline_canvas_width, timeline_canvas_height,
+                        programme_offset=picture_window["programme_start"])
+                video_filters = picture_window["clock"] + [normalize_vf]
                 video_filters.extend(transition_filters["video_filters"])
                 
                 # 1. Render Video (No Audio)
                 segment_v_cmd = [
-                    "ffmpeg", "-ss", str(segment_picture_start), "-i", segment_picture_path,
-                    "-t", str(segment_duration), "-vf", ",".join(video_filters),
+                    "ffmpeg", "-ss", f"{picture_window['seek']:.6f}", "-i", segment_picture_path,
+                    "-frames:v", str(picture_window["frames"]), "-vf", ",".join(video_filters),
                     "-map", "0:v:0", "-an",
                     "-c:v", "libx264", "-preset", "ultrafast",
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
                     segment_video_path,
                 ]
-                await run_subprocess_async(segment_v_cmd, check=True)
+                if picture_window["frames"]:
+                    await run_subprocess_async(segment_v_cmd, check=True)
                 
                 # 2. Render Audio with J/L-Cut offsets
-                if has_audio_stream(segment_source_path):
-                    audio_start = max(0.0, float(segment.start_time) + float(segment.audioTrimOffsetStart or 0))
-                    audio_end = float(segment.end_time) + float(segment.audioTrimOffsetEnd or 0)
-                    audio_dur = max(0.05, audio_end - audio_start)
+                if segment_source_path not in sequence_source_durations:
+                    sequence_source_durations[segment_source_path] = await asyncio.to_thread(get_media_duration, segment_source_path)
+                audio_window = sequence_audio_window(segment, programme_segment_start - segment_duration,
+                    programme_duration, sequence_source_durations[segment_source_path])
+                segment_audio_windows.append(audio_window)
+                if has_audio_stream(segment_source_path) and audio_window["duration"] > .00001:
+                    audio_start = audio_window["source_start"]
+                    audio_dur = audio_window["duration"]
                     segment_a_cmd = [
                         "ffmpeg", "-ss", str(audio_start), "-i", segment_source_path,
                         "-t", str(audio_dur), "-map", "0:a:0",
@@ -31980,7 +32073,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 else:
                     segment_audio_paths.append(None)
 
-                segment_paths.append(segment_video_path)
+                if picture_window["frames"]:
+                    segment_paths.append(segment_video_path)
 
             if not segment_paths:
                 raise HTTPException(status_code=400, detail="No valid timeline segments supplied")
@@ -32006,7 +32100,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     input_idx = len(audio_labels) + 1
                     audio_inputs.extend(["-i", rendered_audio_path])
                     
-                    delay_ms = int(max(0, current_output_time + float(segment.audioTrimOffsetStart or 0)) * 1000)
+                    delay_ms = round(segment_audio_windows[index]["programme_start"] * 1000)
                     audio_mix_parts.append(f"[{input_idx}:a]adelay={delay_ms}|{delay_ms}[a{index}];")
                     audio_labels.append(f"[a{index}]")
                 
@@ -32116,6 +32210,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 )
                 reframe_target_width = max(2, int(reframe_target_width * native_scale) // 2 * 2)
                 reframe_target_height = max(2, int(reframe_target_height * native_scale) // 2 * 2)
+        reframe_target_width, reframe_target_height = studio_sequence_delivery_dimensions(
+            reframe_target_width, reframe_target_height, request.output_settings)
         manual_reframe_keyframes = finish_reframe_plan.get("keyframes") or []
 
         # Analyze the real picture, not letterbox/pillarbox pixels embedded in
@@ -32322,6 +32418,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         raise ValueError("Timed Multi-Camera changes require one synchronized camera programme per framing segment")
                     src_w, src_h = get_video_dimensions(reframe_source_path)
                     reframe_duration = get_media_duration(reframe_source_path)
+                    programme_fps = None
+                    if request.timeline_segments:
+                        picture = next(stream for stream in probe_media_stream_summary(reframe_source_path)['streams']
+                                       if stream.get('codec_type') == 'video')
+                        numerator, denominator = str(picture['avg_frame_rate']).split('/')
+                        programme_fps = float(numerator) / float(denominator)
                     podcast_preflight = preflight_studio_podcast_timeline(
                         {
                             "reframe": finish_reframe_plan,
@@ -32346,6 +32448,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         solo_zoom=finish_reframe_plan.get("zoom", 1),
                         fallback_mode=crop_mode,
                         job_id=job_id,
+                        programme_fps=programme_fps,
                     )
                     working_path = cropped_path
                 elif crop_mode == "group_stack":
@@ -32562,7 +32665,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         except ImportError:
             from studio_motion import build_studio_motion_filter
         if (request.finish_plan or {}).get("color_cube"):
-            from studio_color_cube import write_color_cube
+            try:
+                from .studio_color_cube import write_color_cube
+            except ImportError:
+                from studio_color_cube import write_color_cube
             color_cube_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_grade.cube")
             write_color_cube(request.finish_plan["color_cube"], color_cube_path)
         finish_filter = build_studio_finish_filter(request.finish_plan, color_cube_path)
@@ -32571,6 +32677,19 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         )
         finish_filter = ",".join(part for part in (finish_filter, zoom_filter) if part)
         adjustment_layers = (request.finish_plan or {}).get("adjustment_layers") or []
+        for index, adjustment in enumerate(adjustment_layers):
+            effects = adjustment.setdefault("effects", {})
+            effects.pop("_worker_cube_path", None)
+            effects["_worker_height"] = get_video_dimensions(working_path)[1]
+            if effects.get("color_cube"):
+                try:
+                    from .studio_color_cube import write_color_cube
+                except ImportError:
+                    from studio_color_cube import write_color_cube
+                adjustment_cube_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_adjustment_{index}.cube")
+                write_color_cube(effects["color_cube"], adjustment_cube_path)
+                sequence_temp_paths.add(adjustment_cube_path)
+                effects["_worker_cube_path"] = adjustment_cube_path
         adjustment_graph = build_studio_adjustment_timeline_filter(
             finish_filter, adjustment_layers, get_media_duration(working_path),
         )
@@ -33199,6 +33318,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 or getattr(overlay, "frame_shape", None)
                 or ""
             ).strip().lower()
+            if raw_shape in {"edge", "none", "square"} or getattr(overlay, "borderRadius", None) == 0:
+                return "edge"
             if raw_shape in {"circle", "round", "rounded"}:
                 # Older circle payloads are intentionally upgraded to the studio's
                 # polished rounded-rectangle treatment.
@@ -33316,6 +33437,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
         overlay_audio_specs = []
         prepared_overlay_ranges = {}
+        video_layer_rasters = {}  # Scoped to this export; track mattes remain independent.
         
         for ov in video_overlays:
             try:
@@ -33346,21 +33468,51 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             if ov_path:
                 block_start, block_input = len(filter_chain), current_v_label
                 layer_plan = composition_layer(request.composition_plan, ov.id)
-                if layer_plan and layer_plan.get("motion_keyframes"):
+                try:
+                    from .studio_layer_cache import video_layer_uses_canonical_raster
+                except ImportError:
+                    from studio_layer_cache import video_layer_uses_canonical_raster
+                if video_layer_uses_canonical_raster(ov.id, layer_plan, request.composition_plan):
                     # A moving video uses the same canonical pose/alpha
                     # compositor as images, after ordinary B-roll preparation.
-                    motion_layer_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_video_motion_{input_idx}.mov")
+                    suffix = 'mkv' if layer_plan.get('perspective') else 'mov'
+                    motion_layer_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_video_motion_{input_idx}.{suffix}")
                     overlay_temp_paths.append(motion_layer_path)
-                    receipt = await asyncio.to_thread(render_video_layer_motion,
-                        ov_path, motion_layer_path, ov, layer_plan, base_width, base_height,
-                        rendered_timeline_duration, speed_plan, 30)
+                    try:
+                        from .studio_layer_cache import video_layer_raster_key
+                    except ImportError:
+                        from studio_layer_cache import video_layer_raster_key
+                    layer_fps = delivery_profile['fps'] or 30
+                    raster_key = await asyncio.to_thread(video_layer_raster_key,
+                        ov_path, ov, layer_plan, base_width, base_height,
+                        rendered_timeline_duration, speed_plan, layer_fps)
+                    cached_raster = video_layer_rasters.get(raster_key)
+                    if cached_raster and os.path.isfile(cached_raster[0]):
+                        motion_layer_path, receipt = cached_raster
+                        logger.info("Reusing pixel-identical moving media raster before its independent matte")
+                    else:
+                        receipt = await asyncio.to_thread(render_video_layer_motion,
+                            ov_path, motion_layer_path, ov, layer_plan, base_width, base_height,
+                            rendered_timeline_duration, speed_plan, layer_fps)
+                        video_layer_rasters[raster_key] = (motion_layer_path, receipt)
                     if getattr(ov, "useOverlayAudio", False) and has_audio_stream(ov_path):
                         inputs.extend(["-itsoffset", str(rendered_timeline_time(cue_start)), "-i", ov_path])
                         overlay_audio_specs.append((input_idx, ov))
                         input_idx += 1
                     inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", motion_layer_path])
-                    filter_chain.append(f"[{current_v_label}][{input_idx}:v]overlay=0:0:"
-                                        f"eof_action=pass:format=auto[v{input_idx}];")
+                    media_label = f'{input_idx}:v'
+                    overlay_options = 'eof_action=pass'
+                    if layer_plan.get('perspective'):
+                        try:
+                            from .studio_perspective import projected_overlay_options
+                        except ImportError:
+                            from studio_perspective import projected_overlay_options
+                        media_label = f'plane_rgba_{input_idx}'
+                        plane_fps = delivery_profile['fps'] or 30
+                        filter_chain.append(f'[{input_idx}:v:0][{input_idx}:v:1]alphamerge,settb=1/90000,setpts=STARTPTS+N*90000/{plane_fps}[{media_label}];')
+                        overlay_options = projected_overlay_options(receipt['start_time'],receipt['duration'])
+                    filter_chain.append(f"[{current_v_label}][{media_label}]overlay=0:0:"
+                                        f"{overlay_options}:format=auto[v{input_idx}];")
                     current_v_label = f"v{input_idx}"
                     input_idx += 1
                     remember_overlay_block(ov, block_start, block_input)
@@ -33414,10 +33566,22 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 block_start, block_input = len(filter_chain), current_v_label
                 layer_plan = composition_layer(request.composition_plan, ov.id)
                 layer_effects = (layer_plan or {}).get("effects") or {}
+                is_track_matte_participant = bool(
+                    layer_plan
+                    and (
+                        ((layer_plan.get("track_matte") or {}).get("mode") or "none") != "none"
+                        or any(
+                            str(((cand.get("track_matte") or {}).get("source_layer_id") or "")) == str(ov.id)
+                            for cand in ((request.composition_plan or {}).get("layers") or [])
+                        )
+                    )
+                )
                 layer_has_motion = bool(
                     layer_plan
                     and (
-                        layer_plan.get("vector_shape") is not None
+                        is_track_matte_participant
+                        or layer_plan.get("vector_shape") is not None
+                        or layer_plan.get('perspective') is not None
                         or
                         layer_plan.get("motion_keyframes")
                         or (layer_effects.get("mask") or {}).get("enabled")
@@ -33431,8 +33595,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     )
                 )
                 if layer_has_motion:
+                    suffix = 'mkv' if layer_plan.get('perspective') else 'mov'
                     motion_layer_path = os.path.join(
-                        SHARED_TMP_DIR, f"{job_id}_image_motion_{input_idx}.mov"
+                        SHARED_TMP_DIR, f"{job_id}_image_motion_{input_idx}.{suffix}"
                     )
                     overlay_temp_paths.append(motion_layer_path)
                     receipt = await asyncio.to_thread(
@@ -33445,12 +33610,23 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         base_height,
                         rendered_timeline_duration,
                         speed_plan,
-                        30,
+                        delivery_profile['fps'] or 30,
                     )
                     inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", motion_layer_path])
+                    media_label = f'{input_idx}:v'
+                    overlay_options = 'eof_action=pass'
+                    if layer_plan.get('perspective'):
+                        try:
+                            from .studio_perspective import projected_overlay_options
+                        except ImportError:
+                            from studio_perspective import projected_overlay_options
+                        media_label = f'plane_rgba_{input_idx}'
+                        plane_fps = delivery_profile['fps'] or 30
+                        filter_chain.append(f'[{input_idx}:v:0][{input_idx}:v:1]alphamerge,settb=1/90000,setpts=STARTPTS+N*90000/{plane_fps}[{media_label}];')
+                        overlay_options = projected_overlay_options(receipt['start_time'],receipt['duration'])
                     overlay_filter = (
-                        f"[{current_v_label}][{input_idx}:v]overlay=0:0:"
-                        f"eof_action=pass:format=auto[v{input_idx}];"
+                        f"[{current_v_label}][{media_label}]overlay=0:0:"
+                        f"{overlay_options}:format=auto[v{input_idx}];"
                     )
                     filter_chain.append(overlay_filter)
                     current_v_label = f"v{input_idx}"
@@ -33503,7 +33679,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
 
         # Process Text Overlays
-        text_overlays = [o for o in request.overlays if o.type == 'text' and o.opacity > 0]
+        # A zero base opacity is a valid authored start pose. Ordinary motion
+        # keys may reveal it later; the shared layer renderer evaluates alpha.
+        text_overlays = [o for o in request.overlays if o.type == 'text']
         
         # Robust Font Selection
         font_path = "Arial" # Default to system font name if file not found
@@ -33630,7 +33808,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             rendered_title = txt.model_copy(update={key: value for key, value in geometry.items() if key not in {"lines", "clipBox"}})
             receipt = await asyncio.to_thread(render_image_layer_motion, text_asset, text_motion,
                                              rendered_title, layer_plan, base_width, base_height,
-                                             rendered_timeline_duration, speed_plan, 30, title_animator=title_animator)
+                                             rendered_timeline_duration, speed_plan, delivery_profile['fps'] or 30, title_animator=title_animator)
             inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", text_motion])
             next_label = f"text_overlay_{idx}"
             filter_chain.append(f"[{current_v_label}][{input_idx}:v]overlay=0:0:eof_action=pass:format=auto[{next_label}];")
