@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
+const { optionalPlatformStatusAuth } = require("../middlewares/platformStatusPolicy");
 const { SUPPORTED_PLATFORMS } = require("../validationMiddleware");
 const { db } = require("../firebaseAdmin");
 const { encryptToken } = require("../services/secretVault");
@@ -115,9 +116,10 @@ function sanitizeConnectionForApi(doc) {
 // GET /api/:platform/status
 router.get(
   "/:platform/status",
+  optionalPlatformStatusAuth(authMiddleware),
   // NOTE: allow unauthenticated requests here so clients can check connection status
   // without requiring an ID token. The handler itself will return connected:false when
-  // no user is present. Do not apply authMiddleware which would return 401.
+  // no user is present. Supplied credentials use the real auth boundary above.
   rateLimit({ max: 50, windowMs: 60000, key: r => r.userId || r.ip }),
   async (req, res) => {
     const platform = normalize(req.params.platform);
@@ -191,6 +193,13 @@ router.get(
     }
   }
 );
+
+// Resolve the actual consenting account before selecting its own-profile
+// destination. A connection document alone may have no stored Reddit name.
+router.get('/reddit/profile',authMiddleware,rateLimit({max:20,windowMs:60000,key:r=>r.userId||r.ip}),async(req,res)=>{
+  try { return res.json(await require('../services/redditService').getOwnProfile({uid:req.userId||req.user?.uid})); }
+  catch (_) { return res.status(409).json({error:'reddit_profile_unavailable',reauth_required:true}); }
+});
 
 // GET /api/:platform/metadata - return helpful metadata for the connected user (playlist lists, org pages, guilds)
 

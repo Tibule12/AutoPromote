@@ -29,8 +29,9 @@ def segment(spec,source,geometry,model_dir,output):
                     if i:session=processor.init_video_session(inference_device='cuda',dtype=torch.bfloat16)
                     box=(prompts[i]['box'] if i else p['initialBox']);box=[box[0]*w,box[1]*h,box[2]*w,box[3]*h]
                     opts={'inference_session':session,'frame_idx':0,'obj_ids':1,'input_boxes':[[box]],'original_size':inputs.original_sizes[0]}
-                    if not i and p['points']:
-                        opts.update(input_points=[[[[x['position'][0]*w,x['position'][1]*h] for x in p['points']]]],input_labels=[[[x['label'] for x in p['points']]]])
+                    points = prompts[i].get('points', []) if i else p['points']
+                    if points:
+                        opts.update(input_points=[[[[x['position'][0]*w,x['position'][1]*h] for x in points]]],input_labels=[[[x['label'] for x in points]]])
                     processor.add_inputs_to_inference_session(**opts)
                 predicted=model(inference_session=session,frame=inputs.pixel_values[0])
                 values=processor.post_process_masks([predicted.pred_masks],original_sizes=inputs.original_sizes,binarize=False)[0][0,0].float().cpu().numpy()
@@ -50,7 +51,9 @@ def segment(spec,source,geometry,model_dir,output):
     # SAM inference; the point below documents the reviewed box centre for the
     # legacy compositor's prompt validator, not a fabricated model prediction.
     b=p['initialBox'];prompt={'version':1,'source_sha256':sha(source),'points':[[(b[0]+b[2])*w/2,(b[1]+b[3])*h/2]],'labels':[1],
-       'shot_prompts':[{'frame_index':x['frameIndex'],'points':[[(x['box'][0]+x['box'][2])*w/2,(x['box'][1]+x['box'][3])*h/2]],'labels':[1]} for x in p['shotPrompts']]}
+       'shot_prompts':[{'frame_index':x['frameIndex'],
+          'points':[[v['position'][0]*w,v['position'][1]*h] for v in x.get('points',[])] or [[(x['box'][0]+x['box'][2])*w/2,(x['box'][1]+x['box'][3])*h/2]],
+          'labels':[v['label'] for v in x.get('points',[])] or [1]} for x in p['shotPrompts']]}
     manifest={'version':1,'kind':'source_bound_subject_matte','source_sha256':sha(source),'width':w,'height':h,'fps':24.0,'fps_fraction':'24/1','frame_count':count,
        'model':spec['model']['checkpoint'],'model_revision':spec['model']['revision'],'model_weights_sha256':sha(model_dir/'model.safetensors'),
        'prompt':prompt,'prompt_sha256':sha_json(prompt),'frames':rows,'shot_cuts':cuts,'initial_box':p['initialBox'],

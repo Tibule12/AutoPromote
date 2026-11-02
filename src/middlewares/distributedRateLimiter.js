@@ -3,6 +3,7 @@
 // app.use('/api/', distributedRateLimiter({ capacity:800, refillPerSec:5 }));
 
 const { getRedis } = require("../services/distributed/redisClient");
+const { rateLimiter } = require("./globalRateLimiter");
 
 function distributedRateLimiter(opts = {}) {
   const {
@@ -11,14 +12,18 @@ function distributedRateLimiter(opts = {}) {
     keyFn = req => req.user?.uid || req.ip,
     windowHint = "global",
   } = opts;
+  const localFallback = rateLimiter(opts);
   const redis = getRedis();
   if (!redis) {
     if (process.env.DEBUG_RATE_LIMIT === "true")
       console.log("[rate-limit] Redis unavailable, falling back to in-memory limiter");
-    const { rateLimiter } = require("./globalRateLimiter");
-    return rateLimiter(opts);
+    return localFallback;
   }
   return async function (req, res, next) {
+    // ioredis otherwise queues eval while connecting/retrying. An optional
+    // unavailable cache must not delay every Studio source/preview request.
+    // Preserve limits during the outage rather than admitting requests freely.
+    if (redis.status !== "ready") return localFallback(req, res, next);
     const key = `rl:${windowHint}:${keyFn(req)}`;
     try {
       const script = `local key=KEYS[1]\nlocal cap=tonumber(ARGV[1])\nlocal refill=tonumber(ARGV[2])\nlocal now=tonumber(ARGV[3])\nlocal interval=tonumber(ARGV[4])\nlocal bucket=redis.call('HMGET', key, 'tokens','updated')\nlocal tokens=tonumber(bucket[1]) or cap\nlocal updated=tonumber(bucket[2]) or now\nlocal delta=now-updated\nif delta>0 then\n  tokens=math.min(cap, tokens + delta*refill)\nend\nif tokens<1 then\n  local retry=math.ceil((1-tokens)/refill)\n  return {0,retry} \nend\n tokens=tokens-1\nredis.call('HMSET', key, 'tokens', tokens, 'updated', now)\nredis.call('PEXPIRE', key, interval)\nreturn {1,0}`;
@@ -37,8 +42,7 @@ function distributedRateLimiter(opts = {}) {
     } catch (e) {
       if (process.env.DEBUG_RATE_LIMIT === "true")
         console.warn("[rate-limit] redis error fallback", e.message);
-      // soft-fail to allow request
-      return next();
+      return localFallback(req, res, next);
     }
   };
 }

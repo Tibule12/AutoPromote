@@ -6,6 +6,19 @@ PRESETS = {"natural", "podcast", "noisy_room", "broadcast"}
 AUDIO_TRACKS = ("originalAudio", "voiceover", "music", "broll", "sfx")
 
 
+def build_audio_bus_mix(labels, output_label="a_mix_unpadded"):
+    if not labels:
+        raise ValueError("Audio mix requires at least one bus")
+    if len(labels) == 1:
+        return f"{labels[0]}aresample=48000[{output_label}]"
+    # amix negotiates the first input's rate. Normalize every bus before it
+    # mixes; otherwise a 44.1kHz song down/up-samples native 48kHz whooshes.
+    normalized = [f"[studio_mix_clock_{i}]" for i in range(len(labels))]
+    inputs = ";".join(f"{label}aresample=48000{normalized[i]}" for i, label in enumerate(labels))
+    return (f"{inputs};{''.join(normalized)}amix=inputs={len(labels)}:"
+            f"duration=first:dropout_transition=2:normalize=0[{output_label}]")
+
+
 def _number(value, low, high, default):
     try:
         value = float(value)
@@ -69,13 +82,12 @@ def audio_track_audible(states, track):
     return not soloed or track in soloed
 
 
-def _ease(progress, easing):
-    if easing == "hold": return 0
-    if easing == "ease_in": return progress ** 3
-    if easing == "ease_out": return 1 - (1-progress) ** 3
-    if easing in {"ease_in_out", "bezier"}:
-        return 4*progress**3 if progress < .5 else 1-(-2*progress+2)**3/2
-    return progress
+def _ease(progress, easing, curve=None):
+    try:
+        from .studio_motion import easing_value
+    except ImportError:
+        from studio_motion import easing_value
+    return easing_value(progress, easing, curve)
 
 
 def normalize_volume_keyframes(items, duration):
@@ -85,31 +97,83 @@ def normalize_volume_keyframes(items, duration):
             continue
         time = _number(item.get("time"), 0, max(.05, duration), 0)
         points[time] = {"time": time, "value": _number(item.get("value"), 0, 200, 100)/100,
-                        "easing": str(item.get("easing") or "linear")}
+                        "easing": str(item.get("easing") or "linear"),
+                        "curve": item.get("curve")}
     ordered = [points[key] for key in sorted(points)]
     if len(ordered) < 2:
         return ordered
     sampled = [ordered[0]]
     for left, right in zip(ordered, ordered[1:]):
-        for step in range(1, 9):
-            progress = step/8
-            eased = _ease(progress, right["easing"])
+        # Hold is a discontinuity at the actual key, not a short ramp and not
+        # a permanently held final value. Keep that incoming segment explicit.
+        if right["easing"] == "hold":
+            sampled.append(right)
+            continue
+        steps = 64 if right["easing"] == "bezier" else 8
+        for step in range(1, steps + 1):
+            progress = step/steps
+            eased = 1 if step == steps else _ease(progress, right["easing"], right["curve"])
             sampled.append({"time": left["time"]+(right["time"]-left["time"])*progress,
                             "value": left["value"]+(right["value"]-left["value"])*eased,
                             "easing": "linear"})
     return sampled
 
 
-def build_volume_filter(items, duration):
-    points = normalize_volume_keyframes(items, duration)
+def build_volume_filter(items, duration, speed_plan=None):
+    # Studio keys use the pre-speed programme clock; FFmpeg evaluates volume
+    # against the already-retimed output. Preserve the curve at every rate
+    # boundary as well as each authored/sampled point before changing clocks.
+    programme_duration = max((p["end_time"] for p in speed_plan), default=duration) if speed_plan else duration
+    points = normalize_volume_keyframes(items, programme_duration)
+    if points and speed_plan:
+        try:
+            from .viral_render_contract import map_timeline_time
+        except ImportError:
+            from viral_render_contract import map_timeline_time
+        def value_at(time):
+            if time <= points[0]["time"]:
+                return points[0]["value"]
+            for left, right in zip(points, points[1:]):
+                if time <= right["time"]:
+                    if time == right["time"]:
+                        return right["value"]
+                    if right["easing"] == "hold":
+                        return left["value"]
+                    amount = (time-left["time"])/max(.000001, right["time"]-left["time"])
+                    return left["value"]+(right["value"]-left["value"])*amount
+            return points[-1]["value"]
+        times = {point["time"] for point in points}
+        times.update(time for segment in speed_plan for time in (segment["start_time"], segment["end_time"])
+                     if points[0]["time"] < time < points[-1]["time"])
+        def easing_at(time):
+            return next((point["easing"] for point in points if point["time"] >= time), "linear")
+        points = [{"time": map_timeline_time(speed_plan, time), "value": value_at(time), "easing": easing_at(time)}
+                  for time in sorted(times)]
     if not points:
         return "", []
     if len(points) == 1:
         return f"volume={points[0]['value']:.6f}", points
-    expression = f"{points[-1]['value']:.6f}"
-    for left, right in reversed(list(zip(points, points[1:]))):
+    segments = []
+    for left, right in zip(points, points[1:]):
         slope = (right["value"]-left["value"])/max(.000001, right["time"]-left["time"])
-        segment = f"{left['value']:.6f}+({slope:.8f})*(t-{left['time']:.6f})"
-        expression = f"if(lt(t,{right['time']:.6f}),{segment},{expression})"
-    expression = f"if(lt(t,{points[0]['time']:.6f}),{points[0]['value']:.6f},{expression})"
-    return f"volume='{expression}':eval=frame", points
+        segment = f"{left['value']:.6f}+({slope:.8f})*((n/s)-{left['time']:.17g})"
+        if right["easing"] == "hold":
+            segment = f"{left['value']:.6f}"
+        segments.append(segment)
+    segments.append(f"{points[-1]['value']:.6f}")
+    # FFmpeg's evaluator has a bounded parser stack. Curves and speed-boundary
+    # samples can exceed it with an otherwise valid, modest authored envelope.
+    # Keep every existing segment/value and select it with logarithmic nesting.
+    def select_segment(first, last):
+        if first == last:
+            return segments[first]
+        middle = (first + last) // 2
+        boundary = points[middle + 1]['time']
+        return (f"if(lt(n/s,{boundary:.17g}),{select_segment(first, middle)},"
+                f"{select_segment(middle + 1, last)})")
+    expression = select_segment(0, len(segments) - 1)
+    expression = f"if(lt(n/s,{points[0]['time']:.17g}),{points[0]['value']:.6f},{expression})"
+    # A frame-evaluated volume still holds the gain for a whole decoder block,
+    # even after splitting it into 64-sample chunks. Evaluate this same bounded
+    # envelope at each sample; preserve channel layout, length and Hold edges.
+    return f"aeval=exprs='val(ch)*({expression})':c=same", points

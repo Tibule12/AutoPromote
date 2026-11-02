@@ -1,9 +1,27 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import AudioRemixPanel from "./AudioRemixPanel";
-import { DEFAULT_AUDIO_REMIX, applyAudioRemixPreset } from "./audioRemixModel";
+import { AUDIO_REMIX_PRESETS, DEFAULT_AUDIO_REMIX, applyAudioRemixPreset } from "./audioRemixModel";
 
 describe("AudioRemixPanel", () => {
+  test.each(AUDIO_REMIX_PRESETS)("selecting $name highlights that card and keeps it selected after a control edit", preset => {
+    const Editor = () => {
+      const [value, onChange] = React.useState(DEFAULT_AUDIO_REMIX);
+      return <AudioRemixPanel value={value} onChange={onChange} />;
+    };
+    render(<Editor />);
+    const card = screen.getByTestId(`audio-remix-preset-${preset.id}`);
+    fireEvent.click(card);
+    expect(card).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByTestId(/^audio-remix-preset-/)
+      .filter(button => button.getAttribute("aria-pressed") === "true")).toHaveLength(1);
+    fireEvent.change(screen.getByLabelText("Output gain"), { target: { value: "-2" } });
+    expect(card).toHaveAttribute("aria-pressed", "true");
+    if (preset.id !== "slowed_reverb") {
+      expect(screen.getByTestId("audio-remix-preset-slowed_reverb")).toHaveAttribute("aria-pressed", "false");
+    }
+  });
+
   test("renders the approved controls and activates Slowed + Reverb", () => {
     const onChange = jest.fn();
     render(

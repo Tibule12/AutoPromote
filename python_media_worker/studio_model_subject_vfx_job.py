@@ -17,6 +17,15 @@ except ImportError:
     from studio_subject_matte import sha256, CachedSubjectMatte
     from studio_vfx_plan import render_vfx
 
+# Bind the loaded worker code before work starts. A local edit during a job
+# must fail qualification rather than attest the newer file over older pixels.
+IMPLEMENTATION_FILES={name:sha256(Path(__file__).with_name(name)) for name in
+    ("studio_model_subject_vfx_job.py","studio_vfx_plan.py","studio_vfx_foreground_cache.py")}
+
+def verify_implementation():
+    if any(sha256(Path(__file__).with_name(name))!=digest for name,digest in IMPLEMENTATION_FILES.items()):
+        raise ValueError("Composition implementation changed during execution; discard this attempt")
+
 
 def storage_url(value):
     if not isinstance(value, str) or len(value) > 8192:
@@ -71,6 +80,29 @@ def download(url, target, digest, expected_bytes=None, limit=512*1024**2):
         raise ValueError("Artifact content changed")
 
 
+def valid_replacement_assets(spec):
+    assets = spec.get("replacementAssets", [])
+    if not isinstance(assets, list) or len(assets) > 12:
+        raise ValueError("Invalid replacement assets")
+    effects = {effect["asset_id"]: effect["asset_sha256"] for effect in spec["scene"]["effects"] if effect["type"] == "background_replace"}
+    if len(assets) != len(effects) or {a.get("assetId") for a in assets if isinstance(a, dict)} != set(effects):
+        raise ValueError("Replacement assets do not match the scene")
+    for asset in assets:
+        if (not isinstance(asset, dict) or set(asset) != {"assetId", "sha256", "generation", "bytes", "contentType", "url"}
+                or asset["sha256"] != effects[asset["assetId"]]
+                or not re.fullmatch(r"[a-f0-9]{64}", asset["sha256"])
+                or not isinstance(asset["generation"], str) or not re.fullmatch(r"[0-9]+", asset["generation"])
+                or type(asset["bytes"]) is not int or not 1 <= asset["bytes"] <= 32*1024**2
+                or not isinstance(asset["contentType"], str) or not re.fullmatch(r"image/(png|jpeg|webp)|video/[a-z0-9.+-]+", asset["contentType"])):
+            raise ValueError("Invalid replacement identity")
+        storage_url(asset["url"])
+        # The signed read must be pinned to the exact attested object generation.
+        from urllib.parse import parse_qs
+        if parse_qs(urlparse(asset["url"]).query).get("generation") != [asset["generation"]]:
+            raise ValueError("Replacement generation is not pinned")
+    return assets
+
+
 def extract_masks(bundle, target, data):
     names = {"manifest.json"} | {f"matte_{i:04d}.png" for i in range(data["frameCount"])}
     raw=target.with_suffix('.tar')
@@ -95,6 +127,7 @@ def extract_masks(bundle, target, data):
 
 def compose_materialized(spec, work):
     data = valid_model_input(spec["modelInput"])
+    assets = valid_replacement_assets(spec)
     scene = spec["scene"]
     if (round(scene["sourceRange"]["start"]*90000) != data["sourceRange"]["startTick"]
             or round(scene["sourceRange"]["end"]*90000) != data["sourceRange"]["endTick"]
@@ -115,17 +148,31 @@ def compose_materialized(spec, work):
     plan = {"version": 1, "source_sha256": sha256(work/"source.mp4"),
             "matte_sha256": data["manifestSha256"], "effects": [
                 {**effect,"end":min(effect['end'],data['frameCount']/24)} for effect in scene['effects']]}
-    receipt = render_vfx(work/"source.mp4", matte, plan, work/"render.mp4", encoder="cpu")
+    paths = {asset["assetId"]: work/f"replacement-{index}.asset" for index, asset in enumerate(assets)}
+    for asset in assets:
+        if sha256(paths[asset["assetId"]]) != asset["sha256"]:
+            raise ValueError("Replacement content changed")
+    receipt = render_vfx(work/"source.mp4", matte, plan, work/"render.mp4", encoder="cpu",
+                         asset_resolver=lambda asset_id: paths[asset_id],
+                         audio_source=work/"original.mp4", audio_start=scene["sourceRange"]["start"])
+    verify_implementation()
     receipt.update(original_source_sha256=data["sourceSha256"], requestHash=spec["requestHash"],
                    sourceRange=scene["sourceRange"], modelArtifactHash=data["artifactHash"],
                    mask_manifest_sha256=data["manifestSha256"], gpuCount=0, device="cpu",
-                   implementation_sha256=sha256(Path(__file__)), provenance="deterministic_composition_from_model_artifact")
+                   implementation_sha256=hashlib.sha256(''.join(IMPLEMENTATION_FILES.values()).encode()).hexdigest(),
+                   implementation_files=IMPLEMENTATION_FILES,
+                   provenance="deterministic_composition_from_model_artifact")
+    if assets:
+        receipt["replacementAssets"] = [{key: value for key, value in asset.items() if key != "url"} for asset in assets]
     (work/"result.json").write_text(json.dumps(receipt, indent=2))
     return receipt
 
 
 def execute(spec, work):
     data = valid_model_input(spec["modelInput"])
+    assets = valid_replacement_assets(spec)
+    for index, asset in enumerate(assets):
+        download(asset["url"], work/f"replacement-{index}.asset", asset["sha256"], asset["bytes"], 32*1024**2)
     download(spec["sourceUrl"], work/"original.mp4", data["sourceSha256"])
     for key, name in [("normalizedSource", "source.mp4"), ("maskBundle", "masks.tar.gz")]:
         ref = data["files"][key]

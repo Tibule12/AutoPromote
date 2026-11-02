@@ -204,7 +204,7 @@ export function normalizeAudioRemix(value = {}) {
 
 export function applyAudioRemixPreset(id) {
   const preset = AUDIO_REMIX_PRESETS.find(item => item.id === id) || AUDIO_REMIX_PRESETS[0];
-  return normalizeAudioRemix({ ...preset, enabled: true });
+  return normalizeAudioRemix({ ...preset, preset: preset.id, enabled: true });
 }
 
 export function patchAudioRemix(current, patch) {

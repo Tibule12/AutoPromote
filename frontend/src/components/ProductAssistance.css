@@ -1,0 +1,24 @@
+.product-help-affordance { font: inherit; font-size: 12px; padding: 3px 7px; border: 1px solid #605078; border-radius: 5px; background: transparent; color: inherit; cursor: pointer; }
+.product-assistance-open { position: fixed; right: 18px; top: 9px; z-index: 1050; font: inherit; font-size: 12px; padding: 7px 11px; color: #eee7ff; background: #22182f; border: 1px solid #72528f; border-radius: 7px; cursor: pointer; }
+.product-assistance-backdrop { position: fixed; inset: 0; z-index: 50000; background: #0006; }
+.product-assistance-panel { position: absolute; right: 0; top: 0; bottom: 0; width: min(550px, 95vw); overflow: auto; padding: 20px; box-sizing: border-box; background: #15111d; color: #eee7f5; font-size: 14px; line-height: 1.5; box-shadow: -6px 0 30px #0008; }
+.product-assistance-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.product-assistance-heading h2 { margin: 0; font-size: 21px; }
+.product-assistance-panel button, .product-assistance-panel input, .product-assistance-panel select { font: inherit; color: #f1eaff; background: #292034; border: 1px solid #78618b; border-radius: 5px; padding: 7px 10px; box-shadow: none; }
+.product-assistance-panel form { background: #211b2b; border: 1px solid #4d3d5d; border-radius: 8px; padding: 14px; }
+.product-assistance-panel button { cursor: pointer; }
+.product-assistance-panel button:disabled { opacity: .55; cursor: default; }
+.product-assistance-panel label { display: block; margin: 10px 0; color: #e7def2; }
+.product-assistance-panel input::placeholder { color: #c8b7d8; }
+.product-assistance-panel ol, .product-assistance-panel ul { padding-left: 22px; }
+.product-assistance-panel input { width: 100%; box-sizing: border-box; }
+.product-assistance-panel select { margin-left: 10px; }
+.product-assistance-panel a { color: #d0a7ff; text-decoration: underline; }
+.product-assistance-panel details { padding: 10px 0; border-top: 1px solid #3d3049; }
+.product-assistance-panel summary { cursor: pointer; }
+.product-assistance-feature { border-top: 1px solid #3d3049; padding-top: 6px; margin-top: 14px; }
+.product-readiness { display: inline-block; font-size: 11px; border: 1px solid #796981; border-radius: 4px; padding: 2px 5px; }
+.status-functional { color: #aeecc6; }
+.status-partial { color: #f5d68c; }
+.status-broken, .status-proxy_only, .status-unimplemented { color: #ffb3bb; }
+.product-assistance-answer { white-space: pre-line; }

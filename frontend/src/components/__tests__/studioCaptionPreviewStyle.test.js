@@ -34,6 +34,14 @@ test("caption clock follows its trimmed repeated occurrence across a speed bound
   expect(clipped).toEqual({ start: 1, end: 6, time: 2 });
 });
 
+test("untimed manual copy stays visible without entering the source cue clock", () => {
+  const timeMap = createOutputTimeMap(secondsToTicks(7), []);
+  const chunk = { text: "A creator-reviewed hook caption", words: ["A", "creator-reviewed", "hook", "caption"] };
+  expect(getCaptionPreviewOutputClock({ chunk, time: 0, timeMap })).toBeNull();
+  expect(getCaptionPreviewStyles("minimal", 1, "#fff", { chunk, time: 0 }).pill.opacity).toBe(1);
+  expect(getCaptionPreviewOutputClock({ chunk: { start: NaN, end: 2 }, time: 0, timeMap })).toBeNull();
+});
+
 test("preview definitions match all existing Python renderer styles", () => {
   expect(execFileSync("python3", [path.resolve(__dirname, "../../../../scripts/sync-studio-caption-styles.py"), "--check"],
     { encoding: "utf8" })).toContain("21 existing caption styles match");

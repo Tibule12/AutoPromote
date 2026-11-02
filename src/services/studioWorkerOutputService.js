@@ -89,3 +89,85 @@ async function refreshOwnedStudioOutput({ storagePath, userId, jobId, download =
 }
 
 module.exports = { isTransientWorkerOutput, persistWorkerOutput, refreshOwnedStudioOutput };
+
+// A signed worker URL expires even while its bytes remain in the bucket. Only
+// the exact server-generated job object in the configured bucket may be adopted.
+function workerBucketOutputPath(value, jobId, bucketName) {
+  if (!/^[A-Za-z0-9_-]{1,160}$/.test(jobId || '')) return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.username || url.password || url.port || url.hash) return null;
+    let bucket, object;
+    if (url.hostname === 'storage.googleapis.com') {
+      const parts = url.pathname.slice(1).split('/');
+      bucket = decodeURIComponent(parts.shift()); object = decodeURIComponent(parts.join('/'));
+    } else if (url.hostname === 'firebasestorage.googleapis.com') {
+      const parts = url.pathname.match(/^\/v0\/b\/([^/]+)\/o\/([^/]+)$/);
+      if (!parts) return null;
+      bucket = decodeURIComponent(parts[1]); object = decodeURIComponent(parts[2]);
+    } else return null;
+    return bucket === bucketName && object === `processed/${jobId}_viral.mp4` ? object : null;
+  } catch { return null; }
+}
+
+async function persistWorkerBucketOutput({ url, userId, jobId, expectedSha256, legacy = false }) {
+  // Unrelated legacy providers keep their existing contract. No arbitrary HTTP
+  // fetch occurs: accepted source objects are read through the Storage SDK.
+  let hostname;
+  try { hostname = new URL(url).hostname; } catch { return null; }
+  if (!['storage.googleapis.com','firebasestorage.googleapis.com'].includes(hostname)) return null;
+  if (![userId,jobId].every(value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,160}$/.test(value)) ||
+      !/^[a-f0-9]{64}$/.test(expectedSha256 || '')) {
+    if (legacy) return null;
+    throw new Error('Invalid Studio output identity or hash');
+  }
+  const bucket = outputBucket(), sourcePath = workerBucketOutputPath(url,jobId,bucket.name);
+  if (!sourcePath) {
+    if (legacy) return null;
+    throw new Error('Worker output is not the configured job object');
+  }
+  const storagePath = `studio/exports/${userId}/${jobId}/render.mp4`;
+  const target = bucket.file(storagePath), maximum = 1024*1024*1024;
+  async function existing() {
+    let metadata;
+    try { [metadata] = await target.getMetadata(); }
+    catch (error) { if (Number(error.code) === 404) return null; throw error; }
+    const bytes = Number(metadata.size);
+    if (metadata.metadata?.ownerUid !== userId || metadata.metadata?.jobId !== jobId ||
+        metadata.metadata?.sha256 !== expectedSha256 || !Number.isSafeInteger(bytes) || bytes <= 0 || bytes > maximum)
+      throw new Error('Existing Studio export identity conflicts with this result');
+    const [signedUrl] = await target.getSignedUrl({action:'read',expires:Date.now()+24*3600000});
+    return {url:signedUrl,storagePath,sha256:expectedSha256,bytes,generation:metadata.generation};
+  }
+  const saved = await existing(); if (saved) return saved;
+  const source = bucket.file(sourcePath), [sourceMetadata] = await source.getMetadata();
+  const sourceBytes = Number(sourceMetadata.size);
+  if (!Number.isSafeInteger(sourceBytes) || sourceBytes <= 0 || sourceBytes > maximum || !sourceMetadata.generation)
+    throw new Error('Worker bucket output has invalid size or generation');
+  const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(),'studio-bucket-output-'));
+  const local = path.join(directory,'render.mp4');
+  try {
+    let bytes = 0; const digest = crypto.createHash('sha256');
+    const bounded = new Transform({transform(chunk,encoding,callback) {
+      bytes += chunk.length;
+      if (bytes > maximum) return callback(new Error('Studio output exceeds transfer limit'));
+      digest.update(chunk); callback(null,chunk);
+    }});
+    await pipeline(bucket.file(sourcePath,{generation:sourceMetadata.generation}).createReadStream(),
+      bounded,fs.createWriteStream(local,{flags:'wx'}));
+    if (bytes !== sourceBytes || digest.digest('hex') !== expectedSha256)
+      throw new Error('Worker bucket output differs from the completed render hash');
+    try {
+      await bucket.upload(local,{destination:storagePath,resumable:false,preconditionOpts:{ifGenerationMatch:0},
+        metadata:{contentType:'video/mp4',cacheControl:'private, max-age=3600',
+          metadata:{ownerUid:userId,jobId,purpose:'studio_export',sha256:expectedSha256,
+            sourceGeneration:String(sourceMetadata.generation)}}});
+    } catch (error) { if (Number(error.code) !== 412) throw error; }
+    // A simultaneous adopter may win creation; validate its exact identity.
+    const result = await existing();
+    if (!result) throw new Error('Studio export was not persisted');
+    return result;
+  } finally { await fs.promises.rm(directory,{recursive:true,force:true}); }
+}
+module.exports.workerBucketOutputPath = workerBucketOutputPath;
+module.exports.persistWorkerBucketOutput = persistWorkerBucketOutput;

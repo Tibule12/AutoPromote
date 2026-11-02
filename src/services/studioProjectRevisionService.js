@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const { db } = require("../firebaseAdmin");
+const { subjectVfxRevision } = require("../../frontend/src/components/studioSubjectVfxContract");
 
 const SCHEMA_VERSION = 1;
 const MAX_DOCUMENT_BYTES = 512 * 1024;
@@ -59,20 +60,82 @@ const stale = () => revisionError("STUDIO_PROJECT_REVISION_STALE", 409);
 // Firestore's array representation or its field-name restrictions.
 const boundedJsonTree = root => {
   let nodes = 0;
-  const visit = (value, depth) => {
+  const subjectRevisionPaths = new Set([
+    "layers[].parameters.preview.revision", "layers[].parameters.pending.revision",
+  ]);
+  const subjectRevisions = new Set((Array.isArray(root?.layers) ? root.layers : [])
+    .filter(layer => layer?.type === "subject_vfx")
+    .flatMap(layer => [layer.parameters?.preview?.revision, layer.parameters?.pending?.revision])
+    .filter(value => typeof value === "string"));
+  const subjectSelections = (Array.isArray(root?.layers) ? root.layers : [])
+    .filter(layer => layer?.type === "subject_vfx" && typeof layer.parameters?.maskJob?.selectionJson === "string")
+    .map(layer => ({ value: layer.parameters.maskJob.selectionJson, scene: layer.parameters.scene,
+      finished:layer.parameters.maskJob.finished===true,ref:layer.parameters.modelArtifactRef }));
+  const lut = root?.visualGraph?.settings?.advancedColor?.lutData;
+  const lutPath = "visualGraph.settings.advancedColor.lutData.data";
+  const completeLut = plain(lut) && Number.isInteger(lut.size) && lut.size >= 2 && lut.size <= 65 &&
+    ownKeys(lut, ["size", "data", "domainMin", "domainMax"]) &&
+    Array.isArray(lut.data) && lut.data.length === 3 * lut.size ** 3 &&
+    [lut.domainMin, lut.domainMax].every(domain => Array.isArray(domain) && domain.length === 3 && domain.every(Number.isFinite)) &&
+    lut.domainMax.every((value, index) => value > lut.domainMin[index]);
+  const visit = (value, depth, path = "") => {
     nodes += 1;
     if (nodes > 60_000 || depth > 18) return false;
     if (value === null || typeof value === "boolean") return true;
-    if (typeof value === "string") return value.length <= 16_384;
+    if (typeof value === "string") {
+      if (value.length <= 16_384) return true;
+      // A native fine-matting request serializes bounded source-specific
+      // holdout groups inside its saved selection. Keep the ordinary text
+      // limit; accept this exact field only after validating its source,
+      // selection schema and decoded tree against the same global limits.
+      if (path === "layers[].parameters.maskJob.selectionJson" && value.length <= 48 * 1024) {
+        try {
+          const selection=JSON.parse(value);
+          const match=subjectSelections.find(item=>item.value===value && item.scene &&
+            same(selection.sourceId,item.scene.sourceId) && same(selection.sourceStoragePath,item.scene.sourceStoragePath) &&
+            same(selection.sourceRange,item.scene.sourceRange) && (same(selection.prompt,item.scene.prompt) ||
+              item.finished && validModelArtifactReference(item.ref) && item.ref.capability==='segment_subject' &&
+              item.ref.sourceAssetId===item.scene.sourceId));
+          if (!match || !allowedKeys(selection,["sourceId","sourceStoragePath","sourceRange","prompt","box"],["components","refinement"]) ||
+              stableStringify(selection)!==value) return false;
+          // Imported model scenes may use their normalized mask prompt. The
+          // finished request keeps its original selection for recovery/history.
+          subjectVfxRevision({...match.scene,prompt:selection.prompt});
+          const parameters={subjectId:match.scene.id,initialBox:selection.box,
+            points:selection.prompt.points.map((position,i)=>({position,label:selection.prompt.labels[i]})),
+            shotPrompts:selection.prompt.shotPrompts.map(shot=>({frameIndex:Math.round(shot.time*24),box:selection.box,
+              points:shot.points.map((position,i)=>({position,label:shot.labels[i]}))})),
+            ...(selection.components?{components:selection.components}:{}),...(selection.refinement?{refinement:selection.refinement}:{})};
+          const sourceRange={space:"source",startTick:Math.round(selection.sourceRange.start*90000),endTick:Math.round(selection.sourceRange.end*90000)};
+          require("../modelRuntime/contract").request({schemaVersion:1,requestId:"saved-mask-selection-validation",
+            projectId:root.projectId,projectRevision:root.revision,sourceAssetId:selection.sourceId,
+            sourceSha256:"a".repeat(64),sourceStoragePath:selection.sourceStoragePath,sourceRange,
+            capability:"segment_subject",dependencyHashes:selection.refinement?[selection.refinement.maskArtifactHash]:[],parameters});
+          return visit(selection,depth+1,`${path}.selection`);
+        } catch (_) { return false; }
+      }
+      // Native subject revisions serialize the complete editable scene, including
+      // detailed paths. Validate that scene instead of treating it as free text.
+      // All ordinary strings and the document/node/depth limits stay bounded.
+      if (!subjectRevisionPaths.has(path) || !subjectRevisions.has(value) ||
+          value.length > 128 * 1024) return false;
+      try {
+        const scene = JSON.parse(value);
+        return subjectVfxRevision(scene) === value && visit(scene, depth + 1, `${path}.scene`);
+      } catch (_) { return false; }
+    }
     if (typeof value === "number") return Number.isFinite(value);
-    if (Array.isArray(value)) return value.length <= MAX_ITEMS &&
-      value.every(item => visit(item, depth + 1));
+    // A complete native colour cube is a flat numeric grid, not thousands of
+    // timeline commands. Retain the global node/byte/depth bounds and allow
+    // only this exact validated field to exceed the ordinary item limit.
+    if (Array.isArray(value)) return (path === lutPath ? completeLut : value.length <= MAX_ITEMS) &&
+      value.every(item => (path !== lutPath || typeof item === "number") && visit(item, depth + 1, `${path}[]`));
     if (!plain(value)) return false;
     const keys = Object.keys(value);
     return keys.length <= MAX_ITEMS && keys.every(key =>
       key.length <= 160 && !/[\x00-\x1f\x7f]/.test(key) &&
       !["__proto__", "constructor", "prototype"].includes(key) &&
-      visit(value[key], depth + 1)
+      visit(value[key], depth + 1, path ? `${path}.${key}` : key)
     );
   };
   return visit(root, 0);

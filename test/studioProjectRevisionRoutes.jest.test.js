@@ -314,6 +314,91 @@ test("bounds canonical JSON below Firestore document size", async () => {
   expect(firestore.data.size).toBe(0);
 });
 
+test("a native 17-point grade cube registers intact without lifting other JSON limits", async () => {
+  const lutData={size:17,data:Array.from({length:17**3*3},(_,i)=>(i%17)/16),domainMin:[0,0,0],domainMax:[1,1,1]};
+  const graded=adaptStudioSnapshotToDocument({projectId:"graded-podcast",snapshot:{
+    timeline:[{id:"main",sourceClipId:"source",startRequest:0,endRequest:6}],
+    advancedColor:{lutName:"reviewed.cube",lutData,lutIntensity:75},
+  }});
+  expect((await post({document:graded})).status).toBe(201);
+  const saved=await getCurrentOwnedStudioProjectRevision({uid:"reviewer-1",projectId:graded.projectId,firestore});
+  expect(saved.document.visualGraph.settings.advancedColor.lutData).toEqual(lutData);
+  for(const change of [
+    value=>{value.visualGraph.settings.advancedColor.lutData.data.pop();},
+    value=>{value.visualGraph.settings.advancedColor.lutData.data[0]="not a numeric cube";},
+    value=>{value.audioGraph.arbitrary=Array(2001).fill(0);},
+  ]){
+    const invalid=clone(graded);change(invalid);
+    expect(()=>validateStudioProjectRevisionDocument(invalid)).toThrow("STUDIO_PROJECT_REVISION_INVALID");
+  }
+});
+
+test("detailed native subject revisions register without permitting oversized arbitrary strings", async () => {
+  const { subjectVfxRevision } = require("../frontend/src/components/studioSubjectVfxContract");
+  const scene = {
+    version: 1, id: "subject-scene", sourceId: "asset-1", sourceStoragePath: "owned/source.mp4",
+    sourceRange: { start: 0, end: 6 }, prompt: { points: [[.5,.5]], labels: [1], shotPrompts: [] },
+    effects: [{ id: "rig-detail", type: "foreground_holdout", start: 0, end: 6,
+      corners: [[0,0],[.01,0],[.01,.01],[0,.01]], feather: .4, after_refine: true,
+      paths: Array.from({ length: 16 }, (_, i) => Array.from({ length: 64 }, (_, j) =>
+        [.2 + i*.02 + Math.cos(j*Math.PI/32)*.005, .5 + Math.sin(j*Math.PI/32)*.005])),
+    }],
+  };
+  const revision = subjectVfxRevision(scene);
+  expect(revision.length).toBeGreaterThan(16_384);
+  const detailed = document();
+  detailed.layers = [{ layerId: scene.id, type: "subject_vfx", parameters: {
+    scene, preview: { revision }, pending: { revision },
+  } }];
+  expect((await post({ document: detailed })).status).toBe(201);
+  for (const change of [
+    value => { value.audioGraph.arbitrary = revision; },
+    value => { value.layers[0].parameters.preview.revision = "x".repeat(20_000); },
+    value => {
+      const malformed = clone(scene); malformed.effects[0].paths[0].push([.5,.5]);
+      value.layers[0].parameters.preview.revision = JSON.stringify(malformed);
+    },
+    value => { value.layers[0].parameters.pending.revision = " ".repeat(128*1024+1); },
+  ]) {
+    const invalid = clone(detailed); change(invalid);
+    expect(() => validateStudioProjectRevisionDocument(invalid)).toThrow("STUDIO_PROJECT_REVISION_INVALID");
+  }
+});
+
+test("fine-matte saved selections register with bounded paths while ordinary strings and source binding stay strict",async()=>{
+  const {stable}=require('../frontend/src/components/studioSubjectVfxContract');
+  const scene={version:1,id:'fine-mask',sourceId:'asset-1',sourceStoragePath:'studio/sources/owner/source.mp4',
+    sourceRange:{start:0,end:6},prompt:{points:[[.5,.5]],labels:[1],shotPrompts:[]},
+    effects:[{id:'title',type:'text_behind',start:0,end:6,text:'Fine detail',x:50,y:50,font_size:30,color:'#ffffff'}]};
+  const paths=Array.from({length:12},(_,i)=>Array.from({length:64},(_,j)=>
+    [.2+i*.02+Math.cos(j*Math.PI/32)*.005,.5+Math.sin(j*Math.PI/32)*.005]));
+  const selection={sourceId:scene.sourceId,sourceStoragePath:scene.sourceStoragePath,sourceRange:scene.sourceRange,
+    prompt:scene.prompt,box:[.1,.1,.9,.9],refinement:{maskArtifactHash:'a'.repeat(64),radius:10,holdouts:[],
+      holdoutGroups:[{id:'equipment',start:0,end:6,corners:[[.1,.1],[.2,.1],[.2,.2],[.1,.2]],paths,feather:.5}]}};
+  const value=document();value.layers=[{layerId:scene.id,type:'subject_vfx',parameters:{scene,maskJob:{selectionJson:stable(selection)}}}];
+  expect(value.layers[0].parameters.maskJob.selectionJson.length).toBeGreaterThan(16_384);
+  expect((await post({document:value})).status).toBe(201);
+  const imported=clone(value),parameters=imported.layers[0].parameters;
+  parameters.scene.prompt.points=[[.45,.45]];
+  parameters.maskJob.finished=true;
+  parameters.modelArtifactRef={kind:'model_capability',schemaVersion:1,artifactHash:'b'.repeat(64),
+    sourceAssetId:'asset-1',sourceContentHash:'c'.repeat(64),capability:'segment_subject',
+    sourceRange:{space:'source',startTick:0,endTick:540000}};
+  expect(()=>validateStudioProjectRevisionDocument(imported)).not.toThrow();
+  parameters.maskJob.finished=false;
+  expect(()=>validateStudioProjectRevisionDocument(imported)).toThrow('STUDIO_PROJECT_REVISION_INVALID');
+  for(const change of [
+    d=>{d.audioGraph.arbitrary=d.layers[0].parameters.maskJob.selectionJson;},
+    d=>{d.layers[0].parameters.maskJob.selectionJson='x'.repeat(20_000);},
+    d=>{const s=clone(selection);s.sourceId='other-source';d.layers[0].parameters.maskJob.selectionJson=stable(s);},
+    d=>{const s=clone(selection);s.refinement.holdoutGroups[0].paths[0].push([.5,.5]);d.layers[0].parameters.maskJob.selectionJson=stable(s);},
+    d=>{const s=clone(selection);s.refinement.holdoutGroups[0].end=7;d.layers[0].parameters.maskJob.selectionJson=stable(s);},
+    d=>{d.layers[0].parameters.maskJob.selectionJson+=' ';},
+  ]){
+    const bad=clone(value);change(bad);expect(()=>validateStudioProjectRevisionDocument(bad)).toThrow('STUDIO_PROJECT_REVISION_INVALID');
+  }
+});
+
 test("transaction failure publishes neither project head nor revision", async () => {
   firestore.runTransaction = async work => {
     await work({

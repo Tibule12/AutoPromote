@@ -1,6 +1,14 @@
 import { createOutputTimeMap, createTimeRange, secondsToTicks, ticksToSeconds } from "./studioTime";
-import { projectStudioLinkedTimingToSnapshot, validateStudioProjectDocument } from "./studioProjectDocument";
+import { projectStudioLinkedTimingToSnapshot, projectStudioEditableStateToSnapshot, validateStudioProjectDocument } from "./studioProjectDocument";
 import { buildAdvancedColorCube } from "./studioColorCube";
+import { assertStudioLayerBlendMode, assertStudioMainBlendMode } from "./studioBlendModes";
+
+export const compileStudioOverlaysForRender = (document, transportSnapshot = {}) =>
+  projectStudioEditableStateToSnapshot(document, transportSnapshot).overlays
+    .filter(layer => !layer.isCaption).map(layer => {
+      assertStudioLayerBlendMode(layer);
+      return { ...layer, start_time: Number(layer.startTime ?? 0), duration: Number(layer.duration ?? 0) };
+    });
 
 const fail = (code, message) => {
   const error = new Error(message);
@@ -20,6 +28,9 @@ export const compileStudioTimelineForRender = document => {
       start_time: ticksToSeconds(occurrence.sourceRange.startTick),
       end_time: ticksToSeconds(occurrence.sourceRange.endTick),
       duration: ticksToSeconds(occurrence.sourceRange.endTick - occurrence.sourceRange.startTick),
+      ...(occurrence.parameters?.transitionIn ? { transition_in: occurrence.parameters.transitionIn } : {}),
+      ...(occurrence.parameters?.transitionOut ? { transition_out: occurrence.parameters.transitionOut } : {}),
+      ...(occurrence.parameters?.transitionDuration !== undefined ? { transition_duration: occurrence.parameters.transitionDuration } : {}),
     };
   });
 };
@@ -37,6 +48,7 @@ const visualRenderState = document => {
 export const compileStudioFinishForRender = document => {
   const state = visualRenderState(document);
   const fx = state.finishFx || {}, transform = state.mainTransform || {}, frame = state.mainFrame || {};
+  assertStudioMainBlendMode(transform);
   const colorFields = ["preset", "exposureStops", "lift", "gamma", "gain", "tint",
     "brightness", "contrast", "saturation", "temperature", "sharpness", "vignette"];
   return {
@@ -65,12 +77,20 @@ const compileBaseTransform = layer => ({
 
 export const compileStudioCompositionForRender = document => {
   const state = visualRenderState(document);
+  assertStudioMainBlendMode(state.mainTransform);
+  state.overlays.filter(overlay => !overlay.isCaption).forEach(assertStudioLayerBlendMode);
+  for (const layer of [state.mainTransform, ...state.overlays]) {
+    if (layer?.mask?.enabled && (layer.id === "main-video" || layer.type === "video" || layer.bRollPlaceholder || (layer.bRollMode === "fullscreen" && layer.type === "text")))
+      fail("UNSUPPORTED_GEOMETRIC_VIDEO_MASK", "Geometric masks currently export on image and ordinary title layers. Use the reviewed subject-mask workflow for source video.");
+  }
   return { version: 1, coordinate_space: "canvas_percent", preview_timebase: "output_timeline_seconds",
     layers: [state.mainTransform || { id: "main-video", type: "video" },
       ...state.overlays.filter(overlay => !overlay.isCaption)].map(layer => ({
       id: layer.id, name: layer.name || layer.text || "Visual layer", type: layer.type || "visual",
+      blend_mode: layer.blendMode || "normal",
       base_transform: compileBaseTransform(layer), anchor_x: Number(layer.anchorX ?? 50),
       anchor_y: Number(layer.anchorY ?? 50), effects: {
+        mask: layer.mask ? JSON.parse(JSON.stringify(layer.mask)) : { enabled: false },
         blur: Number(layer.blur || 0),
         glow: { enabled: !!layer.glow?.enabled, color: layer.glow?.color || "#8b5cf6",
           radius: Number(layer.glow?.radius || 0), intensity: Number(layer.glow?.intensity || 0) },

@@ -1,5 +1,8 @@
 import React from "react";
 import { STUDIO_EASINGS, groupMotionKeyframesByTime } from "./studioAutomation";
+import StudioKeyframeCurveEditor from "./StudioKeyframeCurveEditor";
+import ProductHelpButton from "./ProductHelpButton";
+import { STUDIO_EXPORT_BLEND_MODES } from "./studioBlendModes";
 
 const Range = ({ label, valueLabel, ...props }) => (
   <label className="inspector-range">
@@ -25,6 +28,8 @@ export function MotionInspector({
   showMotionPath,
   onToggleMotionPath,
   onResetMotion,
+  focusKeyframeId,
+  keyframesLocked = false,
 }) {
   const targetKeyframes = activeOverlay
     ? keyframes.filter(keyframe => String(keyframe.targetId) === String(activeOverlay.id))
@@ -45,6 +50,7 @@ export function MotionInspector({
         <div>
           <span className="panel-kicker">Motion automation</span>
           <h4>Animate transform, crop and opacity</h4>
+          <ProductHelpButton featureId="studio.keyframes" label="Motion / Transform Keyframes" workspaceType="STUDIO" />
         </div>
         <span className={`inspector-status-dot ${keyframeGroups.length ? "is-ready" : ""}`}>
           {keyframeGroups.length} {keyframeGroups.length === 1 ? "pose" : "poses"}
@@ -208,7 +214,7 @@ export function MotionInspector({
                     onChange={event => onUpdateOverlay("glow", {
                       ...(activeOverlay.glow || {}), enabled: event.target.checked,
                       color: activeOverlay.glow?.color || "#8b5cf6",
-                      radius: activeOverlay.glow?.radius || 16,
+                      radius: activeOverlay.glow?.radius ?? 16,
                       intensity: activeOverlay.glow?.intensity ?? 0.5,
                     })} />
                 </label>
@@ -220,8 +226,8 @@ export function MotionInspector({
                         onChange={event => onUpdateOverlay("glow", { ...activeOverlay.glow, color: event.target.value })} />
                     </label>
                     <div className="inspector-dual-range">
-                      <Range label="Glow radius" valueLabel={`${activeOverlay.glow?.radius || 16}px`}
-                        min={0} max={60} step={1} value={activeOverlay.glow?.radius || 16}
+                      <Range label="Glow radius" valueLabel={`${activeOverlay.glow?.radius ?? 16}px`}
+                        min={0} max={60} step={1} value={activeOverlay.glow?.radius ?? 16}
                         onChange={event => onUpdateOverlay("glow", { ...activeOverlay.glow, radius: Number(event.target.value) })} />
                       <Range label="Glow strength" valueLabel={`${Math.round(Number(activeOverlay.glow?.intensity ?? 0.5) * 100)}%`}
                         min={0} max={1} step={0.05} value={activeOverlay.glow?.intensity ?? 0.5}
@@ -236,7 +242,7 @@ export function MotionInspector({
                     onChange={event => onUpdateOverlay("layerShadow", {
                       ...(activeOverlay.layerShadow || {}), enabled: event.target.checked,
                       color: activeOverlay.layerShadow?.color || "#000000",
-                      blur: activeOverlay.layerShadow?.blur || 18,
+                      blur: activeOverlay.layerShadow?.blur ?? 18,
                       opacity: activeOverlay.layerShadow?.opacity ?? 0.55,
                       x: activeOverlay.layerShadow?.x ?? 0,
                       y: activeOverlay.layerShadow?.y ?? 10,
@@ -258,8 +264,8 @@ export function MotionInspector({
                         onChange={event => onUpdateOverlay("layerShadow", { ...activeOverlay.layerShadow, y: Number(event.target.value) })} /></label>
                     </div>
                     <div className="inspector-dual-range">
-                      <Range label="Shadow blur" valueLabel={`${activeOverlay.layerShadow?.blur || 18}px`}
-                        min={0} max={80} step={1} value={activeOverlay.layerShadow?.blur || 18}
+                      <Range label="Shadow blur" valueLabel={`${activeOverlay.layerShadow?.blur ?? 18}px`}
+                        min={0} max={80} step={1} value={activeOverlay.layerShadow?.blur ?? 18}
                         onChange={event => onUpdateOverlay("layerShadow", { ...activeOverlay.layerShadow, blur: Number(event.target.value) })} />
                       <Range label="Shadow opacity" valueLabel={`${Math.round(Number(activeOverlay.layerShadow?.opacity ?? 0.55) * 100)}%`}
                         min={0} max={1} step={0.05} value={activeOverlay.layerShadow?.opacity ?? 0.55}
@@ -400,6 +406,9 @@ export function MotionInspector({
               );
             })}
           </div>
+          <StudioKeyframeCurveEditor key={activeOverlay.id} keyframes={targetKeyframes}
+            focusId={focusKeyframeId} onUpdate={onUpdateKeyframe} locked={keyframesLocked}
+            onSelect={id => onSeek(Number(targetKeyframes.find(key => key.id === id)?.time || 0))} />
         </>
       ) : (
         <div className="inspector-empty-state">
@@ -429,6 +438,7 @@ export function CompositeInspector({
         <div>
           <span className="panel-kicker">Compositing</span>
           <h4>Masks, keys, tracking and grouped effects</h4>
+          <ProductHelpButton featureId="studio.compositing.text_behind_subject" label="Text Behind Subject / Compositing" workspaceType="STUDIO" />
         </div>
         <span className="inspector-status-dot is-ready">Layer aware</span>
       </div>
@@ -512,8 +522,8 @@ export function CompositeInspector({
                 ["color-dodge", "Color dodge"],
                 ["luminosity", "Luminosity"],
               ].map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
+                <option key={value} value={value} disabled={!STUDIO_EXPORT_BLEND_MODES.includes(value) || (activeOverlay.id === "main-video" && value !== "normal")}>
+                  {label}{STUDIO_EXPORT_BLEND_MODES.includes(value) && (activeOverlay.id !== "main-video" || value === "normal") ? "" : " — unavailable for export"}
                 </option>
               ))}
             </select>
@@ -528,6 +538,7 @@ export function CompositeInspector({
               </span>
               <input
                 type="checkbox"
+                disabled={(activeOverlay.id === "main-video" || activeOverlay.type === "video") && !activeOverlay.mask?.enabled}
                 checked={!!activeOverlay.mask?.enabled}
                 onChange={event =>
                   onUpdateOverlay("mask", {
@@ -537,6 +548,9 @@ export function CompositeInspector({
                 }
               />
             </label>
+            {activeOverlay.id === "main-video" || activeOverlay.type === "video" ? (
+              <p>Geometric masks are available on image and title layers. Source-video subject masks use the reviewed subject-mask workflow.</p>
+            ) : null}
             {activeOverlay.mask?.enabled ? (
               <>
                 <div className="inspector-choice-grid is-three">
@@ -824,6 +838,7 @@ export function AudioRestorationPanel({
   recording,
   onToggleRecording,
   voiceoverCount,
+  keyframesLocked = false,
 }) {
   const sourceKeys = keyframes[source] || [];
   const repairPresets = {
@@ -960,7 +975,7 @@ export function AudioRestorationPanel({
       <div className="audio-automation-card">
         <label className="inspector-select-field">
           <span>Automation source</span>
-          <select value={source} onChange={event => onSourceChange(event.target.value)}>
+          <select aria-label="Automation source" value={source} onChange={event => onSourceChange(event.target.value)}>
             <option value="originalAudio">Original audio</option>
             <option value="masterPodcast">Master podcast audio</option>
             <option value="voiceover">Voice-over</option>
@@ -972,29 +987,9 @@ export function AudioRestorationPanel({
         <button type="button" className="inspector-primary-action" onClick={onAddKeyframe}>
           ◆ Add volume keyframe at {Number(playhead || 0).toFixed(2)}s
         </button>
-        <div className="audio-envelope-preview" aria-label={`${source} volume envelope`}>
-          <svg viewBox="0 0 100 44" preserveAspectRatio="none" role="img">
-            <path className="audio-envelope-wave" d="M0 23 C8 5 12 40 20 20 S32 8 40 24 S53 39 61 18 S74 5 82 24 S93 39 100 18" />
-            {sourceKeys.length > 1 ? (
-              <polyline
-                points={sourceKeys
-                  .slice()
-                  .sort((left, right) => Number(left.time) - Number(right.time))
-                  .map(keyframe => {
-                    const maxTime = Math.max(0.1, ...sourceKeys.map(item => Number(item.time || 0)), Number(playhead || 0));
-                    return `${Math.min(100, (Number(keyframe.time || 0) / maxTime) * 100)},${42 - Math.min(40, Number(keyframe.value || 0) * 0.2)}`;
-                  })
-                  .join(" ")}
-                className="audio-envelope-line"
-              />
-            ) : null}
-            {sourceKeys.map(keyframe => {
-              const maxTime = Math.max(0.1, ...sourceKeys.map(item => Number(item.time || 0)), Number(playhead || 0));
-              return <circle key={`env-${keyframe.id}`} cx={Math.min(100, (Number(keyframe.time || 0) / maxTime) * 100)} cy={42 - Math.min(40, Number(keyframe.value || 0) * 0.2)} r="2.2" />;
-            })}
-          </svg>
-          <small>Waveform envelope · keyframe gain and timing update live</small>
-        </div>
+        <StudioKeyframeCurveEditor key={source} keyframes={sourceKeys} kind="audio"
+          locked={keyframesLocked} onUpdate={onUpdateKeyframe}
+          onSelect={id => onSeek(Number(sourceKeys.find(key => key.id === id)?.time || 0))} />
         <div className="automation-keyframe-list">
           {sourceKeys.map(keyframe => (
             <article key={keyframe.id} className="audio-keyframe-editor">

@@ -212,25 +212,32 @@ def build_speed_filter_complex(
     selected_fps = _finite_number(output_fps, 30)
     if selected_fps not in {24, 25, 30, 50, 60}:
         raise ValueError("Unsupported Studio speed delivery frame rate")
-    # Retain the assembled source clock for lower-rate delivery. Higher-rate
-    # delivery must not first discard frames and duplicate the remainder.
-    intermediate_fps = max(30, selected_fps)
-
-    filters: List[str] = []
-    video_labels: List[str] = []
+    # One continuous picture clock: independently rounding each ramp range to
+    # CFR and concatenating it with audio accumulates video padding at every
+    # boundary. Upsampling an unchanged 24fps range to30 and back also changes
+    # its chosen pictures. Map the assembled source timestamps once, then
+    # sample once at the requested delivery rate. Audio keeps pitch-preserving
+    # atempo ranges and is concatenated independently of picture frame rounding.
+    if len(normalized) == 1:
+        video_time = f"round((PTS-STARTPTS)/{clamp_speed_rate(normalized[0]['rate']):.6f})"
+    else:
+        terms = []
+        for segment in normalized:
+            start = float(segment["start_time"])
+            duration = float(segment["end_time"]) - start
+            rate = clamp_speed_rate(segment["rate"])
+            terms.append(
+                f"min(max((PTS-STARTPTS)*TB-{start:.9f},0),{duration:.9f})/{rate:.6f}"
+            )
+        video_time = "round((" + "+".join(terms) + ")/TB)"
+    filters: List[str] = [
+        f"[0:v]settb=expr=1/90000,setpts='{video_time}',fps={selected_fps:g}[v_speed]"
+    ]
     audio_labels: List[str] = []
     for index, segment in enumerate(normalized):
         start = float(segment["start_time"])
         end = float(segment["end_time"])
         rate = clamp_speed_rate(segment["rate"])
-        video_label = f"speed_v_{index}"
-        filters.append(
-            f"[0:v]trim=start={start:.6f}:end={end:.6f},"
-            # Materialize the selected delivery clock before encoding, retaining
-            # all source events that can fit after the speed change.
-            f"setpts=(PTS-STARTPTS)/{rate:.6f},fps={intermediate_fps:g}[{video_label}]"
-        )
-        video_labels.append(f"[{video_label}]")
         if has_audio:
             audio_label = f"speed_a_{index}"
             filters.append(
@@ -240,17 +247,11 @@ def build_speed_filter_complex(
             audio_labels.append(f"[{audio_label}]")
 
     if len(normalized) == 1:
-        filters.append(f"{video_labels[0]}null[v_speed]")
         if has_audio:
             filters.append(f"{audio_labels[0]}anull[a_speed]")
     elif has_audio:
-        joined = "".join(
-            video + audio for video, audio in zip(video_labels, audio_labels)
-        )
-        filters.append(f"{joined}concat=n={len(normalized)}:v=1:a=1[v_speed][a_speed]")
-    else:
         filters.append(
-            f"{''.join(video_labels)}concat=n={len(normalized)}:v=1:a=0[v_speed]"
+            f"{''.join(audio_labels)}concat=n={len(normalized)}:v=0:a=1[a_speed]"
         )
     return ";".join(filters)
 

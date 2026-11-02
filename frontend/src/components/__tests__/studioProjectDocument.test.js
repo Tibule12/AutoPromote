@@ -46,6 +46,45 @@ const snapshot = () => ({
   ],
 });
 
+test('opening an unchanged legacy occurrence preserves source-duration parameters and export identity', () => {
+  const original=snapshot();original.timeline[0].duration=20;
+  const document=adaptStudioSnapshotToDocument({snapshot:original,projectId:'project-1'});
+  const hydrated=snapshot();hydrated.timeline[0].duration=3;
+  const reopened=adaptStudioSnapshotToDocument({snapshot:hydrated,projectId:'project-1',previousDocument:document});
+  expect(reopened).toEqual(document);
+  hydrated.timeline[0].endRequest=4;
+  const trimmed=adaptStudioSnapshotToDocument({snapshot:hydrated,projectId:'project-1',previousDocument:document});
+  expect(trimmed.clipOccurrences[0].parameters.duration).toBe(3);
+  expect(trimmed.clipOccurrences[0].sourceRange.endTick).toBe(secondsToTicks(4));
+  expect(trimmed.revision).toBeGreaterThan(document.revision);
+});
+
+test('a replacement image has a canonical owned asset identity without becoming a timeline clip',()=>{
+  const original=snapshot(),contentHash='e'.repeat(64);
+  original.projectMedia=[{id:'set',mediaType:'image',contentHash,storagePath:'uploads/images/owner/set.png',status:'ready'}];
+  original.subjectVfxScenes=[{scene:{id:'subject',effects:[{type:'background_replace',asset_id:'set',asset_sha256:contentHash}]}}];
+  const document=adaptStudioSnapshotToDocument({snapshot:original,projectId:'project-a'});
+  expect(document.assets.find(asset=>asset.sourceId==='set')).toMatchObject({contentHash,storagePath:'uploads/images/owner/set.png',identityState:'hash_verified'});
+  expect(document.clipOccurrences).toHaveLength(2);
+  original.projectMedia=[];
+  expect(()=>adaptStudioSnapshotToDocument({snapshot:original,projectId:'project-a'})).toThrow('Save the selected background');
+});
+
+test('canonical subject layers retain refinement recovery and equipment selection across a saved JSON document',()=>{
+  const original=snapshot();
+  const components=[{id:'boom',box:[.1,.2,.8,.7],points:[{position:[.4,.4],label:1}],propagate:false}];
+  const maskJob={requestId:'request-a',projectId:'project-1',projectRevision:2,jobId:'a'.repeat(64),
+    selectionJson:'{}',mode:'refinement',finished:false};
+  original.subjectVfxScenes=[{scene:{id:'subject',effects:[]},maskComponents:components,maskJob}];
+  const document=JSON.parse(JSON.stringify(adaptStudioSnapshotToDocument({snapshot:original,projectId:'project-1'})));
+  const layer=document.layers.find(layer=>layer.type==='subject_vfx');
+  expect(layer.parameters.maskJob).toEqual(maskJob);
+  expect(layer.parameters.maskComponents).toEqual(components);
+  original.subjectVfxScenes=[JSON.parse(JSON.stringify(layer.parameters))];
+  const reopened=adaptStudioSnapshotToDocument({snapshot:original,projectId:'project-1',previousDocument:document});
+  expect(reopened.layers.find(layer=>layer.type==='subject_vfx').parameters).toEqual(layer.parameters);
+});
+
 test("adapts duplicate source occurrences with separate IDs and half-open programme ranges", () => {
   const document = adaptStudioSnapshotToDocument({ snapshot: snapshot(), projectId: "project-1" });
   expect(document.assets).toHaveLength(1);

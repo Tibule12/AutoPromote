@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import MultiCamCombiner from "../components/MultiCamCombiner";
+import ProductHelpButton from "../components/ProductHelpButton";
 import "./CamCombinerPanel.css";
 
 function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
@@ -27,6 +28,7 @@ function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
   if (!studioOpen) {
     return (
       <section className="dashboard-cam-combiner-page cam-combiner-setup">
+        <ProductHelpButton featureId="cam_combiner.switching" label="Cam Combiner" workspaceType="CAM_COMBINER" />
         <ol className="cam-combiner-steps" aria-label="Cam Combiner workflow">
           {["Upload", "Auto-sync", "Review", "Export"].map((label, index) => (
             <li key={label} className={index === 0 ? "active" : ""}>
@@ -218,6 +220,7 @@ function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
 
   return (
     <section className="dashboard-cam-combiner-page" aria-label="Cam Combiner workspace">
+      <ProductHelpButton featureId="cam_combiner.switching" label="Cam Combiner" workspaceType="CAM_COMBINER" />
       <MultiCamCombiner
         primaryFile={cameraFiles[0] || null}
         initialFiles={cameraFiles.filter(Boolean)}

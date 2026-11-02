@@ -51,6 +51,12 @@ jest.mock("../services/billingService", () => ({
   getEffectiveTierSnapshot: jest.fn().mockResolvedValue({ tierId: "premium" }),
 }));
 
+jest.mock("../services/studioWorkerOutputService", () => ({
+  ...jest.requireActual("../services/studioWorkerOutputService"),
+  persistWorkerBucketOutput: jest.fn().mockResolvedValue(null),
+  refreshOwnedStudioOutput: jest.fn().mockResolvedValue("https://storage.example.com/renewed.mp4"),
+}));
+const {persistWorkerBucketOutput,refreshOwnedStudioOutput} = require("../services/studioWorkerOutputService");
 const mediaRoutes = require("../mediaRoutes");
 const { deductCredits, refundCredits, getCreditBreakdown } = require("../creditSystem");
 
@@ -159,7 +165,7 @@ describe("Viral Clip Studio render attempts", () => {
       ...mockDocs.get(first.body.jobId),
       status: "completed",
       progress: 100,
-      result: { url: "https://storage.example.com/rendered.mp4" },
+      result: { url: "https://storage.example.com/rendered.mp4", outputSha256: "a".repeat(64) },
     });
     const recovered = await request(app)
       .get("/api/media/viral-render-attempt/shared-request")
@@ -168,7 +174,7 @@ describe("Viral Clip Studio render attempts", () => {
       jobId: first.body.jobId,
       status: "completed",
       outputUrl: "https://storage.example.com/rendered.mp4",
-      result: { url: "https://storage.example.com/rendered.mp4" },
+      result: { url: "https://storage.example.com/rendered.mp4", outputSha256: "a".repeat(64) },
     });
     const absent = await request(app)
       .get("/api/media/viral-render-attempt/unknown-request")
@@ -241,5 +247,87 @@ describe("Viral Clip Studio render attempts", () => {
     expect(deductCredits).not.toHaveBeenCalled();
     expect(mockStartProcessingJob).not.toHaveBeenCalled();
     expect(mockDocs.size).toBe(0);
+  });
+
+  it.each(["hue", "unknown"])("rejects unsupported %s before worker checks, job creation or charging", async mode => {
+    const response = await request(buildApp()).post("/api/media/process").send({
+      renderRequestId: "unsupported-blend", fileUrl: "https://storage.example.com/source.mp4",
+      options: { renderViral: true, viralData: { overlays: [{ id: "title", type: "text", blendMode: mode }] } },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.body.code).toBe("UNSUPPORTED_STUDIO_BLEND");
+    expect(mockAssertRenderWorkerReady).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockDocs.size).toBe(0);
+  });
+
+  it.each([
+    {layers:[{id:"main-video",blend_mode:"difference"}],overlays:[]},
+    {layers:[{id:"title",blend_mode:"screen"}],overlays:[{id:"title",type:"text",blendMode:"multiply"}]},
+  ])("rejects unsupported main or contradictory canonical layer decisions before charging", async ({layers,overlays}) => {
+    const response = await request(buildApp()).post("/api/media/process").send({
+      renderRequestId: "conflicting-blend", fileUrl: "https://storage.example.com/source.mp4",
+      options: { renderViral: true, viralData: { overlays, composition_plan:{layers} } },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.body.code).toBe("UNSUPPORTED_STUDIO_BLEND");
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockDocs.size).toBe(0);
+  });
+
+  it.each(["normal","multiply","screen","difference","overlay","soft-light","hard-light","color-dodge","luminosity"])("preserves a matching %s decision in the worker request", async mode => {
+    const response = await request(buildApp()).post("/api/media/process").send({
+      renderRequestId: "supported-blend", fileUrl: "https://storage.example.com/source.mp4",
+      options: { renderViral: true, viralData: { overlays:[{id:"title",type:"text",blendMode:mode}],
+        composition_plan:{layers:[{id:"main-video",blend_mode:"normal"},{id:"title",blend_mode:mode}]} } },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(mockStartProcessingJob.mock.calls[0][1].viralData.overlays[0].blendMode).toBe(mode);
+    expect(deductCredits).toHaveBeenCalledTimes(1);
+  });
+
+  it("adopts the owned completed result once and renews subsequent access without a worker or charge", async () => {
+    const jobId=`viral_${"c".repeat(64)}`,sha="a".repeat(64);
+    const storagePath=`studio/exports/owner-1/${jobId}/render.mp4`;
+    mockDocs.set(jobId,{userId:"owner-1",renderRequestId:"legacy-cloud-result",type:"viral_render",
+      status:"completed",options:{renderViral:true},result:{url:`https://storage.googleapis.com/bucket/processed/${jobId}_viral.mp4`,outputSha256:sha}});
+    persistWorkerBucketOutput.mockResolvedValueOnce({url:"https://storage.example.com/owned.mp4",storagePath,
+      sha256:sha,bytes:1234,generation:"456"});
+    const app=buildApp();
+    const first=await request(app).get(`/api/media/status/${jobId}`);
+    const second=await request(app).get(`/api/media/status/${jobId}`);
+    expect(first.statusCode).toBe(200);expect(second.statusCode).toBe(200);
+    expect(persistWorkerBucketOutput).toHaveBeenCalledTimes(1);
+    expect(persistWorkerBucketOutput).toHaveBeenCalledWith(expect.objectContaining({userId:"owner-1",jobId,expectedSha256:sha,legacy:true}));
+    expect(mockDocs.get(jobId)).toMatchObject({outputStoragePath:storagePath,result:{outputSha256:sha,outputGeneration:"456"}});
+    expect(refreshOwnedStudioOutput).toHaveBeenCalledTimes(4);
+    expect(deductCredits).not.toHaveBeenCalled();expect(mockStartProcessingJob).not.toHaveBeenCalled();
+  });
+
+  it("checks the saved job owner before any adoption or signed access", async () => {
+    const jobId=`viral_${"d".repeat(64)}`;
+    mockDocs.set(jobId,{userId:"other-owner",status:"completed",options:{renderViral:true},
+      result:{url:`https://storage.googleapis.com/bucket/processed/${jobId}_viral.mp4`,outputSha256:"a".repeat(64)}});
+    const response=await request(buildApp()).get(`/api/media/status/${jobId}`);
+    expect(response.statusCode).toBe(403);expect(persistWorkerBucketOutput).not.toHaveBeenCalled();
+    expect(refreshOwnedStudioOutput).not.toHaveBeenCalled();expect(deductCredits).not.toHaveBeenCalled();
+  });
+
+  it("returns the owned finished identity for receipt recovery without charging or dispatching", async () => {
+    const jobId = `viral_${"b".repeat(64)}`;
+    mockDocs.set(jobId, { userId: "owner-1", renderRequestId: "render-receipt-request-123", status: "completed",
+      options: { renderViral: true, viralData: { brand_watermark: false } },
+      result: { url: "https://storage.example.com/final.mp4", outputSha256: "a".repeat(64) } });
+    const app = buildApp();
+    const response = await request(app).get(`/api/media/status/${jobId}`);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({ jobId, renderRequestId: "render-receipt-request-123",
+      brandWatermark: false, status: "completed", result: { outputSha256: "a".repeat(64) } });
+    const denied = await request(app).get(`/api/media/status/${jobId}`).set("x-test-user", "other-owner");
+    expect(denied.statusCode).toBe(403);
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
   });
 });

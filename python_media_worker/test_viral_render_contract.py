@@ -1047,7 +1047,7 @@ class ViralRenderContractTests(unittest.TestCase):
         plan = normalize_speed_plan(6, preview_speed=1.5)
         filter_complex = build_speed_filter_complex(plan, has_audio=True)
 
-        self.assertIn("setpts=(PTS-STARTPTS)/1.500000", filter_complex)
+        self.assertIn("(PTS-STARTPTS)/1.500000", filter_complex)
         self.assertIn("atempo=1.500000", filter_complex)
         self.assertIn("[v_speed]", filter_complex)
         self.assertIn("[a_speed]", filter_complex)

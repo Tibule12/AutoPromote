@@ -18,3 +18,19 @@ test("repair presets change the complete processing chain and can be bypassed", 
   fireEvent.click(screen.getByLabelText("Use voice repair on export"));
   expect(onUpdate).toHaveBeenCalledWith("enabled", false);
 });
+
+test("sound automation plots and edits the real bus curve without a decorative waveform", () => {
+  const update = jest.fn();
+  const { container } = render(<AudioRestorationPanel settings={{eq:{low:0,mid:0,high:0}}} onUpdate={jest.fn()}
+    source="sfx" onSourceChange={jest.fn()} keyframes={{sfx:[
+      {id:'a',property:'volume',time:0,value:100},
+      {id:'b',property:'volume',time:1,value:25,easing:'bezier',curve:[.2,0,.8,1]}]}}
+    playhead={1} onAddKeyframe={jest.fn()} onUpdateKeyframe={update} onRemoveKeyframe={jest.fn()}
+    onSeek={jest.fn()} recording={false} onToggleRecording={jest.fn()} voiceoverCount={0} />);
+  expect(container.querySelector('.audio-envelope-wave')).toBeNull();
+  expect(screen.getByRole('img',{name:'volume value curve'})).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Bezier Time 2'), {target:{value:'.4'}});
+  expect(update).toHaveBeenLastCalledWith('b',{easing:'bezier',curve:[.2,0,.4,1]});
+  fireEvent.change(screen.getByLabelText('Selected audio key value'),{target:{value:'250'}});
+  expect(update).toHaveBeenLastCalledWith('b',{value:200});
+});

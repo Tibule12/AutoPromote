@@ -1,0 +1,277 @@
+{
+  "schemaVersion": 1,
+  "templateId": "podcast_set_dialogue_v1",
+  "version": "1.2.0",
+  "label": "Podcast — warm camera-matched set",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "background_replacement",
+    "text_behind_subject",
+    "before_after_transformation"
+  ],
+  "inputSlots": [
+    {
+      "id": "brandColour",
+      "type": "colour",
+      "required": true
+    },
+    {
+      "id": "headline",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureOne",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureTwo",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "callToAction",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "hookFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": true
+    },
+    {
+      "id": "background",
+      "type": "image",
+      "required": true
+    },
+    {
+      "id": "revealSound",
+      "type": "audio",
+      "required": true
+    },
+    {
+      "id": "impactSound",
+      "type": "audio",
+      "required": true
+    },
+    {
+      "id": "responseFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "responseBackground",
+      "type": "image",
+      "required": true
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 1117500,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "hookFootage",
+        "offset": 0,
+        "duration": 8.666666666666666,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0
+      },
+      {
+        "slot": "responseFootage",
+        "offset": 0,
+        "duration": 3.75,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0
+      }
+    ],
+    "titles": [
+      {
+        "id": "unmuted",
+        "start": 1,
+        "duration": 6.85,
+        "x": 75,
+        "y": 22,
+        "width": 44,
+        "scale": 1.15,
+        "weight": 800,
+        "align": "center",
+        "colour": "white",
+        "shadow": "none",
+        "slot": "headline",
+        "line": 0
+      },
+      {
+        "id": "podcast-kicker",
+        "slot": "headline",
+        "line": 1,
+        "start": 1.25,
+        "duration": 6.6,
+        "x": 75,
+        "y": 29,
+        "width": 41,
+        "scale": 0.45,
+        "weight": 600,
+        "align": "center",
+        "colour": "brand",
+        "shadow": "none"
+      },
+      {
+        "id": "story",
+        "slot": "featureOne",
+        "start": 2.9,
+        "duration": 5.4,
+        "x": 75,
+        "y": 40,
+        "width": 41,
+        "scale": 0.64,
+        "weight": 600,
+        "align": "center",
+        "colour": "white",
+        "shadow": "none"
+      },
+      {
+        "id": "guest-context",
+        "slot": "featureTwo",
+        "start": 8.84,
+        "duration": 3.39,
+        "x": 26,
+        "y": 25,
+        "width": 41,
+        "scale": 0.8,
+        "weight": 800,
+        "align": "center",
+        "colour": "white",
+        "shadow": "none"
+      },
+      {
+        "id": "made-with",
+        "slot": "callToAction",
+        "start": 10.2,
+        "duration": 2.18,
+        "x": 26,
+        "y": 41,
+        "width": 40,
+        "scale": 0.43,
+        "weight": 600,
+        "align": "center",
+        "colour": "white",
+        "shadow": "none"
+      }
+    ],
+    "animation": {
+      "enterSeconds": 0.16,
+      "settleSeconds": 0.3,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 0.075,
+      "fadeIn": 0.45,
+      "fadeOut": 1.1,
+      "ducking": true,
+      "duckMode": "constant",
+      "duckingStrength": 0.45
+    },
+    "soundCues": [
+      {
+        "slot": "revealSound",
+        "time": 0.42,
+        "duration": 0.65,
+        "trimStart": 0.12,
+        "volume": 0.065,
+        "fadeIn": 0.03,
+        "fadeOut": 0.25
+      },
+      {
+        "slot": "impactSound",
+        "time": 8.5,
+        "duration": 0.6,
+        "trimStart": 0.2,
+        "volume": 0.035,
+        "fadeIn": 0.02,
+        "fadeOut": 0.35
+      }
+    ],
+    "muteOriginalAudio": false,
+    "finish": {
+      "exposureStops": -0.025,
+      "lift": -0.006,
+      "gamma": 1.01,
+      "gain": 0.98,
+      "contrast": 1.025,
+      "saturation": 0.96,
+      "temperature": -0.04,
+      "tint": 0,
+      "sharpness": 0.04,
+      "vignette": 0,
+      "blur": 0,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "letterbox": 0,
+      "precisionGrade": true
+    },
+    "subjectTreatments": [
+      {
+        "sourceSlot": "hookFootage",
+        "backgroundSlot": "background",
+        "revealStart": 0,
+        "revealSeconds": 0,
+        "backgroundExposure": 0,
+        "foreground": {
+          "exposure": 0,
+          "contrast": 1,
+          "saturation": 1
+        },
+        "titles": [],
+        "rangeSeconds": 8.666666666666666
+      },
+      {
+        "sourceSlot": "responseFootage",
+        "backgroundSlot": "responseBackground",
+        "revealStart": 0,
+        "revealSeconds": 0,
+        "backgroundExposure": 0,
+        "foreground": {
+          "exposure": 0,
+          "contrast": 1,
+          "saturation": 1
+        },
+        "titles": [],
+        "rangeSeconds": 3.75
+      }
+    ],
+    "sourceKeyframes": []
+  }
+}

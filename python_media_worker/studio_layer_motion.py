@@ -5,12 +5,13 @@ evaluates those same keys after mapping output time back through speed changes,
 then creates a transparent full-canvas layer for FFmpeg compositing.
 """
 import math
+import re
 from pathlib import Path
 import subprocess
 import tempfile
 
 import numpy as np
-from PIL import Image, ImageColor, ImageFilter
+from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFilter, ImageOps
 
 try:
     from .studio_motion import easing_value, finite
@@ -66,7 +67,67 @@ def layer_pose(layer, overlay, time):
         "scale": max(.01, interpolate_layer_value(layer, "scale", time, base.get("scale", _get(overlay, "scale", 1)))),
         "rotation": interpolate_layer_value(layer, "rotation", time, base.get("rotation", _get(overlay, "rotation", 0))),
         "opacity": max(0, min(1, interpolate_layer_value(layer, "opacity", time, base.get("opacity", _get(overlay, "opacity", 1))))),
+        "crop_x": max(0, min(45, interpolate_layer_value(layer, "cropX", time, base.get("crop_x", _get(overlay, "cropX", 0))))),
+        "crop_y": max(0, min(45, interpolate_layer_value(layer, "cropY", time, base.get("crop_y", _get(overlay, "cropY", 0))))),
     }
+
+
+def layer_clip_mask(size, mask, crop_x=0, crop_y=0, feather_scale=1):
+    """Rasterize Studio's local percentage clip path, before its transform.
+
+    These are authored geometric masks, not model-generated subject mattes.
+    Ellipse/polygon deliberately retain the native clip-path precedence over
+    crop. Feather is a Gaussian sigma in 720px programme units before the layer
+    transform. Inversion follows feathering and stays inside the local box.
+    """
+    width, height = size
+    enabled = bool((mask or {}).get("enabled"))
+    if not enabled and not crop_x and not crop_y:
+        return None
+    supersample = 4
+    result = Image.new("L", (width * supersample, height * supersample))
+    draw = ImageDraw.Draw(result)
+    w, h = result.size
+    shape = (mask or {}).get("shape", "rectangle") if enabled else "rectangle"
+    if shape == "ellipse":
+        draw.ellipse((w * .02, h * .02, w * .98, h * .98), fill=255)
+    elif shape == "polygon":
+        path = str(mask.get("path") or "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)")
+        match = re.fullmatch(r"polygon\((.{1,2048})\)", path.strip())
+        points = []
+        for pair in match.group(1).split(",") if match else []:
+            point = re.fullmatch(r"\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*", pair)
+            if not point:
+                raise ValueError("Layer mask requires a percentage polygon")
+            points.append((float(point[1]) * w / 100, float(point[2]) * h / 100))
+        if not 3 <= len(points) <= 64:
+            raise ValueError("Layer polygon mask requires 3 to 64 points")
+        draw.polygon(points, fill=255)
+    elif shape == "rectangle":
+        left, top = w * crop_x / 100, h * crop_y / 100
+        right, bottom = w - left, h - top
+        radius = max(0, min(50, finite(mask.get("radius") or 6, 6))) if enabled else 0
+        rx, ry = min(w * radius / 100, (right - left) / 2), min(h * radius / 100, (bottom - top) / 2)
+        if rx and ry:
+            draw.rectangle((left + rx, top, right - rx, bottom), fill=255)
+            draw.rectangle((left, top + ry, right, bottom - ry), fill=255)
+            for x in (left, right - rx * 2):
+                for y in (top, bottom - ry * 2):
+                    draw.ellipse((x, y, x + rx * 2, y + ry * 2), fill=255)
+        else:
+            draw.rectangle((left, top, right, bottom), fill=255)
+    else:
+        raise ValueError("Unsupported geometric layer mask")
+    result = result.resize(size, Image.Resampling.LANCZOS)
+    sigma = max(0, min(100, finite((mask or {}).get("feather"), 0))) * feather_scale if enabled else 0
+    if sigma > 0:
+        pad = max(1, math.ceil(sigma * 4))
+        padded = Image.new("L", (width + pad * 2, height + pad * 2))
+        padded.paste(result, (pad, pad))
+        result = padded.filter(ImageFilter.GaussianBlur(sigma)).crop((pad, pad, width + pad, height + pad))
+    if enabled and mask.get("inverted"):
+        result = ImageOps.invert(result)
+    return result
 
 
 def _effect_layer(alpha, color, opacity, blur):
@@ -80,11 +141,17 @@ def _effect_layer(alpha, color, opacity, blur):
 
 def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
     canvas_width, canvas_height = canvas_size
+    fullscreen = str(_get(overlay, "bRollMode", _get(overlay, "b_roll_mode", ""))) == "fullscreen"
+    if fullscreen:
+        # The native full-canvas mode pins geometry to the stage and uses cover
+        # fit. Retain the authored opacity; inactive PIP transforms/anchors
+        # must not shrink, rotate or displace its export.
+        pose = {**pose, "x": 50, "y": 50, "scale": 1, "rotation": 0}
     width_percent = max(.1, min(100, finite(_get(overlay, "width", 35), 35)))
     height_percent = max(.1, min(100, finite(_get(overlay, "height", 35), 35)))
-    box_width = max(2, round(canvas_width * width_percent / 100 * pose["scale"]))
-    box_height = max(2, round(canvas_height * height_percent / 100 * pose["scale"]))
-    fit = str(_get(overlay, "mediaFit", _get(overlay, "media_fit", "contain")) or "contain").lower()
+    box_width = canvas_width if fullscreen else max(2, round(canvas_width * width_percent / 100 * pose["scale"]))
+    box_height = canvas_height if fullscreen else max(2, round(canvas_height * height_percent / 100 * pose["scale"]))
+    fit = "cover" if fullscreen else str(_get(overlay, "mediaFit", _get(overlay, "media_fit", "contain")) or "contain").lower()
     source_ratio, box_ratio = asset.width / asset.height, box_width / box_height
     if fit == "stretch":
         target_width, target_height = box_width, box_height
@@ -100,8 +167,22 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         top = max(0, (artwork.height - box_height) // 2)
         artwork = artwork.crop((left, top, min(artwork.width, left + box_width), min(artwork.height, top + box_height)))
 
-    anchor_x = max(0, min(100, finite((layer or {}).get("anchor_x", 50), 50))) / 100
-    anchor_y = max(0, min(100, finite((layer or {}).get("anchor_y", 50), 50))) / 100
+    # object-fit acts inside the native layer box. Contain must retain the
+    # transparent letterbox and box-relative anchor/mask, not shrink the box.
+    box = Image.new("RGBA", (box_width, box_height))
+    box.alpha_composite(artwork, ((box_width - artwork.width) // 2, (box_height - artwork.height) // 2))
+    artwork = box
+    if _get(overlay, "type") == "image" and not fullscreen:
+        # Native media corner rounding applies before the layer's effects and
+        # mask. Inverted masks otherwise reveal square corners absent in preview.
+        shape = str(_get(overlay, "frameShape", "round") or "round")
+        if shape != "edge":
+            radius = max(12, min(48, finite(_get(overlay, "borderRadius", 28), 28))) / 4
+            frame_mask = layer_clip_mask(artwork.size, {"enabled": True, "shape": "rectangle", "radius": radius})
+            artwork.putalpha(ImageChops.multiply(artwork.getchannel("A"), frame_mask))
+
+    anchor_x = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_x", 50), 50))) / 100
+    anchor_y = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_y", 50), 50))) / 100
     diagonal = max(8, math.ceil(math.hypot(artwork.width, artwork.height) * 2.1))
     transform_surface = Image.new("RGBA", (diagonal, diagonal))
     anchor = (diagonal // 2, diagonal // 2)
@@ -109,9 +190,6 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         artwork,
         (round(anchor[0] - artwork.width * anchor_x), round(anchor[1] - artwork.height * anchor_y)),
     )
-    if abs(pose["rotation"]) > .001:
-        transform_surface = transform_surface.rotate(-pose["rotation"], Image.Resampling.BICUBIC, center=anchor)
-
     alpha = transform_surface.getchannel("A")
     effects = (layer or {}).get("effects") or {}
     composed = Image.new("RGBA", transform_surface.size)
@@ -120,7 +198,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
         shadow_layer = _effect_layer(
             alpha,
             shadow.get("color", "#000000"),
-            finite(shadow.get("opacity"), .55) * sample_opacity,
+            finite(shadow.get("opacity"), .55),
             finite(shadow.get("blur"), 18),
         )
         composed.alpha_composite(
@@ -133,17 +211,32 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1):
             _effect_layer(
                 alpha,
                 glow.get("color", "#8b5cf6"),
-                finite(glow.get("intensity"), .75) * sample_opacity,
+                finite(glow.get("intensity"), .75),
                 finite(glow.get("radius"), 16),
             )
         )
     blur = max(0, finite(effects.get("blur"), 0))
     if blur > 0:
         transform_surface = transform_surface.filter(ImageFilter.GaussianBlur(blur))
-    opacity = max(0, min(1, pose["opacity"] * sample_opacity))
-    if opacity < .999:
-        transform_surface.putalpha(transform_surface.getchannel("A").point(lambda value: round(value * opacity)))
     composed.alpha_composite(transform_surface)
+    clip_box = (layer or {}).get("clip_box") or {"x": 0, "y": 0, "width": 1, "height": 1}
+    clip_size = (max(1, round(box_width * clip_box["width"])), max(1, round(box_height * clip_box["height"])))
+    clip = layer_clip_mask(clip_size, effects.get("mask") or {}, pose.get("crop_x", 0), pose.get("crop_y", 0), canvas_height / 720 * pose["scale"])
+    if clip is not None:
+        matte = Image.new("L", composed.size)
+        matte.paste(clip, (round(anchor[0] - box_width * anchor_x + box_width * clip_box["x"]),
+                          round(anchor[1] - box_height * anchor_y + box_height * clip_box["y"])))
+        # Native clip-path clips the filtered group in its local box; rotating
+        # only the artwork first incorrectly leaves shadows outside the mask.
+        composed.putalpha(ImageChops.multiply(composed.getchannel("A"), matte))
+    if abs(pose["rotation"]) > .001:
+        composed = composed.rotate(-pose["rotation"], Image.Resampling.BICUBIC, center=anchor)
+    # Native CSS opacity applies after filtering the entire layer. Fading only
+    # the artwork leaves shadow/glow visible at zero opacity and changes the
+    # group's coverage at intermediate keyframes, including motion-blur samples.
+    opacity = max(0, min(1, pose["opacity"] * sample_opacity))
+    if opacity < 1:
+        composed.putalpha(composed.getchannel("A").point(lambda value: round(value * opacity)))
 
     destination = Image.new("RGBA", canvas_size)
     x = round(canvas_width * pose["x"] / 100 - anchor[0])

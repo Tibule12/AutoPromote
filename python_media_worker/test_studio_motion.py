@@ -11,6 +11,18 @@ from python_media_worker.studio_motion import (
 
 
 class StudioMotionTests(unittest.TestCase):
+    def test_fractional_frame_cut_applies_held_pose_on_its_first_picture(self):
+        graph=build_studio_motion_filter({'scale_keyframes':[
+            {'time':0,'value':1},{'time':208/24,'value':1.1,'easing':'hold'}]},160,90)
+        result=subprocess.run(['ffmpeg','-v','error','-filter_threads','1','-f','lavfi','-i',
+            'color=c=black:s=160x90:r=24:d=8.75,drawbox=x=4:y=0:w=2:h=90:color=white:t=fill',
+            '-vf',graph,'-pix_fmt','rgb24','-f','rawvideo','-'],capture_output=True,timeout=30)
+        self.assertEqual(result.returncode,0,result.stderr.decode())
+        frames=np.frombuffer(result.stdout,dtype=np.uint8).reshape(-1,90,160,3)
+        self.assertGreater(frames[207].max(),200)
+        self.assertLess(frames[208].max(),20,'First guest picture retained the previous framing')
+        self.assertTrue(np.array_equal(frames[208],frames[209]))
+
     def test_translation_recovers_top_source_pixels_after_zoom(self):
         graph = build_studio_motion_filter({"base_transform": {
             "scale": 1.1, "x": 50, "y": 55, "rotation": 0,

@@ -66,6 +66,10 @@ const SchedulesPanel = ({
   onDeleteMany,
   onEditCopy,
   onNavigate,
+  scheduleScope = "week",
+  hasMore = false,
+  onScopeChanged,
+  onLoadMore,
 }) => {
   const [selectedId, setSelectedId] = useState("");
   const [expandedPlatform, setExpandedPlatform] = useState("");
@@ -78,8 +82,8 @@ const SchedulesPanel = ({
   const [mediaFailed, setMediaFailed] = useState(false);
   const detailRef = useRef(null);
   const [viewTimezone, setViewTimezone] = useState("");
-  const viewingTimezone = viewTimezone ||
-    (isValidTimezone(defaultTimezone) ? defaultTimezone : browserTimezone());
+  const viewingTimezone =
+    viewTimezone || (isValidTimezone(defaultTimezone) ? defaultTimezone : browserTimezone());
 
   const allReleases = useMemo(
     () => groupSchedules(schedulesList, contentList),
@@ -123,7 +127,11 @@ const SchedulesPanel = ({
     );
   const media = releaseMedia(selected?.content);
   const firstCopy = selected
-    ? scheduleCopy(selected.destinations[0]?.schedule, selected.content, selected.destinations[0]?.platform)
+    ? scheduleCopy(
+        selected.destinations[0]?.schedule,
+        selected.content,
+        selected.destinations[0]?.platform
+      )
     : { title: "", caption: "" };
   const previewTitle =
     firstCopy.title && firstCopy.title !== selected?.title ? firstCopy.title : "";
@@ -248,6 +256,20 @@ const SchedulesPanel = ({
 
   return (
     <section className="schedules-panel" aria-label="Schedule releases">
+      {onScopeChanged ? (
+        <label>
+          Queue period{" "}
+          <select
+            aria-label="Queue period"
+            value={scheduleScope}
+            disabled={loading}
+            onChange={event => onScopeChanged(event.target.value)}
+          >
+            <option value="week">Next 7 days</option>
+            <option value="all">All schedules</option>
+          </select>
+        </label>
+      ) : null}
       {loading && (
         <div className="schedule-loading" role="status">
           Loading your scheduled releases…
@@ -262,12 +284,11 @@ const SchedulesPanel = ({
         <div className="schedule-empty">
           No scheduled releases yet. Choose a finished file in Publisher to schedule your first
           post.
-          {onNavigate && <button
-            className="schedule-primary"
-            onClick={() => onNavigate("upload")}
-          >
-            + New release
-          </button>}
+          {onNavigate && (
+            <button className="schedule-primary" onClick={() => onNavigate("upload")}>
+              + New release
+            </button>
+          )}
         </div>
       )}
 
@@ -275,22 +296,30 @@ const SchedulesPanel = ({
         <>
           <div className="schedule-kpis" aria-label="Schedule summary">
             <article>
-              <span className="schedule-kpi-icon releases" aria-hidden="true">▣</span>
+              <span className="schedule-kpi-icon releases" aria-hidden="true">
+                ▣
+              </span>
               <strong>{releases.length}</strong>
               <span>Releases</span>
             </article>
             <article>
-              <span className="schedule-kpi-icon posts" aria-hidden="true">▤</span>
+              <span className="schedule-kpi-icon posts" aria-hidden="true">
+                ▤
+              </span>
               <strong>{destinationCount}</strong>
               <span>Platform posts</span>
             </article>
             <article>
-              <span className="schedule-kpi-icon destinations" aria-hidden="true">➤</span>
+              <span className="schedule-kpi-icon destinations" aria-hidden="true">
+                ➤
+              </span>
               <strong>{platformCount}</strong>
               <span>Destinations</span>
             </article>
             <article>
-              <span className="schedule-kpi-icon paused" aria-hidden="true">Ⅱ</span>
+              <span className="schedule-kpi-icon paused" aria-hidden="true">
+                Ⅱ
+              </span>
               <strong>{pausedCount}</strong>
               <span>Paused</span>
             </article>
@@ -299,7 +328,11 @@ const SchedulesPanel = ({
           <label className="schedule-view-timezone">
             View times in
             <select value={viewingTimezone} onChange={event => setViewTimezone(event.target.value)}>
-              {timezoneOptions.map(zone => <option key={zone} value={zone}>{zone}</option>)}
+              {timezoneOptions.map(zone => (
+                <option key={zone} value={zone}>
+                  {zone}
+                </option>
+              ))}
             </select>
             <small>Changes the display only.</small>
           </label>
@@ -307,16 +340,26 @@ const SchedulesPanel = ({
             <nav className="schedule-release-list" aria-label="Releases">
               <div className="schedule-list-heading">
                 <h3>Releases</h3>
-                {onNavigate && <button
-                  className="schedule-primary"
-                  onClick={() => onNavigate("upload")}
-                >
-                  + New release
-                </button>}
+                {onNavigate && (
+                  <button className="schedule-primary" onClick={() => onNavigate("upload")}>
+                    + New release
+                  </button>
+                )}
               </div>
               {subjects.map(([subject, items]) => (
                 <div className="schedule-subject" key={subject}>
-                  <h4><span aria-hidden="true">{subject === "Coffee" ? "☕" : subject === "Cycling" ? "🚴" : subject === "Headphones" ? "🎧" : "▣"}</span>{subject}</h4>
+                  <h4>
+                    <span aria-hidden="true">
+                      {subject === "Coffee"
+                        ? "☕"
+                        : subject === "Cycling"
+                          ? "🚴"
+                          : subject === "Headphones"
+                            ? "🎧"
+                            : "▣"}
+                    </span>
+                    {subject}
+                  </h4>
                   {items.map(release => {
                     const zone = displayTimezone(
                       release.destinations[0]?.schedule,
@@ -335,11 +378,19 @@ const SchedulesPanel = ({
                         </span>
                         <span className="schedule-release-kind">
                           <strong>{release.variant || release.title}</strong>
-                          <small className={`schedule-variant ${release.variant === "Timeline" ? "timeline" : "final"}`}>
-                            {release.variant === "Timeline" ? "BEHIND THE EDIT" : release.variant === "Final Edit" ? "FINAL VIDEO" : "RELEASE"}
+                          <small
+                            className={`schedule-variant ${release.variant === "Timeline" ? "timeline" : "final"}`}
+                          >
+                            {release.variant === "Timeline"
+                              ? "BEHIND THE EDIT"
+                              : release.variant === "Final Edit"
+                                ? "FINAL VIDEO"
+                                : "RELEASE"}
                           </small>
                         </span>
-                        <span className="schedule-release-arrow" aria-hidden="true">›</span>
+                        <span className="schedule-release-arrow" aria-hidden="true">
+                          ›
+                        </span>
                       </button>
                     );
                   })}
@@ -354,13 +405,19 @@ const SchedulesPanel = ({
                     setMediaFailed(false);
                   }}
                 >
-                  {showHistory ? "Show upcoming" : `View history (${allReleases.length - upcoming.length})`}
+                  {showHistory
+                    ? "Show upcoming"
+                    : `View history (${allReleases.length - upcoming.length})`}
                 </button>
               )}
             </nav>
 
             {selected && (
-              <article ref={detailRef} className="schedule-detail" aria-label={`${selected.title} details`}>
+              <article
+                ref={detailRef}
+                className="schedule-detail"
+                aria-label={`${selected.title} details`}
+              >
                 <header className="schedule-detail-header">
                   <div>
                     <span
@@ -372,10 +429,15 @@ const SchedulesPanel = ({
                           ? "FINAL VIDEO"
                           : "RELEASE"}
                     </span>
-                    <h3>{selected.subject}{selected.variant ? ` — ${selected.variant}` : ""}</h3>
+                    <h3>
+                      {selected.subject}
+                      {selected.variant ? ` — ${selected.variant}` : ""}
+                    </h3>
                     {origin && <span className="schedule-origin">{origin}</span>}
                   </div>
-                  <strong className="schedule-aggregate">{aggregateStatus(selected.destinations)}</strong>
+                  <strong className="schedule-aggregate">
+                    {aggregateStatus(selected.destinations)}
+                  </strong>
                 </header>
                 <div className="schedule-detail-main">
                   <div className="schedule-media">
@@ -440,119 +502,148 @@ const SchedulesPanel = ({
                       </div>
                     )}
                     <div className="schedule-destinations">
-                  <h4>Destinations ({selected.destinations.length})</h4>
-                  {selected.destinations.map(item => {
-                    const copy = scheduleCopy(item.schedule, item.content, item.platform);
-                    const destinationMedia = scheduleMedia(item.schedule, item.content, item.platform);
-                    const ownSchedule = canControlDestination(item);
-                    const expanded = expandedPlatform === `${item.platform}:${item.schedule.id}`;
-                    const zone = displayTimezone(item.schedule, viewingTimezone);
-                    return (
-                      <div
-                        key={`${item.platform}:${item.schedule.id}`}
-                        className="schedule-destination"
-                      >
-                        <button
-                          className="schedule-destination-toggle"
-                          aria-expanded={expanded}
-                          onClick={() =>
-                            setExpandedPlatform(
-                              expanded ? "" : `${item.platform}:${item.schedule.id}`
-                            )
-                          }
-                        >
-                          <span className={`schedule-platform-icon platform-${item.platform}`}>
-                            {PLATFORM_GLYPHS[item.platform] || (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
-                          </span>
-                          <strong>{PLATFORM_NAMES[item.platform] || item.platform}</strong>
-                          <StatusPill status={item.status} />
-                          <span aria-hidden="true">{expanded ? "⌃" : "⌄"}</span>
-                        </button>
-                        {expanded && (
-                          <div className="schedule-destination-detail">
-                            <div>
-                              <span>Post title</span>
-                              <p>
-                                {copy.title || "No title stored for this destination"}
-                              </p>
-                            </div>
-                            <div>
-                              <span>Caption</span>
-                              <p>{copy.caption || "No platform-specific caption stored"}</p>
-                            </div>
-                            {(destinationMedia.url || destinationMedia.poster) ? (
-                                <div className="schedule-platform-media">
-                                  <span>Media for this destination</span>
-                                  {destinationMedia.kind === "image" || !destinationMedia.url ? (
-                                    <img
-                                      src={destinationMedia.kind === "image" ? destinationMedia.url || destinationMedia.poster : destinationMedia.poster}
-                                      alt={`${PLATFORM_NAMES[item.platform]} scheduled media`}
-                                    />
-                                  ) : (
-                                    <video
-                                      src={destinationMedia.url}
-                                      poster={destinationMedia.poster || undefined}
-                                      controls
-                                      preload="metadata"
-                                      aria-label={`${PLATFORM_NAMES[item.platform]} scheduled video`}
-                                    />
-                                  )}
+                      <h4>Destinations ({selected.destinations.length})</h4>
+                      {selected.destinations.map(item => {
+                        const copy = scheduleCopy(item.schedule, item.content, item.platform);
+                        const destinationMedia = scheduleMedia(
+                          item.schedule,
+                          item.content,
+                          item.platform
+                        );
+                        const ownSchedule = canControlDestination(item);
+                        const expanded =
+                          expandedPlatform === `${item.platform}:${item.schedule.id}`;
+                        const zone = displayTimezone(item.schedule, viewingTimezone);
+                        return (
+                          <div
+                            key={`${item.platform}:${item.schedule.id}`}
+                            className="schedule-destination"
+                          >
+                            <button
+                              className="schedule-destination-toggle"
+                              aria-expanded={expanded}
+                              onClick={() =>
+                                setExpandedPlatform(
+                                  expanded ? "" : `${item.platform}:${item.schedule.id}`
+                                )
+                              }
+                            >
+                              <span className={`schedule-platform-icon platform-${item.platform}`}>
+                                {PLATFORM_GLYPHS[item.platform] ||
+                                  (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
+                              </span>
+                              <strong>{PLATFORM_NAMES[item.platform] || item.platform}</strong>
+                              <StatusPill status={item.status} />
+                              <span aria-hidden="true">{expanded ? "⌃" : "⌄"}</span>
+                            </button>
+                            {expanded && (
+                              <div className="schedule-destination-detail">
+                                <div>
+                                  <span>Post title</span>
+                                  <p>{copy.title || "No title stored for this destination"}</p>
                                 </div>
-                              ) : <p>Media unavailable for this destination.</p>}
-                            <p className="schedule-destination-time">
-                              {formatScheduleTime(
-                                item.schedule.startTime || item.schedule.time,
-                                zone.value
-                              )}{" "}
-                              · {timezoneLabel(zone.value, item.schedule.startTime || item.schedule.time)}
-                              {!zone.recorded ? " (viewing timezone)" : ""}
-                              {zone.storedValue && !zone.recorded && <small>Stored timezone: {zone.storedValue}</small>}
-                            </p>
-                            {!ownSchedule && <p>This schedule is shared by multiple destinations. Use release controls.</p>}
-                            {ownSchedule && <div className="schedule-destination-actions">
-                              {onEditCopy && <button
-                                onClick={() => openCopyEditor(selected, item)}
-                                disabled={!editable(item)}
-                              >
-                                Edit {PLATFORM_NAMES[item.platform] || item.platform} copy
-                              </button>}
-                              {onReschedule && <button
-                                onClick={() => openReschedule(selected, item)}
-                                disabled={!editable(item)}
-                              >
-                                Reschedule {PLATFORM_NAMES[item.platform] || item.platform}
-                              </button>}
-                              {item.status === "Paused" && onResume ? (
-                                <button onClick={() => onResume?.(item.schedule.id)}>
-                                  Resume destination
-                                </button>
-                              ) : editable(item) && item.status !== "Paused" && onPause ? (
-                                <button
-                                  onClick={() => {
-                                    if (
-                                      window.confirm(
-                                        `Pause only ${PLATFORM_NAMES[item.platform] || item.platform} for ${selected.title}?`
-                                      )
-                                    )
-                                      onPause?.(item.schedule.id);
-                                  }}
-                                >
-                                  Pause destination
-                                </button>
-                              ) : null}
-                              {onDelete && <button
-                                className="danger"
-                                onClick={() => onDelete(item.schedule.id)}
-                                disabled={!editable(item)}
-                              >
-                                Cancel destination
-                              </button>}
-                            </div>}
+                                <div>
+                                  <span>Caption</span>
+                                  <p>{copy.caption || "No platform-specific caption stored"}</p>
+                                </div>
+                                {destinationMedia.url || destinationMedia.poster ? (
+                                  <div className="schedule-platform-media">
+                                    <span>Media for this destination</span>
+                                    {destinationMedia.kind === "image" || !destinationMedia.url ? (
+                                      <img
+                                        src={
+                                          destinationMedia.kind === "image"
+                                            ? destinationMedia.url || destinationMedia.poster
+                                            : destinationMedia.poster
+                                        }
+                                        alt={`${PLATFORM_NAMES[item.platform]} scheduled media`}
+                                      />
+                                    ) : (
+                                      <video
+                                        src={destinationMedia.url}
+                                        poster={destinationMedia.poster || undefined}
+                                        controls
+                                        preload="metadata"
+                                        aria-label={`${PLATFORM_NAMES[item.platform]} scheduled video`}
+                                      />
+                                    )}
+                                  </div>
+                                ) : (
+                                  <p>Media unavailable for this destination.</p>
+                                )}
+                                <p className="schedule-destination-time">
+                                  {formatScheduleTime(
+                                    item.schedule.startTime || item.schedule.time,
+                                    zone.value
+                                  )}{" "}
+                                  ·{" "}
+                                  {timezoneLabel(
+                                    zone.value,
+                                    item.schedule.startTime || item.schedule.time
+                                  )}
+                                  {!zone.recorded ? " (viewing timezone)" : ""}
+                                  {zone.storedValue && !zone.recorded && (
+                                    <small>Stored timezone: {zone.storedValue}</small>
+                                  )}
+                                </p>
+                                {!ownSchedule && (
+                                  <p>
+                                    This schedule is shared by multiple destinations. Use release
+                                    controls.
+                                  </p>
+                                )}
+                                {ownSchedule && (
+                                  <div className="schedule-destination-actions">
+                                    {onEditCopy && (
+                                      <button
+                                        onClick={() => openCopyEditor(selected, item)}
+                                        disabled={!editable(item)}
+                                      >
+                                        Edit {PLATFORM_NAMES[item.platform] || item.platform} copy
+                                      </button>
+                                    )}
+                                    {onReschedule && (
+                                      <button
+                                        onClick={() => openReschedule(selected, item)}
+                                        disabled={!editable(item)}
+                                      >
+                                        Reschedule {PLATFORM_NAMES[item.platform] || item.platform}
+                                      </button>
+                                    )}
+                                    {item.status === "Paused" && onResume ? (
+                                      <button onClick={() => onResume?.(item.schedule.id)}>
+                                        Resume destination
+                                      </button>
+                                    ) : editable(item) && item.status !== "Paused" && onPause ? (
+                                      <button
+                                        onClick={() => {
+                                          if (
+                                            window.confirm(
+                                              `Pause only ${PLATFORM_NAMES[item.platform] || item.platform} for ${selected.title}?`
+                                            )
+                                          )
+                                            onPause?.(item.schedule.id);
+                                        }}
+                                      >
+                                        Pause destination
+                                      </button>
+                                    ) : null}
+                                    {onDelete && (
+                                      <button
+                                        className="danger"
+                                        onClick={() => onDelete(item.schedule.id)}
+                                        disabled={!editable(item)}
+                                      >
+                                        Cancel destination
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -564,8 +655,20 @@ const SchedulesPanel = ({
                     Preview
                   </button>
                   <button
-                    onClick={() => openCopyEditor(selected, selected.destinations.find(item => editable(item) && canControlDestination(item)))}
-                    disabled={!onEditCopy || !selected.destinations.some(item => editable(item) && canControlDestination(item))}
+                    onClick={() =>
+                      openCopyEditor(
+                        selected,
+                        selected.destinations.find(
+                          item => editable(item) && canControlDestination(item)
+                        )
+                      )
+                    }
+                    disabled={
+                      !onEditCopy ||
+                      !selected.destinations.some(
+                        item => editable(item) && canControlDestination(item)
+                      )
+                    }
                   >
                     Edit post/copy
                   </button>
@@ -598,7 +701,10 @@ const SchedulesPanel = ({
             <header>
               <div>
                 <h3>Release calendar</h3>
-                <p>Select a release to inspect all destinations. Times include the recorded or viewing timezone.</p>
+                <p>
+                  Select a release to inspect all destinations. Times include the recorded or
+                  viewing timezone.
+                </p>
               </div>
               <div className="schedule-legend">
                 {["Ready", "Scheduled", "Publishing", "Published", "Failed"].map(status => (
@@ -624,7 +730,10 @@ const SchedulesPanel = ({
                     }}
                     aria-label={`Select ${release.title}, ${dateLabel(release.time, zone)}, ${release.destinations.length} destinations`}
                   >
-                    <span className="schedule-calendar-date"><small>{dateLabel(release.time, zone)}</small><StatusPill status={release.destinations[0]?.status || "Ready"} /></span>
+                    <span className="schedule-calendar-date">
+                      <small>{dateLabel(release.time, zone)}</small>
+                      <StatusPill status={release.destinations[0]?.status || "Ready"} />
+                    </span>
                     <span
                       className={`schedule-variant ${release.variant === "Timeline" ? "timeline" : "final"}`}
                     >
@@ -634,8 +743,14 @@ const SchedulesPanel = ({
                           ? "FINAL VIDEO"
                           : "RELEASE"}
                     </span>
-                    <strong>{release.subject}{release.variant ? ` — ${release.variant}` : ""}</strong>
-                    <em>{release.destinations.length} destinations · {clockLabel(release.time, zone)} {timezoneLabel(zone, release.time)}</em>
+                    <strong>
+                      {release.subject}
+                      {release.variant ? ` — ${release.variant}` : ""}
+                    </strong>
+                    <em>
+                      {release.destinations.length} destinations · {clockLabel(release.time, zone)}{" "}
+                      {timezoneLabel(zone, release.time)}
+                    </em>
                     <span className="schedule-calendar-platforms">
                       {release.destinations.map(item => (
                         <span
@@ -643,7 +758,8 @@ const SchedulesPanel = ({
                           title={PLATFORM_NAMES[item.platform] || item.platform}
                           className={`schedule-platform-icon platform-${item.platform}`}
                         >
-                          {PLATFORM_GLYPHS[item.platform] || (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
+                          {PLATFORM_GLYPHS[item.platform] ||
+                            (PLATFORM_NAMES[item.platform] || item.platform).slice(0, 1)}
                         </span>
                       ))}
                     </span>
@@ -842,6 +958,11 @@ const SchedulesPanel = ({
           </form>
         </div>
       )}
+      {hasMore && onLoadMore ? (
+        <button type="button" className="control-btn" disabled={loading} onClick={onLoadMore}>
+          {loading ? "Loading schedules…" : "Load more schedules"}
+        </button>
+      ) : null}
     </section>
   );
 };

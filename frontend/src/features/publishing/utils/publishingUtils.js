@@ -192,6 +192,17 @@ export const mergeDateTimeValue = (currentValue, patch = {}) => {
   return `${date}T${time || "09:00"}`;
 };
 
+export function facebookPublisherPages(snapshot) {
+  const pages=snapshot?.raw?.facebook?.pages || snapshot?.raw?.instagram?.pages || [];
+  return Array.isArray(pages) ? pages.filter(p=>p && p.id && p.name).map(p=>({
+    id:String(p.id),name:String(p.name),
+    ...(p.instagram_business_account?.id ? {instagram_business_account:{
+      id:String(p.instagram_business_account.id),
+      ...(p.instagram_business_account.username ? {username:String(p.instagram_business_account.username)} : {})
+    }} : {})
+  })) : [];
+}
+
 export const DateTimeSplitControl = ({ value, onChange, compact = false }) => {
   const { date, time } = splitDateTimeValue(value);
 

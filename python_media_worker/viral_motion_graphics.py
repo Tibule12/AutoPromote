@@ -16,7 +16,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 PRESETS = ("brand_reveal", "title", "kinetic", "counter", "comparison", "lower_third", "callout", "watermark", "badge", "progress", "quote", "cta")
-SOUNDS = ("sweep", "impact", "pop", "click", "riser", "chime", "reverse", "glitch", "subdrop")
+SOUNDS = ("sweep", "impact", "pop", "click", "riser", "chime", "reverse", "glitch", "subdrop",
+          "cinematic_hit", "airy_whoosh", "bass_punch", "metal_hit", "tape_stop", "sparkle")
 FONT = Path(__file__).parent / "assets/fonts/StudioMotion-Bold.ttf"
 SAMPLE_RATE = 48000
 
@@ -95,6 +96,13 @@ def validate_design(motion_graphics=None, sound_effects=None):
                                       ("trimStart", 0, 86400, 0), ("volume", 0, 1, .8),
                                       ("fadeIn", 0, 15, 0), ("fadeOut", 0, 15, 0)):
             e[key] = bound(e.get(key), low, high, default)
+        if e.get("fadeOffset") is not None or e.get("fadeDuration") is not None:
+            offset, length = e.get("fadeOffset"), e.get("fadeDuration")
+            if (e.get("kind") != "voiceover" or type(offset) not in (int, float)
+                    or type(length) not in (int, float) or not math.isfinite(offset)
+                    or not math.isfinite(length) or offset < 0 or not .05 <= length <= 7200
+                    or offset + e["duration"] > length + 1/90000):
+                raise ValueError("Invalid retained voice-over fade range")
         normalized_effects.append(e)
     return [normalize_motion(s) for s in scenes if s.get("enabled") is not False], normalized_effects
 
@@ -428,12 +436,37 @@ def synthesize_effect(effect, sample_rate=SAMPLE_RATE):
     samples = np.empty(count, dtype=np.float32)
     fade_in, fade_out = max(.001, effect.get("fadeIn", 0)), max(.005, effect.get("fadeOut", 0))
     tone, seed, phase, tau = effect.get("tone"), 123456789, 0, 2*math.pi
+    filtered_noise = 0
     for i in range(count):
         t = i/sample_rate
         p = t/duration
         seed = (seed*1664525+1013904223) & 0xffffffff
         noise = seed/4294967296*2-1
-        if tone in ("sweep", "riser", "reverse"):
+        previous_noise = filtered_noise
+        filtered_noise += min(1, 2400/sample_rate)*(noise-filtered_noise)
+        if tone == "cinematic_hit":
+            phase += tau*(42+105*math.exp(-32*t))/sample_rate
+            value = (.62*math.sin(phase)*math.exp(-3.6*p) +
+                     .26*filtered_noise*math.exp(-12*p) + .10*math.sin(tau*196*t)*math.exp(-6*p))
+        elif tone == "airy_whoosh":
+            phase += tau*(900+2800*math.sin(math.pi*p))/sample_rate
+            value = (.62*(noise-previous_noise)+.09*math.sin(phase))*math.sin(math.pi*p)**2
+        elif tone == "bass_punch":
+            phase += tau*(48+160*math.exp(-42*t))/sample_rate
+            value = .82*math.sin(phase)*math.exp(-7*p)+.15*noise*math.exp(-70*p)
+        elif tone == "metal_hit":
+            value = (.34*math.sin(tau*340*t)+.23*math.sin(tau*731*t)+
+                     .16*math.sin(tau*1193*t)+.09*math.sin(tau*1877*t))*math.exp(-5*p)+.12*noise*math.exp(-65*p)
+        elif tone == "tape_stop":
+            phase += tau*(45+950*(1-p)**3)/sample_rate
+            value = (.48*math.sin(phase)+.18*math.sin(2*phase)+.12*math.sin(3*phase))*(1-p)**.65
+        elif tone == "sparkle":
+            value = 0
+            for k in range(6):
+                local = t-k*duration*.075
+                if local >= 0:
+                    value += .16*math.sin(tau*880*2**(k/3)*local)*(1-math.exp(-120*local))*math.exp(-9*local/duration)
+        elif tone in ("sweep", "riser", "reverse"):
             rise = tone != "sweep"
             frequency = 2600-2300*p if tone == "reverse" else 180+3200*p if rise else 1800-1450*p
             phase += tau*frequency/sample_rate
@@ -486,23 +519,53 @@ def prepare_voiceover_samples(effect, source, speed_plan):
               for p in speed_plan if p["end_time"] > start and p["start_time"] < end]
     if not ranges:
         return np.empty(0, dtype=np.float32), 0
-    chain = [f"[0:a]atrim=start={effect['trimStart']}:duration={effect['duration']},asetpts=PTS-STARTPTS"]
+    # Quantize cumulative output boundaries, rather than rounding every piece
+    # independently. Dense ramps and cut joins must not accumulate sample drift.
+    output_seconds, previous_sample, sampled_ranges = 0.0, 0, []
+    for first, last, rate in ranges:
+        output_seconds += (last-first)/rate
+        end_sample = round(output_seconds * SAMPLE_RATE)
+        if end_sample > previous_sample:
+            sampled_ranges.append((first, last, rate, end_sample-previous_sample))
+        previous_sample = end_sample
+    if not sampled_ranges:
+        return np.empty(0, dtype=np.float32), map_timeline_time(speed_plan, ranges[0][0])
+    # FFmpeg duration options reject scientific notation. Retained curve joins
+    # can be one media tick long, shorter than one output audio sample.
+    chain = [f"[0:a]atrim=start={effect['trimStart']:.9f}:duration={effect['duration']:.9f},asetpts=PTS-STARTPTS"]
+    fade_offset = effect.get("fadeOffset") or 0
+    fade_duration = effect.get("fadeDuration") or effect["duration"]
+    if fade_offset:
+        chain[0] += f"+{fade_offset:.9f}/TB"
     if effect["fadeIn"] > 0:
-        chain[0] += f",afade=t=in:d={effect['fadeIn']}"
+        chain[0] += f",afade=t=in:d={effect['fadeIn']:.9f}"
     if effect["fadeOut"] > 0:
-        chain[0] += f",afade=t=out:st={max(0, effect['duration']-effect['fadeOut'])}:d={effect['fadeOut']}"
-    chain[0] += f",asplit={len(ranges)}" + "".join(f"[vo{i}]" for i in range(len(ranges)))
-    for index, (first, last, rate) in enumerate(ranges):
+        chain[0] += f",afade=t=out:st={max(0, fade_duration-effect['fadeOut']):.9f}:d={effect['fadeOut']:.9f}"
+    if fade_offset:
+        chain[0] += ",asetpts=PTS-STARTPTS"
+    chain[0] += f",aresample={SAMPLE_RATE},asplit={len(sampled_ranges)}" + "".join(f"[vo{i}]" for i in range(len(sampled_ranges)))
+    for index, (first, last, rate, sample_count) in enumerate(sampled_ranges):
         tempos = []
-        remaining = rate
+        # A sub-sample join has no measurable pitch. WSOLA rejects a one-sample
+        # input; retain its sample and let the finite output length place it.
+        remaining = rate if (last-first) * SAMPLE_RATE > 1 else 1
         while remaining < .5:
             tempos.append("atempo=0.5"); remaining /= .5
         while remaining > 2:
             tempos.append("atempo=2"); remaining /= 2
-        tempos.append(f"atempo={remaining}")
-        chain.append(f"[vo{index}]atrim=start={first-start}:end={last-start},asetpts=PTS-STARTPTS,"
-                     + ",".join(tempos) + f",apad,atrim=duration={(last-first)/rate}[vot{index}]")
-    chain.append("".join(f"[vot{i}]" for i in range(len(ranges))) + f"concat=n={len(ranges)}:v=0:a=1[out]")
+        # WSOLA atempo=1 still shifts/changes source samples. An unchanged
+        # rate must retain the exact trimmed recording and its sample phase.
+        if abs(remaining - 1) > 1e-9:
+            tempos.append(f"atempo={remaining}")
+        # WSOLA also needs look-ahead for very short retained ranges. Read real
+        # following speech where available, then finite silence at the cue end;
+        # trim the stretched result back to this interval's exact sample count.
+        context = .2 if tempos and last-first < .1 else 0
+        chain.append(f"[vo{index}]atrim=start={first-start:.9f}:end={last-start+context:.9f},asetpts=PTS-STARTPTS,"
+                     + (f"apad=pad_len={round(context*SAMPLE_RATE)}," if context else "")
+                     + (",".join(tempos) + "," if tempos else "")
+                     + f"apad=whole_len={sample_count},atrim=end_sample={sample_count}[vot{index}]")
+    chain.append("".join(f"[vot{i}]" for i in range(len(sampled_ranges))) + f"concat=n={len(sampled_ranges)}:v=0:a=1[out]")
     raw = run(["ffmpeg", "-v", "error", "-nostdin", "-i", str(source), "-filter_complex", ";".join(chain),
                "-map", "[out]", "-ac", "1", "-ar", str(SAMPLE_RATE), "-f", "f32le", "pipe:1"])
     return np.frombuffer(raw, dtype="<f4"), map_timeline_time(speed_plan, ranges[0][0])

@@ -65,9 +65,25 @@ async function createStudioModelRuntime() {
   if (!artifactBucket) throw fail('MODEL_CAPABILITY_STORAGE_UNCONFIGURED',503);
   const bucket=admin.storage().bucket(artifactBucket), artifacts=new FirestoreArtifactStore(db);
   const config=JSON.parse(process.env.STUDIO_MODEL_WORKERS_JSON || '{}');
-  const client=await new GoogleAuth({scopes:['https://www.googleapis.com/auth/cloud-platform']}).getClient();
+  // Cloud deployments keep ADC. Local private integration can explicitly use
+  // the same configured service identity as the authenticated backend; no user
+  // token, gcloud impersonation or additional credential file is introduced.
+  const credentials=process.env.STUDIO_MODEL_USE_BACKEND_IDENTITY==='true'?require('../../firebaseConfig.server'):undefined;
+  const client=await new GoogleAuth({scopes:['https://www.googleapis.com/auth/cloud-platform'],...(credentials?{credentials}:{})}).getClient();
   const workers=Object.fromEntries(Object.entries(config).map(([key,c])=>[key,new CloudRunCapabilityWorker({client,bucket,
     jobName:c.jobName,image:c.image,artifactStore:artifacts})]));
+  let models;
+  if (process.env.STUDIO_MODEL_LOCAL_CPU_ENABLED==='true') {
+    const {LocalCpuCapabilityWorker}=require('../modelRuntime/localCpuWorker');
+    workers['segmentation-tracking:cpu']=new LocalCpuCapabilityWorker({bucket,
+      artifacts,refinementModelDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_REFINEMENT_MODEL_DIR,
+      image:process.env.STUDIO_MODEL_LOCAL_CPU_IMAGE,directory:process.env.STUDIO_MODEL_LOCAL_CPU_ROOT,
+      modelDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_MODEL_DIR,
+      dependenciesDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_DEPS_DIR,
+      baseDependencies:process.env.STUDIO_MODEL_LOCAL_CPU_BASE_DEPS});
+    models=structuredClone(require('../modelRuntime/contract').registry);
+    models.defaults.segment_subject='sam21-small-cpu-v1';
+  }
   const authorize=async ({ownerUid,request:r,requireCurrentRevision})=>{
     const binding=await getOwnedStudioSourceBinding({uid:ownerUid,projectId:r.projectId,sourceAssetId:r.sourceAssetId,firestore:db});
     if (binding && binding.sourceSha256!==r.sourceSha256) throw fail('MODEL_SOURCE_UNVERIFIED',409);
@@ -87,7 +103,7 @@ async function createStudioModelRuntime() {
       sourceAssetId:r.sourceAssetId,sourceSha256:r.sourceSha256,firestore:db});
     return {sha256:r.sourceSha256,storagePath:r.sourceStoragePath,bucket:artifactBucket,generation:String(metadata.generation),size:Number(metadata.size)};
   };
-  return new ModelCapabilityRuntime({jobs:new FirestoreJobStore(db),artifacts,authorize,workers});
+  return new ModelCapabilityRuntime({jobs:new FirestoreJobStore(db),artifacts,authorize,workers,...(models?{models}:{})});
 }
 async function getRuntime() { if(!instance)instance=createStudioModelRuntime().catch(e=>{instance=null;throw e;});return instance; }
 async function importGeneratedResult({ownerUid,jobId}) {

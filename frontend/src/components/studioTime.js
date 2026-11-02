@@ -413,6 +413,27 @@ export const mapOutputTickToProgrammeTick = (timeMap, outputTick) => {
   return Math.min(segment.programmeRange.endTick, segment.programmeRange.startTick + offset);
 };
 
+// Rendering integrates the rational rates continuously, then rounds once at
+// the sample/frame boundary. Keep the persisted integer knots for edit/UI
+// identity; their accumulated rounding must not shift media phase.
+export const mapStudioContinuousSeconds = (timeMap, seconds, from = "programme") => {
+  if (!timeMap?.length || !Number.isFinite(seconds)) return NaN;
+  let output = timeMap[0].outputRange.startTick / TICKS_PER_SECOND;
+  const forward = from === "programme";
+  if (seconds <= (forward ? timeMap[0].programmeRange.startTick / TICKS_PER_SECOND : output))
+    return forward ? output : timeMap[0].programmeRange.startTick / TICKS_PER_SECOND;
+  for (const row of timeMap) {
+    const start = row.programmeRange.startTick / TICKS_PER_SECOND;
+    const end = row.programmeRange.endTick / TICKS_PER_SECOND;
+    const rate = row.rateNumerator / row.rateDenominator;
+    const length = (end - start) / rate;
+    if (forward && seconds <= end) return output + Math.max(0, seconds - start) / rate;
+    if (!forward && seconds <= output + length) return start + Math.max(0, seconds - output) * rate;
+    output += length;
+  }
+  return forward ? output : timeMap.at(-1).programmeRange.endTick / TICKS_PER_SECOND;
+};
+
 export const mapProgrammeRangeToOutputRanges = (timeMap, programmeRange) => {
   const range = requireTimeRange("programme", programmeRange);
   return (timeMap || []).flatMap(segment => {

@@ -2,6 +2,7 @@
 // these legacy decisions until they have been reconciled once. Never infer
 // deletion of an unmigrated field from its absence in an old document.
 export const STUDIO_EDIT_SETTING_FIELDS = [
+  "creativeTemplateInstance",
   "captionCoverageMode", "contentProfile", "joinTransition", "joinTransitionDuration",
   "silenceRemoval", "silenceThreshold", "minSilenceDuration", "silencePreview",
   "removeWatermark", "watermarkMode", "brandWatermark", "manualWatermarkRegions",

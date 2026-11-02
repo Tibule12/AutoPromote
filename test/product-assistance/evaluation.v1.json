@@ -1,0 +1,17 @@
+[
+  {"question":"How do I put text behind someone?","features":["studio.compositing.text_behind_subject","studio.creator.text_behind_subject"],"task":"task.text_behind","control":"studio.subject.range"},
+  {"question":"Can AutoPromote track an object?","features":["studio.tracking","studio.creator.tracking"],"task":"task.tracked_text","control":"studio.subject.seed_points"},
+  {"question":"Why isn't cleanup removing the object?","features":["studio.creator.object_cleanup"],"task":"task.remove_object"},
+  {"question":"How do I automatically switch podcast cameras?","features":["cam_combiner.switching","cam_combiner.synchronization"],"task":"task.cam_combiner","control":"cam_combiner.switch_interval"},
+  {"question":"How do I fix reversed podcast speakers?","features":["cam_combiner.channel_mapping"],"task":"task.reversed_channels","control":"cam_combiner.swap_channels"},
+  {"question":"How do I animate my logo?","features":["creative.logo_brand","studio.three_d"],"task":"task.cinematic_logo","control":"studio.three_d.x"},
+  {"question":"Can I turn an image into video?","features":["generation.image_to_video"],"task":"task.image_cinematic"},
+  {"question":"How do I edit Director's result?","features":["director.proposals","director.review"],"task":"task.director_manual"},
+  {"question":"Why are my automatic captions wrong?","features":["studio.captions"],"task":"task.captions_correct"},
+  {"question":"How do I add keyframes?","features":["studio.keyframes"],"control":"studio.keyframe.time"},
+  {"question":"What is the difference between tracking and a manual position?","features":["studio.tracking","studio.creator.tracking"],"task":"task.tracked_text"},
+  {"question":"Can AutoPromote estimate real scene depth?","features":["studio.compositing.depth_estimation","studio.compositing.mask_depth"]},
+  {"question":"How do I use a product launch template?","features":["studio.templates","creative.shared_templates"],"task":"task.use_template"},
+  {"question":"Why can't I export my 3D scene?","features":["studio.three_d","studio.blender"],"task":"task.three_d_title","control":"studio.three_d.material"},
+  {"question":"Can AutoPromote publish directly to TikTok?","features":["publishing.publish","publishing.connections","publishing.schedule"]}
+]

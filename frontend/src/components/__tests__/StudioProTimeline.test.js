@@ -2,6 +2,62 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import StudioProTimeline, {buildTimelineCaptionRegions} from "../StudioProTimeline";
 
+test('motion property lanes select the actual authored key and support precise frame nudges and deletion', () => {
+  const select = jest.fn(), update = jest.fn(), remove = jest.fn(), seek = jest.fn();
+  render(<StudioProTimeline duration={10} playbackRate={2} frameRate={24} trackStates={{}}
+    motionKeyframes={[{ id: 'scale-a', targetId: 'main-video', property: 'scale', time: 3, value: 1.2, easing: 'linear' }]}
+    onSelectMotionKeyframe={select} onUpdateMotionKeyframe={update} onRemoveMotionKeyframe={remove} onSeek={seek} />);
+  expect(screen.queryByTestId('motion-timeline-key-scale-a')).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Expand Source video keyframes' }));
+  const key = screen.getByTestId('motion-timeline-key-scale-a');
+  fireEvent.click(key);
+  expect(select).toHaveBeenCalledWith('scale-a', 'main-video');
+  expect(seek.mock.lastCall[1]).toBe(3);
+  fireEvent.keyDown(key, { key: 'ArrowRight' });
+  expect(update.mock.lastCall[0]).toBe('scale-a');
+  expect(update.mock.lastCall[1].time).toBeCloseTo(3 + 2/24, 10);
+  fireEvent.keyDown(key, { key: 'Delete' });
+  expect(remove).toHaveBeenCalledWith('scale-a');
+});
+
+test('dragging a motion key commits one edit; locking its owning track retains selection and blocks mutation', () => {
+  const update = jest.fn(), select = jest.fn(), remove = jest.fn();
+  const props = { duration: 10, frameRate: 20, trackStates: {}, overlays: [{ id: 'logo', type: 'image', name: 'Logo' }],
+    motionKeyframes: [{ id: 'logo-x', targetId: 'logo', property: 'x', time: 2, value: 40 }],
+    onSelectMotionKeyframe: select, onUpdateMotionKeyframe: update, onRemoveMotionKeyframe: remove };
+  const { rerender } = render(<StudioProTimeline {...props} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Expand Logo keyframes' }));
+  const key = screen.getByTestId('motion-timeline-key-logo-x');
+  jest.spyOn(key.parentElement, 'getBoundingClientRect').mockReturnValue({ width: 1000 });
+  fireEvent(key, new MouseEvent('pointerdown', { bubbles: true, clientX: 200, button: 0 }));
+  fireEvent(key, new MouseEvent('pointermove', { bubbles: true, clientX: 350 }));
+  fireEvent(key, new MouseEvent('pointerup', { bubbles: true, clientX: 350 }));
+  expect(update).toHaveBeenCalledTimes(1);
+  expect(update).toHaveBeenCalledWith('logo-x', { time: 3.5 });
+  update.mockClear(); rerender(<StudioProTimeline {...props} trackStates={{ broll: { locked: true } }} />);
+  fireEvent.click(key); fireEvent.keyDown(key, { key: 'ArrowRight' }); fireEvent.keyDown(key, { key: 'Delete' });
+  key.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, clientX: 200, button: 0 }));
+  key.dispatchEvent(new MouseEvent('pointermove', { bubbles: true, clientX: 350 }));
+  key.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, clientX: 350 }));
+  expect(select).toHaveBeenCalledWith('logo-x', 'logo');
+  expect(update).not.toHaveBeenCalled(); expect(remove).not.toHaveBeenCalled();
+});
+
+test('every image/video layer has one native media lane even before a layout mode is chosen', () => {
+  const select = jest.fn();
+  render(<StudioProTimeline duration={10} trackStates={{}} onSelectOverlay={select}
+    overlays={[{ id: 'logo', type: 'image', name: 'Brand logo', startTime: 3, duration: 2 },
+      { id: 'shot', type: 'video', name: 'Inserted shot', startTime: 4, duration: 3 },
+      { id: 'cutaway', type: 'text', bRollMode: 'fullscreen', name: 'Title cutaway', startTime: 2, duration: 1 },
+      { id: 'headline', type: 'text', name: 'Headline', startTime: 0, duration: 2 }]} />);
+  expect(screen.getAllByTestId(/pro-broll-clip-/)).toHaveLength(3);
+  expect(screen.getAllByTestId(/pro-graphics-clip-/)).toHaveLength(1);
+  fireEvent.click(screen.getByText('Brand logo'));
+  expect(select).toHaveBeenCalledWith('logo');
+});
+
 test("2x programme clock matches export while clip selection preserves source edit coordinates", () => {
   const seek = jest.fn();
   const selectOverlay = jest.fn();

@@ -51,12 +51,12 @@ export const rippleStudioSnapshotLinkedTimeline = (
     existingIds.add(id);
     return id;
   };
-  const retimeItems = items => rippleTimedItems(items, from, to, nextId);
+  const retimeItems = (items, preserveVoiceFade) => rippleTimedItems(items, from, to, nextId, {preserveVoiceFade});
   const retimeKeys = (keys, preserveRightState = false) =>
     rippleTimelineKeys(keys, from, to, { preserveRightState });
   const next = { ...snapshot };
   for (const field of ["overlays", "soundEffects", "voiceovers", "adjustmentLayers"]) {
-    if (Array.isArray(snapshot[field])) next[field] = retimeItems(snapshot[field]);
+    if (Array.isArray(snapshot[field])) next[field] = retimeItems(snapshot[field], field === "voiceovers");
   }
   if (Array.isArray(snapshot.motionScenes))
     next.motionScenes = cutMotion(snapshot.motionScenes, from, to);

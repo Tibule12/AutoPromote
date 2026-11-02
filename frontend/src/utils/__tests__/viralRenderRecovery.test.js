@@ -1,5 +1,6 @@
 import {
   clearViralRenderAttempt,
+  clearSessionPreservingRenderAttempts,
   loadViralRenderAttempt,
   saveViralRenderAttempt,
 } from "../viralRenderRecovery";
@@ -12,6 +13,19 @@ describe("viral render recovery", () => {
   beforeEach(() => {
     window.localStorage.clear();
     jest.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
+  });
+
+  test("sign-out clears session data while retaining owner-scoped render recovery", () => {
+    window.localStorage.setItem("user", "private session");
+    window.localStorage.setItem("token", "expired token");
+    saveViralRenderAttempt("owner-a", { requestId: REQUEST_A, studioProjectId: "project-a", brandWatermark: false });
+    saveViralRenderAttempt("owner-b", { requestId: REQUEST_B, studioProjectId: "project-b", brandWatermark: false });
+    clearSessionPreservingRenderAttempts();
+    expect(window.localStorage.getItem("user")).toBeNull();
+    expect(window.localStorage.getItem("token")).toBeNull();
+    expect(loadViralRenderAttempt("owner-a", "project-a").requestId).toBe(REQUEST_A);
+    expect(loadViralRenderAttempt("owner-b", "project-a")).toBeNull();
+    expect(loadViralRenderAttempt("owner-b", "project-b").requestId).toBe(REQUEST_B);
   });
 
   afterEach(() => {

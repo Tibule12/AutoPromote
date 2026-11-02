@@ -80,6 +80,7 @@ export function ensureAudioRemixPreview(media) {
     const reverb = context.createConvolver();
     const compressor = context.createDynamicsCompressor();
     const output = context.createGain();
+    const trackGain = context.createGain();
     const analyser = context.createAnalyser();
 
     try {
@@ -90,9 +91,12 @@ export function ensureAudioRemixPreview(media) {
 
     compressor.threshold.value = -16;
     compressor.knee.value = 12;
-    compressor.ratio.value = 2.5;
+    // Creating a graph for metering/track gain must leave untreated audio dry.
+    // updateAudioRemixPreview enables dynamics and reverb only when requested.
+    compressor.ratio.value = 1;
     compressor.attack.value = 0.008;
     compressor.release.value = 0.22;
+    wet.gain.value = 0;
 
     analyser.fftSize = 1024;
     analyser.smoothingTimeConstant = 0.68;
@@ -101,7 +105,7 @@ export function ensureAudioRemixPreview(media) {
     // source -> bass -> clarity -> air
     // air -> dry -> compressor -> output (clean dry speech)
     // air -> reverb -> wet -> output (parallel reverb, doesn't squash compressor)
-    // output -> analyser -> context.destination
+    // output -> trackGain -> analyser -> context.destination
     source.connect(bass);
     bass.connect(clarity);
     clarity.connect(air);
@@ -114,7 +118,8 @@ export function ensureAudioRemixPreview(media) {
     reverb.connect(wet);
     wet.connect(output);
 
-    output.connect(analyser);
+    output.connect(trackGain);
+    trackGain.connect(analyser);
     analyser.connect(context.destination);
 
     const unlockAudio = () => {
@@ -144,6 +149,7 @@ export function ensureAudioRemixPreview(media) {
       reverb,
       compressor,
       output,
+      trackGain,
       analyser,
       meterSubscribers: new Set(),
       meterFrame: null,
@@ -159,12 +165,36 @@ export function ensureAudioRemixPreview(media) {
   }
 }
 
-export async function updateAudioRemixPreview(media, value, bypass = false) {
+// MediaElement.volume is restricted to [0, 1], while Studio's authored bus
+// curves support boosts. Reuse the existing per-element audio graph and apply
+// bus gain after effects, without changing the saved fader/remix decisions.
+export function applyStudioMediaGain(media, value) {
+  if (!media) return false;
+  const gain = Number.isFinite(Number(value)) ? Math.max(0, Math.min(4, Number(value))) : 0;
+  let graph = graphs.get(media) || media.__audioRemixGraph;
+  if (!graph && gain > 1) graph = ensureAudioRemixPreview(media);
+  if (graph?.trackGain) {
+    if (graph.trackGain.gain.value !== gain) graph.trackGain.gain.value = gain;
+    if (media.volume !== 1) media.volume = 1;
+    return true;
+  }
+  const nativeGain = Math.min(1, gain);
+  if (media.volume !== nativeGain) media.volume = nativeGain;
+  return gain <= 1;
+}
+
+export async function updateAudioRemixPreview(media, value, bypass = false, { playbackRate = 1 } = {}) {
   if (!media) return false;
   const remix = normalizeAudioRemix(value);
   const active = remix.enabled && !bypass;
 
-  media.playbackRate = active ? remix.speed : 1;
+  // Pacing owns the untreated programme clock. Resetting a prepared decoder
+  // to 1x and then restoring its authored rate can restart its native clock
+  // exactly while a cut is being promoted.
+  const fallbackRate = Number.isFinite(Number(playbackRate))
+    ? Math.max(.25, Math.min(4, Number(playbackRate))) : 1;
+  const rate = active ? remix.speed : fallbackRate;
+  if (media.playbackRate !== rate) media.playbackRate = rate;
   media.preservesPitch = active ? remix.keepPitch : true;
   media.mozPreservesPitch = media.preservesPitch;
   media.webkitPreservesPitch = media.preservesPitch;

@@ -141,7 +141,7 @@ const cloneParameters = (item, fields) => JSON.parse(JSON.stringify(Object.fromE
 const AUDIO_CUE_PARAMETER_FIELDS = [
   "enabled", "builtIn", "kind", "tone", "name", "label", "sourceClipId",
   "sourceStoragePath", "storagePath", "contentHash", "sha256", "volume",
-  "muted", "fadeIn", "fadeOut", "pan", "audioMode", "rate", "pitchPreserved",
+  "muted", "fadeIn", "fadeOut", "fadeOffset", "fadeDuration", "pan", "audioMode", "rate", "pitchPreserved",
 ];
 const cueParameterFields = collection => collection === "adjustmentLayers"
   ? ["enabled", "name", "label", "preset", "opacity", "finishFx", "effects", "intensity"]
@@ -231,6 +231,8 @@ export const buildStudioLayersFromSnapshot = snapshot => [
       ...(item.trackingArtifactRef ? { trackingArtifactRef: createModelArtifactReference(item.trackingArtifactRef) } : {}),
       ...(item.preview ? { preview: cloneStudioDecisionFields(item.preview, ["jobId", "revision", "reviewed", "receipt"]) } : {}),
       ...(item.pending ? { pending: cloneStudioDecisionFields(item.pending, ["clientRequestId", "revision", "jobId"]) } : {}),
+      ...(item.maskJob ? { maskJob: cloneStudioDecisionFields(item.maskJob, ["requestId", "selectionJson", "projectId", "projectRevision", "jobId", "mode", "finished", "reusedAtRevision"]) } : {}),
+      ...(item.maskComponents?.length ? { maskComponents: JSON.parse(JSON.stringify(item.maskComponents)) } : {}),
     },
   })),
   ...(snapshot.captionSegments || []).map(captionLayerReference),
@@ -620,9 +622,32 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       parameters: cloneParameters(clip, STUDIO_OCCURRENCE_PARAMETER_FIELDS),
       playback: { direction: "forward", freeze: false, rate: { numerator: 1, denominator: 1 } },
     };
+    // Older native projects stored full-source duration in these parameters.
+    // Hydration can supply occurrence duration instead. Preserve the existing
+    // value when the owned source and authored range did not change; merely
+    // opening the same project must not invalidate its completed export.
+    const previousOccurrence = previousDocument?.clipOccurrences?.find(item=>item.occurrenceId===occurrence.occurrenceId);
+    const previousAsset = previousDocument?.assets?.find(item=>item.assetId===asset.assetId);
+    if (previousOccurrence?.assetId === asset.assetId &&
+        previousAsset?.contentHash === asset.contentHash && previousAsset?.storagePath === asset.storagePath &&
+        stableStringify(previousOccurrence.sourceRange) === stableStringify(occurrence.sourceRange) &&
+        Number.isFinite(previousOccurrence.parameters?.duration)) {
+      occurrence.parameters.duration = previousOccurrence.parameters.duration;
+    }
     programmeTick += durationTick;
     return occurrence;
   });
+  // Replacement plates are owned inputs even though they are not sequence
+  // occurrences. Keep their identity in the canonical asset registry so the
+  // server can authorize the exact scene without trusting a browser URL.
+  for (const item of snapshot.subjectVfxScenes || []) for (const effect of item.scene?.effects || []) {
+    if (effect.type !== "background_replace" || !effect.asset_id) continue;
+    const media = (snapshot.projectMedia || []).find(media => media.id === effect.asset_id);
+    if (!media?.storagePath || media.contentHash !== effect.asset_sha256)
+      fail("BACKGROUND_ASSET_MISSING", "Save the selected background in this project before rendering.");
+    const asset = assetReference(media);
+    assets.set(asset.assetId, asset);
+  }
   const layers = buildStudioLayersFromSnapshot(snapshot);
   const linkedTiming = buildStudioLinkedTimingFromSnapshot(snapshot);
   const visualGraph = buildStudioVisualGraph(snapshot);

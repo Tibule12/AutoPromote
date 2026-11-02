@@ -1,0 +1,448 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "templateId": "podcast_clip_proof_reddit_v1",
+  "version": "1.0.0",
+  "label": "Podcast proof \u2014 Reddit",
+  "categoryIds": [
+    "podcast_to_vertical_promo",
+    "before_after_transformation"
+  ],
+  "inputSlots": [
+    {
+      "id": "brandColour",
+      "type": "colour",
+      "required": true
+    },
+    {
+      "id": "headline",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureOne",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureTwo",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "callToAction",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "resultFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "beforeFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "workflowFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": true
+    }
+  ],
+  "supportedAspects": [
+    "9:16"
+  ],
+  "durationTicks": 1620000,
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "9:16",
+    "sequence": [
+      {
+        "slot": "resultFootage",
+        "offset": 3,
+        "duration": 2.5,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "beforeFootage",
+        "offset": 3,
+        "duration": 4,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "workflowFootage",
+        "offset": 0,
+        "duration": 4,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "resultFootage",
+        "offset": 6.5,
+        "duration": 7.5,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [
+      {
+        "id": "problem-a",
+        "start": 0,
+        "duration": 2.5,
+        "x": 7,
+        "y": 10,
+        "width": 85,
+        "scale": 0.46,
+        "portraitScale": 1,
+        "colour": "brand",
+        "weight": 900,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "headline",
+        "line": 0
+      },
+      {
+        "id": "problem-b",
+        "start": 0,
+        "duration": 2.5,
+        "x": 7,
+        "y": 15,
+        "width": 85,
+        "scale": 0.46,
+        "portraitScale": 1,
+        "colour": "white",
+        "weight": 900,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "headline",
+        "line": 1
+      },
+      {
+        "id": "before-label",
+        "start": 2.5,
+        "duration": 4,
+        "x": 7,
+        "y": 21,
+        "width": 85,
+        "scale": 0.32,
+        "portraitScale": 1,
+        "colour": "brand",
+        "weight": 700,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "SAME RECORDING \u00b7 BEFORE"
+      },
+      {
+        "id": "before-a",
+        "start": 2.6,
+        "duration": 3.8,
+        "x": 7,
+        "y": 73,
+        "width": 85,
+        "scale": 0.36,
+        "portraitScale": 1,
+        "colour": "white",
+        "weight": 700,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureOne",
+        "line": 0
+      },
+      {
+        "id": "before-b",
+        "start": 2.6,
+        "duration": 3.8,
+        "x": 7,
+        "y": 78,
+        "width": 85,
+        "scale": 0.36,
+        "portraitScale": 1,
+        "colour": "white",
+        "weight": 700,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureOne",
+        "line": 1
+      },
+      {
+        "id": "how-label",
+        "start": 6.5,
+        "duration": 4,
+        "x": 7,
+        "y": 17,
+        "width": 85,
+        "scale": 0.34,
+        "portraitScale": 1,
+        "colour": "brand",
+        "weight": 700,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "REAL STUDIO CONTROLS"
+      },
+      {
+        "id": "how-a",
+        "start": 6.6,
+        "duration": 3.8,
+        "x": 7,
+        "y": 78,
+        "width": 85,
+        "scale": 0.36,
+        "portraitScale": 1,
+        "colour": "white",
+        "weight": 700,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureTwo",
+        "line": 0
+      },
+      {
+        "id": "how-b",
+        "start": 6.6,
+        "duration": 3.8,
+        "x": 7,
+        "y": 83,
+        "width": 85,
+        "scale": 0.36,
+        "portraitScale": 1,
+        "colour": "white",
+        "weight": 700,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureTwo",
+        "line": 1
+      },
+      {
+        "id": "payoff-label",
+        "start": 10.5,
+        "duration": 2.0,
+        "x": 7,
+        "y": 12,
+        "width": 85,
+        "scale": 0.29,
+        "portraitScale": 1,
+        "colour": "brand",
+        "weight": 700,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "THE EDITED RESULT"
+      },
+      {
+        "id": "cta",
+        "start": 15.5,
+        "duration": 2.45,
+        "x": 7,
+        "y": 17,
+        "width": 85,
+        "scale": 0.39,
+        "portraitScale": 1,
+        "colour": "white",
+        "weight": 800,
+        "align": "left",
+        "shadow": "strong",
+        "motion": {
+          "enterSeconds": 0.12,
+          "settleSeconds": 0.18,
+          "exitSeconds": 0.1,
+          "enterY": 1.0,
+          "enterScale": 0.99,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "callToAction"
+      }
+    ],
+    "animation": {
+      "enterSeconds": 0.12,
+      "settleSeconds": 0.18,
+      "exitSeconds": 0.1,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "muteOriginalAudio": false,
+    "music": {
+      "volume": 0.04,
+      "fadeIn": 0.05,
+      "fadeOut": 0.25,
+      "ducking": false
+    },
+    "soundCues": [
+      {
+        "time": 2.5,
+        "tone": "airy_whoosh",
+        "duration": 0.22,
+        "volume": 0.07,
+        "fadeIn": 0.01,
+        "fadeOut": 0.06
+      },
+      {
+        "time": 6.5,
+        "tone": "click",
+        "duration": 0.16,
+        "volume": 0.07,
+        "fadeIn": 0.01,
+        "fadeOut": 0.06
+      },
+      {
+        "time": 10.5,
+        "tone": "airy_whoosh",
+        "duration": 0.22,
+        "volume": 0.07,
+        "fadeIn": 0.01,
+        "fadeOut": 0.06
+      }
+    ],
+    "sourceKeyframes": []
+  }
+}

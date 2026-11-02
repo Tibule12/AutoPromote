@@ -4,5 +4,7 @@ export { dryRunStudioCommandBatch } from "../frontend/src/components/studioComma
 // Internal factory callers use the actual Studio adapters and renderer contract.
 export { adaptStudioSnapshotToDocument, validateStudioProjectDocument, projectStudioEditableStateToSnapshot } from "../frontend/src/components/studioProjectDocument";
 export { compileStudioTimelineForRender, assertStudioExportTimelineMatchesDocument, compileStudioFinishForRender, compileStudioCompositionForRender } from "../frontend/src/components/studioRenderCompiler";
+export { compileStudioOverlaysForRender } from "../frontend/src/components/studioRenderCompiler";
 export { buildViralRenderData } from "../frontend/src/components/viralRenderPayload";
 export { createModelArtifactReference } from "../frontend/src/components/studioModelArtifactReference";
+export { instantiateStudioCreativeTemplate, proposeStudioDirectorTemplate, PRODUCT_LAUNCH_TEMPLATE } from "../frontend/src/components/studioCreativeTemplate";

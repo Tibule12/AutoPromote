@@ -10,6 +10,21 @@ const {
 } = require("./services/clipOutcomeLearningService");
 const router = express.Router();
 
+// Exact owned campaign observations for platform-specific marketing review.
+// No provider dispatch, account impersonation or default-zero performance claim.
+router.get('/marketing-posts', authMiddleware, async (req, res) => {
+  try {
+    const result = await require('./services/marketingPostEvidence').collectMarketingPostEvidence({
+      db, uid: req.user?.uid || req.userId,
+      contentIds: typeof req.query.contentIds === 'string' ? req.query.contentIds.split(',') : [],
+      refresh: req.query.refresh === '1',
+    });
+    res.json(result);
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.status ? error.message : 'Post observations unavailable' });
+  }
+});
+
 function parseTimestamp(value) {
   if (!value) return null;
   if (value.toMillis) return value.toMillis();

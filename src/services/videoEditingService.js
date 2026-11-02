@@ -3,10 +3,12 @@
 // Bridges Node.js backend with Python Media Worker
 
 const axios = require("axios");
+const { captionTranscriptionOptions } = require("./captionTranscriptionOptions");
 const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
 const fs = require("fs");
-const { isTransientWorkerOutput, persistWorkerOutput } = require("./studioWorkerOutputService");
+const { gzipSync, gunzipSync } = require("node:zlib");
+const { isTransientWorkerOutput, persistWorkerOutput, persistWorkerBucketOutput } = require("./studioWorkerOutputService");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 const { deductCredits, refundCredits } = require("../creditSystem");
 const { buildWorkerRequestConfig } = require("../utils/cloudRunAuth");
@@ -131,7 +133,39 @@ function getMulticamExpiryIso(fromMs = Date.now()) {
 
 const { v4: uuidv4 } = require("uuid");
 
+// Dense grade grids and canonical render graphs are payloads, not queryable
+// Firestore arrays. A versioned lossless envelope avoids index-entry and
+// document-size failures while retaining the exact worker request and hash.
+const persistProcessingOptions = options => {
+  if (options?.renderViral !== true) return { options };
+  const raw = Buffer.from(JSON.stringify(options));
+  const payload = gzipSync(raw);
+  if (raw.length > 8 * 1024 ** 2 || payload.length > 768 * 1024)
+    throw new Error("Studio render settings exceed the persisted request limit");
+  const watermark = options.viralData?.brand_watermark;
+  return {
+    options: { renderViral: true, ...(watermark === undefined ? {} : { viralData: { brand_watermark: watermark } }) },
+    optionsPayloadEncoding: "gzip-json-v1",
+    optionsPayload: payload,
+    optionsPayloadSha256: crypto.createHash("sha256").update(raw).digest("hex"),
+  };
+};
+
+const readProcessingOptions = record => {
+  if (record?.optionsPayloadEncoding === undefined) return record?.options;
+  if (record.optionsPayloadEncoding !== "gzip-json-v1" ||
+      !Buffer.isBuffer(record.optionsPayload) || record.optionsPayload.length > 768 * 1024)
+    throw new Error("Invalid persisted Studio render settings");
+  const raw = gunzipSync(record.optionsPayload, { maxOutputLength: 8 * 1024 ** 2 });
+  if (crypto.createHash("sha256").update(raw).digest("hex") !== record.optionsPayloadSha256)
+    throw new Error("Persisted Studio render settings changed");
+  const options = JSON.parse(raw.toString("utf8"));
+  if (options?.renderViral !== true) throw new Error("Invalid persisted Studio render kind");
+  return options;
+};
+
 class VideoEditingService {
+  static readProcessingOptions(record) { return readProcessingOptions(record); }
   async assertRenderWorkerReady() {
     try {
       const target = `${MEDIA_WORKER_URL}/health`;
@@ -231,7 +265,7 @@ class VideoEditingService {
         jobId,
         userId,
         videoUrl,
-        options,
+        ...persistProcessingOptions(options),
         ...(attempt.renderRequestId ? { type: "viral_render", renderRequestId: attempt.renderRequestId } : {}),
         ...(attempt.sourceRenderJobId ? { sourceRenderJobId: attempt.sourceRenderJobId } : {}),
         ...(attempt.creditReceipt ? { creditReceipt: attempt.creditReceipt } : {}),
@@ -1217,18 +1251,33 @@ class VideoEditingService {
             }
           }
         }
+        if (!durableOutput && options.renderViral) {
+          durableOutput = await persistWorkerBucketOutput({url:outputUrl,userId,jobId,
+            expectedSha256:result.output_sha256 || result.outputSha256});
+          if (durableOutput) { outputUrl=durableOutput.url; outputStoragePath=durableOutput.storagePath; }
+        }
         console.log("[VideoEditing] Worker output ready", { durable: Boolean(durableOutput) });
+        const workerOutputHash = result.output_sha256 || result.outputSha256;
+        const outputIntegrity = durableOutput
+          ? { outputSha256: durableOutput.sha256, outputBytes: durableOutput.bytes }
+          : typeof workerOutputHash === "string" && /^[a-f0-9]{64}$/.test(workerOutputHash)
+            ? { outputSha256: workerOutputHash,
+                ...(Number.isSafeInteger(result.output_bytes) && result.output_bytes > 0
+                  ? { outputBytes: result.output_bytes } : {}) }
+            : {};
         return {
           success: true,
           url: outputUrl,
           outputStoragePath,
-          ...(durableOutput ? { outputSha256: durableOutput.sha256, outputBytes: durableOutput.bytes } : {}),
+          ...outputIntegrity,
+          ...(durableOutput?.generation ? { outputGeneration: durableOutput.generation } : {}),
           thumbnailUrl,
           coverFrame: result.cover_frame || result.coverFrame || null,
           thumbnailFrame: result.thumbnail_frame || result.thumbnailFrame || null,
           duration: result.duration || 0,
           audioProof: result.audio_proof || result.audioProof || null,
           captionReviewCopy: result.caption_review_copy === true,
+          creativeTemplateInstance: result.creative_template_instance || null,
           message: "Processing completed (Remote Worker)",
         };
       }
@@ -1306,6 +1355,7 @@ class VideoEditingService {
         success: true,
         url: publicUrl,
         message: "Video processed successfully",
+        creativeTemplateInstance: result.creative_template_instance || null,
       };
     } catch (error) {
       console.error("[VideoEditing] Error:", error.message);
@@ -1454,7 +1504,8 @@ class VideoEditingService {
   /**
    * Start an async transcription job
    */
-  async startTranscriptionJob(videoUrl, userId, { translateToEnglish = false } = {}) {
+  async startTranscriptionJob(videoUrl, userId, { translateToEnglish = false, sourceLanguage = "auto" } = {}) {
+    ({ translateToEnglish, sourceLanguage } = captionTranscriptionOptions({translateToEnglish, sourceLanguage}));
     const jobId = uuidv4();
     try {
       // Store initial job state
@@ -1466,11 +1517,12 @@ class VideoEditingService {
         status: "queued",
         progress: 0,
         translateToEnglish: !!translateToEnglish,
+        sourceLanguage,
         createdAt: new Date().toISOString(),
       });
 
       // Start background task
-      this.processTranscriptionBackground(jobId, videoUrl, { translateToEnglish }).catch(err => {
+      this.processTranscriptionBackground(jobId, videoUrl, { translateToEnglish, sourceLanguage }).catch(err => {
         console.error(`[VideoTranscribe] Background Job ${jobId} Failed:`, err);
       });
 
@@ -1483,7 +1535,7 @@ class VideoEditingService {
   /**
    * Background processor for transcription
    */
-  async processTranscriptionBackground(jobId, videoUrl, { translateToEnglish = false } = {}) {
+  async processTranscriptionBackground(jobId, videoUrl, { translateToEnglish = false, sourceLanguage = "auto" } = {}) {
     const docRef = db.collection("video_edits").doc(jobId);
     try {
       await docRef.update({ status: "processing", progress: 10 });
@@ -1492,13 +1544,14 @@ class VideoEditingService {
 
       // Call Python Worker
       const response = await axios.post(
-        `${MEDIA_WORKER_URL}/transcribe`,
+        `${process.env.CAPTION_WORKER_URL || MEDIA_WORKER_URL}/transcribe`,
         {
           video_url: videoUrl,
           // The worker intentionally validates this endpoint as Dict[str, str].
           // Sending a JSON boolean makes FastAPI reject the whole request with
           // 422 before transcription starts.
           translate_to_english: translateToEnglish ? "true" : "false",
+          source_language: sourceLanguage,
         },
         {
           // Full podcast transcription can legitimately exceed ten minutes on

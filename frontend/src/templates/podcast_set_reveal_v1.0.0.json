@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "templateId": "podcast_set_reveal_v1",
+  "version": "1.0.0",
+  "label": "Podcast \u2014 set and type reveal",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "background_replacement",
+    "text_behind_subject",
+    "before_after_transformation"
+  ],
+  "inputSlots": [
+    {
+      "id": "brandColour",
+      "type": "colour",
+      "required": true
+    },
+    {
+      "id": "headline",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureOne",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureTwo",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "callToAction",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "hookFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": true
+    },
+    {
+      "id": "background",
+      "type": "image",
+      "required": true
+    },
+    {
+      "id": "revealSound",
+      "type": "audio",
+      "required": true
+    },
+    {
+      "id": "impactSound",
+      "type": "audio",
+      "required": true
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 540000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "hookFootage",
+        "offset": 0,
+        "duration": 6,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0
+      }
+    ],
+    "titles": [
+      {
+        "id": "raw-label",
+        "literal": "ORIGINAL",
+        "start": 0.08,
+        "duration": 0.63,
+        "x": 5,
+        "y": 8,
+        "width": 30,
+        "scale": 0.32,
+        "weight": 600,
+        "align": "left",
+        "colour": "white",
+        "shadow": "strong"
+      },
+      {
+        "id": "closing-kicker",
+        "slot": "featureTwo",
+        "start": 4.35,
+        "duration": 1.65,
+        "x": 66,
+        "y": 71,
+        "width": 47,
+        "scale": 0.3,
+        "weight": 600,
+        "align": "center",
+        "colour": "brand",
+        "shadow": "none"
+      },
+      {
+        "id": "brand-payoff",
+        "slot": "callToAction",
+        "start": 4.48,
+        "duration": 1.52,
+        "x": 66,
+        "y": 79,
+        "width": 50,
+        "scale": 0.52,
+        "weight": 800,
+        "align": "center",
+        "colour": "white",
+        "shadow": "none"
+      }
+    ],
+    "animation": {
+      "enterSeconds": 0.16,
+      "settleSeconds": 0.3,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 0.07,
+      "fadeIn": 1.1,
+      "fadeOut": 0.8,
+      "ducking": true,
+      "duckMode": "constant",
+      "duckingStrength": 0.45
+    },
+    "soundCues": [
+      {
+        "slot": "revealSound",
+        "time": 0.59,
+        "duration": 0.72,
+        "trimStart": 0,
+        "volume": 0.16,
+        "fadeIn": 0.04,
+        "fadeOut": 0.18
+      },
+      {
+        "slot": "impactSound",
+        "time": 1.1,
+        "duration": 0.65,
+        "trimStart": 0,
+        "volume": 0.13,
+        "fadeIn": 0.01,
+        "fadeOut": 0.3
+      },
+      {
+        "slot": "revealSound",
+        "time": 4.28,
+        "duration": 0.35,
+        "trimStart": 0.2,
+        "volume": 0.065,
+        "fadeIn": 0.015,
+        "fadeOut": 0.12
+      }
+    ],
+    "muteOriginalAudio": false,
+    "finish": {
+      "exposureStops": -0.04,
+      "lift": -0.006,
+      "gamma": 1.01,
+      "gain": 0.98,
+      "contrast": 1.08,
+      "saturation": 0.93,
+      "temperature": -0.13,
+      "tint": 0,
+      "sharpness": 0.04,
+      "vignette": 0.025,
+      "blur": 0,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "letterbox": 0,
+      "precisionGrade": true
+    },
+    "subjectTreatment": {
+      "sourceSlot": "hookFootage",
+      "backgroundSlot": "background",
+      "revealStart": 0.75,
+      "revealSeconds": 0.58,
+      "backgroundExposure": -0.12,
+      "foreground": {
+        "exposure": -0.09,
+        "contrast": 1.04,
+        "saturation": 0.93
+      },
+      "titles": [
+        {
+          "id": "set-headline",
+          "slot": "headline",
+          "line": 0,
+          "start": 1.18,
+          "end": 5.95,
+          "x": 61,
+          "y": 27,
+          "font_size": 108,
+          "tracking": 4,
+          "travel": 38,
+          "align": "center",
+          "colour": "white"
+        },
+        {
+          "id": "set-subline",
+          "slot": "featureOne",
+          "start": 1.43,
+          "end": 4.18,
+          "x": 65,
+          "y": 43,
+          "font_size": 31,
+          "tracking": 6,
+          "travel": 18,
+          "align": "center",
+          "colour": "brand"
+        }
+      ]
+    }
+  }
+}

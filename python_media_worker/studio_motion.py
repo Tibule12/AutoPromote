@@ -70,8 +70,11 @@ def automation_expression(keys, default=1.0):
                 segment = f"({va:.8f}+({vb-va:.8f})*({p}-{a:.8f})*32)"
                 progress = f"if(lt({p},{b:.8f}),{segment},{progress})"
         value = f"({left['value']:.8f}+({right['value']-left['value']:.8f})*({progress}))"
-        expression = f"if(lt(t,{end:.8f}),{value},{expression})"
-    return f"if(lt(t,{points[0]['time']:.8f}),{points[0]['value']:.8f},{expression})"
+        # Decimal seconds rounded to eight places can lie just beyond a real
+        # rational frame (208/24 -> 8.66666667), delaying a held cut by one
+        # picture. Compare boundaries on Studio's existing canonical clock.
+        expression = f"if(lt(floor(t*90000+0.5),{round(end*90000)}),{value},{expression})"
+    return f"if(lt(floor(t*90000+0.5),{round(points[0]['time']*90000)}),{points[0]['value']:.8f},{expression})"
 
 
 def _property_keys(plan, property_name):

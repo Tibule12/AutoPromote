@@ -1,9 +1,11 @@
 const mockFileObjects = new Map();
+let mockUniformAccess = false;
 
 jest.mock("firebase-admin", () => ({
   app: jest.fn(() => ({ options: { storageBucket: "test-bucket" } })),
   storage: jest.fn(() => ({
     bucket: jest.fn(bucketName => ({
+      getMetadata: jest.fn(async () => [{ iamConfiguration: { uniformBucketLevelAccess: { enabled: mockUniformAccess } } }]),
       file: jest.fn(storagePath => {
         const key = `${bucketName}/${storagePath}`;
         if (!mockFileObjects.has(key)) {
@@ -31,6 +33,7 @@ const {
 describe("multicam upload service", () => {
   beforeEach(() => {
     mockFileObjects.clear();
+    mockUniformAccess = false;
     process.env.MULTICAM_INGEST_BUCKET = "test-bucket";
   });
 
@@ -106,6 +109,15 @@ describe("multicam upload service", () => {
     );
   });
 
+  it("does not request a rejected legacy ACL for a Studio upload into a uniform-access bucket", async () => {
+    mockUniformAccess = true;
+    const result = await startMulticamUpload({userId:"user-1",fileName:"source.mp4",contentType:"video/mp4",
+      sizeBytes:2048,lastModified:999,purpose:"studio_project",origin:"http://localhost:5000"});
+    const file=mockFileObjects.get(`test-bucket/${result.storagePath}`);
+    expect(file.createResumableUpload.mock.calls[0][0]).not.toHaveProperty("private");
+    expect(file.createResumableUpload.mock.calls[0][0].metadata.metadata.ownerUid).toBe("user-1");
+  });
+
   it("keeps completed Studio project media without a three-day expiry", async () => {
     const storagePath = buildIngestStoragePath({
       userId: "user-1",
@@ -126,6 +138,7 @@ describe("multicam upload service", () => {
           firebaseStorageDownloadTokens: "token-1",
         },
       }]),
+      createReadStream: jest.fn(() => require('node:stream').Readable.from([Buffer.alloc(2048)])),
       setMetadata: jest.fn(async () => [{}]),
       delete: jest.fn(),
     };

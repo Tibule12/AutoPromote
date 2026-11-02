@@ -1,3 +1,4 @@
+const { captionTranscriptionOptions } = require("./services/captionTranscriptionOptions");
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
@@ -10,7 +11,28 @@ const { buildWorkerRequestConfig } = require("./utils/cloudRunAuth");
 // The service file exports an instance by default? No, let's check.
 const VideoEditingService = require("./services/videoEditingService");
 const videoEditingService = new VideoEditingService(); // Instantiate for general use
-const { refreshOwnedStudioOutput } = require("./services/studioWorkerOutputService");
+const { refreshOwnedStudioOutput, persistWorkerBucketOutput } = require("./services/studioWorkerOutputService");
+
+async function refreshCompletedStudioOutput(data,userId,jobId,docRef) {
+  if (data.status !== "completed" || data.options?.renderViral !== true) return;
+  let storagePath = data.outputStoragePath || data.result?.outputStoragePath;
+  if (!storagePath?.startsWith("studio/exports/")) {
+    const adopted = await persistWorkerBucketOutput({userId,jobId,legacy:true,
+      url:data.outputUrl || data.result?.url || data.result?.output_url,
+      expectedSha256:data.result?.outputSha256 || data.result?.output_sha256});
+    if (adopted) {
+      storagePath=adopted.storagePath;
+      const result={...data.result,url:adopted.url,outputStoragePath:storagePath,
+        outputSha256:adopted.sha256,outputBytes:adopted.bytes,outputGeneration:adopted.generation};
+      await docRef.set({outputStoragePath:storagePath,outputUrl:adopted.url,result},{merge:true});
+      Object.assign(data,{outputStoragePath:storagePath,outputUrl:adopted.url,result});
+    }
+  }
+  if (storagePath?.startsWith("studio/exports/")) {
+    data.outputUrl=await refreshOwnedStudioOutput({storagePath,userId,jobId});
+    data.downloadUrl=await refreshOwnedStudioOutput({storagePath,userId,jobId,download:true});
+  }
+}
 
 const authMiddleware = require("./authMiddleware");
 const { deductCredits, refundCredits, getCreditBreakdown } = require("./creditSystem");
@@ -40,7 +62,7 @@ const {
   startMulticamUpload,
   verifyMulticamRenderInputs,
 } = require("./services/multicamUploadService");
-const { getStudioSourceBucket, resolveOwnedStudioVideoSource } = require("./services/studioSourceService");
+const { getStudioSourceBucket, resolveOwnedStudioVideoSource, resolveOwnedStudioMediaSource } = require("./services/studioSourceService");
 const { assertOwnedStudioSourceBinding } = require("./services/studioDirectorProjectBinding");
 const {
   persistSourceShotArtifact,
@@ -303,7 +325,12 @@ const viralRenderAttemptResponse = (jobId, data) => {
     error: data.status === "failed" ? data.error || "Rendering failed" : null,
     outputUrl,
     downloadUrl: completed ? data.downloadUrl || null : null,
-    result: outputUrl ? { url: outputUrl } : null,
+    result: outputUrl ? {
+      url: outputUrl,
+      ...(typeof (data.result?.outputSha256 || data.outputSha256) === "string" &&
+          /^[a-f0-9]{64}$/.test(data.result?.outputSha256 || data.outputSha256)
+        ? { outputSha256: data.result?.outputSha256 || data.outputSha256 } : {}),
+    } : null,
     creditsRefunded: Boolean(data.creditsRefunded),
   };
 };
@@ -932,6 +959,39 @@ const modelCapabilityError = (res, error) => res.status(error.statusCode || 503)
   success: false, code: error.code || 'MODEL_CAPABILITY_UNAVAILABLE',
   message: 'The capability result is unavailable. Your Studio edit is preserved.',
 });
+const subjectMaskAccess=require('./services/studioSubjectMaskAccess');
+const subjectMaskGuards=[subjectMaskAccess.requireSubjectMaskPreview,requireTesterEditingFeature('clipRender')];
+router.post('/studio-subject-masks/requests',subjectMaskGuards,async(req,res)=>{
+  try{return res.status(202).json(await (await modelCapability.getRuntime()).submit({ownerUid:req.user.uid,
+    input:subjectMaskAccess.assertSubjectMaskRequest(req.body)}));}
+  catch(error){return modelCapabilityError(res,error);}
+});
+router.get('/studio-subject-masks/jobs/:jobId',subjectMaskGuards,async(req,res)=>{
+  try{const runtime=await modelCapability.getRuntime();await subjectMaskAccess.ownedSubjectMaskJob(runtime,req.user.uid,req.params.jobId);
+    return res.json(await runtime.reconcile({ownerUid:req.user.uid,jobId:req.params.jobId}));}
+  catch(error){return modelCapabilityError(res,error);}
+});
+router.post('/studio-subject-masks/jobs/:jobId/cancel',subjectMaskGuards,async(req,res)=>{
+  try{const runtime=await modelCapability.getRuntime();await subjectMaskAccess.ownedSubjectMaskJob(runtime,req.user.uid,req.params.jobId);
+    return res.json(await runtime.cancel({ownerUid:req.user.uid,jobId:req.params.jobId}));}
+  catch(error){return modelCapabilityError(res,error);}
+});
+router.post('/studio-subject-masks/jobs/:jobId/subject',subjectMaskGuards,async(req,res)=>{
+  try {
+    const runtime=await modelCapability.getRuntime(),job=await subjectMaskAccess.ownedSubjectMaskJob(runtime,req.user.uid,req.params.jobId);
+    const result=await runtime.getArtifact({ownerUid:req.user.uid,jobId:job.id});
+    if(!result.applicable || Object.keys(req.body || {}).sort().join()!=='effects,id,sourceStoragePath' ||
+       req.body.sourceStoragePath!==job.request.sourceStoragePath)
+      throw Object.assign(new Error('MODEL_SUBJECT_SOURCE_MISMATCH'),{code:'MODEL_SUBJECT_SOURCE_MISMATCH',statusCode:409});
+    await runtime.authorize({ownerUid:req.user.uid,request:job.request,requireCurrentRevision:false});
+    return res.json(require('./modelRuntime/studioAdapter').editableSubjectScene({segmentation:result.artifact,...req.body}));
+  } catch(error){return modelCapabilityError(res,error);}
+});
+router.post('/studio-subject-masks/jobs/:jobId/subject/reuse',subjectMaskGuards,async(req,res)=>{
+  try{return res.json(await subjectMaskAccess.reuseSavedSubjectMask({runtime:await modelCapability.getRuntime(),
+    ownerUid:req.user.uid,jobId:req.params.jobId,input:req.body}));}
+  catch(error){return modelCapabilityError(res,error);}
+});
 router.post('/studio-capabilities/requests', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
   try { return res.status(202).json(await (await modelCapability.getRuntime()).submit({ownerUid:req.user.uid,input:req.body})); }
   catch(error) { return modelCapabilityError(res,error); }
@@ -943,6 +1003,17 @@ router.get('/studio-capabilities/jobs/:jobId', requireModelRuntimeFounder, requi
 router.get('/studio-capabilities/jobs/:jobId/artifact', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
   try { return res.json(await (await modelCapability.getRuntime()).getArtifact({ownerUid:req.user.uid,jobId:req.params.jobId})); }
   catch(error) { return modelCapabilityError(res,error); }
+});
+router.post('/studio-capabilities/jobs/:jobId/subject', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
+  try {
+    const runtime=await modelCapability.getRuntime(), job=await runtime.owned(req.user.uid,req.params.jobId);
+    const result=await runtime.getArtifact({ownerUid:req.user.uid,jobId:job.id});
+    if(!result.applicable || result.artifact.capability!=='segment_subject' ||
+       Object.keys(req.body || {}).sort().join()!=='effects,id,sourceStoragePath' || req.body.sourceStoragePath!==job.request.sourceStoragePath)
+      throw Object.assign(new Error('MODEL_SUBJECT_SOURCE_MISMATCH'),{code:'MODEL_SUBJECT_SOURCE_MISMATCH',statusCode:409});
+    await runtime.authorize({ownerUid:req.user.uid,request:job.request,requireCurrentRevision:false});
+    return res.json(require('./modelRuntime/studioAdapter').editableSubjectScene({segmentation:result.artifact,...req.body}));
+  } catch(error) {return modelCapabilityError(res,error);}
 });
 router.post('/studio-capabilities/jobs/:jobId/cancel', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
   try { return res.json(await (await modelCapability.getRuntime()).cancel({ownerUid:req.user.uid,jobId:req.params.jobId})); }
@@ -986,6 +1057,10 @@ router.post('/studio-broll/jobs/:jobId/recheck',requireTesterEditingFeature('cli
 
 const requireModelSubjectFounder=(req,res,next)=>{
   if(!req.body?.modelArtifactRef)return next();
+  if(process.env.STUDIO_SUBJECT_MASK_PREVIEW_ENABLED==='true' &&
+     (process.env.STUDIO_SUBJECT_MASK_PREVIEW_UIDS || '').split(',').map(uid=>uid.trim()).includes(req.user?.uid) &&
+     req.body.modelArtifactRef.capability==='segment_subject')
+    return subjectMaskAccess.requireSubjectMaskPreview(req,res,next);
   return requireModelRuntimeFounder[0](req,res,()=>requireModelRuntimeFounder[1](req,res,next));
 };
 router.post("/studio-subject-vfx", requireTesterEditingFeature("clipRender"),requireModelSubjectFounder, async (req,res) => {
@@ -1018,7 +1093,7 @@ router.delete("/studio-subject-vfx/:jobId", requireTesterEditingFeature("clipRen
 
 router.post("/studio-assets/resolve", requireTesterEditingFeature("clipRender"), async (req, res) => {
   try {
-    const source = await resolveOwnedStudioVideoSource({
+    const source = await resolveOwnedStudioMediaSource({
       storagePath: req.body?.storagePath,
       userId: req.user.uid,
     });
@@ -1036,6 +1111,41 @@ router.post("/studio-assets/resolve", requireTesterEditingFeature("clipRender"),
       message: error.message || "Could not reopen this Studio video",
     });
   }
+});
+
+router.post("/studio-assets/source-frame", requireTesterEditingFeature("clipRender"), async (req, res) => {
+  const controller = new AbortController();
+  const cancel = () => { if (!res.writableEnded) controller.abort(); };
+  res.once('close', cancel);
+  try {
+    const { getOwnedSourceFrame } = require('./services/studioSourceFrameService');
+    const result = await getOwnedSourceFrame({ ownerUid: req.user.uid, input: req.body, signal: controller.signal });
+    if (res.destroyed) return;
+    res.set('Cache-Control', 'private, no-store');
+    return res.json(result);
+  } catch (error) {
+    if (res.destroyed) return;
+    return res.status(error.statusCode || 503).json({
+      code: error.code || 'STUDIO_FRAME_UNAVAILABLE',
+      message: error.statusCode ? error.message : 'Accurate paused preview is temporarily unavailable',
+    });
+  } finally { res.removeListener('close', cancel); }
+});
+
+router.post('/studio-assets/voice-bus-preview', requireTesterEditingFeature('clipRender'), async (req, res) => {
+  const controller = new AbortController();
+  const cancel = () => { if (!res.writableEnded) controller.abort(); };
+  res.once('close', cancel);
+  try {
+    const { getOwnedVoiceBusPreview } = require('./services/studioVoiceBusPreviewService');
+    const result = await getOwnedVoiceBusPreview({ ownerUid: req.user.uid, input: req.body, signal: controller.signal });
+    if (!res.destroyed) { res.set('Cache-Control', 'private, no-store'); return res.json(result); }
+  } catch (error) {
+    if (!res.destroyed) return res.status(error.statusCode || 503).json({
+      code: error.code || 'STUDIO_VOICE_PREVIEW_UNAVAILABLE',
+      message: error.statusCode ? error.message : 'Recorded-speech preview is temporarily unavailable',
+    });
+  } finally { res.removeListener('close', cancel); }
 });
 
 router.post("/studio-assets/import-render", requireTesterEditingFeature("clipRender"), async (req, res) => {
@@ -1441,6 +1551,9 @@ router.post(
   requireTesterEditingFeature("audioExtract"),
   async (req, res) => {
     try {
+      let speechOptions;
+      try { speechOptions = captionTranscriptionOptions(req.body); }
+      catch (error) { return res.status(400).json({ error: error.message }); }
       const userId = req.user.uid;
       const storagePath = String(req.body?.storage_path || req.body?.storagePath || "")
         .trim()
@@ -1495,11 +1608,7 @@ router.post(
         expires: Date.now() + 1000 * 60 * 60 * 2,
       });
       const job = await videoEditingService.startTranscriptionJob(url, userId, {
-        translateToEnglish: ["1", "true", "yes", "on"].includes(
-          String(req.body?.translate_to_english ?? req.body?.translateToEnglish ?? "")
-            .trim()
-            .toLowerCase()
-        ),
+        ...speechOptions,
       });
       return res.json({
         success: true,
@@ -1522,6 +1631,9 @@ router.post(
   upload.single("file"),
   async (req, res) => {
     try {
+      let speechOptions;
+      try { speechOptions = captionTranscriptionOptions(req.body); }
+      catch (error) { return res.status(400).json({ error: error.message }); }
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
       const userId = req.user.uid;
@@ -1555,8 +1667,7 @@ router.post(
         try {
           // Old sync: const segments = await videoEditingService.transcribeVideo(url);
           const job = await videoEditingService.startTranscriptionJob(url, userId, {
-            translateToEnglish:
-              String(req.body?.translate_to_english || "").toLowerCase() === "true",
+            ...speechOptions,
           });
           res.json({ success: true, jobId: job.jobId, message: "Transcription started" });
         } catch (err) {
@@ -1660,6 +1771,25 @@ router.post(
       } catch (error) {
         console.error("[MediaRoute] Render retry lookup failed:", error.message);
         return res.status(503).json({ message: "Could not check the previous render attempt" });
+      }
+    }
+
+    if (isViralClipRender) {
+      // Validate supported composition decisions before source lookups, worker
+      // allocation or charging. Existing attempt recovery above stays authoritative.
+      const supportedBlendModes = new Set(["normal", "multiply", "screen", "difference", "overlay", "soft-light", "hard-light", "color-dodge", "luminosity"]);
+      const overlays = Array.isArray(options?.viralData?.overlays) ? options.viralData.overlays : [];
+      const layers = Array.isArray(options?.viralData?.composition_plan?.layers)
+        ? options.viralData.composition_plan.layers : [];
+      const unsupportedOverlay = overlays.some(layer => !supportedBlendModes.has(layer?.blendMode || "normal"));
+      const unsupportedLayer = layers.some(layer => !supportedBlendModes.has(layer?.blend_mode || "normal") ||
+        (layer?.id === "main-video" && (layer.blend_mode || "normal") !== "normal"));
+      const conflictingLayer = layers.some(layer => layer?.id !== "main-video" &&
+        overlays.some(overlay => overlay?.id === layer?.id &&
+          (overlay.blendMode || "normal") !== (layer.blend_mode || "normal")));
+      if (unsupportedOverlay || unsupportedLayer || conflictingLayer) {
+        return res.status(400).json({ code: "UNSUPPORTED_STUDIO_BLEND",
+          message: "This Studio blend is unavailable or conflicts with its layer. Use Normal for main video and a supported blend mode for visual overlays." });
       }
     }
 
@@ -1888,12 +2018,8 @@ router.get("/viral-render-attempt/:requestId", async (req, res) => {
     }
     const data = doc.data();
     const refundResult = await refundViralRenderJobIfNeeded(userId, jobId, data);
-    const durablePath = data.outputStoragePath || data.result?.outputStoragePath;
-    if (data.status === "completed" && typeof durablePath === "string" &&
-        durablePath.startsWith("studio/exports/")) {
-      data.outputUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId });
-      data.downloadUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId, download: true });
-    }
+    await refreshCompletedStudioOutput(data,userId,jobId,
+      admin.firestore().collection("video_edits").doc(jobId));
     return res.json({
       ...viralRenderAttemptResponse(jobId, data),
       creditsRefunded: Boolean(data.creditsRefunded || refundResult?.success),
@@ -3145,12 +3271,8 @@ router.get("/status/:jobId", async (req, res) => {
 
     // Refresh private download access from the durable owner-bound object,
     // independently of the worker's availability or the old signed URL expiry.
-    const durablePath = data.outputStoragePath || data.result?.outputStoragePath;
-    if (data.status === "completed" && data.options?.renderViral === true &&
-        typeof durablePath === "string" && durablePath.startsWith("studio/exports/")) {
-      data.outputUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId });
-      data.downloadUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId, download: true });
-    }
+    await refreshCompletedStudioOutput(data,userId,jobId,
+      admin.firestore().collection("video_edits").doc(jobId));
 
     await refundCleanAudioSyncJobIfNeeded(userId, jobId, data, "worker_failed");
     await refundMulticamRenderJobIfNeeded(userId, jobId, data, "status_poll_failed_job");
@@ -3230,6 +3352,9 @@ router.get("/status/:jobId", async (req, res) => {
     res.json({
       success: true,
       status,
+      ...(data.options?.renderViral === true ? { jobId,
+        renderRequestId: data.renderRequestId || null,
+        brandWatermark: data.options?.viralData?.brand_watermark } : {}),
       stage: data.stage,
       progress: data.progress,
       detail: data.detail || data.result?.detail || null,

@@ -139,3 +139,54 @@ test('tracking cannot publish a sparse path as decoded-frame coverage',()=>{
  const r={...base(),capability:'track_object',parameters:{subjectId:'s',maskArtifactHash:'b'.repeat(64)}};
  assert.throws(()=>validateRequestCoverage(r,{subjectId:'s',sourceRange:r.sourceRange,dependencyArtifactHash:r.parameters.maskArtifactHash,samples:[]}),/COVERAGE/);
 });
+
+test('foreground component selections reject ambiguous identities, inverted boxes and cross-cut reuse',()=>{
+ const input={...base(),capability:'segment_subject',parameters:{subjectId:'speaker',initialBox:[.1,.1,.9,1],points:[],shotPrompts:[],
+  components:[{id:'microphone',box:[.2,.2,.6,.8],points:[{position:[.3,.3],label:1}],propagate:false}]}};
+ assert.equal(request(input).parameters.components[0].propagate,false);
+ const duplicate=structuredClone(input);duplicate.parameters.components.push({...duplicate.parameters.components[0]});
+ assert.throws(()=>request(duplicate),{code:'MODEL_CAPABILITY_COMPONENT_SELECTION_INVALID'});
+ const inverted=structuredClone(input);inverted.parameters.components[0].box=[.6,.2,.2,.8];
+ assert.throws(()=>request(inverted),{code:'MODEL_CAPABILITY_COMPONENT_SELECTION_INVALID'});
+ const cut=structuredClone(input);cut.parameters.shotPrompts=[{frameIndex:24,box:[.1,.1,.8,.9]}];
+ assert.throws(()=>request(cut),{code:'MODEL_CAPABILITY_COMPONENT_SELECTION_INVALID'});
+ const corrected=structuredClone(input);
+ corrected.parameters.shotPrompts=[{frameIndex:24,box:[.1,.1,.8,.9],points:[{position:[.5,.5],label:1},{position:[.2,.2],label:0}]}];
+ assert.deepEqual(request(corrected).parameters.shotPrompts,corrected.parameters.shotPrompts);
+ corrected.parameters.shotPrompts[0].points[0].label=0;
+ assert.throws(()=>request(corrected),{code:'MODEL_CAPABILITY_SHOT_PROMPT_INVALID'});
+});
+
+test('a component request cannot silently fall through to a worker that ignores equipment selections',async t=>{
+ const f=await fixture(t);
+ await assert.rejects(f.runtime.submit({ownerUid:'owner',input:{...base(),capability:'segment_subject',parameters:{subjectId:'speaker',
+  initialBox:[.1,.1,.9,1],points:[],shotPrompts:[],components:[{id:'mic',box:[.2,.2,.5,.5],points:[],propagate:false}]}}}),{code:'MODEL_COMPONENT_WORKER_UNAVAILABLE'});
+ assert.equal(f.counts().dispatches,0);
+});
+
+test('matting needs an exact immutable dependency and never falls back to the segmentation default',async t=>{
+ const input={...base(),capability:'segment_subject',parameters:{subjectId:'s',initialBox:[.1,.1,.9,.9],points:[],shotPrompts:[],
+  refinement:{maskArtifactHash:'b'.repeat(64),radius:10,holdouts:[]}}};
+ assert.throws(()=>request(input),{code:'MODEL_MASK_REFINEMENT_DEPENDENCY_REQUIRED'});
+ const f=await fixture(t);input.dependencyHashes=['b'.repeat(64)];
+ await assert.rejects(f.runtime.submit({ownerUid:'owner',input}),{code:'MODEL_ARTIFACT_MISSING'});assert.equal(f.counts().dispatches,0);
+ const unavailable={...registry,refinementDefaults:{segment_subject:'unavailable'}};
+ const runtime=new ModelCapabilityRuntime({jobs:f.jobs,artifacts:f.artifacts,workers:{},authorize:async()=>{},models:unavailable});
+ await assert.rejects(runtime.submit({ownerUid:'owner',input}),{code:'MODEL_CAPABILITY_UNAVAILABLE'});
+});
+
+
+test('refined holdout paths are bounded to their source clock and geometry',()=>{
+ const refinement={maskArtifactHash:'b'.repeat(64),radius:10,holdouts:[],holdoutGroups:[{
+  id:'rig',start:0,end:3,feather:.5,corners:[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],
+  paths:[[[.2,.1],[.3,.1],[.3,.8],[.2,.8]]]}]};
+ const input={...base(),capability:'segment_subject',dependencyHashes:[refinement.maskArtifactHash],
+  parameters:{subjectId:'person',initialBox:[0,0,1,1],points:[{position:[.5,.5],label:1}],shotPrompts:[],refinement}};
+ assert.deepEqual(request(input).parameters.refinement,refinement);
+ const outOfRange=structuredClone(input);outOfRange.parameters.refinement.holdoutGroups[0].end=4;
+ assert.throws(()=>request(outOfRange),/HOLDOUT_RANGE_INVALID/);
+ const reversed=structuredClone(input);reversed.parameters.refinement.holdoutGroups[0].start=3;
+ assert.throws(()=>request(reversed),/HOLDOUT_RANGE_INVALID/);
+ const oversized=structuredClone(input);oversized.parameters.refinement.holdoutGroups[0].paths=Array(33).fill(refinement.holdoutGroups[0].paths[0]);
+ assert.throws(()=>request(oversized),/REQUEST_INVALID/);
+});

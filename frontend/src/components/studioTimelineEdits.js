@@ -1,6 +1,8 @@
 // Ripple edits use the retained programme clock; captions remain source-timed
 // and are remapped separately by mapCaptionSegmentsToTimeline.
-export const rippleTimedItems = (items, from, to, createId) => {
+import { retainStudioVoiceoverFade } from "./studioAudioFades";
+
+export const rippleTimedItems = (items, from, to, createId, { preserveVoiceFade = false } = {}) => {
   if (!(to > from)) return items;
   const removed = to - from;
   return items.flatMap(item => {
@@ -11,7 +13,9 @@ export const rippleTimedItems = (items, from, to, createId) => {
     if (end <= from) return [item];
     if (start >= to) return [{ ...item, startTime: start - removed }];
     const pieces = [];
-    if (start < from) pieces.push({ ...item, duration: from - start });
+    if (start < from) pieces.push({ ...item, duration: from - start,
+      ...(preserveVoiceFade ? retainStudioVoiceoverFade(item, 0) : {}),
+    });
     if (end > to) {
       const skipped = to - start;
       pieces.push({
@@ -22,9 +26,10 @@ export const rippleTimedItems = (items, from, to, createId) => {
         ...(item.type === "video"
           ? { sourceStartTime: Number(item.sourceStartTime || 0) + skipped }
           : {}),
-        ...(item.trimStart !== undefined
+        ...(item.trimStart !== undefined || preserveVoiceFade
           ? { trimStart: Number(item.trimStart || 0) + skipped }
           : {}),
+        ...(preserveVoiceFade ? retainStudioVoiceoverFade(item, skipped) : {}),
       });
     }
     return pieces;
@@ -48,3 +53,11 @@ export const rippleTimelineKeys = (keys, from, to, { preserveRightState = false 
     ? [...retained, { ...lastRemoved, time: from, cut: true }].sort((left, right) => Number(left.time) - Number(right.time))
     : retained;
 };
+// Decoder metadata describes the complete source, never the edited occurrence.
+export function applyStudioClipMetadata(clip, sourceDuration, fallback = {}) {
+  if (!Number.isFinite(sourceDuration) || sourceDuration <= 0) return clip;
+  const start = clip.startRequest ?? fallback.start ?? 0;
+  const end = clip.endRequest ?? fallback.end ?? sourceDuration;
+  return { ...clip, sourceDuration, startRequest: start, endRequest: end,
+    duration: Math.max(0, end - start) };
+}
