@@ -69,7 +69,7 @@ async function createStudioModelRuntime() {
   // the same configured service identity as the authenticated backend; no user
   // token, gcloud impersonation or additional credential file is introduced.
   const credentials=process.env.STUDIO_MODEL_USE_BACKEND_IDENTITY==='true'?require('../../firebaseConfig.server'):undefined;
-  const client=await new GoogleAuth({scopes:['https://www.googleapis.com/auth/cloud-platform'],...(credentials?{credentials}:{})}).getClient();
+  const client=Object.keys(config).length ? await new GoogleAuth({scopes:['https://www.googleapis.com/auth/cloud-platform'],...(credentials?{credentials}:{})}).getClient() : undefined;
   const workers=Object.fromEntries(Object.entries(config).map(([key,c])=>[key,new CloudRunCapabilityWorker({client,bucket,
     jobName:c.jobName,image:c.image,artifactStore:artifacts})]));
   let models;
@@ -80,9 +80,22 @@ async function createStudioModelRuntime() {
       image:process.env.STUDIO_MODEL_LOCAL_CPU_IMAGE,directory:process.env.STUDIO_MODEL_LOCAL_CPU_ROOT,
       modelDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_MODEL_DIR,
       dependenciesDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_DEPS_DIR,
+      edgeDependencies:process.env.STUDIO_MODEL_LOCAL_CPU_EDGE_DEPS_DIR,
       baseDependencies:process.env.STUDIO_MODEL_LOCAL_CPU_BASE_DEPS});
     models=structuredClone(require('../modelRuntime/contract').registry);
-    models.defaults.segment_subject='sam21-small-cpu-v1';
+    models.defaults.segment_subject=process.env.STUDIO_BACKGROUND_PIPELINE_V2==='true'?'sam21-multiobject-cpu-v2':'sam21-small-cpu-v1';
+    if(process.env.STUDIO_BACKGROUND_PIPELINE_V2==='true')models.refinementDefaults.segment_subject='vitmatte-small-temporal-cpu-v2';
+  }
+  if(process.env.STUDIO_BACKGROUND_DEMO==='true') {
+    const {EmulatorCpuWorker}=require('../modelRuntime/emulatorCpuWorker');
+    workers['segmentation-tracking:cpu']=await EmulatorCpuWorker.create({bucket,artifacts,
+      directory:process.env.STUDIO_MODEL_LOCAL_CPU_ROOT,python:process.env.CREDITS_PYTHON_BIN,
+      modelDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_MODEL_DIR,
+      refinementModelDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_REFINEMENT_MODEL_DIR,
+      dependenciesDirectory:process.env.STUDIO_MODEL_LOCAL_CPU_DEPS_DIR});
+    models=structuredClone(require('../modelRuntime/contract').registry);
+    models.defaults.segment_subject='sam21-multiobject-cpu-v2';
+    models.refinementDefaults.segment_subject='vitmatte-small-temporal-cpu-v2';
   }
   const authorize=async ({ownerUid,request:r,requireCurrentRevision})=>{
     const binding=await getOwnedStudioSourceBinding({uid:ownerUid,projectId:r.projectId,sourceAssetId:r.sourceAssetId,firestore:db});

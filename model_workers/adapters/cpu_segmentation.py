@@ -17,6 +17,9 @@ from model_workers.adapters.segmentation import sha_json
 
 
 def segment(spec, source, geometry, model_dir, output):
+    if spec['model'].get('limits', {}).get('componentRois'):
+        from model_workers.adapters.component_segmentation import segment as component_segment
+        return component_segment(spec, source, geometry, model_dir, output)
     import torch
     from transformers import Sam2VideoModel, Sam2VideoProcessor
     from python_media_worker.studio_subject_matte import detect_shot_cuts, mask_geometry

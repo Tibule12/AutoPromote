@@ -289,7 +289,7 @@ describe("ordinary application routes with one nonproduction wallet", () => {
       sourceStoragePath: `studio/sources/${uid}/source.mp4`,
       options: { renderViral: true },
     };
-    const q = await quote("studio.render", body);
+    const q = await quote("studio.render", body, [], true);
     workerFailure = true;
     const r = await post("/api/media/process", body, q).expect(200);
     assert.equal((await terminal("video_edits", r.body.jobId)).status, "failed");
@@ -308,6 +308,15 @@ describe("ordinary application routes with one nonproduction wallet", () => {
     assert.equal(control.lifetimeSpentMicros, q.maxCostMicros);
     assert.equal(control.lifetimeReservedMicros, 0);
     assert.equal((await db.collection("credit_refunds").get()).size, 0);
+  });
+  it("quotes exact native mask coordinates as JSON and rejects changed creative decisions", async () => {
+    const body={sourceStoragePath:`studio/sources/${uid}/source.mp4`,options:{renderViral:true,quad:[[0,0],[1,0],[1,1],[0,1]]}};
+    const q=await quote('studio.render',body,[],true);
+    const changed=structuredClone(body);changed.options.quad[0][0]=.1;
+    await post('/api/media/process',changed,q).expect(409);
+    const stored=(await db.collection('credits_v2_inputs').doc(hash(uid,q.sourceId)).get()).data();
+    assert.deepEqual(JSON.parse(stored.workflowInput.requestBodyJson),body);
+    assert.equal((await service.getAccount(uid)).balance,15);
   });
   it("runs Find Viral Clips analysis and generation through their ordinary services", async () => {
     const body = { videoUrl: `${origin}/objects/source.mp4`, contentId: "source-content" };

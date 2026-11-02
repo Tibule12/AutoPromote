@@ -23,6 +23,7 @@ class ModelCapabilityRuntime {
     if(r.parameters.refinement && !model.limits?.requiresSegmentationDependency)throw fail('MODEL_MASK_REFINEMENT_UNAVAILABLE',503);
     if (r.capability==='segment_subject' && r.parameters.components?.length && !model.limits?.supportsComponents)
       throw fail('MODEL_COMPONENT_WORKER_UNAVAILABLE',503);
+    if(r.capability==='segment_subject' && r.parameters.components?.some(c=>c.shotPrompts?.length) && !model.limits?.componentRois && !model.limits?.temporalAlpha)throw fail('MODEL_COMPONENT_CORRECTIONS_UNAVAILABLE',503);
     const source = await this.authorize({ ownerUid, request: r, requireCurrentRevision: true });
     if (!source || source.sha256 !== r.sourceSha256 || !source.generation) throw fail('MODEL_SOURCE_UNVERIFIED', 409);
     for (const artifactHash of r.dependencyHashes) {

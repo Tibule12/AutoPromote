@@ -38,3 +38,13 @@ test('cross-owner storage and non-project assets are rejected before a worker se
   parseStudioProjectHeadRecord.mockReturnValue({ document: { assets: [] } });
   await expect(resolveSubjectReplacementAssets(input)).rejects.toMatchObject({ statusCode: 409 });
 });
+test('a saved background needs no separate timeline occurrence to belong to the canonical project', async () => {
+  parseStudioProjectHeadRecord.mockReturnValue({document:{assets:[],editGraph:{media:[{id:'plate',contentHash:sha256,storagePath:source.storagePath}]}}});
+  const assets=await resolveSubjectReplacementAssets(input);
+  expect(assets[0].sha256).toBe(sha256);expect(assets[0].assetId).toBe('plate');
+});
+test('conflicting canonical identities cannot select an arbitrary matching background', async () => {
+  parseStudioProjectHeadRecord.mockReturnValue({document:{assets:[{sourceId:'plate',contentHash:sha256,storagePath:source.storagePath}],editGraph:{media:[{id:'plate',contentHash:sha256,storagePath:'uploads/images/owner/another.png'}]}}});
+  await expect(resolveSubjectReplacementAssets(input)).rejects.toMatchObject({statusCode:409});
+  expect(input.resolveSource).not.toHaveBeenCalled();
+});

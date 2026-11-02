@@ -1060,6 +1060,10 @@ router.post('/studio-broll/jobs/:jobId/recheck',requireTesterEditingFeature('cli
 
 const requireModelSubjectFounder=(req,res,next)=>{
   if(!req.body?.modelArtifactRef)return next();
+  // The private subject cohort can compose its own saved mask without gaining
+  // access to the administrative multi-capability model API. The service still
+  // checks artifact owner, source generation, selection and canonical project.
+  if(subjectMaskAccess.isSubjectMaskPreviewUser(req.user?.uid))return next();
   return requireModelRuntimeFounder[0](req,res,()=>requireModelRuntimeFounder[1](req,res,next));
 };
 router.post("/studio-subject-vfx", requireTesterEditingFeature("clipRender"),requireModelSubjectFounder, async (req,res) => {

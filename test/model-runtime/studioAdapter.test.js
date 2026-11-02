@@ -89,3 +89,13 @@ test('editable artifact retains later-frame keep/remove points instead of a repl
   effects:[{id:'grade',type:'background_grade',start:0,end:3,exposure:0,saturation:1,contrast:1}]});
  assert.deepEqual(item.scene.prompt.shotPrompts,[{time:1,points:[[.45,.4],[.8,.1]],labels:[1,0]}]);
 });
+
+
+test('v2 subject import retains actual initial keep/remove clicks while v1 remains compatible',()=>{
+ const base=mask(),parameters={...base.parameters,points:[{position:[.3,.4],label:1},{position:[.8,.2],label:0}]};
+ const old=artifact('segment_subject',base.output,parameters);
+ const {artifactHash,...core}=old;core.modelVersion='2.0.0';const modern={...core,artifactHash:hash(core)};
+ const options={sourceStoragePath:'studio/sources/owner/source.mp4',effects:[{id:'grade',type:'background_grade',start:0,end:3,exposure:0,saturation:1,contrast:1}]};
+ assert.deepEqual(editableSubjectScene({...options,segmentation:modern}).scene.prompt.points,[[.3,.4],[.8,.2]]);
+ assert.deepEqual(editableSubjectScene({...options,segmentation:old}).scene.prompt.points,[[.35,.55]]);
+});

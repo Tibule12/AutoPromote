@@ -22,6 +22,19 @@ directory = Path(record["directory"])
 started = time.monotonic()
 if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
     raise RuntimeError("Explicit demo runtime required")
+cpu_seconds = record.get("localCpuSeconds", 240)
+long_review = record.get('localReview') is True
+if long_review:
+    ranges = record['body'].get('timeline_segments') or [record['body']]
+    durations = [float(item['end_time']) - float(item['start_time']) for item in ranges]
+    if (os.environ.get('STUDIO_BACKGROUND_DEMO') != 'true' or
+            os.environ.get('STUDIO_BACKGROUND_LONG_DEMO') != 'true' or
+            record['expected']['endpoint'] not in ('/render-viral-clip','/render-clip') or
+            not durations or any(not 0 < d <= 240 for d in durations) or not sum(durations) <= 240 or
+            cpu_seconds != 900 or record.get('localFileBytes') != 512 * 1024**2 or
+            record.get('localSourceBytes') != 512 * 1024**2):
+        raise RuntimeError('Invalid bounded local four-minute review')
+
 # Keep ten CPU minutes for ordinary demos. The measured minute-long masked
 # graphics/3D stack exhausted that bound during final compositing; allow a
 # finite twenty CPU minutes for that explicitly identified local combination.
@@ -35,7 +48,7 @@ def local_render_cpu_ceiling(body, env):
 
 
 is_analysis = record['expected']['endpoint'] == '/analyze-clips'
-cpu_ceiling = record.get('localCpuSeconds', 240) if is_analysis else local_render_cpu_ceiling(record.get('body', {}), os.environ)
+cpu_ceiling = cpu_seconds if long_review or is_analysis else local_render_cpu_ceiling(record.get('body', {}), os.environ)
 if is_analysis and (not isinstance(cpu_ceiling, int) or not 30 <= cpu_ceiling <= 300):
     raise RuntimeError('Invalid local analysis CPU ceiling')
 resource.setrlimit(resource.RLIMIT_CPU, (cpu_ceiling, cpu_ceiling))
@@ -51,7 +64,7 @@ def local_render_file_ceiling(body, env):
     return int(value) * 1024**2
 
 
-file_ceiling = 20 * 1024**2 if is_analysis else local_render_file_ceiling(record.get('body', {}), os.environ)
+file_ceiling = record['localFileBytes'] if long_review else (20 * 1024**2 if is_analysis else local_render_file_ceiling(record.get('body', {}), os.environ))
 resource.setrlimit(resource.RLIMIT_FSIZE, (file_ceiling, file_ceiling))
 connect = socket.socket.connect
 
@@ -85,7 +98,7 @@ async def materialize(url, target, *args, **kwargs):
     if not approved or f"{parsed.scheme}://{parsed.netloc}" != record["apiOrigin"]:
         raise ValueError("Unapproved worker source")
     with urllib.request.urlopen(url, timeout=15) as response:
-        data = response.read(50 * 1024**2 + 1)
+        data = response.read((record['localSourceBytes'] if long_review else 50 * 1024**2) + 1)
     if len(data) != approved["size"] or hashlib.sha256(data).hexdigest() != approved["contentHash"]:
         raise ValueError("Source generation/hash changed")
     Path(target).parent.mkdir(parents=True, exist_ok=True)
@@ -94,6 +107,21 @@ async def materialize(url, target, *args, **kwargs):
 
 
 worker.materialize_video_input = materialize
+if os.environ.get('STUDIO_BACKGROUND_DEMO')=='true':
+    import python_media_worker.studio_subject_vfx_export as subject_export
+    from urllib.parse import urlparse,parse_qs
+    validate_subjects=subject_export.validate_resolved_subject_vfx
+    def owned_subject_access(url,item):
+        parsed=urlparse(url)
+        if f'{parsed.scheme}://{parsed.netloc}'!=record['apiOrigin'] or not parsed.path.startswith('/api/credit-pilot/object/'):
+            raise ValueError('Owned demo subject URL required')
+        payload=parse_qs(parsed.query).get('cap',[''])[0].split('.')[0]
+        import base64
+        data=json.loads(base64.urlsafe_b64decode(payload+'='*((-len(payload))%4)))
+        if data['userId']!=item['ownerUid'] or data['storagePath']!=f"temp_studio_vfx/{item['ownerUid']}/{item['jobId']}/render.mp4" or data['contentHash']!=item['sha256']:
+            raise ValueError('Reviewed subject ownership changed')
+    subject_export.validate_resolved_subject_vfx=lambda items:validate_subjects(items,access_validator=owned_subject_access)
+
 # Progress is telemetry only. The canonical API publishes completed job state
 # after verified bytes reach private storage, not a worker's placeholder URI.
 def process_telemetry(job_id, data, **kwargs):
@@ -162,5 +190,7 @@ finally:
         "wallSeconds": time.monotonic() - started,
         "cpuSeconds": usage.ru_utime + usage.ru_stime + children.ru_utime + children.ru_stime,
         "peakRssKiB": max(usage.ru_maxrss, children.ru_maxrss),
+        "cpuCeilingSeconds": cpu_seconds,
+        "localFileCeilingBytes": file_limit,
         "providerChargesStarted": False, "invoiceCostMicros": None,
     }))

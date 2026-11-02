@@ -8764,6 +8764,17 @@ def build_studio_sequence_video_filters(normalize_filter, fps, source_framing=Fa
     return clock + [normalize_filter] if source_framing else [normalize_filter] + clock
 
 
+def build_studio_sequence_encode_args(reviewed_subject=False):
+    # A reviewed replacement is already encoded. The default x264 CRF 23
+    # temporary cut visibly removes skin, cloth and thin equipment detail
+    # before the selected delivery profile even runs. Preserve its YUV samples
+    # during assembly; the ordinary final export still owns delivery quality.
+    args = ["-c:v", "libx264", "-preset", "ultrafast"]
+    if reviewed_subject:
+        args.extend(["-crf", "0"])
+    return args
+
+
 def build_reviewed_reframe_filter(keyframes, target_width, target_height, zoom=1, programme_offset=0):
     """Interpolate editor object-position marks without substituting face detection."""
     points = {}
@@ -9299,6 +9310,7 @@ async def render_reframe_timeline_sequential(
     fallback_mode="speaker_track",
     job_id="reframe",
     programme_fps=None,
+    reviewed_subject=False,
 ):
     """Render long reviewed timelines with bounded memory and preserve source audio."""
     specs = plan_reframe_timeline_segments(
@@ -9338,7 +9350,9 @@ async def render_reframe_timeline_sequential(
                     alternate_input_label="[1:v]" if active_offsets else None,
                 ),
                 "-map", "[vout]", "-an",
-                *build_viral_export_encode_args(resolve_viral_export_profile({}, target_width, target_height)),
+                *(build_studio_sequence_encode_args(reviewed_subject=True)
+                  if reviewed_subject else
+                  build_viral_export_encode_args(resolve_viral_export_profile({}, target_width, target_height))),
                 "-movflags", "+faststart", "-y", segment_path,
             ])
             if programme_fps is not None:
@@ -30893,6 +30907,7 @@ async def render_studio_finish_timeline_sequential(
     layers,
     duration,
     job_id="finish",
+    reviewed_subject=False,
 ):
     """Render timed Finish Rack intervals without retaining the full programme in RAM."""
     specs = plan_studio_adjustment_segments(layers, duration)
@@ -30931,7 +30946,9 @@ async def render_studio_finish_timeline_sequential(
                 # This is encoded again by the final caption/delivery graph.
                 # Veryfast keeps the intermediate compact enough for Cloud
                 # Run's memory-backed filesystem while preserving CRF 19.
-                "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                *(build_studio_sequence_encode_args(reviewed_subject=True)
+                  if reviewed_subject else
+                  ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]),
                 "-pix_fmt", "yuv420p", "-fps_mode", "passthrough", "-y", segment_path,
             ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
         # The concat demuxer rebases every segment's packet timestamps. Binary
@@ -31605,7 +31622,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "ffmpeg", "-ss", f"{picture_window['seek']:.6f}", "-i", segment_picture_path,
                     "-frames:v", str(picture_window["frames"]), "-vf", ",".join(video_filters),
                     "-map", "0:v:0", "-an",
-                    "-c:v", "libx264", "-preset", "ultrafast",
+                    *build_studio_sequence_encode_args(
+                        reviewed_subject=segment_picture_path != segment_source_path),
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
                     segment_video_path,
                 ]
@@ -32008,6 +32026,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         fallback_mode=crop_mode,
                         job_id=job_id,
                         programme_fps=programme_fps,
+                        reviewed_subject=bool(request.subjectVfx),
                     )
                     working_path = cropped_path
                 elif crop_mode == "group_stack":
@@ -32266,11 +32285,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     adjustment_layers,
                     get_media_duration(working_path),
                     job_id=job_id,
+                    reviewed_subject=bool(request.subjectVfx),
                 )
             else:
                 finish_cmd = [
                     "ffmpeg", "-i", working_path, "-vf", finish_filter,
-                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                    *(build_studio_sequence_encode_args(reviewed_subject=True)
+                      if request.subjectVfx else
+                      ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]),
                     "-pix_fmt", "yuv420p",
                 ]
                 if finish_has_audio:

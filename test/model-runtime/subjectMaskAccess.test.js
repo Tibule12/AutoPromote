@@ -1,5 +1,5 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
-const {requireSubjectMaskPreview,assertSubjectMaskRequest,ownedSubjectMaskJob}=require('../../src/services/studioSubjectMaskAccess');
+const {requireSubjectMaskPreview,isSubjectMaskPreviewUser,assertSubjectMaskRequest,ownedSubjectMaskJob}=require('../../src/services/studioSubjectMaskAccess');
 const {reuseSavedSubjectMask}=require('../../src/services/studioSubjectMaskAccess');
 const {buildArtifact}=require('../../src/modelRuntime/artifacts');
 const {selectModel,hash,stable,fail}=require('../../src/modelRuntime/contract');
@@ -9,6 +9,7 @@ test('normal Studio mask rollout requires the exact server cohort; no admin role
   let accepted=false,status;const res={status:n=>{status=n;return res;},json:()=>res};
   requireSubjectMaskPreview({user:{uid:'other'}},res,()=>accepted=true);assert.equal(status,403);assert.equal(accepted,false);
   requireSubjectMaskPreview({user:{uid:'owner',isAdmin:false}},res,()=>accepted=true);assert.equal(accepted,true);
+  assert.equal(isSubjectMaskPreviewUser('owner'),true);assert.equal(isSubjectMaskPreviewUser('other'),false);
   process.env.STUDIO_SUBJECT_MASK_PREVIEW_ENABLED='false';accepted=false;
   requireSubjectMaskPreview({user:{uid:'owner',isAdmin:true}},res,()=>accepted=true);assert.equal(accepted,false);
  }finally{for(const[k,v]of Object.entries({STUDIO_SUBJECT_MASK_PREVIEW_ENABLED:old.enabled,STUDIO_SUBJECT_MASK_PREVIEW_UIDS:old.uids}))if(v===undefined)delete process.env[k];else process.env[k]=v;}

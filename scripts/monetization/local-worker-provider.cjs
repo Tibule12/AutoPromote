@@ -19,6 +19,8 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
   if (!Number.isSafeInteger(maxRequestBytes) || maxRequestBytes < 512 * 1024 || maxRequestBytes > 4 * 1024 * 1024) throw Error('Local request limit must be 512 KiB–4 MiB.');
   if (!Number.isSafeInteger(port) || port < 0 || port > 65535) throw Error('Choose a valid loopback worker port.');
   assertSandbox(env);
+  const { localReviewBounds, validateLongReviewRequest } = require('./local-review-bounds.cjs');
+  const reviewBounds = localReviewBounds(env);
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const executionRoot = fs.realpathSync(directory);
   const privateFile = path.join(directory, "signing-key.pem");
@@ -150,7 +152,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
         if (!actual.startsWith(allowed) && !actual.startsWith(dir + path.sep))
           throw new Error("Worker artifact escaped scratch directory");
         const bytes = fs.readFileSync(actual);
-        if (bytes.length > maxArtifactBytes) throw new Error("Worker artifact exceeds budget");
+        if (bytes.length > (reviewBounds.longer ? reviewBounds.maxArtifactBytes : maxArtifactBytes)) throw new Error("Worker artifact exceeds budget");
         const artifact = path.join(dir, "artifact.mp4");
         fs.copyFileSync(actual, artifact);
         payload.output = {
@@ -190,6 +192,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
         )
           return res.sendStatus(403);
         const dir = folder(expected.executionId);
+        const longReview = validateLongReviewRequest(req.body, req.path, reviewBounds);
         fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
         const requestFile = path.join(dir, "request.json");
         const record = {
@@ -198,7 +201,9 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
           apiOrigin,
           directory: dir,
           localCpuSeconds:
-            expected.endpoint === "/analyze-clips" ? Math.ceil(analysisTimeoutMs / 1000) : 120,
+            expected.endpoint === "/analyze-clips" ? Math.ceil(analysisTimeoutMs / 1000) : longReview ? reviewBounds.renderCpuSeconds : 120,
+          ...(longReview ? { localReview: true, localFileBytes: reviewBounds.fileBytes,
+            localSourceBytes: reviewBounds.maxSourceBytes } : {}),
         };
         if (
           fs.existsSync(requestFile) &&
@@ -250,7 +255,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
             try {
               process.kill(-child.pid, "SIGKILL");
             } catch {}
-          }, expected.endpoint === "/analyze-clips" ? analysisTimeoutMs : timeoutMs);
+          }, expected.endpoint === "/analyze-clips" ? analysisTimeoutMs : longReview ? reviewBounds.renderTimeoutMs : timeoutMs);
           const promise = new Promise(resolve => {
             child.once("error", () => {
               clearTimeout(timeout);

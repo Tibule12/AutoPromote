@@ -19,7 +19,17 @@ async function resolveSubjectReplacementAssets({ ownerUid, projectId, scene, sig
       if (result.find(asset => asset.assetId === effect.asset_id).sha256 !== effect.asset_sha256) throw invalid();
       continue;
     }
-    const asset = parsed.document.assets.find(asset => asset.sourceId === effect.asset_id || asset.assetId === effect.asset_id);
+    // Timeline occurrences are only one part of the canonical media graph.
+    // A background uploaded in Composite is saved project media even when it
+    // has no independent timeline occurrence. Resolve that persisted identity,
+    // never a browser URL or an unsaved media record.
+    const candidates = [
+      ...parsed.document.assets.filter(asset => asset.sourceId === effect.asset_id || asset.assetId === effect.asset_id),
+      ...(parsed.document.editGraph?.media || []).filter(asset => asset.id === effect.asset_id),
+    ];
+    const identities = new Set(candidates.map(asset => JSON.stringify([asset.storagePath, asset.contentHash])));
+    if (identities.size !== 1) throw invalid();
+    const asset = candidates[0];
     if (!asset || asset.contentHash !== effect.asset_sha256) throw invalid();
     const source = await resolveSource({ userId: ownerUid, storagePath: asset.storagePath, signRead: false });
     if (!/^(image\/(png|jpeg|webp)|video\/[a-z0-9.+-]+)$/.test(source.contentType) ||

@@ -18,7 +18,12 @@ def file_hash(path):
         for block in iter(lambda:file.read(1024*1024),b""): value.update(block)
     return value.hexdigest()
 
-def validate_resolved_subject_vfx(items):
+def storage_subject_access(value,item):
+    url=urlparse(value);path=unquote(url.path)
+    expected=f"/temp_studio_vfx/{item['ownerUid']}/{item['jobId']}/render.mp4"
+    if url.scheme!="https" or url.hostname!="storage.googleapis.com" or url.username or url.password or not url.query or not path.endswith(expected) or ".." in path: raise ValueError("Subject media must be an owned signed storage object")
+
+def validate_resolved_subject_vfx(items, access_validator=storage_subject_access):
     if items is None: return []
     if not isinstance(items,list) or len(items)>8: raise ValueError("Invalid resolved subject renders")
     required={"jobId","ownerUid","source_clip_id","start_time","end_time","url","sha256","pixel_sha256","source_sha256"}
@@ -30,9 +35,7 @@ def validate_resolved_subject_vfx(items):
         start,end=item["start_time"],item["end_time"]
         if any(isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value) for value in (start,end)) or start<0 or not .25<=end-start<=10: raise ValueError("Invalid subject source range")
         if not isinstance(item["url"],str) or len(item["url"])>8192: raise ValueError("Invalid subject media URL")
-        url=urlparse(item["url"]);path=unquote(url.path)
-        expected=f"/temp_studio_vfx/{item['ownerUid']}/{item['jobId']}/render.mp4"
-        if url.scheme!="https" or url.hostname!="storage.googleapis.com" or url.username or url.password or not url.query or not path.endswith(expected) or ".." in path: raise ValueError("Subject media must be an owned signed storage object")
+        access_validator(item["url"],item)
     for a,left in enumerate(items):
         if any(left["source_clip_id"]==right["source_clip_id"] and left["start_time"]<right["end_time"] and right["start_time"]<left["end_time"] for right in items[a+1:]): raise ValueError("Overlapping subject render ranges")
     return items

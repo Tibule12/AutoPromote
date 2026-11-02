@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Retire standalone Analytics, Smart Promo and Idea-to-Video; preserve shared operational paths and historical compatibility.",
-  "reviewed_at": "2026-10-31T15:09:45.293Z",
-  "catalog_sha256": "ddf0f97de79810f8fbbedb78a713d5127d703903e4a9fcfe3c39d3ce409a04a4",
+  "reason": "Reviewed actual continuous four-minute failed visual proof, separate 48-frame repaired short interval, flattened native import/export/playback and unchanged readiness. Bounded weak trimap evidence and exact compositor preparation repairs do not qualify native editable long-form masks or professional visual quality.",
+  "reviewed_at": "2026-11-02T03:31:34.648Z",
+  "catalog_sha256": "fc732b34595d7dfa532b571e7280ed3dcb8f5fafd6153f72423557ac53351eed",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -11,11 +11,11 @@
     },
     {
       "path": "config/model-runtime/registry.v1.json",
-      "sha256": "86fa3bec951aa71d48c2ec33df006406c711ac5df0be791e9bae183b6216a125"
+      "sha256": "9cc7c4d8b1e67116a76652b142b566ce53fb70c9015913ddf773c2ee895b290e"
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "ff2d9fe89a30ebbc2261988ce3b67d0710e5a162336d9aa82c25049074e62665"
+      "sha256": "6e8508961feff487afe0bc011b989137971a8b12ee12f2cf361147047104c88f"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
@@ -23,7 +23,7 @@
     },
     {
       "path": "contracts/model-capabilities-v1.json",
-      "sha256": "958fa697dee59a4b71cd90f7594e306dfef6225616db4326bfe4e3d2316881a7"
+      "sha256": "adfd2088426d286098e0169238ba0294ca718fc5305d7c033adacc393bd30ecd"
     },
     {
       "path": "contracts/product-knowledge-impact-v1.schema.json",
@@ -171,7 +171,7 @@
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
-      "sha256": "f779b5f48044a8e103d59d9dedbf69a5f21de8ba4e5f826f7a701e7dacf3de59"
+      "sha256": "9451e137e0f2b4b3029fade310f329759ce281489fc1323c3ec19e4e2dbea639"
     },
     {
       "path": "frontend/src/components/StudioTextAnimatorPanel.js",
@@ -307,7 +307,7 @@
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "b12b4d0dee23528cdcb7a2c232911d861f353b76dee744eb0955faf9cd5593f7"
+      "sha256": "8c46831dbfdc84d27f4dda3f6e1b943a4407d48d09eddc37cf14af91d6e9dc6a"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
@@ -387,7 +387,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "35b42d9afb0096dadcfa2113b03bfff2a007e29853c629f039f0e194a0f1a5f5"
+      "sha256": "aa1ea8b2530eacd960dfc4c6717ca9da9673c3a5d8378470314b4fc5a272a466"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -419,7 +419,7 @@
     },
     {
       "path": "python_media_worker/studio_vfx_plan.py",
-      "sha256": "d67c7cede6d24559be1fe5dcaa8daade16a44e05edfff932a27d9c6a28dbfcf9"
+      "sha256": "c5cc7eafdc3ca414ed54f49deae2da696a945617561b6f260ee7e782551e2b55"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
@@ -499,7 +499,7 @@
     },
     {
       "path": "src/modelRuntime/router.js",
-      "sha256": "d370221c992791263aab9131c51ff8f1b98bb328f7f1446217851d18a09c6503"
+      "sha256": "a66c6078ef9de20174969cc2cc0fa40c871b64003a533ffc838cd65c8fbfe48a"
     },
     {
       "path": "src/productAssistance/index.js",
@@ -595,7 +595,7 @@
     },
     {
       "path": "src/services/studioModelCapabilityService.js",
-      "sha256": "dad69b8d93a933128043b57188b623a3de3434cce80c878986a77392eaedf5dc"
+      "sha256": "d15019682c9e9394c255a27d5a707ea14cc927239fbf9800eb872ec07307201a"
     },
     {
       "path": "src/services/studioSourceFrameService.js",
@@ -607,7 +607,7 @@
     },
     {
       "path": "src/services/studioSubjectVfxService.js",
-      "sha256": "e55cfeade85722ff79b924263f6007e742b372d7b5ab403840fbc81bea64737b"
+      "sha256": "b4ab4e95f348c80c96ed99760832770fbf361af3e90347d0a5878cf2eef63fd6"
     },
     {
       "path": "src/services/uploadAllowance.js",
@@ -623,11 +623,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "d63e7a3995876b6a7cd8343bf6b8e18495607aa7937f24768861712a7535b31a"
+      "sha256": "1f8c893d67401bd8525c3c89529622fd97e495dabd85a3d9bcb83dde434eae94"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "e4487373c19860e7f34f20158b8c3a1b2c56a63a3162f4c4ba25ac41e633a8d1"
+      "sha256": "41b88d433f406e08ae14eebc7abdc35108a3d556b9a9dbc5b3c4d743ed4d48ff"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createModelArtifactReference } from "./studioModelArtifactReference";
 import { stable, validateSubjectVfxScene } from "./studioSubjectVfxContract";
+import { savedSubjectBox } from "./studioSubjectCorrections";
 
 // Capability requests contain source/selection contracts only. Model choice,
 // checkpoint, device and worker routing belong to the server runtime.
 export default function StudioSubjectMaskControls({ item, onChange, getDocument, getToken, apiBase, createId }) {
-  const [box, setBox] = useState(() => item.maskJob ? JSON.parse(item.maskJob.selectionJson).box : [.05, .02, .75, .99]);
+  const [box, setBox] = useState(() => savedSubjectBox(item) || [.05, .02, .75, .99]);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState("");
   const [staleJob,setStaleJob]=useState(false);
   const [componentBox,setComponentBox]=useState([.45,.45,.85,.99]);
@@ -19,6 +20,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
   // identifies an unfinished refinement without losing or replacing that job.
   const pendingRefinement = !!savedSelection?.refinement && !item.maskJob.finished &&
     item.modelArtifactRef?.artifactHash === savedSelection.refinement.maskArtifactHash;
+  const colourComponentIds=item.maskColourComponentIds || savedSelection?.refinement?.colourComponentIds || [];
   const componentSelection=value=>{
     const components=value.maskComponents || (value.maskJob ? JSON.parse(value.maskJob.selectionJson).components : null);
     return components?.length?{components}:{};
@@ -61,7 +63,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
           throw new Error("The saved project version does not match this edit.");
         saved = { requestId: createId("subject-mask"), selectionJson, projectRevision: document.revision, projectId: document.projectId,
           ...(refinement?{mode:'refinement'}:{}) };
-        onChange({ ...current.current, maskJob: saved });
+        onChange({ ...current.current, maskBox: [...box], maskJob: saved });
       }
       const input = { schemaVersion: 1, requestId: saved.requestId, projectId: saved.projectId, projectRevision: saved.projectRevision,
         sourceAssetId: scene.sourceId, sourceSha256: asset.contentHash, sourceStoragePath: asset.storagePath,
@@ -110,7 +112,7 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
       createModelArtifactReference(result.modelArtifactRef);
       if (result.scene.id !== scene.id || result.scene.sourceId !== scene.sourceId ||
           result.modelArtifactRef.sourceContentHash !== asset.contentHash) throw new Error("The returned mask targets another source.");
-      onChange({ ...result, maskJob: {...saved,finished:true}, ...(item.maskComponents?.length?{maskComponents:item.maskComponents}:{}) });
+      onChange({ ...result, maskBox: [...box], maskJob: {...saved,finished:true}, ...(item.maskComponents?.length?{maskComponents:item.maskComponents}:{}) });
       setMessage("Subject mask saved. Adjust the background and render a preview; changing effects reuses this mask.");
     } catch (error) { if (mounted.current) setMessage(error.message); }
     finally { running.current = false; if (mounted.current) setBusy(false); }
@@ -119,7 +121,11 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
     if (!item.maskJob?.jobId) return;
     try {
       let result = await request(`/api/media/studio-subject-masks/jobs/${item.maskJob.jobId}/cancel`, "POST", {});
-      if(result.status==="cancelling") result=await request(`/api/media/studio-subject-masks/jobs/${item.maskJob.jobId}`);
+      for(let check=0;result.status==="cancelling" && check<5;check++) {
+        await new Promise(resolve=>setTimeout(resolve,1000));
+        if(!mounted.current)return;
+        result=await request(`/api/media/studio-subject-masks/jobs/${item.maskJob.jobId}`);
+      }
       setMessage(`Mask request ${result.status}.`);
       if (["cancelled", "failed"].includes(result.status)) onChange({ ...current.current, maskJob: undefined });
     } catch (error) { setMessage(error.message); }
@@ -151,7 +157,10 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
     <p>Select the person to keep. Add furniture, microphones or other objects only when you want to keep them too. The box uses source-frame coordinates from 0 to 1.</p>
     {["Left", "Top", "Right", "Bottom"].map((label, index) => <label key={label}>Subject box {label.toLowerCase()}
       <input type="number" min="0" max="1" step=".01" value={box[index]} disabled={busy || !!item.maskJob}
-        onChange={event => setBox(current => current.map((value, i) => i === index ? Number(event.target.value) : value))} />
+        onChange={event => {
+          const next=box.map((value,i)=>i===index?Number(event.target.value):value);
+          setBox(next);onChange({...current.current,maskBox:next});
+        }} />
     </label>)}
     {!item.modelArtifactRef && !item.maskJob && <details>
       <summary>Keep additional foreground objects</summary>
@@ -186,15 +195,26 @@ export default function StudioSubjectMaskControls({ item, onChange, getDocument,
       onClick={()=>mask()}>{item.modelArtifactRef&&!pendingRefinement ? "Subject mask attached" : item.maskJob ? "Resume subject mask" : "Create subject mask"}</button>
     {staleJob&&<button type="button" disabled={busy} onClick={reuse}>Use saved mask for this edit</button>}
     {item.modelArtifactRef && <>
+      {(item.maskComponents||[]).filter(component=>component.propagate===false &&
+        component.points.some(point=>point.label===0) && component.points.some(point=>point.label===1)).map(component=><label key={component.id}>
+        <input type="checkbox" disabled={busy||pendingRefinement}
+          checked={colourComponentIds.includes(component.id)}
+          onChange={event=>onChange({...current.current,maskColourComponentIds:event.target.checked
+            ? [...colourComponentIds,component.id] : colourComponentIds.filter(id=>id!==component.id)})}/>
+        Clean fine edges of foreground object {(item.maskComponents||[]).indexOf(component)+1}
+      </label>)}
+      {!!(item.maskComponents||[]).some(component=>component.propagate===false) &&
+        <p>For a selected fixed object, use its foreground and background points to clean remaining background colour. Check the moving result before exporting.</p>}
       <label>Edge refinement radius<input type="number" min="2" max="24" step="1" disabled={busy}
         value={refinementRadius} onChange={event=>setRefinementRadius(Number(event.target.value))}/></label>
       <button type="button" disabled={busy||pendingRefinement} onClick={()=>{
         mask({maskArtifactHash:item.modelArtifactRef.artifactHash,radius:refinementRadius,
+          ...(colourComponentIds.length?{colourComponentIds}:{}),
           holdouts:item.scene.effects.filter(effect=>effect.type==='foreground_holdout').map(effect=>effect.corners)});
       }}>Refine saved mask edges</button>
     </>}
     {item.modelArtifactRef && <button type="button" disabled={busy||pendingRefinement} onClick={()=>{
-      onChange({...current.current,modelArtifactRef:undefined,maskJob:undefined,preview:undefined});
+      onChange({...current.current,maskBox:[...box],modelArtifactRef:undefined,maskJob:undefined,preview:undefined});
       setMessage("Choose a new foreground selection. The previous mask remains in saved project history.");
     }}>Refine foreground selection</button>}
     {item.maskJob?.jobId && <button type="button" onClick={cancel}>Cancel mask request</button>}

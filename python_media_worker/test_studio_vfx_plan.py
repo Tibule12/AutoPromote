@@ -39,6 +39,30 @@ def plan(cache):
             "effects": [{"id": "text", "type": "text_behind", "start": 0, "end": 1, "text": "STORIES", "x": 50, "y": 50, "font_size": 30, "color": "#ffffff"}]}
 
 
+@pytest.mark.parametrize('protected_cleanup',[False,True])
+def test_feathered_colour_key_does_not_pop_on_one_value_of_source_light(source_cache,protected_cleanup):
+    _, _, cache = source_cache
+    effect={"id":"spill", "type":"foreground_refine", "start":0, "end":1,
+        "choke":0,"feather":.3,"recover_box":[0,0,0,0],"recover_hue":210,
+        "hue_tolerance":30,"saturation_min":.2,"detail_box":[0,0,1,1],"dark_max":0,
+        "clear_box":[0,0,0,0],"reject_hue":15,"reject_tolerance":25,
+        "reject_saturation":.7,"reject_value":.8}
+    if protected_cleanup:effect['after_holdout']=True
+    command=plan(cache);command['effects']=[effect]
+    renderer=VfxFrameRenderer(command,cache)
+    alpha=Image.new('L',(128,72),255)
+    # These colours straddle the former hard V=.8 boundary by 1/255.
+    values=[]
+    for colour in [(203,80,25),(204,80,25),(255,80,25),(40,100,150)]:
+        frame=Image.new('RGB',(128,72),colour)
+        _,result=renderer._prepare_foreground(frame,alpha,[effect],128,72)
+        values.append(int(np.asarray(result)[35,90]))
+    assert abs(values[0]-values[1])<30
+    assert 40<values[0]<215 and 40<values[1]<215
+    assert values[2]==0 # Fully keyed old-screen colour remains absent.
+    assert values[3]==255 # A different surface colour is retained.
+
+
 def test_text_changes_background_while_subject_pixels_remain_exact(source_cache):
     _, _, cache = source_cache
     frame = Image.new("RGB", (128, 72), "navy")
@@ -608,3 +632,24 @@ def test_two_surface_replacements_retain_previous_surface_and_original_edges(sou
     assert np.array_equal(output[15,15],[180,80,30])
     assert np.array_equal(output[45,45],[180,80,30])
     assert np.array_equal(output[30,30],[0,0,128])
+
+
+def test_fine_alpha_keeps_opaque_seeds_on_a_two_pixel_microphone_rail(source_cache):
+    _, _, cache = source_cache
+    values = np.zeros((72,128),np.uint8)
+    values[:,80:] = 255
+    values[10:62,30:32] = 255
+    frame = np.full((72,128,3),[220,130,30],np.uint8)
+    frame[10:62,30:32] = [12,15,18]
+    frame[:,80:] = [35,45,55]
+    effect = {'id':'edge','type':'foreground_refine','start':0,'end':1,'choke':0,'feather':0,
+        'recover_box':[0,0,0,0],'recover_hue':0,'hue_tolerance':0,'saturation_min':1,
+        'detail_box':[0,0,0,0],'dark_max':0,'clear_box':[0,0,0,0],
+        'reject_hue':0,'reject_tolerance':0,'reject_saturation':1,'reject_value':1,
+        'edge_radius':3,'decontaminate':0}
+    command = plan(cache);command['effects']=[effect]
+    renderer = VfxFrameRenderer(command,cache)
+    _, alpha = renderer._prepare_foreground(Image.fromarray(frame),Image.fromarray(values),[effect],128,72)
+    result = np.asarray(alpha)
+    assert np.all(result[15:57,30:32] == 255), 'Fine edge erosion must not erase the selected opaque equipment core'
+    assert result[36,10] == 0

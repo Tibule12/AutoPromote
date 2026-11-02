@@ -76,6 +76,8 @@ async function createSubjectVfxPreview({ ownerUid, scene: input, clientRequestId
   if(modelArtifactRef!==undefined && (!modelArtifactRef || typeof modelArtifactRef!=='object' || Array.isArray(modelArtifactRef)))
     throw error(422,'Invalid immutable mask reference.');
   const scene = validateSubjectVfxScene(input);
+  if(scene.effects.some(effect=>effect.type==='background_replace') && !modelArtifactRef)
+    throw error(422,'Create a saved subject mask before replacing the background.');
   const executionKind=modelArtifactRef?'model_artifact_cpu':undefined;
   const config = workerConfig(executionKind);
   const { source, sourceBucket, generation,sha256 } = await sourceIdentity(ownerUid, scene);
