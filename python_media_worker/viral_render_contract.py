@@ -40,6 +40,21 @@ def build_delivery_video_clock_filter(fps: float, duration: float, source_fps: f
     )
 
 
+def build_studio_cfr_packet_args(fps: float) -> List[str]:
+    """Give every non-reordered intermediate picture a complete CFR packet.
+
+    Some FFmpeg versions omit the last packet duration in a short MP4. Concat
+    then rebases the next segment early even when the frame count is right.
+    These arguments require an encoder with B-frames disabled; they retain
+    each existing compressed picture and do not create or discard pictures.
+    """
+    if not math.isfinite(fps) or not 1 <= fps <= 120:
+        raise ValueError("Picture packets require a valid frame rate")
+    clock = f"({fps:.12g}*TB)"
+    return ["-bsf:v", f"setts=pts=N/{clock}:dts=N/{clock}:duration=1/{clock}",
+            "-video_track_timescale", "90000"]
+
+
 def build_studio_timeline_mux_args(duration: float) -> List[str]:
     """Bound intermediate stream copies without dropping buffered video packets.
 

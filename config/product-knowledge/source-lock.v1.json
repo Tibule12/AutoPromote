@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Worker release repair restores delivery-frame and grade concat contracts, retaining canonical source clock, reviewed pixels and existing product readiness. Shared credential-free image gate added; no user flow or feature entitlement change.",
-  "reviewed_at": "2026-11-02T18:55:00.276Z",
+  "reason": "Explicit CFR packet clock in sequential grade and reframe joins preserves compressed frames and exact end duration across FFmpeg versions; no product control or readiness promotion.",
+  "reviewed_at": "2026-11-02T19:01:20.488Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -399,7 +399,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "a99fdb493fa69caf43cc1e3759278766eca86a3dd724b9dda755e22bc4654333"
+      "sha256": "4334d6302dced718239be737ffcc3b280dd8330f989b4227784d002c1583f687"
     },
     {
       "path": "python_media_worker/studio_audio.py",
@@ -435,7 +435,7 @@
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
-      "sha256": "fcefe9561cf6c68cdf87c120dc187d5a55d7195037090cb96184c75c7953b9a8"
+      "sha256": "640bb8ab74e69c7afbafba29afef8c97f5e62c8b46158f93a0ca8ebdef520265"
     },
     {
       "path": "reports/footer-pages-20261021/README.md",

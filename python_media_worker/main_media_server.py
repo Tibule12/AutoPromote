@@ -74,6 +74,7 @@ try:
         build_caption_override_transcript,
         build_edited_caption_transcript,
         build_delivery_video_clock_filter,
+        build_studio_cfr_packet_args,
         build_studio_timeline_mux_args,
         resolve_studio_audio_bitrate,
         build_studio_audio_delivery_filter,
@@ -93,6 +94,7 @@ except ImportError:
         build_caption_override_transcript,
         build_edited_caption_transcript,
         build_delivery_video_clock_filter,
+        build_studio_cfr_packet_args,
         build_studio_timeline_mux_args,
         resolve_studio_audio_bitrate,
         build_studio_audio_delivery_filter,
@@ -9383,7 +9385,7 @@ async def render_reframe_timeline_sequential(
                 # One-frame camera intervals cannot carry reordered DTS across
                 # a concat boundary. Retain exact duration as well as count.
                 command[-1:-1] = ['-frames:v', str(segment['frame_count']), '-fps_mode', 'passthrough',
-                                  '-bf', '0', '-video_track_timescale', '90000']
+                                  '-bf', '0', *build_studio_cfr_packet_args(picture_fps)]
             await run_subprocess_async(
                 command, check=True, job_context=job_id,
                 timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
@@ -9395,6 +9397,7 @@ async def render_reframe_timeline_sequential(
             "ffmpeg", "-f", "concat", "-safe", "0", "-i", concat_path,
             "-i", source_path,
             "-map", "0:v:0", "-map", "1:a?", "-c:v", "copy", "-c:a", "copy",
+            *(build_studio_cfr_packet_args(picture_fps) if picture_fps is not None else []),
             *build_studio_timeline_mux_args(duration),
             "-movflags", "+faststart", "-y", output_path,
         ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
@@ -30979,7 +30982,7 @@ async def render_studio_finish_timeline_sequential(
                   if reviewed_subject else
                   ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]),
                 "-pix_fmt", "yuv420p", "-fps_mode", "passthrough",
-                "-bf", "0", "-video_track_timescale", "90000", "-y", segment_path,
+                "-bf", "0", *build_studio_cfr_packet_args(fps), "-y", segment_path,
             ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
         # The concat demuxer rebases every segment's packet timestamps. Binary
         # concatenation of reset MPEG-TS timestamps lost B-frames at grade cuts.
@@ -30998,7 +31001,8 @@ async def render_studio_finish_timeline_sequential(
         else:
             concat_command.append("-an")
         concat_command.extend([
-            "-c:v", "copy", *build_studio_timeline_mux_args(duration),
+            "-c:v", "copy", *build_studio_cfr_packet_args(fps),
+            *build_studio_timeline_mux_args(duration),
             "-movflags", "+faststart", "-y", output_path,
         ])
         await run_subprocess_async(
