@@ -8,7 +8,6 @@ const SUBSCRIPTION_PLANS = {
       uploads: 3,
       platformLimit: 1,
       wolfHuntTasks: 3,
-      analytics: "Basic",
       support: "Self-serve",
       multicam: false,
       teamSeats: 1,
@@ -24,7 +23,6 @@ const SUBSCRIPTION_PLANS = {
       uploads: 20,
       platformLimit: 5,
       wolfHuntTasks: 20,
-      analytics: "Workflow analytics",
       support: "Email support",
       multicam: true,
       teamSeats: 1,
@@ -40,7 +38,6 @@ const SUBSCRIPTION_PLANS = {
       uploads: 80,
       platformLimit: 6,
       wolfHuntTasks: 100,
-      analytics: "Advanced insights",
       support: "Priority support",
       multicam: true,
       teamSeats: 3,
@@ -56,7 +53,6 @@ const SUBSCRIPTION_PLANS = {
       uploads: 240,
       platformLimit: 6,
       wolfHuntTasks: 500,
-      analytics: "Export-ready analytics",
       support: "Priority support",
       multicam: true,
       teamSeats: 10,
@@ -77,8 +73,6 @@ const CREDIT_COSTS = {
   transcribe: 3,
   hook: 3,
   music: 1,
-  "idea-video-preview": 5,
-  "idea-video-render": 25,
 };
 
 /**
@@ -173,15 +167,6 @@ const EDITING_FEATURE_CATALOG = {
     creditOperation: "render-clip",
     limitModel: "monthly_credits_then_topups",
   },
-  smartPromoSummary: {
-    label: "Smart Promo Summary",
-    clientSide: false,
-    backendProcessing: true,
-    pythonWorker: true,
-    usesStorage: true,
-    creditOperation: "promo-summary",
-    limitModel: "monthly_credits_then_topups",
-  },
   videoProcessing: {
     label: "AI Video Processing",
     clientSide: false,
@@ -204,14 +189,7 @@ const EDITING_FEATURE_CATALOG = {
 
 const PLAN_CAPABILITIES = {
   free: {
-    analytics: {
-      allowedRanges: ["24h", "7d"],
-      platformBreakdown: false,
-      recoveryLab: false,
-      canExport: false,
-      topContentLimit: 10,
-      summary: "Recent KPI snapshot for published content.",
-    },
+    recoveryLab: false,
     support: {
       ticketAccess: false,
       allowedPriorities: ["low"],
@@ -220,14 +198,7 @@ const PLAN_CAPABILITIES = {
     },
   },
   premium: {
-    analytics: {
-      allowedRanges: ["24h", "7d", "30d"],
-      platformBreakdown: true,
-      recoveryLab: false,
-      canExport: false,
-      topContentLimit: 25,
-      summary: "Workflow analytics with platform breakdown and 30-day history.",
-    },
+    recoveryLab: false,
     support: {
       ticketAccess: true,
       allowedPriorities: ["low", "medium"],
@@ -236,14 +207,7 @@ const PLAN_CAPABILITIES = {
     },
   },
   pro: {
-    analytics: {
-      allowedRanges: ["24h", "7d", "30d", "90d", "all"],
-      platformBreakdown: true,
-      recoveryLab: true,
-      canExport: false,
-      topContentLimit: 50,
-      summary: "Advanced insights with Recovery Lab access and full history.",
-    },
+    recoveryLab: true,
     support: {
       ticketAccess: true,
       allowedPriorities: ["low", "medium", "high"],
@@ -252,14 +216,7 @@ const PLAN_CAPABILITIES = {
     },
   },
   enterprise: {
-    analytics: {
-      allowedRanges: ["24h", "7d", "30d", "90d", "all"],
-      platformBreakdown: true,
-      recoveryLab: true,
-      canExport: true,
-      topContentLimit: 100,
-      summary: "Export-ready analytics with Recovery Lab.",
-    },
+    recoveryLab: true,
     support: {
       ticketAccess: true,
       allowedPriorities: ["low", "medium", "high"],
@@ -315,10 +272,7 @@ function getPlanCapabilities(planId) {
   return {
     planId: normalizedPlanId,
     planName: plan.name,
-    analytics: {
-      ...base.analytics,
-      label: plan.features.analytics,
-    },
+    recoveryLab: base.recoveryLab,
     support: {
       ...base.support,
       label: plan.features.support,

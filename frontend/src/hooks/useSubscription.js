@@ -23,7 +23,6 @@ const FREE_FALLBACK = {
       thumbnailLab: { enabled: false },
       findViralClips: { enabled: false },
       viralClipStudio: { enabled: false },
-      smartPromoSummary: { enabled: false },
     },
   },
 };
@@ -42,7 +41,10 @@ export const useSubscription = () => {
       topUpBalance: profile?.topUpBalance ?? FREE_FALLBACK.credits.topUpBalance,
       remaining: profile?.totalCredits ?? FREE_FALLBACK.credits.remaining,
     };
-    const editing = profile?.editing || FREE_FALLBACK.editing;
+    const rawEditing = profile?.editing || FREE_FALLBACK.editing;
+    const editing = { ...rawEditing, features: Object.fromEntries(
+      Object.entries(rawEditing.features || {}).filter(([key]) => !["smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "analytics"].includes(key))
+    ) };
     const capabilityFeatures = Object.fromEntries(
       Object.entries(editing.features || {}).map(([featureId, config]) => [
         featureId,
@@ -59,7 +61,7 @@ export const useSubscription = () => {
   }, [profile]);
 
   const canUseFeature = feature =>
-    Boolean(
+    !["smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "analytics"].includes(feature) && Boolean(
       (creditPilotEnabled() && ["findViralClips", "viralClipStudio"].includes(feature)) ||
       isRuntimeE2EEnabled() ||
       normalized.editing?.features?.[feature]?.enabled ||

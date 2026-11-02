@@ -1,0 +1,22 @@
+[
+  {
+    "path": "/analytics/",
+    "status": 200,
+    "final": "/#/?tab=schedules"
+  },
+  {
+    "path": "/metrics/",
+    "status": 200,
+    "final": "/#/?tab=schedules"
+  },
+  {
+    "path": "/smart-promo/",
+    "status": 200,
+    "final": "/#/?tab=viral_clip_studio"
+  },
+  {
+    "path": "/idea-to-video/",
+    "status": 200,
+    "final": "/#/?tab=viral_clip_studio"
+  }
+]

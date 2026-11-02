@@ -1,6 +1,6 @@
 # Publishing
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.46 • 2026-10-31
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -171,52 +171,6 @@ Submits selected owned content to eligible connected platforms under the existin
 - Reddit creates a post that only shows a video link: Check the actual video attachment and playback. A video poster should come from the selected movie; an incomplete attachment is not a successful video publication.
 
 **Controls:** No source-qualified editable control is recorded.
-
-**Guides:** No task guide in V1.
-
-**Templates:** No pinned shared-template binding recorded.
-
-## Analytics
-
-ID: `publishing.analytics` • **PARTIAL** • DETERMINISTIC
-
-Shows collected account-owned platform statistics, distinguishes missing counters from measured zero, filters a published release and refreshes its recent destination posts.
-
-**Purpose:** Judge published work using real collected metrics without confusing missing data, impressions and video views.
-
-**Available to:** signed-in users with owned project and applicable entitlement
-
-**Media:** video
-
-**Requires:** system.account (FUNCTIONAL)
-
-**Optional:** None recorded.
-
-**Workflow**
-
-1. Open Analytics and choose the available date range.
-2. Choose a Published release to inspect that release as new content is published; All published releases restores the account view.
-3. Read the collected-post coverage and last successful update. Unavailable counters are not zero.
-4. Use Sync latest platform statistics to refresh up to six recent published posts in the selected scope, one per destination.
-5. Compare posts within each platform. Review unavailable connections and permissions before drawing performance conclusions.
-
-**Preview:** Displays collected metrics, unavailable values, collected-post coverage and last successful update. A reported zero remains zero.
-
-**Final render:** No video render is performed. An explicit bounded statistics refresh reads connected providers and persists owned post observations.
-
-**Limits**
-
-- Provider permissions, connection health and account allowance apply. Some destinations provide engagement but no view count.
-- The refresh selects up to six owned successful non-simulated posts and has a five-minute per-post cooldown.
-- Metrics cover collected posts only. Impressions are separate from views; a combined click-through rate is unavailable without matched attribution.
-- Public provider delivery and whole-account collection coverage are separate from source and local signed-in verification.
-- Automatic observations remain scheduled through the seven-day collection window even when first-day views are low. Older legacy post records without collection initialization need an explicit refresh; local checks do not deploy backend changes.
-
-**Common errors**
-
-- Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
-
-**Controls:** [Sync latest platform statistics](../control-reference/index.md#publishing-analytics-sync_latest), [Published release](../control-reference/index.md#publishing-analytics-release)
 
 **Guides:** No task guide in V1.
 

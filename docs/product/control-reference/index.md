@@ -1,6 +1,6 @@
 # Source-qualified controls
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.46 • 2026-10-31
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -201,8 +201,6 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.logo_design.png | Download logo PNG | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.logo_design.contour | Vector contour | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.logo_design.canvas | Start a logo design | object | source-dependent … source-dependent | design units | not a fixed default | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
-| publishing.analytics.sync_latest | Sync latest platform statistics | array | 1 … 6 | none | [] | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
-| publishing.analytics.release | Published release | string | source-dependent … source-dependent | none | "" | UNSUPPORTED | SUPPORTED | UNSUPPORTED | UNSUPPORTED |
 | studio.captions.source_language | Speech language | enum | auto, en, af, za-mixed, xh, zu, st, tn, ts, nr, ve | none | "auto" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.composite.background_edge_radius | Edge detail width | number | 0 … 8 | source pixels | 3 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.background_decontaminate | Remove old background colour | number | 0 … 1 | strength | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
@@ -2650,32 +2648,6 @@ Applies to: ordinary native vector logo layers. Requires: studio.logo_design.
 
 - Creation drafts become ordinary vector contours and base transforms; the saved project is authoritative after adding. Logo assembly keys use normal Motion controls.
 - Static masters export the base layout before animation; source, character and composition limitations are described under Logo Workshop.
-
-<a id="publishing-analytics-sync_latest"></a>
-
-## Sync latest platform statistics
-
-ID: `publishing.analytics.sync_latest` • **PARTIAL**
-
-Refreshes up to six newest owned published posts in the selected release or account scope, one per destination. Selection uses publication time independently of the performance-ranked display.
-
-Applies to: video. Requires: publishing.analytics, system.account.
-
-- Five-minute per-post cooldown; only owned successful non-simulated posts qualify.
-- Missing permissions or unsupported platform metrics remain unavailable. The action does not publish content or promise reach.
-
-<a id="publishing-analytics-release"></a>
-
-## Published release
-
-ID: `publishing.analytics.release` • **PARTIAL**
-
-Limits collected statistics and refresh targets to one owned published release within the selected date range.
-
-Applies to: video. Requires: publishing.analytics, system.account.
-
-- Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.
-- Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach.
 
 <a id="studio-captions-source_language"></a>
 

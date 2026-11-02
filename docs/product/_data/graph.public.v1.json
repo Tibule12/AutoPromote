@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.45",
+  "knowledge_version": "1.0.46",
   "product_version": "1.2.0",
   "nodes": [
     {
@@ -404,11 +404,6 @@
       "status": "FUNCTIONAL"
     },
     {
-      "id": "generation.idea_to_video",
-      "kind": "feature",
-      "status": "PARTIAL"
-    },
-    {
       "id": "generation.idea_recommendations",
       "kind": "feature",
       "status": "PROXY_ONLY"
@@ -495,11 +490,6 @@
     },
     {
       "id": "publishing.publish",
-      "kind": "feature",
-      "status": "PARTIAL"
-    },
-    {
-      "id": "publishing.analytics",
       "kind": "feature",
       "status": "PARTIAL"
     },
@@ -1485,16 +1475,6 @@
     },
     {
       "id": "studio.logo_design.canvas",
-      "kind": "control",
-      "status": "PARTIAL"
-    },
-    {
-      "id": "publishing.analytics.sync_latest",
-      "kind": "control",
-      "status": "PARTIAL"
-    },
-    {
-      "id": "publishing.analytics.release",
       "kind": "control",
       "status": "PARTIAL"
     },
@@ -2591,11 +2571,6 @@
       "to": "system.account"
     },
     {
-      "from": "generation.idea_to_video",
-      "type": "requires",
-      "to": "system.account"
-    },
-    {
       "from": "generation.image_to_video",
       "type": "requires",
       "to": "system.model_runtime"
@@ -2692,11 +2667,6 @@
     },
     {
       "from": "publishing.publish",
-      "type": "requires",
-      "to": "system.account"
-    },
-    {
-      "from": "publishing.analytics",
       "type": "requires",
       "to": "system.account"
     },
@@ -3769,16 +3739,6 @@
       "from": "studio.logo_design",
       "type": "editable_with",
       "to": "studio.logo_design.canvas"
-    },
-    {
-      "from": "publishing.analytics",
-      "type": "editable_with",
-      "to": "publishing.analytics.sync_latest"
-    },
-    {
-      "from": "publishing.analytics",
-      "type": "editable_with",
-      "to": "publishing.analytics.release"
     },
     {
       "from": "studio.captions",

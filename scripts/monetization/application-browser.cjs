@@ -106,12 +106,12 @@ async function main() {
       const title =
         phase === "studio-zero" ? "Zero credit recovery project" : "Credit lifecycle local project";
       await projectName.fill(title);
-      if (phase === "studio-zero") {
+      if (["studio-zero", "studio-edit"].includes(phase)) {
         await clickStudioControl(page, page.getByRole("button", { name: "Graphics", exact: true }));
         await page.getByRole("button", { name: /H1 Headline Bold hook copy/ }).click();
         await page
           .getByRole("textbox", { name: "Title text", exact: true })
-          .fill("Saved at zero credits");
+          .fill(phase === "studio-zero" ? "Saved at zero credits" : "Same project. Active Studio.");
       }
       await page.getByTestId("studio-save-project").click();
       await page.waitForTimeout(1200);
@@ -123,7 +123,14 @@ async function main() {
           .readdirSync(path.join(directory, "worker"))
           .filter(name => /^[a-f0-9]{64}$/.test(name)).length;
         const backup = page.waitForEvent("download");
-        await page.getByRole("button", { name: "Download project backup", exact: true }).click();
+        await clickStudioControl(
+          page,
+          page.getByRole("button", {
+            name: "Download project backup",
+            exact: true,
+            includeHidden: true,
+          })
+        );
         await (await backup).saveAs(path.join(directory, "zero-project.autopromote.json"));
         await page.reload();
         await page.getByTestId("shared-credit-balance").waitFor();
@@ -285,7 +292,7 @@ async function main() {
       await page
         .getByRole("button", { name: /Create clip/ })
         .first()
-        .waitFor({ timeout: 150000 });
+        .waitFor({ timeout: 270000 });
     } else if (phase === "publisher") {
       await page.getByRole("button", { name: "Publisher", exact: true }).first().click();
       await page.getByRole("tab", { name: "Upload", exact: true }).click();

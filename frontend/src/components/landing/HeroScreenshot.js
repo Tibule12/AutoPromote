@@ -7,7 +7,7 @@ const DEMOS = [
     eyebrow: "Current AutoPromote experience",
     title: "See the new creator dashboard in action.",
     description:
-      "Walk through publishing, platform previews, the queue, analytics, and the updated creator workspace.",
+      "Walk through publishing, platform previews, the queue, delivery status, and the updated creator workspace.",
     src: "/demos/dashboard-demo.webm",
     poster: "/demos/dashboard-demo-poster.jpg",
   },

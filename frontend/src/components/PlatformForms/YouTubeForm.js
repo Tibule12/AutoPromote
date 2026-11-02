@@ -358,7 +358,7 @@ const YouTubeForm = ({
           </code>{" "}
           to manage your videos. We do not delete your existing videos or manage your account
           settings. The <code>readonly</code> permission allows us to check channel status and
-          analytics to optimize your upload times.
+          channel data to review your upload times.
         </p>
       </div>}
 

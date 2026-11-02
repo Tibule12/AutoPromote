@@ -77,7 +77,6 @@ describe("testerProgramService", () => {
             "publishing",
             "queue",
             "findViralClips",
-            "smartPromoSummary",
           ]),
           autoRenews: false,
         }),
@@ -118,7 +117,7 @@ describe("testerProgramService", () => {
     expect(capabilities.editing.features.multicam.enabled).toBe(true);
     expect(capabilities.editing.features.findViralClips.enabled).toBe(true);
     expect(capabilities.editing.features.clipRender.enabled).toBe(true);
-    expect(capabilities.editing.features.smartPromoSummary.enabled).toBe(true);
+    expect(capabilities.editing.features.smartPromoSummary).toBeUndefined();
     expect(capabilities.editing.features.thumbnailLab.enabled).toBe(false);
     expect(capabilities.editing.features.viralClipStudio.enabled).toBe(false);
     expect(capabilities.editing.features.watermarkRemoval.enabled).toBe(false);

@@ -33,15 +33,6 @@ const views = [
     alt: "AutoPromote publishing calendar showing sample upcoming YouTube, Instagram and TikTok posts",
     detail: ["Calendar and queue views", "Release timing", "Sample posts shown"],
   },
-  {
-    id: "measure",
-    label: "Learn what lands",
-    title: "See what your audience comes back for.",
-    copy: "Explore performance by platform and date range. Use your connected-account data to decide where to focus your next release.",
-    image: "workspace-analytics.png",
-    alt: "AutoPromote Analytics with sample platform performance and date filters",
-    detail: ["Platform breakdowns", "Date-range comparison", "Sample metrics shown"],
-  },
 ];
 
 export default function LandingProductShowcase({ onWatchDemo }) {
@@ -128,7 +119,7 @@ export default function LandingProductShowcase({ onWatchDemo }) {
             ))}
           </ul>
           <button type="button" className="lp-text-button" onClick={onWatchDemo}>
-            Watch the walkthrough <LandingIcon name="play" />
+            Back to the workspace <LandingIcon name="play" />
           </button>
         </div>
       </div>

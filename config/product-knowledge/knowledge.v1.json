@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.45",
+  "knowledge_version": "1.0.46",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-21",
+  "updated_at": "2026-10-31",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -5555,59 +5555,6 @@
       ]
     },
     {
-      "feature_id": "generation.idea_to_video",
-      "name": "Idea-to-Video",
-      "area": "Generated media",
-      "summary": "Builds a scene draft from an idea with selectable voice and media searches, then requests an output. A scripted safe fallback is not proof of AI-generated moving footage.",
-      "purpose": "Builds a scene draft from an idea with selectable voice and media searches, then requests an output. A scripted safe fallback is not proof of AI-generated moving footage.",
-      "implementation_kind": "HYBRID",
-      "available_to": [
-        "signed-in users with owned project and applicable entitlement"
-      ],
-      "supported_media": [
-        "video"
-      ],
-      "requires": [
-        "system.account"
-      ],
-      "optional_capabilities": [],
-      "controls": [],
-      "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
-      ],
-      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
-      "limitations": [
-        "Draft quality, source rights, provider availability and render cost need review.",
-        "A scene description or stock search is not image-to-video generation."
-      ],
-      "common_errors": [
-        {
-          "condition": "Feature unavailable or output stale",
-          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
-        }
-      ],
-      "related_features": [],
-      "templates_using_feature": [],
-      "model_capabilities": [],
-      "examples": [],
-      "aliases": [],
-      "readiness_authority": null,
-      "review_state": "SOURCE_AUDITED",
-      "status": "PARTIAL",
-      "updated_at": "2026-10-12",
-      "product_version": "1.2.0",
-      "visibility": "PUBLIC",
-      "source_evidence": [
-        {
-          "path": "frontend/src/UserDashboardTabs/IdeaVideoPanel.js",
-          "anchor": "cleanIdeaText",
-          "kind": "IMPLEMENTATION"
-        }
-      ]
-    },
-    {
       "feature_id": "generation.idea_recommendations",
       "name": "Content idea suggestions",
       "area": "Generated media",
@@ -6829,88 +6776,6 @@
         {
           "path": "src/services/linkedinService.js",
           "anchor": "requireReconnect",
-          "kind": "IMPLEMENTATION"
-        }
-      ]
-    },
-    {
-      "feature_id": "publishing.analytics",
-      "name": "Analytics",
-      "area": "Publishing",
-      "summary": "Shows collected account-owned platform statistics, distinguishes missing counters from measured zero, filters a published release and refreshes its recent destination posts.",
-      "purpose": "Judge published work using real collected metrics without confusing missing data, impressions and video views.",
-      "implementation_kind": "DETERMINISTIC",
-      "available_to": [
-        "signed-in users with owned project and applicable entitlement"
-      ],
-      "supported_media": [
-        "video"
-      ],
-      "requires": [
-        "system.account"
-      ],
-      "optional_capabilities": [],
-      "controls": [
-        "publishing.analytics.sync_latest",
-        "publishing.analytics.release"
-      ],
-      "workflow": [
-        "Open Analytics and choose the available date range.",
-        "Choose a Published release to inspect that release as new content is published; All published releases restores the account view.",
-        "Read the collected-post coverage and last successful update. Unavailable counters are not zero.",
-        "Use Sync latest platform statistics to refresh up to six recent published posts in the selected scope, one per destination.",
-        "Compare posts within each platform. Review unavailable connections and permissions before drawing performance conclusions."
-      ],
-      "preview_behavior": "Displays collected metrics, unavailable values, collected-post coverage and last successful update. A reported zero remains zero.",
-      "render_behavior": "No video render is performed. An explicit bounded statistics refresh reads connected providers and persists owned post observations.",
-      "limitations": [
-        "Provider permissions, connection health and account allowance apply. Some destinations provide engagement but no view count.",
-        "The refresh selects up to six owned successful non-simulated posts and has a five-minute per-post cooldown.",
-        "Metrics cover collected posts only. Impressions are separate from views; a combined click-through rate is unavailable without matched attribution.",
-        "Public provider delivery and whole-account collection coverage are separate from source and local signed-in verification.",
-        "Automatic observations remain scheduled through the seven-day collection window even when first-day views are low. Older legacy post records without collection initialization need an explicit refresh; local checks do not deploy backend changes."
-      ],
-      "common_errors": [
-        {
-          "condition": "Feature unavailable or output stale",
-          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
-        }
-      ],
-      "related_features": [],
-      "templates_using_feature": [],
-      "model_capabilities": [],
-      "examples": [],
-      "aliases": [],
-      "readiness_authority": null,
-      "review_state": "SOURCE_AUDITED",
-      "status": "PARTIAL",
-      "updated_at": "2026-10-21",
-      "product_version": "1.2.0",
-      "visibility": "PUBLIC",
-      "source_evidence": [
-        {
-          "path": "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
-          "anchor": "const AnalyticsPanel = () => {",
-          "kind": "IMPLEMENTATION"
-        },
-        {
-          "path": "src/analyticsRoutes.js",
-          "anchor": "postsWithoutMetrics",
-          "kind": "IMPLEMENTATION"
-        },
-        {
-          "path": "src/services/ownedPlatformMetricsRefresh.js",
-          "anchor": "refreshOwnedPlatformMetrics",
-          "kind": "IMPLEMENTATION"
-        },
-        {
-          "path": "src/services/platformMetricValues.js",
-          "anchor": "normalizeMetrics",
-          "kind": "IMPLEMENTATION"
-        },
-        {
-          "path": "src/services/platformMetricsSchedule.js",
-          "anchor": "computeNextAnalyticsCheck",
           "kind": "IMPLEMENTATION"
         }
       ]
@@ -17023,104 +16888,6 @@
       ]
     },
     {
-      "control_id": "publishing.analytics.sync_latest",
-      "label": "Sync latest platform statistics",
-      "meaning": "Refreshes up to six newest owned published posts in the selected release or account scope, one per destination. Selection uses publication time independently of the performance-ranked display.",
-      "feature_ids": [
-        "publishing.analytics"
-      ],
-      "field": "postIds",
-      "constraints": {
-        "type": "array",
-        "minimum": 1,
-        "maximum": 6,
-        "default": [],
-        "default_known": true,
-        "values": []
-      },
-      "unit": "none",
-      "keyframeable": "UNSUPPORTED",
-      "preview_support": "SUPPORTED",
-      "render_support": "UNSUPPORTED",
-      "director_edit": "UNSUPPORTED",
-      "applicable_media": [
-        "video"
-      ],
-      "dependencies": [
-        "publishing.analytics",
-        "system.account"
-      ],
-      "limitations": [
-        "Five-minute per-post cooldown; only owned successful non-simulated posts qualify.",
-        "Missing permissions or unsupported platform metrics remain unavailable. The action does not publish content or promise reach."
-      ],
-      "status": "PARTIAL",
-      "updated_at": "2026-10-21",
-      "product_version": "1.2.0",
-      "visibility": "PUBLIC",
-      "source_evidence": [
-        {
-          "path": "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
-          "anchor": "Sync latest platform statistics",
-          "kind": "IMPLEMENTATION"
-        },
-        {
-          "path": "src/services/ownedPlatformMetricsRefresh.js",
-          "anchor": "postIds.length > 6",
-          "kind": "IMPLEMENTATION"
-        }
-      ]
-    },
-    {
-      "control_id": "publishing.analytics.release",
-      "label": "Published release",
-      "meaning": "Limits collected statistics and refresh targets to one owned published release within the selected date range.",
-      "feature_ids": [
-        "publishing.analytics"
-      ],
-      "field": "contentId",
-      "constraints": {
-        "type": "string",
-        "default": "",
-        "default_known": true,
-        "values": [],
-        "minimum": null,
-        "maximum": null
-      },
-      "unit": "none",
-      "keyframeable": "UNSUPPORTED",
-      "preview_support": "SUPPORTED",
-      "render_support": "UNSUPPORTED",
-      "director_edit": "UNSUPPORTED",
-      "applicable_media": [
-        "video"
-      ],
-      "dependencies": [
-        "publishing.analytics",
-        "system.account"
-      ],
-      "limitations": [
-        "Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.",
-        "Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach."
-      ],
-      "status": "PARTIAL",
-      "updated_at": "2026-10-21",
-      "product_version": "1.2.0",
-      "visibility": "PUBLIC",
-      "source_evidence": [
-        {
-          "path": "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
-          "anchor": "aria-label=\"Published release\"",
-          "kind": "IMPLEMENTATION"
-        },
-        {
-          "path": "src/analyticsRoutes.js",
-          "anchor": "selectedReleaseId: requestedRelease",
-          "kind": "IMPLEMENTATION"
-        }
-      ]
-    },
-    {
       "control_id": "studio.captions.source_language",
       "label": "Speech language",
       "meaning": "Selects the speech recognizer and source language for the next automatic caption request. Does not relabel or replace existing lines.",
@@ -19407,11 +19174,6 @@
     },
     {
       "type": "requires",
-      "to": "system.account",
-      "from": "generation.idea_to_video"
-    },
-    {
-      "type": "requires",
       "to": "system.model_runtime",
       "from": "generation.image_to_video"
     },
@@ -19519,11 +19281,6 @@
       "type": "requires",
       "to": "system.account",
       "from": "publishing.publish"
-    },
-    {
-      "type": "requires",
-      "to": "system.account",
-      "from": "publishing.analytics"
     },
     {
       "type": "usable_in",
@@ -20756,16 +20513,6 @@
       "to": "studio.logo_design.canvas"
     },
     {
-      "from": "publishing.analytics",
-      "to": "publishing.analytics.sync_latest",
-      "type": "editable_with"
-    },
-    {
-      "type": "editable_with",
-      "from": "publishing.analytics",
-      "to": "publishing.analytics.release"
-    },
-    {
       "from": "studio.captions",
       "to": "studio.captions.source_language",
       "type": "editable_with"
@@ -20926,11 +20673,6 @@
     {
       "surface": "Captions help",
       "help_feature_id": "studio.captions",
-      "control_ids": []
-    },
-    {
-      "surface": "Idea-to-Video help",
-      "help_feature_id": "generation.idea_to_video",
       "control_ids": []
     },
     {

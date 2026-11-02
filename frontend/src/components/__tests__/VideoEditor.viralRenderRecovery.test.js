@@ -47,7 +47,6 @@ jest.mock("../ViralClipStudio", () => props => (
 
 jest.mock("../MultiCamCombiner", () => () => null);
 jest.mock("../ThumbnailGenerator", () => () => null);
-jest.mock("../SmartPromoSummaryPanel", () => () => null);
 
 const source = {
   name: "source.mp4",

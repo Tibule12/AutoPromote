@@ -11,7 +11,7 @@ const updates = [
   [
     "21 October 2026",
     "A clearer picture of a release.",
-    "Publishing and analytics work distinguishes scheduled, processing and published states, preserves unavailable metrics separately from real zeroes, and keeps destination copy and timing visible.",
+    "Publishing work distinguishes scheduled, processing and published states, preserves unavailable metrics separately from real zeroes, and keeps destination copy and timing visible.",
   ],
   [
     "18 October 2026",

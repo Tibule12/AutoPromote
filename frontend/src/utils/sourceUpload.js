@@ -11,7 +11,6 @@ const backendUploadQueue=createStudioUploadQueue();
 export const STORAGE_UPLOAD_LIMIT_MB = 500;
 const TEMPORARY_SOURCE_PREFIXES = Object.freeze({
   viral_scan: "temp_scans",
-  smart_promo: "temp_sources",
 });
 
 export function inferUploadMediaType(file, fallback = "video") {

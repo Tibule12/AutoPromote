@@ -483,12 +483,6 @@
       "required": true
     },
     {
-      "feature_id": "generation.idea_to_video",
-      "path": "frontend/src/UserDashboardTabs/IdeaVideoPanel.js",
-      "anchor": "cleanIdeaText",
-      "required": true
-    },
-    {
       "feature_id": "generation.idea_recommendations",
       "path": "src/services/contentIdeaEngine.js",
       "anchor": "generateContentIdeas",
@@ -609,12 +603,6 @@
       "required": true
     },
     {
-      "feature_id": "publishing.analytics",
-      "path": "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
-      "anchor": "const AnalyticsPanel = () => {",
-      "required": true
-    },
-    {
       "feature_id": "workspace.team",
       "path": "frontend/src/UserDashboardTabs/TeamPanel.js",
       "anchor": "TeamPanel",
@@ -654,12 +642,6 @@
       "feature_id": "workspace.mission_control",
       "path": "frontend/src/UserDashboardTabs/MissionControlPanel.js",
       "anchor": "MissionControlPanel",
-      "required": false
-    },
-    {
-      "feature_id": "workspace.smart_promo",
-      "path": "frontend/src/UserDashboardTabs/SmartPromoPanel.js",
-      "anchor": "SmartPromoPanel",
       "required": false
     },
     {

@@ -741,7 +741,6 @@ const PayPalSubscriptionPanel = ({
       uploads: "📤",
       communityPosts: "📝",
       aiClips: "🤖",
-      analytics: "📊",
       support: "🎧",
       watermark: "⭐",
       viralBoost: "🚀",
@@ -760,7 +759,6 @@ const PayPalSubscriptionPanel = ({
     const labels = {
       uploads: "Monthly uploads",
       platformLimit: "Connected platforms",
-      analytics: "Analytics depth",
       support: "Support",
       communityPosts: "Community posts",
       aiClips: "AI clip tools",
@@ -806,13 +804,10 @@ const PayPalSubscriptionPanel = ({
   const publishingUsage = usage?.publishing || null;
   const creditUsage = usage?.credits || null;
   const featureCostLabels = {
-    ideaVideoPreview: "Idea-to-Video preview",
-    ideaVideoRender: "Idea-to-Video full render",
     camCombinerRender: "Cam Combiner server MP4",
     cleanAudioSync: "Clean-audio sync proof",
     findViralClips: "Find Viral Clips",
     finalClipRender: "Final clip render",
-    smartPromo: "Smart Promo",
     videoProcessing: "Video processing",
     transcription: "Audio transcript",
   };
@@ -823,9 +818,8 @@ const PayPalSubscriptionPanel = ({
     "thumbnailLab",
     "viralClipStudio",
     "findViralClips",
-    "smartPromoSummary",
   ];
-  const hiddenPlanFeatureKeys = new Set(["wolfHuntTasks"]);
+  const hiddenPlanFeatureKeys = new Set(["wolfHuntTasks", "analytics", "smartPromoSummary", "ideaVideoPreview", "ideaVideoRender", "smartPromo"]);
 
   const getPlanEditingSummary = plan => {
     const editing = plan.capabilities?.editing;

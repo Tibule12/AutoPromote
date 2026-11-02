@@ -205,6 +205,9 @@ async function main() {
       timeoutMs: Number(process.env.CREDITS_LOCAL_RENDER_TIMEOUT_MS || 120000),
       maxArtifactBytes: Number(process.env.CREDITS_LOCAL_MAX_ARTIFACT_BYTES || 20 * 1024 * 1024),
       maxRequestBytes: Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 512 * 1024),
+      // Includes cold local model import/loading. Production Cloud Run limits
+      // and the existing render deadline are unaffected; no paid execution.
+      analysisTimeoutMs: 240000,
     });
     env.MEDIA_WORKER_URL = env.LOCAL_MEDIA_WORKER_URL = worker.origin;
     const policy = {
@@ -271,11 +274,19 @@ async function main() {
     const buildLog = fs.openSync(path.join(directory, "build.log"), "a", 0o600);
     const builder = reuse
       ? null
-      : spawn(process.execPath, [require.resolve("react-scripts/scripts/build", { paths: [path.join(root, "frontend")] })], {
-          env: buildEnv,
-          cwd: path.join(root, "frontend"),
-          stdio: ["ignore", buildLog, buildLog],
-        });
+      : spawn(
+          process.execPath,
+          [
+            require.resolve("react-scripts/scripts/build", {
+              paths: [path.join(root, "frontend")],
+            }),
+          ],
+          {
+            env: buildEnv,
+            cwd: path.join(root, "frontend"),
+            stdio: ["ignore", buildLog, buildLog],
+          }
+        );
     const [exit] = builder ? await once(builder, "exit") : [0];
     fs.closeSync(buildLog);
     if (exit !== 0)

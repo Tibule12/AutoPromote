@@ -45,7 +45,7 @@ const ProfilePanel = ({
       label: "TikTok",
       status: tiktokStatus,
       handler: handleConnectTikTok,
-      helper: "Connect TikTok for publishing and analytics.",
+      helper: "Connect TikTok for publishing and delivery status.",
     },
     {
       id: "facebook",
@@ -193,28 +193,6 @@ const ProfilePanel = ({
               Find Viral Clips
             </button>
           </article>
-          <article className="overview-feature-card">
-            <span className="overview-tool-icon overview-tool-icon--cyan">◇</span>
-            <div>
-              <small>Campaign creation</small>
-              <h3>Smart Promo</h3>
-              <p>Create a master edit, social previews, and campaign visuals from one source.</p>
-            </div>
-            <button className="btn-secondary" onClick={() => onNavigate?.("smart_promo")}>
-              Open Smart Promo
-            </button>
-          </article>
-          <article className="overview-feature-card">
-            <span className="overview-tool-icon overview-tool-icon--cyan">◇</span>
-            <div>
-              <small>Creative studio</small>
-              <h3>Idea-to-Video</h3>
-              <p>Build scenes, captions, voiceover direction, and a ready-to-publish render.</p>
-            </div>
-            <button className="btn-secondary" onClick={() => onNavigate?.("idea_video")}>
-              Open Creative Tools
-            </button>
-          </article>
         </div>
       </section>
 
@@ -222,7 +200,7 @@ const ProfilePanel = ({
         <div className="overview-section-heading">
           <div>
             <small>Your AutoPromote workflow</small>
-            <h3>From raw media to measurable results</h3>
+            <h3>From raw media to the next release</h3>
           </div>
         </div>
         <ol>
@@ -230,7 +208,7 @@ const ProfilePanel = ({
             ["Upload", "Import recordings or a finished master."],
             ["Auto-edit", "Sync, enhance, and prepare the strongest content."],
             ["Publish", "Distribute to the channels you select."],
-            ["Measure", "Track performance and improve the next release."],
+            ["Review", "Check delivery status in Queue before your next release."],
           ].map(([title, copy], index) => (
             <li key={title}>
               <span>{index + 1}</span>
@@ -247,27 +225,14 @@ const ProfilePanel = ({
         <article className="overview-summary-card">
           <div className="overview-section-heading">
             <div>
-              <small>Workspace performance</small>
+              <small>Workspace activity</small>
               <h3>Publishing activity</h3>
             </div>
-            <button className="btn-secondary" onClick={() => onNavigate?.("analytics")}>
-              View analytics
+            <button className="btn-secondary" onClick={() => onNavigate?.("schedules")}>
+              Open Queue
             </button>
           </div>
-          <div className="performance-summary">
-            <div>
-              <strong>Views</strong>
-              <span>{stats?.views ?? 0}</span>
-            </div>
-            <div>
-              <strong>Clicks</strong>
-              <span>{stats?.clicks ?? 0}</span>
-            </div>
-            <div>
-              <strong>CTR</strong>
-              <span>{stats?.ctr ?? 0}%</span>
-            </div>
-          </div>
+          <p>Review scheduled releases, destination receipts and posts that need attention in Queue.</p>
         </article>
 
         <article className="overview-summary-card">

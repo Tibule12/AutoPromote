@@ -1020,7 +1020,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
 
     const handleGrantTesterAccess = async user => {
       const confirmed = window.confirm(
-        `Grant ${user.email || user.name || "this user"} one of the 10 Founding Tester places?\n\nThis gives 30 days to test Cam Combiner, publishing/queue, Find Viral Clips, and Smart Promo with 1,500 credits, 10 uploads, 30 queued posts, and 3 connected platforms. Other tools stay locked. It does not create a paid subscription or auto-renew.`
+        `Grant ${user.email || user.name || "this user"} one of the 10 Founding Tester places?\n\nThis gives 30 days to test Cam Combiner, publishing/queue, Find Viral Clips, and clip rendering with 1,500 credits, 10 uploads, 30 queued posts, and 3 connected platforms. Other tools stay locked. It does not create a paid subscription or auto-renew.`
       );
       if (!confirmed) return;
 

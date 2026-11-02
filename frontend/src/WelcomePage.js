@@ -5,7 +5,6 @@ import LandingFeatures from "./components/landing/LandingFeatures";
 import LandingWorkflow from "./components/landing/LandingWorkflow";
 import LandingCreators from "./components/landing/LandingCreators";
 import LandingFooter, { LandingCTA } from "./components/landing/LandingFooter";
-import LandingDemo from "./components/landing/LandingDemo";
 import LandingProductShowcase from "./components/landing/LandingProductShowcase";
 import { WORKSPACE_ENDPOINTS } from "./config/workspaceApi";
 import "./components/landing/LandingPage.css";
@@ -126,7 +125,6 @@ const WorkspaceInviteNotice = ({ onCreateAccount, onSignIn }) => {
 };
 
 const WelcomePage = ({ onGetStarted, onSignIn }) => {
-  const [demoOpen, setDemoOpen] = useState(false);
 
   if (process.env.REACT_APP_WELCOME_STUDIO_PREVIEW === "true" && !getWorkspaceInviteParams()) {
     return <Suspense fallback={<div style={{ minHeight: "100vh", background: "#0b0b10" }} />}><StudioWelcomePreview onGetStarted={onGetStarted} onSignIn={onSignIn} /></Suspense>;
@@ -147,7 +145,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
         <LandingNavbar onSignIn={onSignIn} onGetStarted={onGetStarted} />
         <WorkspaceInviteNotice onCreateAccount={onGetStarted} onSignIn={onSignIn} />
         <main id="landing-main" tabIndex={-1}>
-          <HeroSection onGetStarted={onGetStarted} onWatchDemo={() => setDemoOpen(true)} />
+          <HeroSection onGetStarted={onGetStarted} onWatchDemo={() => document.getElementById("workspace")?.scrollIntoView({ behavior: "smooth" })} />
           <div className="lp-output-strip" aria-label="Create for social video">
             <span>MAKE ROOM FOR YOUR NEXT RELEASE</span>
             <span>TikTok</span>
@@ -156,7 +154,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
             <i />
             <span>Instagram Reels</span>
           </div>
-          <LandingProductShowcase onWatchDemo={() => setDemoOpen(true)} />
+          <LandingProductShowcase onWatchDemo={() => document.getElementById("workspace")?.scrollIntoView({ behavior: "smooth" })} />
           <LandingFeatures />
           <LandingWorkflow />
           <LandingCreators />
@@ -164,7 +162,6 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
         </main>
         <LandingFooter />
       </div>
-      {demoOpen && <LandingDemo onClose={() => setDemoOpen(false)} />}
     </div>
   );
 };

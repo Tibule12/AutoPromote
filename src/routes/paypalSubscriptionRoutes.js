@@ -382,7 +382,6 @@ function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
           platformLimit: TESTER_PROGRAM.usageLimits.connectedPlatforms,
           teamSeats: 1,
           multicam: true,
-          analytics: "Basic analytics",
           support: "Founding Tester feedback lane",
         }
       : { ...effectivePlan.features, uploads: snapshot.tier?.monthly_upload_cap ?? effectivePlan.features.uploads },
@@ -1284,13 +1283,10 @@ router.get("/usage", authMiddleware, async (req, res) => {
         totalAvailable: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed) + topUpBalance,
       },
       featureCosts: {
-        ideaVideoPreview: CREDIT_COSTS["idea-video-preview"] || 0,
-        ideaVideoRender: CREDIT_COSTS["idea-video-render"] || 0,
         camCombinerRender: CREDIT_COSTS["render-multicam"] || 0,
         cleanAudioSync: CREDIT_COSTS["clean-audio-sync"] || 0,
         findViralClips: CREDIT_COSTS.analyze || CREDIT_COSTS["find-viral-clips"] || 0,
         finalClipRender: CREDIT_COSTS["render-clip"] || 0,
-        smartPromo: CREDIT_COSTS["promo-summary"] || CREDIT_COSTS["smart-promo-summary"] || 0,
         videoProcessing: CREDIT_COSTS.process || 0,
         transcription: CREDIT_COSTS.transcribe || CREDIT_COSTS["audio-extract"] || 0,
       },

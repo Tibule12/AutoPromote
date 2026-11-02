@@ -19,9 +19,6 @@ export default function HelpCenter() {
         <PageCard title="Connect and publish" to="/docs/publishing">
           <p>Review destination options, reconnect an account and follow the release state.</p>
         </PageCard>
-        <PageCard title="Understand the numbers" to="/metrics">
-          <p>Separate publication status from the performance data each platform returns.</p>
-        </PageCard>
         <PageCard title="Plans and billing" to="/pricing" link="View current plans">
           <p>Check allowances, editing access and credits on the current plan cards.</p>
         </PageCard>
@@ -38,13 +35,6 @@ export default function HelpCenter() {
           <p>
             A platform can accept an upload before the published post is ready. Check the
             destination state in the queue before creating another submission.
-          </p>
-        </details>
-        <details>
-          <summary>Why are some analytics missing?</summary>
-          <p>
-            Platforms expose different metrics and update them at different times. Unavailable data
-            is separate from an observed zero.
           </p>
         </details>
         <details>

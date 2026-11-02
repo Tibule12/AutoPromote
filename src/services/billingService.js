@@ -33,7 +33,7 @@ const TIERS = {
       global_distribution: false, // Block "Publish Everywhere"
       multicam: false,
     },
-    features: ["organic_upload", "basic_analytics"],
+    features: ["organic_upload"],
   },
   BASIC: {
     id: "basic", // Legacy ID
@@ -52,7 +52,7 @@ const TIERS = {
       global_distribution: true,
       multicam: true,
     },
-    features: ["organic_upload", "basic_analytics", "bot_views", "multi_platform"],
+    features: ["organic_upload", "bot_views", "multi_platform"],
   },
   PREMIUM: {
     id: "premium", // Matches PayPal Plan
@@ -71,7 +71,7 @@ const TIERS = {
       global_distribution: true,
       multicam: true,
     },
-    features: ["organic_upload", "basic_analytics", "bot_views", "multi_platform"],
+    features: ["organic_upload", "bot_views", "multi_platform"],
   },
   PRO: {
     id: "pro",
@@ -92,7 +92,6 @@ const TIERS = {
     },
     features: [
       "organic_upload",
-      "advanced_analytics",
       "priority_scheduling",
       "all_bot_tools",
       "global_distribution",
@@ -118,7 +117,6 @@ const TIERS = {
     },
     features: [
       "organic_upload",
-      "advanced_analytics",
       "priority_scheduling",
       "all_bot_tools",
       "global_distribution",

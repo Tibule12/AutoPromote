@@ -34,7 +34,10 @@ def local_render_cpu_ceiling(body, env):
     return int(value)
 
 
-cpu_ceiling = local_render_cpu_ceiling(record.get('body', {}), os.environ)
+is_analysis = record['expected']['endpoint'] == '/analyze-clips'
+cpu_ceiling = record.get('localCpuSeconds', 240) if is_analysis else local_render_cpu_ceiling(record.get('body', {}), os.environ)
+if is_analysis and (not isinstance(cpu_ceiling, int) or not 30 <= cpu_ceiling <= 300):
+    raise RuntimeError('Invalid local analysis CPU ceiling')
 resource.setrlimit(resource.RLIMIT_CPU, (cpu_ceiling, cpu_ceiling))
 # Native full-frame transparency intermediates can exceed a source MP4's size.
 # Keep a finite per-file ceiling for this demo-only CPU process; production
@@ -48,7 +51,7 @@ def local_render_file_ceiling(body, env):
     return int(value) * 1024**2
 
 
-file_ceiling = local_render_file_ceiling(record.get('body', {}), os.environ)
+file_ceiling = 20 * 1024**2 if is_analysis else local_render_file_ceiling(record.get('body', {}), os.environ)
 resource.setrlimit(resource.RLIMIT_FSIZE, (file_ceiling, file_ceiling))
 connect = socket.socket.connect
 
