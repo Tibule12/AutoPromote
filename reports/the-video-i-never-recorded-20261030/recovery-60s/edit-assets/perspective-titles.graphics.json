@@ -1,0 +1,398 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "perspective-titles.graphics.json",
+  "width": 1920,
+  "height": 1080,
+  "duration": 16,
+  "layers": [
+    {
+      "id": "Time-of-discovery",
+      "name": "Time-of-discovery",
+      "type": "text",
+      "text": "08:42",
+      "startTime": 0.3,
+      "duration": 1.9999999999999998,
+      "x": 13,
+      "y": 85,
+      "width": 90,
+      "scale": 0.9,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "color": "#f3efe7",
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0.3,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 0.5,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 2.0999999999999996,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 2.299,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Recorded-evidence-label",
+      "name": "Recorded-evidence-label",
+      "type": "text",
+      "text": "SOURCE VIDEO / RECONSTRUCTION",
+      "startTime": 3,
+      "duration": 4.4,
+      "x": 50,
+      "y": 10,
+      "width": 90,
+      "scale": 0.42,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "color": "#c8bdab",
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 3.2,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 7.2,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 7.399,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Never-said",
+      "name": "Never-said",
+      "type": "text",
+      "text": "NEVER SAID.",
+      "startTime": 5.62,
+      "duration": 1.7800000000000002,
+      "x": 31,
+      "y": 81,
+      "width": 90,
+      "scale": 1.9,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 800,
+      "color": "#f3efe7",
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 5.62,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 5.82,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 7.2,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 7.399,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Face-clue",
+      "name": "Face-clue",
+      "type": "text",
+      "text": "THE FACE",
+      "startTime": 8.36,
+      "duration": 1.290000000000001,
+      "x": 27,
+      "y": 81,
+      "width": 90,
+      "scale": 1.65,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 800,
+      "color": "#f3efe7",
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 8.36,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 8.559999999999999,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 9.450000000000001,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 9.649000000000001,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Voice-clue",
+      "name": "Voice-clue",
+      "type": "text",
+      "text": "THE VOICE",
+      "startTime": 10.34,
+      "duration": 1.3800000000000008,
+      "x": 30,
+      "y": 81,
+      "width": 90,
+      "scale": 1.65,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 800,
+      "color": "#f3efe7",
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 10.34,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 10.54,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.520000000000001,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 11.719000000000001,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Room-clue",
+      "name": "Room-clue",
+      "type": "text",
+      "text": "THE ROOM",
+      "startTime": 12.68,
+      "duration": 1.8200000000000003,
+      "x": 30,
+      "y": 81,
+      "width": 90,
+      "scale": 1.65,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 800,
+      "color": "#f3efe7",
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 12.68,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 12.879999999999999,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 14.499,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Second-evidence-label",
+      "name": "Second-evidence-label",
+      "type": "text",
+      "text": "THE SAME ROOM. THE SAME PERSON.",
+      "startTime": 8.4,
+      "duration": 6.1,
+      "x": 50,
+      "y": 10,
+      "width": 90,
+      "scale": 0.42,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "color": "#c8bdab",
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 8.4,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 8.6,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 14.3,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 14.499,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Story-title",
+      "name": "Story-title",
+      "type": "text",
+      "text": "THE VIDEO I NEVER RECORDED",
+      "startTime": 15.05,
+      "duration": 0.9499999999999993,
+      "x": 50,
+      "y": 84,
+      "width": 90,
+      "scale": 0.8,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 600,
+      "color": "#f3efe7",
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 15.05,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 15.25,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 15.8,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 15.999,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    },
+    {
+      "id": "Fiction-disclosure",
+      "name": "Fiction-disclosure",
+      "type": "text",
+      "text": "FICTIONAL DRAMATIZATION",
+      "startTime": 0,
+      "duration": 16,
+      "x": 50,
+      "y": 96,
+      "width": 90,
+      "scale": 0.3,
+      "rotation": 0,
+      "opacity": 1,
+      "fontWeight": 400,
+      "color": "#b0a9a4",
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0,
+          "value": 0,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 0.2,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 15.8,
+          "value": 1,
+          "easing": "ease_in_out"
+        },
+        {
+          "property": "opacity",
+          "time": 15.999,
+          "value": 0,
+          "easing": "ease_in_out"
+        }
+      ]
+    }
+  ],
+  "groups": []
+}

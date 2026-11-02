@@ -1,0 +1,84 @@
+{
+  "observedAt": "2026-10-31T07:09:23.087Z",
+  "contentId": "AvegMgUwJtMuYnNPi3uE",
+  "title": "Slowed + Reverb — Corrected lyrics | Studio edit + full remix · AutoPromote",
+  "deliveryMode": "publish_now",
+  "exactUploadedStudioRecordingSha256": "c97ca02bebf8ce5cc2eeb81f715fef35fd566239805fa05aeb54d15d04e0b843",
+  "uploadedBytes": 6394918,
+  "tasks": [
+    {
+      "taskId": "1EC2rhZr8DfDek59LpyA",
+      "platform": "linkedin",
+      "status": "completed",
+      "success": true,
+      "providerStatus": null,
+      "published": true,
+      "postId": "urn:li:ugcPost:7522192228786634752",
+      "publishId": null,
+      "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7522192228786634752",
+      "error": null
+    },
+    {
+      "taskId": "6aNEe4gFSInDY07G2DTe",
+      "platform": "tiktok",
+      "status": "completed",
+      "success": true,
+      "providerStatus": "PUBLISH_COMPLETE",
+      "published": true,
+      "postId": null,
+      "publishId": "v_pub_file~v2-1.7702724197827069972",
+      "url": null,
+      "error": null
+    },
+    {
+      "taskId": "JwqktO8OSZJ2JPfSZYaz",
+      "platform": "youtube",
+      "status": "completed",
+      "success": true,
+      "providerStatus": null,
+      "published": true,
+      "postId": "RsVc_uWid1M",
+      "publishId": null,
+      "url": "https://www.youtube.com/watch?v=RsVc_uWid1M",
+      "error": null
+    },
+    {
+      "taskId": "SC6hIXAaMYII7KyTlnkc",
+      "platform": "instagram",
+      "status": "completed",
+      "success": true,
+      "providerStatus": null,
+      "published": true,
+      "postId": "18102227024334508",
+      "publishId": null,
+      "url": null,
+      "error": null
+    },
+    {
+      "taskId": "e1lOstSWF8POuOcfTx38",
+      "platform": "facebook",
+      "status": "completed",
+      "success": true,
+      "providerStatus": null,
+      "published": true,
+      "postId": "3532880016915641",
+      "publishId": null,
+      "url": null,
+      "error": null
+    }
+  ],
+  "confirmedPlatforms": [
+    "linkedin",
+    "tiktok",
+    "youtube",
+    "instagram",
+    "facebook"
+  ],
+  "allProvidersAccepted": true,
+  "allProvidersConfirmed": true,
+  "verifiedAt": "2026-10-31T07:10:39.500Z",
+  "status": "PUBLISHED_FIVE_DESTINATIONS",
+  "supersededUncaptionedSchedulesPaused": 5,
+  "reddit": "Not submitted; current account release limit is five destinations",
+  "otherCaptionedVersionsPublished": false
+}

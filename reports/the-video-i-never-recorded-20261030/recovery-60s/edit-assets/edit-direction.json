@@ -1,0 +1,16 @@
+{
+  "durationSeconds": 16,
+  "source": "Untrimmed approved source tests joined without effects; native programme trims encoder tail to16s.",
+  "anchors": {
+    "video": 2.5,
+    "never": 5.62,
+    "said": 5.88,
+    "face": 8.36,
+    "voice": 10.34,
+    "room": 12.68
+  },
+  "clockGraphics": false,
+  "externalCompositedPicture": false,
+  "perspectiveClaimed": false,
+  "reason": "The two spoken takes precede the clock observation. All graphic motion is native Studio; this excerpt uses supported 2D framing and typography, not a false 3D claim."
+}

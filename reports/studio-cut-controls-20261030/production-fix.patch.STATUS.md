@@ -1,0 +1,1 @@
+The earlier patch is retained as initial-cut-chipmunk-only.patch. It contains only the initial Razor/finished-clock/Chipmunk changes and does not contain the subsequent precision Cut, history, Creator FX, finished playback or audio-quality repairs. It is not the current release candidate. No current release/deployment is claimed.

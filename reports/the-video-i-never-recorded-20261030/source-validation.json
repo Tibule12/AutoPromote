@@ -1,0 +1,20 @@
+{
+  "sha256": "28d97f2a63bea987c11c037327d215874fa4219c36755fd52aabb81fbfdddbaf",
+  "width": 1920,
+  "height": 1080,
+  "fps": "24/1",
+  "frames": 192,
+  "pictureSeconds": 8.0,
+  "audioSeconds": 8.0,
+  "sampleRate": 48000,
+  "channels": 2,
+  "fullDecodePassed": true,
+  "audioLevelsDbfs": {
+    "mean_volume": -21.8,
+    "max_volume": -1.3
+  },
+  "asr": "proof/take-A-asr.json",
+  "humanListening": "not yet approved",
+  "perceptualLipSync": "not qualified",
+  "visualReview": "single original male, dark studio and microphone; gaze slightly off-camera; incidental mic branding; no baked subtitles/motion graphics"
+}

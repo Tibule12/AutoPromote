@@ -1,0 +1,32 @@
+[
+  {
+    "preset": "chipmunk",
+    "fullDecode": true,
+    "audioPacketsIdenticalToAcceptedVersion": true,
+    "ownerLyricsExact": true,
+    "verseRepeatCount": 2,
+    "firstOccurrenceIncludesYho": true,
+    "cueCount": 6,
+    "sourceEnd": 78
+  },
+  {
+    "preset": "slowed_reverb",
+    "fullDecode": true,
+    "audioPacketsIdenticalToAcceptedVersion": true,
+    "ownerLyricsExact": true,
+    "verseRepeatCount": 2,
+    "firstOccurrenceIncludesYho": true,
+    "cueCount": 6,
+    "sourceEnd": 78.00933333333333
+  },
+  {
+    "preset": "sped_up",
+    "fullDecode": true,
+    "audioPacketsIdenticalToAcceptedVersion": true,
+    "ownerLyricsExact": true,
+    "verseRepeatCount": 2,
+    "firstOccurrenceIncludesYho": true,
+    "cueCount": 6,
+    "sourceEnd": 78
+  }
+]

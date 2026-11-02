@@ -1,0 +1,14 @@
+{
+  "approved": true,
+  "userInstruction": "just do it shit",
+  "context": "Approval follows the explicit question about paying Google for two eight-second presenter tests, estimated $0.96 each / $1.92 total.",
+  "recordedAt": "2026-10-30T13:29:42.978297+00:00",
+  "maximumRequests": 2,
+  "secondsPerRequest": 8,
+  "maximumEstimatedGenerationUsd": 1.92,
+  "model": "veo-3.1-fast-generate-001",
+  "automaticRegeneration": false,
+  "fullMinuteGenerationApproved": false,
+  "tenMinuteGenerationApproved": false,
+  "productionChangesApproved": false
+}

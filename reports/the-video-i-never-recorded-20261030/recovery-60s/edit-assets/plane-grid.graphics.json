@@ -1,0 +1,27 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Native perspective geometry qualification",
+  "width": 1920,
+  "height": 1080,
+  "duration": 3,
+  "layers": [
+    {
+      "id": "grid",
+      "name": "Labelled plane grid",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\" viewBox=\"0 0 1280 720\"><rect width=\"1280\" height=\"720\" fill=\"#151821\"/><path d=\"M0 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M80 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M160 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M240 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M320 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M400 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M480 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M560 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M640 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M720 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M800 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M880 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M960 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M1040 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M1120 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M1200 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M1280 0V720\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 0H1280\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 80H1280\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 160H1280\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 240H1280\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 320H1280\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 400H1280\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 480H1280\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 560H1280\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 640H1280\" stroke=\"#606575\" stroke-width=\"2\"/><path d=\"M0 720H1280\" stroke=\"#606575\" stroke-width=\"2\"/><circle cx=\"64\" cy=\"64\" r=\"22\" fill=\"#ff3333\"/><text x=\"92\" y=\"76\" font-size=\"32\" fill=\"white\">TL</text><circle cx=\"1216\" cy=\"64\" r=\"22\" fill=\"#33ff33\"/><text x=\"1126\" y=\"76\" font-size=\"32\" fill=\"white\">TR</text><circle cx=\"1216\" cy=\"656\" r=\"22\" fill=\"#3333ff\"/><text x=\"1126\" y=\"668\" font-size=\"32\" fill=\"white\">BR</text><circle cx=\"64\" cy=\"656\" r=\"22\" fill=\"#ffff33\"/><text x=\"92\" y=\"668\" font-size=\"32\" fill=\"white\">BL</text><text x=\"640\" y=\"350\" text-anchor=\"middle\" font-size=\"48\" fill=\"white\">NATIVE PLANE GRID</text><text x=\"640\" y=\"410\" text-anchor=\"middle\" font-size=\"30\" fill=\"white\">1280 x 720 / 24 FPS</text></svg>",
+      "startTime": 0,
+      "duration": 3,
+      "x": 50,
+      "y": 50,
+      "width": 75,
+      "height": 75,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "keys": []
+    }
+  ],
+  "groups": []
+}

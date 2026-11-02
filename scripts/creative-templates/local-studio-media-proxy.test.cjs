@@ -1,0 +1,50 @@
+const test=require('node:test'),assert=require('node:assert/strict'),express=require('express');
+const {Readable}=require('node:stream');
+const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
+const {createLocalStudioMediaProxy}=require('./local-studio-media-proxy');
+test('local playback preserves bytes/ranges and rechecks the owner, token, expiry and origin',async t=>{
+ const app=express(),server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());
+ const bytes=Buffer.from('real source bytes'),uid='owner-1',storagePath='studio/sources/owner-1/source.mp4';
+ let owner=uid,clock=1000,pinned;
+ const bucket=()=>({file:(_path,options)=>{
+  assert.equal(_path,storagePath);if(options)pinned=options.generation;
+  return {getMetadata:async()=>[{generation:'31',size:bytes.length,contentType:'video/mp4',metadata:{ownerUid:owner,purpose:'studio_source',firebaseStorageDownloadTokens:'original-source-token'}}],
+   createReadStream:({start,end})=>Readable.from(bytes.subarray(start,end+1))};
+ }});
+ const proxy=createLocalStudioMediaProxy({appOrigin:'http://localhost:5008',apiOrigin:`http://127.0.0.1:${server.address().port}`,bucket,now:()=>clock});app.get(proxy.prefix+':capability',proxy.stream);
+ const firebaseUrl='https://firebasestorage.googleapis.com/v0/b/owned-bucket/o/'+encodeURIComponent(storagePath)+'?token=original-source-token';
+ const url=proxy.issue(uid,storagePath,firebaseUrl);
+ const response=await fetch(url,{headers:{Origin:'http://localhost:5008',Range:'bytes=2-5'}});
+ assert.equal(response.status,206);assert.equal(response.headers.get('content-range'),'bytes 2-5/17');assert.equal(await response.text(),bytes.subarray(2,6).toString());assert.equal(pinned,'31');
+ assert.equal(response.headers.get('access-control-allow-origin'),'http://localhost:5008');
+ const recovered=proxy.issue(uid,storagePath,'https://storage.googleapis.com/owned-bucket/'+storagePath+'?Signature=signed-read-proof');
+ assert.equal((await fetch(recovered)).status,200);
+ assert.throws(()=>proxy.issue(uid,storagePath,'https://storage.googleapis.com/owned-bucket/another-object?Signature=signed-read-proof'));
+ assert.throws(()=>proxy.issue('other',storagePath,'https://firebasestorage.googleapis.com/source'));
+ const changed=new URL(url);changed.searchParams.set('token','wrong');assert.equal((await fetch(changed)).status,403);
+ owner='other';assert.equal((await fetch(url)).status,403);owner=uid;
+ assert.equal((await fetch(url,{headers:{Origin:'https://other.example'}})).status,403);
+ assert.equal((await fetch(url,{headers:{Range:'bytes=0-1,3-4'}})).status,416);
+ const bad=new URL(url);bad.pathname+='x';assert.equal((await fetch(bad)).status,403);
+ clock=3*3600000+1001;assert.equal((await fetch(url)).status,403);
+});
+test('verified export cache requires the current object generation and matching cloud checksum',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'studio-media-cache-test-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const bytes=Buffer.from('completed real export'),sha=crypto.createHash('sha256').update(bytes).digest('hex');
+ const uid='owner-2',job='viral_job_1',storagePath=`studio/exports/${uid}/${job}/render.mp4`;
+ fs.writeFileSync(path.join(dir,sha+'.bin'),bytes);fs.writeFileSync(path.join(dir,'manifest.private.json'),JSON.stringify([{storagePath,generation:'42',sha256:sha}]));
+ let generation='42',remoteReads=0;
+ const bucket=()=>({file:()=>({getMetadata:async()=>[{generation,size:bytes.length,contentType:'video/mp4',md5Hash:crypto.createHash('md5').update(bytes).digest('base64'),metadata:{ownerUid:uid,jobId:job,purpose:'studio_export',sha256:sha}}],createReadStream:()=>{remoteReads++;return Readable.from(bytes);}})});
+ const app=express(),server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());
+ const proxy=createLocalStudioMediaProxy({appOrigin:'http://localhost:5008',apiOrigin:`http://127.0.0.1:${server.address().port}`,bucket,cacheDirectory:dir});app.get(proxy.prefix+':capability',proxy.stream);
+ const url=proxy.issue(uid,storagePath,'https://storage.googleapis.com/bucket/'+storagePath+'?Signature=owned-read');
+ assert.equal(await(await fetch(url)).text(),bytes.toString());assert.equal(remoteReads,0);
+ const download=new URL(url);download.searchParams.set('download','1');
+ const attachment=await fetch(download);assert.equal(attachment.headers.get('content-disposition'),'attachment; filename="viral_clip_rendered.mp4"');
+ assert.equal(await attachment.text(),bytes.toString());
+ assert.equal((await fetch(url)).headers.get('content-disposition'),null);
+ fs.writeFileSync(path.join(dir,sha+'.bin'),Buffer.from('tampered cache'));
+ assert.equal(await(await fetch(url)).text(),bytes.toString());assert.equal(remoteReads,1);
+ fs.writeFileSync(path.join(dir,sha+'.bin'),bytes);generation='43';
+ assert.equal(await(await fetch(url)).text(),bytes.toString());assert.equal(remoteReads,2);
+});

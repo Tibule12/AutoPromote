@@ -1,4 +1,5 @@
 // Owns fresh isolated emulators and the actual App build. No Firebase CLI login.
+require('../assert-local-studio-enabled.cjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -16,6 +17,16 @@ async function port() {
   return value;
 }
 async function main() {
+  const localMediaLimits = {
+    maxSourceSeconds: Number(process.env.CREDITS_DEMO_SOURCE_SECONDS || 30),
+    maxExecutionSeconds: Number(process.env.CREDITS_DEMO_EXECUTION_SECONDS || 120),
+  };
+  const localTestCredits=Number(process.env.CREDITS_DEMO_TEST_CREDITS || 15);
+  if (!Number.isInteger(localTestCredits)||localTestCredits<1||localTestCredits>200)
+    throw Error('Fresh local demo allowance must be 1–200 symbolic test credits.');
+  if (!Number.isInteger(localMediaLimits.maxSourceSeconds) || localMediaLimits.maxSourceSeconds < 1 || localMediaLimits.maxSourceSeconds > 120 ||
+      !Number.isInteger(localMediaLimits.maxExecutionSeconds) || localMediaLimits.maxExecutionSeconds < 1 || localMediaLimits.maxExecutionSeconds > 900)
+    throw Error('Local demo media limits must be bounded whole seconds (source <= 120, execution <= 900).');
   const reuse =
     process.argv[2] === "--reuse-build"
       ? JSON.parse(fs.readFileSync(path.join(process.argv[3], "config.json")))
@@ -46,6 +57,7 @@ async function main() {
         "CREDITS_PYTHON_BIN",
         "STUDIO_3D_LOCAL_CPU",
         "STUDIO_3D_BLENDER_BIN",
+        "CREDITS_DEMO_EXECUTION_SECONDS",
         "K_SERVICE",
         "FUNCTION_TARGET",
         "RENDER_SERVICE_ID",
@@ -248,12 +260,13 @@ async function main() {
       ...JSON.parse(fs.readFileSync(path.join(root, "config/unified-credits.pilot.draft.json"))),
       version: "actual-ui-local-test-v1",
       spendScope: "actual-ui-local-test",
-      monthlyCredits: { free: 15, premium: 150, pro: 500, enterprise: 2000 },
+      monthlyCredits: { free: localTestCredits, premium: 150, pro: 500, enterprise: 2000 },
     };
     // Symbolic test prices only; not a recommendation from local CPU measurements.
     for (const item of Object.values(policy.operations)) {
       item.baseMicros = 0;
       item.microsPerUnit = item.unit === "seconds" ? 10 : 1000;
+      if (item.unit === 'seconds') item.maxUnits=Math.max(item.maxUnits,localMediaLimits.maxExecutionSeconds);
     }
     const build = reuse?.build || path.join(directory, "build");
     const buildEnv = {
@@ -275,9 +288,11 @@ async function main() {
       REACT_APP_CREDITS_FIRESTORE_EMULATOR: `http://127.0.0.1:${firestorePort}`,
       REACT_APP_CREDITS_STORAGE_EMULATOR: `http://127.0.0.1:${storagePort}`,
       REACT_APP_WELCOME_STUDIO_PREVIEW: "true",
+      REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW: process.env.CREDITS_DEMO_PRESENTED_FRAME_PREVIEW === 'true' ? 'true' : 'false',
     };
     const config = {
       env,
+      localMediaLimits,
       cohort,
       origin,
       storageOrigin: `http://127.0.0.1:${storagePort}`,
