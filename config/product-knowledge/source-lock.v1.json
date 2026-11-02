@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Integration review preserves dense-grade job archives and legacy decode compatibility, optional 3D field parity and product retirement; no financial or readiness changes.",
-  "reviewed_at": "2026-11-02T17:42:34.153Z",
+  "reason": "Worker release repair restores delivery-frame and grade concat contracts, retaining canonical source clock, reviewed pixels and existing product readiness. Shared credential-free image gate added; no user flow or feature entitlement change.",
+  "reviewed_at": "2026-11-02T18:55:00.276Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -399,7 +399,7 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "6f235972e5be631bde78129da392f5e3b21fb7884f52df5436912692d7ac0880"
+      "sha256": "a99fdb493fa69caf43cc1e3759278766eca86a3dd724b9dda755e22bc4654333"
     },
     {
       "path": "python_media_worker/studio_audio.py",

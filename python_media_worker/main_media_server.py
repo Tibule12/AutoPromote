@@ -9075,6 +9075,7 @@ def plan_reframe_timeline_segments(
     speaker_order_cuts=None,
     solo_keyframes=None,
     fallback_mode="speaker_track",
+    minimum_segment_duration=.02,
 ):
     """Resolve the reviewed reframe state into independently renderable intervals.
 
@@ -9157,7 +9158,7 @@ def plan_reframe_timeline_segments(
     boundaries = sorted(set(normalized) | set(order_by_time) | {0.0, duration})
     specs = []
     for start, end in zip(boundaries, boundaries[1:]):
-        if end-start < .02:
+        if end-start < minimum_segment_duration:
             continue
         local_split = {
             "divider_percent": (split_framing or {}).get(
@@ -9315,14 +9316,23 @@ async def render_reframe_timeline_sequential(
     job_id="reframe",
     programme_fps=None,
     reviewed_subject=False,
+    delivery_fps=None,
 ):
-    """Render long reviewed timelines with bounded memory and preserve source audio."""
+    """Render bounded framing intervals on one source or delivery picture clock."""
+    if programme_fps is not None and delivery_fps is not None:
+        raise ValueError("Choose one programme or delivery frame clock for timed framing")
+    picture_fps = programme_fps if programme_fps is not None else delivery_fps
+    if picture_fps is not None:
+        picture_fps = float(picture_fps)
+        if not math.isfinite(picture_fps) or not 1 <= picture_fps <= 120:
+            raise ValueError("Timed framing needs a valid picture frame rate")
     specs = plan_reframe_timeline_segments(
         duration, timeline_cuts, split_framing, speaker_order_cuts,
         solo_keyframes, fallback_mode,
+        minimum_segment_duration=.5 / picture_fps if picture_fps is not None else .02,
     )
-    if programme_fps is not None:
-        specs = reframe_picture_segments(specs, programme_fps)
+    if picture_fps is not None:
+        specs = reframe_picture_segments(specs, picture_fps)
     segment_paths = []
     work_dir = os.path.dirname(os.path.abspath(output_path))
     concat_path = os.path.join(work_dir, f"{job_id}_reframe_concat.txt")
@@ -9347,20 +9357,33 @@ async def render_reframe_timeline_sequential(
                 command.extend([
                     "-ss", f"{segment['start'] + active_offsets[0]:.9f}", "-i", source_path,
                 ])
+            graph = build_reframe_segment_filter(
+                src_width, src_height, target_width, target_height, segment, solo_zoom,
+                alternate_input_label="[1:v]" if active_offsets else None,
+            )
+            if delivery_fps is not None:
+                # Raw sources may have a different rate. Compiled programmes
+                # already own their picture grid and must not be resampled.
+                graph = graph.replace("[0:v]", "[clocked]")
+                clock = f"[0:v]fps={picture_fps:g},setpts=PTS-STARTPTS[clocked];"
+                if active_offsets:
+                    graph = graph.replace("[1:v]", "[alternate_clocked]")
+                    clock += f"[1:v]fps={picture_fps:g},setpts=PTS-STARTPTS[alternate_clocked];"
+                graph = clock + graph
             command.extend([
-                "-t", f"{segment['end']-segment['start']:.6f}",
-                "-filter_complex", build_reframe_segment_filter(
-                    src_width, src_height, target_width, target_height, segment, solo_zoom,
-                    alternate_input_label="[1:v]" if active_offsets else None,
-                ),
+                "-t", f"{segment['end']-segment['start']:.9f}",
+                "-filter_complex", graph,
                 "-map", "[vout]", "-an",
                 *(build_studio_sequence_encode_args(reviewed_subject=True)
                   if reviewed_subject else
                   build_viral_export_encode_args(resolve_viral_export_profile({}, target_width, target_height))),
                 "-movflags", "+faststart", "-y", segment_path,
             ])
-            if programme_fps is not None:
-                command[-1:-1] = ['-frames:v', str(segment['frame_count']), '-fps_mode', 'passthrough']
+            if picture_fps is not None:
+                # One-frame camera intervals cannot carry reordered DTS across
+                # a concat boundary. Retain exact duration as well as count.
+                command[-1:-1] = ['-frames:v', str(segment['frame_count']), '-fps_mode', 'passthrough',
+                                  '-bf', '0', '-video_track_timescale', '90000']
             await run_subprocess_async(
                 command, check=True, job_context=job_id,
                 timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
@@ -30955,7 +30978,8 @@ async def render_studio_finish_timeline_sequential(
                 *(build_studio_sequence_encode_args(reviewed_subject=True)
                   if reviewed_subject else
                   ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]),
-                "-pix_fmt", "yuv420p", "-fps_mode", "passthrough", "-y", segment_path,
+                "-pix_fmt", "yuv420p", "-fps_mode", "passthrough",
+                "-bf", "0", "-video_track_timescale", "90000", "-y", segment_path,
             ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
         # The concat demuxer rebases every segment's packet timestamps. Binary
         # concatenation of reset MPEG-TS timestamps lost B-frames at grade cuts.

@@ -142,6 +142,14 @@ class ViralRenderContractTests(unittest.TestCase):
         )
         self.assertFalse(request.professional_cleanup)
 
+    def test_timed_framing_rejects_conflicting_picture_clocks_before_execution(self):
+        with patch("python_media_worker.main_media_server.run_subprocess_async", new_callable=AsyncMock) as run:
+            with self.assertRaisesRegex(ValueError, "Choose one programme or delivery"):
+                asyncio.run(render_reframe_timeline_sequential(
+                    "/not-read/source.mp4", "/not-written/output.mp4", 160, 90, 90, 160,
+                    1, [{"time": 0, "mode": "center"}], programme_fps=30, delivery_fps=24))
+            run.assert_not_awaited()
+
     def test_fractional_camera_cuts_share_one_delivery_frame_grid(self):
         with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"VIRAL_EXPORT_ENCODER": "cpu"}):
             source, output = str(Path(directory) / "source.mp4"), str(Path(directory) / "output.mp4")
@@ -1047,18 +1055,28 @@ class ViralRenderContractTests(unittest.TestCase):
             repo_root / ".github" / "workflows" / "deploy-media-worker.yml"
         ).read_text(encoding="utf-8")
 
+        verifier_path = "scripts/verify-media-worker-image.sh"
+        self.assertIn(f"bash {verifier_path}", workflow)
+        pr_workflow = (repo_root / ".github/workflows/verify-media-worker.yml").read_text(encoding="utf-8")
+        self.assertIn("pull_request:", pr_workflow)
+        self.assertIn(f"bash {verifier_path}", pr_workflow)
+        self.assertNotIn("secrets.", pr_workflow)
+        verifier = (repo_root / verifier_path).read_text(encoding="utf-8")
+        self.assertNotIn("gcloud ", verifier)
+        self.assertNotIn("docker push", verifier)
+
         self.assertEqual(allowed_suffix, ["..", "tmp"])
         self.assertEqual(allowed_dir, "/tmp")
         self.assertIn(
             f"--volume /tmp/viral-render-smoke:{smoke_dir}:ro",
-            workflow,
+            verifier,
         )
         self.assertIn(
             f'"video_url": "{smoke_dir}/source.mp4"',
-            workflow,
+            verifier,
         )
         self.assertIn(f"RUN mkdir -p {allowed_dir}", dockerfile)
-        self.assertNotIn("/app/tmp/smoke", workflow)
+        self.assertNotIn("/app/tmp/smoke", verifier)
 
     def test_normalizes_speed_segments_and_fills_timeline_gaps(self):
         plan = normalize_speed_plan(
