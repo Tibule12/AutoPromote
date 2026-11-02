@@ -2913,6 +2913,9 @@ test("records the complete frontend-first creator feature tour without rendering
       await pausePreview(page);
       await seekOutput(page, 1.2);
       await expect(programme).toHaveJSProperty("seeking", false);
+      const showTimeline = page.getByRole("button", { name: "Show timeline", exact: true });
+      if (await showTimeline.isVisible()) await showTimeline.click();
+      await expect(page.getByTestId("studio-pro-timeline")).toBeVisible();
       const frozenLayers = page.getByRole("button", { name: "Select Micro-freeze layer", exact: true });
       const before = await frozenLayers.count();
       await button.click();
