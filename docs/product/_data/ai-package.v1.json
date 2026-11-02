@@ -593,6 +593,10 @@
     {
       "task_id": "task.final_export",
       "documentation": "../task-guides/task-final_export.md"
+    },
+    {
+      "task_id": "task.own_style",
+      "documentation": "../task-guides/task-own_style.md"
     }
   ],
   "policy": "Dated, read-only product documentation. Preserve readiness and limitations. Not project execution authority or a guarantee of external AI ingestion."

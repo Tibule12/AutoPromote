@@ -6,7 +6,7 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 
 This generated user documentation describes the actual development snapshot. It does not announce a release or certify public showcase films.
 
-The canonical internal catalogue has 104 features, 196 control records and 18 task guides. This safe projection contains 102 features; internal-only provider records and implementation/evidence paths are excluded.
+The canonical internal catalogue has 104 features, 204 control records and 19 task guides. This safe projection contains 102 features; internal-only provider records and implementation/evidence paths are excluded.
 
 ## Readiness
 

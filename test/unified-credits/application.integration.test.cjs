@@ -309,13 +309,15 @@ describe("ordinary application routes with one nonproduction wallet", () => {
     assert.equal(control.lifetimeReservedMicros, 0);
     assert.equal((await db.collection("credit_refunds").get()).size, 0);
   });
-  it("quotes exact native mask coordinates as JSON and rejects changed creative decisions", async () => {
+  it("binds exact native mask coordinates without storing nested wallet arrays and rejects changed creative decisions", async () => {
     const body={sourceStoragePath:`studio/sources/${uid}/source.mp4`,options:{renderViral:true,quad:[[0,0],[1,0],[1,1],[0,1]]}};
     const q=await quote('studio.render',body,[],true);
     const changed=structuredClone(body);changed.options.quad[0][0]=.1;
     await post('/api/media/process',changed,q).expect(409);
     const stored=(await db.collection('credits_v2_inputs').doc(hash(uid,q.sourceId)).get()).data();
-    assert.deepEqual(JSON.parse(stored.workflowInput.requestBodyJson),body);
+    assert.equal(stored.workflowInput.requestBodyHash, require("../../src/services/unifiedCredits/workerVerification").digest(body));
+    assert.equal(stored.workflowInput.requestBody, undefined);
+    assert.equal(stored.workflowInput.requestBodyJson, undefined);
     assert.equal((await service.getAccount(uid)).balance,15);
   });
   it("runs Find Viral Clips analysis and generation through their ordinary services", async () => {

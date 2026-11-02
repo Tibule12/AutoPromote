@@ -1,6 +1,6 @@
 const fs = require('node:fs/promises'), os = require('node:os'), path = require('node:path'), crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
-const local = require('../src/services/studio3DLocal');
+const local = require('../src/services/studio3DLocalDurable');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 let root, fixture;
 beforeAll(async () => {

@@ -1,4 +1,3 @@
-import { SafeVideo } from "./SafeMedia";
 import { useEffect, useRef, useState } from "react";
 import { validateSubjectVfxScene, subjectVfxRevision } from "./studioSubjectVfxContract";
 import StudioSubjectMaskControls from "./StudioSubjectMaskControls";
@@ -164,13 +163,9 @@ export default function StudioSubjectVfxPanel({
     attempt = useRef(0);
   latest.current = items;
   const item = items.find(value => value.scene.id === selected) || items[0];
-  const source =
-    sources.find(
-      value =>
-        value.id === item?.scene.sourceId &&
-        value.start === item?.scene.sourceRange.start &&
-        value.end === item?.scene.sourceRange.end
-    ) || sources.find(value => value.id === item?.scene.sourceId);
+  const source = sources.find(value => value.id === item?.scene.sourceId &&
+    value.start === item?.scene.sourceRange.start && value.end === item?.scene.sourceRange.end) ||
+    sources.find(value => value.id === item?.scene.sourceId);
   const revision = (() => {
     try {
       return item && subjectVfxRevision(item.scene);
@@ -396,16 +391,8 @@ export default function StudioSubjectVfxPanel({
             : null;
       const created = savedJobId
         ? { jobId: savedJobId }
-        : await request(
-            "POST",
-            "",
-            {
-              scene,
-              clientRequestId,
-              ...(item.modelArtifactRef ? { modelArtifactRef: item.modelArtifactRef } : {}),
-            },
-            signal
-          );
+        : await request("POST", "", { scene, clientRequestId,
+            ...(item.modelArtifactRef?{modelArtifactRef:item.modelArtifactRef}:{}) }, signal);
       if (!isCurrent()) return;
       if (typeof created.jobId !== "string" || !/^[-A-Za-z0-9_]{8,128}$/.test(created.jobId))
         throw new Error("The renderer did not confirm this job. Retry the saved request.");
@@ -461,8 +448,7 @@ export default function StudioSubjectVfxPanel({
                         jobId: created.jobId,
                         url: state.url,
                         revision: initialRevision,
-                        reviewed:
-                          current.preview?.reviewed === true &&
+                        reviewed: current.preview?.reviewed === true &&
                           current.preview?.jobId === created.jobId &&
                           current.preview?.receipt?.pixel_sha256 === state.receipt.pixel_sha256,
                         receipt: state.receipt,
@@ -585,8 +571,7 @@ export default function StudioSubjectVfxPanel({
           <option value="">Add effects to a clip…</option>
           {sources.map(value => (
             <option key={sourceSelectionKey(value)} value={sourceSelectionKey(value)}>
-              {value.name} · {(value.end - value.start).toFixed(1)}s · {value.start.toFixed(1)}–
-              {value.end.toFixed(1)}s
+              {value.name} · {(value.end - value.start).toFixed(1)}s · {value.start.toFixed(1)}–{value.end.toFixed(1)}s
             </option>
           ))}
         </select>
@@ -683,7 +668,7 @@ export default function StudioSubjectVfxPanel({
             </select>
           </label>
           <div className="subject-vfx-source">
-            <SafeVideo
+            <video
               key={source?.url}
               ref={video}
               src={source?.url}
@@ -818,6 +803,77 @@ export default function StudioSubjectVfxPanel({
                     } catch { setMessage("Use 1–32 holdout paths, each with 3–64 source-frame points, or [] to remove additional paths."); }
                   }} />
               </label>}
+              {effect.type === "foreground_holdout" && <label>
+                Colour treatment paths
+                <small>Apply this object&apos;s saturation treatment inside these regions without keeping any additional background pixels.</small>
+                <textarea aria-label="Colour treatment paths" key={JSON.stringify(effect.color_paths || [])}
+                  defaultValue={JSON.stringify(effect.color_paths || [])}
+                  onBlur={event => {
+                    try {
+                      const paths=JSON.parse(event.target.value),next={...effect};
+                      if(Array.isArray(paths)&&!paths.length)delete next.color_paths;else next.color_paths=paths;
+                      const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                      validateSubjectVfxScene(scene);update(scene);
+                    } catch { setMessage("Use 1–32 colour treatment paths with 3–64 source-frame points each, or [] to remove them."); }
+                  }} />
+              </label>}
+              {effect.type === "foreground_holdout" && <label>
+                Repair opaque detail from source
+                <small>Copy a clean part of this source frame over a damaged object. Choose original source colour to retain photographed texture, with optional saturation. Coordinates stay fixed; use separate timed repairs for moving objects.</small>
+                <textarea aria-label="Repair opaque detail from source" key={JSON.stringify(effect.source_patches || [])}
+                  defaultValue={JSON.stringify(effect.source_patches || [])}
+                  onBlur={event => {
+                    try {
+                      const patches=JSON.parse(event.target.value),next={...effect};
+                      if(Array.isArray(patches) && !patches.length) delete next.source_patches;else next.source_patches=patches;
+                      const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                      validateSubjectVfxScene(scene);update(scene);
+                    } catch { setMessage("Use up to 16 repairs with source and target four-corner paths, feather (0–3) and end_blend (0–32 pixels), or [] to remove repairs."); }
+                  }} />
+              </label>}
+              {effect.type === "foreground_refine" && !effect.after_refine && !effect.after_holdout && <fieldset>
+                <legend>Edge opacity</legend>
+                <small>Adjust a translucent fringe while keeping a soft outline. Choose a region below to limit this correction.</small>
+                {["Transparent edge level", "Opaque edge level"].map((label, coordinate) => <label key={label}>
+                  {label}
+                  <input aria-label={label} type="number" min="0" max="1" step="0.01"
+                    value={(effect.alpha_levels || [0, 1])[coordinate]}
+                    onChange={event => {
+                      const levels=[...(effect.alpha_levels || [0,1])];levels[coordinate]=Number(event.target.value);
+                      if (!levels.every(value=>Number.isFinite(value)&&value>=0&&value<=1) || levels[1]<levels[0]+.05) {
+                        setMessage("Keep the opaque edge level at least 0.05 above the transparent edge level.");return;
+                      }
+                      const next={...effect};if(levels[0]===0&&levels[1]===1)delete next.alpha_levels;else next.alpha_levels=levels;
+                      update({...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)});
+                    }} />
+                </label>)}
+                <label>Edge opacity region points
+                  <textarea aria-label="Edge opacity region points" key={JSON.stringify(effect.alpha_polygon || [])}
+                    defaultValue={JSON.stringify(effect.alpha_polygon || [])}
+                    onBlur={event=>{
+                      try {
+                        const points=JSON.parse(event.target.value),next={...effect};
+                        if(Array.isArray(points)&&!points.length)delete next.alpha_polygon;else next.alpha_polygon=points;
+                        const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                        validateSubjectVfxScene(scene);update(scene);
+                      } catch {setMessage("Use 3–64 source-frame points, or [] to adjust opacity across the whole subject.");}
+                    }}/>
+                </label>
+              </fieldset>}
+              {effect.type === "foreground_refine" && <label>
+                Edge refinement region points
+                <small>Limit edge refinement to this source-frame region. Set Edge detail width above zero first. Colour cleanup becomes a soft edge guide here; explicit removal paths stay excluded.</small>
+                <textarea aria-label="Edge refinement region points" key={JSON.stringify(effect.edge_polygon || [])}
+                  defaultValue={JSON.stringify(effect.edge_polygon || [])}
+                  onBlur={event => {
+                    try {
+                      const points=JSON.parse(event.target.value),next={...effect};
+                      if(Array.isArray(points) && !points.length) delete next.edge_polygon; else next.edge_polygon=points;
+                      const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                      validateSubjectVfxScene(scene);update(scene);
+                    } catch { setMessage("Set a positive Edge detail width and use 3–64 source-frame points, or [] to refine the whole frame."); }
+                  }} />
+              </label>}
               {effect.type === "foreground_refine" && <label>
                 Detail region points
                 <textarea aria-label="Detail region points" key={JSON.stringify(effect.detail_polygon || [])}
@@ -847,7 +903,7 @@ export default function StudioSubjectVfxPanel({
                   }} />
               </label>}
               {Object.entries(effect.type === "foreground_refine" ? { edge_radius: 0, decontaminate: 0, blue_spill: 0, after_refine: false, after_holdout: false, reject_connected: false, ...effect } : effect.type === "foreground_holdout" ? { after_refine: false, saturation: 1, ...effect } : effect)
-                .filter(([key]) => !["id", "type", "asset_sha256", "detail_polygon", "paths", "clear_paths"].includes(key))
+                .filter(([key]) => !["id", "type", "asset_sha256", "alpha_levels", "alpha_polygon", "detail_polygon", "edge_polygon", "paths", "color_paths", "clear_paths", "source_patches"].includes(key))
                 .map(([key, value]) => (
                   <label key={key}>
                     {key === "asset_id" ? "Background media" : key === "after_holdout" ? "Clean protected object edges" : key === "reject_connected" ? "Limit colour cleanup to background edges" : key === "after_refine" ? effect.type === "foreground_refine" ? "Apply colour cleanup after matting" : "Keep thin detail through cleanup" : key.replaceAll("_", " ")}
@@ -1040,7 +1096,7 @@ export default function StudioSubjectVfxPanel({
           </div>
           {ready && (
             <div className="subject-vfx-result">
-              <SafeVideo
+              <video
                 controls
                 playsInline
                 preload="metadata"

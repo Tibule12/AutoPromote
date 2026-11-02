@@ -10,19 +10,35 @@ import './StudioLaunchTemplatePanel.css';
 const roleLabels = { statementFootage: 'Guest statement', reactionFootage: 'Real reaction', questionFootage: 'Question', answerFootage: 'Answer / revelation', actionFootage: 'Decisive action', wideFootage: 'Wider context', conflictFootage: 'Conflict / counter-angle', struggleFootage: 'The struggle', journeyFootage: 'A step forward', payoffFootage: 'The hopeful result', detailFootage: 'Movement / detail', beforeFootage: 'Preparation / before', contextFootage: 'Process / context', resultFootage: 'Finished result', narration: 'Narration', payoffVoice: 'Closing words', music: 'Music bed' };
 
 const noCaptions = [];
-export default function StudioLaunchTemplatePanel({ projectId, media, instance, onApply, hookLibraryRequest = 0, sourceCaptions = noCaptions }) {
+export default function StudioLaunchTemplatePanel(props) {
+  const reference = props.instance?.templateRef;
+  const missing = reference && !STUDIO_CREATIVE_TEMPLATES.some(item => item.templateId === reference.templateId && item.version === reference.version);
+  const [replacement, setReplacement] = useState('');
+  if (missing && !replacement) return <section className="studio-launch-template-panel">
+    <h3>Saved template unavailable</h3>
+    <p role="status">Your existing edit is preserved. Choose an available template only when you want to prepare a separate change.</p>
+    <label>Creative template<select aria-label="Creative template" value="" onChange={event => setReplacement(event.target.value)}>
+      <option value="">Choose a template</option>
+      {STUDIO_CREATIVE_TEMPLATES.map(item => <option key={`${item.templateId}@${item.version}`} value={`${item.templateId}@${item.version}`}>{item.label}</option>)}
+    </select></label>
+  </section>;
+  return <KnownStudioLaunchTemplatePanel {...props} initialTemplateId={replacement || (reference && `${reference.templateId}@${reference.version}`)} />;
+}
+
+function KnownStudioLaunchTemplatePanel({ projectId, media, instance, onApply, initialTemplateId, hookLibraryRequest = 0, sourceCaptions = noCaptions }) {
   const [copy, setCopy] = useState({ headline: 'RAISE\nTHE RITUAL', featureOne: 'PRECISION.\nIN EVERY POUR.',
     featureTwo: 'CRAFTED FOR\nYOUR EVERYDAY.', callToAction: 'Discover the collection', brandColour: '#ffb15a' });
   const [slots, setSlots] = useState({});
   const [variationId, setVariationId] = useState('signature');
   const [transcripts, setTranscripts] = useState({});
-  const [templateId, setTemplateId] = useState(`${STUDIO_CREATIVE_TEMPLATES[0].templateId}@${STUDIO_CREATIVE_TEMPLATES[0].version}`);
+  const [templateId, setTemplateId] = useState(initialTemplateId || `${STUDIO_CREATIVE_TEMPLATES[0].templateId}@${STUDIO_CREATIVE_TEMPLATES[0].version}`);
   const [aspect, setAspect] = useState('16:9');
   const template = STUDIO_CREATIVE_TEMPLATES.find(item => `${item.templateId}@${item.version}` === templateId);
   const selectableMedia = [...new Map([...media, ...Object.values(slots)].map(asset => [asset.id, asset])).values()];
   const hook = template.executionDefinition.hook;
   let recipe = resolveStudioTemplateRecipe(template, variationId);
   try { recipe = materializeStudioHookRanges(recipe, slots); } catch (_) { /* Apply reports invalid source drafts. */ }
+  recipe = { ...recipe, sequence: recipe.sequence || [] };
   const plannedSeconds = recipe.sequence.reduce((sum, shot) => sum + shot.duration, 0);
   const copyLabel = key => recipe.inputPresentation?.[key]?.label || ({ headline: 'Launch headline', featureOne: 'Feature one', featureTwo: 'Feature two', callToAction: 'Launch CTA', brandColour: 'Launch colour' })[key] || key;
   const [status, setStatus] = useState('');
@@ -49,7 +65,7 @@ export default function StudioLaunchTemplatePanel({ projectId, media, instance, 
     return fallback;
   };
   useEffect(() => {
-    if (!instance?.bindings) return;
+    if (!instance?.bindings || !STUDIO_CREATIVE_TEMPLATES.some(item => item.templateId === instance.templateRef?.templateId && item.version === instance.templateRef?.version)) return;
     const identity = JSON.stringify(instance);
     if (restoredRef.current === identity) return;
     const restored = {};

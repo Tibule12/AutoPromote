@@ -1,0 +1,67 @@
+[
+  {
+    "branch": "feat/studio-motion-flow-20261031",
+    "revision": "877613023694cfa53a87b37641582989482a995d",
+    "ancestorOfIntegrationBeforeFinalFixes": false
+  },
+  {
+    "branch": "creative/mobile-video-revision-20261028",
+    "revision": "68c4f92544d31a1a09440d46f3e3440e42f84977",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "fix/studio-background-replacement-20261101",
+    "revision": "cbe1715af525b05b1ceca5e08af406f9e5c39cef",
+    "ancestorOfIntegrationBeforeFinalFixes": false
+  },
+  {
+    "branch": "fix/studio-preview-gain-20261024",
+    "revision": "23a21fdb0d1900bc2f78fede501249d62be0b567",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "feat/gcp-cost-cleanup-20261031",
+    "revision": "604acb09cc016be473f04a4be645b296cb6593df",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "feat/studio-hook-templates-20261026",
+    "revision": "b70fee0a239841af5bf0ed42b7f9400574133d9e",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "checkpoint/studio-professional-continuation-20261102",
+    "revision": "9c078e16e4a0faea56e25e9ea79b411e9eb2469a",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "agent/product-knowledge-system-v1",
+    "revision": "8b1dda2e8bdceaa113fbfbd9cf6903cdc1a03e53",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "feat/rewarded-credits-continuation-20261027",
+    "revision": "4149ae3f9c0056bf83e68ff2f7ded61e6c263d6a",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "feat/studio-podcast-revision-20261031",
+    "revision": "62666dd3f08c34d68a4a054d6bf9acd44fc69eba",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "feat/product-retirement-20261031",
+    "revision": "ace34a2b3b83b9408add201b5d1f371e8a8c92c5",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "feat/unmuted-comeback-20261031",
+    "revision": "17678049ed5c940ca562c9ea36afd6fd91698de6",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  },
+  {
+    "branch": "feat/studio-cinematic-evidence-20261031",
+    "revision": "9ec5220b11e7ea971fdd69665f19e0cd1476d056",
+    "ancestorOfIntegrationBeforeFinalFixes": true
+  }
+]

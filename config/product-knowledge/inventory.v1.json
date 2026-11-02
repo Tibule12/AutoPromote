@@ -172,8 +172,8 @@
     },
     {
       "feature_id": "studio.blender",
-      "path": "frontend/src/components/threeD/studio3DParity.js",
-      "anchor": "STUDIO_3D_FIELD_PARITY_VERSION",
+      "path": "src/services/studio3DLocalDurable.js",
+      "anchor": "async function reconcile",
       "required": true
     },
     {
@@ -724,7 +724,7 @@
     },
     {
       "feature_id": "studio.blender",
-      "path": "src/services/studio3DLocal.js",
+      "path": "src/services/studio3DLocalDurable.js",
       "anchor": "async function reconcile",
       "required": true
     }

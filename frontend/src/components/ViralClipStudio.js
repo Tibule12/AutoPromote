@@ -12247,6 +12247,7 @@ const ViralClipStudio = ({
         };
       }
       setExportStatusLabel("Uploading edit layers...");
+      const overlaySourceUploads = new WeakMap();
       const newOverlays = await prepareStudioOverlayMedia(
         exportEditState.overlays, async overlay => {
           let fileToUpload = overlay.file instanceof Blob ? overlay.file : null;

@@ -1,6 +1,6 @@
 # Edit a video in your own style
 
-Development documentation • product 1.2.0 • knowledge 1.0.17 • 2026-10-26
+Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -40,16 +40,16 @@ Change ordinary clips, titles, framing, captions, motion, colour and sound manua
 
 ## Feature readiness
 
-- studio.timeline — **PARTIAL**: Displays clip occurrences, layers, audio cues and property keys on the shared programme clock.
+- studio.timeline — **PARTIAL**: Shows the real composition as separate front-to-back layer and group rows, with exact clip timing and expandable transform properties. Sequence tracks remain available for source editing and sound. Both views use the same project and programme clock.
 - studio.cut — **PARTIAL**: Splits a canonical clip occurrence at the mapped output playhead; source ranges and linked material follow the shared edit transaction.
 - studio.trim — **PARTIAL**: Changes the retained source range of an occurrence and rebases linked timing. This is a source edit rather than merely hiding a browser element.
 - studio.layers — **FUNCTIONAL**: Stores ordinary text, image and video overlays as editable canonical layers. Arbitrary nested global composition is still outside the qualified subset.
 - studio.transforms — **FUNCTIONAL**: Edits position, scale, rotation, anchor, crop and opacity of ordinary layers. Native transform animation is preserved after save and reopen.
-- studio.keyframes — **FUNCTIONAL**: Adds property keys to a selected ordinary layer, moves them in the timeline and interpolates poses. Retained evidence covers native controls, undo/redo, reopen and export; whole-stage agreement is still partial.
+- studio.keyframes — **FUNCTIONAL**: Edit property keys, spatial position handles and value/velocity graphs on the same editable project. Curve the route between paired positions while retaining ordinary history, saving and final compilation.
 - studio.color — **FUNCTIONAL**: Edits deterministic grade parameters and finish keys. Grade controls affect the selected supported stage; they do not establish arbitrary film-grade workflow parity.
-- studio.captions — **BROKEN**: Creates editable timed speech captions with a source-language choice. The empty-hint repetition defect is repaired on the retained mixed-speech clip; mixed-language wording and broad automatic-caption quality remain unqualified.
+- studio.captions — **BROKEN**: Creates editable timed captions with a speech-language choice. Regeneration replaces only the selected source and preserves edits made while listening. Mixed-language wording still needs review.
 - studio.audio — **FUNCTIONAL**: Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX buses. Cues and gain keys remain editable in the project.
-- studio.compositing — **PARTIAL**: Combines editable layers and masks, including opt-in background image replacement in Composite. New footage needs its own reviewed subject mask; clean automatic replacement across arbitrary videos remains unqualified.
+- studio.compositing — **PARTIAL**: Combines ordinary layers and animated graphic groups with shared order, static masks, alpha-aware blending and editable group clip timing. Broad preview/export picture and sound agreement remains incomplete.
 - studio.templates — **PARTIAL**: Instantiates a pinned draft template into ordinary editable clips, layers, keyframes and audio. Retained signed-in local lifecycle evidence exists; public qualification and the showroom handoff remain incomplete.
 - studio.revision — **FUNCTIONAL**: Preserves canonical revision and provenance for manual edits, Director proposals, artifact review and output binding. Stale proposals must be reviewed again.
 - studio.export — **PARTIAL**: Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.

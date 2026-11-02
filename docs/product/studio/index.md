@@ -48,7 +48,7 @@ Shows the real composition as separate front-to-back layer and group rows, with 
 
 **Controls:** [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Composition layers / Sequence tracks](../control-reference/index.md#studio-timeline-view), [At playhead](../control-reference/index.md#studio-timeline-at_playhead)
 
-**Guides:** No task guide in V1.
+**Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -85,7 +85,7 @@ Splits a canonical clip occurrence at the mapped output playhead; source ranges 
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Put text behind a person](../task-guides/task-text_behind.md)
+**Guides:** [Put text behind a person](../task-guides/task-text_behind.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -122,7 +122,7 @@ Changes the retained source range of an occurrence and rebases linked timing. Th
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Add B-roll](../task-guides/task-add_broll.md)
+**Guides:** [Add B-roll](../task-guides/task-add_broll.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -196,7 +196,7 @@ Stores ordinary text, image and video overlays as editable canonical layers. Arb
 
 **Controls:** [Layer start](../control-reference/index.md#studio-layer-start), [Layer duration](../control-reference/index.md#studio-layer-duration), [Layer width](../control-reference/index.md#studio-layer-width), [Layer height](../control-reference/index.md#studio-layer-height)
 
-**Guides:** No task guide in V1.
+**Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -236,7 +236,7 @@ Edits position, scale, rotation, anchor, crop and opacity of ordinary layers. Na
 
 **Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy)
 
-**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md)
+**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -294,7 +294,7 @@ Edit property keys, spatial position handles and value/velocity graphs on the sa
 
 **Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Selected keyframe time scale](../control-reference/index.md#studio-keyframe-selection_scale), [Keyframe paste destination](../control-reference/index.md#studio-keyframe-paste_target), [Start velocity](../control-reference/index.md#studio-keyframe-start_velocity), [End velocity](../control-reference/index.md#studio-keyframe-end_velocity), [Start influence](../control-reference/index.md#studio-keyframe-start_influence), [End influence](../control-reference/index.md#studio-keyframe-end_influence), [Curve path / Straighten path](../control-reference/index.md#studio-keyframe-spatial_curve), [Spatial path handles](../control-reference/index.md#studio-keyframe-spatial_handle)
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -422,7 +422,7 @@ Creates editable timed captions with a speech-language choice. Regeneration repl
 
 **Controls:** [Speech language](../control-reference/index.md#studio-captions-source_language)
 
-**Guides:** [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Create captions and correct transcription](../task-guides/task-captions_correct.md)
+**Guides:** [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Create captions and correct transcription](../task-guides/task-captions_correct.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -607,9 +607,9 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Enable group mask](../control-reference/index.md#studio-composite-group_mask_enabled), [Group mask shape](../control-reference/index.md#studio-composite-group_mask_shape), [Group mask feather](../control-reference/index.md#studio-composite-group_mask_feather), [Invert group mask](../control-reference/index.md#studio-composite-group_mask_inverted), [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Edge detail width](../control-reference/index.md#studio-composite-background_edge_radius), [Remove old background colour](../control-reference/index.md#studio-composite-background_decontaminate)
+**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Enable group mask](../control-reference/index.md#studio-composite-group_mask_enabled), [Group mask shape](../control-reference/index.md#studio-composite-group_mask_shape), [Group mask feather](../control-reference/index.md#studio-composite-group_mask_feather), [Invert group mask](../control-reference/index.md#studio-composite-group_mask_inverted), [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Edge detail width](../control-reference/index.md#studio-composite-background_edge_radius), [Remove old background colour](../control-reference/index.md#studio-composite-background_decontaminate), [Repair opaque detail from source](../control-reference/index.md#studio-composite-source_detail_repair), [Edge refinement region points](../control-reference/index.md#studio-composite-edge_refinement_region), [Colour treatment paths](../control-reference/index.md#studio-composite-colour_treatment_paths), [Transparent edge level](../control-reference/index.md#studio-composite-alpha_transparent), [Opaque edge level](../control-reference/index.md#studio-composite-alpha_opaque), [Edge opacity region points](../control-reference/index.md#studio-composite-alpha_region)
 
-**Guides:** No task guide in V1.
+**Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -851,7 +851,7 @@ Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX bus
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Add B-roll](../task-guides/task-add_broll.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Add B-roll](../task-guides/task-add_broll.md), [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -886,7 +886,7 @@ Records or imports owned voice takes, places them on the timeline and edits cue 
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Voice take volume](../control-reference/index.md#studio-voiceover-volume), [Voice take duration](../control-reference/index.md#studio-voiceover-duration)
+**Controls:** [Voice take volume](../control-reference/index.md#studio-voiceover-volume), [Voice take duration](../control-reference/index.md#studio-voiceover-duration), [Voice take fade in](../control-reference/index.md#studio-voiceover-fade_in), [Voice take fade out](../control-reference/index.md#studio-voiceover-fade_out)
 
 **Guides:** No task guide in V1.
 
@@ -1115,7 +1115,7 @@ Edits deterministic grade parameters and finish keys. Grade controls affect the 
 
 **Controls:** [Exposure stops](../control-reference/index.md#studio-grade-exposurestops), [Lift](../control-reference/index.md#studio-grade-lift), [Gamma](../control-reference/index.md#studio-grade-gamma), [Grade gain](../control-reference/index.md#studio-grade-gain), [Tint](../control-reference/index.md#studio-grade-tint)
 
-**Guides:** No task guide in V1.
+**Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -1403,7 +1403,7 @@ Instantiates a pinned draft template into ordinary editable clips, layers, keyfr
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Use a creative template](../task-guides/task-use_template.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Use a creative template](../task-guides/task-use_template.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -1518,7 +1518,7 @@ Requests a final movie and downloads the exact completed output after applicable
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md), [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Use a creative template](../task-guides/task-use_template.md), [Export a final film](../task-guides/task-final_export.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md), [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Use a creative template](../task-guides/task-use_template.md), [Export a final film](../task-guides/task-final_export.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -1631,7 +1631,7 @@ Preserves canonical revision and provenance for manual edits, Director proposals
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Export a final film](../task-guides/task-final_export.md)
+**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Export a final film](../task-guides/task-final_export.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 

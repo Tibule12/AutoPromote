@@ -22,3 +22,4 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 - [Use a creative template](task-use_template.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Modify Director edits manually](task-director_manual.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Export a final film](task-final_export.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
+- [Edit a video in your own style](task-own_style.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS

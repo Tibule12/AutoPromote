@@ -964,6 +964,94 @@
       "aliases": [],
       "updated_at": "2026-10-12",
       "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.own_style",
+      "title": "Edit a video in your own style",
+      "status": "PARTIAL",
+      "summary": "Change ordinary clips, titles, framing, captions, motion, colour and sound manually in the same editable project used by templates and reviewed Director edits.",
+      "feature_ids": [
+        "studio.timeline",
+        "studio.cut",
+        "studio.trim",
+        "studio.layers",
+        "studio.transforms",
+        "studio.keyframes",
+        "studio.color",
+        "studio.captions",
+        "studio.audio",
+        "studio.compositing",
+        "studio.templates",
+        "studio.revision",
+        "studio.export"
+      ],
+      "control_ids": [],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Import your owned footage or apply an available shared template from Media. Templates author normal editable clips, layers, keys and audio; they do not lock your style.",
+          "feature_id": "studio.templates",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Cut for splits/trims and select the occurrence you want to change. Reframe changes aspect, position and zoom; review faces throughout the crop.",
+          "feature_id": "studio.cut",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Graphics for your own text, fonts, colours, images, position, size, opacity and timing. Edit caption words/timing and style in Captions.",
+          "feature_id": "studio.layers",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Motion for supported transform keys, easing and movement. Select the actual layer and inspect its entrance and exit. Some advanced 3D/Creator FX controls are placement studies; read their limits.",
+          "feature_id": "studio.keyframes",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Color to adjust the image finish. Composite provides optional subject/background treatment; keep the original background when replacement is unnecessary.",
+          "feature_id": "studio.color",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Sound for speech, music, voiceover, sound effects, levels and fades. Review the rendered mix; whole live-preview/final sound agreement remains unqualified.",
+          "feature_id": "studio.audio",
+          "control_ids": []
+        },
+        {
+          "instruction": "Save and reopen the project to retain your choices. Undo/Redo operates on the shared project. Keep an editable backup before major changes. Changing a processed scene requires a new reviewed preview.",
+          "feature_id": "studio.revision",
+          "control_ids": []
+        },
+        {
+          "instruction": "Render the current revision, then watch the full actual movie with sound. Check cuts, typography, moving boundaries and audio before using the result.",
+          "feature_id": "studio.export",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "Your own editable style and timing in the normal Studio project, with a reviewed export. No mandatory template or background replacement.",
+      "limitations": [
+        "Supported controls remain subject to their feature limits, account access and media ownership. This does not certify every tool or effect combination.",
+        "Whole predictive picture/sound parity, arbitrary nesting and broad ordinary-account model execution remain incomplete. Source-specific manual mask corrections do not generalize to new videos.",
+        "Technical records document private development work. They are not evidence that every feature is deployed or available in production.",
+        "Caption wording, timing and style can be edited manually. Automatic caption generation has its separate documented blocking defect; manual editing does not qualify automatic transcription."
+      ],
+      "aliases": [
+        "edit in my own preferred style",
+        "customize my video",
+        "manual video editing",
+        "change a template",
+        "what editing controls can I use"
+      ],
+      "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
     }
   ]
 }

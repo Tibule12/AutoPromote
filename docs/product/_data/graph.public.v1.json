@@ -1494,6 +1494,46 @@
       "status": "PARTIAL"
     },
     {
+      "id": "studio.voiceover.fade_in",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.voiceover.fade_out",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.source_detail_repair",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.edge_refinement_region",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.colour_treatment_paths",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.alpha_transparent",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.alpha_opaque",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "studio.composite.alpha_region",
+      "kind": "control",
+      "status": "PARTIAL"
+    },
+    {
       "id": "task.image_cinematic",
       "kind": "task",
       "status": "PARTIAL"
@@ -1580,6 +1620,11 @@
     },
     {
       "id": "task.final_export",
+      "kind": "task",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "task.own_style",
       "kind": "task",
       "status": "PARTIAL"
     }
@@ -3754,6 +3799,131 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.background_decontaminate"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.fade_in"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.fade_out"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.subject_cutout",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.revision",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.cut",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.trim",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.layers",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.color",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.captions",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.audio",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.templates",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.revision",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.source_detail_repair"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.edge_refinement_region"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.colour_treatment_paths"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_transparent"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_opaque"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_region"
     }
   ]
 }

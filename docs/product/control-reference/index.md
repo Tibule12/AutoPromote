@@ -204,6 +204,14 @@ A value is scoped to its listed inspector/media type. Unknown defaults/ranges ar
 | studio.captions.source_language | Speech language | enum | auto, en, af, za-mixed, xh, zu, st, tn, ts, nr, ve | none | "auto" | UNSUPPORTED | PARTIAL | PARTIAL | UNVERIFIED |
 | studio.composite.background_edge_radius | Edge detail width | number | 0 … 8 | source pixels | 3 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
 | studio.composite.background_decontaminate | Remove old background colour | number | 0 … 1 | strength | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.voiceover.fade_in | Voice take fade in | number | 0 … 5 | seconds | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.voiceover.fade_out | Voice take fade out | number | 0 … 5 | seconds | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNVERIFIED |
+| studio.composite.source_detail_repair | Repair opaque detail from source | array | 0 … 16 | normalized source-frame corners; feather and end blending in source pixels | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.edge_refinement_region | Edge refinement region points | array | 0 … 64 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.colour_treatment_paths | Colour treatment paths | array | 0 … 32 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.alpha_transparent | Transparent edge level | number | 0 … 1 | alpha | 0 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.alpha_opaque | Opaque edge level | number | 0 … 1 | alpha | 1 | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
+| studio.composite.alpha_region | Edge opacity region points | array | 0 … 64 | normalized source-frame points | [] | UNSUPPORTED | PARTIAL | SUPPORTED | UNSUPPORTED |
 
 <a id="studio-transform-x"></a>
 
@@ -2684,3 +2692,113 @@ Recovers photographed foreground edge colour using the final mask, including pro
 Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
 
 - This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified.
+
+<a id="studio-voiceover-fade_in"></a>
+
+## Voice take fade in
+
+ID: `studio.voiceover.fade_in` • **PARTIAL**
+
+Sets the recorded take fade in in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.
+
+Applies to: video. Requires: studio.voiceover.
+
+- Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial.
+
+<a id="studio-voiceover-fade_out"></a>
+
+## Voice take fade out
+
+ID: `studio.voiceover.fade_out` • **PARTIAL**
+
+Sets the recorded take fade out in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.
+
+Applies to: video. Requires: studio.voiceover.
+
+- Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial.
+
+<a id="studio-composite-source_detail_repair"></a>
+
+## Repair opaque detail from source
+
+ID: `studio.composite.source_detail_repair` • **PARTIAL**
+
+Manually copies a clean opaque detail from the same source frame onto an authored target after matte cleanup. Optional cleanup removes damaged outlines; protection paths keep the actual fractional foreground in front of the restored detail.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.
+- The default copies this frame’s cleaned source colour. Set source_color to original to retain photographed opaque equipment texture, with optional saturation 0–2; select clean source pixels so old-room colours are not copied. This does not reconstruct the hidden original, detect objects or track motion. Review every moving pose and the export.
+- New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality.
+- Protection paths place the existing foreground in front of the repaired detail using its actual alpha. Transparent padding does not punch a hole in the repair; soft accessory edges blend over it.
+
+<a id="studio-composite-edge_refinement_region"></a>
+
+## Edge refinement region points
+
+ID: `studio.composite.edge_refinement_region` • **PARTIAL**
+
+Limits the CPU edge solve to an authored source-frame region. Colour rejection becomes a soft boundary guide inside it; explicit removal paths and boxes remain excluded. Alpha outside the region is unchanged.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Set Edge detail width above zero first. Use 3–64 points forming a nonempty region; clear the field to refine the entire frame.
+- This manual region stays fixed in the source frame. Inspect the complete moving shot; it is not automatic tracking or object reconstruction.
+- The latest podcast correction remains under review. Broader footage and creative acceptance remain unqualified.
+
+<a id="studio-composite-colour_treatment_paths"></a>
+
+## Colour treatment paths
+
+ID: `studio.composite.colour_treatment_paths` • **PARTIAL**
+
+Apply the foreground holdout saturation to an additional region while keeping the existing cutout alpha. Use this to neutralise source lighting on retained equipment without restoring the old room.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Advanced manual geometry: 1–32 polygons with 3–64 points each, within source coordinates 0–1; [] removes the optional regions.
+- Only the existing object saturation treatment applies. These paths never enlarge the inclusion matte or change the source mask.
+- The regions stay fixed in source coordinates. They do not detect or track an object and do not prove clean replacement on arbitrary footage.
+- The three short room examples pass technical preview/export/reopen checks but remain owner-rejected for whole-shot realism. Colour-only paths fix a selection/colour separation defect; they do not establish a convincing professional background. Fixed geometry and these examples do not qualify arbitrary/longer footage.
+
+<a id="studio-composite-alpha_transparent"></a>
+
+## Transparent edge level
+
+ID: `studio.composite.alpha_transparent` • **PARTIAL**
+
+Sets the soft-matte value treated as transparent before foreground colour recovery. Raising it removes low-opacity residue in the selected region.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.
+- Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.
+- An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement.
+
+<a id="studio-composite-alpha_opaque"></a>
+
+## Opaque edge level
+
+ID: `studio.composite.alpha_opaque` • **PARTIAL**
+
+Sets the soft-matte value treated as opaque before foreground colour recovery. Lower it carefully when clothing edges are too translucent; fractional coverage remains between the two levels.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.
+- Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.
+- An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement.
+
+<a id="studio-composite-alpha_region"></a>
+
+## Edge opacity region points
+
+ID: `studio.composite.alpha_region` • **PARTIAL**
+
+Restricts edge-opacity levels to an authored source-frame polygon. Its boundary fades inward; alpha outside the region remains unchanged.
+
+Applies to: owned video with a source-bound subject mask. Requires: studio.compositing, studio.subject_cutout.
+
+- Use 3–64 normalized source-frame points forming a nonempty polygon. Clear the field to apply levels across the subject.
+- The polygon stays fixed in source coordinates and is not an automatically tracked selection. Explicit removed-background regions remain excluded.
+- Preview and full-film appearance still require moving review; the controls do not establish professional or universal replacement quality.
