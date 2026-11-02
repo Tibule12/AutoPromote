@@ -346,6 +346,25 @@ describe("owned Studio project sources", () => {
     expect(deductCredits).not.toHaveBeenCalled();
   });
 
+  it.each([["images", "logo.png", "image/png"], ["audios", "voice.wav", "audio/wav"]])(
+    "restores raw-upload %s backups only after checking actual owner and media type",
+    async (type, name, contentType) => {
+      const path = `uploads/${type}/123_${name}`;
+      putVideo(path, "owner-1", { contentType });
+      const owned = await request(buildApp()).post("/api/media/studio-assets/resolve").send({ storagePath: path });
+      expect(owned.statusCode).toBe(200);
+      putVideo(path, "attacker", { contentType });
+      expect((await request(buildApp()).post("/api/media/studio-assets/resolve").send({ storagePath: path })).statusCode).toBe(403);
+      putVideo(path, "owner-1", { contentType: "text/html" });
+      expect((await request(buildApp()).post("/api/media/studio-assets/resolve").send({ storagePath: path })).statusCode).toBe(422);
+      const { getStudioSourcePathKind } = require("../services/studioSourceService");
+      expect(getStudioSourcePathKind(path, "owner-1", false)).toBeNull();
+      expect(getStudioSourcePathKind(`uploads/${type}/elsewhere/nested/${name}`, "owner-1", true)).toBeNull();
+      expect(deductCredits).not.toHaveBeenCalled();
+      expect(mockStartProcessingJob).not.toHaveBeenCalled();
+    }
+  );
+
   it("does not import another user's Cam Combiner master", async () => {
     mockDocs.set("master-1", {
       userId: "attacker",

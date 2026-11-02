@@ -11,15 +11,16 @@ const { buildWorkerRequestConfig } = require("./utils/cloudRunAuth");
 // The service file exports an instance by default? No, let's check.
 const VideoEditingService = require("./services/videoEditingService");
 const videoEditingService = new VideoEditingService(); // Instantiate for general use
-const { refreshOwnedStudioOutput, persistWorkerBucketOutput } = require("./services/studioWorkerOutputService");
+const { refreshOwnedStudioOutput, persistWorkerBucketOutput, retainedLocalCompletionHash } = require("./services/studioWorkerOutputService");
 
 async function refreshCompletedStudioOutput(data,userId,jobId,docRef) {
   if (data.status !== "completed" || data.options?.renderViral !== true) return;
   let storagePath = data.outputStoragePath || data.result?.outputStoragePath;
   if (!storagePath?.startsWith("studio/exports/")) {
+    const expectedSha256=data.result?.outputSha256 || data.result?.output_sha256 || await retainedLocalCompletionHash(jobId);
     const adopted = await persistWorkerBucketOutput({userId,jobId,legacy:true,
       url:data.outputUrl || data.result?.url || data.result?.output_url,
-      expectedSha256:data.result?.outputSha256 || data.result?.output_sha256});
+      expectedSha256});
     if (adopted) {
       storagePath=adopted.storagePath;
       const result={...data.result,url:adopted.url,outputStoragePath:storagePath,

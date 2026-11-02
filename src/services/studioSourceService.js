@@ -27,6 +27,8 @@ const getStudioSourcePathKind = (storagePath, userId, allowMedia = false) => {
   // The backend's older raw upload route omitted the UID from its object name.
   // Its immutable ownerUid metadata is still checked below.
   if (/^uploads\/videos\/[^/]+$/.test(storagePath)) return "legacy_upload";
+  if (allowMedia && /^uploads\/(images|audios)\/[^/]+$/.test(storagePath))
+    return "legacy_upload";
   return null;
 };
 

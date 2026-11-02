@@ -3473,6 +3473,41 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("uploads a repeated overlay File once and preserves each occurrence when exporting", async () => {
+    const shared = new File(["same media"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
+    const distinct = new File(["different!"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
+    const source = { id: "main", name: "Owned source", url: "https://example.com/source.mp4",
+      storagePath: "studio/sources/test-user/source.mp4", start: 0, end: 6, duration: 6 };
+    const layer = (id, file, startTime) => ({ id, name: id, type: "video", file, src: "blob:local-media",
+      isLocal: true, bRollMode: "pip", startTime, duration: 2, sourceDuration: 6,
+      sourceStartTime: 0, width: 30, height: 20, x: 50, y: 50, scale: 1, opacity: 1 });
+    const overlays = [layer("first", shared, 0), layer("second", shared, 2), layer("different", distinct, 4)];
+    uploadSourceFileViaBackend.mockImplementation(({ file }) => Promise.resolve({
+      url: file === shared ? "https://example.com/shared.mp4" : "https://example.com/distinct.mp4",
+      storagePath: file === shared ? "studio/sources/test-user/shared.mp4" : "studio/sources/test-user/distinct.mp4",
+    }));
+    global.fetch.mockResolvedValue({ ok: true, json: async () => ({}) });
+    const onSave = jest.fn();
+    render(<ViralClipStudio videoUrl={source.url} clips={[source]} onSave={onSave} onCancel={jest.fn()}
+      initialSavedProject={{ id: "shared-file-export", name: "Repeated source", snapshot: {
+        orderedClips: [source], selectedClipId: source.id,
+        timeline: [{ ...source, sourceClipId: source.id, startRequest: 0, endRequest: 6 }],
+        projectMedia: [{ ...source, status: "ready", mediaType: "video" }], overlays,
+        reframeAspect: "16:9", smartCrop: false, previewSpeed: 1, addHook: false,
+        autoCaptions: false, silenceRemoval: false, motionKeyframes: [],
+      } }} />);
+    await screen.findByDisplayValue("Repeated source");
+    await act(async () => { await clickRenderFinalClip(); });
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === shared)).toHaveLength(1);
+    expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === distinct)).toHaveLength(1);
+    expect(onSave.mock.calls[0][1]).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "first", startTime: 0, duration: 2, src: "https://example.com/shared.mp4" }),
+      expect.objectContaining({ id: "second", startTime: 2, duration: 2, src: "https://example.com/shared.mp4" }),
+      expect.objectContaining({ id: "different", startTime: 4, duration: 2, src: "https://example.com/distinct.mp4" }),
+    ]));
+  });
+
   test("materializes blob-backed main timeline clips before export", async () => {
     const onSave = jest.fn();
     global.fetch = jest.fn(url => {

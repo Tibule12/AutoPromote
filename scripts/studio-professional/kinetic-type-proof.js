@@ -25,23 +25,39 @@ async function range(input, value) { await input.evaluate((e, v) => {
 async function recording(page) {
   require('../creative-templates/proof-storage').requireProofSpace(folder);
   const frames = path.join(folder, `editing-frames-${Date.now()}.private`); fs.mkdirSync(frames, { recursive: true });
-  const session = await page.context().newCDPSession(page), images = []; let bytes = 0, failure;
-  session.on('Page.screencastFrame', event => {
+  const session = await page.context().newCDPSession(page), images = []; let bytes = 0, failure, stopping = false;
+  const captureFps = process.env.STUDIO_QA_CAPTURE_FPS === undefined ? null : Number(process.env.STUDIO_QA_CAPTURE_FPS);
+  assert(captureFps === null || Number.isInteger(captureFps) && captureFps >= 1 && captureFps <= 24,
+    'Use a bounded 1–24 fps observational editing capture cadence.');
+  const onFrame = event => {
+    if (stopping) return;
+    const now = Date.now() / 1000;
+    if (captureFps && images.length && now - images.at(-1).time < 1 / captureFps) {
+      void session.send('Page.screencastFrameAck', { sessionId: event.sessionId }).catch(error => {
+        if (!stopping) failure = error.message;
+      });
+      return;
+    }
     const data = Buffer.from(event.data, 'base64');
     if (bytes + data.length > 256 * 1024 ** 2) failure = 'Editing capture exceeded256MiB';
     if (!failure) { const file = path.join(frames, `${String(images.length).padStart(6, '0')}.jpg`); fs.writeFileSync(file, data); images.push({ file, time: Date.now() / 1000 }); bytes += data.length; }
-    void session.send('Page.screencastFrameAck', { sessionId: event.sessionId });
-  });
+    void session.send('Page.screencastFrameAck', { sessionId: event.sessionId }).catch(error => {
+      if (!stopping) failure = error.message;
+    });
+  };
+  session.on('Page.screencastFrame', onFrame);
   await session.send('Page.startScreencast', { format: 'jpeg', quality: 65, maxWidth: 1920, maxHeight: 1200, everyNthFrame: 2 });
   return async () => {
-    await session.send('Page.stopScreencast'); await session.detach(); assert(!failure, failure); assert(images.length);
+    stopping = true;
+    await session.send('Page.stopScreencast'); session.off('Page.screencastFrame', onFrame);
+    await session.detach(); assert(!failure, failure); assert(images.length);
     const concat = path.join(frames, 'frames.ffconcat'); fs.writeFileSync(concat, 'ffconcat version 1.0\n' + images.map((f, i) => `file '${f.file}'\nduration ${Math.max(.001, (images[i + 1]?.time ?? f.time + .1) - f.time)}\n`).join('') + `file '${images.at(-1).file}'\n`);
     const movie = path.join(folder, 'editing-in-studio.mp4');
     if (fs.existsSync(movie)) fs.renameSync(movie, movie.replace('.mp4', `-${Date.now()}.mp4`));
     execFileSync('ffmpeg', ['-v', 'error', '-y', '-safe', '0', '-i', concat, '-vf', 'fps=24', '-c:v', 'libx264', '-preset', 'fast', '-crf', '24', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', movie]);
     const keep = new Set([images[0].file, images[Math.floor(images.length / 2)].file, images.at(-1).file]);
     for (const item of images) if (!keep.has(item.file)) fs.unlinkSync(item.file); fs.unlinkSync(concat);
-    fs.writeFileSync(path.join(folder, 'editing-recording.json'), JSON.stringify({ seconds: images.at(-1).time - images[0].time, frames: images.length, rawBytes: bytes, nativeControlsOnly: true, setupExcluded: true, audio: 'Silent native editing capture' }, null, 2));
+    fs.writeFileSync(path.join(folder, 'editing-recording.json'), JSON.stringify({ seconds: images.at(-1).time - images[0].time, frames: images.length, rawBytes: bytes, requestedObservationalCaptureFps: captureFps, nativeControlsOnly: true, setupExcluded: true, audio: 'Silent native editing capture' }, null, 2));
   };
 }
 async function open(page, title) { await page.getByRole('button', { name: title, exact: true }).click(); await h.rail(page); await pause(page); }

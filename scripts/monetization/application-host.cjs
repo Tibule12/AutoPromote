@@ -52,6 +52,11 @@ const firestore = Object.assign(() => db, {
 let gateway;
 const bucket = new Proxy(rawBucket, {
   get(target, key) {
+    if (key === "upload") return async (file, options) => {
+      if (options?.destination?.startsWith("temp_studio_3d/") && options.destination.endsWith("/overlay.mov") && fs.statSync(file).size > 100 * 1024 ** 2)
+        return require("./upload-local-alpha.cjs")({ file, options, bucket: target, origin: config.storageOrigin, cohort: config.cohort });
+      return target.upload(file, options);
+    };
     // Firebase's local Storage emulator has no bucket-IAM metadata endpoint.
     // Model its private transport capability; object bytes/metadata still use SDK I/O.
     if (key === "getMetadata")
@@ -296,12 +301,22 @@ app.get("/api/credit-pilot/object/:id", async (req, res, next) => {
   }
 });
 app.use("/api/auth", require("../../src/authRoutes"));
+if (process.env.STUDIO_3D_LOCAL_ENABLED === "true") {
+  // Match the application's existing public, bounded documentation route.
+  // It has no model/provider/project actions; its journal belongs to this demo.
+  const { createAssistance } = require("../../src/productAssistance");
+  const { privateJournal } = require("../../src/productAssistance/journal");
+  app.use("/api/product-assistance", require("../../src/routes/productAssistanceRoutes")({
+    service: createAssistance({ journal: privateJournal(path.join(path.dirname(process.argv[2]), "product-help.private.json")) }),
+  }));
+}
 const auth = require("../../src/authMiddleware");
 app.use("/api", auth, (req, res, next) => {
   if (!config.cohort.includes(req.user.uid)) return res.sendStatus(403);
   // Block every unpriced/provider/admin mutation; allow ordinary own profile and workspace saving.
   if (
     req.method !== "GET" &&
+    !(process.env.STUDIO_3D_LOCAL_ENABLED === "true" && req.method === "POST" && req.path === "/media/studio-3d/preview") &&
     !/^\/(?:credit-pilot\/|media\/(?:process|analyze|render-clip|studio-assets\/resolve|multicam\/uploads\/(?:start|complete|abort))$|content\/(?:upload(?:\/(?:source-file|readiness))?$|[^/]+\/promotion-schedules$|promotion-schedules\/[^/]+\/(?:resume|reschedule|pause)$)|users\/me\/accept-terms$|workspaces(?:\/|$))/.test(
       req.path
     )

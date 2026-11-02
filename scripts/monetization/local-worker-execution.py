@@ -20,7 +20,9 @@ started = time.monotonic()
 if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
     raise RuntimeError("Explicit demo runtime required")
 resource.setrlimit(resource.RLIMIT_CPU, (120, 120))
-resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024**2, 20 * 1024**2))
+local_alpha = bool(record.get("body", {}).get("threeDGraphics")) and os.environ.get("STUDIO_3D_LOCAL_ENABLED") == "true"
+file_limit = (250 if local_alpha else 20) * 1024**2
+resource.setrlimit(resource.RLIMIT_FSIZE, (file_limit, file_limit))
 connect = socket.socket.connect
 
 
@@ -45,6 +47,13 @@ firebase_admin.initialize_app(EmulatorCredential(), {
     "projectId": "demo-autopromote-credits", "storageBucket": "demo-autopromote-credits",
 })
 import python_media_worker.main_media_server as worker
+from python_media_worker import studio_3d_overlay
+from local_3d_transport import install_overlay_transport
+
+# Both canonical import forms share the same explicit emulator transport.
+# Production renderer code and production signed-storage validation are intact.
+sys.modules["studio_3d_overlay"] = studio_3d_overlay
+install_overlay_transport(studio_3d_overlay, record)
 
 
 async def materialize(url, target, *args, **kwargs):

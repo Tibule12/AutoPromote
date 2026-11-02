@@ -743,9 +743,9 @@
     },
     {
       "task_id": "task.three_d_title",
-      "title": "Create a 3D title/logo scene",
+      "title": "Create a 3D object, title or logo scene",
       "status": "PARTIAL",
-      "summary": "Use supported bounded scene fields, then obtain and review a current owned final 3D result.",
+      "summary": "Author a bounded editable object composition or title/logo template, review its rendered result and composite matching private alpha through Studio.",
       "feature_ids": [
         "system.costs",
         "studio.three_d",
@@ -764,24 +764,26 @@
       "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
         {
-          "instruction": "Choose a scene preset and edit title/material plus supported transform values.",
+          "instruction": "Open Studio → Motion → 3D Motion. Choose Object Composition for separate editable geometry, or use an existing title/logo preset.",
+          "feature_id": "studio.three_d",
+          "control_ids": []
+        },
+        {
+          "instruction": "Select each mesh object, set its colour and XYZ pose, and add the first object key. Seek to another scene time, adjust that object and add its next key. Save the project.",
+          "feature_id": "studio.three_d",
+          "control_ids": []
+        },
+        {
+          "instruction": "Adjust supported scene material, camera focal length and light intensity. Disabled fields do not gain final support.",
           "feature_id": "studio.three_d",
           "control_ids": [
             "studio.three_d.material",
-            "studio.three_d.x",
-            "studio.three_d.rotationy"
-          ]
-        },
-        {
-          "instruction": "Adjust camera focal length/light intensity; disabled fields do not gain final support.",
-          "feature_id": "studio.three_d",
-          "control_ids": [
             "studio.three_d.focallength",
             "studio.three_d.lightintensity"
           ]
         },
         {
-          "instruction": "Request the existing final scene path only under its availability and cost checks, then review and compose the owned result.",
+          "instruction": "Request the configured 3D render and review its actual quality profile. After reopening, use Check saved 3D render to recover the accepted job. Review the animation before ordinary final export composites matching private alpha.",
           "feature_id": "studio.blender",
           "control_ids": []
         }
@@ -790,12 +792,17 @@
         "system.unsupported_media",
         "studio.revision"
       ],
-      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "expected_result": "A saved editable scene and reviewed owned 3D render that the ordinary final compositor can reuse. Actual quality follows the reported render profile.",
       "limitations": [
-        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+        "At most 24 objects, 32 keys per object and 256 object keys total.",
+        "The local CPU path is explicitly enabled for nonproduction; its bounded landscape profile is 640 × 360 at 24 fps. A larger final canvas upscales that layer.",
+        "Contour morphing, procedural repeaters, general Blender scene import and arbitrary node scripts are unavailable.",
+        "Object keys through timeline cuts, retiming and trimmed boundaries remain unqualified; the verified scene uses a fixed uncut interval.",
+        "Browser lighting, materials, colour and edges do not establish full final-picture parity.",
+        "Uncertain accepted work must not be automatically rerun; API-restart recovery does not establish host/worker-loss or pre-dispatch recovery."
       ],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-29",
       "product_version": "1.2.0"
     },
     {

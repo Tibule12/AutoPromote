@@ -49,6 +49,12 @@ async function main() {
         "RENDER_SERVICE_ID",
         "RENDER_EXTERNAL_HOSTNAME",
         "RENDER",
+        "STUDIO_3D_LOCAL_ENABLED",
+        "STUDIO_3D_LOCAL_ROOT",
+        "STUDIO_3D_BLENDER_BIN",
+        "STUDIO_3D_PYTHON_BIN",
+        "STUDIO_3D_LOCAL_QUALITY",
+        "STUDIO_3D_LOCAL_DEVICE",
       ].includes(key)
     )
   );
@@ -168,7 +174,8 @@ async function main() {
     });
     const { createSandboxDatabase } = require("../../src/services/unifiedCredits/runtime");
     const db = createSandboxDatabase();
-    const cohort = ["demo-pilot-alice", "demo-pilot-empty"];
+    const cohort = ["demo-pilot-alice", "demo-pilot-empty",
+      ...(process.env.CREDITS_DEMO_CREATIVE_SECOND_USER === "true" ? ["demo-pilot-bob"] : [])];
     const password = `Demo-${crypto.randomBytes(12).toString("hex")}!`;
     for (const uid of cohort) {
       await admin.auth().createUser({

@@ -1,6 +1,8 @@
+import { normalizeStudio3DObjects, createStudio3DObject } from "./studio3DObjects";
 // Version 1 of the editor/worker contract. Keep every field bounded before it
 // becomes a render request; the Python worker validates the contract again.
 export const STUDIO_3D_TEMPLATES = [
+  { id: "object_scene", name: "Object Composition", accent: "#8b5cf6", material: "matte", entrance: "fade" },
   { id: "cinematic_title", name: "Cinematic 3D Title", accent: "#79d9ff", material: "chrome", entrance: "dolly" },
   { id: "neon_logo", name: "Neon Logo Reveal", accent: "#a855f7", material: "neon", entrance: "orbit" },
   { id: "chrome_lyric", name: "Chrome Lyric Burst", accent: "#f5f7ff", material: "chrome", entrance: "burst" },
@@ -60,7 +62,7 @@ const normalizeKeyframes = (raw, startTime, endTime) => (Array.isArray(raw) ? ra
   .sort((left, right) => left.time - right.time);
 
 export function normalizeStudio3DScene(raw = {}) {
-  const template = STUDIO_3D_TEMPLATES.find(item => item.id === raw.template) || STUDIO_3D_TEMPLATES[0];
+  const template = STUDIO_3D_TEMPLATES.find(item => item.id === raw.template) || STUDIO_3D_TEMPLATES.find(item => item.id === "cinematic_title");
   const startTime = between(raw.startTime, 0, 86400, 0);
   const duration = between(raw.duration, 0.5, 10, 5);
   return {
@@ -68,8 +70,9 @@ export function normalizeStudio3DScene(raw = {}) {
     id: clean(raw.id, 100),
     template: template.id,
     name: clean(raw.name || template.name, 80),
-    text: clean(raw.text || "AUTOPROMOTE", 80),
-    secondary: clean(raw.secondary || "CREATE WHAT MOVES PEOPLE", 100),
+    text: template.id === "object_scene" ? "" : clean(raw.text || "AUTOPROMOTE", 80),
+    secondary: template.id === "object_scene" ? "" : clean(raw.secondary || "CREATE WHAT MOVES PEOPLE", 100),
+    ...(template.id === "object_scene" ? { objects: normalizeStudio3DObjects(raw.objects, duration) } : {}),
     startTime,
     duration,
     endTime: startTime + duration,
@@ -105,6 +108,7 @@ export function normalizeStudio3DScene(raw = {}) {
     lightDirection: between(raw.lightDirection, -180, 180, 35),
     lightColor: color(raw.lightColor, "#ffffff"),
     lightIntensity: between(raw.lightIntensity, 0, 5, 2.2),
+    ...(template.id === "object_scene" && raw.lightingRig === "sculpture" ? { lightingRig: "sculpture" } : {}),
     shadows: raw.shadows !== false,
     reflections: raw.reflections !== false,
     bloom: between(raw.bloom, 0, 1, template.id === "neon_logo" ? 0.7 : 0.32),
@@ -119,7 +123,8 @@ export function normalizeStudio3DScene(raw = {}) {
 }
 
 export function createStudio3DScene(template, startTime, id) {
-  return normalizeStudio3DScene({ template, startTime, id, text: "AutoPromote" });
+  return normalizeStudio3DScene({ template, startTime, id, text: "AutoPromote",
+    ...(template === "object_scene" ? { objects: [createStudio3DObject("sphere", `${id}-object-1`)] } : {}) });
 }
 
 export function studio3DSceneRevision(scene) {

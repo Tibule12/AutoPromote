@@ -31,17 +31,17 @@
       ],
       "workflow": [
         "Use a laptop or desktop with a screen at least 900 pixels wide and a precise pointer. Choose a tool in the left rail; its controls open in the inspector beside Preview. Scroll inside the inspector to reach its lower sections while keeping the preview and timeline visible.",
-        "Use Composition layers to inspect each title, artwork or scene on its own row. Expand a layer’s keyframes to edit its existing transform properties. Bars show clip timing; opacity, occlusion and parent group gates determine the picture.",
+        "Use Composition layers to inspect each title, artwork or scene on its own row. Expand a layer\u2019s keyframes to edit its existing transform properties. Bars show clip timing; opacity, occlusion and parent group gates determine the picture.",
         "Use At playhead to filter by current clip timing and all parent group gates. This display filter changes no project decisions. Use Sequence tracks for source footage and track mix controls.",
         "Move an ordinary animated layer using its bar or arrow keys. Its canonical transform keys move by the same bounded delta. Undo restores layer timing and keys together.",
         "Select a source, layer or group on its timeline row. Group bars remain available when property rows are collapsed.",
         "Move a group with a pointer gesture or frame nudge; its descendant starts and keys move in one history transaction. Drag or nudge its In/Out edges to limit visibility while keeping child source edits and hidden keys.",
-        "Selecting a group focuses its property rows; select an ordinary child clip to edit that child’s keys. Graphics and child-track locks block group timing changes.",
+        "Selecting a group focuses its property rows; select an ordinary child clip to edit that child\u2019s keys. Graphics and child-track locks block group timing changes.",
         "Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported.",
         "Download project backup saves the current editable project and available media. Select Include saved versions in backup when the saved-version history is also needed; this choice does not delete local versions. Owned media access is re-authorized when restoring."
       ],
       "preview_behavior": "Group In/Out uses a half-open programme-time visibility range around assembled child graphics. Group move shifts canonical child timing and keys, retaining source phase. The same derived group range clips linked motion cues for preview and export. Property focus and clip selection do not change the edit.",
-      "render_behavior": "The shared composition plan carries group timing into the CPU compositor. The existing inverse programme clock gates the group’s assembled output at the same In/Out range. Source clips, child animation and audio use their existing compilation paths.",
+      "render_behavior": "The shared composition plan carries group timing into the CPU compositor. The existing inverse programme clock gates the group\u2019s assembled output at the same In/Out range. Source clips, child animation and audio use their existing compilation paths.",
       "limitations": [
         "This dated development snapshot does not establish professional or production readiness.",
         "One real 20-second footage/title/music/SFX project exercises group pointer move, trim, opacity keys, locks, group deletion/undo, source split/history and exact cold reopen. Broader source-occurrence attachment/reordering, group split/duplicate, nested audio/video/owned 3D timing and continuous/full picture/sound remain unqualified. Group trim preserves hidden keys and source phase; it does not retime/stretch child content."
@@ -514,7 +514,7 @@
         },
         {
           "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
-          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "anchor": "# Native keyframe timeline and retimed sound \u2014 11 October 2026",
           "kind": "NATIVE_REPORT"
         }
       ]
@@ -567,7 +567,7 @@
         "studio.keyframe.spatial_handle"
       ],
       "workflow": [
-        "Open Motion → Transform keyframes and choose the Target layer. Read X, Y, Scale, Rotate and Opacity at the playhead. Scroll down for keyframes, value/easing fields and the separate Start/End velocity and influence controls.",
+        "Open Motion \u2192 Transform keyframes and choose the Target layer. Read X, Y, Scale, Rotate and Opacity at the playhead. Scroll down for keyframes, value/easing fields and the separate Start/End velocity and influence controls.",
         "Show motion keyframes in the timeline and expand an ordinary visual layer or graphic group, including targets without animation keys.",
         "Edit an unanimated property value and commit with Enter or blur; Escape cancels. Add the individual property key at the playhead to start animation.",
         "Move the playhead and edit that animated property to write its next key. Inspect evaluated values and use previous/next keys, timeline nudges and the existing easing/curve inspector.",
@@ -579,17 +579,17 @@
         "Select a timeline key, open Graph editor and choose Value graph or Velocity graph. Edit the interval arriving at that key. Signed velocity uses property units per programme second; endpoint influence preserves endpoint velocity. Numeric edits commit on Enter/blur and write the existing four cubic handles.",
         "Once a transform is animated, Motion inspector value edits write a key at the playhead. The static fallback is retained for the base transform; it no longer overrides visible key-driven values.",
         "Editing motion keys while viewing a completed movie switches After to Live Edit. The prior download remains available through Export; it is not presented as an updated movie.",
-        "For paired position keys, select the layer in Motion → Transform keyframes, place the playhead in the interval and choose Curve path. Drag or arrow-nudge the amber handles; release commits once and Escape cancels. Straighten path retains its endpoints. Check the changed route before export."
+        "For paired position keys, select the layer in Motion \u2192 Transform keyframes, place the playhead in the interval and choose Curve path. Drag or arrow-nudge the amber handles; release commits once and Escape cancels. Straighten path retains its endpoints. Check the changed route before export."
       ],
       "preview_behavior": "Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.",
       "render_behavior": "Uses the existing shared compiler/compositor and interpolation expressions where supported. Group keys retain canonical target ownership and are projected into the group composition plan; output time maps back to the programme clock. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
         "This dated development snapshot does not establish professional or production readiness.",
         "Two bounded masked image-effect edits preserve eight position/scale/rotation/opacity keys through native save/reopen/export. Inverted-polygon sampled picture passes; one ellipse raster pair still exceeds the strict colour bound. This does not qualify every mask/easing/media or legacy entrance clock.",
-        "One native nested image/two-motion project preserves 16 group keys across eight channels, including one custom X Bézier curve. Midpoint, property rows, nudge/lock, reset/remove/undo, save/cold reopen, CPU export and full timeline playback pass; four image geometry pairs pass and decoded source-tone audio is unchanged. Native retiming, broader curves, broader mask/blend combinations, video/owned 3D/deeper groups, full raster and live sound remain unqualified. Existing worker Bézier expressions approximate 32 samples; browser interpolation solves the curve.",
+        "One native nested image/two-motion project preserves 16 group keys across eight channels, including one custom X B\u00e9zier curve. Midpoint, property rows, nudge/lock, reset/remove/undo, save/cold reopen, CPU export and full timeline playback pass; four image geometry pairs pass and decoded source-tone audio is unchanged. Native retiming, broader curves, broader mask/blend combinations, video/owned 3D/deeper groups, full raster and live sound remain unqualified. Existing worker B\u00e9zier expressions approximate 32 samples; browser interpolation solves the curve.",
         "Cross-layer paste requires a single source layer and a current-project destination supporting every copied property and value range. Missing targets, unsupported crop/group bounds, destination locks, half-frame timing collisions and programme overflow reject the whole paste. Original-layers mode supports mixed owners. Clipboard is local to this timeline component; it is not an OS/project interchange format. Freehand lasso and cross-project interchange are not qualified. Broad media/retiming/full picture and sound qualification remains open.",
-        "Velocity/influence edits write a custom cubic curve, including when converting an easing preset. Flat intervals cannot acquire movement through velocity alone. Influence is1–99%; speeds that exceed the supported handle range reject. Hold has a discontinuous step and no finite editable endpoint velocity. Worker custom curves retain the existing32-sample approximation.",
-        "Spatial handles are endpoint-relative position offsets, bounded to ±200 composition percent. The route uses paired neighboring X/Y keys; other keys retain their existing interpolation. Adding or retiming individual keys can change adjacent intervals. Automatic arc-length speed, roving keys, closed vector contours and vector-shape morphs are not provided by these handles.",
+        "Velocity/influence edits write a custom cubic curve, including when converting an easing preset. Flat intervals cannot acquire movement through velocity alone. Influence is1\u201399%; speeds that exceed the supported handle range reject. Hold has a discontinuous step and no finite editable endpoint velocity. Worker custom curves retain the existing32-sample approximation.",
+        "Spatial handles are endpoint-relative position offsets, bounded to \u00b1200 composition percent. The route uses paired neighboring X/Y keys; other keys retain their existing interpolation. Adding or retiming individual keys can change adjacent intervals. Automatic arc-length speed, roving keys, closed vector contours and vector-shape morphs are not provided by these handles.",
         "Curved intervals share a sampled travel curve in preview and export. Travel progress stays on the authored route; it is distinct from constant screen-distance speed. Native proof covers one image and four intervals; broader retiming, animated parents, other media and whole picture/sound remain unqualified."
       ],
       "common_errors": [
@@ -763,7 +763,7 @@
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "The shared curve contract allows Y overshoot -2–2, while some numeric inspector widgets restrict Y to 0–1.",
+        "The shared curve contract allows Y overshoot -2\u20132, while some numeric inspector widgets restrict Y to 0\u20131.",
         "The right-hand key supplies easing for the interval between keys.",
         "This is native 2D property interpolation, distinct from legacy scene-level 3D easing.",
         "Velocity is signed change in the property per programme second, not screen-path speed. Influence preserves endpoint velocity. Editing a preset converts it to a custom cubic; hold and constant-value intervals have no editable finite motion velocity. Spatial handles have bounded native image evidence; broader combinations and constant-distance path speed remain unqualified."
@@ -807,7 +807,7 @@
         },
         {
           "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
-          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "anchor": "# Native keyframe timeline and retimed sound \u2014 11 October 2026",
           "kind": "NATIVE_REPORT"
         },
         {
@@ -925,10 +925,10 @@
         "studio.captions.source_language"
       ],
       "workflow": [
-        "Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
+        "Open Studio \u2192 Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
         "Choose Generate speech captions. Changing the language keeps the existing track until you explicitly regenerate.",
         "Correct uncertain wording, speaker/language labels and timing in the editable lines. Preview the current phrases and inspect the final export.",
-        "Regenerate a selected source without replacing other sources’ caption tracks. If its wording changes while listening, keep the edits and regenerate when ready."
+        "Regenerate a selected source without replacing other sources\u2019 caption tracks. If its wording changes while listening, keep the edits and regenerate when ready."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
@@ -1259,20 +1259,20 @@
       "workflow": [
         "Select an owned image or ordinary title in Studio Composite.",
         "Enable its geometric mask and choose rectangle, ellipse or polygon.",
-        "For polygons, enter3–64 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.",
-        "For rectangles, set Mask corner radius from0–50%;0 retains square mask corners.",
+        "For polygons, enter3\u201364 percentage points and commit with Enter/blur; invalid drafts are not applied and Escape cancels.",
+        "For rectangles, set Mask corner radius from0\u201350%;0 retains square mask corners.",
         "Review feather/inversion and the actual export; whole alpha and broader stacks remain unqualified.",
         "To transform graphics together, choose root layers/groups in Composite and use Group selected layers. Choose an existing root group with other roots to nest them.",
         "Set group X/Y, scale, rotation and opacity; child edits and keys stay local. Use Composite arrows to reorder group roots or their children.",
-        "Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom Bézier curve in Composite.",
+        "Add an individual group property key at the playhead, seek and edit its next value. Expand the group in the shared timeline for property values, key navigation and frame nudges; choose easing or a custom B\u00e9zier curve in Composite.",
         "Enable the group mask and choose rectangle, ellipse or percentage polygon. Set rectangle corner radius, programme-unit feather and inversion. Polygon Enter/blur commits valid paths; Escape cancels invalid drafts. The group mask clips assembled children before its transform.",
         "Choose a supported group blend mode to combine the assembled result with its sibling backdrop. Ordinary child blends stay inside the isolated parent group. Reset group mask clears only its mask; graphics locks prevent changes.",
-        "Reset transform removes that group’s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.",
+        "Reset transform removes that group\u2019s keys and restores its neutral base. Remove group transform removes its keys and promotes children without baking. Undo/redo and save/reopen apply; inspect the exact final export.",
         "Select the group clip bar to move all child clips and keys, or trim its In/Out visibility. Composite provides exact timing values, Fit to children and reversible Delete group and layers. Source and child-track locks protect the same operation.",
-        "Open Studio → Composite and add effects to the selected owned video clip.",
+        "Open Studio \u2192 Composite and add effects to the selected owned video clip.",
         "Leave Background choice on Keep original background, or upload a PNG, JPEG or WebP image and choose it for replacement.",
         "Select the person using Subject point on the paused source. Select optional furniture, microphones or other objects separately. Extra objects are empty by default; people selection is not automatic detection of everyone.",
-        "Create and review this source’s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.",
+        "Create and review this source\u2019s subject mask through the available model workflow, or explicitly reuse a valid mask belonging to the same source and range.",
         "Tune foreground/background colour, matte refinement and optional holdouts, render the processed preview and inspect moving edges throughout the shot. Save and export the current reviewed revision.",
         "At a later problem frame, add both keep and remove points and rerun the selection. The selection box and points are retained together; inspect the complete moving result.",
         "For hair or fine equipment, use Refine saved mask edges on the existing selection, then render and inspect movement. Keep earlier results available; refinement cannot reconstruct a missing foreground object.",
@@ -1282,11 +1282,11 @@
       "render_behavior": "The shared compiler carries group mask/blend decisions and transform keys into the existing CPU compositor. The ordinary geometric matte rasterizer clips assembled local child alpha before transform/opacity; registered request-owned matte scratch is cleaned after the render. RGB blend color weights the blend result by backdrop alpha, preserving foreground color over transparent isolated parents. Group and child blending share the existing leaf compositor and inverse programme clock. Static/Normal paths retain previous pixels. Source/source-VFX/generated-caption stages remain separate; inspect the exact final movie.",
       "limitations": [
         "Image and title geometric masks support feather and inversion. Inspect their boundaries in the exported movie, especially with soft edges.",
-        "Geometric masks on the main video or video layers currently stop export. Real person/background separation uses Composite’s separately processed subject mask. Arbitrary nesting and global layer/effect order remain incomplete.",
+        "Geometric masks on the main video or video layers currently stop export. Real person/background separation uses Composite\u2019s separately processed subject mask. Arbitrary nesting and global layer/effect order remain incomplete.",
         "This dated development snapshot does not establish professional or production readiness.",
         "Background replacement is optional. Uploads accept PNG, JPEG or WebP up to 32 MB; a scene supports at most twelve effect layers.",
         "A new video requires its own source-bound mask and available authorized model execution. A saved mask from another video cannot be transferred. An unavailable model service prevents creating a new mask.",
-        "The retained podcast example uses manual source-specific object contours and still has rejected fringes. Those corrections do not prove clean automatic replacement for other users’ footage.",
+        "The retained podcast example uses manual source-specific object contours and still has rejected fringes. Those corrections do not prove clean automatic replacement for other users\u2019 footage.",
         "Optional object holdouts and removal paths are advanced manual normalized source-frame geometry. They do not automatically identify furniture or microphones or track a hand-drawn shape through motion."
       ],
       "common_errors": [
@@ -2150,7 +2150,7 @@
         },
         {
           "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
-          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "anchor": "# Native keyframe timeline and retimed sound \u2014 11 October 2026",
           "kind": "NATIVE_REPORT"
         },
         {
@@ -2287,15 +2287,16 @@
     },
     {
       "feature_id": "studio.three_d",
-      "name": "3D title/logo scene",
+      "name": "3D object, title and logo scenes",
       "area": "Studio",
-      "summary": "Authors bounded 3D scenes and renders them through the existing 3D worker path. Supported transforms are approximate across browser and final render, and several displayed fields are disabled for final output.",
-      "purpose": "Authors bounded 3D scenes and renders them through the existing 3D worker path. Supported transforms are approximate across browser and final render, and several displayed fields are disabled for final output.",
+      "summary": "Builds bounded mesh compositions and continuously flowing ribbon surfaces. Individual objects retain colours, surfaces, roughness, transforms and pose keys; browser and final lighting/materials remain approximate.",
+      "purpose": "Create editable object motion and combine reviewed rendered alpha with the existing Studio timeline.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
       ],
       "supported_media": [
+        "authored 3D mesh-object composition",
         "authored 3D title/logo scene"
       ],
       "requires": [
@@ -2328,13 +2329,26 @@
         "studio.three_d.quality"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open an owned Studio project, then Motion \u2192 3D Motion.",
+        "Choose Object Composition to start with an editable sphere, or choose an existing title/logo template.",
+        "Add box, sphere, torus, cylinder, icosphere, plane or ribbon; select each object and set its colour, surface, roughness, position, XYZ scale and rotation. Box and cylinder edges support a bounded bevel.",
+        "For a ribbon, choose loop, knot or wave. Adjust width, thickness, wave amount, lobes and twists; speed and phase control the continuous flow. In Advanced, choose the sculpture lighting rig for aimed studio strips.",
+        "Set the first pose and add its object key. Seek to another time, change that object\u2019s values and add the next key. Object-key times are relative to the scene start.",
+        "Save the project and request a 3D preview through the configured worker. Check its reported dimensions and frame rate.",
+        "After a reload, use Check saved 3D render to recover the accepted result. Keep an unavailable accepted job for status recovery.",
+        "Review the rendered animation, then use ordinary Studio export to composite its private alpha."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "render_behavior": "The existing Blender worker produces a reviewed preview and private alpha. The ordinary Studio compositor reuses the owned, matching alpha; changing scene decisions requires a matching render.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "At most 24 objects, 32 keys per object and 256 object keys total.",
+        "The explicit nonproduction local adapter defaults to 640 \u00d7 360 at 24 fps. Its optional higher-resolution/CUDA App path remains unqualified after real long-job failures; successful direct canonical local renders do not prove App recovery. A larger final canvas can upscale a lower-resolution layer.",
+        "Contour morphing, procedural repeaters, general Blender scene import and arbitrary node scripts are unavailable.",
+        "Object keys through timeline cuts, retiming and trimmed boundaries remain unqualified; the verified scene uses a fixed uncut interval.",
+        "Browser lighting, materials, colour and edges do not establish full final-picture parity.",
+        "Uncertain accepted work must not be automatically rerun; API-restart recovery does not establish host/worker-loss or pre-dispatch recovery.",
+        "Per-object glass, chrome, gold, matte, neon, holographic and architecture surfaces are available. Browser glass can reveal opaque parts behind it; matching Blender colour, reflection and edge pixels remains unqualified.",
+        "Ribbon flow is relative to the scene clock. Its timing across cuts, retiming and trimmed boundaries remains unqualified; use an uncut rendered scene for the verified workflow."
       ],
       "common_errors": [
         {
@@ -2346,13 +2360,19 @@
       "templates_using_feature": [],
       "model_capabilities": [],
       "examples": [],
-      "aliases": [],
+      "aliases": [
+        "3D objects",
+        "Object Composition",
+        "sphere",
+        "torus",
+        "object motion"
+      ],
       "readiness_authority": {
         "matrix_id": "three_d"
       },
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-29",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -2365,6 +2385,16 @@
           "path": "test/e2e/studio-capability-matrix.json",
           "anchor": "\"id\": \"three_d\"",
           "kind": "READINESS"
+        },
+        {
+          "path": "frontend/src/components/threeD/studio3DObjects.js",
+          "anchor": "OBJECT_POSE_FIELDS",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "frontend/src/components/threeD/studio3DRibbon.js",
+          "anchor": "ribbonMesh",
+          "kind": "IMPLEMENTATION"
         }
       ]
     },
@@ -2372,13 +2402,14 @@
       "feature_id": "studio.blender",
       "name": "Final 3D rendering",
       "area": "Studio",
-      "summary": "Renders supported authored scenes to owned output for the canonical composition. A browser WebGL preview alone is insufficient to qualify the final scene.",
-      "purpose": "Renders supported authored scenes to owned output for the canonical composition. A browser WebGL preview alone is insufficient to qualify the final scene.",
+      "summary": "Renders supported authored object/title/logo scenes to owned preview and private alpha for the canonical Studio compositor. Configured nonproduction local CPU execution supports saved-job API-restart recovery.",
+      "purpose": "Review actual rendered object motion and composite matching private alpha without rebuilding a separate editing engine.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
       ],
       "supported_media": [
+        "authored 3D mesh-object composition",
         "authored 3D title/logo scene"
       ],
       "requires": [
@@ -2387,13 +2418,17 @@
       "optional_capabilities": [],
       "controls": [],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Author and save a supported scene in Studio \u2192 Motion \u2192 3D Motion.",
+        "Generate the preview through the configured worker and check its actual dimensions/frame rate.",
+        "Use Check saved 3D render after reopening the project to recover the same accepted result.",
+        "Review the separate animation before ordinary final Studio export."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "The qualified local CPU path is nonproduction and bounded to short scenes; its quality profile can be lower than the final canvas.",
+        "Host/worker loss, pre-dispatch reconciliation, remote GPU recovery and full preview/final material/lighting parity remain unqualified.",
+        "A completed technical test does not establish creative or production readiness."
       ],
       "common_errors": [
         {
@@ -2402,7 +2437,7 @@
         },
         {
           "condition": "Generate an HQ 3D preview for every active 3D scene before exporting.",
-          "resolution": "An active scene needs current owned HQ frames matching its settings, source and aspect. Open Motion → 3D Motion and review the matching preview. A browser WebGL scene is insufficient; existing availability and cost checks still apply."
+          "resolution": "An active scene needs current owned HQ frames matching its settings, source and aspect. Open Motion \u2192 3D Motion and review the matching preview. A browser WebGL scene is insufficient; existing availability and cost checks still apply."
         },
         {
           "condition": "3D preview is missing",
@@ -2410,7 +2445,7 @@
         },
         {
           "condition": "3D preview is stale or not owned by this project",
-          "resolution": "Check the current scene, completed job, ownership and covered duration. Use the normal owned preview path; never reuse another project’s output."
+          "resolution": "Check the current scene, completed job, ownership and covered duration. Use the normal owned preview path; never reuse another project\u2019s output."
         },
         {
           "condition": "3D preview aspect ratio changed; generate a new preview",
@@ -2427,7 +2462,7 @@
       },
       "review_state": "SOURCE_AUDITED",
       "status": "PARTIAL",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-29",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
@@ -2440,6 +2475,11 @@
           "path": "test/e2e/studio-capability-matrix.json",
           "anchor": "\"id\": \"blender\"",
           "kind": "READINESS"
+        },
+        {
+          "path": "src/services/studio3DLocal.js",
+          "anchor": "async function reconcile",
+          "kind": "IMPLEMENTATION"
         }
       ]
     },
@@ -2783,7 +2823,7 @@
         },
         {
           "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
-          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "anchor": "# Native keyframe timeline and retimed sound \u2014 11 October 2026",
           "kind": "NATIVE_REPORT"
         }
       ]
@@ -3477,7 +3517,7 @@
       "preview_behavior": "Shows the reviewed source-bound composite when its revision is current. CSS cutout studies do not qualify as this output.",
       "render_behavior": "A reviewed current owned subject scene is composited through the deterministic Studio path; stale scenes are rejected.",
       "limitations": [
-        "Supported scene ranges are 0.25–10 seconds, not arbitrary full-length footage.",
+        "Supported scene ranges are 0.25\u201310 seconds, not arbitrary full-length footage.",
         "Render and review each active scene; split occurrences at scene range edges before export.",
         "New mask execution depends on configured capability availability and applicable authorization.",
         "Effect parameters are not arbitrary native per-property keyframes."
@@ -5709,7 +5749,7 @@
     },
     {
       "feature_id": "generation.image_to_video",
-      "name": "Image → cinematic moving scene",
+      "name": "Image \u2192 cinematic moving scene",
       "area": "Generated media",
       "summary": "The shared generation capability supports image-conditioned video. A valid example needs the conditioning image attached to verified execution and the resulting moving shot imported and reviewed.",
       "purpose": "The shared generation capability supports image-conditioned video. A valid example needs the conditioning image attached to verified execution and the resulting moving shot imported and reviewed.",
@@ -5768,7 +5808,7 @@
     },
     {
       "feature_id": "generation.text_to_video",
-      "name": "Text → moving video",
+      "name": "Text \u2192 moving video",
       "area": "Generated media",
       "summary": "The common generation contract supports text-prompted video through a configured worker. Review actual motion, provenance and owned import before using the result.",
       "purpose": "The common generation contract supports text-prompted video through a configured worker. Review actual motion, provenance and owned import before using the result.",
@@ -6568,12 +6608,12 @@
         "publishing.queue.load_more"
       ],
       "workflow": [
-        "Select an owned completed movie from Publisher’s Studio, Generated or Project assets, or upload a new file; set the title and description.",
+        "Select an owned completed movie from Publisher\u2019s Studio, Generated or Project assets, or upload a new file; set the title and description.",
         "Choose connected destinations, review platform-specific options and set a future date and time.",
         "Review the exact destinations and timing, then choose Schedule posts.",
         "Open Schedule and verify each requested platform has the intended pending schedule.",
         "Use Queue period to review the next seven days or all schedules. Load another page when more entries remain.",
-        "Review the complete upcoming calendar with brand icons, each destination’s exact publish time and its current status. The release list scrolls independently when many entries exist."
+        "Review the complete upcoming calendar with brand icons, each destination\u2019s exact publish time and its current status. The release list scrolls independently when many entries exist."
       ],
       "preview_behavior": "Publisher previews the selected movie and review details; Queue displays pending owned schedules.",
       "render_behavior": "Scheduling uses the selected completed movie. It does not rerender or allocate a generation worker.",
@@ -6926,7 +6966,7 @@
         "signed-in users with owned project and applicable entitlement"
       ],
       "supported_media": [
-        "SVG logos with 1–8 top-level shapes or groups",
+        "SVG logos with 1\u20138 top-level shapes or groups",
         "PNG, JPEG or WebP logos"
       ],
       "requires": [
@@ -6945,11 +6985,11 @@
         "studio.logo_motion.piece_style"
       ],
       "workflow": [
-        "Open Graphics → Logo motion in an owned programme at least eight seconds long.",
+        "Open Graphics \u2192 Logo motion in an owned programme at least eight seconds long.",
         "Select a local image up to 250 KB or an SVG up to 100 KB, with a maximum of 4096 pixels per side. SVG files need a viewBox or numeric dimensions. Image logos use their visible alpha bounds as a viewport; the source file is not rewritten.",
-        "Choose the brand name, accent, background and an 8–14 second duration that fits the programme. Build editable logo motion at the programme start.",
+        "Choose the brand name, accent, background and an 8\u201314 second duration that fits the programme. Build editable logo motion at the programme start.",
         "For an image with a left-hand symbol and separate lettering, enable Separate left symbol from wordmark. Symbol width places the search boundary; the builder follows transparent space and rejects cuts through opaque artwork. Three separately masked fragments assemble the symbol, which accelerates along forward routes before joining the original wordmark.",
-        "Enable Construct words from pieces to assemble the original bitmap wordmark from 2–16 interlocking slices. Five words each construct from three independently masked title pieces, with staggered rebounds before a continuous close.",
+        "Enable Construct words from pieces to assemble the original bitmap wordmark from 2\u201316 interlocking slices. Five words each construct from three independently masked title pieces, with staggered rebounds before a continuous close.",
         "Choose Piece choreography: Spring assembly keeps the symbol-first interlocking arrangement; Diamond cascade opens with four triangular pieces per word, moves each complete word into place, then assembles the original logo in centre-out diagonal slices.",
         "Edit the resulting ordinary layers, masks, groups and keys. Undo removes the authored composition. Add and time sound through the normal Sound controls.",
         "Review the actual preview, save/reopen and export through the existing Studio workflow."
@@ -6963,7 +7003,7 @@
         "Programme aspect must be between 1:2 and 2:1. The intro starts at programme time zero and must fit the programme.",
         "The existing project limit of 128 graphics, 8192 imported keys, 2 MiB aggregate inline artwork and 4 MiB graphics input remains. Each SVG artwork payload may contain up to 512 KiB, allowing bounded embedded local logo pixels.",
         "Background choice covers underlying footage. Sound is added separately through normal Sound controls. Whole live picture/sound and smoothness remain separate qualification.",
-        "Symbol separation requires visible transparent space between a left-hand symbol and its lettering. Adjust the 10–60% boundary or use the full-logo reveal when the source cannot be separated.",
+        "Symbol separation requires visible transparent space between a left-hand symbol and its lettering. Adjust the 10\u201360% boundary or use the full-logo reveal when the source cannot be separated.",
         "Symbol construction uses three polygon-masked bitmap fragments. It does not infer semantic ribbon boundaries or reconstruct editable vector paths from a PNG. Masks and transforms can be revised with the existing Studio controls.",
         "Piece construction requires a decoded image with a separable left symbol. Wordmark slices are bitmap crops, not inferred letters or vector outlines. The five-word text is a creation preset; after building, matching text pieces are ordinary separate layers and must be edited together.",
         "Titles use bundled Inter weights 400, 600, 800 and 900. Logo word-piece creation uses 800; graphics import rejects unsupported 700 before authoring or export."
@@ -7068,17 +7108,17 @@
         "studio.vector.stroke_offset"
       ],
       "workflow": [
-        "Open Graphics and expand Vector artwork · editable paths. Choose Add vector artwork.",
+        "Open Graphics and expand Vector artwork \u00b7 editable paths. Choose Add vector artwork.",
         "Drag square points and round tangents; arrow keys nudge, Shift increases the step and Escape cancels a drag.",
         "Split after point preserves the existing cubic route. Remove points or choose Corner point / Smooth point to reshape it.",
-        "Choose fill, gradient direction/colors and a visible stroke width/color. In Motion → Transform keyframes, select the artwork and animate Stroke start / Stroke end / Stroke offset, or use their timeline rows and value/velocity graph.",
+        "Choose fill, gradient direction/colors and a visible stroke width/color. In Motion \u2192 Transform keyframes, select the artwork and animate Stroke start / Stroke end / Stroke offset, or use their timeline rows and value/velocity graph.",
         "Save and reopen the project, then export and inspect the movie."
       ],
       "preview_behavior": "The safe SVG reflects contour decisions and evaluated stroke start/end/offset values in the ordinary image layer. Partial stroke length and offset use the same bounded 128-sample-per-cubic distance measure as export. The contour inspector retains the full editable route.",
       "render_behavior": "The existing image compositor evaluates canonical stroke start/end/offset keys on the programme clock. It clips open paths or continuously joins wrapped closed-path intervals, preserves the fill, and applies normal layer transforms, masks/effects and composition. The cached image is not the geometry authority.",
       "limitations": [
-        "Version one retains a single 2–64-point contour. Version two provides one to eight contours with even-odd fill, up to 64 points each and 256 total. Percentage anchors and endpoint-relative tangents remain editable. No arbitrary SVG/PDF path importer or automatic bitmap/letter tracing; Logo Workshop uses exact pre-extracted bundled glyph contours.",
-        "Contour geometry, fill and stroke width/color remain static. Start/end are 0–100 percent of sampled path distance; start greater than or equal to end hides the outline while preserving fill. Offset is −1000 to 1000 percent: closed paths wrap continuously across their original seam, open paths clip at their endpoints. A full closed outline remains full under offset. No per-segment timing, contour morph keys, compound booleans or full pen/zoom workspace.",
+        "Version one retains a single 2\u201364-point contour. Version two provides one to eight contours with even-odd fill, up to 64 points each and 256 total. Percentage anchors and endpoint-relative tangents remain editable. No arbitrary SVG/PDF path importer or automatic bitmap/letter tracing; Logo Workshop uses exact pre-extracted bundled glyph contours.",
+        "Contour geometry, fill and stroke width/color remain static. Start/end are 0\u2013100 percent of sampled path distance; start greater than or equal to end hides the outline while preserving fill. Offset is \u22121000 to 1000 percent: closed paths wrap continuously across their original seam, open paths clip at their endpoints. A full closed outline remains full under offset. No per-segment timing, contour morph keys, compound booleans or full pen/zoom workspace.",
         "Native evidence is bounded to the retained artwork project. Whole raster/audio, arbitrary self-intersections, animated parents, broad retiming and professional/production creative qualification remain separate.",
         "Version two adds one to eight contours, up to 64 nodes each and 256 total. Closed overlaps cut through the fill; stroke trim/offset follows each contour independently. Boolean unions/subtractions and morph keyframes remain separate."
       ],
@@ -7191,8 +7231,8 @@
       "workflow": [
         "Open Graphics, select an ordinary title and expand Text choreography. Choose Animate this title.",
         "Choose letters or words, ordering, stagger, selector range and the starting travel, scale, rotation, opacity and spread.",
-        "Open Motion → Transform keyframes, select that title and edit Text progress. Reverse or hold its ordinary timeline keys and shape their value/velocity curves.",
-        "Rebuild entrance keys replaces only that title’s progress keys; Remove text animator returns it to a plain title. Other layer motion is retained.",
+        "Open Motion \u2192 Transform keyframes, select that title and edit Text progress. Reverse or hold its ordinary timeline keys and shape their value/velocity curves.",
+        "Rebuild entrance keys replaces only that title\u2019s progress keys; Remove text animator returns it to a plain title. Other layer motion is retained.",
         "Save, reopen and export through the normal Studio workflow."
       ],
       "preview_behavior": "Explicit per-unit SVG text transforms follow evaluated programme-clock Text progress. One plain copy field remains editable; wrapping uses the same versioned Inter glyph advances as export.",
@@ -7318,7 +7358,7 @@
         "studio.logo_design.contour"
       ],
       "workflow": [
-        "Open Studio and choose Start a logo design to prepare a blank canvas through the ordinary owned-source flow. Open Creator Studio, then Graphics → Logo Workshop. Enter a name and choose Flow, Orbit or Facet.",
+        "Open Studio and choose Start a logo design to prepare a blank canvas through the ordinary owned-source flow. Open Creator Studio, then Graphics \u2192 Logo Workshop. Enter a name and choose Flow, Orbit or Facet.",
         "In the Graphics inspector, the three symbol choices appear together. Enter the Brand name, choose Flow, Orbit or Facet, then use the Layout and Lettering fields below. Scroll down for spacing, symbol size, colours and the controls for adding or downloading the logo.",
         "Choose horizontal, stacked or symbol-only layout, lettering weight, spacing, symbol size and colours. Optionally enable ordinary assembly motion keys.",
         "Add logo to timeline. Select its symbol pieces or individual letter outlines under Vector artwork. Choose a contour to edit a counter or outer path.",
@@ -7328,9 +7368,9 @@
       "preview_behavior": "The design draft and ordinary vector image layers use authored cubic contours and real even-odd counters. Accepted designs become normal grouped vector layers with ordinary motion keys.",
       "render_behavior": "The shared compiler preserves compound vector geometry; the existing image compositor samples each contour and applies even-odd fill. Stroke trim/offset runs independently on each contour. Static masters use portable SVG paths and a transparent browser PNG, before timeline animation.",
       "limitations": [
-        "Three editable deterministic symbol families, not an unrestricted AI brief generator or automatic tracing of uploaded logos. Bundled A–Z/a–z letters, numbers, spaces, ampersand, period and hyphen; 1–32 characters, Inter 600/900.",
+        "Three editable deterministic symbol families, not an unrestricted AI brief generator or automatic tracing of uploaded logos. Bundled A\u2013Z/a\u2013z letters, numbers, spaces, ampersand, period and hyphen; 1\u201332 characters, Inter 600/900.",
         "Each outlined letter is a vector layer after creation. Change its contours or build a new wordmark from the name field; it is not a live text object and does not retain an editable text-to-outline binding.",
-        "Compound artwork supports one to eight contours, 2–64 points per contour (three if closed), at most 256 total. Overlapping fills use even-odd parity. This does not add boolean operations or contour morph animation.",
+        "Compound artwork supports one to eight contours, 2\u201364 points per contour (three if closed), at most 256 total. Overlapping fills use even-odd parity. This does not add boolean operations or contour morph animation.",
         "Master downloads use a flat logo group, vector geometry and base transforms before motion. Masks, crops, rounded frames, glows, shadows and blends must be removed; nested or non-vector members are rejected. Whole film picture/audio, broader combinations, owner creative review and professional/production qualification remain separate.",
         "Logo letter spacing supports signed drafts: Enter/blur commits; Escape or locking discards an uncommitted draft. The new blank entry prepares an eight-second canvas through the same upload, ownership and entitlement path as other Studio sources."
       ],
@@ -8109,7 +8149,7 @@
       ],
       "limitations": [
         "Scope is the listed feature; do not transfer this range or support claim to another inspector.",
-        "Group evaluation clamps values to each group property’s bounds. Worker Bézier expressions use the existing 32-sample approximation; broad curve/raster equivalence is unqualified.",
+        "Group evaluation clamps values to each group property\u2019s bounds. Worker B\u00e9zier expressions use the existing 32-sample approximation; broad curve/raster equivalence is unqualified.",
         "The property timeline also applies this operation to selected ordinary keys in one history edit. Paste can retain original ownership or target one compatible layer with new identities; timing collisions and destination locks reject the entire change."
       ],
       "status": "FUNCTIONAL",
@@ -8157,7 +8197,7 @@
     {
       "control_id": "studio.keyframe.curve",
       "label": "Cubic curve handles",
-      "meaning": "Sets the bounded cubic interpolation curve; X handles stay 0–1 and Y handles may overshoot -2–2 in the shared contract.",
+      "meaning": "Sets the bounded cubic interpolation curve; X handles stay 0\u20131 and Y handles may overshoot -2\u20132 in the shared contract.",
       "feature_ids": [
         "studio.easing"
       ],
@@ -8852,7 +8892,7 @@
         "studio.tracking"
       ],
       "limitations": [
-        "Two source times; duration must be 0.25–10 seconds. Source bounds and frame count are validated."
+        "Two source times; duration must be 0.25\u201310 seconds. Source bounds and frame count are validated."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-12",
@@ -8896,7 +8936,7 @@
         "studio.tracking"
       ],
       "limitations": [
-        "1–16 coordinate pairs; normalized coordinates 0–0.999999. At least one positive label is required."
+        "1\u201316 coordinate pairs; normalized coordinates 0\u20130.999999. At least one positive label is required."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-12",
@@ -9195,7 +9235,7 @@
         "cam_combiner.drift"
       ],
       "limitations": [
-        "Automatic drift estimation is normally clamped to 0.99–1.01; source time mapping clamps to 0.95–1.05."
+        "Automatic drift estimation is normally clamped to 0.99\u20131.01; source time mapping clamps to 0.95\u20131.05."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-12",
@@ -11302,7 +11342,7 @@
         "studio.ducking"
       ],
       "limitations": [
-        "UI slider is 10–90%; other internal prepared-mix paths use their own bounded contract.",
+        "UI slider is 10\u201390%; other internal prepared-mix paths use their own bounded contract.",
         "Default shown in this music inspector is 0.4, not a universal render/provider default."
       ],
       "status": "PARTIAL",
@@ -11642,7 +11682,7 @@
         "studio.transitions"
       ],
       "limitations": [
-        "Clean cut uses 0.02 seconds; the 0.04–2 range describes non-clean joins in this operation.",
+        "Clean cut uses 0.02 seconds; the 0.04\u20132 range describes non-clean joins in this operation.",
         "Other occurrence transitions retain their own contract."
       ],
       "status": "PARTIAL",
@@ -11727,7 +11767,7 @@
         "studio.titles"
       ],
       "limitations": [
-        "Title size widget is 0.5–2; ordinary motion inspector scale is a different 0.1–5 range."
+        "Title size widget is 0.5\u20132; ordinary motion inspector scale is a different 0.1\u20135 range."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-12",
@@ -12059,7 +12099,7 @@
       },
       "unit": "percent",
       "limitations": [
-        "Percentage polygon with3–64 points and at most2048 characters inside its parentheses. Each point contains finite X/Y percentages.",
+        "Percentage polygon with3\u201364 points and at most2048 characters inside its parentheses. Each point contains finite X/Y percentages.",
         "Path animation, arbitrary SVG paths and neural subject masks are unsupported.",
         "Group masks/blend modes are static. One nested Multiply/Screen native edit and bounded image geometry/interior-color checks pass; wider native modes/media, full alpha/raster and continuous picture/sound remain unqualified."
       ],
@@ -12277,7 +12317,7 @@
         "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
         "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
         "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
-        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+        "Existing worker B\u00e9zier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-14",
@@ -12370,7 +12410,7 @@
         "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
         "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
         "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
-        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+        "Existing worker B\u00e9zier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-14",
@@ -12463,7 +12503,7 @@
         "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
         "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
         "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
-        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+        "Existing worker B\u00e9zier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-14",
@@ -12556,7 +12596,7 @@
         "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
         "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
         "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
-        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+        "Existing worker B\u00e9zier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-14",
@@ -12649,7 +12689,7 @@
         "Keys stay in the existing canonical motionKeyframes with the group ID as targetId. At most 256 keys per group across the five supported properties; duplicate property times and invalid values/curves fail validation. The shared six easing choices apply and evaluated overshoot clamps to these bounds.",
         "At most 64 groups and eight nesting levels; children need one parent and a contiguous canonical leaf order. Each intermediate must fit the 4K pixel budget; filter graphs above 96,000 characters fail explicitly.",
         "Editable group anchor and source-occurrence attachment/remapping are unsupported. Group clips move child timing/keys together and trim visibility without stretching content. Group masks and all nine blend modes are static canonical decisions. One native 16-key/eight-channel image/two-motion edit with nested Multiply/Screen and polygon/rectangle masks is bounded; larger/deeper/video/owned 3D groups, native retiming, broader curves/grouped drag/deletion, full raster and live sound remain unqualified.",
-        "Existing worker Bézier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
+        "Existing worker B\u00e9zier expressions approximate 32 samples while browser interpolation solves the curve. Whole curve/raster equivalence is unqualified."
       ],
       "status": "PARTIAL",
       "updated_at": "2026-10-14",
@@ -12769,7 +12809,7 @@
     {
       "control_id": "studio.composite.group_mask_shape",
       "label": "Group mask shape",
-      "meaning": "Chooses rectangle, ellipse or percentage polygon in the group’s local programme canvas.",
+      "meaning": "Chooses rectangle, ellipse or percentage polygon in the group\u2019s local programme canvas.",
       "feature_ids": [
         "studio.compositing"
       ],
@@ -13008,7 +13048,7 @@
     {
       "control_id": "studio.group_clip.in",
       "label": "Group clip In",
-      "meaning": "Sets the start of the group’s half-open programme visibility range without changing child content phase.",
+      "meaning": "Sets the start of the group\u2019s half-open programme visibility range without changing child content phase.",
       "feature_ids": [
         "studio.timeline",
         "studio.compositing"
@@ -13069,7 +13109,7 @@
     {
       "control_id": "studio.group_clip.out",
       "label": "Group clip Out",
-      "meaning": "Sets the end of the group’s half-open visibility range; child keys and source edits remain available.",
+      "meaning": "Sets the end of the group\u2019s half-open visibility range; child keys and source edits remain available.",
       "feature_ids": [
         "studio.timeline",
         "studio.compositing"
@@ -13269,7 +13309,7 @@
       ],
       "limitations": [
         "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
-        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0\u20131 and value handles stay-2\u20132; impossible speeds reject.",
         "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
       ],
       "status": "PARTIAL",
@@ -13326,7 +13366,7 @@
       ],
       "limitations": [
         "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
-        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0\u20131 and value handles stay-2\u20132; impossible speeds reject.",
         "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
       ],
       "status": "PARTIAL",
@@ -13383,7 +13423,7 @@
       ],
       "limitations": [
         "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
-        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0\u20131 and value handles stay-2\u20132; impossible speeds reject.",
         "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
       ],
       "status": "PARTIAL",
@@ -13440,7 +13480,7 @@
       ],
       "limitations": [
         "Writes the existing cubic curve; no independent velocity state is saved. Editing an easing preset explicitly converts it to a custom cubic.",
-        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0–1 and value handles stay-2–2; impossible speeds reject.",
+        "Only changing intervals support these controls. Hold and constant intervals cannot be reshaped into movement. Cubic time handles stay0\u20131 and value handles stay-2\u20132; impossible speeds reject.",
         "Native image X-curve history/cold/export evidence is scoped. Worker custom curves use32 samples; whole raster/live sound, broad media/retiming and broader spatial-handle combinations remain unqualified."
       ],
       "status": "PARTIAL",
@@ -13904,7 +13944,7 @@
         "Static SVG artwork passes the existing sanitizer and is rasterized to at most 2048 pixels on its longest side. Source vector paths are not editable after import.",
         "Adds layers and leaves current footage/audio decisions in place. Invalid or stale imports commit no layers; successful import is one undo step.",
         "Whole preview/final raster, live sound, broad media combinations and creative/pro/production qualification remain separate.",
-        "Optional title strokeWidth 0–8 and strokeColor hex fields use the ordinary title controls and CPU rasterizer.",
+        "Optional title strokeWidth 0\u20138 and strokeColor hex fields use the ordinary title controls and CPU rasterizer.",
         "Optional layer/group masks use the existing enabled, shape, percentage-polygon path, radius, feather and inversion fields. Masks remain editable in Composite; imported masks are static."
       ],
       "status": "PARTIAL",
@@ -15764,7 +15804,7 @@
     {
       "control_id": "studio.text_animator.spread",
       "label": "Starting spread",
-      "meaning": "Spread units around each line’s center by a share of their center distance.",
+      "meaning": "Spread units around each line\u2019s center by a share of their center distance.",
       "feature_ids": [
         "studio.text_choreography"
       ],
@@ -16034,7 +16074,7 @@
     {
       "control_id": "studio.text_animator.rebuild",
       "label": "Rebuild entrance keys",
-      "meaning": "Replace only this title’s progress keys over at most its first 1.8 seconds.",
+      "meaning": "Replace only this title\u2019s progress keys over at most its first 1.8 seconds.",
       "feature_ids": [
         "studio.text_choreography"
       ],
@@ -17432,7 +17472,7 @@
       "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
         {
-          "instruction": "Choose a source-bound 0.25–10 second range and place subject seed points.",
+          "instruction": "Choose a source-bound 0.25\u201310 second range and place subject seed points.",
           "feature_id": "studio.subject_cutout",
           "control_ids": [
             "studio.subject.range",
@@ -18038,7 +18078,7 @@
       "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
         {
-          "instruction": "Open Studio → Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
+          "instruction": "Open Studio \u2192 Captions and choose Speech language. Automatic detection uses the general speech recognizer. Choose English or Afrikaans for that language; choose a listed South African language or mixed English for the specialised recognizer.",
           "feature_id": "studio.captions",
           "control_ids": [
             "studio.captions.source_language"
@@ -18131,8 +18171,8 @@
     },
     {
       "task_id": "task.three_d_title",
-      "title": "Create a 3D title/logo scene",
-      "summary": "Use supported bounded scene fields, then obtain and review a current owned final 3D result.",
+      "title": "Create a 3D object, title or logo scene",
+      "summary": "Author a bounded editable object composition or title/logo template, review its rendered result and composite matching private alpha through Studio.",
       "feature_ids": [
         "system.costs",
         "studio.three_d",
@@ -18151,24 +18191,26 @@
       "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
         {
-          "instruction": "Choose a scene preset and edit title/material plus supported transform values.",
+          "instruction": "Open Studio \u2192 Motion \u2192 3D Motion. Choose Object Composition for separate editable geometry, or use an existing title/logo preset.",
+          "feature_id": "studio.three_d",
+          "control_ids": []
+        },
+        {
+          "instruction": "Select each mesh object, set its colour and XYZ pose, and add the first object key. Seek to another scene time, adjust that object and add its next key. Save the project.",
+          "feature_id": "studio.three_d",
+          "control_ids": []
+        },
+        {
+          "instruction": "Adjust supported scene material, camera focal length and light intensity. Disabled fields do not gain final support.",
           "feature_id": "studio.three_d",
           "control_ids": [
             "studio.three_d.material",
-            "studio.three_d.x",
-            "studio.three_d.rotationy"
-          ]
-        },
-        {
-          "instruction": "Adjust camera focal length/light intensity; disabled fields do not gain final support.",
-          "feature_id": "studio.three_d",
-          "control_ids": [
             "studio.three_d.focallength",
             "studio.three_d.lightintensity"
           ]
         },
         {
-          "instruction": "Request the existing final scene path only under its availability and cost checks, then review and compose the owned result.",
+          "instruction": "Request the configured 3D render and review its actual quality profile. After reopening, use Check saved 3D render to recover the accepted job. Review the animation before ordinary final export composites matching private alpha.",
           "feature_id": "studio.blender",
           "control_ids": []
         }
@@ -18177,19 +18219,29 @@
         "system.unsupported_media",
         "studio.revision"
       ],
-      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "expected_result": "A saved editable scene and reviewed owned 3D render that the ordinary final compositor can reuse. Actual quality follows the reported render profile.",
       "limitations": [
-        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+        "At most 24 objects, 32 keys per object and 256 object keys total.",
+        "The local CPU path is explicitly enabled for nonproduction; its bounded landscape profile is 640 \u00d7 360 at 24 fps. A larger final canvas upscales that layer.",
+        "Contour morphing, procedural repeaters, general Blender scene import and arbitrary node scripts are unavailable.",
+        "Object keys through timeline cuts, retiming and trimmed boundaries remain unqualified; the verified scene uses a fixed uncut interval.",
+        "Browser lighting, materials, colour and edges do not establish full final-picture parity.",
+        "Uncertain accepted work must not be automatically rerun; API-restart recovery does not establish host/worker-loss or pre-dispatch recovery."
       ],
       "aliases": [],
       "status": "PARTIAL",
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-29",
       "product_version": "1.2.0",
       "visibility": "PUBLIC",
       "source_evidence": [
         {
-          "path": "frontend/src/components/StudioGeneratedBRollPanel.js",
-          "anchor": "StudioGeneratedBRollPanel",
+          "path": "frontend/src/components/threeD/Studio3DPanel.js",
+          "anchor": "Studio3DPanel",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "src/services/studio3DLocal.js",
+          "anchor": "async function reconcile",
           "kind": "IMPLEMENTATION"
         }
       ]
@@ -20989,7 +21041,7 @@
         },
         {
           "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
-          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "anchor": "# Native keyframe timeline and retimed sound \u2014 11 October 2026",
           "kind": "NATIVE_REPORT"
         },
         {

@@ -727,6 +727,24 @@
       "path": "frontend/src/components/public/PublicFooter.js",
       "anchor": "FOOTER_GROUPS",
       "required": true
+    },
+    {
+      "feature_id": "studio.three_d",
+      "path": "frontend/src/components/threeD/Studio3DObjectEditor.js",
+      "anchor": "Studio3DObjectEditor",
+      "required": true
+    },
+    {
+      "feature_id": "studio.three_d",
+      "path": "frontend/src/components/threeD/studio3DObjects.js",
+      "anchor": "OBJECT_POSE_FIELDS",
+      "required": true
+    },
+    {
+      "feature_id": "studio.blender",
+      "path": "src/services/studio3DLocal.js",
+      "anchor": "async function reconcile",
+      "required": true
     }
   ]
 }

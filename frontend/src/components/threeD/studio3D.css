@@ -25,6 +25,49 @@
   max-height: 70vh;
   overflow: auto;
 }
+.studio-3d-object-editor {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.studio-3d-object-editor > label {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+}
+.studio-3d-object-editor [aria-label="Add scene object"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.studio-3d-object-editor button {
+  padding: 7px 9px;
+  color: #eaf0ff;
+  background: #1b2240;
+  border: 1px solid #414869;
+  border-radius: 7px;
+  cursor: pointer;
+  line-height: 1.35;
+}
+.studio-3d-object-editor button:disabled {
+  opacity: .5;
+  cursor: default;
+}
+.studio-3d-object-editor input,
+.studio-3d-object-editor select {
+  min-width: 0;
+  max-width: 100%;
+}
+.studio-3d-object-editor [aria-label="Object pose keys"] > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px;
+  padding: 8px 0;
+  border-bottom: 1px solid #333e5a;
+}
+.studio-3d-object-editor [aria-label="Object pose keys"] > div > button:first-child {
+  grid-column: 1 / -1;
+  text-align: left;
+}
 .studio-3d-heading h4 {
   font-size: 22px;
   margin: 6px 0;

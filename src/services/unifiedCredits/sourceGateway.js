@@ -62,7 +62,9 @@ function createSourceGateway({
       fail("SOURCE_FORBIDDEN", 403);
     const file = bucket.file(storagePath);
     const [metadata] = await file.getMetadata();
-    if (owner(storagePath, metadata) !== uid || Number(metadata.size) > 50 * 1024 * 1024)
+    const localAlpha = process.env.STUDIO_3D_LOCAL_ENABLED === "true" &&
+      new RegExp(`^temp_studio_3d/${uid}/[A-Za-z0-9_-]{8,100}/overlay\\.mov$`).test(storagePath) && metadata.contentType === "video/quicktime";
+    if (owner(storagePath, metadata) !== uid || Number(metadata.size) > (localAlpha ? 250 : 50) * 1024 * 1024)
       fail("SOURCE_FORBIDDEN", 403);
     const [bytes] = await file.download();
     // Use the standard SHA-256 of the actual bytes, independent of metadata claims.

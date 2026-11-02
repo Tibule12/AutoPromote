@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review CI loopback fixture build, legacy explicit admin alias and unchanged production auth/readiness boundaries.",
-  "reviewed_at": "2026-10-28T18:19:31.064Z",
-  "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
+  "reason": "Three private cinematic abstract films plus actual Studio walkthroughs delivered; bounded ribbons/materials/local CUDA handoff and verified output recovery; explicit emulator replay limitations and unchanged formal readiness",
+  "reviewed_at": "2026-10-30T08:54:22.775Z",
+  "catalog_sha256": "a55dd60d8b290c72e0f0ab03b0b7691b6df0f943f143fbf9ca33ed0e7f7c6478",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
@@ -19,7 +19,7 @@
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
-      "sha256": "d0ae4bcceecf1cd53173b1b53272738f16c0af4f5b8de651b4e4e41f50ac1a02"
+      "sha256": "dbfd883f621753b2185c9262ae6e774eb9dbb273deef022a6914bed2610a43e8"
     },
     {
       "path": "contracts/model-capabilities-v1.json",
@@ -195,7 +195,7 @@
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "2715d65c4c1915295085c30244496cf6e2cfcf2da051df9b86e6a05845c11685"
+      "sha256": "4cc8876d4f2ab92379a45a3f98bb6cc10e10baf6d33b9ea61cf7ff341f00e61b"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -346,12 +346,24 @@
       "sha256": "8c97560358757a6c97efa75e9db570b7c00ae3cc0183e2dd3dc3413f8e082f4b"
     },
     {
+      "path": "frontend/src/components/threeD/Studio3DPanel.js",
+      "sha256": "2707fdafafe2d6fc0d61c7af2fb00aebbd575c48b5721d484af19cb217e616e1"
+    },
+    {
       "path": "frontend/src/components/threeD/studio3DModel.js",
-      "sha256": "648cc0899d9831c0425dca8b022a5c7119621523eb979f92ef747da530eb45eb"
+      "sha256": "5fbde0b827bd24de26f8bb20a8fd16fb51deaafa7948caec3fc77ce97b3cab6e"
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DObjects.js",
+      "sha256": "4418801faf183fdd83a2722c7b52cad744a829864ee6018cc1f037b49c260c12"
     },
     {
       "path": "frontend/src/components/threeD/studio3DParity.js",
-      "sha256": "f1941d64ec4befe17f602a7831d41b054195af1e5513690699cc3492c0021e49"
+      "sha256": "6a93ed263405a7a9c5370953a37c78f2186316c4b545be018276873001baaa11"
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DRibbon.js",
+      "sha256": "33aab97b75aea772eaa509c399c5c0b607589c3c7641eedda58627b5b9a54219"
     },
     {
       "path": "frontend/src/components/useStudioKeyframeMarquee.js",
@@ -618,6 +630,10 @@
       "sha256": "1477c875dc00e1ee20990e2c582cca40fd54285efe3e4438c75b94982a059dd6"
     },
     {
+      "path": "src/services/studio3DLocal.js",
+      "sha256": "c4fe81e9f90384d452c8b0241f89235014cab2afd619be05e82e32efa9dbf841"
+    },
+    {
       "path": "src/services/studioModelCapabilityService.js",
       "sha256": "dad69b8d93a933128043b57188b623a3de3434cce80c878986a77392eaedf5dc"
     },
@@ -627,7 +643,7 @@
     },
     {
       "path": "src/services/studioSourceService.js",
-      "sha256": "51340a9ea0bd83937334739b6151f1e298131651321cec49eca30f06169c39a6"
+      "sha256": "a802afbe52ee2343c76aec43314a9ef8fb62e3b5443bdd05d958e7dbef9d8e87"
     },
     {
       "path": "src/services/studioSubjectVfxService.js",
@@ -647,11 +663,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "2023ac386877e7de00407b0a4e2f2701133332622b90b24647181b97b00a6493"
+      "sha256": "e43723f7a6337908bb03459d88a7e2bdc5de2d07c3eee9ded283ff9cb5920a06"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "6932bbf31df248b3ecd9a92f5f2a3dee9912f173d88e3d94f88b26a72629cc71"
+      "sha256": "5916057437bc9735dd769a0a276c6d33260bd243cd595d39c89de40f81adc16e"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

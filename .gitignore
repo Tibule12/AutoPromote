@@ -79,6 +79,7 @@ test/e2e/playwright/proof/
 test/e2e/playwright/test-assets/
 *.patch
 *.mp4
+!frontend/public/studio/blank-logo-canvas.mp4
 *.webm
 *.gif
 *.png
