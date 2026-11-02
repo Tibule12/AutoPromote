@@ -8378,6 +8378,173 @@
           "kind": "IMPLEMENTATION"
         }
       ]
+    },
+    {
+      "feature_id": "studio.templates",
+      "name": "Apply a creative template",
+      "area": "Studio",
+      "summary": "Builds an editable footage-led opening from a pinned template. Six development hook families cover podcast, interview, cinematic, story, motion type and creator demonstrations, each with two cut arrangements. Creative approval and broad preview/final qualification remain open.",
+      "purpose": "Assemble owned footage, reviewed source captions, sound and ordinary motion keys into a reusable, editable opening.",
+      "implementation_kind": "DETERMINISTIC",
+      "available_to": [
+        "signed-in users with owned project and applicable entitlement"
+      ],
+      "supported_media": [
+        "video"
+      ],
+      "requires": [
+        "studio.layers",
+        "studio.audio"
+      ],
+      "optional_capabilities": [],
+      "controls": [],
+      "workflow": [
+        "Open Hook and choose Browse story-driven hooks, or open the template library in the media/project rail.",
+        "Choose a pinned template, cut arrangement and output aspect. Bind owned footage and optional music or narration.",
+        "Set source in-points and, for spoken roles, out-points. Review source focus and import source-timed caption JSON if needed.",
+        "Apply the template, or prepare a Director hook and explicitly review before applying. This replaces the composition and supports Undo/Redo.",
+        "Review every shot and sound in Live Edit; adjust cuts, caption words, framing, layers and Sound takes through ordinary Studio controls.",
+        "For an already edited conversation with camera changes, select each source occurrence and review Reframe → Follow existing camera cuts. A fixed source focus does not follow camera switches.",
+        "Save, download a project backup and inspect the complete ordinary export before sharing."
+      ],
+      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
+      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "limitations": [
+        "The six hook families are draft development templates, not approved public showcase entries or professional/production qualification.",
+        "Templates do not infer a truthful reaction, complete answer or correct transcript. Select source ranges and review speaker intent and imported caption provenance.",
+        "Template metadata provides audience and recommendation signals; automatic AI Director footage analysis/style recommendation is not implemented by this expansion.",
+        "Spoken durations resolve once to the nearest 24 fps frame. Source intervals are 0.25–30 seconds and assembled hooks stay within 90 seconds.",
+        "Whole moving picture/sound, colour/edge and broader media parity remain unqualified. Sparse browser recordings do not establish smooth playback."
+      ],
+      "common_errors": [
+        {
+          "condition": "Feature unavailable or output stale",
+          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
+        },
+        {
+          "condition": "TEMPLATE_IDENTITY_MISMATCH",
+          "resolution": "The selected exact template definition is unavailable. Select an available pinned version; do not silently substitute a similar version."
+        },
+        {
+          "condition": "TEMPLATE_OWNED_MEDIA_REQUIRED",
+          "resolution": "Save an owned asset of the required slot type before binding the template."
+        },
+        {
+          "condition": "TEMPLATE_FOOTAGE_TOO_SHORT",
+          "resolution": "Choose footage with enough duration after its in-point for the template slot."
+        },
+        {
+          "condition": "CREATIVE_TEMPLATE_VERSION_UNAVAILABLE",
+          "resolution": "The exact requested shared template version cannot be resolved."
+        },
+        {
+          "condition": "TEMPLATE_HOOK_INVALID",
+          "resolution": "Check the selected arrangement, complete source range, focus bounds and source-timed caption data. Keep individual spoken ranges within 0.25–30 seconds."
+        }
+      ],
+      "related_features": [],
+      "templates_using_feature": [
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.1"
+        },
+        {
+          "template_id": "cycling_rhythm_v1",
+          "version": "1.0.2"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.0"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.1"
+        },
+        {
+          "template_id": "product_launch_cinematic_v1",
+          "version": "1.1.2"
+        },
+        {
+          "template_id": "podcast_cold_open_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "interview_revelation_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "cinematic_flashforward_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "storytelling_comeback_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "kinetic_pressure_v1",
+          "version": "1.0.0"
+        },
+        {
+          "template_id": "creator_action_edit_v1",
+          "version": "1.0.0"
+        }
+      ],
+      "model_capabilities": [],
+      "examples": [
+        {
+          "label": "Retained native edit and export evidence",
+          "kind": "RETAINED_PRIVATE_EVIDENCE",
+          "evidence_path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "qualification": "Private retained native lifecycle evidence. Not a public release, creative approval or whole-product qualification."
+        }
+      ],
+      "aliases": [
+        "podcast hook",
+        "interview hook",
+        "cinematic cold open",
+        "motion typography hook"
+      ],
+      "readiness_authority": null,
+      "review_state": "SOURCE_AUDITED",
+      "status": "PARTIAL",
+      "updated_at": "2026-10-26",
+      "product_version": "1.2.0",
+      "visibility": "PUBLIC",
+      "source_evidence": [
+        {
+          "path": "config/creative-templates/registry.v1.json",
+          "anchor": "{",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "reports/model-capability-runtime-v1-20261009/NATIVE-KEYFRAMES-RETIMED-SOUND-20261011.md",
+          "anchor": "# Native keyframe timeline and retimed sound — 11 October 2026",
+          "kind": "NATIVE_REPORT"
+        },
+        {
+          "path": "frontend/src/components/studioHookTemplate.js",
+          "anchor": "export function resolveStudioTemplateRecipe",
+          "kind": "IMPLEMENTATION"
+        },
+        {
+          "path": "docs/STUDIO-HOOK-TEMPLATES.md",
+          "anchor": "# Footage-led opening templates",
+          "kind": "READINESS"
+        },
+        {
+          "path": "reports/studio-hook-templates-20261026/README.md",
+          "anchor": "# Footage-led Studio hook templates",
+          "kind": "NATIVE_REPORT"
+        }
+      ]
     }
   ],
   "controls": [
@@ -21980,6 +22147,90 @@
     {
       "template_id": "product_launch_cinematic_v1",
       "version": "1.1.2",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "podcast_cold_open_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "interview_revelation_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "cinematic_flashforward_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "storytelling_comeback_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "kinetic_pressure_v1",
+      "version": "1.0.0",
+      "feature_ids": [
+        "studio.templates",
+        "studio.layers",
+        "studio.keyframes",
+        "studio.audio",
+        "studio.sfx",
+        "studio.render",
+        "studio.revision",
+        "studio.cut"
+      ]
+    },
+    {
+      "template_id": "creator_action_edit_v1",
+      "version": "1.0.0",
       "feature_ids": [
         "studio.templates",
         "studio.layers",

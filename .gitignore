@@ -218,3 +218,7 @@ reports/studio-voice-fade-phase-20261023/*
 # Private retained-speed projects, recordings, authenticated receipts and local QA.
 reports/studio-retained-speed-20261023/*
 !reports/studio-retained-speed-20261023/README.md
+
+# Private hook-template footage, projects, builds and proof.
+reports/studio-hook-templates-20261026/*
+!reports/studio-hook-templates-20261026/README.md

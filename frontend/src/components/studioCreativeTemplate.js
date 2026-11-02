@@ -5,10 +5,12 @@ import cyclingInitialDefinition from "../templates/cycling_rhythm_v1.0.0.json";
 import editorialLaunch from "../templates/product_launch_cinematic_v1.1.0.json";
 import refinedEditorialLaunch from "../templates/product_launch_cinematic_v1.1.1.json";
 import composedEditorialLaunch from "../templates/product_launch_cinematic_v1.1.2.json";
+import hookDefinitions from "../templates/hooks.v1.json";
+import { resolveStudioTemplateRecipe, studioTemplateCaptions, studioTemplateVoiceClips, studioTemplateFraming, materializeStudioHookRanges } from "./studioHookTemplate";
 import { adaptStudioSnapshotToDocument, projectStudioEditableStateToSnapshot } from "./studioProjectDocument";
 
 export const PRODUCT_LAUNCH_TEMPLATE = definition;
-export const STUDIO_CREATIVE_TEMPLATES = [definition, composedEditorialLaunch, refinedEditorialLaunch, editorialLaunch, cyclingDefinition, cyclingSecondDefinition, cyclingInitialDefinition];
+export const STUDIO_CREATIVE_TEMPLATES = [definition, composedEditorialLaunch, refinedEditorialLaunch, editorialLaunch, cyclingDefinition, cyclingSecondDefinition, cyclingInitialDefinition, ...hookDefinitions];
 export const stableTemplateJson = value => JSON.stringify(value, (_key, item) =>
   item && typeof item === "object" && !Array.isArray(item)
     ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
@@ -29,9 +31,9 @@ export async function proposeStudioDirectorTemplate({ intent, ...options }) {
   if (!selected.categoryIds.includes(intent)) fail("TEMPLATE_INTENT_UNSUPPORTED", "Choose a brief supported by this template.");
   const result = await instantiateStudioCreativeTemplate({ ...options, actor: "director" });
   return { templateRef: result.templateRef,
-    selectionReason: selected.templateId === "cycling_rhythm_v1"
+    selectionReason: selected.executionDefinition.hook?.selectionReason || (selected.templateId === "cycling_rhythm_v1"
       ? "Cycling brief: continuous source shots, authored rhythm cuts, animated type and a brand ending in 20 seconds."
-      : "Product-launch brief: hook, product action, two benefits and a brand ending in 20 seconds.",
+      : "Product-launch brief: hook, product action, two benefits and a brand ending in 20 seconds."),
     sourceEvidence: result.document.assets.map(asset => ({ assetId: asset.assetId, contentHash: asset.contentHash })),
     startsModelJob: false, result };
 }
@@ -39,7 +41,7 @@ export async function proposeStudioDirectorTemplate({ intent, ...options }) {
 // The adapter creates ordinary editable Studio decisions. It draws no frames,
 // starts no jobs and shares the browser's canonical projection with Director.
 export async function instantiateStudioCreativeTemplate({ template = definition, templateRef, ownerUid,
-  projectId, bindings, aspect = "16:9", resolution = "720p", actor = "manual", intensity = 1 }) {
+  projectId, bindings, aspect = "16:9", resolution = "720p", actor = "manual", intensity = 1, variationId, transcripts }) {
   const exactReference = await studioTemplateReference(template);
   const registered = STUDIO_CREATIVE_TEMPLATES.find(item => item.templateId === template.templateId && item.version === template.version);
   if (templateRef?.definitionHash !== exactReference.definitionHash ||
@@ -50,6 +52,7 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
   if (!ownerUid || !projectId || !template.supportedAspects.includes(aspect) ||
       !Number.isFinite(intensity) || intensity < .5 || intensity > 1.25)
     fail("TEMPLATE_INPUT_INVALID", "Choose an owner, project, aspect and supported motion intensity.");
+  const recipe = materializeStudioHookRanges(resolveStudioTemplateRecipe(template, variationId), bindings || {});
   if (!bindings || Object.keys(bindings).some(key => !template.inputSlots.some(slot => slot.id === key)))
     fail("TEMPLATE_INPUT_INVALID", "Unknown template input.");
   for (const slot of template.inputSlots) {
@@ -61,7 +64,7 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
         fail("TEMPLATE_COPY_INVALID", `Provide readable ${slot.id} copy (at most 64 characters).`);
       // Keep the authored hierarchy. Overlong copy is a visible correction,
       // never silently shrunk or truncated to fit.
-      if (binding.split("\n").length > 2 || binding.split("\n").some(line => line.length > (slot.id === "headline" ? 16 : 24)))
+      if (binding.split("\n").length > 2 || binding.split("\n").some(line => line.length > (recipe.hook ? 40 : slot.id === "headline" ? 16 : 24)))
         fail("TEMPLATE_COPY_TOO_LONG", `Use at most two short lines for ${slot.id}.`);
     } else if (slot.type === "colour") {
       if (!/^#[a-f0-9]{6}$/i.test(binding || "")) fail("TEMPLATE_COLOUR_INVALID", "Choose a six-digit brand colour.");
@@ -71,9 +74,8 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
       fail("TEMPLATE_OWNED_MEDIA_REQUIRED", `Save an owned ${slot.type} asset for ${slot.id} first.`);
     }
   }
-  if (bindings.headline.split("\n").length !== 2)
+  if (!recipe.hook && bindings.headline.split("\n").length !== 2)
     fail("TEMPLATE_COPY_INVALID", "The launch headline needs two lines.");
-  const recipe = template.executionDefinition;
   const timeline = recipe.sequence.map((shot, index) => {
     const asset = bindings[shot.slot];
     const start = Number(asset.trimStart || 0) + shot.offset;
@@ -89,8 +91,12 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
   const overlays = recipe.titles.flatMap(title => {
     const words = title.slot ? bindings[title.slot] : title.literal;
     const text = title.line === undefined ? words : words.split("\n")[title.line];
+    if (title.wordIndex !== undefined) {
+      const words = text.trim().split(/\s+/);
+      if (words.length !== recipe.wordCount) fail("TEMPLATE_COPY_INVALID", `Use exactly ${recipe.wordCount} words for this rhythm.`);
+    }
     if (!text) return [];
-    return [{ id: `${projectId}:${title.id}`, type: "text", name: title.id, text,
+    return [{ id: `${projectId}:${title.id}`, type: "text", name: title.id, text: title.wordIndex === undefined ? text : text.trim().split(/\s+/)[title.wordIndex],
       x: title.x, y: title.y, anchorX: title.align === "center" ? 50 : 0, anchorY: 50,
       width: title.width ?? (portrait ? 80 : 36), fontFamily: "Inter", fontWeight: title.weight || 900,
       textAlign: title.align || "left", color: title.colour === "brand" ? bindings.brandColour : "#ffffff",
@@ -99,12 +105,14 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
       animation: { enter: "none", exit: "none" } }];
   });
   const logo = bindings.logo;
+  if (logo && recipe.logo) {
   overlays.push({ id: `${projectId}:logo`, type: "image", name: "Brand logo", src: logo.url,
     sourceMediaId: logo.id, storagePath: logo.storagePath, contentHash: logo.contentHash,
     mediaFit: "contain", opacity: 1, scale: 1, rotation: 0, ...recipe.logo });
   overlays[overlays.length - 1].startTime = recipe.logo.start;
   delete overlays[overlays.length - 1].start;
   delete overlays[overlays.length - 1].motion;
+  }
   const motionKeyframes = overlays.flatMap(layer => {
     const start = layer.startTime, end = start + layer.duration;
     const authoredTitle = recipe.titles.find(title => `${projectId}:${title.id}` === layer.id);
@@ -127,9 +135,11 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
   }));
   let programmeTime = 0;
   recipe.sequence.forEach((shot, index) => {
+    const shotTime = programmeTime;
     if (shot.scale !== undefined) motionKeyframes.push({
       id: `${projectId}:shot-scale:${index}`, targetId: "main-video", property: "scale",
-      time: programmeTime, value: shot.scale, easing: "hold",
+      time: programmeTime, value: shot.scale * (recipe.hook
+        ? (bindings[shot.slot]?.focus?.zoom ?? [...(recipe.framing?.positions || [])].reverse().find(row => row.time <= shotTime)?.zoom ?? 1) : 1), easing: "hold",
     });
     programmeTime += shot.duration;
   });
@@ -140,23 +150,29 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
     instantiatedBy: actor, bindings: Object.fromEntries(template.inputSlots.filter(slot => bindings[slot.id]).map(slot => [slot.id,
       typeof bindings[slot.id] === "string" ? bindings[slot.id]
         : { assetId: bindings[slot.id].id, contentHash: bindings[slot.id].contentHash,
-          storagePath: bindings[slot.id].storagePath, trimStart: Number(bindings[slot.id].trimStart || 0) }])),
-    intensity, aspect, qualified: false };
+          storagePath: bindings[slot.id].storagePath, trimStart: Number(bindings[slot.id].trimStart || 0),
+          ...(bindings[slot.id].focus ? { focus: copy(bindings[slot.id].focus) } : {}),
+          ...(bindings[slot.id].selectedEnd !== undefined ? { selectedEnd: bindings[slot.id].selectedEnd } : {}) }])),
+    intensity, aspect, ...(recipe.hook ? { variationId: recipe.variationId, hookFamily: recipe.hook.family } : {}), qualified: false };
   const snapshot = { projectMedia: media, timeline, orderedClips: timeline.map(clip => ({ ...clip,
     start: clip.startRequest, end: clip.endRequest })), selectedClipId: timeline[0].id,
     reframeAspect: aspect, smartCrop: !!recipe.framing && (portrait || !!recipe.framing.forceAspect),
     smartCropMode: recipe.framing && (portrait || recipe.framing.forceAspect) ? recipe.framing.mode : "off",
-    ...(recipe.framing && (portrait || recipe.framing.forceAspect) ? { reframeKeyframes: copy(recipe.framing.positions) } : {}), videoFit: "cover",
+    ...(recipe.framing && (portrait || recipe.framing.forceAspect) ? { reframeKeyframes: studioTemplateFraming(recipe, bindings, projectId) } : {}), videoFit: "cover",
     mainTransform: { id: "main-video", type: "video", x: 50, y: 50, scale: 1, rotation: 0, opacity: 1 },
     mainFrame: { enabled: false }, overlays, motionKeyframes, motionScenes: [], threeDScenes: [],
     ...(recipe.finish ? { finishFx: copy(recipe.finish) } : {}),
-    speedKeyframes: [], previewSpeed: 1, autoCaptions: false, captionSegments: [],
-    addHook: false, brandWatermark: false, muteOriginalAudio: true,
-    addMusic: true, musicTrack: { ...copy(bindings.music), volume: recipe.music.volume,
-      fadeIn: recipe.music.fadeIn, fadeOut: recipe.music.fadeOut, loop: false }, musicVolume: recipe.music.volume,
+    speedKeyframes: [], previewSpeed: 1,
+    autoCaptions: Object.values(transcripts || {}).some(cues => cues.length > 0),
+    captionSegments: studioTemplateCaptions(transcripts, bindings, template, projectId),
+    ...(recipe.hook ? { captionStyle: recipe.captionStyle || "editorial", captionSize: 1,
+      voiceovers: studioTemplateVoiceClips(recipe, bindings, projectId) } : {}),
+    addHook: false, brandWatermark: false, muteOriginalAudio: recipe.keepOriginalAudio !== true,
+    addMusic: !!bindings.music, musicTrack: bindings.music ? { ...copy(bindings.music), volume: recipe.music.volume,
+      fadeIn: recipe.music.fadeIn, fadeOut: recipe.music.fadeOut, loop: false } : null, musicVolume: recipe.music.volume,
     musicLoop: false, musicFadeIn: recipe.music.fadeIn, musicFadeOut: recipe.music.fadeOut,
     musicDucking: false, musicDuckingStrength: 0,
-    soundEffects: recipe.soundCues.map((cue, index) => {
+    soundEffects: (recipe.soundCues || []).map((cue, index) => {
       const asset = cue.slot && bindings[cue.slot];
       return { id: `${projectId}:sound:${index}`, enabled: true, kind: "sfx",
         builtIn: !asset, tone: asset ? "custom" : cue.tone, name: asset?.name || cue.tone,
@@ -165,7 +181,7 @@ export async function instantiateStudioCreativeTemplate({ template = definition,
         startTime: cue.time, duration: cue.duration, volume: cue.volume,
         fadeIn: cue.fadeIn ?? .01, fadeOut: cue.fadeOut ?? .04 };
     }),
-    audioKeyframes: {}, trackStates: {}, creativeTemplateInstance: metadata,
+    audioKeyframes: copy(recipe.audioKeyframes || {}), trackStates: {}, creativeTemplateInstance: metadata,
     exportSettings: { resolution, fps: 24, codec: "h264", audioCodec: "aac", audioBitrate: "256" } };
   const document = adaptStudioSnapshotToDocument({ snapshot, projectId });
   return { projectId, ownerUid, templateRef: copy(templateRef), document,

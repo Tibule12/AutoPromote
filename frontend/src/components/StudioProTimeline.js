@@ -1,7 +1,10 @@
 import React from "react";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
+<<<<<<< HEAD
 import StudioSequenceClip from './StudioSequenceClip';
 import { normalizeSplitAudioClip } from './studioAudioSplit';
+=======
+>>>>>>> origin/feat/studio-hook-templates-20261026
 import { StudioTimelinePosition, useStudioPlayheadDisplay } from "./StudioPlaybackPosition";
 import StudioControlMenu from "./StudioControlMenu";
 import StudioGroupTimelineClip from "./StudioGroupTimelineClip";

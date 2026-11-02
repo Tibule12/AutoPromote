@@ -4397,6 +4397,2603 @@
           ]
         }
       }
+    },
+    {
+      "schemaVersion": 1,
+      "templateId": "podcast_cold_open_v1",
+      "version": "1.0.0",
+      "label": "Podcast \u00b7 Before the punchline",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "podcast_to_vertical_promo"
+      ],
+      "inputSlots": [
+        {
+          "id": "statementFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "reactionFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "questionFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": false
+        },
+        {
+          "id": "openingLine",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "payoffLine",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "9:16",
+        "16:9"
+      ],
+      "durationTicks": 1080000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "hook": {
+          "family": "podcast",
+          "selectionReason": "Open on the guest\u2019s selected statement, allow a genuine reaction, then return to the question that gives it context.",
+          "audience": "Podcasters introducing the person behind a familiar public identity",
+          "promise": "Open on the guest\u2019s selected statement, allow a genuine reaction, then return to the question that gives it context.",
+          "recommendationSignals": [
+            "dialogue",
+            "guest_statement",
+            "reaction"
+          ]
+        },
+        "defaultAspect": "9:16",
+        "defaultVariation": "signature",
+        "inputPresentation": {
+          "openingLine": {
+            "label": "Opening context",
+            "default": "BEFORE THE PUNCHLINE"
+          },
+          "payoffLine": {
+            "label": "Open question",
+            "default": "WHERE DID IT BEGIN?"
+          }
+        },
+        "sequence": [
+          {
+            "slot": "statementFootage",
+            "offset": 0,
+            "duration": 7,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0,
+            "fitRange": true
+          },
+          {
+            "slot": "reactionFootage",
+            "offset": 0,
+            "duration": 0.5,
+            "scale": 1.04,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0,
+            "fitRange": true
+          },
+          {
+            "slot": "questionFootage",
+            "offset": 0,
+            "duration": 4.5,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0,
+            "fitRange": true
+          }
+        ],
+        "titles": [
+          {
+            "id": "opening-context",
+            "slot": "openingLine",
+            "start": 0.2,
+            "duration": 1.9,
+            "x": 50,
+            "y": 18,
+            "scale": 0.52,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          },
+          {
+            "id": "ending-question",
+            "slot": "payoffLine",
+            "start": 9,
+            "duration": 2.8,
+            "x": 50,
+            "y": 78,
+            "scale": 0.72,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.14,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.1,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.08,
+          "fadeIn": 0.08,
+          "fadeOut": 0.45
+        },
+        "soundCues": [],
+        "keepOriginalAudio": true,
+        "framing": {
+          "mode": "speaker_track",
+          "forceAspect": true,
+          "positions": [
+            {
+              "time": 0,
+              "x": 67,
+              "y": 52,
+              "zoom": 1.06,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 7,
+              "x": 35,
+              "y": 52,
+              "zoom": 1.06,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 7.5,
+              "x": 35,
+              "y": 52,
+              "zoom": 1.06,
+              "cut": true,
+              "origin": "manual"
+            }
+          ]
+        },
+        "variations": [
+          {
+            "id": "signature",
+            "label": "Signature cut",
+            "description": "The authored opening and payoff.",
+            "overrides": {}
+          },
+          {
+            "id": "alternate",
+            "label": "Question first",
+            "description": "Lead with the host, then hear the statement.",
+            "overrides": {
+              "sequence": [
+                {
+                  "slot": "questionFootage",
+                  "offset": 0,
+                  "duration": 4.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0,
+                  "fitRange": true
+                },
+                {
+                  "slot": "reactionFootage",
+                  "offset": 0,
+                  "duration": 0.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0,
+                  "fitRange": true
+                },
+                {
+                  "slot": "statementFootage",
+                  "offset": 0,
+                  "duration": 7,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0,
+                  "fitRange": true
+                }
+              ],
+              "framing": {
+                "mode": "speaker_track",
+                "forceAspect": true,
+                "positions": [
+                  {
+                    "time": 0,
+                    "x": 35,
+                    "y": 52,
+                    "zoom": 1.06,
+                    "cut": true,
+                    "origin": "manual"
+                  },
+                  {
+                    "time": 4.5,
+                    "x": 35,
+                    "y": 52,
+                    "zoom": 1.06,
+                    "cut": true,
+                    "origin": "manual"
+                  },
+                  {
+                    "time": 5,
+                    "x": 67,
+                    "y": 52,
+                    "zoom": 1.06,
+                    "cut": true,
+                    "origin": "manual"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "templateId": "interview_revelation_v1",
+      "version": "1.0.0",
+      "label": "Interview \u00b7 The question underneath",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "long_video_to_short"
+      ],
+      "inputSlots": [
+        {
+          "id": "questionFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "answerFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": false
+        },
+        {
+          "id": "openingLine",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "payoffLine",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "9:16",
+        "16:9"
+      ],
+      "durationTicks": 1440000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "hook": {
+          "family": "interview",
+          "selectionReason": "Keep the provocative question intact and cut to the selected answer, with the speaker\u2019s own words carrying the reveal.",
+          "audience": "Interviewers cutting an identity or origin-story introduction",
+          "promise": "Keep the provocative question intact and cut to the selected answer, with the speaker\u2019s own words carrying the reveal.",
+          "recommendationSignals": [
+            "question",
+            "answer",
+            "transcript"
+          ]
+        },
+        "defaultAspect": "9:16",
+        "defaultVariation": "signature",
+        "inputPresentation": {
+          "openingLine": {
+            "label": "Curiosity line",
+            "default": "BEYOND THE PUBLIC PERSONA"
+          },
+          "payoffLine": {
+            "label": "Revelation context",
+            "default": "THE STORY STARTS EARLIER."
+          }
+        },
+        "sequence": [
+          {
+            "slot": "questionFootage",
+            "offset": 0,
+            "duration": 9.5,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0,
+            "fitRange": true
+          },
+          {
+            "slot": "answerFootage",
+            "offset": 0,
+            "duration": 6.5,
+            "scale": 1.025,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0,
+            "fitRange": true
+          }
+        ],
+        "titles": [
+          {
+            "id": "curiosity",
+            "slot": "openingLine",
+            "start": 0.12,
+            "duration": 2.1,
+            "x": 50,
+            "y": 17,
+            "scale": 0.55,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          },
+          {
+            "id": "turn",
+            "slot": "payoffLine",
+            "start": 10,
+            "duration": 2.2,
+            "x": 50,
+            "y": 79,
+            "scale": 0.65,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.14,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.1,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.08,
+          "fadeIn": 0.08,
+          "fadeOut": 0.45
+        },
+        "soundCues": [],
+        "keepOriginalAudio": true,
+        "framing": {
+          "mode": "speaker_track",
+          "forceAspect": true,
+          "positions": [
+            {
+              "time": 0,
+              "x": 35,
+              "y": 52,
+              "zoom": 1.06,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 9.5,
+              "x": 67,
+              "y": 52,
+              "zoom": 1.06,
+              "cut": true,
+              "origin": "manual"
+            }
+          ]
+        },
+        "variations": [
+          {
+            "id": "signature",
+            "label": "Signature cut",
+            "description": "The authored opening and payoff.",
+            "overrides": {}
+          },
+          {
+            "id": "alternate",
+            "label": "Answer first",
+            "description": "Flash forward to the selected answer before the complete question.",
+            "overrides": {
+              "sequence": [
+                {
+                  "slot": "answerFootage",
+                  "offset": 0,
+                  "duration": 6.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0,
+                  "fitRange": true
+                },
+                {
+                  "slot": "questionFootage",
+                  "offset": 0,
+                  "duration": 9.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0,
+                  "fitRange": true
+                }
+              ],
+              "framing": {
+                "mode": "speaker_track",
+                "forceAspect": true,
+                "positions": [
+                  {
+                    "time": 0,
+                    "x": 67,
+                    "y": 52,
+                    "zoom": 1.06,
+                    "cut": true,
+                    "origin": "manual"
+                  },
+                  {
+                    "time": 6.5,
+                    "x": 35,
+                    "y": 52,
+                    "zoom": 1.06,
+                    "cut": true,
+                    "origin": "manual"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "templateId": "cinematic_flashforward_v1",
+      "version": "1.0.0",
+      "label": "Cinematic \u00b7 One more round",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "brand_trailer"
+      ],
+      "inputSlots": [
+        {
+          "id": "actionFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "wideFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "conflictFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": false
+        },
+        {
+          "id": "openingLine",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "turnLine",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "payoffLine",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "9:16",
+        "16:9"
+      ],
+      "durationTicks": 1260000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "hook": {
+          "family": "cinematic",
+          "selectionReason": "Flash forward into a decisive action beat, reveal the wider conflict, accelerate the exchanges and leave a meaningful open question.",
+          "audience": "Filmmakers and sport storytellers building a teaser",
+          "promise": "Flash forward into a decisive action beat, reveal the wider conflict, accelerate the exchanges and leave a meaningful open question.",
+          "recommendationSignals": [
+            "action",
+            "conflict",
+            "wide_context"
+          ]
+        },
+        "defaultAspect": "16:9",
+        "defaultVariation": "signature",
+        "inputPresentation": {
+          "openingLine": {
+            "label": "Immediate stakes",
+            "default": "ONE MORE ROUND."
+          },
+          "turnLine": {
+            "label": "Conflict",
+            "default": "WHEN QUITTING MAKES SENSE."
+          },
+          "payoffLine": {
+            "label": "Cliffhanger",
+            "default": "WHAT MAKES YOU STAY?"
+          }
+        },
+        "sequence": [
+          {
+            "slot": "actionFootage",
+            "offset": 9,
+            "duration": 0.75,
+            "scale": 1.08,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "wideFootage",
+            "offset": 1,
+            "duration": 2,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "conflictFootage",
+            "offset": 1.5,
+            "duration": 1.5,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "actionFootage",
+            "offset": 2.25,
+            "duration": 0.75,
+            "scale": 1.04,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "conflictFootage",
+            "offset": 2.5,
+            "duration": 0.5,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "actionFootage",
+            "offset": 6,
+            "duration": 0.5,
+            "scale": 1.06,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "conflictFootage",
+            "offset": 4,
+            "duration": 0.75,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "actionFootage",
+            "offset": 8,
+            "duration": 2.75,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "wideFootage",
+            "offset": 4,
+            "duration": 2.5,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "actionFootage",
+            "offset": 4,
+            "duration": 2,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          }
+        ],
+        "titles": [
+          {
+            "id": "premise",
+            "slot": "openingLine",
+            "start": 0.12,
+            "duration": 1.5,
+            "x": 50,
+            "y": 75,
+            "scale": 0.95,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          },
+          {
+            "id": "cost",
+            "slot": "turnLine",
+            "start": 3,
+            "duration": 1.5,
+            "x": 50,
+            "y": 80,
+            "scale": 0.64,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          },
+          {
+            "id": "cliffhanger",
+            "slot": "payoffLine",
+            "start": 12.1,
+            "duration": 1.8,
+            "x": 50,
+            "y": 50,
+            "scale": 0.85,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.14,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.1,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.22,
+          "fadeIn": 0,
+          "fadeOut": 0.4
+        },
+        "soundCues": [
+          {
+            "time": 0,
+            "tone": "impact",
+            "duration": 0.24,
+            "volume": 0.15,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          },
+          {
+            "time": 0.75,
+            "tone": "subdrop",
+            "duration": 0.6,
+            "volume": 0.17,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          },
+          {
+            "time": 4.25,
+            "tone": "riser",
+            "duration": 2.2,
+            "volume": 0.09,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          },
+          {
+            "time": 6.75,
+            "tone": "impact",
+            "duration": 0.32,
+            "volume": 0.18,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          },
+          {
+            "time": 12,
+            "tone": "subdrop",
+            "duration": 0.55,
+            "volume": 0.14,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          }
+        ],
+        "keepOriginalAudio": false,
+        "framing": {
+          "mode": "speaker_track",
+          "forceAspect": true,
+          "positions": [
+            {
+              "time": 0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 0.75,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 2.75,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 4.25,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 5.0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 5.5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 6.0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 6.75,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 9.5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 12.0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            }
+          ]
+        },
+        "audioKeyframes": {
+          "music": [
+            {
+              "id": "rise",
+              "time": 0,
+              "property": "volume",
+              "value": 85,
+              "easing": "linear"
+            },
+            {
+              "id": "pressure",
+              "time": 5,
+              "property": "volume",
+              "value": 110,
+              "easing": "linear"
+            },
+            {
+              "id": "vacuum",
+              "time": 6.5,
+              "property": "volume",
+              "value": 12,
+              "easing": "hold"
+            },
+            {
+              "id": "release",
+              "time": 7,
+              "property": "volume",
+              "value": 100,
+              "easing": "linear"
+            }
+          ]
+        },
+        "variations": [
+          {
+            "id": "signature",
+            "label": "Signature cut",
+            "description": "The authored opening and payoff.",
+            "overrides": {}
+          },
+          {
+            "id": "alternate",
+            "label": "Slow-burn opening",
+            "description": "Establish the space before the same accelerating conflict.",
+            "overrides": {
+              "sequence": [
+                {
+                  "slot": "wideFootage",
+                  "offset": 1,
+                  "duration": 2,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 9,
+                  "duration": 0.75,
+                  "scale": 1.08,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "conflictFootage",
+                  "offset": 1.5,
+                  "duration": 1.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 2.25,
+                  "duration": 0.75,
+                  "scale": 1.04,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "conflictFootage",
+                  "offset": 2.5,
+                  "duration": 0.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 6,
+                  "duration": 0.5,
+                  "scale": 1.06,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "conflictFootage",
+                  "offset": 4,
+                  "duration": 0.75,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 8,
+                  "duration": 2.75,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "wideFootage",
+                  "offset": 4,
+                  "duration": 2.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 4,
+                  "duration": 2,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "templateId": "storytelling_comeback_v1",
+      "version": "1.0.0",
+      "label": "Story \u00b7 Tomorrow might be kinder",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "founder_story"
+      ],
+      "inputSlots": [
+        {
+          "id": "struggleFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "journeyFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "payoffFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "narration",
+          "type": "audio",
+          "required": false
+        },
+        {
+          "id": "payoffVoice",
+          "type": "audio",
+          "required": false
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": false
+        },
+        {
+          "id": "openingLine",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "payoffLine",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "9:16",
+        "16:9"
+      ],
+      "durationTicks": 1440000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "hook": {
+          "family": "storytelling",
+          "selectionReason": "Tease the outcome, return to the struggle and follow a small concrete movement toward hope; optional narration remains a separate editable take.",
+          "audience": "Creators telling an honest resilience or transformation story",
+          "promise": "Tease the outcome, return to the struggle and follow a small concrete movement toward hope; optional narration remains a separate editable take.",
+          "recommendationSignals": [
+            "struggle",
+            "journey",
+            "payoff",
+            "narration"
+          ]
+        },
+        "defaultAspect": "9:16",
+        "defaultVariation": "signature",
+        "inputPresentation": {
+          "openingLine": {
+            "label": "Emotional promise",
+            "default": "TOMORROW MIGHT BE KINDER."
+          },
+          "payoffLine": {
+            "label": "Final decision",
+            "default": "REFUSING TO QUIT."
+          }
+        },
+        "sequence": [
+          {
+            "slot": "payoffFootage",
+            "offset": 0,
+            "duration": 0.75,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "struggleFootage",
+            "offset": 0,
+            "duration": 3.25,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "journeyFootage",
+            "offset": 0,
+            "duration": 3,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "struggleFootage",
+            "offset": 3,
+            "duration": 1.5,
+            "scale": 1.05,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "journeyFootage",
+            "offset": 3,
+            "duration": 3,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "payoffFootage",
+            "offset": 1,
+            "duration": 4.5,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          }
+        ],
+        "titles": [
+          {
+            "id": "promise",
+            "slot": "openingLine",
+            "start": 2.75,
+            "duration": 2.3,
+            "x": 50,
+            "y": 75,
+            "scale": 0.85,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          },
+          {
+            "id": "decision",
+            "slot": "payoffLine",
+            "start": 13.5,
+            "duration": 2.3,
+            "x": 50,
+            "y": 76,
+            "scale": 0.95,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.14,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.1,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.13,
+          "fadeIn": 0.5,
+          "fadeOut": 0.7
+        },
+        "soundCues": [
+          {
+            "time": 0.75,
+            "tone": "sweep",
+            "duration": 0.2,
+            "volume": 0.06,
+            "fadeIn": 0.005,
+            "fadeOut": 0.06666666666666667
+          },
+          {
+            "time": 11.5,
+            "tone": "riser",
+            "duration": 1.5,
+            "volume": 0.055,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          },
+          {
+            "time": 13.5,
+            "tone": "subdrop",
+            "duration": 0.6,
+            "volume": 0.075,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          }
+        ],
+        "keepOriginalAudio": false,
+        "framing": {
+          "mode": "speaker_track",
+          "forceAspect": true,
+          "positions": [
+            {
+              "time": 0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 0.75,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 4.0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 7.0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 8.5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 11.5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            }
+          ]
+        },
+        "voiceClips": [
+          {
+            "slot": "narration",
+            "start": 0,
+            "sourceStart": 0,
+            "duration": 13.2,
+            "volume": 0.94
+          },
+          {
+            "slot": "payoffVoice",
+            "start": 14,
+            "sourceStart": 0,
+            "duration": 2,
+            "volume": 0.94
+          }
+        ],
+        "variations": [
+          {
+            "id": "signature",
+            "label": "Signature cut",
+            "description": "The authored opening and payoff.",
+            "overrides": {}
+          },
+          {
+            "id": "alternate",
+            "label": "Struggle first",
+            "description": "Start with the lived problem before revealing the hopeful image.",
+            "overrides": {
+              "sequence": [
+                {
+                  "slot": "struggleFootage",
+                  "offset": 0,
+                  "duration": 4,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "journeyFootage",
+                  "offset": 0,
+                  "duration": 3,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "struggleFootage",
+                  "offset": 3,
+                  "duration": 1.5,
+                  "scale": 1.05,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "journeyFootage",
+                  "offset": 3,
+                  "duration": 3,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "payoffFootage",
+                  "offset": 1,
+                  "duration": 4.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "templateId": "kinetic_pressure_v1",
+      "version": "1.0.0",
+      "label": "Motion type \u00b7 One more, then another",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "motion_graphics"
+      ],
+      "inputSlots": [
+        {
+          "id": "actionFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "detailFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": false
+        },
+        {
+          "id": "openingLine",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "9:16",
+        "16:9"
+      ],
+      "durationTicks": 900000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "hook": {
+          "family": "motion_typography",
+          "selectionReason": "Cut real movement to five authored word accents, build pressure, then leave the result moving; each word and sound accent remains an ordinary editable layer.",
+          "audience": "Creators using a short statement as the rhythm of a footage edit",
+          "promise": "Cut real movement to five authored word accents, build pressure, then leave the result moving; each word and sound accent remains an ordinary editable layer.",
+          "recommendationSignals": [
+            "rhythm",
+            "action",
+            "short_phrase"
+          ]
+        },
+        "defaultAspect": "9:16",
+        "defaultVariation": "signature",
+        "inputPresentation": {
+          "openingLine": {
+            "label": "Five-word statement",
+            "default": "ONE MORE ROUND. THEN ANOTHER."
+          }
+        },
+        "sequence": [
+          {
+            "slot": "actionFootage",
+            "offset": 2,
+            "duration": 0.75,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 1,
+            "duration": 0.75,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "actionFootage",
+            "offset": 4,
+            "duration": 1,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 2,
+            "duration": 1,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "actionFootage",
+            "offset": 6,
+            "duration": 0.5,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 3,
+            "duration": 0.5,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "actionFootage",
+            "offset": 8,
+            "duration": 2.5,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "detailFootage",
+            "offset": 4,
+            "duration": 1,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "actionFootage",
+            "offset": 10,
+            "duration": 2,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          }
+        ],
+        "titles": [
+          {
+            "id": "word-0",
+            "slot": "openingLine",
+            "start": 0.125,
+            "duration": 0.62,
+            "x": 50,
+            "y": 44,
+            "scale": 2.4,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.08,
+              "settleSeconds": 0.22,
+              "exitSeconds": 0.1,
+              "enterScale": 0.7,
+              "enterY": 0,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ],
+              "enterX": 12
+            },
+            "wordIndex": 0
+          },
+          {
+            "id": "word-1",
+            "slot": "openingLine",
+            "start": 0.75,
+            "duration": 0.75,
+            "x": 50,
+            "y": 54,
+            "scale": 2.4,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.08,
+              "settleSeconds": 0.22,
+              "exitSeconds": 0.1,
+              "enterScale": 0.7,
+              "enterY": 0,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ],
+              "enterX": -12
+            },
+            "wordIndex": 1
+          },
+          {
+            "id": "word-2",
+            "slot": "openingLine",
+            "start": 1.5,
+            "duration": 1.8,
+            "x": 50,
+            "y": 48,
+            "scale": 2.2,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.08,
+              "settleSeconds": 0.22,
+              "exitSeconds": 0.1,
+              "enterScale": 1.35,
+              "enterY": 0,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ],
+              "enterX": 12
+            },
+            "wordIndex": 2
+          },
+          {
+            "id": "word-3",
+            "slot": "openingLine",
+            "start": 3.5,
+            "duration": 0.75,
+            "x": 50,
+            "y": 25,
+            "scale": 1.5,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.08,
+              "settleSeconds": 0.22,
+              "exitSeconds": 0.1,
+              "enterScale": 0.7,
+              "enterY": 0,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ],
+              "enterX": -12
+            },
+            "wordIndex": 3
+          },
+          {
+            "id": "word-4",
+            "slot": "openingLine",
+            "start": 4.5,
+            "duration": 3.25,
+            "x": 50,
+            "y": 51,
+            "scale": 1.9,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.08,
+              "settleSeconds": 0.22,
+              "exitSeconds": 0.1,
+              "enterScale": 1.35,
+              "enterY": 0,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ],
+              "enterX": 12
+            },
+            "wordIndex": 4
+          },
+          {
+            "id": "phrase-return",
+            "slot": "openingLine",
+            "start": 8,
+            "duration": 1.8,
+            "x": 50,
+            "y": 77,
+            "scale": 0.5,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.14,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.1,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.2,
+          "fadeIn": 0,
+          "fadeOut": 0.4
+        },
+        "soundCues": [
+          {
+            "time": 0.125,
+            "tone": "click",
+            "duration": 0.075,
+            "volume": 0.12,
+            "fadeIn": 0.005,
+            "fadeOut": 0.024999999999999998
+          },
+          {
+            "time": 0.75,
+            "tone": "click",
+            "duration": 0.075,
+            "volume": 0.12,
+            "fadeIn": 0.005,
+            "fadeOut": 0.024999999999999998
+          },
+          {
+            "time": 1.5,
+            "tone": "click",
+            "duration": 0.075,
+            "volume": 0.12,
+            "fadeIn": 0.005,
+            "fadeOut": 0.024999999999999998
+          },
+          {
+            "time": 3.5,
+            "tone": "click",
+            "duration": 0.075,
+            "volume": 0.12,
+            "fadeIn": 0.005,
+            "fadeOut": 0.024999999999999998
+          },
+          {
+            "time": 4.5,
+            "tone": "click",
+            "duration": 0.075,
+            "volume": 0.12,
+            "fadeIn": 0.005,
+            "fadeOut": 0.024999999999999998
+          },
+          {
+            "time": 4.5,
+            "tone": "impact",
+            "duration": 0.25,
+            "volume": 0.15,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          },
+          {
+            "time": 2.75,
+            "tone": "riser",
+            "duration": 1.6,
+            "volume": 0.07,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          }
+        ],
+        "keepOriginalAudio": false,
+        "framing": {
+          "mode": "speaker_track",
+          "forceAspect": true,
+          "positions": [
+            {
+              "time": 0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 0.75,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 1.5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 2.5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 3.5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 4.0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 4.5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 7.0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 8.0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            }
+          ]
+        },
+        "variations": [
+          {
+            "id": "signature",
+            "label": "Signature cut",
+            "description": "The authored opening and payoff.",
+            "overrides": {}
+          },
+          {
+            "id": "alternate",
+            "label": "Reverse angle",
+            "description": "Swap the opening movement and let the same five-word rhythm drive the cuts.",
+            "overrides": {
+              "sequence": [
+                {
+                  "slot": "detailFootage",
+                  "offset": 1,
+                  "duration": 0.75,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 2,
+                  "duration": 0.75,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 4,
+                  "duration": 1,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "detailFootage",
+                  "offset": 2,
+                  "duration": 1,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 6,
+                  "duration": 0.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "detailFootage",
+                  "offset": 3,
+                  "duration": 0.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 8,
+                  "duration": 2.5,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "detailFootage",
+                  "offset": 4,
+                  "duration": 1,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "actionFootage",
+                  "offset": 10,
+                  "duration": 2,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                }
+              ]
+            }
+          }
+        ],
+        "wordCount": 5
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "templateId": "creator_action_edit_v1",
+      "version": "1.0.0",
+      "label": "Creator \u00b7 Make the cut mean something",
+      "status": "draft",
+      "canonicalContractVersion": 1,
+      "compiler": "studioRenderCompiler",
+      "renderer": "render_viral_clip_impl",
+      "surfaces": [
+        "studio",
+        "director",
+        "welcome"
+      ],
+      "workflow": "studio",
+      "categoryIds": [
+        "before_after_transformation"
+      ],
+      "inputSlots": [
+        {
+          "id": "beforeFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "contextFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "resultFootage",
+          "type": "video",
+          "required": true
+        },
+        {
+          "id": "music",
+          "type": "audio",
+          "required": false
+        },
+        {
+          "id": "openingLine",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "turnLine",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "payoffLine",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "supportedAspects": [
+        "9:16",
+        "16:9"
+      ],
+      "durationTicks": 1260000,
+      "qualification": {
+        "studioLifecycle": "unverified",
+        "directorInstantiation": "unverified",
+        "creativeQuality": "unapproved",
+        "previewFinalParity": "unverified"
+      },
+      "executionDefinition": {
+        "hook": {
+          "family": "educational_creator",
+          "selectionReason": "Show a held unstructured shot, then assemble preparation, context and a finished result; the actual cut sequence demonstrates the editing decision.",
+          "audience": "Food and editing creators teaching sequence and pacing",
+          "promise": "Show a held unstructured shot, then assemble preparation, context and a finished result; the actual cut sequence demonstrates the editing decision.",
+          "recommendationSignals": [
+            "before",
+            "process",
+            "result"
+          ]
+        },
+        "defaultAspect": "9:16",
+        "defaultVariation": "signature",
+        "inputPresentation": {
+          "openingLine": {
+            "label": "Common mistake",
+            "default": "STOP CUTTING AT RANDOM."
+          },
+          "turnLine": {
+            "label": "Practical technique",
+            "default": "PREP. HEAT. PLATE."
+          },
+          "payoffLine": {
+            "label": "Useful result",
+            "default": "THREE SHOTS. ONE CLEAR STORY."
+          }
+        },
+        "sequence": [
+          {
+            "slot": "beforeFootage",
+            "offset": 0,
+            "duration": 3,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "beforeFootage",
+            "offset": 3,
+            "duration": 1,
+            "scale": 1.08,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "contextFootage",
+            "offset": 0,
+            "duration": 1,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "resultFootage",
+            "offset": 2,
+            "duration": 1,
+            "scale": 1.04,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "beforeFootage",
+            "offset": 6,
+            "duration": 0.75,
+            "scale": 1.12,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "contextFootage",
+            "offset": 2,
+            "duration": 0.75,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "resultFootage",
+            "offset": 5,
+            "duration": 1.25,
+            "scale": 1.06,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "beforeFootage",
+            "offset": 8,
+            "duration": 1.25,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          },
+          {
+            "slot": "resultFootage",
+            "offset": 8,
+            "duration": 4,
+            "scale": 1,
+            "transitionIn": "clean_cut",
+            "transitionOut": "clean_cut",
+            "transitionDuration": 0
+          }
+        ],
+        "titles": [
+          {
+            "id": "problem",
+            "slot": "openingLine",
+            "start": 0.15,
+            "duration": 2.4,
+            "x": 50,
+            "y": 22,
+            "scale": 0.8,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          },
+          {
+            "id": "first-rule",
+            "slot": "turnLine",
+            "start": 3.05,
+            "duration": 2.4,
+            "x": 50,
+            "y": 18,
+            "scale": 0.58,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          },
+          {
+            "id": "payoff",
+            "slot": "payoffLine",
+            "start": 10.1,
+            "duration": 3.6,
+            "x": 50,
+            "y": 78,
+            "scale": 0.7,
+            "portraitScale": 0.85,
+            "width": 86,
+            "align": "center",
+            "weight": 800,
+            "colour": "white",
+            "shadow": "strong",
+            "motion": {
+              "enterSeconds": 0.14,
+              "settleSeconds": 0.28,
+              "exitSeconds": 0.1,
+              "enterScale": 0.98,
+              "enterY": 2,
+              "curve": [
+                0.16,
+                1,
+                0.3,
+                1
+              ]
+            }
+          }
+        ],
+        "animation": {
+          "enterSeconds": 0.14,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.1,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "music": {
+          "volume": 0.2,
+          "fadeIn": 0.1,
+          "fadeOut": 0.5
+        },
+        "soundCues": [
+          {
+            "time": 3,
+            "tone": "click",
+            "duration": 0.08,
+            "volume": 0.1,
+            "fadeIn": 0.005,
+            "fadeOut": 0.02666666666666667
+          },
+          {
+            "time": 4,
+            "tone": "click",
+            "duration": 0.08,
+            "volume": 0.08,
+            "fadeIn": 0.005,
+            "fadeOut": 0.02666666666666667
+          },
+          {
+            "time": 5,
+            "tone": "click",
+            "duration": 0.08,
+            "volume": 0.08,
+            "fadeIn": 0.005,
+            "fadeOut": 0.02666666666666667
+          },
+          {
+            "time": 10,
+            "tone": "subdrop",
+            "duration": 0.4,
+            "volume": 0.1,
+            "fadeIn": 0.005,
+            "fadeOut": 0.08
+          }
+        ],
+        "keepOriginalAudio": false,
+        "framing": {
+          "mode": "speaker_track",
+          "forceAspect": true,
+          "positions": [
+            {
+              "time": 0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 3,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 4,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 6,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 6.75,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 7.5,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 8.75,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            },
+            {
+              "time": 10.0,
+              "x": 50,
+              "y": 50,
+              "zoom": 1,
+              "cut": true,
+              "origin": "manual"
+            }
+          ]
+        },
+        "variations": [
+          {
+            "id": "signature",
+            "label": "Signature cut",
+            "description": "The authored opening and payoff.",
+            "overrides": {}
+          },
+          {
+            "id": "alternate",
+            "label": "Result first",
+            "description": "Lead with the finished result, then demonstrate how the sequence earns it.",
+            "overrides": {
+              "sequence": [
+                {
+                  "slot": "resultFootage",
+                  "offset": 8,
+                  "duration": 1,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "beforeFootage",
+                  "offset": 0,
+                  "duration": 2,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "beforeFootage",
+                  "offset": 3,
+                  "duration": 1,
+                  "scale": 1.08,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "contextFootage",
+                  "offset": 0,
+                  "duration": 1,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "resultFootage",
+                  "offset": 2,
+                  "duration": 1,
+                  "scale": 1.04,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "beforeFootage",
+                  "offset": 6,
+                  "duration": 0.75,
+                  "scale": 1.12,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "contextFootage",
+                  "offset": 2,
+                  "duration": 0.75,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "resultFootage",
+                  "offset": 5,
+                  "duration": 1.25,
+                  "scale": 1.06,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "beforeFootage",
+                  "offset": 8,
+                  "duration": 1.25,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                },
+                {
+                  "slot": "resultFootage",
+                  "offset": 8,
+                  "duration": 4,
+                  "scale": 1,
+                  "transitionIn": "clean_cut",
+                  "transitionOut": "clean_cut",
+                  "transitionDuration": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
     }
   ]
 }

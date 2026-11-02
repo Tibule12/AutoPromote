@@ -142,6 +142,36 @@ class ViralRenderContractTests(unittest.TestCase):
         )
         self.assertFalse(request.professional_cleanup)
 
+    def test_fractional_camera_cuts_share_one_delivery_frame_grid(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"VIRAL_EXPORT_ENCODER": "cpu"}):
+            source, output = str(Path(directory) / "source.mp4"), str(Path(directory) / "output.mp4")
+            subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                "testsrc2=s=160x90:r=30:d=2", "-f", "lavfi", "-i", "sine=frequency=440:duration=2",
+                "-c:v", "libx264", "-threads", "1", "-c:a", "aac", "-y", source], check=True, capture_output=True)
+            cuts = [{"time": time, "mode": "speaker_track"} for time in [0, .146677, .380011, .580011, .780011, 1.046677, 1.280011, 1.546677]]
+            asyncio.run(render_reframe_timeline_sequential(source, output, 160, 90, 90, 160,
+                43 / 24, cuts, solo_keyframes=[{"time": 0, "x": 50, "y": 50}],
+                delivery_fps=24, job_id="fractional-cut-test"))
+            streams = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-show_streams", "-of", "json", output]))["streams"]
+            picture = next(stream for stream in streams if stream["codec_type"] == "video")
+            self.assertEqual(int(picture["nb_frames"]), 43)
+            self.assertEqual(picture["avg_frame_rate"], "24/1")
+            self.assertAlmostEqual(float(picture["duration"]), 43 / 24, places=5)
+            subprocess.run(["ffmpeg", "-v", "error", "-i", output, "-f", "null", "-"], check=True, capture_output=True)
+
+    def test_delivery_grid_keeps_single_frame_camera_intervals_at_60fps(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"VIRAL_EXPORT_ENCODER": "cpu"}):
+            source, output = str(Path(directory) / "source.mp4"), str(Path(directory) / "output.mp4")
+            subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "testsrc2=s=160x90:r=60:d=0.5",
+                "-c:v", "libx264", "-threads", "1", "-y", source], check=True, capture_output=True)
+            asyncio.run(render_reframe_timeline_sequential(source, output, 160, 90, 90, 160,
+                .5, [{"time": time, "mode": "speaker_track"} for time in [0, 1/60, 2/60]],
+                solo_keyframes=[{"time": 0, "x": 50, "y": 50}], delivery_fps=60, job_id="single-frame-cut"))
+            picture = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-select_streams", "v:0",
+                "-show_streams", "-of", "json", output]))["streams"][0]
+            self.assertEqual(int(picture["nb_frames"]), 30)
+            self.assertEqual(picture["avg_frame_rate"], "60/1")
+
     def test_long_reframe_timeline_renders_bounded_intervals_then_restores_audio(self):
         cuts = [
             {"time": index * 10, "mode": "center" if index in {4, 9} else "speaker_track"}
