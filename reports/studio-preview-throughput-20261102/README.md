@@ -1,0 +1,35 @@
+# Native Studio preview repair — 2 November 2026
+
+[Delivered review: live Studio playback, native authoring, exact project, finished playback and paired pictures](</home/tibule12/Videos/AutoPromote Motion and Flow - 2026-11-01/Cinematic Episode/Studio preview repair - 2026-11-02/README.md>).
+
+The same **Flowing worlds** composition is preserved. No new creative edit or native movie was generated. The professional creative target remains unmet; live real-time playback and whole-picture parity remain unqualified.
+
+| Actual local observation | Result |
+| --- | --- |
+| Baseline full live programme | 36s in 113.553s; 105.308s in recorded browser long tasks |
+| Final full live programme, with screen capture | 36s in 49.840s; 16.511s in browser long tasks |
+| Final programme hold | Programme 35.958333/source 11.958333; paused; Play available |
+| Actual operator Pause | An advancing source stops and remains at 2.892831s after 1.2s |
+| Exact finished movie through Studio | 36s in 36.084s; one reported drop; media ended at 36 |
+| Native authoring and persistence | Corner edit → Undo → Redo → Undo → Save; reviewed scene plan and rejection without mutation; independent actual backup restore |
+| Native project | 49 overlays, 10,968 keys; compiled composition equals the accepted original CPU request |
+| Paired paused pictures | 19; minimum SSIM 0.841533/PSNR 20.8824dB; no whole-picture pass |
+| Prior delivery preservation | All 214 manifest files unchanged |
+
+The baseline lacks screen capture; the final run includes it. Both use the actual App, normal emulator sign-in, loopback-only access and a muted headless software browser. Preparation, stalls and other local workload are included; do not infer a portable benchmark or real-time qualification. The final live recording has 440 captured updates/51.859s (about 8.48 updates/s). The finished recording has 416/35.889s (about 11.59/s). Screen-capture rate, decoded-media counters and encoded frame count are different measurements. The unchanged native H.264 movie is independently counted at 864 pictures/24fps/1280×720/36s and retains SHA256 b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734. Human listening remains unapproved.
+
+The repair makes canonical corner validation index channels once per call and use lower-bound lookup. It retains geometry/edge-collapse rejection and rejects unsupported simultaneous changing corner/progress trajectories. All 39 real/malformed cases retain their acceptance/error outcome (25 accept, 14 reject); the retained local validator benchmark improves 1,531.209→279.581ms across three passes of twenty planes. The Flow inspector now obtains a fresh canonical snapshot when building/applying a scene rather than on playhead renders; revision/ownership/geometry checks still run at the actions.
+
+Original-speech ducking now uses the existing bounded prepared-source pool. Each slot reuses its own Web Audio graph; the current analyser follows the active media, and analysis contexts close on unmount. Actual observations show three graphs, and focused music/overlapping-cue/Pause tests cover original speech as well as muted/off modes. Default sequence completion holds the last valid frame, stops transport intent and ignores the queued source ended event which previously refocused an earlier shot. Explicit trim/hook loops retain their existing path.
+
+A paused secondary texture now requests a presented-frame refresh and invalidates its shared copy when that frame arrives. This is not a completed source-picture repair. The first 24.25s dissolve seek still shows a texture difference; a repeat seek in the separate diagnostic displays the expected person. The next repair must bind independent paused texture clocks to verified decoded pictures, followed by remaining live drawing/startup cost and colour/edge parity. Editing guides are disabled in the final nineteen comparisons. Different monitor sizes mean these numbers must not be treated as directly interchangeable with older 806px comparisons. Visible surface faceting, creative cohesion and general mesh/camera/light depth remain unfinished.
+
+Validation: 86 focused tests across eight suites; five focused full-editor cut/music/end checks pass (151 other full-editor cases were not run). No test was skipped or weakened to qualify the repair; those 151 cases are outside the targeted command. Each retained build passes eight anonymous welcome comparisons; normal sign-in/help is exercised by native flows. The full-mode build retains two mixed-operator warnings in an existing inspector condition. Shared Director replay check, canonical compilation, script syntax and diff checks pass. Worker perspective/motion source hashes remain identical to the accepted movie's manifest; no new worker export was needed.
+
+Failures remain retained. The first observer stayed on the finished-file view and timed out; it is not a live result. An interrupted baseline from the cleanup turn has no complete result. The 65.592s intermediate run reaches the programme end but fails its held-frame check; it is not a successful terminal fix. Two authoring observers are incomplete; a closing CDP acknowledgment became an unhandled rejection in one. The capture helper now guards shutdown acknowledgments. Root cause of the initial observer/page closures remains unverified. A third complete native authoring/capture passes, and subsequent independent reopen, operator Pause, all nineteen samples and exact finished playback pass. Earlier mismatched test setup simulated media before the saved-project restore committed; the corrected fixture waits for its actual 24fps transport and retains the same assertions. Native backup downloads inspect intermediate Undo/Redo states without repeatedly adding saved versions.
+
+The exact independent backup hash is cab2224b603f9e1e390a088000c15ee4d4716895be145978022e97e08e0f7f4e. The accepted movie/render identity and canonical project are retained; source time, layer order, 49 layers and all 10,968 keys remain editable. Technical playback success is separate from creative quality. No creative, public-showroom, PRO or production readiness promotion occurs. Formal counts remain 2 UNIMPLEMENTED/1 BROKEN/9 PARTIAL/17 FUNCTIONAL/0 PRO-READY/0 PRODUCTION-READY.
+
+Current build/source/API/worker identity: final-preflight.json; native binding: native-binding.json; actual results: validation.json; user delivery hashes: delivery.json. The isolated demo API and idle worker remain available. Exact owned static candidates are stopped separately. No live-user data, paid generation/GPU/provider call, push, merge or deployment occurred.
+
+The earlier disk-cleanup ledger and original checkpoint remain intact. This continuation losslessly compresses its repetitive private snapshot dumps and shares 423 byte-identical immutable build files, preserving paths/hashes; measured filesystem availability increases 260,788,224 bytes during that deduplication. Future builds must use a fresh directory. No source media, model, project backup or historical recording is deleted. Current availability is about 10.61GiB; concurrent work can change it.

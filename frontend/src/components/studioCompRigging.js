@@ -1,3 +1,4 @@
+import { studioTitleMatteMarkup } from './studioTitleMatte';
 import {
   buildMotionAutomationStyle,
   interpolateAutomationValue,
@@ -309,6 +310,9 @@ export const validateStudioTrackMattes = (overlays = [], disabledIds = []) => {
     }
     if (source.isNullRig) {
       fail("INVALID_TRACK_MATTE", "A Null Rig layer cannot act as a pixel track matte.");
+    }
+    if (source.type === 'video' && (source.perspective || source.mask?.enabled || source.motionBlur?.enabled || source.layerShadow?.enabled || source.glow?.enabled || source.useOverlayAudio || source.bRollMode === 'fullscreen')) {
+      fail('INVALID_TRACK_MATTE', 'Video matte sources support ordinary 2D transforms and silent pixels; disable their perspective, mask, blur, glow and shadow first.');
     }
     if (source.trackMatte?.mode && source.trackMatte.mode !== "none") {
       fail("INVALID_TRACK_MATTE", "Chained track mattes are unsupported; matte source must be direct.");
@@ -736,6 +740,7 @@ export const buildTrackMatteStageSvgDataUri = ({
 }) => {
   if (!matteLayer || !mode || mode === "none") return "";
   const pose = evaluateWorldLayerPose(matteLayer, overlays, motionKeyframes, time, mainTransform);
+  if(pose.mask)matteLayer={...matteLayer,mask:pose.mask};
   const start = Number(matteLayer.startTime ?? 0);
   const end = start + Math.max(0.05, Number(matteLayer.duration ?? 9999));
   const inWindow = time >= start && time < end;
@@ -759,13 +764,17 @@ export const buildTrackMatteStageSvgDataUri = ({
 
   const fillColor = isLuma ? escapeXml(matteLayer.color || "#ffffff") : "#ffffff";
   let shapeMarkup = "";
-  if (matteLayer.type === "text" && String(matteLayer.text || "").trim()) {
-    const fontSize = Math.max(18, Math.min(240, (Number(matteLayer.fontSize || 52) / 720) * vh * scale));
+  if (matteLayer.type === 'video') {
+    // The decoded-frame painter replaces this transparent initial mask. An
+    // unloaded movie must never masquerade as an opaque rectangular matte.
+    return 'url("data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>`) + '")';
+  } else if (matteLayer.type === "text" && String(matteLayer.text || "").trim()) {
     const bgFill =
       matteLayer.bg && matteLayer.bg !== "transparent"
         ? `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="18" fill="${isLuma ? escapeXml(matteLayer.bg) : "#ffffff"}" />`
         : "";
-    shapeMarkup = `${bgFill}<text x="0" y="${(fontSize * 0.34).toFixed(1)}" text-anchor="middle" font-family="Inter, sans-serif" font-weight="${Number(matteLayer.fontWeight || 900)}" font-size="${fontSize.toFixed(1)}" fill="${fillColor}">${escapeXml(matteLayer.text)}</text>`;
+    const nativeTitle = studioTitleMatteMarkup(matteLayer, pose, safeAspect, time, fillColor);
+    shapeMarkup = `${bgFill}<g transform="scale(${vh/720})">${nativeTitle || `<text x="0" y="13" text-anchor="middle" font-family="Inter, sans-serif" font-weight="${Number(matteLayer.fontWeight || 900)}" font-size="36" fill="${fillColor}">${escapeXml(matteLayer.text)}</text>`}</g>`;
   } else if (matteLayer.mask?.enabled && matteLayer.mask.shape === "ellipse") {
     shapeMarkup = `<ellipse cx="${(x + w / 2).toFixed(1)}" cy="${(y + h / 2).toFixed(1)}" rx="${(w * 0.48).toFixed(1)}" ry="${(h * 0.48).toFixed(1)}" fill="${fillColor}" />`;
   } else if (matteLayer.mask?.enabled && matteLayer.mask.shape === "polygon") {

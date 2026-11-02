@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { compactWorkflowDescriptor } = require('../../src/services/unifiedCredits/workflowDescriptor');
+const { compactWorkflowDescriptor, matchesWorkflowRequest } = require('../../src/services/unifiedCredits/workflowDescriptor');
 const { digest } = require('../../src/services/unifiedCredits/workerVerification');
 
 test('large creative input remains fingerprint-bound without duplicating its body in the operation descriptor', () => {
@@ -12,4 +12,16 @@ test('large creative input remains fingerprint-bound without duplicating its bod
   assert.deepEqual(result.sources, sources); assert.equal(result.expectedExecutions, 1);
   assert(JSON.stringify(result).length < 131072); assert.equal(JSON.stringify(input), before);
   assert.notEqual(compactWorkflowDescriptor({ ...input, requestBody: { options: {} } }).requestBodyHash, result.requestBodyHash);
+});
+
+test('both compact quotes and retained full-body quotes enforce the exact canonical request', () => {
+  const request={options:{maskPoints:Array(80000).fill({x:15,y:25})},sourceStoragePath:'owned/source'};
+  assert(Buffer.byteLength(JSON.stringify(request))>1024*1024);
+  for(const input of [{requestBody:request},compactWorkflowDescriptor({requestBody:request})]){
+    assert.equal(matchesWorkflowRequest(input,request),true);
+    assert.equal(matchesWorkflowRequest(input,{...request,sourceStoragePath:'foreign/source'}),false);
+    assert.equal(matchesWorkflowRequest(input,{...request,options:{maskPoints:[{x:15,y:26}]}}),false);
+  }
+  for(const input of [null,{},[],{requestBodyHash:'invalid'}, {requestBody:request,requestBodyHash:'0'.repeat(64)}])
+    assert.equal(matchesWorkflowRequest(input,request),false);
 });

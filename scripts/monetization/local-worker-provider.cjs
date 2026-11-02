@@ -11,9 +11,12 @@ const {
   workerRequestDigest,
 } = require("../../src/services/unifiedCredits/workerVerification");
 const { assertSandbox } = require("../../src/services/unifiedCredits/runtime");
-async function createLocalWorkerProvider({ directory, python, env, apiOrigin, timeoutMs = 120000, maxArtifactBytes = 20 * 1024 * 1024 }) {
+async function createLocalWorkerProvider({ directory, python, env, apiOrigin, timeoutMs = 120000, maxArtifactBytes = 20 * 1024 * 1024,
+  maxRequestBytes = 512 * 1024, port = 0 }) {
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 1800000) throw Error("Local CPU timeout must be 1–1800 seconds.");
   if (!Number.isSafeInteger(maxArtifactBytes) || maxArtifactBytes < 20 * 1024 * 1024 || maxArtifactBytes > 128 * 1024 * 1024) throw Error('Local artifact limit must be 20–128 MiB.');
+  if (!Number.isSafeInteger(maxRequestBytes) || maxRequestBytes < 512 * 1024 || maxRequestBytes > 4 * 1024 * 1024) throw Error('Local request limit must be 512 KiB–4 MiB.');
+  if (!Number.isSafeInteger(port) || port < 0 || port > 65535) throw Error('Choose a valid loopback worker port.');
   assertSandbox(env);
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const executionRoot = fs.realpathSync(directory);
@@ -52,7 +55,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
   // Bound every route, including unauthenticated health and capability downloads.
   // This process binds only to loopback and does not trust forwarded client IPs.
   app.use(rateLimit({ windowMs: 60000, max: 240, standardHeaders: true, legacyHeaders: false }));
-  app.use(express.json({ limit: "512kb" }));
+  app.use(express.json({ limit: maxRequestBytes }));
   app.get(["/health", "/status"], (_req, res) =>
     res.json({
       status: "ok",
@@ -294,7 +297,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin, ti
   app.use((error, _req, res, _next) =>
     res.status(error.status || (error.code === "ENOENT" ? 404 : 500)).json({ error: error.message })
   );
-  const server = app.listen(0, "127.0.0.1");
+  const server = app.listen(port, "127.0.0.1");
   await new Promise(resolve => server.once("listening", resolve));
   const workerOrigin = `http://127.0.0.1:${server.address().port}`;
   app.locals.workerOrigin = workerOrigin;

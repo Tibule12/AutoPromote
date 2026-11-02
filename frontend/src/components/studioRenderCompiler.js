@@ -4,7 +4,7 @@ import { createOutputTimeMap, createTimeRange, secondsToTicks, ticksToSeconds } 
 import { projectStudioLinkedTimingToSnapshot, projectStudioEditableStateToSnapshot, validateStudioProjectDocument } from "./studioProjectDocument";
 import { buildAdvancedColorCube } from "./studioColorCube";
 import { assertStudioLayerBlendMode, assertStudioMainBlendMode } from "./studioBlendModes";
-import { parseStudioMaskPolygon } from "./studioMaskGeometry";
+import { parseStudioMaskPolygon, validateStudioMaskAnimation } from "./studioMaskGeometry";
 import { studioGroupTree, removeStudioGroupMembers, GROUP_KIND, validateStudioGroupKeyframes } from "./studioGroups";
 import { validateSpatialCurve } from "./studioAutomation";
 import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
@@ -192,13 +192,14 @@ export const compileStudioCompositionForRender = document => {
   state.overlays.filter(overlay => !overlay.isCaption && !overlay.isNullRig).forEach(assertStudioLayerBlendMode);
   for (const layer of [state.mainTransform, ...state.overlays]) {
     if (!layer) continue;
+    validateStudioMaskAnimation(layer,(state.motionKeyframes||[]).filter(key=>key.targetId===layer.id));
     validateStudioMotionDrivers(layer);
     validateStudioPerspectiveLayer(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id),
       compounds.some(group => group.layerIds?.includes(layer?.id)));
     validateStudioTextAnimation(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id));
     validateStudioVectorTrim(layer, (state.motionKeyframes || []).filter(key => key.targetId === layer?.id));
-    if (layer?.mask?.enabled && (layer.id === "main-video" || layer.type === "video" || layer.bRollPlaceholder || (layer.bRollMode === "fullscreen" && layer.type === "text")))
-      fail("UNSUPPORTED_GEOMETRIC_VIDEO_MASK", "Geometric masks currently export on image and ordinary title layers. Use the reviewed subject-mask workflow for source video.");
+    if (layer?.mask?.enabled && (layer.id === "main-video" || layer.bRollPlaceholder || (layer.bRollMode === "fullscreen" && layer.type === "text")))
+      fail("UNSUPPORTED_GEOMETRIC_VIDEO_MASK", "Mask an ordinary media layer or use the reviewed subject-mask workflow for the main source video.");
     if (layer?.mask?.enabled && layer.mask.shape === "polygon") {
       try { parseStudioMaskPolygon(layer.mask.path || undefined); }
       catch (error) { fail("INVALID_GEOMETRIC_MASK_PATH", `Mask polygon path: ${error.message}`); }

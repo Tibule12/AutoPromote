@@ -282,9 +282,30 @@ app.locals.sharedCreditPilot = integration;
 // Apply before Auth, signed object reads, static files and SPA fallback. Credit
 // admission keeps its additional tighter per-operation limits.
 app.use(rateLimit({ windowMs: 60000, max: 1200, standardHeaders: true, legacyHeaders: false }));
-app.use(express.json({ limit: "1mb" }));
+const localRequestBytes=Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 1024*1024);
+if(!Number.isSafeInteger(localRequestBytes)||localRequestBytes<512*1024||localRequestBytes>4*1024*1024)
+  throw Error('Local request limit must be 512 KiB–4 MiB.');
+app.use(express.json({ limit: localRequestBytes }));
+// A separately served, immutable candidate build needs real signed-in QA
+// before replacing the local App. Opt in only exact loopback origins; normal
+// runs retain the single-origin boundary and all existing Auth/admission.
+const candidateOrigins = config.previewOrigins || [];
+if (!Array.isArray(candidateOrigins) || candidateOrigins.length > 2 || candidateOrigins.some(value => {
+  try { const url = new URL(value); return url.protocol !== 'http:' || url.hostname !== '127.0.0.1' || url.origin !== value; }
+  catch { return true; }
+})) throw Error('Candidate builds require at most two exact loopback origins.');
 app.use((req, res, next) => {
-  if (req.get("Origin") && req.get("Origin") !== config.origin) return res.sendStatus(403);
+  const origin = req.get('Origin');
+  if (origin && origin !== config.origin && !candidateOrigins.includes(origin)) return res.sendStatus(403);
+  if (origin && candidateOrigins.includes(origin)) {
+    res.set('Access-Control-Allow-Origin', origin);
+    res.vary('Origin');
+    res.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    const headers = req.get('Access-Control-Request-Headers');
+    if (headers && !/^[a-z0-9, _-]{1,2048}$/i.test(headers)) return res.sendStatus(403);
+    if (headers) res.set('Access-Control-Allow-Headers', headers);
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+  }
   res.set("Cache-Control", "no-store");
   next();
 });

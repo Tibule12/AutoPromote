@@ -25,15 +25,19 @@ async function range(input, value) { await input.evaluate((e, v) => {
 async function recording(page, outputFolder = folder) {
   require('../creative-templates/proof-storage').requireProofSpace(outputFolder);
   const frames = path.join(outputFolder, `editing-frames-${Date.now()}.private`); fs.mkdirSync(frames, { recursive: true });
-  const session = await page.context().newCDPSession(page), images = []; let bytes = 0, failure;
+  const session = await page.context().newCDPSession(page), images = []; let bytes = 0, failure, stopping = false;
   session.on('Page.screencastFrame', event => {
+    if (stopping) { void session.send('Page.screencastFrameAck', { sessionId: event.sessionId }).catch(() => {}); return; }
     const data = Buffer.from(event.data, 'base64');
     if (bytes + data.length > 256 * 1024 ** 2) failure = 'Editing capture exceeded256MiB';
     if (!failure) { const file = path.join(frames, `${String(images.length).padStart(6, '0')}.jpg`); fs.writeFileSync(file, data); images.push({ file, time: Date.now() / 1000 }); bytes += data.length; }
-    void session.send('Page.screencastFrameAck', { sessionId: event.sessionId });
+    void session.send('Page.screencastFrameAck', { sessionId: event.sessionId }).catch(error => {
+      if (!stopping) failure = error.message;
+    });
   });
   await session.send('Page.startScreencast', { format: 'jpeg', quality: 65, maxWidth: 1920, maxHeight: 1200, everyNthFrame: 2 });
   return async () => {
+    stopping = true;
     await session.send('Page.stopScreencast'); await session.detach(); assert(!failure, failure); assert(images.length);
     const concat = path.join(frames, 'frames.ffconcat'); fs.writeFileSync(concat, 'ffconcat version 1.0\n' + images.map((f, i) => `file '${f.file}'\nduration ${Math.max(.001, (images[i + 1]?.time ?? f.time + .1) - f.time)}\n`).join('') + `file '${images.at(-1).file}'\n`);
     const movie = path.join(outputFolder, 'editing-in-studio.mp4');

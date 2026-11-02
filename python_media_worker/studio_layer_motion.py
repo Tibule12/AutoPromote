@@ -15,13 +15,13 @@ import numpy as np
 from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFilter, ImageOps
 
 try:
-    from .studio_perspective import project_media, validate_perspective_layer
+    from .studio_perspective import project_media, validate_perspective_layer, validate_perspective
     from .studio_vector_shape import rasterize_vector_shape, validate_vector_trim
     from .studio_motion import automation_segment_value, finite
     from .viral_motion_graphics import edit_clock
     from .viral_render_contract import map_timeline_time
 except ImportError:
-    from studio_perspective import project_media, validate_perspective_layer
+    from studio_perspective import project_media, validate_perspective_layer, validate_perspective
     from studio_vector_shape import rasterize_vector_shape, validate_vector_trim
     from studio_motion import automation_segment_value, finite
     from viral_motion_graphics import edit_clock
@@ -68,7 +68,11 @@ def interpolate_layer_value(layer, property_name, time, fallback):
 def layer_pose(layer, overlay, time):
     base = (layer or {}).get("base_transform") or {}
     return {
-        **({'perspective_progress': max(0,min(100,interpolate_layer_value(layer,'perspectiveProgress',time,base.get('perspective_progress',100))))} if (layer or {}).get('perspective') else {}),
+        **({'mask_path': animated_mask_path(layer,time)} if ((layer or {}).get('effects') or {}).get('mask',{}).get('shape')=='polygon' else {}),
+        **({'perspective_progress': max(0,min(100,interpolate_layer_value(layer,'perspectiveProgress',time,base.get('perspective_progress',100)))),
+            'perspective':{**validate_perspective(layer['perspective']),'corners':[
+                [interpolate_layer_value(layer,f'planeCorner{i}{axis}',time,p[j]) for j,axis in enumerate(('X','Y'))]
+                for i,p in enumerate(validate_perspective(layer['perspective'])['corners'])]}} if (layer or {}).get('perspective') else {}),
         **({"text_progress": max(0, min(100, interpolate_layer_value(layer, "textProgress", time, base.get("text_progress", 100))))} if (layer or {}).get("text_animator") else {}),
         "x": interpolate_layer_value(layer, "x", time, base.get("x", _get(overlay, "x", 50))),
         "y": interpolate_layer_value(layer, "y", time, base.get("y", _get(overlay, "y", 50))),
@@ -82,6 +86,44 @@ def layer_pose(layer, overlay, time):
                 ('stroke_end', 'strokeEnd', 100, 0, 100), ('stroke_offset', 'strokeOffset', 0, -1000, 1000)]}
            if (layer or {}).get('vector_shape') is not None else {}),
     }
+
+
+def validate_mask_animation(layer):
+    keys=[key for key in (layer or {}).get('motion_keyframes') or [] if str(key.get('property','')).startswith('maskPoint')]
+    if not keys:return
+    mask=((layer or {}).get('effects') or {}).get('mask') or {}
+    if mask.get('shape')!='polygon' or layer.get('type') not in {'image','video'}:
+        raise ValueError('Mask point animation requires an ordinary media polygon')
+    points=_mask_points(mask)
+    for key in keys:
+        prop=re.fullmatch(r'maskPoint(\d{1,2})(X|Y)',str(key.get('property','')))
+        value,time=key.get('value'),key.get('time')
+        if (not prop or int(prop[1])>=len(points) or isinstance(value,bool) or not isinstance(value,(int,float))
+                or not math.isfinite(value) or not -100<=value<=200 or isinstance(time,bool)
+                or not isinstance(time,(int,float)) or not math.isfinite(time) or time<0):
+            raise ValueError('Invalid animated mask point channel, time or coordinate')
+
+
+def _mask_points(mask):
+    path=str(mask.get('path') or 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)')
+    match=re.fullmatch(r'polygon\((.{1,2048})\)',path.strip())
+    points=[]
+    for pair in match[1].split(',') if match else []:
+        point=re.fullmatch(r'\s*(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*',pair)
+        if not point:raise ValueError('Mask points require finite percentage coordinates')
+        points.append([float(point[1]),float(point[2])])
+    if not 3<=len(points)<=64:raise ValueError('Mask polygon requires 3–64 points')
+    return points
+
+
+def animated_mask_path(layer,time):
+    mask=((layer or {}).get('effects') or {}).get('mask') or {}
+    points=_mask_points(mask)
+    result=[]
+    for index,point in enumerate(points):
+        values=[interpolate_layer_value(layer,f'maskPoint{index}{axis}',time,point[j]) for j,axis in enumerate(['X','Y'])]
+        result.append(f'{values[0]:.8f}% {values[1]:.8f}%')
+    return 'polygon('+', '.join(result)+')'
 
 
 def layer_clip_mask(size, mask, crop_x=0, crop_y=0, feather_scale=1):
@@ -180,6 +222,13 @@ def _bounded_text_pose(artwork, overlay, layer, pose, canvas_size, sample_opacit
 
 
 def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, reference_surface=False):
+    region=((layer or {}).get('perspective') or {}).get('sourceRect')
+    if region is not None:
+        validate_perspective(layer['perspective'])
+    if pose.get('mask_path') is not None:
+        effects={**((layer or {}).get('effects') or {})}
+        effects['mask']={**(effects.get('mask') or {}),'path':pose['mask_path']}
+        layer={**layer,'effects':effects}
     canvas_width, canvas_height = canvas_size
     fullscreen = str(_get(overlay, "bRollMode", _get(overlay, "b_roll_mode", ""))) == "fullscreen"
     if fullscreen:
@@ -191,7 +240,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
     height_percent = max(.1, min(1000 if _get(overlay, "type") == "text" else 100, finite(_get(overlay, "height", 35), 35)))
     box_width = canvas_width if fullscreen else max(2, round(canvas_width * width_percent / 100 * pose["scale"]))
     box_height = canvas_height if fullscreen else max(2, round(canvas_height * height_percent / 100 * pose["scale"]))
-    fit = "cover" if fullscreen else str(_get(overlay, "mediaFit", _get(overlay, "media_fit", "contain")) or "contain").lower()
+    fit = "stretch" if region is not None else "cover" if fullscreen else str(_get(overlay, "mediaFit", _get(overlay, "media_fit", "contain")) or "contain").lower()
     source_ratio, box_ratio = asset.width / asset.height, box_width / box_height
     if fit == "stretch":
         target_width, target_height = box_width, box_height
@@ -227,7 +276,7 @@ def _render_pose(asset, overlay, layer, pose, canvas_size, sample_opacity=1, *, 
     if (layer or {}).get('perspective'):
         if fullscreen:
             raise ValueError('Perspective is available on ordinary inset media planes')
-        artwork = project_media(artwork,layer['perspective'],pose['perspective_progress'])
+        artwork = project_media(artwork,pose.get('perspective',layer['perspective']),pose['perspective_progress'])
     anchor_x = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_x", 50), 50))) / 100
     anchor_y = .5 if fullscreen else max(0, min(100, finite((layer or {}).get("anchor_y", 50), 50))) / 100
     diagonal = max(8, math.ceil(math.hypot(artwork.width, artwork.height) * 2.1))
@@ -422,6 +471,7 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
     vector_shape = (layer or {}).get('vector_shape')
     validate_perspective_layer(layer or {})
     validate_vector_trim(layer or {})
+    validate_mask_animation(layer or {})
     if vector_shape is not None and frame_source is not None:
         raise ValueError('Vector artwork cannot replace a decoded video source')
     asset = (None if vector_shape is not None else
@@ -437,8 +487,7 @@ def render_image_layer_motion(asset_path, output_path, overlay, layer, width, he
     shutter = max(0, min(1, finite(motion_blur.get("shutter"), .5)))
     encoding = (["-filter_complex", "[0:v]split=2[color][a];[a]alphaextract[alpha]",
                  "-map", "[color]", "-map", "[alpha]",
-                 "-c:v:0", "libx264rgb", "-crf:v:0", "18", "-maxrate:v:0", "8M", "-bufsize:v:0", "2M",
-                 "-preset:v:0", "ultrafast", "-pix_fmt:v:0", "rgb24",
+                 "-c:v:0", "ffv1", "-level:v:0", "3", "-pix_fmt:v:0", "bgr0",
                  "-c:v:1", "ffv1", "-level:v:1", "3", "-pix_fmt:v:1", "gray", "-f", "matroska"]
                 # Full-frame alpha gradients compress poorly as qtrle and can
                 # exhaust bounded local intermediate storage. PNG-in-MOV

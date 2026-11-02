@@ -19,7 +19,7 @@ export default function StudioPerspectiveSurface({ value, progress, children, cl
         time < Number(current.layer.startTime || 0) + Number(current.layer.duration || 0) ? 'visible' : 'hidden';
       parent.style.left = `${pose.x}%`; parent.style.top = `${pose.y}%`; parent.style.opacity = String(pose.opacity);
       parent.style.setProperty('--title-scale', String(pose.scale)); parent.style.setProperty('--title-rotation', `${pose.rotation}deg`);
-      el.style.transform = perspectiveCssMatrix(current.value, pose.perspectiveProgress,
+      el.style.transform = perspectiveCssMatrix(pose.perspective || current.value, pose.perspectiveProgress,
         Math.max(1, el.clientWidth), Math.max(1, el.clientHeight));
       el.dataset.programmeTime = String(time);
     };
@@ -49,6 +49,12 @@ export default function StudioPerspectiveSurface({ value, progress, children, cl
     return () => observer?.disconnect();
   }, [enabled]);
   if (!value) return children;
+  const region=value.sourceRect||[0,0,100,100],rw=region[2]-region[0],rh=region[3]-region[1];
+  const cropped=!!value.sourceRect;
   return <div ref={ref} data-testid="studio-perspective-surface" data-plane-width={size[0]} data-plane-height={size[1]} style={{width:'100%',height:'100%',
-    transformOrigin:'0 0',transform:perspectiveCssMatrix(value,progress,...size)}}>{children}</div>;
+    transformOrigin:'0 0',transform:perspectiveCssMatrix(value,progress,...size)}}>
+    {cropped?<div style={{width:'100%',height:'100%',overflow:'hidden',position:'relative'}}>
+      <div data-testid="studio-plane-source-region" style={{position:'absolute',width:`${10000/rw}%`,height:`${10000/rh}%`,
+        left:`${-region[0]*100/rw}%`,top:`${-region[1]*100/rh}%`}}>{children}</div>
+    </div>:children}</div>;
 }

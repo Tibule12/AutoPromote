@@ -1,5 +1,7 @@
 // Property metadata for the existing canonical transform/keyframe graph.
 import { GROUP_BOUNDS, GROUP_KIND } from './studioGroups';
+import { parseStudioMaskPolygon } from './studioMaskGeometry';
+import { PLANE_CORNER_CHANNELS } from './studioPerspective';
 export const STUDIO_MOTION_PROPERTIES = [
   { id: "textProgress", label: "Text progress", min: 0, max: 100, step: .1, textAnimatorOnly: true },
   { id: "perspectiveProgress", label: "Perspective progress", min: 0, max: 100, step: .1, perspectiveOnly: true },
@@ -18,8 +20,12 @@ export const STUDIO_MOTION_PROPERTIES = [
 export const studioMotionPropertiesForTarget = target => target?.kind === GROUP_KIND
   ? STUDIO_MOTION_PROPERTIES.filter(property => Object.hasOwn(GROUP_BOUNDS, property.id))
     .map(property => ({ ...property, min: GROUP_BOUNDS[property.id][0], max: GROUP_BOUNDS[property.id][1] }))
-  : STUDIO_MOTION_PROPERTIES.filter(property => (!property.perspectiveOnly || !!target?.perspective) && (!property.textAnimatorOnly || !!target?.textAnimator) && (!property.vectorOnly || !!target?.vectorShape) &&
-    (!property.mediaOnly || target?.id === 'main-video' || ['image', 'video'].includes(target?.type)));
+  : [...STUDIO_MOTION_PROPERTIES.filter(property => (!property.perspectiveOnly || !!target?.perspective) && (!property.textAnimatorOnly || !!target?.textAnimator) && (!property.vectorOnly || !!target?.vectorShape) &&
+    (!property.mediaOnly || target?.id === 'main-video' || ['image', 'video'].includes(target?.type))),
+    ...(target?.perspective ? PLANE_CORNER_CHANNELS : []),
+    ...(target?.id!=='main-video'&&['image','video'].includes(target?.type)&&target?.mask?.enabled&&target.mask.shape==='polygon'
+      ? parseStudioMaskPolygon(target.mask.path).flatMap((_,index)=>['X','Y'].map(axis=>({id:`maskPoint${index}${axis}`,
+        label:`Mask point ${index+1} ${axis}`,min:-100,max:200,step:.1,maskPoint:true}))) : [])];
 
 // Authoring time is the edit clock; one output frame spans playbackRate / fps.
 // Half a frame distinguishes adjacent keys, including 50/60fps delivery.

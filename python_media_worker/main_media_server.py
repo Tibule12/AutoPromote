@@ -27,9 +27,13 @@ import cv2  # OpenCV (Phase 1)
 try:
     from .studio_render_scratch import studio_render_scratch_directory
     from .studio_ffmpeg_limits import bounded_studio_ffmpeg_command
+    from .studio_ffmpeg_transport import ffmpeg_filter_scripts
+    from .studio_reframe_clock import reframe_picture_segments
 except ImportError:
     from studio_render_scratch import studio_render_scratch_directory
     from studio_ffmpeg_limits import bounded_studio_ffmpeg_command
+    from studio_ffmpeg_transport import ffmpeg_filter_scripts
+    from studio_reframe_clock import reframe_picture_segments
 try:
     from .caption_transcription import caption_transcription_options
 except ImportError:
@@ -9294,12 +9298,15 @@ async def render_reframe_timeline_sequential(
     solo_zoom=1,
     fallback_mode="speaker_track",
     job_id="reframe",
+    programme_fps=None,
 ):
     """Render long reviewed timelines with bounded memory and preserve source audio."""
     specs = plan_reframe_timeline_segments(
         duration, timeline_cuts, split_framing, speaker_order_cuts,
         solo_keyframes, fallback_mode,
     )
+    if programme_fps is not None:
+        specs = reframe_picture_segments(specs, programme_fps)
     segment_paths = []
     work_dir = os.path.dirname(os.path.abspath(output_path))
     concat_path = os.path.join(work_dir, f"{job_id}_reframe_concat.txt")
@@ -9318,11 +9325,11 @@ async def render_reframe_timeline_sequential(
             if len(active_offsets) > 1:
                 raise ValueError("A source split supports one alternate full-frame angle per segment")
             command = [
-                "ffmpeg", "-ss", f"{segment['start']:.6f}", "-i", source_path,
+                "ffmpeg", "-ss", f"{segment['start']:.9f}", "-i", source_path,
             ]
             if active_offsets:
                 command.extend([
-                    "-ss", f"{segment['start'] + active_offsets[0]:.6f}", "-i", source_path,
+                    "-ss", f"{segment['start'] + active_offsets[0]:.9f}", "-i", source_path,
                 ])
             command.extend([
                 "-t", f"{segment['end']-segment['start']:.6f}",
@@ -9334,6 +9341,8 @@ async def render_reframe_timeline_sequential(
                 *build_viral_export_encode_args(resolve_viral_export_profile({}, target_width, target_height)),
                 "-movflags", "+faststart", "-y", segment_path,
             ])
+            if programme_fps is not None:
+                command[-1:-1] = ['-frames:v', str(segment['frame_count']), '-fps_mode', 'passthrough']
             await run_subprocess_async(
                 command, check=True, job_context=job_id,
                 timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
@@ -12455,6 +12464,25 @@ async def run_queued_heavy_job(job_id, feature, coroutine_factory):
             })
 
 async def run_subprocess_async(
+    cmd,
+    check=True,
+    stdout=None,
+    stderr=None,
+    text=False,
+    job_context=None,
+    timeout_seconds=None,
+):
+    # The same canonical graph can exceed Linux's per-argument byte limit.
+    # FFmpeg's native script transport keeps that graph exact and cleans up on
+    # success, launch failure, timeout and cancellation.
+    with ffmpeg_filter_scripts(cmd) as prepared:
+        return await _run_subprocess_async_prepared(
+            prepared, check=check, stdout=stdout, stderr=stderr, text=text,
+            job_context=job_context, timeout_seconds=timeout_seconds,
+        )
+
+
+async def _run_subprocess_async_prepared(
     cmd,
     check=True,
     stdout=None,
@@ -31698,8 +31726,8 @@ async def render_viral_clip(request: RenderViralRequest):
         normalize_audio_remix(getattr(request, "audio_remix", None) or getattr(request, "audioRemix", None))
         for layer in (request.composition_plan or {}).get("layers") or []:
             mask = (layer.get("effects") or {}).get("mask") or {}
-            if mask.get("enabled") and (layer.get("id") == "main-video" or layer.get("type") == "video"):
-                raise ValueError("Geometric masks currently export on image and ordinary title layers. Use the reviewed subject-mask workflow for source video.")
+            if mask.get("enabled") and layer.get("id") == "main-video":
+                raise ValueError("Use an ordinary media layer or the reviewed subject-mask workflow for the main source video.")
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if request.async_mode:
@@ -32390,6 +32418,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         raise ValueError("Timed Multi-Camera changes require one synchronized camera programme per framing segment")
                     src_w, src_h = get_video_dimensions(reframe_source_path)
                     reframe_duration = get_media_duration(reframe_source_path)
+                    programme_fps = None
+                    if request.timeline_segments:
+                        picture = next(stream for stream in probe_media_stream_summary(reframe_source_path)['streams']
+                                       if stream.get('codec_type') == 'video')
+                        numerator, denominator = str(picture['avg_frame_rate']).split('/')
+                        programme_fps = float(numerator) / float(denominator)
                     podcast_preflight = preflight_studio_podcast_timeline(
                         {
                             "reframe": finish_reframe_plan,
@@ -32414,6 +32448,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         solo_zoom=finish_reframe_plan.get("zoom", 1),
                         fallback_mode=crop_mode,
                         job_id=job_id,
+                        programme_fps=programme_fps,
                     )
                     working_path = cropped_path
                 elif crop_mode == "group_stack":
@@ -33402,6 +33437,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
         overlay_audio_specs = []
         prepared_overlay_ranges = {}
+        video_layer_rasters = {}  # Scoped to this export; track mattes remain independent.
         
         for ov in video_overlays:
             try:
@@ -33432,16 +33468,33 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             if ov_path:
                 block_start, block_input = len(filter_chain), current_v_label
                 layer_plan = composition_layer(request.composition_plan, ov.id)
-                if layer_plan and (layer_plan.get("motion_keyframes") or layer_plan.get('perspective')):
+                try:
+                    from .studio_layer_cache import video_layer_uses_canonical_raster
+                except ImportError:
+                    from studio_layer_cache import video_layer_uses_canonical_raster
+                if video_layer_uses_canonical_raster(ov.id, layer_plan, request.composition_plan):
                     # A moving video uses the same canonical pose/alpha
                     # compositor as images, after ordinary B-roll preparation.
                     suffix = 'mkv' if layer_plan.get('perspective') else 'mov'
                     motion_layer_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_video_motion_{input_idx}.{suffix}")
                     overlay_temp_paths.append(motion_layer_path)
-                    receipt = await asyncio.to_thread(render_video_layer_motion,
-                        ov_path, motion_layer_path, ov, layer_plan, base_width, base_height,
-                        rendered_timeline_duration, speed_plan,
-                        (delivery_profile['fps'] or 30) if layer_plan.get('perspective') else 30)
+                    try:
+                        from .studio_layer_cache import video_layer_raster_key
+                    except ImportError:
+                        from studio_layer_cache import video_layer_raster_key
+                    layer_fps = delivery_profile['fps'] or 30
+                    raster_key = await asyncio.to_thread(video_layer_raster_key,
+                        ov_path, ov, layer_plan, base_width, base_height,
+                        rendered_timeline_duration, speed_plan, layer_fps)
+                    cached_raster = video_layer_rasters.get(raster_key)
+                    if cached_raster and os.path.isfile(cached_raster[0]):
+                        motion_layer_path, receipt = cached_raster
+                        logger.info("Reusing pixel-identical moving media raster before its independent matte")
+                    else:
+                        receipt = await asyncio.to_thread(render_video_layer_motion,
+                            ov_path, motion_layer_path, ov, layer_plan, base_width, base_height,
+                            rendered_timeline_duration, speed_plan, layer_fps)
+                        video_layer_rasters[raster_key] = (motion_layer_path, receipt)
                     if getattr(ov, "useOverlayAudio", False) and has_audio_stream(ov_path):
                         inputs.extend(["-itsoffset", str(rendered_timeline_time(cue_start)), "-i", ov_path])
                         overlay_audio_specs.append((input_idx, ov))

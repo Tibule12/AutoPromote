@@ -20,6 +20,11 @@ async function main() {
   const browser = await chromium.launch({ channel: 'chromium', headless: true, args: ['--mute-audio', '--host-resolver-rules=MAP localhost 127.0.0.1', '--disk-cache-size=1048576'] });
   const deadline = setTimeout(() => browser.close().finally(() => process.exit(1)), 180000);
   const errors = [], writes = [], checks = [];
+  const localOnly = async context => context.route('**/*', route => {
+    const url = new URL(route.request().url());
+    return ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) || ['data:', 'blob:'].includes(url.protocol)
+      ? route.continue() : route.abort();
+  });
   const observe = page => {
     page.on('pageerror', error => errors.push(error.message));
     page.on('request', request => { if (request.method() !== 'GET' && new URL(request.url()).pathname.startsWith('/api/')) writes.push(new URL(request.url()).pathname); });
@@ -29,6 +34,7 @@ async function main() {
       const snapshots = [];
       for (const [name, url] of [['baseline', baseline], ['candidate', candidate]].filter(([, url]) => url)) {
         const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'reduce', timezoneId: 'Africa/Johannesburg' });
+        await localOnly(context);
         const page = await context.newPage(); page.setDefaultTimeout(20000); observe(page);
         try {
           await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -72,6 +78,7 @@ async function main() {
       const projectCount = storage.origins.flatMap(o => o.indexedDB || []).find(db => db.name === 'autopromote-viral-studio')?.stores.find(s => s.name === 'projects')?.records.length || 0;
       storage.origins = storage.origins.map(o => ({ ...o, origin: o.origin === 'http://localhost:5000' ? new URL(candidate).origin : o.origin, indexedDB: (o.indexedDB || []).filter(db => db.name !== 'autopromote-viral-studio') }));
       const context = await browser.newContext({ storageState: storage, viewport: { width: 1440, height: 1000 } });
+      await localOnly(context);
       const page = await context.newPage(); page.setDefaultTimeout(20000); observe(page);
       try {
         await page.goto(candidate, { waitUntil: 'domcontentloaded' });

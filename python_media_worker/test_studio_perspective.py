@@ -70,13 +70,17 @@ def test_unknown_projection_and_unsupported_consumers_rejected():
         with pytest.raises(ValueError):validate_perspective_layer({**base,**extra})
     with pytest.raises(ValueError):validate_perspective_layer(base,grouped=True)
 
-def test_projected_stream_retains_alpha_and_bounded_colour_error_on_the_delivery_clock(tmp_path):
+def test_projected_stream_preserves_exact_rgb_and_alpha_on_the_delivery_clock(tmp_path):
     path=tmp_path/'plane.mkv'
     overlay={'type':'video','start_time':0,'duration':.5,'width':90,'height':90,'frameShape':'edge'}
     layer={'id':'plane','type':'video','perspective':PLANE,'base_transform':{'x':50,'y':50,'scale':1},
            'motion_keyframes':[{'property':'perspectiveProgress','time':0,'value':0},
                               {'property':'perspectiveProgress','time':.4,'value':100,'easing':'linear'}]}
-    def source(index):return Image.new('RGBA',(80,40),(index*10,50,150,255))
+    def source(index):
+        y,x=np.indices((40,80))
+        pixels=np.stack(((x*13+index*17)%256,(y*19+index*5)%256,(x*y+index*23)%256,
+                         np.full_like(x,255)),axis=-1).astype(np.uint8)
+        return Image.fromarray(pixels,'RGBA')
     render_image_layer_motion(None,path,overlay,layer,100,60,.5,[],fps=24,frame_source=source)
     raw=subprocess.check_output(['ffmpeg','-v','error','-i',str(path),'-filter_complex','[0:v:0][0:v:1]alphamerge[v]',
                                  '-map','[v]','-pix_fmt','rgba','-f','rawvideo','-'])
@@ -85,9 +89,7 @@ def test_projected_stream_retains_alpha_and_bounded_colour_error_on_the_delivery
     for i,frame in enumerate(frames):
         expected=_render_pose(source(i),overlay,layer,layer_pose(layer,overlay,i/24),(100,60))
         expected=np.asarray(expected)
-        np.testing.assert_array_equal(frame[:,:,3],expected[:,:,3])
-        opaque=expected[:,:,3]>250
-        assert np.mean(np.abs(frame[:,:,:3].astype(float)-expected[:,:,:3])[opaque])<2
+        np.testing.assert_array_equal(frame,expected)
 
 def test_rounded_intermediate_timestamps_keep_the_last_declared_frame_without_leaking_after_cue(tmp_path):
     path=tmp_path/'plane.mkv'

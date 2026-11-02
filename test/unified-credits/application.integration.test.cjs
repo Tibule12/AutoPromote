@@ -58,7 +58,7 @@ async function terminal(collection, id) {
   }
   throw new Error(`Job did not become terminal: ${collection}/${id}`);
 }
-async function quote(operation, body, destinations = []) {
+async function quote(operation, body, destinations = [], compact = false) {
   const sourceId = `input-${crypto.randomUUID()}`;
   await db
     .collection("credits_v2_inputs")
@@ -71,7 +71,7 @@ async function quote(operation, body, destinations = []) {
       objectGeneration: "1",
       enforcedMaxSeconds: 1,
       allowedDestinations: ["facebook"],
-      workflowInput: { requestBody: body },
+      workflowInput: compact ? require('../../src/services/unifiedCredits/workflowDescriptor').compactWorkflowDescriptor({requestBody:body}) : { requestBody: body },
     });
   const result = await request(app)
     .post("/api/credit-pilot/quote")
@@ -349,6 +349,16 @@ describe("ordinary application routes with one nonproduction wallet", () => {
     assert.equal((await service.getAccount(uid)).balance, 15);
     assert.equal((await db.collection("clip_analyses").get()).size, 0);
     assert.equal(getApplicationContext(), null);
+  });
+  it('admits a digest-bound quote and rejects changed input before charging or dispatch', async () => {
+    const body={videoUrl:`${origin}/objects/source.mp4`,contentId:'source-content'};
+    const q=await quote('clips.analyze',body,[],true);
+    await post('/api/clips/analyze',{...body,videoUrl:'https://attacker.example/changed'},q).expect(409);
+    assert.equal((await service.getAccount(uid)).balance,15);
+    assert.equal((await db.collection('clip_analyses').get()).size,0);
+    const accepted=await post('/api/clips/analyze',body,q).expect(200);
+    assert(accepted.body.creditOperationId);
+    assert.equal((await db.collection('credits_v2_operations').get()).size,1);
   });
   it("keeps the absolute pilot ceiling across renewal and prevents budget reset by policy replacement", async () => {
     const base = require("../../config/unified-credits.sandbox.example.json");

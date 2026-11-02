@@ -204,6 +204,7 @@ async function main() {
       apiOrigin: origin,
       timeoutMs: Number(process.env.CREDITS_LOCAL_RENDER_TIMEOUT_MS || 120000),
       maxArtifactBytes: Number(process.env.CREDITS_LOCAL_MAX_ARTIFACT_BYTES || 20 * 1024 * 1024),
+      maxRequestBytes: Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 512 * 1024),
     });
     env.MEDIA_WORKER_URL = env.LOCAL_MEDIA_WORKER_URL = worker.origin;
     const policy = {

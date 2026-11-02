@@ -1,0 +1,37 @@
+{
+  "sixRetainedSourceClips": [
+    {
+      "name": "City.mp4",
+      "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d",
+      "unchanged": true
+    },
+    {
+      "name": "Footsteps.mp4",
+      "sha256": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac",
+      "unchanged": true
+    },
+    {
+      "name": "Open trail.mp4",
+      "sha256": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96",
+      "unchanged": true
+    },
+    {
+      "name": "Autumn.mp4",
+      "sha256": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468",
+      "unchanged": true
+    },
+    {
+      "name": "Coast.mp4",
+      "sha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c",
+      "unchanged": true
+    },
+    {
+      "name": "Summit.mp4",
+      "sha256": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00",
+      "unchanged": true
+    }
+  ],
+  "previousRejectedBendingMovieUnchanged": true,
+  "existingProjectsPreserved": true,
+  "newProjectId": "viral-project-fa5921d4-7d4c-44bb-955d-dc65ef0c1360"
+}

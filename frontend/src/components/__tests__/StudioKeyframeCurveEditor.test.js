@@ -7,6 +7,13 @@ const keys = [
   { id: "b", targetId: "title", property: "opacity", time: 1, value: 1, easing: "bezier", curve: [.2, .1, .8, .9] },
   { id: "c", targetId: "title", property: "x", time: 1, value: 50, easing: "linear" },
 ];
+test('plane corner curves expose the interpolation modes protected by geometry validation',()=>{
+  render(<StudioKeyframeCurveEditor keyframes={[{id:'p0',property:'planeCorner0X',time:0,value:0,easing:'linear'},
+    {id:'p1',property:'planeCorner0X',time:1,value:15,easing:'linear'}]} focusId="p1" onUpdate={jest.fn()} />);
+  const options=[...screen.getByLabelText('Selected motion key easing').options].map(o=>o.value);
+  expect(options).toEqual(['linear','hold']);
+  expect(screen.queryByLabelText('Bezier Time 1')).not.toBeInTheDocument();
+});
 test("selected timeline key edits its own value and all four curve coordinates without overwriting sibling properties", () => {
   const update = jest.fn();
   render(<StudioKeyframeCurveEditor keyframes={keys} focusId="b" onUpdate={update} />);

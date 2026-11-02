@@ -91,3 +91,19 @@ test.each([false, true])(
     expect(after.pose.rotation).toBeCloseTo(before.pose.rotation, 4);
   }
 );
+
+
+test('a polygon point can be stamped, curved and changed in the shared graph while transform drivers remain gated', () => {
+  const layer = {...plate, parentId: undefined, mask: {enabled:true, shape:'polygon', path:'polygon(10% 10%, 90% 10%, 50% 90%)'}};
+  render(<Harness layer={layer} keys={[
+    {id:'point-0',targetId:'plate',property:'maskPoint0X',time:0,value:10,easing:'linear'},
+    {id:'point-2',targetId:'plate',property:'maskPoint0X',time:2,value:30,easing:'linear'},
+  ]} />);
+  stamp('maskPoint0X');
+  expect(state().motionKeyframes.find(key=>key.time===time).value).toBeCloseTo(22,4);
+  fireEvent.change(screen.getByLabelText('Selected keyframe value'), {target:{value:'25'}});
+  expect(state().motionKeyframes.find(key=>key.time===time).value).toBe(25);
+  fireEvent.click(screen.getByTestId('comp-curve-preset-whip_snap'));
+  expect(state().motionKeyframes.find(key=>key.time===time).easing).toBe('bezier');
+  expect(screen.getByLabelText('Motion driver expression type')).toBeDisabled();
+});

@@ -3,6 +3,10 @@ import { validateStudioPerspectiveLayer, PERSPECTIVE_LEFT } from './studioPerspe
 import { validateStudioTextAnimation } from './studioTextAnimator';
 import { reconcileStudioDocument } from './studioProjectDocument';
 import { compileStudioCompositionForRender, compileStudioFinishForRender } from './studioRenderCompiler';
+import { buildStudioGraphicsPackage } from './studioGraphicsPackage';
+import { studioMotionPropertiesForTarget } from './studioMotionProperties';
+import { validateSpatialCurve } from './studioAutomation';
+import { validateStudioGroupComposite } from './studioGroups';
 
 const only = (value, fields) => {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !fields.includes(k)))
@@ -38,8 +42,15 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
   const compositionOrder = [...(snapshot.compositionOrder || snapshot.overlays.map(o => o.id))];
   const ids = new Map();
   const target = id => id === 'main-video' ? id : ids.get(id) || (overlays.some(layer => layer.id === id) ? id : null);
+  const channelLimits = (id, property) => {
+    const layer = id === 'main-video' ? { ...snapshot.mainTransform, id, type: 'video' } : overlays.find(item => item.id === id);
+    const field = studioMotionPropertiesForTarget(layer).find(item => item.id === property);
+    if (!field) throw Error('Choose a motion channel supported by this scene layer.');
+    const legacy = { x: [-100, 200], y: [-100, 200], scale: [.02, 6], rotation: [-3600, 3600] };
+    return legacy[property] || [field.min, field.max];
+  };
   for (const action of plan.actions) {
-    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'perspective', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'beforeId', 'property']);
+    only(action, ['type', 'id', 'name', 'startTime', 'duration', 'transform', 'text', 'sourceMediaId', 'sourceStart', 'perspective', 'mask', 'targetId', 'parentId', 'matteSourceId', 'mode', 'keys', 'grade', 'beforeId', 'property']);
     const type = action.type;
     if (['null', 'title', 'media_plane', 'adjustment'].includes(type)) {
       string(action.id); string(action.name, 100);
@@ -65,10 +76,16 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
         const sourceStart = finite(action.sourceStart ?? 0, 0, Number(media.duration));
         if (sourceStart + length > Number(media.duration) + .001) throw Error('Scene plane would run past its source video.');
         Object.assign(layer, { type: 'video', src: media.url, file: media.file, sourceMediaId: media.id,
+          sourceDuration: Number(media.duration), contentHash: media.contentHash || null,
           sourceStoragePath: media.storagePath, sourceStartTime: sourceStart, width: 70, height: 70,
           bRollMode: 'pip', mediaFit: 'contain', frameShape: 'edge', borderRadius: 0, volume: 0, muted: true,
           layerShadow: {enabled: true, color: '#000000', opacity: .35, blur: 12, x: 0, y: 16},
           ...(action.perspective ? { perspective: action.perspective } : {}) });
+        if (action.mask) {
+          validateStudioGroupComposite({ mask: action.mask });
+          layer.mask = JSON.parse(JSON.stringify(action.mask));
+          layer.layerShadow = { enabled: false };
+        }
       }
       overlays.push(layer); compositionOrder.push(id);
     } else if (type === 'parent') {
@@ -86,17 +103,17 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
       compositionOrder.splice(oldIndex, 1); compositionOrder.splice(compositionOrder.indexOf(beforeId), 0, id);
     } else if (type === 'remove_keys') {
       const id = target(action.targetId);
-      if (!id || !['x', 'y', 'scale', 'rotation', 'opacity', 'perspectiveProgress'].includes(action.property)) throw Error('Choose a supported scene key channel.');
+      if (!id) throw Error('Choose a supported scene key channel.');
+      channelLimits(id, action.property);
       for (let i = motionKeyframes.length - 1; i >= 0; i--) {
         if (motionKeyframes[i].targetId === id && motionKeyframes[i].property === action.property) motionKeyframes.splice(i, 1);
       }
     } else if (type === 'keys') {
       const id = target(action.targetId); if (!id || !Array.isArray(action.keys) || action.keys.length > 128) throw Error('Scene keys need an existing target and a bounded key list.');
       for (const key of action.keys) {
-        only(key, ['property', 'time', 'value', 'easing', 'curve']);
-        if (!['x', 'y', 'scale', 'rotation', 'opacity', 'perspectiveProgress'].includes(key.property)) throw Error('Unsupported scene animation property.');
-        const limits = { x: [-100, 200], y: [-100, 200], scale: [.02, 6], rotation: [-3600, 3600], opacity: [0, 1], perspectiveProgress: [0, 100] };
-        finite(key.time, 0, duration); finite(key.value, ...limits[key.property]);
+        only(key, ['property', 'time', 'value', 'easing', 'curve', 'spatialCurve']);
+        finite(key.time, 0, duration); finite(key.value, ...channelLimits(id, key.property));
+        validateSpatialCurve(key);
         if (!['linear', 'hold', 'ease_in', 'ease_out', 'ease_in_out', 'bezier'].includes(key.easing)) throw Error('Unsupported scene easing.');
         if (key.easing === 'bezier') {
           if (!Array.isArray(key.curve) || key.curve.length !== 4) throw Error('Scene Bezier keys need four controls.');
@@ -118,6 +135,41 @@ export function executeStudioSceneActions(plan, snapshot, createId) {
   const document = reconcileStudioDocument({ snapshot: next, projectId: doc.projectId, storedDocument: doc });
   compileStudioCompositionForRender(document); compileStudioFinishForRender(document);
   return { ...next, studioDocument: document };
+}
+
+// Director scene plans and manual graphics import share the same validated
+// authoring operation. Rasterisation only prepares static artwork; motion,
+// mattes, groups and text choreography remain ordinary editable project data.
+export async function prepareStudioSceneActions(plan, snapshot, createId, options) {
+  only(plan, ['format', 'version', 'projectId', 'baseRevision', 'name', 'actions', 'graphics']);
+  const { graphics, ...actionsPlan } = plan;
+  if (!graphics) return { snapshot: executeStudioSceneActions(actionsPlan, snapshot, createId), urls: [] };
+  if (actionsPlan.projectId !== snapshot.studioDocument.projectId ||
+      actionsPlan.baseRevision !== snapshot.studioDocument.revision)
+    throw Error('Scene plan is stale or belongs to another project.');
+  const isCurrent = options?.isCurrent || (() => true);
+  const revokeUrl = options?.revokeUrl || (url => URL.revokeObjectURL(url));
+  if (!isCurrent()) throw Error('The edit changed while preparing the scene.');
+  const occupied = new Set(['main-video', ...snapshot.overlays.map(layer => layer.id),
+    ...(actionsPlan.actions || []).filter(action => action.id).map(action => action.id)]);
+  for (const item of [...(graphics.layers || []), ...(graphics.groups || [])])
+    if (occupied.has(item.id)) throw Error('Graphics aliases must not collide with existing scene targets.');
+  const result = await buildStudioGraphicsPackage({ input: graphics,
+    overlays: snapshot.overlays, keyframes: snapshot.motionKeyframes || [], compounds: snapshot.compoundClips || [],
+    order: snapshot.compositionOrder || snapshot.overlays.map(layer => layer.id),
+    duration: snapshot.studioDocument.outputTimeMap.at(-1).outputRange.endTick / 90000,
+    aspect: options?.aspect, createId, ...options, revokeUrl });
+  try {
+    if (!isCurrent()) throw Error('The edit changed while preparing the scene.');
+    const aliases = new Map(graphics.layers.map((layer, index) => [layer.id, result.layers[index].id]));
+    const remapped = { ...actionsPlan, actions: actionsPlan.actions.map(action => ({ ...action,
+      ...Object.fromEntries(['targetId', 'parentId', 'matteSourceId', 'beforeId'].filter(field => action[field])
+        .map(field => [field, aliases.get(action[field]) || action[field]])),
+    })) };
+    const next = { ...snapshot, overlays: result.overlays, motionKeyframes: result.keyframes,
+      compoundClips: result.compounds, compositionOrder: result.order };
+    return { snapshot: executeStudioSceneActions(remapped, next, createId), urls: result.urls };
+  } catch (error) { result.urls.forEach(url => revokeUrl(url)); throw error; }
 }
 
 // A transparent local recipe, not evidence of model inference. Exact media and

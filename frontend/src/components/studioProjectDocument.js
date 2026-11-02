@@ -13,6 +13,7 @@ import { validateSpatialCurve } from "./studioAutomation";
 import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
 import { validateStudioPerspectiveLayer } from './studioPerspective';
+import { validateStudioMaskAnimation } from './studioMaskGeometry';
 import {
   validateStudioMotionDrivers,
   validateStudioParentGraph,
@@ -955,6 +956,7 @@ export const validateStudioProjectDocument = document => {
     ...(document.linkedTiming?.keys?.motionKeyframes || []).map(key => ({ ...key.parameters,
       time: key.atProgrammeTick === null ? NaN : ticksToSeconds(key.atProgrammeTick) }))];
   (document.layers || []).forEach(layer => {
+    validateStudioMaskAnimation({...layer.parameters,type:layer.legacyType},vectorMotionKeys.filter(key=>key.targetId===layer.layerId));
     validateStudioPerspectiveLayer({ ...layer.parameters, id: layer.layerId, type: layer.legacyType },
       vectorMotionKeys.filter(key => key.targetId === layer.layerId),
       (document.editGraph?.settings?.compoundClips || []).some(group => group.layerIds?.includes(layer.layerId)));

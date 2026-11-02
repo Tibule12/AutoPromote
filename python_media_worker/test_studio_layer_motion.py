@@ -15,7 +15,28 @@ from python_media_worker.studio_layer_motion import (
     _render_pose,
     render_image_layer_motion,
     render_video_layer_motion,
+    validate_mask_animation,
 )
+
+def test_polygon_point_keys_use_the_existing_curve_on_changing_video_pixels(tmp_path):
+    source,output=tmp_path/'source.mov',tmp_path/'point-keys.mov'
+    subprocess.run(['ffmpeg','-nostdin','-v','error','-y','-f','lavfi','-i',
+        'testsrc2=s=80x80:r=10:d=1','-c:v','qtrle',str(source)],check=True)
+    overlay={'type':'video','start_time':0,'duration':1,'width':100,'height':100,'frameShape':'edge','mediaFit':'stretch'}
+    layer={'id':'roto','type':'video','base_transform':{'x':50,'y':50,'scale':1,'opacity':1},
+      'effects':{'mask':{'enabled':True,'shape':'polygon','path':'polygon(10% 10%, 90% 10%, 50% 90%)','feather':0}},
+      'motion_keyframes':[{'property':'maskPoint0X','time':0,'value':10,'easing':'linear'},
+        {'property':'maskPoint0X','time':.9,'value':60,'easing':'linear'}]}
+    validate_mask_animation(layer)
+    assert '35.00000000% 10.00000000%' in layer_pose(layer,overlay,.45)['mask_path']
+    render_video_layer_motion(source,output,overlay,layer,80,80,1,[],fps=10)
+    raw=subprocess.check_output(['ffmpeg','-v','error','-i',str(output),'-pix_fmt','rgba','-f','rawvideo','-'])
+    frames=np.frombuffer(raw,np.uint8).reshape(-1,80,80,4)
+    assert len(frames)==10
+    assert frames[0,12,16,3]>250 and frames[8,12,16,3]<5
+    assert not np.array_equal(frames[0,35:45,40,:3],frames[8,35:45,40,:3])
+    for extra in [{'property':'maskPoint3X'},{'property':'maskPoint0Z'},{'value':float('nan')},{'time':-1}]:
+        with pytest.raises(ValueError):validate_mask_animation({**layer,'motion_keyframes':[{**layer['motion_keyframes'][0],**extra}]})
 
 
 def test_still_holds_reuse_one_raster_without_changing_encoded_pixels(tmp_path, monkeypatch):
@@ -117,6 +138,34 @@ def test_moving_video_uses_canonical_position_scale_opacity_and_changing_source_
     assert frames[0, ..., 0][first].mean() > 200
     assert frames[3, ..., 2][later].mean() > 200, "Video must keep changing, not animate a frozen poster"
     assert frames[-1, ..., 3].max() == 0, "Canonical opacity must reveal the underlying timeline"
+    assert source.read_bytes() == original
+
+
+@pytest.mark.parametrize("inverted", [False, True])
+def test_native_moving_video_keeps_feathered_mask_and_changing_pixels(tmp_path, inverted):
+    source, output = tmp_path / "colour.mov", tmp_path / "masked.mov"
+    subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y",
+        "-f", "lavfi", "-i", "color=c=red:s=64x64:r=10:d=0.3",
+        "-f", "lavfi", "-i", "color=c=blue:s=64x64:r=10:d=0.3",
+        "-filter_complex", "[0:v][1:v]concat=n=2:v=1:a=0[v]", "-map", "[v]",
+        "-c:v", "qtrle", str(source)], check=True)
+    original = source.read_bytes()
+    overlay = {"type": "video", "start_time": 0, "duration": .6,
+        "width": 80, "height": 80, "frameShape": "edge", "mediaFit": "contain"}
+    layer = {"base_transform": {"x": 50, "y": 50, "scale": 1, "opacity": 1},
+        "effects": {"mask": {"enabled": True, "shape": "ellipse", "feather": 4, "inverted": inverted}}}
+    receipt = render_video_layer_motion(source, output, overlay, layer, 128, 128, .6, [], fps=10)
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(output),
+        "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
+    frames = np.frombuffer(raw, np.uint8).reshape(-1, 128, 128, 4)
+    assert len(frames) == 6 and receipt["duration"] == .6
+    center, corner = frames[0, 64, 64, 3], frames[0, 28, 28, 3]
+    assert (center < 5 and corner > 200) if inverted else (center > 250 and corner < 20)
+    alpha = frames[0, ..., 3]
+    assert ((alpha > 0) & (alpha < 255)).any(), "Feather must survive video decoding/encoding"
+    visible = alpha > 200
+    assert frames[0, ..., 0][visible].mean() > 200
+    assert frames[3, ..., 2][visible].mean() > 200, "The mask must retain changing video, not a poster"
     assert source.read_bytes() == original
 
 

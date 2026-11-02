@@ -1,10 +1,12 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { STUDIO_EXPORT_BLEND_MODES } from "./studioBlendModes";
 import {
   interpolateAutomationValue,
   sortAutomationKeyframes,
   upsertAutomationKeyframe,
+  buildMotionAutomationStyle,
 } from "./studioAutomation";
+import { studioMotionPropertiesForTarget } from './studioMotionProperties';
 import {
   COMP_CURVE_PRESETS,
   MOTION_DRIVER_CATALOG,
@@ -84,6 +86,16 @@ export default function StudioCompWorkbench({
       ...mainTransform,
     };
   }, [selectedTargetId, visualOverlays, mainTransform]);
+  const graphChannels=studioMotionPropertiesForTarget(selectedLayer);
+  const rawPose=buildMotionAutomationStyle([],0,selectedLayer);
+  const propMeta={...PROP_META,...Object.fromEntries(graphChannels.filter(field=>!PROP_META[field.id]).map(field=>[field.id,
+    {label:field.label,color:'#c4a1ff',unit:'%',min:field.min,max:field.max,fallback:rawPose[field.id]??0}]))};
+  const channelSignature=graphChannels.map(field=>field.id).join(',');
+  useEffect(()=>{
+    const supported=new Set(channelSignature.split(','));
+    setVisibleProps(current=>{const next=current.filter(prop=>supported.has(prop));return next.length?next:['scale'];});
+    setDriverProp(current=>supported.has(current)?current:'scale');
+  },[selectedTargetId,channelSignature]);
 
   const targetKeyframes = useMemo(
     () =>
@@ -206,7 +218,7 @@ export default function StudioCompWorkbench({
       keyframes: targetKeyframes,
       property: activeProp,
       time: currentTime,
-      fallback: selectedLayer[activeProp] ?? PROP_META[activeProp].fallback,
+      fallback: selectedLayer[activeProp] ?? propMeta[activeProp].fallback,
     });
     const nextKey = {
       id: `kf-${selectedLayer.id}-${activeProp}-${Date.now()}`,
@@ -226,7 +238,7 @@ export default function StudioCompWorkbench({
     if (!selectedKeyframe || String(rawValue).trim() === "") return;
     const numeric = Number(rawValue);
     if (!Number.isFinite(numeric)) return;
-    const meta = PROP_META[selectedKeyframe.property] || PROP_META.scale;
+    const meta = propMeta[selectedKeyframe.property] || PROP_META.scale;
     const clampedValue = Number(clamp(numeric, meta.min, meta.max).toFixed(4));
     const nextList = (motionKeyframes || []).map(k =>
       String(k.id) === String(selectedKeyframe.id) ? { ...k, value: clampedValue } : k
@@ -249,6 +261,7 @@ export default function StudioCompWorkbench({
   };
 
   const handleDriverTypeChange = nextType => {
+    if(!MOTION_DRIVER_PROPERTIES.includes(driverProp))return;
     const existingDrivers = { ...(selectedLayer.motionDrivers || {}) };
     if (!nextType || nextType === "none") {
       delete existingDrivers[driverProp];
@@ -314,8 +327,8 @@ export default function StudioCompWorkbench({
   // Sample curves for Value / Speed Graph
   const sampledSeries = useMemo(() => {
     const sampleCount = 72;
-    return visibleProps.map(prop => {
-      const meta = PROP_META[prop];
+    return visibleProps.filter(prop=>propMeta[prop]).map(prop => {
+      const meta = propMeta[prop];
       const propKeys = targetKeyframes.filter(k => k.property === prop);
       const basePoints = [];
       const drivenPoints = [];
@@ -749,9 +762,9 @@ export default function StudioCompWorkbench({
                   value={driverProp}
                   onChange={e => setDriverProp(e.target.value)}
                 >
-                  {MOTION_DRIVER_PROPERTIES.map(prop => (
-                    <option key={prop} value={prop}>
-                      {PROP_META[prop].label}
+                  {graphChannels.map(field => (
+                    <option key={field.id} value={field.id}>
+                      {propMeta[field.id].label}
                     </option>
                   ))}
                 </select>
@@ -759,6 +772,7 @@ export default function StudioCompWorkbench({
                   className="ap-comp-select"
                   style={{ width: 148 }}
                   aria-label="Motion driver expression type"
+                  disabled={!MOTION_DRIVER_PROPERTIES.includes(driverProp)}
                   value={activeDriver?.type || "none"}
                   onChange={e => handleDriverTypeChange(e.target.value)}
                 >
@@ -952,8 +966,8 @@ export default function StudioCompWorkbench({
         <div className="ap-comp-graph-pane">
           <div className="ap-comp-prop-toggles">
             <div className="ap-mfx-toolbar-group">
-              {MOTION_DRIVER_PROPERTIES.map(prop => {
-                const meta = PROP_META[prop];
+              {[...new Set([...MOTION_DRIVER_PROPERTIES,...visibleProps])].map(prop => {
+                const meta = propMeta[prop]||PROP_META.scale;
                 const active = visibleProps.includes(prop);
                 return (
                   <button
@@ -1036,7 +1050,7 @@ export default function StudioCompWorkbench({
             {graphMode === "dope" ? (
               /* Dope Sheet Diamond Lanes */
               visibleProps.map((prop, laneIdx) => {
-                const meta = PROP_META[prop];
+                const meta = propMeta[prop]||PROP_META.scale;
                 const laneY = 38 + laneIdx * 32;
                 const keys = targetKeyframes.filter(k => k.property === prop);
                 return (

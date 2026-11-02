@@ -26,13 +26,29 @@ if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
 # graphics/3D stack exhausted that bound during final compositing; allow a
 # finite twenty CPU minutes for that explicitly identified local combination.
 # The provider's thirty-minute wall ceiling and production limits are unchanged.
-cpu_ceiling = 1200 if record.get('body', {}).get('threeDGraphics') else 600
+def local_render_cpu_ceiling(body, env):
+    default = 1200 if body.get('threeDGraphics') else 600
+    value = env.get('CREDITS_LOCAL_RENDER_CPU_SECONDS', str(default))
+    if not str(value).isdecimal() or not 600 <= int(value) <= 1200:
+        raise ValueError('Local CPU rendering requires a finite 600–1200 second ceiling')
+    return int(value)
+
+
+cpu_ceiling = local_render_cpu_ceiling(record.get('body', {}), os.environ)
 resource.setrlimit(resource.RLIMIT_CPU, (cpu_ceiling, cpu_ceiling))
 # Native full-frame transparency intermediates can exceed a source MP4's size.
 # Keep a finite per-file ceiling for this demo-only CPU process; production
 # execution settings and the separately bounded source-download sizes do not
 # inherit this local limit.
-file_ceiling = (750 if record.get('body', {}).get('threeDGraphics') else 128) * 1024**2
+def local_render_file_ceiling(body, env):
+    default = 750 if body.get('threeDGraphics') else 128
+    value = env.get('CREDITS_LOCAL_RENDER_FILE_MIB', str(default))
+    if not str(value).isdecimal() or not 128 <= int(value) <= 750:
+        raise ValueError('Local render files require a finite 128–750 MiB ceiling')
+    return int(value) * 1024**2
+
+
+file_ceiling = local_render_file_ceiling(record.get('body', {}), os.environ)
 resource.setrlimit(resource.RLIMIT_FSIZE, (file_ceiling, file_ceiling))
 connect = socket.socket.connect
 

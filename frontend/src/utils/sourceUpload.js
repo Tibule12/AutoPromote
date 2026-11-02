@@ -1,9 +1,12 @@
+import { createStudioUploadQueue } from './studioUploadQueue';
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { auth, storage } from "../firebaseClient";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { getRuntimeE2EToken } from "./mediaAuth";
 import { uploadMulticamSourceResumable } from "./multicamResumableUpload";
 import { hashStudioSourceBlob } from "./studioSourceHash";
+
+const backendUploadQueue=createStudioUploadQueue();
 
 export const STORAGE_UPLOAD_LIMIT_MB = 500;
 const TEMPORARY_SOURCE_PREFIXES = Object.freeze({
@@ -171,7 +174,7 @@ async function uploadSourceFileViaFirebase({
   };
 }
 
-async function uploadSourceFileViaBackendRequest({
+async function uploadSourceFileViaBackendRequestRaw({
   file,
   token,
   mediaType,
@@ -219,7 +222,10 @@ async function uploadSourceFileViaBackendRequest({
 
   const result = await response.json().catch(() => null);
   if (!response.ok || !result?.url) {
-    throw buildStructuredUploadError(result, "Failed to upload source media", response.status);
+    const error=buildStructuredUploadError(result, "Failed to upload source media", response.status);
+    const delay=Number(response.headers?.get?.('Retry-After'));
+    if(response.status===429&&Number.isFinite(delay)&&delay>0&&delay<=60)error.retryAfterMs=delay*1000;
+    throw error;
   }
 
   if (typeof onProgress === "function") {
@@ -229,6 +235,8 @@ async function uploadSourceFileViaBackendRequest({
 
   return result;
 }
+
+const uploadSourceFileViaBackendRequest=options=>backendUploadQueue(()=>uploadSourceFileViaBackendRequestRaw(options));
 
 export async function uploadSourceFileViaBackend({
   file,

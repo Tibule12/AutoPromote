@@ -15,9 +15,9 @@ except ImportError:
     from studio_vector_shape import validate_vector_shape, validate_vector_trim
     from studio_motion import automation_expression, _curve_bounds, output_to_programme_expression, validate_spatial_curve
 try:
-    from .studio_layer_motion import layer_clip_mask
+    from .studio_layer_motion import layer_clip_mask, validate_mask_animation
 except ImportError:
-    from studio_layer_motion import layer_clip_mask
+    from studio_layer_motion import layer_clip_mask, validate_mask_animation
 
 BLEND_MODES = {"normal", "multiply", "screen", "difference", "overlay", "hard-light", "soft-light", "color-dodge", "luminosity"}
 TRACK_MATTE_MODES = {"none", "alpha", "alpha_inverted", "luma", "luma_inverted"}
@@ -116,6 +116,7 @@ def validate_layer_order(plan, overlay_ids, motion_ids, three_d_ids, *, source_o
                 raise ValueError("Text animators need an ordinary title source")
             text_layout(source, 1280, layer["text_animator"])
         validate_vector_trim(layer)
+        validate_mask_animation(layer)
         if 'vector_shape' in layer:
             if layer.get('type') != 'image':
                 raise ValueError('Vector artwork needs an image layer')

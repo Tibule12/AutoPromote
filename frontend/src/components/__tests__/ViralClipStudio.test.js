@@ -244,6 +244,46 @@ describe("ViralClipStudio timeline sequencing", () => {
     return video;
   };
 
+  test.each([1,2])('the final trimmed shot in a %s-shot edit holds its last frame and ignores late canplay',async count=>{
+    const source={id:'range',start:0,end:12,duration:12,sourceDuration:12};
+    const timeline=count===1
+      ? [{id:'main',sourceClipId:'range',startRequest:2,endRequest:8,url:'https://example.com/source.mp4'}]
+      : [{id:'main',sourceClipId:'range',startRequest:0,endRequest:4,url:'https://example.com/source.mp4'},
+         {id:'last',sourceClipId:'range',startRequest:4,endRequest:12,url:'https://example.com/source.mp4'}];
+    mountNativePreview({initialSavedProject:{id:`terminal-${count}`,name:'Terminal source',snapshot:{
+      orderedClips:[source],selectedClipId:'range',timeline,activeTimelineIndex:count-1,addHook:false,
+      exportSettings:{fps:'24'},overlays:[],motionKeyframes:[],
+    }}});
+    // Saved-project restore commits on its own animation frame. Wait for its
+    // 24fps transport before simulating media on the selected source slot.
+    await waitFor(()=>expect(Number(screen.getByLabelText('Edited output position').step)).toBeCloseTo(1/24,8));
+    fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:count===1?'3':'7'}});
+    const video=screen.getByTestId('studio-after-video');
+    let paused=true;
+    Object.defineProperties(video,{
+      paused:{configurable:true,get:()=>paused},readyState:{configurable:true,value:4},
+      duration:{configurable:true,value:12},currentSrc:{configurable:true,get:()=>video.src},
+    });
+    video.play=jest.fn(()=>{if(paused){paused=false;video.dispatchEvent(new Event('play'));}return Promise.resolve();});
+    video.pause=jest.fn(()=>{if(!paused){paused=true;video.dispatchEvent(new Event('pause'));}});
+    fireEvent.loadedData(video);
+    fireEvent.click(screen.getByRole('button',{name:'Play comparison',exact:true}));
+    await waitFor(()=>expect(video.paused).toBe(false));
+    const end=timeline.at(-1).endRequest;
+    act(()=>{video.currentTime=end;video.dispatchEvent(new Event('timeupdate'));});
+    await waitFor(()=>expect(screen.getByRole('button',{name:'Play comparison',exact:true})).toBeInTheDocument());
+    expect(screen.getByTestId('studio-after-video')).toBe(video);
+    const frameStep=Number(screen.getByLabelText('Edited output position').step);
+    expect(video.currentTime).toBeCloseTo(end-frameStep,5);expect(video.paused).toBe(true);
+    // A native ended event can already be queued when the precise trim
+    // watcher pauses the element. It must not refocus an earlier cutaway.
+    fireEvent.ended(video);
+    expect(screen.getByTestId('studio-after-video')).toBe(video);
+    expect(video.currentTime).toBeCloseTo(end-frameStep,5);
+    video.play.mockClear();fireEvent.canPlay(video);
+    expect(video.play).not.toHaveBeenCalled();expect(video.paused).toBe(true);
+  });
+
   test("an existing finished URL cannot hide recovery actions that still need attention", () => {
     mountNativePreview({ renderedOutput: { url: 'https://example.com/finished.mp4' },
       renderRecoveryNeedsAttention: true,
@@ -319,6 +359,77 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.change(screen.getByLabelText('Edited output position'), { target: { value: '2.4' } });
     await waitFor(() => expect(overlay.currentTime).toBeCloseTo(2.9, 3));
     expect(overlay.paused).toBe(true);
+  });
+
+  test('repeated known overlay metadata does not rebuild the canonical edit or history', async () => {
+    const source={id:'range',start:2,end:8,duration:6,sourceDuration:12};
+    mountNativePreview({initialSavedProject:{id:'metadata-stable',name:'Metadata stable',snapshot:{
+      orderedClips:[source],selectedClipId:'range',addHook:false,
+      timeline:[{...source,sourceClipId:'range',startRequest:2,endRequest:8,url:'https://example.com/source.mp4'}],
+      overlays:[{id:'result',type:'video',src:'https://example.com/result.mp4',sourceDuration:12,
+        startTime:0,duration:6,width:70,height:70,x:50,y:50}],
+    }}});
+    const overlay=await screen.findByTestId('broll-preview-result');
+    Object.defineProperty(overlay,'duration',{configurable:true,value:12});
+    const reconcile=jest.spyOn(studioProjectDocument,'reconcileStudioDocument');reconcile.mockClear();
+    fireEvent.loadedMetadata(overlay);
+    expect(reconcile).not.toHaveBeenCalled();
+    Object.defineProperty(overlay,'duration',{configurable:true,value:13});
+    fireEvent.loadedMetadata(overlay);
+    await waitFor(()=>expect(reconcile).toHaveBeenCalled());reconcile.mockRestore();
+  });
+
+  test('projected video decoders exist only near their authored cue', async () => {
+    const source={id:'range',start:2,end:8,duration:6,sourceDuration:12};
+    mountNativePreview({initialSavedProject:{id:'bounded-plane',name:'Bounded plane',snapshot:{
+      workspaceMode:'fxflow',orderedClips:[source],selectedClipId:'range',addHook:false,
+      timeline:[{...source,sourceClipId:'range',startRequest:2,endRequest:8,url:'https://example.com/source.mp4'}],
+      overlays:[{id:'plane',type:'video',src:'https://example.com/plane.mp4',sourceDuration:12,
+        startTime:4,duration:1,width:70,height:70,x:50,y:50,
+        perspective:{version:1,corners:[[0,12],[88,0],[88,100],[0,88]]}}],
+    }}});
+    await screen.findByDisplayValue('Bounded plane');
+    fireEvent.click(screen.getByTestId('studio-mode-fxflow'));
+    fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:'1'}});
+    expect(screen.queryByTestId('broll-preview-plane')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:'4.2'}});
+    await screen.findByTestId('broll-preview-plane');
+    fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:'5.5'}});
+    await waitFor(()=>expect(screen.queryByTestId('broll-preview-plane')).not.toBeInTheDocument());
+  });
+
+  test('finished playback releases live overlay decoders and restores them only for the live edit', async () => {
+    const source = { id: 'range', start: 2, end: 8, duration: 6, sourceDuration: 12 };
+    const { video } = mountNativePreview({
+      renderedOutput: { url: 'https://example.com/finished.mp4' },
+      initialSavedProject: { id: 'finished-media', name: 'Finished media', snapshot: {
+        orderedClips: [source], selectedClipId: 'range',
+        timeline: [{ ...source, sourceClipId: 'range', startRequest: 2, endRequest: 8,
+          url: 'https://example.com/source.mp4' }], addHook: false,
+        overlays: [{ id: 'result', type: 'video', src: 'https://example.com/result.mp4',
+          startTime: 0, duration: 6, sourceDuration: 12, sourceStartTime: .5,
+          x: 50, y: 50, width: 100, height: 90 }],
+      } },
+    });
+    await screen.findByDisplayValue('Finished media');
+    expect(screen.queryByTestId('broll-preview-result')).not.toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' }))
+      .getByRole('button', { name: 'Export', exact: true }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Show Live Edit', exact: true }));
+    const overlay = await screen.findByTestId('broll-preview-result');
+    Object.defineProperty(overlay, 'duration', { configurable: true, value: 12 });
+    fireEvent.change(screen.getByLabelText('Edited output position'), { target: { value: '2.3' } });
+    await waitFor(() => expect(overlay.currentTime).toBeCloseTo(2.8, 3));
+    const pause = jest.spyOn(overlay, 'pause');
+    fireEvent.click(screen.getByRole('button', { name: 'Show Finished Video', exact: true }));
+    expect(screen.queryByTestId('broll-preview-result')).not.toBeInTheDocument();
+    expect(pause).toHaveBeenCalled();
+    expect(overlay.getAttribute('src')).toBeNull();
+    const releasedTime = overlay.currentTime;
+    fireEvent.play(video);
+    video.currentTime = 3;
+    fireEvent.timeUpdate(video);
+    expect(overlay.currentTime).toBe(releasedTime);
   });
 
   test("metadata reload preserves the selected trim and paused editing frame", () => {
@@ -464,7 +575,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(video.paused).toBe(true);
   });
 
-  test.each(['off','speech'])("a prepared native cut keeps music and an overlapping cue on one audio clock and Pause stops both: %s", async duckMode => {
+  test.each(['off','speech','speech-original'])("a prepared native cut keeps music and an overlapping cue on one audio clock and Pause stops both: %s", async duckMode => {
     const previousContext = window.AudioContext;
     const previousFrameRequest = HTMLVideoElement.prototype.requestVideoFrameCallback;
     const previousFrameCancel = HTMLVideoElement.prototype.cancelVideoFrameCallback;
@@ -514,7 +625,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         target: { files: [new File(['song'], 'cut-song.mp3', { type: 'audio/mpeg' })] },
       });
       if (duckMode === 'off') fireEvent.click(screen.getByRole('checkbox', { name: /Duck under speech/i }));
-      else fireEvent.click(screen.getByRole('checkbox', { name: /Keep original audio/i }));
+      else if(duckMode==='speech')fireEvent.click(screen.getByRole('checkbox', { name: /Keep original audio/i }));
       await waitFor(() => expect(context.decodeAudioData).toHaveBeenCalled());
       const constructorsAfterMusic = window.AudioContext.mock.calls.length;
       fireEvent.timeUpdate(video);

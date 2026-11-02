@@ -7,7 +7,8 @@ const baseFolder = path.join(root, 'reports/studio-motion-flow-takeover-20261031
 const cinematicVariant = process.env.STUDIO_MOTION_VARIANT === 'cinematic';
 const dialogueVariant = process.env.STUDIO_MOTION_VARIANT === 'dialogue';
 const textureVariant = process.env.STUDIO_MOTION_VARIANT === 'video-texture';
-const folder = textureVariant ? path.join(baseFolder,'video-texture') : dialogueVariant ? path.join(baseFolder, 'dialogue') : cinematicVariant ? path.join(baseFolder, 'cinematic') : baseFolder;
+const episodeVariant = process.env.STUDIO_MOTION_VARIANT === 'episode';
+const folder = process.env.STUDIO_MOTION_PROOF_DIR ? path.resolve(root,process.env.STUDIO_MOTION_PROOF_DIR) : episodeVariant ? path.join(root,'reports/studio-cinematic-episode-20261101') : textureVariant ? path.join(baseFolder,'video-texture') : dialogueVariant ? path.join(baseFolder, 'dialogue') : cinematicVariant ? path.join(baseFolder, 'cinematic') : baseFolder;
 fs.mkdirSync(folder, {recursive:true});
 process.env.STUDIO_TEMPLATE_PROOF_DIR = folder;
 process.env.STUDIO_KINETIC_PROOF_DIR = folder;
@@ -20,6 +21,7 @@ const config = JSON.parse(fs.readFileSync(path.join(directory, 'browser-private.
 let title = cinematicVariant && (phase !== 'cinematic' || ['Editable Project.autopromote.json','Interrupted Project.autopromote.json'].some(name=>fs.existsSync(path.join(folder,name)))) ? 'Motion & Flow — Evidence Reconstruction' : 'Motion & Flow — Investigative Motion Test';
 if (dialogueVariant) title = 'Motion & Flow — Dialogue Opening';
 if (textureVariant) title = 'Motion & Flow — Open World';
+if (episodeVariant) title = process.env.STUDIO_MOTION_PROOF_TITLE || 'AutoPromote — Every frame, intentional';
 const source = name => path.join(baseFolder, 'media', name);
 const stamp = name => path.join(folder, name);
 const browserState = stamp('session.private.json');
@@ -27,7 +29,14 @@ const decisions = doc => { const { revision, journal, idempotency, ...rest } = d
 async function pause(p) {
   for (const name of ['Pause edited preview', 'Pause comparison']) {
     const button = p.getByRole('button', { name, exact: true });
-    if (await button.isVisible()) await button.click();
+    if (await button.isVisible()) {
+      try { await button.click({ timeout: 15000 }); }
+      catch (error) {
+        // Natural completion can replace Pause with Play between the visibility
+        // read and click. Preserve real failures while accepting that held end.
+        if (await button.isVisible()) throw error;
+      }
+    }
   }
   await p.locator('video,audio').evaluateAll(nodes => nodes.forEach(el => { el.muted = true; el.pause(); }));
 }
@@ -285,7 +294,7 @@ async function render(p, raw = false) {
   const timeline = p.getByTestId('dock-tab-timeline'); if (await timeline.isVisible()) await timeline.click();
   const consent = (async () => {
     const modal = p.getByRole('dialog', { name: 'Studio export', exact: true });
-    await modal.waitFor({ timeout: 120000 });
+    await modal.waitFor({ timeout: 600000 });
     await modal.getByRole('button', { name: /^Approve / }).click();
   })();
   await Promise.all([h.render(p, raw ? 'native-raw-source' : 'native-motion-flow'), consent]);
@@ -1069,4 +1078,5 @@ async function main() {
     throw err;
   } finally { await context.storageState({ path: browserState }).catch(() => {}); await context.close(); await browser.close(); }
 }
-main().catch(err => { console.error(err.stack); process.exitCode = 1; });
+module.exports = { entry, open, pause, seek, range, save, backup, render, folder, title, decisions };
+if (require.main === module) main().catch(err => { console.error(err.stack); process.exitCode = 1; });

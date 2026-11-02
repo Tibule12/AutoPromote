@@ -1,0 +1,347 @@
+{
+  "complete": true,
+  "elapsedSeconds": 113.553,
+  "terminal": {
+    "ms": 120324.79999999702,
+    "programme": 36,
+    "videos": [
+      {
+        "slot": "studio-after-video",
+        "source": "/api/credit-pilot/object/b9996a7c60201de4eacc13bfb03a3d34f8e3592384a973b036d32cb6bed486de",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0
+      },
+      {
+        "slot": "studio-next-video",
+        "source": "/",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0
+      },
+      {
+        "slot": "studio-later-video",
+        "source": "/",
+        "time": 0,
+        "paused": true,
+        "seeking": false,
+        "ready": 0,
+        "ended": false,
+        "rate": 1,
+        "decoded": 0,
+        "dropped": 0
+      }
+    ]
+  },
+  "longTasks": {
+    "count": 51,
+    "seconds": 105.308,
+    "longestMs": 5739
+  },
+  "functions": [
+    {
+      "seconds": 8.572422,
+      "name": "(idle)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 3.718511,
+      "name": "(program)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 2.218085,
+      "name": "(garbage collector)",
+      "column": -1,
+      "snippet": ""
+    },
+    {
+      "seconds": 1.599412,
+      "name": "i",
+      "column": 1068198,
+      "snippet": "nates and Linear or Hold interpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.v"
+    },
+    {
+      "seconds": 1.219532,
+      "name": "i",
+      "column": 1068198,
+      "snippet": "nates and Linear or Hold interpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.v"
+    },
+    {
+      "seconds": 1.054871,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 1.052213,
+      "name": "i",
+      "column": 1068198,
+      "snippet": "nates and Linear or Hold interpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.v"
+    },
+    {
+      "seconds": 1.052035,
+      "name": "i",
+      "column": 1068198,
+      "snippet": "nates and Linear or Hold interpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.v"
+    },
+    {
+      "seconds": 1.043211,
+      "name": "",
+      "column": 1068594,
+      "snippet": "(e=>e.time))].sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){con"
+    },
+    {
+      "seconds": 1.031623,
+      "name": "",
+      "column": 1068594,
+      "snippet": "(e=>e.time))].sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){con"
+    },
+    {
+      "seconds": 1.012543,
+      "name": "xg",
+      "column": 1092689,
+      "snippet": "return{...r,...JSON.parse(JSON.stringify(e))}},xg=e=>JSON.stringify(e,(e,t)=>t&&\"object\"===typeof t&&!Array.isArray(t)?Object.fromEntries(Object.keys(t).sort().map(e=>[e,t[e]])):t),Qg=(e,t)=>{const n=new Error(t);throw n.code=e,n},wg=[\"version\",\"name\",\"seconda"
+    },
+    {
+      "seconds": 0.988017,
+      "name": "i",
+      "column": 1068198,
+      "snippet": "nates and Linear or Hold interpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.v"
+    },
+    {
+      "seconds": 0.966736,
+      "name": "i",
+      "column": 1068198,
+      "snippet": "nates and Linear or Hold interpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.v"
+    },
+    {
+      "seconds": 0.944845,
+      "name": "",
+      "column": 1068594,
+      "snippet": "(e=>e.time))].sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){con"
+    },
+    {
+      "seconds": 0.938826,
+      "name": "",
+      "column": 1068594,
+      "snippet": "(e=>e.time))].sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){con"
+    },
+    {
+      "seconds": 0.935652,
+      "name": "xg",
+      "column": 1092689,
+      "snippet": "return{...r,...JSON.parse(JSON.stringify(e))}},xg=e=>JSON.stringify(e,(e,t)=>t&&\"object\"===typeof t&&!Array.isArray(t)?Object.fromEntries(Object.keys(t).sort().map(e=>[e,t[e]])):t),Qg=(e,t)=>{const n=new Error(t);throw n.code=e,n},wg=[\"version\",\"name\",\"seconda"
+    },
+    {
+      "seconds": 0.913202,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.9101,
+      "name": "",
+      "column": 1068225,
+      "snippet": "terpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.value;const o=i[i.indexOf(a)"
+    },
+    {
+      "seconds": 0.885566,
+      "name": "",
+      "column": 1068594,
+      "snippet": "(e=>e.time))].sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){con"
+    },
+    {
+      "seconds": 0.882126,
+      "name": "i",
+      "column": 1068198,
+      "snippet": "nates and Linear or Hold interpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.v"
+    },
+    {
+      "seconds": 0.874121,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.870396,
+      "name": "",
+      "column": 1068594,
+      "snippet": "(e=>e.time))].sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){con"
+    },
+    {
+      "seconds": 0.862996,
+      "name": "",
+      "column": 1068225,
+      "snippet": "terpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.value;const o=i[i.indexOf(a)"
+    },
+    {
+      "seconds": 0.835839,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.824188,
+      "name": "i",
+      "column": 1068198,
+      "snippet": "nates and Linear or Hold interpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.v"
+    },
+    {
+      "seconds": 0.81596,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.814987,
+      "name": "",
+      "column": 1068594,
+      "snippet": "(e=>e.time))].sort((e,t)=>e-t),o=t=>e.corners.map((e,n)=>e.map((e,r)=>i(`planeCorner${n}${r?\"Y\":\"X\"}`,t,e)));a.forEach(t=>vf({...e,corners:o(t)}));for(let s=1;s<a.length;s++){const t=o(a[s-1]),n=o(a[s]-Math.min(1e-8,(a[s]-a[s-1])/1e6));for(let r=0;r<4;r++){con"
+    },
+    {
+      "seconds": 0.79363,
+      "name": "",
+      "column": 1068225,
+      "snippet": "terpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.value;const o=i[i.indexOf(a)"
+    },
+    {
+      "seconds": 0.765643,
+      "name": "",
+      "column": 1119639,
+      "snippet": "Zm)(e.atProgrammeTick)}))];(e.layers||[]).forEach(t=>{var n,r,i;kA({...t.parameters,type:t.legacyType},y.filter(e=>e.targetId===t.layerId)),yf({...t.parameters,id:t.layerId,type:t.legacyType},y.filter(e=>e.targetId===t.layerId),((null===(n=e.editGraph)||void 0"
+    },
+    {
+      "seconds": 0.743549,
+      "name": "",
+      "column": 1068225,
+      "snippet": "terpolation.\");const i=(e,t,n)=>{const i=r.filter(t=>t.property===e).sort((e,t)=>e.time-t.time);if(!i.length)return n;if(t<=i[0].time)return i[0].value;const a=i.find(e=>e.time>=t);if(!a)return i.at(-1).value;if(t===a.time)return a.value;const o=i[i.indexOf(a)"
+    }
+  ],
+  "transitions": [
+    {
+      "seconds": 0.5287000000029802,
+      "programme": null,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9996a7c60201de4eacc13bfb03a3d34f8e3592384a973b036d32cb6bed486de",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 20.94,
+      "programme": 4,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/5436e92ef71040bceee4cf2d34198da811cc52984c210a75b53eef9ccb60c6ab",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 28.90339999999106,
+      "programme": 6,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9996a7c60201de4eacc13bfb03a3d34f8e3592384a973b036d32cb6bed486de",
+      "time": 4,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 38.63839999999106,
+      "programme": 10,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/597ee9c989bddb021346c2ed41abe15b214f1669d7ba866d5478f48acb77a7ef",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 51.01959999999404,
+      "programme": 16,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9129f6fff0bf3b15d83a452ce6452d18d7417f71d7df4e377698d6a82bb22a9",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 64.65939999999105,
+      "programme": 20,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/4cd8e4267da97d886ffb0d28ba27723b661c35a58d98be09e2993cbd95734174",
+      "time": 0,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 79.66439999999106,
+      "programme": 24,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/b9129f6fff0bf3b15d83a452ce6452d18d7417f71d7df4e377698d6a82bb22a9",
+      "time": 4,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    },
+    {
+      "seconds": 102.14270000000298,
+      "programme": 28,
+      "slot": "studio-after-video",
+      "source": "/api/credit-pilot/object/770b2eafad2beb7649d2802e2376a27dd449ae213c9a713695c8eb5890fcd7e0",
+      "time": 4,
+      "paused": true,
+      "seeking": false,
+      "ready": 0,
+      "ended": false,
+      "rate": 1,
+      "decoded": 0,
+      "dropped": 0
+    }
+  ]
+}

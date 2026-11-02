@@ -83,3 +83,47 @@ test('normal pause, seek, play and ref promotion stop the former shot and rebind
   expect(screen.getByTestId('time').dataset.programmeTime).toBe('4.5');
   view.unmount(); expect(second.cancelVideoFrameCallback).toHaveBeenCalledTimes(1);
 });
+
+test('the decoded programme frame paints animated polygon vertices without a React timeupdate', () => {
+  const video=decoder(), clockRef={current:video};
+  const layer={id:'foreground',type:'video',startTime:0,duration:4,
+    mask:{enabled:true,shape:'polygon',path:'polygon(10% 10%, 90% 10%, 50% 90%)'}};
+  const keys=[{targetId:layer.id,property:'maskPoint0X',time:0,value:10,easing:'linear'},
+    {targetId:layer.id,property:'maskPoint0X',time:4,value:90,easing:'linear'}];
+  let renders=0;
+  render(<StudioProgrammeFrame clockRef={clockRef} mapTime={t=>t} time={0}
+    layers={[layer]} keyframes={keys} getClipPath={resolved=>resolved.mask.path}>
+    {()=>{renders++;return <div data-studio-layer-id={layer.id} data-testid="foreground" />;}}
+  </StudioProgrammeFrame>);
+  const initial=renders;
+  act(()=>video.frame(2,2.2));
+  expect(screen.getByTestId('foreground').style.clipPath).toBe('polygon(50% 10%, 90% 10%, 50% 90%)');
+  expect(renders).toBe(initial);
+});
+
+test('a settled secondary decoder repaints matching video pieces while the programme is paused',()=>{
+ const main=decoder();main.paused=true;main.currentTime=4.5;
+ const hash='a'.repeat(64),source={type:'video',sourceStoragePath:'owned/summit',contentHash:hash,sourceStartTime:0,startTime:24,duration:4,sourceDuration:12};
+ const layers=[{...source,id:'owner'},{...source,id:'piece',perspective:{version:1,corners:[[0,0],[100,0],[100,100],[0,100]],sourceRect:[25,0,50,100]}}],drawImage=jest.fn();
+ const context=jest.spyOn(HTMLCanvasElement.prototype,'getContext').mockReturnValue({drawImage});
+ const pause=jest.spyOn(HTMLMediaElement.prototype,'pause').mockImplementation(()=>{});
+ const load=jest.spyOn(HTMLMediaElement.prototype,'load').mockImplementation(()=>{});
+ const view=render(<StudioProgrammeFrame clockRef={{current:main}} mapTime={t=>t+20} time={24.5} layers={layers}>
+  {()=>layers.map(l=><div key={l.id} data-studio-layer-id={l.id}><video data-testid={l.id} data-studio-overlay-decoder="true" /><canvas data-studio-shared-video="true" /></div>)}
+ </StudioProgrammeFrame>);
+ const owner=screen.getByTestId('owner'),piece=screen.getByTestId('piece');
+ let presented;
+ owner.requestVideoFrameCallback=jest.fn(callback=>{presented=callback;return 7;});
+ owner.cancelVideoFrameCallback=jest.fn();
+ for(const [name,value]of Object.entries({readyState:4,seeking:false,paused:true,currentTime:.5,videoWidth:1280,videoHeight:720}))Object.defineProperty(owner,name,{value,configurable:true});
+ act(()=>owner.dispatchEvent(new Event('seeked')));
+ expect(piece.dataset.sharedProgrammeFrame).toBe('true');expect(piece.dataset.sharedFrameOwner).toBe('owner');
+ expect(drawImage).toHaveBeenCalledWith(owner,320,0,320,720,0,0,320,720);
+ expect(piece.parentElement.querySelector('canvas').width).toBe(320);
+ expect(piece.parentElement.querySelector('canvas').style.width).toBe('25%');
+ const copies=drawImage.mock.calls.length;
+ // The source can present new paused pixels after seeked, at the same time.
+ act(()=>presented(0,{mediaTime:.5}));
+ expect(drawImage.mock.calls.length).toBeGreaterThan(copies);
+ view.unmount();context.mockRestore();pause.mockRestore();load.mockRestore();
+});
