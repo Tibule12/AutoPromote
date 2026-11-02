@@ -1,0 +1,104 @@
+[
+  {
+    "name": "autopromote-model-v1-tracking-cpu",
+    "tasks": 1,
+    "parallelism": 1,
+    "maxRetries": 0,
+    "timeout": "120s",
+    "accelerator": null,
+    "resources": [
+      {
+        "cpu": "2",
+        "memory": "2Gi"
+      }
+    ]
+  },
+  {
+    "name": "autopromote-model-v1-video",
+    "tasks": 1,
+    "parallelism": 1,
+    "maxRetries": 0,
+    "timeout": "3300s",
+    "accelerator": "nvidia-rtx-pro-6000",
+    "resources": [
+      {
+        "cpu": "20",
+        "nvidia.com/gpu": "1",
+        "memory": "80Gi"
+      }
+    ]
+  },
+  {
+    "name": "autopromote-model-v1-segmentation",
+    "tasks": 1,
+    "parallelism": 1,
+    "maxRetries": 0,
+    "timeout": "600s",
+    "accelerator": "nvidia-rtx-pro-6000",
+    "resources": [
+      {
+        "cpu": "20",
+        "nvidia.com/gpu": "1",
+        "memory": "80Gi"
+      }
+    ]
+  },
+  {
+    "name": "autopromote-model-v1-vision",
+    "tasks": 1,
+    "parallelism": 1,
+    "maxRetries": 0,
+    "timeout": "600s",
+    "accelerator": "nvidia-rtx-pro-6000",
+    "resources": [
+      {
+        "cpu": "20",
+        "nvidia.com/gpu": "1",
+        "memory": "80Gi"
+      }
+    ]
+  },
+  {
+    "name": "viral-studio-rtx-qualification",
+    "tasks": 1,
+    "parallelism": 1,
+    "maxRetries": 0,
+    "timeout": "300s",
+    "accelerator": "nvidia-rtx-pro-6000",
+    "resources": [
+      {
+        "cpu": "20",
+        "nvidia.com/gpu": "1",
+        "memory": "80Gi"
+      }
+    ]
+  },
+  {
+    "name": "cam-combiner-render-fast-job",
+    "tasks": 1,
+    "parallelism": 1,
+    "maxRetries": 0,
+    "timeout": "14400s",
+    "accelerator": null,
+    "resources": [
+      {
+        "cpu": "8",
+        "memory": "12Gi"
+      }
+    ]
+  },
+  {
+    "name": "cam-combiner-render-job",
+    "tasks": 1,
+    "parallelism": 1,
+    "maxRetries": 0,
+    "timeout": "14400s",
+    "accelerator": null,
+    "resources": [
+      {
+        "cpu": "8",
+        "memory": "12Gi"
+      }
+    ]
+  }
+]

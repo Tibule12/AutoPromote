@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "project": "demo-autopromote-cost-check",
+  "concurrentRequests": 10,
+  "firstUserQueries": 1,
+  "totalQueriesWithSecondUser": 2,
+  "cloudReads": 0
+}

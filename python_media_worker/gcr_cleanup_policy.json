@@ -1,13 +1,5 @@
 [
   {
-    "name": "delete-untagged-after-3-days",
-    "action": { "type": "Delete" },
-    "condition": {
-      "tagState": "untagged",
-      "olderThan": "3d"
-    }
-  },
-  {
     "name": "delete-stale-build-cache-after-14-days",
     "action": { "type": "Delete" },
     "condition": {
@@ -25,10 +17,10 @@
     }
   },
   {
-    "name": "keep-three-rollbacks",
+    "name": "keep-five-rollbacks",
     "action": { "type": "Keep" },
     "mostRecentVersions": {
-      "keepCount": 3
+      "keepCount": 5
     }
   }
 ]
