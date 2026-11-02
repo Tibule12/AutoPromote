@@ -177,6 +177,10 @@ def build_audio_remix_chain(value):
     output_gain = 10 ** (remix["output_gain_db"] / 20)
     if abs(remix["output_gain_db"]) >= .01:
         filters.append(f"volume={output_gain:.8f}")
+    # Loudness/pitch processing can return a short discontinuity near its last
+    # audio blocks. Materialize its timestamp gaps before encoding, so a movie
+    # and a decoded audio-only copy retain the same continuous programme clock.
+    filters.append("aresample=48000:async=1:min_hard_comp=0.001:first_pts=0")
     filters.append("alimiter=limit=0.95:level=false:latency=true")
     return ",".join(filters), remix
 

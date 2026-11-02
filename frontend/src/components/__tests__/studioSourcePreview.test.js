@@ -1,5 +1,6 @@
-import { primeStudioSourceVideo, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, waitForStudioAudio, pausedStudioFrameRequest, pausedStudioFrameKey } from '../studioSourcePreview';
-import { studioPausedFrameHasIdentityClock, pausedStudioMappedFrameRequest, studioPausedFrameReceiptMatches } from '../studioSourcePreview';
+import { primeStudioSourceVideo, startStudioPreparedCut, watchStudioProgrammeFrames, watchStudioClipBoundary, watchStudioAudioClock, studioJoinFade, mapStudioSourceAccess, isStudioSourceClockCurrent, waitForStudioAudio, pausedStudioFrameRequest, pausedStudioFrameKey } from '../studioSourcePreview';
+import { studioPausedFrameHasIdentityClock, pausedStudioMappedFrameRequest, studioPausedFrameReceiptMatches,
+  studioProgrammePictureTime } from '../studioSourcePreview';
 import { createOutputTimeMap } from '../studioTime';
 const rampMap = () => createOutputTimeMap(270000, [
   {programmeRange:{space:'programme',startTick:0,endTick:90000},rateNumerator:1,rateDenominator:1},
@@ -173,6 +174,34 @@ test('programme canvas paints decoded frames and never schedules a duplicate dis
   expect(paint).toHaveBeenCalledTimes(2);
   stop(); expect(video.cancelVideoFrameCallback).toHaveBeenCalled(); raf.mockRestore();
 });
+test('picture effects use the decoded frame rather than an earlier continuous media clock', () => {
+  const video = Object.assign(new EventTarget(), decoder(), { src: 'https://media.example.com/picture.mp4' });
+  const samples = [];
+  const stop = watchStudioProgrammeFrames(video, () => samples.push(studioProgrammePictureTime(video)));
+  video.frame(1.5, 1.475);
+  expect(samples).toEqual([1.5]);
+  expect(studioProgrammePictureTime(video)).toBe(1.5);
+  // Ordinary paint and inspector updates retain the same native picture.
+  video.currentTime = 1.49; expect(studioProgrammePictureTime(video)).toBe(1.5);
+  video.seeking = true; video.dispatchEvent(new Event('seeking'));
+  expect(studioProgrammePictureTime(video)).toBe(1.49);
+  video.seeking = false; video.currentTime = 2;
+  expect(studioProgrammePictureTime(video)).toBe(2);
+  video.frame(2.041667, 2.02); expect(studioProgrammePictureTime(video)).toBe(2.041667);
+  video.paused = true; video.currentTime = 2.1;
+  expect(studioProgrammePictureTime(video)).toBe(2.1);
+  stop();
+});
+test('a late decoded receipt cannot repaint a reused source slot or survive disposal', () => {
+  const video = Object.assign(new EventTarget(), decoder(), { src: 'https://media.example.com/first.mp4' });
+  const paint = jest.fn();
+  const stop = watchStudioProgrammeFrames(video, paint);
+  video.frame(.5, .48); expect(studioProgrammePictureTime(video)).toBe(.5);
+  video.src = 'https://media.example.com/second.mp4'; video.currentTime = 5;
+  expect(studioProgrammePictureTime(video)).toBe(5);
+  video.frame(.541667, 5); expect(paint).toHaveBeenCalledTimes(1);
+  stop(); expect(studioProgrammePictureTime(video)).toBe(5);
+});
 test('disposed and paused programme loops cannot keep painting the former shot', () => {
   const video = decoder(), paint = jest.fn();
   watchStudioProgrammeFrames(video, paint);
@@ -266,6 +295,26 @@ test('switching/disposal cancels the prior source callback', () => {
   const video = decoder(); const stop = watchStudioClipBoundary(video, { end: 2, enabled: true, onBoundary: jest.fn() });
   stop(); expect(video.cancelVideoFrameCallback).toHaveBeenCalledWith(1);
 });
+test.each(['playing', 'cancelled', 'superseded', 'timeout', 'rejected'])('prepared-cut completion respects native %s', async outcome => {
+  jest.useFakeTimers();
+  try {
+    let resolve, reject, current = true;
+    const commit = jest.fn(), stop = jest.fn();
+    const cancel = startStudioPreparedCut({ play: () => new Promise((yes, no) => { resolve=yes; reject=no; }),
+      isCurrent: () => current, commit, stop, timeoutMs: 50 });
+    expect(commit).not.toHaveBeenCalled();
+    if (outcome === 'cancelled') cancel();
+    if (outcome === 'superseded') current = false;
+    if (outcome === 'timeout') jest.advanceTimersByTime(50);
+    if (outcome === 'rejected') reject(new Error('decoder unavailable')); else resolve(true);
+    await Promise.resolve();
+    if (['cancelled','superseded'].includes(outcome)) {
+      expect(commit).not.toHaveBeenCalled(); expect(stop).toHaveBeenCalledTimes(1);
+    } else expect(commit.mock.calls).toEqual([[outcome === 'playing']]);
+    jest.advanceTimersByTime(500); expect(commit).toHaveBeenCalledTimes(['cancelled','superseded'].includes(outcome)?0:1);
+  } finally { jest.useRealTimers(); }
+});
+
 test('finished movies and unsupported browsers retain the ordinary media-event path', () => {
   const video = decoder();
   watchStudioClipBoundary(video, { end: 2, enabled: false, onBoundary: jest.fn() })();
@@ -280,9 +329,10 @@ function createVideo() {
 }
 test('standby preparation keeps original source identity and the requested in-point', () => {
   const video = createVideo();
-  const cancel = primeStudioSourceVideo(video, { url: 'https://media.example.com/a.mp4', start: 5 });
+  const cancel = primeStudioSourceVideo(video, { url: 'https://media.example.com/a.mp4', start: 5, playbackRate: 2 });
   expect(video.src).toBe('https://media.example.com/a.mp4');
   expect(video.currentTime).toBe(5); expect(video.muted).toBe(true);
+  expect(video.playbackRate).toBe(2);
   expect(video.crossOrigin).toBe('anonymous'); cancel();
   // A prepared decoder promoted to the programme retains its decoded source.
   expect(video.hasAttribute('src')).toBe(true);

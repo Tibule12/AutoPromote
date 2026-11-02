@@ -84,6 +84,7 @@ export function scheduleStudioPreparedDuck(context, param, prepared, plan) {
   source.connect(param);
   param.cancelScheduledValues(context.currentTime);
   param.setValueAtTime(0, context.currentTime);
-  source.start(plan.when, plan.offset);
+  const rate=Number(context.sampleRate || prepared.sampleRate || 48000);
+  source.start(Math.round(plan.when*rate)/rate, Math.round(plan.offset*rate)/rate);
   return source;
 }

@@ -106,7 +106,7 @@ async function getOwnedVoiceBusPreview({ ownerUid, input, signal }) {
     folder = await fs.mkdtemp(path.join(os.tmpdir(), 'studio-voice-bus-'));
     for (let i=0; i<owned.length; i++) {
       const o = owned[i], file = path.join(folder, `source-${i}`);
-      const object = getStudioSourceBucket(o.kind).file(o.storagePath, { generation: o.generation });
+      const object = getStudioSourceBucket(o.kind, o.bucketName).file(o.storagePath, { generation: o.generation });
       const sourceStream = object.createReadStream({ validation: 'crc32c', decompress: false });
       const readSignal = AbortSignal.any([signal || new AbortController().signal, AbortSignal.timeout(15000)]);
       let reading = false;

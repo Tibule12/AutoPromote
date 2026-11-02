@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.48 • 2026-10-24
+Development documentation • product 1.2.0 • knowledge 1.0.54 • 2026-10-26
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -32,7 +32,7 @@ Shows the real composition as separate front-to-back layer and group rows, with 
 8. Use the normal source editing controls, undo/redo, save/reopen and export. Inspect the exact movie beside the editable timeline. Group splitting/duplication and source-occurrence attachment remain unsupported.
 9. Download project backup saves the current editable project and available media. Select Include saved versions in backup when the saved-version history is also needed; this choice does not delete local versions. Owned media access is re-authorized when restoring.
 
-**Preview:** Group In/Out uses a half-open programme-time visibility range around assembled child graphics. Group move shifts canonical child timing and keys, retaining source phase. The same derived group range clips linked motion cues for preview and export. Property focus and clip selection do not change the edit.
+**Preview:** Group In/Out uses a half-open programme-time visibility range around assembled child graphics. Group move shifts canonical child timing and keys, retaining source phase. The same derived group range clips linked motion cues for preview and export. Property focus and clip selection do not change the edit. Timeline markers, the output-position control and playback time follow the programme decoder and the existing output time map. Split and source trim commands sample the decoder when clicked, including between ordinary UI updates. Finished-file source edits resolve the correct source occurrence and return to Live Edit. An edge cursor is rejected instead of reusing an earlier UI position.
 
 **Final render:** The shared composition plan carries group timing into the CPU compositor. The existing inverse programme clock gates the group’s assembled output at the same In/Out range. Source clips, child animation and audio use their existing compilation paths.
 
@@ -40,6 +40,8 @@ Shows the real composition as separate front-to-back layer and group rows, with 
 
 - This dated development snapshot does not establish professional or production readiness.
 - One real 20-second footage/title/music/SFX project exercises group pointer move, trim, opacity keys, locks, group deletion/undo, source split/history and exact cold reopen. Broader source-occurrence attachment/reordering, group split/duplicate, nested audio/video/owned 3D timing and continuous/full picture/sound remain unqualified. Group trim preserves hidden keys and source phase; it does not retime/stretch child content.
+- Detailed inspector values, active-layer filtering, key navigation and broader retimed/nested combinations still require separate qualification. A more responsive playhead does not establish full picture/sound synchronization or playback smoothness.
+- Playback latency during heavy work remains under review. Check the paused frame before detailed effect edits; a responsive cursor does not certify full live picture/sound accuracy.
 
 **Common errors**
 
@@ -272,7 +274,7 @@ Edit property keys, spatial position handles and value/velocity graphs on the sa
 12. Editing motion keys while viewing a completed movie switches After to Live Edit. The prior download remains available through Export; it is not presented as an updated movie.
 13. For paired position keys, select the layer in Motion → Transform keyframes, place the playhead in the interval and choose Curve path. Drag or arrow-nudge the amber handles; release commits once and Escape cancels. Straighten path retains its endpoints. Check the changed route before export.
 
-**Preview:** Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified.
+**Preview:** Evaluates canonical layer/group property keys on the existing preview clock. Keyed images take precedence over legacy CSS entrance animations and transitions. Nested groups apply evaluated parent transforms after child composition and clamp curve overshoot to the group control bounds. Broad raster, media, curves and continuous playback agreement remains unqualified. Main-video motion, crop, finish/adjustment and join effects follow the native decoded picture timestamp while playing. Paused scrubbing retains its existing exact-frame/native route. This bounded frame-clock repair does not establish whole audiovisual or pixel parity.
 
 **Final render:** Uses the existing shared compiler/compositor and interpolation expressions where supported. Group keys retain canonical target ownership and are projected into the group composition plan; output time maps back to the programme clock. Inspect the actual exported movie; the status does not certify every combination.
 
@@ -898,7 +900,7 @@ Adds owned music and adjusts cue placement and volume automation in the same pro
 1. Open the relevant workspace with an owned source.
 2. Review the result and its limitations before saving or exporting.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified. Music automation and overlapping fades follow the output audio clock. Ready imported cues use the final mixer’s linear sample mapping in the decoded preview route; their source controls remain editable. Prepared speech ducking retains its bounded CPU-verified gain samples. An explicit prepared Play/Resume retains the paused start position. The verified native music/speech/cue mix includes its opening samples and stays continuous through a prepared cut. Eligible silent pictures adjust their preview rate toward that sound clock; Pause and real seeks retain their stop/reanchor behavior. Held pictures under UI load, exact terminal delivery, other audio routes and broad processed picture/sound/listening still need qualification.
 
 **Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
 
@@ -1014,7 +1016,7 @@ Edits source-bus volume keys and interpolation alongside native cue gain. Retain
 2. Review the result and its limitations before saving or exporting.
 3. Dense gain curves preserve their sampled values and programme-to-output timing using bounded FFmpeg expression nesting; gain keys do not require removing easing to export.
 
-**Preview:** Source, master-podcast, music, B-roll and SFX gain boosts use browser audio processing above 100%. Source automation takes precedence over the master-podcast fallback. J-cut/L-cut dialogue overlaps follow original-track gain, mute and solo controls. B-roll gain automation persists when switching inspectors. Finished-video monitoring plays the already mixed movie with monitor volume/mute only; Live Edit restores the authored buses. Full mixed-sound comparison remains unqualified.
+**Preview:** Source, master-podcast, music, B-roll and SFX gain boosts use browser audio processing above 100%. Source automation takes precedence over the master-podcast fallback. J-cut/L-cut dialogue overlaps follow original-track gain, mute and solo controls. B-roll gain automation persists when switching inspectors. Finished-video monitoring plays the already mixed movie with monitor volume/mute only; Live Edit restores the authored buses. Full mixed-sound comparison remains unqualified. Original/master source gain and J/L-cut dialogue update from decoded frames without rendering the editor per frame. Source/occurrence checks reject stale clocks; buffering/seeking suspend dialogue and resume reanchors it. Frame-clock timing is separate from sample-exact whole-mix qualification. Short source-gain lookahead on the existing browser audio graph keeps a fade moving during a bounded editor stall; seeking, buffering and pause cancel/reanchor it. Music automation and overlapping fades follow the output audio clock. Ready imported cues use the final mixer’s linear sample mapping in the decoded preview route; their source controls remain editable. Prepared speech ducking retains its bounded CPU-verified gain samples. Native whole-mix startup/handoff and broad processed sound accuracy still need qualification. Equal envelope data no longer restarts running music ramps. Linked recorded-voice cuts retain their original fades through save, reopen and export; prepared speech shares the current decoder’s planned music handoff. Bounded mixed-bus samples pass, while continuous picture/sound transport and broad listening remain under review. Prepared-cut playback retains authored pacing and starts the decoded programme audio from an advancing video frame. Bounded native mixed audio remains continuous across the verified cut without per-cut reanchoring; picture startup and full audiovisual alignment remain unqualified. Decoded programme sound keeps its existing clock when video starts late. The preview catches the picture up; creator Pause and seek still override that recovery. Broader audiovisual timing remains unqualified.
 
 **Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
 
@@ -1022,6 +1024,7 @@ Edits source-bus volume keys and interpolation alongside native cue gain. Retain
 
 - This dated development snapshot does not establish professional or production readiness.
 - Volume above 100% requires browser audio processing. If unavailable, the preview reports its 100% limit; export retains the authored gain.
+- The verified continuous mixed-audio path uses muted source sound, prepared speech and decoded cues. Original sound, extracted/B-roll audio and decoder fallbacks still need broader parity checks.
 
 **Common errors**
 
