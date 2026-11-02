@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Final integration source review: explicit perspective-key grouping, retained native template versions, source-bound compositor and security/retirement compatibility; no product readiness promotion.",
-  "reviewed_at": "2026-11-02T17:23:02.962Z",
+  "reason": "Hardened media URL sinks, local preview request rates/path confinement and owner-prefix matching; canonical freeze/hold checks preserve current native behavior; no readiness promotion.",
+  "reviewed_at": "2026-11-02T17:39:10.026Z",
   "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
@@ -171,7 +171,7 @@
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
-      "sha256": "a5120a2004a6eade05a4f6da4fe49252a2a4c2c71c65c19a0d51467609336294"
+      "sha256": "52fc5ff31cbd80891e95f13f62bcb58811ff1cdb940023b66621c50757f9a944"
     },
     {
       "path": "frontend/src/components/StudioTextAnimatorPanel.js",
@@ -607,7 +607,7 @@
     },
     {
       "path": "src/services/studio3DLocalDurable.js",
-      "sha256": "c4fe81e9f90384d452c8b0241f89235014cab2afd619be05e82e32efa9dbf841"
+      "sha256": "e2ff6f50f7c3f5aa8b1570150d1d9bb20b7c51cc80a525a7c518ecade7bc1aa5"
     },
     {
       "path": "src/services/studioModelCapabilityService.js",

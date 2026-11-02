@@ -72,7 +72,8 @@ async function reconcile({ config, jobId, data, bucket, jobRef, db }) {
   const key = `${config.root}/${jobId}`;
   if (reconciling.has(key)) return reconciling.get(key);
   const task = (async () => {
-    await privateRoot(config); const directory = path.join(config.root, jobId);
+    await privateRoot(config); const directory = path.resolve(config.root, jobId);
+    if (!directory.startsWith(config.root + path.sep)) throw Error("Local Blender job escaped its private root");
     if (await fs.realpath(directory) !== directory) throw Error("Invalid local Blender job directory");
     let outcome;
     try { outcome = await readJson(path.join(directory, "status.json")); }

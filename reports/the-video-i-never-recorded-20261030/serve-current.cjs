@@ -1,6 +1,7 @@
 // Isolated current-source Studio review host. Existing App files are untouched.
 const express=require('express'),path=require('path'),fs=require('fs');
 const app=express(),build=path.join(__dirname,'proof/verified-studio-build');
+app.use(require('express-rate-limit')({windowMs:60000,max:240,standardHeaders:true,legacyHeaders:false}));
 if(!fs.existsSync(path.join(build,'index.html')))throw Error('Build the current sources first.');
 app.use('/background-review',express.static(build));
 app.get('/background-review/{*rest}',(_req,res)=>res.sendFile(path.join(build,'index.html')));

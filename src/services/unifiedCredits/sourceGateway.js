@@ -65,8 +65,11 @@ function createSourceGateway({
       fail("SOURCE_FORBIDDEN", 403);
     const file = bucket.file(storagePath);
     const [metadata] = await file.getMetadata();
+    const segments = storagePath.split("/");
     const localAlpha = process.env.STUDIO_3D_LOCAL_ENABLED === "true" &&
-      new RegExp(`^temp_studio_3d/${uid}/[A-Za-z0-9_-]{8,100}/overlay\\.mov$`).test(storagePath) && metadata.contentType === "video/quicktime";
+      segments.length === 4 && segments[0] === "temp_studio_3d" && segments[1] === uid &&
+      /^[A-Za-z0-9_-]{8,100}$/.test(segments[2]) && segments[3] === "overlay.mov" &&
+      metadata.contentType === "video/quicktime";
     if (owner(storagePath, metadata) !== uid || Number(metadata.size) > (localAlpha ? 250 * 1024 * 1024 : maxSourceBytes))
       fail("SOURCE_FORBIDDEN", 403);
     const [bytes] = await file.download();

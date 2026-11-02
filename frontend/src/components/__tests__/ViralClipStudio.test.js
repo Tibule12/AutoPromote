@@ -463,16 +463,16 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId("pro-current-edit")).toHaveTextContent("0:06");
   });
 
-  test("a playing single-clip sequence loops at its trimmed end", () => {
+  test("ordinary single-clip playback holds the final authored frame at its trimmed end", () => {
     const { video } = mountNativePreview();
     fireEvent.click(screen.getByRole("button", { name: /Play comparison/ }));
     video.currentTime = 8.1;
     fireEvent.timeUpdate(video);
-    expect(video.currentTime).toBe(2);
-    expect(video.paused).toBe(false);
+    expect(video.currentTime).toBeCloseTo(8 - 1 / 30, 5);
+    expect(video.paused).toBe(true);
   });
 
-  test("native source EOF loops a full-length clip while user-paused EOF stays paused", () => {
+  test("native source EOF holds a full-length clip while user-paused EOF stays paused", () => {
     const { video } = mountNativePreview({
       clips: [{ id: "full", start: 0, end: 12, duration: 12 }],
     });
@@ -482,9 +482,10 @@ describe("ViralClipStudio timeline sequencing", () => {
     }); // Native EOF pauses before dispatching ended.
     video.currentTime = 12;
     fireEvent.ended(video);
-    expect(video.currentTime).toBe(0);
-    expect(video.paused).toBe(false);
-    fireEvent.click(screen.getByRole("button", { name: "Pause comparison" }));
+    expect(video.currentTime).toBeCloseTo(12 - 1 / 30, 5);
+    expect(video.paused).toBe(true);
+    fireEvent.canPlay(video);
+    expect(video.paused).toBe(true);
     video.currentTime = 12;
     fireEvent.ended(video);
     expect(video.paused).toBe(true);
@@ -4064,7 +4065,8 @@ describe("ViralClipStudio timeline sequencing", () => {
       value: 20,
     });
     fireEvent.ended(afterVideo);
-    await waitFor(() => expect(afterVideo.currentTime).toBeLessThan(2));
+    await waitFor(() => expect(afterVideo.currentTime).toBeCloseTo(20 - 1 / 30, 5));
+    expect(afterVideo.paused).toBe(true);
 
     fireEvent.click(screen.getByRole("button", { name: "After" }));
     expect(afterVideo).not.toHaveAttribute("controls");

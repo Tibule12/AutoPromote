@@ -1,3 +1,4 @@
+import { applySafeMediaSource, getSafeMediaSource } from "../utils/security";
 import { useEffect, useRef, useState } from "react";
 import { validateSubjectVfxScene, subjectVfxRevision } from "./studioSubjectVfxContract";
 import StudioSubjectMaskControls from "./StudioSubjectMaskControls";
@@ -166,6 +167,7 @@ export default function StudioSubjectVfxPanel({
   const source = sources.find(value => value.id === item?.scene.sourceId &&
     value.start === item?.scene.sourceRange.start && value.end === item?.scene.sourceRange.end) ||
     sources.find(value => value.id === item?.scene.sourceId);
+  useEffect(() => { applySafeMediaSource(video.current, source?.url); }, [source?.url]);
   const revision = (() => {
     try {
       return item && subjectVfxRevision(item.scene);
@@ -671,7 +673,6 @@ export default function StudioSubjectVfxPanel({
             <video
               key={source?.url}
               ref={video}
-              src={source?.url}
               preload="metadata"
               playsInline
               aria-label="Select subject in source footage"
@@ -1100,7 +1101,7 @@ export default function StudioSubjectVfxPanel({
                 controls
                 playsInline
                 preload="metadata"
-                src={item.preview.url}
+                src={getSafeMediaSource(item.preview.url)}
                 aria-label="Rendered subject effects with original audio"
                 onPlaying={() => setPlayed(true)}
                 onError={() => {

@@ -3,7 +3,7 @@ const {Readable}=require('node:stream');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
 const {createLocalStudioMediaProxy}=require('./local-studio-media-proxy');
 test('local playback preserves bytes/ranges and rechecks the owner, token, expiry and origin',async t=>{
- const app=express(),server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());
+ const app=express();app.use(require('express-rate-limit')({windowMs:60000,max:120,standardHeaders:true,legacyHeaders:false}));const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());
  const bytes=Buffer.from('real source bytes'),uid='owner-1',storagePath='studio/sources/owner-1/source.mp4';
  let owner=uid,clock=1000,pinned;
  const bucket=()=>({file:(_path,options)=>{
@@ -35,7 +35,7 @@ test('verified export cache requires the current object generation and matching 
  fs.writeFileSync(path.join(dir,sha+'.bin'),bytes);fs.writeFileSync(path.join(dir,'manifest.private.json'),JSON.stringify([{storagePath,generation:'42',sha256:sha}]));
  let generation='42',remoteReads=0;
  const bucket=()=>({file:()=>({getMetadata:async()=>[{generation,size:bytes.length,contentType:'video/mp4',md5Hash:crypto.createHash('md5').update(bytes).digest('base64'),metadata:{ownerUid:uid,jobId:job,purpose:'studio_export',sha256:sha}}],createReadStream:()=>{remoteReads++;return Readable.from(bytes);}})});
- const app=express(),server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());
+ const app=express();app.use(require('express-rate-limit')({windowMs:60000,max:120,standardHeaders:true,legacyHeaders:false}));const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());
  const proxy=createLocalStudioMediaProxy({appOrigin:'http://localhost:5008',apiOrigin:`http://127.0.0.1:${server.address().port}`,bucket,cacheDirectory:dir});app.get(proxy.prefix+':capability',proxy.stream);
  const url=proxy.issue(uid,storagePath,'https://storage.googleapis.com/bucket/'+storagePath+'?Signature=owned-read');
  assert.equal(await(await fetch(url)).text(),bytes.toString());assert.equal(remoteReads,0);

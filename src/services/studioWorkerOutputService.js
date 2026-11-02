@@ -99,7 +99,8 @@ async function retainedLocalCompletionHash(jobId, env = process.env) {
   if (!path.isAbsolute(root) || await fs.promises.realpath(root) !== root) throw new Error('Invalid retained local completion directory');
   const directory=await fs.promises.lstat(root);
   if (!directory.isDirectory() || directory.isSymbolicLink() || (directory.mode & 0o077)) throw new Error('Retained completion directory must be private');
-  const file=path.join(root,jobId+'_viral.mp4');
+  const file=path.resolve(root,jobId+'_viral.mp4');
+  if(!file.startsWith(root+path.sep))throw new Error('Retained completion escaped its private root');
   let handle;
   try { handle=await fs.promises.open(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW); }
   catch(error){if(error.code==='ENOENT')return null;throw error;}

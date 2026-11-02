@@ -1638,6 +1638,9 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   // Establish a real subject-safe composition before demonstrating finish/VFX.
   // Signature tools should be judged on a correctly framed shot, never a center-crop guess.
   await toolRail.getByRole("button", { name: "Reframe", exact: true }).click();
+  // Source-preserving framing can be off after prior cut/history actions.
+  // Explicitly enable the reviewed composition through its ordinary control.
+  await inspector.getByTestId("auto-reframe-toggle").check();
   await expect(inspector.getByTestId("auto-reframe-toggle")).toBeChecked();
   await inspector.getByTestId("reframe-aspect-4-5").click();
   await inspector.getByTestId("add-reframe-keyframe").click();
@@ -2905,11 +2908,21 @@ test("records the complete frontend-first creator feature tour without rendering
   const showDemo = async (id, hold = 620, expand = true) => {
     const button = workbench.getByTestId(`creator-demo-${id}`);
     await button.scrollIntoViewIfNeeded();
-    await button.click();
-    await expect(page.getByTestId("studio-creator-preview-layer")).toHaveAttribute(
-      "data-active-demo",
-      id
-    );
+    if (["reaction_freeze", "reaction_punch"].includes(id)) {
+      await pausePreview(page);
+      await seekOutput(page, 1.2);
+      const graphics = page.getByTestId(/pro-graphics-clip-/);
+      const before = await graphics.count();
+      await button.click();
+      await expect(graphics).toHaveCount(before + 1);
+      await expect(page.getByTestId("studio-creator-preview-layer")).toHaveCount(0);
+      await expect(page.getByText("Freeze picture added to the editable timeline. Undo restores the complete edit.", { exact: true })).toBeVisible();
+    } else {
+      await button.click();
+      await expect(page.getByTestId("studio-creator-preview-layer")).toHaveAttribute(
+        "data-active-demo", id
+      );
+    }
     await page.waitForTimeout(260);
     if (expand) await presentPreview(hold);
     else await page.waitForTimeout(hold);

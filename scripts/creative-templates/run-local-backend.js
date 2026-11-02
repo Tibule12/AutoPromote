@@ -20,6 +20,7 @@ Object.assign(process.env, { NODE_ENV:'development', PORT:String(port),
   MEDIA_WORKER_URL:`http://127.0.0.1:${workerPort}`, LOCAL_MEDIA_WORKER_URL:`http://127.0.0.1:${workerPort}` });
 const actualApp = require(path.join(root,'src/server'));
 const localApp = require('express')();
+localApp.use(require('express-rate-limit')({windowMs:60000,max:240,standardHeaders:true,legacyHeaders:false}));
 if (process.env.STUDIO_QA_APP_ORIGIN) {
   const {createLocalStudioMediaProxy}=require('./local-studio-media-proxy');
   const {resolveIngestBucketName}=require(path.join(root,'src/services/multicamUploadService'));
