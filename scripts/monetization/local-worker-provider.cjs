@@ -25,6 +25,8 @@ async function createLocalWorkerProvider({
   )
     throw new Error("LOCAL_ANALYSIS_DEADLINE_INVALID");
   assertSandbox(env);
+  const { localReviewBounds, validateLongReviewRequest } = require('./local-review-bounds.cjs');
+  const reviewBounds = localReviewBounds(env);
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const executionRoot = fs.realpathSync(directory);
   const privateFile = path.join(directory, "signing-key.pem");
@@ -155,7 +157,7 @@ async function createLocalWorkerProvider({
       if (!actual.startsWith(allowed) && !actual.startsWith(dir + path.sep))
         throw new Error("Worker artifact escaped scratch directory");
       const bytes = fs.readFileSync(actual);
-      if (bytes.length > 20 * 1024 * 1024) throw new Error("Worker artifact exceeds budget");
+      if (bytes.length > reviewBounds.maxArtifactBytes) throw new Error("Worker artifact exceeds budget");
       const artifact = path.join(dir, "artifact.mp4");
       fs.copyFileSync(actual, artifact);
       payload.output = {
@@ -188,6 +190,7 @@ async function createLocalWorkerProvider({
         )
           return res.sendStatus(403);
         const dir = folder(expected.executionId);
+        const longReview = validateLongReviewRequest(req.body, req.path, reviewBounds);
         fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
         const requestFile = path.join(dir, "request.json");
         const record = {
@@ -196,7 +199,9 @@ async function createLocalWorkerProvider({
           apiOrigin,
           directory: dir,
           localCpuSeconds:
-            expected.endpoint === "/analyze-clips" ? Math.ceil(analysisTimeoutMs / 1000) : 120,
+            expected.endpoint === "/analyze-clips" ? Math.ceil(analysisTimeoutMs / 1000) : longReview ? reviewBounds.renderCpuSeconds : 120,
+          ...(longReview ? { localReview: true, localFileBytes: reviewBounds.fileBytes,
+            localSourceBytes: reviewBounds.maxSourceBytes } : {}),
         };
         if (
           fs.existsSync(requestFile) &&
@@ -250,7 +255,7 @@ async function createLocalWorkerProvider({
                 process.kill(-child.pid, "SIGKILL");
               } catch {}
             },
-            expected.endpoint === "/analyze-clips" ? analysisTimeoutMs : 120000
+            expected.endpoint === "/analyze-clips" ? analysisTimeoutMs : longReview ? reviewBounds.renderTimeoutMs : 120000
           );
           const promise = new Promise(resolve => {
             child.once("error", () => {

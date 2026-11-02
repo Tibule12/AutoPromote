@@ -207,8 +207,8 @@ function createApplicationIntegration({
           (quote, source) => {
             if (
               quote.operation !== operation ||
-              !source.workflowInput?.requestBody ||
-              hash(source.workflowInput.requestBody) !== hash(req.body)
+              !(source.workflowInput?.requestBody || source.workflowInput?.requestBodyJson) ||
+              hash(source.workflowInput.requestBodyJson ? JSON.parse(source.workflowInput.requestBodyJson) : source.workflowInput.requestBody) !== hash(req.body)
             )
               fail("WORKFLOW_INPUT_CHANGED", 409);
           }

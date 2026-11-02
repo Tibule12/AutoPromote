@@ -72,7 +72,7 @@ beforeEach(() => {
   global.fetch = jest.fn();
 });
 
-test("background edge cleanup is an editable canonical effect and never starts a job", () => {
+test("background edge cleanup preserves soft alpha by default and remains editable without starting a job", () => {
   const current=scene();
   current.effects.push({id:"room",type:"background_replace",start:0,end:6,asset_id:"set-1",
     asset_sha256:"c".repeat(64),blur:0,exposure:0,saturation:1});
@@ -80,7 +80,7 @@ test("background edge cleanup is an editable canonical effect and never starts a
     storagePath:"uploads/images/owner/set.png",contentHash:"c".repeat(64)}]} />);
   fireEvent.click(screen.getByRole("button",{name:"Clean background edges"}));
   let saved=JSON.parse(screen.getByTestId("saved").textContent)[0];
-  expect(saved.scene.effects[2]).toMatchObject({id:"background-edge-cleanup",edge_radius:3,decontaminate:1,choke:0,feather:0});
+  expect(saved.scene.effects[2]).toMatchObject({id:"background-edge-cleanup",edge_radius:0,decontaminate:1,choke:0,feather:0});
   expect(saved.scene.effects.slice(0,2)).toEqual(current.effects);
   fireEvent.change(screen.getByLabelText("Background edge detail width"),{target:{value:"2"}});
   fireEvent.change(screen.getByLabelText("Remove old background colour"),{target:{value:"0.6"}});

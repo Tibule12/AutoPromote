@@ -46,6 +46,9 @@ function editableSubjectScene({segmentation,tracking,sourceStoragePath,effects,i
       throw fail('MODEL_SUBJECT_TRACK_DEPENDENCY_INVALID',409);
   }
   const box=mask.parameters.initialBox;
+  // Existing v1 projects stored a centre prompt. Retain their import contract;
+  // v2 preserves the actual corrective selection end to end.
+  const preservePoints=parseInt(mask.modelVersion,10)>=2;
   // Uploaded durations can be rounded to microseconds by media metadata.
   // The artifact range is authoritative at 90kHz. Project effect boundaries on
   // that same clock before validating; never widen the owned source interval.
@@ -54,7 +57,8 @@ function editableSubjectScene({segmentation,tracking,sourceStoragePath,effects,i
     end:Number.isFinite(effect.end)&&effect.end>=0?Math.round(effect.end*90000)/90000:effect.end}));
   const scene=validateSubjectVfxScene({version:1,id,sourceId:mask.sourceAssetId,sourceStoragePath,
     sourceRange:{start:mask.sourceRange.startTick/90000,end:mask.sourceRange.endTick/90000},
-    prompt:{points:[[(box[0]+box[2])/2,(box[1]+box[3])/2]],labels:[1],
+    prompt:{points:preservePoints && mask.parameters.points.length ? mask.parameters.points.map(p=>p.position) : [[(box[0]+box[2])/2,(box[1]+box[3])/2]],
+      labels:preservePoints && mask.parameters.points.length ? mask.parameters.points.map(p=>p.label) : [1],
       shotPrompts:mask.parameters.shotPrompts.map(x=>({time:x.frameIndex/24,
         points:x.points?.length ? x.points.map(p=>p.position) : [[(x.box[0]+x.box[2])/2,(x.box[1]+x.box[3])/2]],
         labels:x.points?.length ? x.points.map(p=>p.label) : [1]}))},effects:clockEffects});

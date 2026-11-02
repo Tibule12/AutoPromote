@@ -241,6 +241,11 @@ export const buildStudioLayersFromSnapshot = snapshot => {
     layerId: item.scene.id, type: "subject_vfx", legacyCollection: "subjectVfxScenes",
     compositionStage: "source_subject_vfx", parameters: {
       scene: JSON.parse(JSON.stringify(item.scene)), enabled: item.enabled !== false,
+      ...(item.maskBox ? { maskBox: [...item.maskBox] } : {}),
+      ...(item.maskComponents?.length ? { maskComponents: JSON.parse(JSON.stringify(item.maskComponents)) } : {}),
+      ...(Array.isArray(item.maskColourComponentIds) ? { maskColourComponentIds: [...item.maskColourComponentIds] } : {}),
+      ...(item.maskJob ? { maskJob: cloneStudioDecisionFields(item.maskJob,
+        ["requestId", "selectionJson", "projectRevision", "projectId", "mode", "jobId", "finished", "reusedAtRevision"]) } : {}),
       ...(item.modelArtifactRef ? { modelArtifactRef: createModelArtifactReference(item.modelArtifactRef) } : {}),
       ...(item.trackingArtifactRef ? { trackingArtifactRef: createModelArtifactReference(item.trackingArtifactRef) } : {}),
       ...(item.preview ? { preview: cloneStudioDecisionFields(item.preview, ["jobId", "revision", "reviewed", "receipt"]) } : {}),
@@ -480,6 +485,13 @@ export const projectStudioEditableStateToSnapshot = (document, transportSnapshot
         // evidence until the explicit edit migration boundary is present.
         if (document.compatibility?.editStateVersion !== 1) return { ...old, ...item };
         const restored = { ...old, ...item };
+        // V2 owns correction requests in the canonical layer. Keep only legacy
+        // job selections for older layers that predate this migration.
+        if (Object.prototype.hasOwnProperty.call(item, "maskComponents"))
+          restored.maskComponents = JSON.parse(JSON.stringify(item.maskComponents));
+        if (Array.isArray(item.maskColourComponentIds))restored.maskColourComponentIds=[...item.maskColourComponentIds];
+        if (item.maskBox) restored.maskBox = [...item.maskBox];
+        if (item.maskJob) restored.maskJob = JSON.parse(JSON.stringify(item.maskJob));
         for (const field of ["preview", "pending"]) {
           if (!item[field]) delete restored[field];
           else restored[field] = { ...JSON.parse(JSON.stringify(item[field])),

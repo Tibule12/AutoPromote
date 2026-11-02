@@ -247,19 +247,34 @@ class VfxFrameRenderer:
                     self.assets[effect["id"]] = image.convert("RGBA")
 
     def _prepare_foreground(self, frame, alpha, active, width, height):
-        def refine_alpha(alpha, effect):
+        # All cleanup layers examine this same photographed frame. Reuse its
+        # colour/guide arrays; repeated full-resolution conversions add avoidable
+        # work to long subject previews without changing any inclusion decision.
+        frame_colour = {}
+        def refine_alpha(alpha, effect, source_frame=frame, colours=frame_colour):
+            frame=source_frame;width,height=frame.size;frame_colour=colours
+            if (not effect["choke"] and not effect["feather"] and not effect.get("clear_paths")
+                    and effect["clear_box"][0]==effect["clear_box"][2]
+                    and effect["recover_box"][0]==effect["recover_box"][2]
+                    and effect["detail_box"][0]==effect["detail_box"][2]):
+                return alpha
             if effect["choke"]:alpha=alpha.filter(ImageFilter.MinFilter(2*effect["choke"]+1))
             values=np.array(alpha,dtype=np.float32)/255
-            hsv=np.array(frame.convert("HSV"),dtype=np.float32)/255
-            hue=hsv[:,:,0]*360
+            if "hsv" not in frame_colour:
+                frame_colour["hsv"]=np.array(frame.convert("HSV"),dtype=np.float32)/255
+                frame_colour["hue"]=frame_colour["hsv"][:,:,0]*360
+            hsv,hue=frame_colour["hsv"],frame_colour["hue"]
             def region(box):
                 mask=np.zeros((height,width),dtype=bool)
                 x0,y0,x1,y1=box
                 mask[round(y0*height):round(y1*height),round(x0*width):round(x1*width)]=True
                 return mask
             def hue_distance(target):
-                distance=np.abs(hue-target)
-                return np.minimum(distance,360-distance)
+                key=("hue_distance",target)
+                if key not in frame_colour:
+                    distance=np.abs(hue-target)
+                    frame_colour[key]=np.minimum(distance,360-distance)
+                return frame_colour[key]
             values[region(effect["clear_box"])]=0
             if effect.get("clear_paths"):
                 garbage=Image.new("L",(width,height))
@@ -276,7 +291,26 @@ class VfxFrameRenderer:
             detail=region(effect["detail_box"]) & selection
             dark=np.clip((effect["dark_max"]+.05-hsv[:,:,2])/.1,0,1)
             values[detail]=np.maximum(values[detail],dark[detail])
-            spill=detail & (hue_distance(effect["reject_hue"])<=effect["reject_tolerance"]) & (hsv[:,:,1]>=effect["reject_saturation"]) & (hsv[:,:,2]>=effect["reject_value"])
+            distance=hue_distance(effect["reject_hue"])
+            colour_feather=effect.get("_colour_feather",effect["feather"])
+            if colour_feather:
+                # A hard HSV comparison makes a nearly identical photographed
+                # edge alternate between opaque and absent as compression or
+                # light changes by one code value. Feather the colour key as
+                # well as its spatial boundary; saturated old-screen cores
+                # still disappear completely. Zero feather retains hard keys.
+                def smoothstep(low,high,value):
+                    t=np.clip((value-low)/(high-low),0,1)
+                    return t*t*(3-2*t)
+                hue_width=max(2,min(8,colour_feather*12))
+                colour_width=max(2/255,min(.08,colour_feather*.12))
+                rejection=(1-smoothstep(effect["reject_tolerance"]-hue_width,effect["reject_tolerance"]+hue_width,distance))
+                rejection*=smoothstep(effect["reject_saturation"]-colour_width,effect["reject_saturation"]+colour_width,hsv[:,:,1])
+                rejection*=smoothstep(effect["reject_value"]-colour_width,effect["reject_value"]+colour_width,hsv[:,:,2])
+                rejection*=detail
+            else:
+                rejection=(detail & (distance<=effect["reject_tolerance"]) & (hsv[:,:,1]>=effect["reject_saturation"]) & (hsv[:,:,2]>=effect["reject_value"])).astype(np.float32)
+            spill=rejection>0
             if effect.get("reject_connected",False):
                 # A matching colour inside a shirt/trouser patch must not cut
                 # a hole. Only remove matching components that reach an actual
@@ -286,12 +320,15 @@ class VfxFrameRenderer:
                 exterior=np.unique(labels[spill & (values<=1/255)])
                 exterior=exterior[exterior!=0]
                 spill &= np.isin(labels,exterior)
-            values[spill]=0
+                rejection*=spill
+            values*=1-rejection
             if effect["feather"]:
                 # An edge-aware feather follows source detail rather than
                 # smearing opaque old-room pixels into the replacement set.
                 import cv2
-                guide=cv2.cvtColor(np.asarray(frame),cv2.COLOR_RGB2GRAY).astype(np.float32)/255
+                if "guide" not in frame_colour:
+                    frame_colour["guide"]=cv2.cvtColor(np.asarray(frame),cv2.COLOR_RGB2GRAY).astype(np.float32)/255
+                guide=frame_colour["guide"]
                 radius=max(1,round(effect["feather"]*6));kernel=(2*radius+1,)*2
                 mean=lambda value:cv2.boxFilter(value,-1,kernel,borderType=cv2.BORDER_REFLECT)
                 mean_guide,mean_alpha=mean(guide),mean(values)
@@ -334,6 +371,13 @@ class VfxFrameRenderer:
             kernel=cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*radius+1,)*2)
             inside=cv2.erode(opaque,kernel)>0 if radius else np.asarray(alpha)==255
             outside=cv2.dilate(opaque,kernel)==0 if radius else np.asarray(alpha)==0
+            if radius:
+                # Preserve opaque medial seeds in real thin equipment. Erosion
+                # alone removes every seed from rails narrower than the band.
+                strong=(np.asarray(alpha)>=224).astype(np.uint8)
+                distance=cv2.distanceTransform(strong,cv2.DIST_L2,5)
+                medial=(distance>=cv2.dilate(distance,np.ones((3,3),np.uint8))-.01)&(distance>=1)&(distance<=radius)
+                inside|=medial
             if not inside.any() or not outside.any():raise ValueError("Fine alpha needs both foreground and background seeds")
             trimap=np.full(opaque.shape,.5,dtype=np.float64)
             trimap[inside]=1;trimap[outside]=0
@@ -366,7 +410,30 @@ class VfxFrameRenderer:
             if effect["type"]=="foreground_refine" and effect.get("after_holdout",False):
                 # Explicit source-frame cleanup may remove a wrongly protected
                 # background fragment. It can never add pixels to the matte.
-                cleaned=refine_alpha(alpha,{**effect,"feather":0})
+                # Spatial subtraction is feathered below. Keep the requested
+                # colour-threshold transition here: forcing both to zero made
+                # protected mic/plant edges pop on one-code-value changes.
+                command={**effect,"feather":0,"_colour_feather":effect["feather"]}
+                # Colour subtraction is confined to the authored boxes. A full
+                # frame HSV conversion per small TV exclusion wastes work; its
+                # local domain is exact because this stage has no choke/feather.
+                boxes=[effect[name] for name in ("clear_box","recover_box","detail_box")
+                       if effect[name][0]<effect[name][2] and effect[name][1]<effect[name][3]]
+                if boxes and not effect.get("clear_paths") and not effect.get("detail_polygon"):
+                    left=min(round(b[0]*width) for b in boxes);top=min(round(b[1]*height) for b in boxes)
+                    right=max(round(b[2]*width) for b in boxes);bottom=max(round(b[3]*height) for b in boxes)
+                    if right>left and bottom>top:
+                        for name in ("clear_box","recover_box","detail_box"):
+                            x0,y0,x1,y1=effect[name]
+                            command[name]=[max(0,min(right-left,round(x0*width)-left))/(right-left),
+                                max(0,min(bottom-top,round(y0*height)-top))/(bottom-top),
+                                max(0,min(right-left,round(x1*width)-left))/(right-left),
+                                max(0,min(bottom-top,round(y1*height)-top))/(bottom-top)]
+                        cleaned=alpha.copy();local=refine_alpha(alpha.crop((left,top,right,bottom)),command,
+                            frame.crop((left,top,right,bottom)),{})
+                        cleaned.paste(local,(left,top))
+                    else:cleaned=alpha
+                else:cleaned=refine_alpha(alpha,command)
                 values=np.asarray(alpha,dtype=np.int16)
                 removed=Image.fromarray(np.maximum(0,values-np.asarray(cleaned,dtype=np.int16)).astype(np.uint8))
                 if effect["feather"]:

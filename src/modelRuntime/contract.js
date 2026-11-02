@@ -91,6 +91,9 @@ function request(input) {
   const p = input.parameters;
   if(input.capability==='segment_subject' && p.refinement && !input.dependencyHashes.includes(p.refinement.maskArtifactHash))
     throw fail('MODEL_MASK_REFINEMENT_DEPENDENCY_REQUIRED');
+  if(input.capability==='segment_subject' && p.refinement?.colourComponentIds?.some(id=>
+    !p.components?.some(c=>c.id===id && c.propagate===false && c.points.some(p=>p.label===0) && c.points.some(p=>p.label===1))))
+    throw fail('MODEL_COLOUR_CORRECTION_COMPONENT_INVALID');
   if(input.capability==='detect_object' && p.frameIndex>=frames)throw fail('MODEL_CAPABILITY_FRAME_INVALID');
   if (input.capability === 'generate_video' && !((p.width === 1280 && p.height === 704) || (p.width === 704 && p.height === 1280)))
     throw fail('MODEL_CAPABILITY_VIDEO_GEOMETRY_INVALID');
@@ -101,7 +104,9 @@ function request(input) {
      (s.points?.length && !s.points.some(p=>p.label===1))))
     throw fail('MODEL_CAPABILITY_SHOT_PROMPT_INVALID');
   if (input.capability==='segment_subject' && p.components?.length && (p.shotPrompts.some(s=>!s.points?.length) ||
-      new Set(p.components.map(c=>c.id)).size!==p.components.length || p.components.some(c=>c.box[0]>=c.box[2] || c.box[1]>=c.box[3])))
+      new Set([p.subjectId,...p.components.map(c=>c.id)]).size!==p.components.length+1 || p.components.some(c=>c.box[0]>=c.box[2] || c.box[1]>=c.box[3] ||
+        (c.shotPrompts?.length && c.propagate===false) || c.shotPrompts?.some((s,i)=>s.frameIndex>=frames ||
+          (i>0 && s.frameIndex<=c.shotPrompts[i-1].frameIndex) || !s.points.length))))
     throw fail('MODEL_CAPABILITY_COMPONENT_SELECTION_INVALID');
   if (input.capability === 'track_object' && (p.mode !== 'mask_centroid' || !p.maskArtifactHash || !input.dependencyHashes.includes(p.maskArtifactHash) || p.points.length))
     throw fail('MODEL_CAPABILITY_POINT_TRACKING_UNAVAILABLE', 503);

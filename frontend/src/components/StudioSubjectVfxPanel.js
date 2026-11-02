@@ -2,6 +2,7 @@ import { SafeVideo } from "./SafeMedia";
 import { useEffect, useRef, useState } from "react";
 import { validateSubjectVfxScene, subjectVfxRevision } from "./studioSubjectVfxContract";
 import StudioSubjectMaskControls from "./StudioSubjectMaskControls";
+import { correctSubjectItem } from "./studioSubjectCorrections";
 import ProductHelpButton from "./ProductHelpButton";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import "./StudioSubjectVfxPanel.css";
@@ -147,6 +148,7 @@ export default function StudioSubjectVfxPanel({
   const [frameTime, setFrameTime] = useState(0),
     [pointLabel, setPointLabel] = useState(1),
     [layerType, setLayerType] = useState("text_behind");
+  const [correctionTarget, setCorrectionTarget] = useState('person');
   const [played, setPlayed] = useState(false),
     [pictureBox, setPictureBox] = useState(null);
   const video = useRef(null),
@@ -200,6 +202,7 @@ export default function StudioSubjectVfxPanel({
     setBusy(false);
     setStatus("idle");
     setMessage("");
+    setCorrectionTarget('person');
   }, [item?.scene.id]);
   const measurePicture = () => {
     const element = video.current;
@@ -318,27 +321,14 @@ export default function StudioSubjectVfxPanel({
     const x = (event.clientX - rect.left - (rect.width - width) / 2) / width,
       y = (event.clientY - rect.top - (rect.height - height) / 2) / height;
     if (x < 0 || x >= 1 || y < 0 || y >= 1) return;
-    const prompt = JSON.parse(JSON.stringify(item.scene.prompt));
-    let target = prompt;
-    const time = Math.round(frameTime * 24) / 24;
-    if (time > 0.001) {
-      target = prompt.shotPrompts.find(shot => Math.abs(shot.time - time) < 1 / 48);
-      if (!target) {
-        target = { time, points: [], labels: [] };
-        prompt.shotPrompts.push(target);
-        prompt.shotPrompts.sort((a, b) => a.time - b.time);
-      }
-    }
-    if (target.points.length >= 16) {
-      setMessage("This frame already has sixteen points.");
-      return;
-    }
-    target.points.push([x, y]);
-    target.labels.push(pointLabel);
-    update({ ...item.scene, prompt });
-    setMessage(
-      `Added ${pointLabel ? "subject" : "background"} point at ${time.toFixed(2)} seconds.`
-    );
+    addCorrection([x,y]);
+  };
+  const addCorrection = (point, clear=false) => {
+    try {
+      const corrected=correctSubjectItem(item,correctionTarget,Math.round(frameTime*24),point,pointLabel,clear);
+      onChange(items.map(value=>value===item?corrected:value));
+      setMessage('Selection updated. Recreate the mask and refine its edges; later-frame corrections propagate forward within this shot.');
+    } catch(error) { setMessage(error.message); }
   };
   const render = async (options = {}) => {
     if (operation.current) return;
@@ -566,10 +556,11 @@ export default function StudioSubjectVfxPanel({
     proposal.sourceStoragePath === source?.storagePath &&
     proposal.sourceRange?.start === item?.scene.sourceRange.start &&
     proposal.sourceRange?.end === item?.scene.sourceRange.end;
-  const currentPrompt =
-    frameTime < 0.001
-      ? item?.scene.prompt
-      : item?.scene.prompt.shotPrompts.find(shot => Math.abs(shot.time - frameTime) < 1 / 48);
+  const objectPrompt=item?.maskComponents?.find(c=>c.id===correctionTarget);
+  const selectedObjectPrompt=frameTime<.001?objectPrompt:objectPrompt?.shotPrompts?.find(p=>p.frameIndex===Math.round(frameTime*24));
+  const currentPrompt = correctionTarget==='person' ? (frameTime<.001?item?.scene.prompt:
+    item?.scene.prompt.shotPrompts.find(shot=>Math.abs(shot.time-frameTime)<1/48)) :
+    (selectedObjectPrompt?{points:selectedObjectPrompt.points.map(p=>p.position),labels:selectedObjectPrompt.points.map(p=>p.label)}:null);
   return (
     <section className="studio-subject-vfx" aria-labelledby="subject-vfx-heading">
       <header>
@@ -658,7 +649,10 @@ export default function StudioSubjectVfxPanel({
                 {!edge ? <button type="button" disabled={item.scene.effects.length>=12}
                   onClick={()=>update({...item.scene,effects:[...item.scene.effects,{
                     ...presets.foreground_refine(item.scene.sourceRange.end-item.scene.sourceRange.start),
-                    id:'background-edge-cleanup',choke:0,feather:0,edge_radius:3,decontaminate:1,
+                    // Keep the model's fractional hair, skin and motion edges.
+                    // A nonzero radius thresholds that alpha before re-solving
+                    // it; use the explicit width control when that is needed.
+                    id:'background-edge-cleanup',choke:0,feather:0,edge_radius:0,decontaminate:1,
                   }]})}>Clean background edges</button> : <>
                   <label>Edge detail width
                     <input aria-label="Background edge detail width" type="number" min="0" max="8" step="1"
@@ -680,6 +674,12 @@ export default function StudioSubjectVfxPanel({
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadBackground} />
             </label>}
           </fieldset>
+          <label>Correct foreground selection
+            <select aria-label="Correction target" value={correctionTarget} onChange={event=>setCorrectionTarget(event.target.value)}>
+              <option value="person">Person</option>
+              {(item.maskComponents||[]).map((component,index)=><option key={component.id} value={component.id}>Foreground object {index+1}</option>)}
+            </select>
+          </label>
           <div className="subject-vfx-source">
             <SafeVideo
               key={source?.url}
@@ -737,7 +737,7 @@ export default function StudioSubjectVfxPanel({
             <button
               type="button"
               onClick={() =>
-                update({ ...item.scene, prompt: { points: [], labels: [], shotPrompts: [] } })
+                addCorrection(null,true)
               }
             >
               Clear points
@@ -784,18 +784,10 @@ export default function StudioSubjectVfxPanel({
                     setMessage("Points must be between zero and one, inside the frame.");
                     return;
                   }
-                  if (item.scene.prompt.points.length >= 16) return;
-                  update({
-                    ...item.scene,
-                    prompt: {
-                      ...item.scene.prompt,
-                      points: [...item.scene.prompt.points, [x, y]],
-                      labels: [...item.scene.prompt.labels, pointLabel],
-                    },
-                  });
+                  addCorrection([x,y]);
                 }}
               >
-                Add first-frame point
+                Add point on selected frame
               </button>
             </div>
           </label>

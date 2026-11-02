@@ -1,0 +1,361 @@
+{
+  "frames": {
+    "source": 72,
+    "preview": 72,
+    "export": 72,
+    "before": 72
+  },
+  "sourceIntervalSeconds": [
+    22.458333333333332,
+    25.458333333333332
+  ],
+  "sourceCrop": {
+    "x": 170,
+    "y": 40,
+    "width": 1430,
+    "height": 1000
+  },
+  "previewToExport": {
+    "framesCompared": 72,
+    "ssimMean": 0.9873219444444445,
+    "ssimMin": 0.986188,
+    "geometry": "Exact FFmpeg Fit full scaling/padding from preview 1430x1000 to export 1920x1080. Independent H264 encoding adds differences.",
+    "pixelIdentical": false,
+    "creativePass": false
+  },
+  "exportSha256": "1d308aa195b1463110425ca7371a1df0eec5238d0a9b7a9d6cb03c5d5859d748",
+  "fullDecodePassed": true,
+  "creativeGate": false,
+  "technicalStatus": "NATIVE_SHORT_SHOT_VERIFIED",
+  "visualStatus": "FAILS_PROFESSIONAL_CLEANLINESS_TARGET",
+  "projectId": "viral-project-ee5826b7-4a56-4d7e-bc65-b4a5be530444",
+  "saveColdReopenCanonicalExact": true,
+  "finalExportNativeSettingChange": "FPS changed 30 to 24 through native Export control after the cold reopen; subject scene and artifact unchanged.",
+  "maskComponents": 6,
+  "laterFrameCorrection": 36,
+  "nativePreviewReviewCheckbox": "Inspection completed for diagnostic export; not founder approval",
+  "finalPlayback": {
+    "playback": {
+      "duration": 3,
+      "currentTime": 3,
+      "ended": true,
+      "width": 1920,
+      "height": 1080,
+      "frameClock": [
+        {
+          "mediaTime": 0.041667,
+          "expectedEpoch": 1793528475.2623
+        },
+        {
+          "mediaTime": 0.083333,
+          "expectedEpoch": 1793528475.3123
+        },
+        {
+          "mediaTime": 0.125,
+          "expectedEpoch": 1793528475.3455
+        },
+        {
+          "mediaTime": 0.166667,
+          "expectedEpoch": 1793528475.3956
+        },
+        {
+          "mediaTime": 0.208333,
+          "expectedEpoch": 1793528475.4289002
+        },
+        {
+          "mediaTime": 0.25,
+          "expectedEpoch": 1793528475.4789002
+        },
+        {
+          "mediaTime": 0.291667,
+          "expectedEpoch": 1793528475.5455
+        },
+        {
+          "mediaTime": 0.333333,
+          "expectedEpoch": 1793528475.5789
+        },
+        {
+          "mediaTime": 0.375,
+          "expectedEpoch": 1793528475.6289
+        },
+        {
+          "mediaTime": 0.416667,
+          "expectedEpoch": 1793528475.6622002
+        },
+        {
+          "mediaTime": 0.458333,
+          "expectedEpoch": 1793528475.7123
+        },
+        {
+          "mediaTime": 0.5,
+          "expectedEpoch": 1793528475.7456
+        },
+        {
+          "mediaTime": 0.541667,
+          "expectedEpoch": 1793528475.7956002
+        },
+        {
+          "mediaTime": 0.583333,
+          "expectedEpoch": 1793528475.8289
+        },
+        {
+          "mediaTime": 0.625,
+          "expectedEpoch": 1793528475.8789
+        },
+        {
+          "mediaTime": 0.666667,
+          "expectedEpoch": 1793528475.9122002
+        },
+        {
+          "mediaTime": 0.708333,
+          "expectedEpoch": 1793528475.9622002
+        },
+        {
+          "mediaTime": 0.75,
+          "expectedEpoch": 1793528475.9955
+        },
+        {
+          "mediaTime": 0.791667,
+          "expectedEpoch": 1793528476.0455
+        },
+        {
+          "mediaTime": 0.833333,
+          "expectedEpoch": 1793528476.0789
+        },
+        {
+          "mediaTime": 0.875,
+          "expectedEpoch": 1793528476.1289
+        },
+        {
+          "mediaTime": 0.916667,
+          "expectedEpoch": 1793528476.1622002
+        },
+        {
+          "mediaTime": 1,
+          "expectedEpoch": 1793528476.2455
+        },
+        {
+          "mediaTime": 1.083333,
+          "expectedEpoch": 1793528476.3289
+        },
+        {
+          "mediaTime": 1.125,
+          "expectedEpoch": 1793528476.3789
+        },
+        {
+          "mediaTime": 1.166667,
+          "expectedEpoch": 1793528476.4123
+        },
+        {
+          "mediaTime": 1.208333,
+          "expectedEpoch": 1793528476.4622002
+        },
+        {
+          "mediaTime": 1.25,
+          "expectedEpoch": 1793528476.4955
+        },
+        {
+          "mediaTime": 1.291667,
+          "expectedEpoch": 1793528476.5456002
+        },
+        {
+          "mediaTime": 1.333333,
+          "expectedEpoch": 1793528476.5789
+        },
+        {
+          "mediaTime": 1.375,
+          "expectedEpoch": 1793528476.6288002
+        },
+        {
+          "mediaTime": 1.416667,
+          "expectedEpoch": 1793528476.6622002
+        },
+        {
+          "mediaTime": 1.458333,
+          "expectedEpoch": 1793528476.7122002
+        },
+        {
+          "mediaTime": 1.5,
+          "expectedEpoch": 1793528476.7455
+        },
+        {
+          "mediaTime": 1.583333,
+          "expectedEpoch": 1793528476.8289
+        },
+        {
+          "mediaTime": 1.625,
+          "expectedEpoch": 1793528476.8789
+        },
+        {
+          "mediaTime": 1.666667,
+          "expectedEpoch": 1793528476.9122002
+        },
+        {
+          "mediaTime": 1.708333,
+          "expectedEpoch": 1793528476.9622002
+        },
+        {
+          "mediaTime": 1.75,
+          "expectedEpoch": 1793528476.9955
+        },
+        {
+          "mediaTime": 1.833333,
+          "expectedEpoch": 1793528477.0789
+        },
+        {
+          "mediaTime": 1.875,
+          "expectedEpoch": 1793528477.1289
+        },
+        {
+          "mediaTime": 1.916667,
+          "expectedEpoch": 1793528477.1622002
+        },
+        {
+          "mediaTime": 2,
+          "expectedEpoch": 1793528477.2455
+        },
+        {
+          "mediaTime": 2.041667,
+          "expectedEpoch": 1793528477.2955
+        },
+        {
+          "mediaTime": 2.083333,
+          "expectedEpoch": 1793528477.3289
+        },
+        {
+          "mediaTime": 2.125,
+          "expectedEpoch": 1793528477.3789
+        },
+        {
+          "mediaTime": 2.166667,
+          "expectedEpoch": 1793528477.4121
+        },
+        {
+          "mediaTime": 2.208333,
+          "expectedEpoch": 1793528477.4622002
+        },
+        {
+          "mediaTime": 2.25,
+          "expectedEpoch": 1793528477.4955
+        },
+        {
+          "mediaTime": 2.333333,
+          "expectedEpoch": 1793528477.5789
+        },
+        {
+          "mediaTime": 2.375,
+          "expectedEpoch": 1793528477.6288002
+        },
+        {
+          "mediaTime": 2.416667,
+          "expectedEpoch": 1793528477.6621
+        },
+        {
+          "mediaTime": 2.458333,
+          "expectedEpoch": 1793528477.7122002
+        },
+        {
+          "mediaTime": 2.541667,
+          "expectedEpoch": 1793528477.8288
+        },
+        {
+          "mediaTime": 2.583333,
+          "expectedEpoch": 1793528477.8622003
+        },
+        {
+          "mediaTime": 2.625,
+          "expectedEpoch": 1793528477.9121
+        },
+        {
+          "mediaTime": 2.666667,
+          "expectedEpoch": 1793528477.9455
+        },
+        {
+          "mediaTime": 2.75,
+          "expectedEpoch": 1793528478.0288
+        },
+        {
+          "mediaTime": 2.833333,
+          "expectedEpoch": 1793528478.1121001
+        },
+        {
+          "mediaTime": 2.875,
+          "expectedEpoch": 1793528478.1622002
+        },
+        {
+          "mediaTime": 2.916667,
+          "expectedEpoch": 1793528478.1954002
+        },
+        {
+          "mediaTime": 2.958333,
+          "expectedEpoch": 1793528478.2455
+        }
+      ],
+      "quality": {
+        "totalVideoFrames": 82,
+        "droppedVideoFrames": 0
+      }
+    },
+    "nativeFinishedOutput": true,
+    "editableTimelineVisible": true,
+    "exportSha256": "1d308aa195b1463110425ca7371a1df0eec5238d0a9b7a9d6cb03c5d5859d748",
+    "capturedFrames": 77,
+    "audioOffset": 0.30072808265686035,
+    "audio": "Exact exported soundtrack muxed at the observed native frame display epoch; QA device muted.",
+    "smoothnessQualified": false,
+    "creativeGate": false,
+    "noRenderSubmitted": true
+  },
+  "tests": {
+    "modelRuntime": 48,
+    "frontend": 46,
+    "subjectServices": 28,
+    "compositorExport": 51,
+    "thinMicrophoneRail": 1,
+    "temporalAlpha": 5,
+    "freshFirestoreWalletIntegration": 13,
+    "documentationAssistance": 51
+  },
+  "scope": {
+    "paidCloudInference": false,
+    "deploy": false,
+    "merge": false,
+    "productionDataOperations": false
+  },
+  "remainingDefects": [
+    "Frame 36 bright microphone rim has residual alpha mottling.",
+    "Fine brown plant stems and leaves retain orange/red background spill and softened or missing thin detail.",
+    "Some reflective equipment edges are rough; original highlights must not be mistaken for smooth alpha.",
+    "Single-view replacement photo has approximate scale/perspective and graded exposure, without recovered scene geometry or physical relighting/contact-shadow reconstruction.",
+    "This short-haired source does not qualify wispy hair or long moving/occluded footage."
+  ],
+  "limitations": [
+    "ViTMatte is an image network plus deterministic source-flow temporal refinement, not a trained video matting network.",
+    "Runtime was an explicit bounded local CPU emulator process, not deployed or qualified as a production GPU/Docker runtime.",
+    "Static component tracks assume this fixed source camera; camera movement needs moving tracks.",
+    "CPU timing is too slow for interactive video inference on this laptop.",
+    "Backup references isolated local demo owned media/artifacts; offline movies and source/mask bundles are delivered separately, without claiming universally portable project recovery."
+  ],
+  "help": {
+    "normalSavedLogin": true,
+    "status": 200,
+    "featureId": "studio.keyframes",
+    "headless": true,
+    "muted": true,
+    "mockedResponses": false,
+    "projectDataChanged": false
+  },
+  "documentationSourceReview": "Validated source lock and generated catalogue check after scoped pipeline documentation updates; signed-in actual help returned 200.",
+  "studioContract": {
+    "valid": true,
+    "readinessCounts": {
+      "UNIMPLEMENTED": 2,
+      "BROKEN": 1,
+      "PARTIAL": 9,
+      "FUNCTIONAL": 17,
+      "PRO-READY": 0,
+      "PRODUCTION-READY": 0
+    }
+  },
+  "automatedCasesPassed": 243
+}

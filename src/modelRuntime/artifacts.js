@@ -60,7 +60,7 @@ function buildArtifact({ job, result, createdAt = new Date().toISOString() }) {
     confidence: output.confidence ?? null, status: 'completed', createdAt, output,
     files: result.files, metrics, provenance: { ...result.provenance,
       origin: r.capability === 'generate_video' ? 'generated_illustration' :
-        (r.capability === 'track_object' && model.requiredDevice === 'cpu' ? 'derived_from_model_artifact' : 'model_inferred'),
+        ((r.capability === 'track_object' && model.requiredDevice === 'cpu') || result.provenance.modelInferencePerformed===false ? 'derived_from_model_artifact' : 'model_inferred'),
       producer: 'autopromote-model-capability-runtime', jobId: job.id, requestHash: job.requestHash,
       attemptToken: job.attemptToken, workerImage: job.workerImage, sourceGeneration: job.source.generation },
     reviewRequired: true });

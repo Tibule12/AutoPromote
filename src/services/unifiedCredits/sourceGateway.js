@@ -22,6 +22,8 @@ function createSourceGateway({
   service,
 }) {
   assertSandbox(process.env, db);
+  const reviewBounds = require('../../../scripts/monetization/local-review-bounds.cjs').localReviewBounds(process.env);
+  const maxSourceBytes = reviewBounds.maxSourceBytes;
   if (bucket.name !== "demo-autopromote-credits" || !/^http:\/\/127\.0\.0\.1:[0-9]+$/.test(origin))
     fail("DEMO_STORAGE_REQUIRED");
   const mac = value => crypto.createHmac("sha256", secret).update(value).digest("base64url");
@@ -62,7 +64,7 @@ function createSourceGateway({
       fail("SOURCE_FORBIDDEN", 403);
     const file = bucket.file(storagePath);
     const [metadata] = await file.getMetadata();
-    if (owner(storagePath, metadata) !== uid || Number(metadata.size) > 50 * 1024 * 1024)
+    if (owner(storagePath, metadata) !== uid || Number(metadata.size) > maxSourceBytes)
       fail("SOURCE_FORBIDDEN", 403);
     const [bytes] = await file.download();
     // Use the standard SHA-256 of the actual bytes, independent of metadata claims.
@@ -153,6 +155,7 @@ function createSourceGateway({
           sources.push(await describe(uid, segment.sourceStoragePath));
       }
       const dir = await fs.mkdtemp(path.join(os.tmpdir(), "credit-source-probe-"));
+      const longerRender = reviewBounds.longer && ['studio.render', 'clips.render'].includes(operation);
       let duration;
       try {
         const [bytes] = await bucket.file(primary.storagePath).download();
@@ -171,7 +174,7 @@ function createSourceGateway({
           { timeout: 5000, maxBuffer: 65536 }
         );
         duration = Number(JSON.parse(result.stdout).format.duration);
-        if (!Number.isFinite(duration) || duration <= 0 || duration > 30)
+        if (!Number.isFinite(duration) || duration <= 0 || duration > (longerRender ? reviewBounds.maxSourceSeconds : 30))
           fail("PILOT_MEDIA_LIMIT", 413);
       } finally {
         await fs.rm(dir, { recursive: true, force: true });
@@ -196,10 +199,13 @@ function createSourceGateway({
         gpu: false,
         contentHash: primary.contentHash,
         objectGeneration: primary.objectGeneration,
-        enforcedMaxSeconds: 120,
+        enforcedMaxSeconds: longerRender ? reviewBounds.renderCpuSeconds : 120,
         allowedDestinations: destinations || [],
         workflowInput: {
-          requestBody,
+          // Native compositing contains point pairs and quadrilateral arrays.
+          // Firestore cannot store arrays nested directly inside arrays. Keep
+          // the exact quoted body as JSON, never remove its creative decisions.
+          requestBodyJson: canonical(requestBody),
           route,
           sources,
           duration,

@@ -4,6 +4,8 @@ import {
   rebaseStudioHistoryRestore,
   reconcileStudioDocument,
   validateStudioProjectDocument,
+  buildStudioLayersFromSnapshot,
+  projectStudioLinkedTimingToSnapshot,
 } from "../studioProjectDocument";
 import { secondsToTicks } from "../studioTime";
 
@@ -44,6 +46,16 @@ const snapshot = () => ({
       cacheKey: `semantic:1:${"b".repeat(64)}:words:model-1:config-1:${"c".repeat(64)}`,
     },
   ],
+});
+
+test('selected and explicitly disabled object colour corrections survive canonical layer projection',()=>{
+ for(const ids of [['prop-a'],[]]){
+  const item={scene:{id:'scene-a'},enabled:true,maskColourComponentIds:ids};
+  const layers=buildStudioLayersFromSnapshot({subjectVfxScenes:[item]});
+  expect(layers[0].parameters.maskColourComponentIds).toEqual(ids);
+  const projected=projectStudioLinkedTimingToSnapshot({layers});
+  expect(projected.subjectVfxScenes[0].maskColourComponentIds).toEqual(ids);
+ }
 });
 
 test('opening an unchanged legacy occurrence preserves source-duration parameters and export identity', () => {

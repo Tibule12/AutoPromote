@@ -75,6 +75,18 @@ async function main() {
     OPENAI_LOGGING_ENABLED: "1",
     LOCAL_EDITING_CREDIT_BYPASS: "false",
   };
+  if(process.env.STUDIO_BACKGROUND_DEMO==='true') Object.assign(env,{
+    STUDIO_BACKGROUND_DEMO:'true',STUDIO_MODEL_RUNTIME_ENABLED:'true',STUDIO_MODEL_ARTIFACT_BUCKET:project,
+    ...(process.env.STUDIO_BACKGROUND_LONG_DEMO==='true'?{STUDIO_BACKGROUND_LONG_DEMO:'true'}:{}),
+    STUDIO_MODEL_LOCAL_CPU_ROOT:path.join(directory,'model-jobs'),
+    STUDIO_MODEL_LOCAL_CPU_MODEL_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/sam21-small-pinned'),
+    STUDIO_MODEL_LOCAL_CPU_REFINEMENT_MODEL_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/vitmatte-small-pinned'),
+    STUDIO_MODEL_LOCAL_CPU_DEPS_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/sam-cpu-eval-deps'),
+    STUDIO_MODEL_LOCAL_CPU_EDGE_DEPS_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/source-edge-deps-1.1.16'),
+    ...(process.env.STUDIO_BACKGROUND_MATTING_DEPS?{STUDIO_BACKGROUND_MATTING_DEPS:process.env.STUDIO_BACKGROUND_MATTING_DEPS}:{}),
+    STUDIO_SUBJECT_MASK_PREVIEW_ENABLED:'true',STUDIO_SUBJECT_MASK_PREVIEW_UIDS:'demo-pilot-alice',
+    CREDITS_PYTHON_BIN:process.env.CREDITS_PYTHON_BIN||path.resolve(root,'../AutoPromote/.venv/bin/python'),
+  });
   for (const key of ["GOOGLE_APPLICATION_CREDENTIALS", "FIREBASE_TOKEN", "FIREBASE_CONFIG"])
     delete env[key];
   Object.assign(process.env, env);
@@ -120,7 +132,7 @@ async function main() {
       content: fs.readFileSync(path.join(root, "storage.rules"), "utf8"),
     },
   });
-  let worker, api;
+  let worker, api, subjectPreview;
   let stopped = false;
   async function stop() {
     if (stopped) return;
@@ -141,6 +153,7 @@ async function main() {
       }
     }
     await worker?.stop();
+    await subjectPreview?.stop();
     await storage.stop();
     await auth.stop();
     firestore.kill("SIGTERM");
@@ -168,6 +181,12 @@ async function main() {
     });
     const { createSandboxDatabase } = require("../../src/services/unifiedCredits/runtime");
     const db = createSandboxDatabase();
+    if (process.env.STUDIO_BACKGROUND_INPUT_FIXTURE) {
+      if (env.STUDIO_BACKGROUND_DEMO !== 'true') throw Error('Background fixture requires the isolated demo');
+      await require('../background-replacement/recover-input-fixture.cjs').restore({
+        fixture: process.env.STUDIO_BACKGROUND_INPUT_FIXTURE, storage, db,
+      });
+    }
     const cohort = ["demo-pilot-alice", "demo-pilot-empty"];
     const password = `Demo-${crypto.randomBytes(12).toString("hex")}!`;
     for (const uid of cohort) {
@@ -205,6 +224,11 @@ async function main() {
       analysisTimeoutMs: 240000,
     });
     env.MEDIA_WORKER_URL = env.LOCAL_MEDIA_WORKER_URL = worker.origin;
+    if(env.STUDIO_BACKGROUND_DEMO==='true'){
+      subjectPreview=await require('../background-replacement/preview-provider.cjs').create({directory:path.join(directory,'subject-previews'),python:env.CREDITS_PYTHON_BIN,env,origin});
+      env.STUDIO_MODEL_VFX_URL=subjectPreview.url;env.STUDIO_MODEL_VFX_SECRET=subjectPreview.secret;
+    }
+
     const policy = {
       ...JSON.parse(
         fs.readFileSync(path.join(root, "config/unified-credits.sandbox.example.json"))

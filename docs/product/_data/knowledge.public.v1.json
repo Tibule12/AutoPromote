@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.46",
+  "knowledge_version": "1.0.52",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-31",
+  "updated_at": "2026-11-02",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -882,13 +882,22 @@
         "studio.subject.mask_expansion"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open Studio → Creator → Composite and choose a clip under Add effects to a clip.",
+        "Choose the person and separate foreground objects to retain, including the microphone and supports.",
+        "Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.",
+        "Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.",
+        "Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval."
       ],
-      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "preview_behavior": "A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.",
+      "render_behavior": "The ordinary final export consumes the reviewed source-bound replacement. The short local proof preserves it through save and cold reopen; scaling and encoding differ from preview, and broader parity remains unqualified.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "The correction/alpha pipeline remains opt-in development work. Two short angles have reviewed soft face/body/hand boundaries, corrected sleeve cleanup and persisted person framing. Fine foliage/prop contamination and compressed source detail still block a complete professional quality claim.",
+        "The image matting model uses a separate source-flow temporal stage. Wispy hair, long occlusions and camera motion are not qualified; fixed-object tracks require a fixed camera.",
+        "Local CPU processing is slow. Current runtime availability, source ownership and any execution costs must be checked before submitting.",
+        "The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.",
+        "The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.",
+        "The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness."
       ],
       "common_errors": [
         {
@@ -903,7 +912,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-13",
+      "updated_at": "2026-11-02",
       "product_version": "1.2.0"
     },
     {
@@ -978,13 +987,22 @@
         "studio.subject.seed_labels"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open Studio → Creator → Composite and choose a clip under Add effects to a clip.",
+        "Choose the person and separate foreground objects to retain, including the microphone and supports.",
+        "Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.",
+        "Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.",
+        "Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval."
       ],
-      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "preview_behavior": "A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.",
+      "render_behavior": "The ordinary final export consumes the reviewed source-bound replacement. The short local proof preserves it through save and cold reopen; scaling and encoding differ from preview, and broader parity remains unqualified.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "The correction/alpha pipeline remains opt-in development work. Two short angles have reviewed soft face/body/hand boundaries, corrected sleeve cleanup and persisted person framing. Fine foliage/prop contamination and compressed source detail still block a complete professional quality claim.",
+        "The image matting model uses a separate source-flow temporal stage. Wispy hair, long occlusions and camera motion are not qualified; fixed-object tracks require a fixed camera.",
+        "Local CPU processing is slow. Current runtime availability, source ownership and any execution costs must be checked before submitting.",
+        "The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.",
+        "The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.",
+        "The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness."
       ],
       "common_errors": [
         {
@@ -995,7 +1013,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-02",
       "product_version": "1.2.0"
     },
     {
@@ -2586,7 +2604,8 @@
       "preview_behavior": "Browser placement study only; it does not establish a finished model result.",
       "render_behavior": "No qualified final workflow exists for this feature.",
       "limitations": [
-        "Use only as a placement study. Do not claim this browser display is a real model output or finished supported workflow."
+        "Use only as a placement study. Do not claim this browser display is a real model output or finished supported workflow.",
+        "This Creator placement study is separate from the model-backed Composite workflow. That opt-in development workflow has a short native export proof but still fails its professional visual target."
       ],
       "common_errors": [
         {
@@ -2594,10 +2613,13 @@
           "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
         }
       ],
-      "related_features": [],
+      "related_features": [
+        "studio.subject_cutout",
+        "studio.masks"
+      ],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-01",
       "product_version": "1.2.0"
     },
     {

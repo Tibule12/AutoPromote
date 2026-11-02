@@ -1071,6 +1071,145 @@
         "reports/footer-pages-20261021/README.md"
       ],
       "reason": "Knowledge 1.0.43 source-review of the current footer pages and public reader of the canonical generated documentation. This changes navigation and explanation, not Studio readiness, a qualified public showroom, account entitlements or model availability."
+    },
+    {
+      "feature_id": "studio.subject_cutout",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "DEPENDENCIES"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/studioSubjectCorrections.js",
+        "frontend/src/components/studioProjectDocument.js",
+        "model_workers/adapters/component_segmentation.py",
+        "model_workers/adapters/cpu_matting.py",
+        "model_workers/adapters/temporal_alpha.py",
+        "src/modelRuntime/router.js",
+        "src/services/studioSubjectVfxService.js",
+        "reports/background-replacement-20261101/README.md"
+      ],
+      "reason": "Knowledge 1.0.47 records the opt-in local multi-object and corrective-click replacement workflow and its actual failed visual quality gate. Native short-shot export and cold recovery do not promote formal readiness, whole preview parity, production model availability or creative approval."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "DEPENDENCIES"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/studioSubjectCorrections.js",
+        "frontend/src/components/studioProjectDocument.js",
+        "model_workers/adapters/component_segmentation.py",
+        "model_workers/adapters/cpu_matting.py",
+        "model_workers/adapters/temporal_alpha.py",
+        "src/modelRuntime/router.js",
+        "src/services/studioSubjectVfxService.js",
+        "reports/background-replacement-20261101/README.md"
+      ],
+      "reason": "Knowledge 1.0.47 records the opt-in local multi-object and corrective-click replacement workflow and its actual failed visual quality gate. Native short-shot export and cold recovery do not promote formal readiness, whole preview parity, production model availability or creative approval."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "model_workers/adapters/temporal_alpha.py",
+        "model_workers/adapters/cpu_matting.py",
+        "python_media_worker/studio_vfx_plan.py",
+        "test/model-runtime/temporalAlpha.py",
+        "python_media_worker/test_studio_vfx_plan.py"
+      ],
+      "reason": "Knowledge 1.0.48 explains the bounded motion repair: stationary-source opacity consensus with object-scoped correction intervals and soft colour-key transitions. Retained visual failures and broader hair/motion limits prevent creative/readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "config/model-runtime/registry.v1.json",
+        "model_workers/adapters/source_edge_alpha.py",
+        "model_workers/adapters/cpu_matting.py",
+        "src/modelRuntime/componentGuidance.js",
+        "src/services/studioModelCapabilityService.js",
+        "python_media_worker/studio_vfx_plan.py",
+        "reports/background-replacement-20261101/movement-equipment-repair.md"
+      ],
+      "reason": "Knowledge 1.0.49 records source-resolution couch reveal and protected microphone cleanup on the reviewed moving shot, exact native persistence and complete final playback. Fine foliage colour/detail and broader motion/physical limits prevent professional/readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/two-speakers.md"
+      ],
+      "reason": "Knowledge 1.0.50 records the actual six-second native two-speaker continuation, exact save/reopen/export and complete Studio playback. Model tracks plus existing native corrections repair bounded shirt/boom and TV remnants; fine foliage/props and broader temporal/physical limits remain. No engine feature or readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/StudioSubjectMaskControls.js",
+        "frontend/src/components/studioSubjectCorrections.js",
+        "frontend/src/components/studioProjectDocument.js",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/body-edge-repair.md"
+      ],
+      "reason": "Knowledge 1.0.51 records actual moving body-edge repair, soft-alpha cleanup default and correction-box persistence through canonical recovery. Existing source-specific object corrections replace sleeve colour reconstruction. Fine props/foliage, physical integration and broader motion remain unqualified; no readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "python_media_worker/main_media_server.py",
+        "scripts/monetization/local-worker-execution.py",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/original-comparison-repair.md"
+      ],
+      "reason": "Knowledge 1.0.52 records matched-original review and preservation of reviewed subject detail through sequence/reframe/finish intermediate encoding. Corrected object prompts improve second-angle TV separation. Fine foreground boundaries, physical integration, broad motion and latency remain unqualified; no readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "python_media_worker/studio_vfx_plan.py",
+        "model_workers/adapters/temporal_alpha.py",
+        "scripts/monetization/local-review-bounds.cjs",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/four-minute-continuation.md"
+      ],
+      "reason": "Four-minute actual-footage review exposes remaining boom/couch/plant/head defects; local weak person trimap leakage and redundant foreground preparation repaired. Private hybrid model proof and flattened native import do not qualify native editable long-form masks. No public feature/readiness promotion; default production transports and limits preserved."
     }
   ]
 }

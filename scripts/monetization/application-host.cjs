@@ -100,6 +100,13 @@ const { createSourceGateway } = require("../../src/services/unifiedCredits/sourc
 const {
   createLocalProcessVerifier,
 } = require("../../src/services/unifiedCredits/workerVerification");
+const reviewBounds = require('./local-review-bounds.cjs').localReviewBounds(process.env);
+if (reviewBounds.longer) {
+  // The local wallet must reserve the full enforced local runtime ceiling.
+  // Symbolic per-unit test prices remain; no production pricing is loaded.
+  for (const operation of ['studio.render', 'clips.render'])
+    config.policy.operations[operation].maxUnits = reviewBounds.renderCpuSeconds;
+}
 const service = createWalletService({
   db,
   policy: config.policy,
@@ -283,6 +290,24 @@ app.locals.sharedCreditPilot = integration;
 // admission keeps its additional tighter per-operation limits.
 app.use(rateLimit({ windowMs: 60000, max: 1200, standardHeaders: true, legacyHeaders: false }));
 app.use(express.json({ limit: "1mb" }));
+if (process.env.STUDIO_BACKGROUND_LONG_DEMO === 'true') {
+  const bounds = require('./local-review-bounds.cjs').localReviewBounds(process.env);
+  // The Storage emulator's GCS endpoint finalizes the first PUT instead of
+  // acknowledging partial GCS chunks. Its bounded local review transfer must
+  // therefore send the actual complete bytes in one PUT. Production resumable
+  // uploads and the normal ownership/size/hash completion checks are unchanged.
+  app.use('/api/media/multicam/uploads/start', (_req, res, next) => {
+    const send = res.json.bind(res);
+    res.json = body => {
+      if (body?.uploadUrl && Number(body.expectedSizeBytes) > 0 &&
+          Number(body.expectedSizeBytes) <= bounds.maxSourceBytes &&
+          new URL(body.uploadUrl).origin === config.storageOrigin)
+        return send({ ...body, chunkSizeBytes: Math.ceil(body.expectedSizeBytes / 262144) * 262144 });
+      return send(body);
+    };
+    next();
+  });
+}
 app.use((req, res, next) => {
   if (req.get("Origin") && req.get("Origin") !== config.origin) return res.sendStatus(403);
   res.set("Cache-Control", "no-store");
@@ -308,6 +333,10 @@ app.use("/api", auth, (req, res, next) => {
   // Block every unpriced/provider/admin mutation; allow ordinary own profile and workspace saving.
   if (
     req.method !== "GET" &&
+    !(process.env.STUDIO_BACKGROUND_DEMO==='true' && (
+      req.path==='/studio/director/projects/revisions' ||
+      /^\/media\/studio-subject-masks\/(?:requests$|jobs\/[a-f0-9]{64}\/(?:cancel|subject(?:\/reuse)?)$)/.test(req.path) ||
+      /^\/media\/studio-subject-vfx(?:$|\/[A-Za-z0-9_-]{8,128}(?:\/refresh)?$)/.test(req.path))) &&
     !/^\/(?:credit-pilot\/|media\/(?:process|analyze|render-clip|studio-assets\/resolve|multicam\/uploads\/(?:start|complete|abort))$|content\/(?:upload(?:\/(?:source-file|readiness))?$|[^/]+\/promotion-schedules$|promotion-schedules\/[^/]+\/(?:resume|reschedule|pause)$)|users\/me\/accept-terms$|workspaces(?:\/|$))/.test(
       req.path
     )
@@ -351,6 +380,7 @@ app.get("/api/media/scan-preflight", async (req, res) => {
 });
 app.use("/api/users", require("../../src/userRoutes"));
 app.use("/api/workspaces", require("../../src/routes/workspaceRoutes"));
+if(process.env.STUDIO_BACKGROUND_DEMO==='true')app.use("/api/studio/director/projects/revisions",require("../../src/routes/studioProjectRevisionRoutes"));
 app.use(
   "/api/content",
   (req, res, next) => {

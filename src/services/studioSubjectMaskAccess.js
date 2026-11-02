@@ -3,9 +3,12 @@
 const denied = () => Object.assign(new Error('Subject masks are unavailable for this account.'), {
   statusCode: 403, code: 'STUDIO_SUBJECT_MASK_UNAVAILABLE',
 });
-function requireSubjectMaskPreview(req, res, next) {
+function isSubjectMaskPreviewUser(uid) {
   const cohort = (process.env.STUDIO_SUBJECT_MASK_PREVIEW_UIDS || '').split(',').map(uid => uid.trim()).filter(Boolean);
-  if (process.env.STUDIO_SUBJECT_MASK_PREVIEW_ENABLED !== 'true' || !req.user?.uid || !cohort.includes(req.user.uid))
+  return process.env.STUDIO_SUBJECT_MASK_PREVIEW_ENABLED === 'true' && !!uid && cohort.includes(uid);
+}
+function requireSubjectMaskPreview(req, res, next) {
+  if (!isSubjectMaskPreviewUser(req.user?.uid))
     return res.status(403).json({success:false,code:'STUDIO_SUBJECT_MASK_UNAVAILABLE'});
   return next();
 }
@@ -53,4 +56,4 @@ async function reuseSavedSubjectMask({runtime,ownerUid,jobId,input,readProjectHe
   return require('../modelRuntime/studioAdapter').editableSubjectScene({segmentation:result.artifact,
     sourceStoragePath:scene.sourceStoragePath,effects:scene.effects,id:scene.id});
 }
-module.exports = { requireSubjectMaskPreview, assertSubjectMaskRequest, ownedSubjectMaskJob, reuseSavedSubjectMask };
+module.exports = { requireSubjectMaskPreview, isSubjectMaskPreviewUser, assertSubjectMaskRequest, ownedSubjectMaskJob, reuseSavedSubjectMask };
