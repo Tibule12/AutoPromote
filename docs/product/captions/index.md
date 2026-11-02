@@ -1,6 +1,6 @@
 # Captions and reviewed transcription
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -45,6 +45,6 @@ Creates editable timed captions with a speech-language choice. Regeneration repl
 
 **Controls:** [Speech language](../control-reference/index.md#studio-captions-source_language)
 
-**Guides:** [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Create captions and correct transcription](../task-guides/task-captions_correct.md)
+**Guides:** [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Create captions and correct transcription](../task-guides/task-captions_correct.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.

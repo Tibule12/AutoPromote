@@ -10,7 +10,7 @@ const pricingFacts = [
   },
   {
     title: "Paid Plans Include Credits",
-    copy: "Paid plans include the monthly credits and limits shown on each plan card below. Higher tiers add more credits, platform connections, uploads, seats, analytics, and support.",
+    copy: "Paid plans include the monthly credits and limits shown on each plan card below. Higher tiers add more credits, platform connections, uploads, seats and support.",
   },
   {
     title: "Renders Spend Credits",
@@ -19,8 +19,6 @@ const pricingFacts = [
 ];
 
 const creditCostFacts = [
-  "Idea-to-Video preview: 5 credits",
-  "Idea-to-Video full render: starts at 25 credits",
   "Find Viral Clips: 8 credits",
   "Final clip render: 5 credits",
   "Video processing: 10 credits",

@@ -1,6 +1,6 @@
 # Task guides
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -18,7 +18,8 @@ Readiness is scoped to each entry. FUNCTIONAL does not mean professional or prod
 - [Correct reversed clean-audio channels](task-reversed_channels.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Create captions and correct transcription](task-captions_correct.md) — BROKEN; SUPPORTED_WITH_LIMITATIONS
 - [Add B-roll](task-add_broll.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
-- [Create a 3D title/logo scene](task-three_d_title.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
+- [Create a 3D object, title or logo scene](task-three_d_title.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Use a creative template](task-use_template.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Modify Director edits manually](task-director_manual.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
 - [Export a final film](task-final_export.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS
+- [Edit a video in your own style](task-own_style.md) — PARTIAL; SUPPORTED_WITH_LIMITATIONS

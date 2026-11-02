@@ -7,6 +7,7 @@ import { STUDIO_EXPORT_BLEND_MODES } from "./studioBlendModes";
 import StudioMaskPathEditor from "./StudioMaskPathEditor";
 import StudioLayerStack from "./StudioLayerStack";
 import StudioGroupInspector from "./StudioGroupInspector";
+import StudioPerspectiveInspector from './StudioPerspectiveInspector';
 
 const Range = ({ label, valueLabel, ...props }) => (
   <label className="inspector-range">
@@ -105,6 +106,32 @@ export function MotionInspector({
 
       {activeOverlay ? (
         <>
+          {activeOverlay.mask?.enabled&&activeOverlay.mask.shape==='polygon'&&['image','video'].includes(activeOverlay.type)&&
+            <details className="advanced-tool-section" data-testid="studio-mask-point-animation">
+              <summary>Animate polygon points</summary>
+              <p>Each coordinate uses the existing motion keys and curves. Keep the same point order across poses.</p>
+              {studioMotionPropertiesForTarget(activeOverlay).filter(field=>field.maskPoint).map(field=><label key={field.id}>
+                <span>{field.label}</span>
+                <StrokePropertyValue descriptor={field} value={evaluated[field.id]} playhead={playhead}
+                  locked={keyframesLocked} onCommit={value=>onUpdateOverlay(field.id,value)} />
+                <button type="button" disabled={keyframesLocked} aria-label={`Toggle ${field.label} key at playhead`}
+                  onClick={()=>onTogglePropertyKeyframe?.(field.id)}>◇ Key</button>
+              </label>)}
+            </details>}
+          {activeOverlay.perspective && <details className="advanced-tool-section" open><summary>Perspective motion</summary>
+            <label><span>Perspective progress (%)</span><StrokePropertyValue
+              descriptor={studioMotionPropertiesForTarget(activeOverlay).find(p=>p.id==='perspectiveProgress')}
+              value={evaluated.perspectiveProgress} playhead={playhead} locked={keyframesLocked}
+              onCommit={value=>onUpdateOverlay('perspectiveProgress',value)} /></label>
+            <button type="button" disabled={keyframesLocked} onClick={()=>onTogglePropertyKeyframe?.('perspectiveProgress')}>Toggle perspective key</button>
+            <p>Corner coordinates use Linear or Hold keys. Crossed and collapsing planes cannot export.</p>
+            {studioMotionPropertiesForTarget(activeOverlay).filter(field=>field.planeCorner).map(field=><label key={field.id}>
+              <span>{field.label}</span><StrokePropertyValue descriptor={field} value={evaluated[field.id]}
+                playhead={playhead} locked={keyframesLocked} onCommit={value=>onUpdateOverlay(field.id,value)} />
+              <button type="button" disabled={keyframesLocked} aria-label={`Toggle ${field.label} key at playhead`}
+                onClick={()=>onTogglePropertyKeyframe?.(field.id)}>◇ Key</button>
+            </label>)}
+          </details>}
           {activeOverlay.textAnimator && <details className="advanced-tool-section" open><summary>Text choreography</summary>
             <p>0 shows the starting arrangement; 100 settles the selected letters or words. Set order, stagger and starting poses in Titles.</p>
             <div className="motion-position-grid"><label><span>Text progress (%)</span><StrokePropertyValue key={`${activeOverlay.id}:textProgress`}
@@ -404,7 +431,7 @@ export function MotionInspector({
                     value={easing}
                     onChange={event => updateKeyframeGroup(group, { easing: event.target.value })}
                   >
-                    {STUDIO_EASINGS.map(easing => (
+                    {STUDIO_EASINGS.filter(e=>!group.keyframes.some(k=>/^planeCorner/.test(k.property))||['linear','hold'].includes(e.id)).map(easing => (
                       <option key={easing.id} value={easing.id}>
                         {easing.label}
                       </option>
@@ -600,6 +627,9 @@ export function CompositeInspector({
             </select>
           </label>
 
+          {activeOverlay.id !== 'main-video' && ['image','video'].includes(activeOverlay.type) &&
+            <StudioPerspectiveInspector layer={activeOverlay} onChange={value=>onUpdateOverlay('perspective',value)} />}
+
           <details className="advanced-tool-section" open>
             <summary>Mask / rotoscope</summary>
             <label className="inspector-toggle-row">
@@ -609,7 +639,7 @@ export function CompositeInspector({
               </span>
               <input
                 type="checkbox"
-                disabled={(activeOverlay.id === "main-video" || activeOverlay.type === "video") && !activeOverlay.mask?.enabled}
+                disabled={activeOverlay.id === "main-video" && !activeOverlay.mask?.enabled}
                 checked={!!activeOverlay.mask?.enabled}
                 onChange={event =>
                   onUpdateOverlay("mask", {
@@ -619,8 +649,8 @@ export function CompositeInspector({
                 }
               />
             </label>
-            {activeOverlay.id === "main-video" || activeOverlay.type === "video" ? (
-              <p>Geometric masks are available on image and title layers. Source-video subject masks use the reviewed subject-mask workflow.</p>
+            {activeOverlay.id === "main-video" ? (
+              <p>Use an ordinary media layer for a geometric mask. Source-video subject masks use the reviewed subject-mask workflow.</p>
             ) : null}
             {activeOverlay.mask?.enabled ? (
               <>

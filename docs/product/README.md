@@ -1,12 +1,12 @@
 # AutoPromote product knowledge
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
 This generated user documentation describes the actual development snapshot. It does not announce a release or certify public showcase films.
 
-The canonical internal catalogue has 106 features, 198 control records and 18 task guides. This safe projection contains 104 features; internal-only provider records and implementation/evidence paths are excluded.
+The canonical internal catalogue has 104 features, 204 control records and 19 task guides. This safe projection contains 102 features; internal-only provider records and implementation/evidence paths are excluded.
 
 ## Readiness
 
@@ -15,7 +15,7 @@ The canonical internal catalogue has 106 features, 198 control records and 18 ta
 | UNIMPLEMENTED | 6 |
 | BROKEN | 1 |
 | PROXY_ONLY | 6 |
-| PARTIAL | 64 |
+| PARTIAL | 62 |
 | FUNCTIONAL | 29 |
 | PRO_READY | 0 |
 | PRODUCTION_READY | 0 |
@@ -45,4 +45,4 @@ UNIMPLEMENTED means no qualified implementation. BROKEN identifies a known block
 
 [Structured user knowledge](_data/knowledge.public.v1.json), [searchable records](_data/search.public.v1.jsonl) and [public relationship graph](_data/graph.public.v1.json) retain stable IDs, readiness and product/knowledge versions. Consuming this data grants no authority to run jobs or mutate a project.
 
-Ten adjacent workspace/assistant surfaces remain outside the audited V1 catalogue. The internal inventory names them; this is not complete documentation of the entire product.
+Nine adjacent workspace/assistant surfaces remain outside the audited V1 catalogue. The internal inventory names them; this is not complete documentation of the entire product.

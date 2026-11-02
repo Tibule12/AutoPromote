@@ -1,0 +1,14 @@
+
+> autopromote-frontend@1.0.0 test
+> react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/__tests__/studioPerspective.test.js src/components/__tests__/studioSequenceEdits.test.js src/components/__tests__/studioRenderCompiler.test.js src/components/threeD/Studio3DPanel.test.js
+
+PASS src/components/__tests__/studioRenderCompiler.test.js
+PASS src/components/__tests__/studioSequenceEdits.test.js
+PASS src/components/threeD/Studio3DPanel.test.js
+PASS src/components/__tests__/studioPerspective.test.js
+
+Test Suites: 4 passed, 4 total
+Tests:       50 passed, 50 total
+Snapshots:   0 total
+Time:        3.603 s
+Ran all test suites within paths "src/components/__tests__/studioPerspective.test.js", "src/components/__tests__/studioSequenceEdits.test.js", "src/components/__tests__/studioRenderCompiler.test.js", "src/components/threeD/Studio3DPanel.test.js".

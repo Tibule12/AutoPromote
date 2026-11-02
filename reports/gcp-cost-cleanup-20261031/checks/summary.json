@@ -1,0 +1,15 @@
+{
+  "distinctJestTestsPassed": 31,
+  "firestoreEmulator": {
+    "passed": true,
+    "project": "demo-autopromote-cost-check",
+    "concurrentRequests": 10,
+    "firstUserQueries": 1,
+    "totalQueriesWithSecondUser": 2,
+    "cloudReads": 0
+  },
+  "initialPublisherTestTimeout": "One pre-existing Publisher case exceeded its default 5-second test deadline. Isolated rerun with 30-second deadline passed all nine cases; no Publisher code changed. React act warnings remained.",
+  "syntaxChecks": "passed",
+  "formattingChecks": "passed",
+  "gitDiffCheck": "passed"
+}

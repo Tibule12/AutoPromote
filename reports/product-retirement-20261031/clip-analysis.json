@@ -1,0 +1,28 @@
+{
+  "state": "succeeded",
+  "executionId": "de6fbccab4b7a03aa32b438f0342b68f291fdd270c6b4c6e70e213cece5fd9a6",
+  "stage": "clips.analyze",
+  "operationId": "c1628f9aa3a385d81e4c9e31c88a0cac1fb2693bffda5e1ce009070c31c90e6f",
+  "inputBytes": 260594,
+  "resource": {
+    "wallSeconds": 77.45926042200153,
+    "cpuSeconds": 76.425134,
+    "peakRssKiB": 2387592,
+    "providerChargesStarted": false,
+    "invoiceCostMicros": null
+  },
+  "suggestedWindows": [
+    {
+      "start": 0,
+      "end": 3.01
+    }
+  ],
+  "observedFrontend": {
+    "available": 13,
+    "held": 0,
+    "createClipVisible": true
+  },
+  "source": "three-second generated pattern with local English speech",
+  "network": "loopback-only",
+  "cloudExecution": false
+}

@@ -12,6 +12,14 @@ import { studioLayerEntries } from "./studioLayerOrder";
 import { validateSpatialCurve } from "./studioAutomation";
 import { validateStudioTextAnimation } from "./studioTextAnimator";
 import { validateStudioVectorShape, validateStudioVectorTrim } from "./studioVectorShape";
+import { validateStudioPerspectiveLayer } from './studioPerspective';
+import { validateStudioMaskAnimation } from './studioMaskGeometry';
+import {
+  validateStudioMotionDrivers,
+  validateStudioParentGraph,
+  validateStudioTrackMattes,
+} from "./studioCompRigging";
+import { validateStudioNodeFlow } from "./studioNodeFlow";
 
 import {
   STUDIO_EDIT_SETTING_FIELDS, STUDIO_SOURCE_DECISION_FIELDS,
@@ -68,6 +76,7 @@ const assetReference = clip => {
 
 const LAYER_PARAMETER_FIELDS = [
   "version", "name", "secondary", "endTime", "assetStoragePath", "assetName",
+  "assetType", "assetSourceStart", "assetAspect", "assetContentHash",
   "sourceStoragePath", "storagePath", "sourceClipId", "contentHash", "sha256",
   "hqPreviewRevision", "hqPreviewJobId",
   "textAlign", "lineSpacing", "primaryColor", "secondaryColor",
@@ -77,6 +86,7 @@ const LAYER_PARAMETER_FIELDS = [
   "bloom", "background",
   "bg", "anchorX", "anchorY", "blendMode", "glow", "layerShadow", "motionBlur",
   "cropX", "cropY", "blur", "sourceDuration", "aspectRatio",
+  "perspective", "perspectiveProgress",
   "isCaption",
   "shadow", "strokeWidth", "strokeColor",
   "frameShape", "frame_shape", "borderRadius", "border_radius", "mediaFit", "media_fit",
@@ -145,7 +155,7 @@ const cloneParameters = (item, fields) => JSON.parse(JSON.stringify(Object.fromE
 const AUDIO_CUE_PARAMETER_FIELDS = [
   "enabled", "builtIn", "kind", "tone", "name", "label", "sourceClipId",
   "sourceStoragePath", "storagePath", "contentHash", "sha256", "volume",
-  "muted", "fadeIn", "fadeOut", "pan", "audioMode", "rate", "pitchPreserved",
+  "muted", "fadeIn", "fadeOut", "fadeOffset", "fadeDuration", "pan", "audioMode", "rate", "pitchPreserved",
 ];
 const cueParameterFields = collection => collection === "adjustmentLayers"
   ? ["enabled", "name", "label", "preset", "opacity", "finishFx", "effects", "intensity"]
@@ -171,6 +181,7 @@ const VISUAL_SETTING_FIELDS = [
   "speakerStackCameraCount", "speakerStackLayout", "speakerStackSyncConfirmed",
   "exportSettings", "stabilization", "enhanceQuality", "beatSnapEnabled",
   "creativeIntent", "creativeEffectsEnabled", "creativePreset", "creativeIntensity", "pacingLevel",
+  "nodeFlow", "hideShyLayers",
 ];
 const CAMERA_SOURCE_FIELDS = [
   "id", "name", "duration", "sourceClipId", "sourceMediaId", "sourceStoragePath",
@@ -232,10 +243,17 @@ export const buildStudioLayersFromSnapshot = snapshot => {
     layerId: item.scene.id, type: "subject_vfx", legacyCollection: "subjectVfxScenes",
     compositionStage: "source_subject_vfx", parameters: {
       scene: JSON.parse(JSON.stringify(item.scene)), enabled: item.enabled !== false,
+      ...(item.maskBox ? { maskBox: [...item.maskBox] } : {}),
+      ...(item.maskComponents?.length ? { maskComponents: JSON.parse(JSON.stringify(item.maskComponents)) } : {}),
+      ...(Array.isArray(item.maskColourComponentIds) ? { maskColourComponentIds: [...item.maskColourComponentIds] } : {}),
+      ...(item.maskJob ? { maskJob: cloneStudioDecisionFields(item.maskJob,
+        ["requestId", "selectionJson", "projectRevision", "projectId", "mode", "jobId", "finished", "reusedAtRevision"]) } : {}),
       ...(item.modelArtifactRef ? { modelArtifactRef: createModelArtifactReference(item.modelArtifactRef) } : {}),
       ...(item.trackingArtifactRef ? { trackingArtifactRef: createModelArtifactReference(item.trackingArtifactRef) } : {}),
       ...(item.preview ? { preview: cloneStudioDecisionFields(item.preview, ["jobId", "revision", "reviewed", "receipt"]) } : {}),
       ...(item.pending ? { pending: cloneStudioDecisionFields(item.pending, ["clientRequestId", "revision", "jobId"]) } : {}),
+      ...(item.maskJob ? { maskJob: cloneStudioDecisionFields(item.maskJob, ["requestId", "selectionJson", "projectId", "projectRevision", "jobId", "mode", "finished", "reusedAtRevision"]) } : {}),
+      ...(item.maskComponents?.length ? { maskComponents: JSON.parse(JSON.stringify(item.maskComponents)) } : {}),
     },
   })),
   ...(snapshot.captionSegments || []).map(captionLayerReference),
@@ -337,6 +355,7 @@ export const projectStudioLinkedTimingToSnapshot = document => {
       time: ticksToSeconds(key.atProgrammeTick),
       value: key.rate,
       easing: key.easing,
+      ...(key.curve !== undefined ? { curve: [...key.curve] } : {}),
     })),
   };
   for (const layer of document.layers || []) {
@@ -471,6 +490,13 @@ export const projectStudioEditableStateToSnapshot = (document, transportSnapshot
         // evidence until the explicit edit migration boundary is present.
         if (document.compatibility?.editStateVersion !== 1) return { ...old, ...item };
         const restored = { ...old, ...item };
+        // V2 owns correction requests in the canonical layer. Keep only legacy
+        // job selections for older layers that predate this migration.
+        if (Object.prototype.hasOwnProperty.call(item, "maskComponents"))
+          restored.maskComponents = JSON.parse(JSON.stringify(item.maskComponents));
+        if (Array.isArray(item.maskColourComponentIds))restored.maskColourComponentIds=[...item.maskColourComponentIds];
+        if (item.maskBox) restored.maskBox = [...item.maskBox];
+        if (item.maskJob) restored.maskJob = JSON.parse(JSON.stringify(item.maskJob));
         for (const field of ["preview", "pending"]) {
           if (!item[field]) delete restored[field];
           else restored[field] = { ...JSON.parse(JSON.stringify(item[field])),
@@ -488,6 +514,17 @@ export const projectStudioEditableStateToSnapshot = (document, transportSnapshot
         delete transport[key];
       const path = item.assetStoragePath || item.sourceStoragePath || item.storagePath;
       const oldPath = old?.assetStoragePath || old?.sourceStoragePath || old?.storagePath;
+      // The initial video-texture snapshots predate canonical ownership of
+      // these four fields. Migrate only an intact, same-source legacy video;
+      // the version marker prevents resurrecting later canonical deletions.
+      const videoFields=['assetType','assetSourceStart','assetAspect','assetContentHash'];
+      if(collection==='threeDScenes' && document.compatibility?.videoTextureFieldsVersion!==1 &&
+        videoFields.every(key=>item[key]===undefined) && path===oldPath && String(path).startsWith('studio/sources/') &&
+        old?.assetType==='video' && /^[a-f0-9]{64}$/.test(old.assetContentHash||'') &&
+        Number.isFinite(old.assetSourceStart) && old.assetSourceStart>=0 &&
+        Number.isFinite(old.assetAspect) && old.assetAspect>=.25 && old.assetAspect<=4){
+        for(const key of videoFields)transport[key]=old[key];
+      }
       const hash = item.contentHash || item.sha256;
       const oldHash = old?.contentHash || old?.sha256;
       if ((path && path !== oldPath) || (hash && hash !== oldHash)) {
@@ -583,6 +620,7 @@ export const buildStudioOutputTimeMap = ({
       time: ticksToSeconds(key.atProgrammeTick),
       value: key.rate,
       easing: key.easing || "linear",
+      ...(key.curve !== undefined ? { curve: key.curve } : {}),
     })),
     duration: ticksToSeconds(durationTick),
     fallback: fallbackSpeed,
@@ -653,6 +691,17 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
     programmeTick += durationTick;
     return occurrence;
   });
+  // Replacement plates are owned inputs even though they are not sequence
+  // occurrences. Keep their identity in the canonical asset registry so the
+  // server can authorize the exact scene without trusting a browser URL.
+  for (const item of snapshot.subjectVfxScenes || []) for (const effect of item.scene?.effects || []) {
+    if (effect.type !== "background_replace" || !effect.asset_id) continue;
+    const media = (snapshot.projectMedia || []).find(media => media.id === effect.asset_id);
+    if (!media?.storagePath || media.contentHash !== effect.asset_sha256)
+      fail("BACKGROUND_ASSET_MISSING", "Save the selected background in this project before rendering.");
+    const asset = assetReference(media);
+    assets.set(asset.assetId, asset);
+  }
   const layers = buildStudioLayersFromSnapshot(snapshot);
   const linkedTiming = buildStudioLinkedTimingFromSnapshot(snapshot);
   const visualGraph = buildStudioVisualGraph(snapshot);
@@ -698,11 +747,12 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       rate: Number(key.value ?? key.rate ?? 1),
     }))
     .filter(key => key.property === "speed" && Number.isFinite(key.rate))
-    .map(({ id, atProgrammeTick, rate, easing }) => ({
+    .map(({ id, atProgrammeTick, rate, easing, curve }) => ({
       ...(id !== undefined ? { id: String(id) } : {}),
       atProgrammeTick,
       rate,
       easing: easing || "linear",
+      ...(curve !== undefined ? { curve: Array.isArray(curve) ? [...curve] : curve } : {}),
     }));
   const fallbackSpeed = Number(snapshot.previewSpeed ?? 1);
   if (!Number.isFinite(fallbackSpeed) || fallbackSpeed <= 0) {
@@ -810,6 +860,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       editableStateVersion: 1,
       visualStateVersion: 1,
       editStateVersion: 1,
+      ...((snapshot.threeDScenes || []).some(scene=>scene.assetType==='video') || previousDocument?.compatibility?.videoTextureFieldsVersion===1
+        ? {videoTextureFieldsVersion:1} : {}),
       layerComposition: Array.isArray(snapshot.compositionOrder) ? "ordered_flat_layers" : "separate_worker_stages",
     },
   };
@@ -932,11 +984,30 @@ export const validateStudioProjectDocument = document => {
     ...(document.linkedTiming?.keys?.motionKeyframes || []).map(key => ({ ...key.parameters,
       time: key.atProgrammeTick === null ? NaN : ticksToSeconds(key.atProgrammeTick) }))];
   (document.layers || []).forEach(layer => {
+    validateStudioMaskAnimation({...layer.parameters,type:layer.legacyType},vectorMotionKeys.filter(key=>key.targetId===layer.layerId));
+    validateStudioPerspectiveLayer({ ...layer.parameters, id: layer.layerId, type: layer.legacyType },
+      vectorMotionKeys.filter(key => key.targetId === layer.layerId),
+      (document.editGraph?.settings?.compoundClips || []).some(group => group.layerIds?.includes(layer.layerId)));
     validateStudioTextAnimation({ ...layer.parameters, type: layer.legacyType }, vectorMotionKeys.filter(key => key.targetId === layer.layerId));
     if (layer.parameters?.vectorShape !== undefined) validateStudioVectorShape(layer.parameters.vectorShape);
     validateStudioVectorTrim(layer.parameters || {}, vectorMotionKeys
       .filter(key => key.targetId === layer.layerId));
+    validateStudioMotionDrivers(layer.parameters || {});
   });
+  if (document.visualGraph?.settings?.mainTransform) {
+    validateStudioMotionDrivers(document.visualGraph.settings.mainTransform);
+  }
+  validateStudioNodeFlow(document.visualGraph?.settings?.nodeFlow);
+  const docOverlayParams = (document.layers || [])
+    .filter(layer => layer.legacyCollection === "overlays" && !layer.parameters?.isCaption)
+    .map(layer => ({ ...layer.parameters, id: layer.layerId, type: layer.legacyType }));
+  validateStudioParentGraph(docOverlayParams, document.visualGraph?.settings?.mainTransform || null);
+  validateStudioTrackMattes(
+    docOverlayParams,
+    (document.layers || [])
+      .filter(layer => layer.type === "three_d" && layer.parameters?.enabled === false)
+      .map(layer => layer.layerId)
+  );
   const validParameters = (parameters, fields) => parameters &&
     typeof parameters === "object" && !Array.isArray(parameters) &&
     Object.keys(parameters).every(key => fields.includes(key));
@@ -1049,6 +1120,10 @@ export const validateStudioProjectDocument = document => {
   });
   if (!Number.isFinite(document.fallbackSpeed) || document.fallbackSpeed <= 0)
     fail("INVALID_SPEED", "Invalid fallback speed.");
+  if (!Array.isArray(document.programmeSpeedKeys) || document.programmeSpeedKeys.some(key =>
+    key.curve !== undefined && (!Array.isArray(key.curve) || key.curve.length !== 4 || key.curve.some((value, index) =>
+      typeof value !== "number" || !Number.isFinite(value) || value < (index % 2 ? -2 : 0) || value > (index % 2 ? 2 : 1)))))
+    fail("INVALID_SPEED", "Speed curves need four valid time/value handles.");
   if (new Set(document.assets.map(asset => asset.assetId)).size !== document.assets.length)
     fail("DUPLICATE_ASSET", "Asset IDs must be unique.");
   const ids = new Set();

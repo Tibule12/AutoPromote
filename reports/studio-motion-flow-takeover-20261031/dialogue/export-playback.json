@@ -1,0 +1,13 @@
+{
+  "time": 15.76,
+  "duration": 15.76,
+  "maximumTime": 15.76,
+  "ended": true,
+  "totalVideoFrames": 378,
+  "droppedVideoFrames": 0,
+  "corruptedVideoFrames": 0,
+  "playbackWallMs": 15861,
+  "captureAndEncodeWallMs": 19569,
+  "nativeReceiptRestored": true,
+  "scope": "Finished export played through the signed-in Studio, separately from live graph preview."
+}

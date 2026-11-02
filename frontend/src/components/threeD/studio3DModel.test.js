@@ -1,6 +1,6 @@
 import {
   STUDIO_3D_TEMPLATES, createStudio3DScene, normalizeStudio3DScene,
-  studio3DPose, studio3DSceneRevision, cutStudio3DScenes,
+  studio3DPose, studio3DSceneRevision, cutStudio3DScenes, studio3DRenderIdentity,
 } from "./studio3DModel";
 
 test.each(STUDIO_3D_TEMPLATES)("%s creates a bounded, animated timeline scene", template => {
@@ -64,4 +64,29 @@ test("interpolates editable pose keyframes on the same preview clock", () => {
   ] });
   expect(studio3DPose(scene, 3).x).toBeCloseTo(1);
   expect(scene.keyframes).toHaveLength(2);
+});
+
+test('video texture identity, source-in and aspect survive normalization and invalidate stale previews',()=>{
+  const scene=normalizeStudio3DScene({...createStudio3DScene('comparison_card',0,'video'),
+    assetType:'video',assetContentHash:'a'.repeat(64),assetSourceStart:2.5,assetAspect:16/9,
+    assetStoragePath:'studio/sources/owner/source.mp4',text:'',secondary:''});
+  expect(normalizeStudio3DScene(JSON.parse(JSON.stringify(scene)))).toEqual(scene);
+  expect(scene.text).toBe('');expect(scene.secondary).toBe('');
+  for(const patch of [{assetContentHash:'b'.repeat(64)},{assetSourceStart:3},{assetAspect:1}])
+    expect(studio3DSceneRevision({...scene,...patch})).not.toBe(studio3DSceneRevision(scene));
+  const image=normalizeStudio3DScene({...scene,assetType:undefined});
+  expect(image).not.toHaveProperty('assetSourceStart');expect(image).not.toHaveProperty('assetContentHash');
+});
+
+test('refreshing video texture access preserves its byte-bound HQ revision',()=>{
+ const scene=normalizeStudio3DScene({...createStudio3DScene('media_plane',0,'plane'),assetType:'video',
+ assetStoragePath:'studio/sources/owner/source.mp4',assetContentHash:'a'.repeat(64),assetSourceStart:2,assetAspect:16/9,assetUrl:'https://owned/old'});
+ const ready={...scene,hqPreviewRevision:studio3DSceneRevision(scene),hqPreviewJobId:'owned-job'};
+ expect(studio3DSceneRevision({...ready,assetUrl:'https://owned/refreshed'})).toBe(ready.hqPreviewRevision);
+ expect(normalizeStudio3DScene(ready).hqPreviewRevision).toBe(ready.hqPreviewRevision);
+});
+test('render recovery identity ignores transport changes and retains source sampling',()=>{
+ const scene=normalizeStudio3DScene({...createStudio3DScene('media_plane',0,'recover-plane'),assetType:'video',assetContentHash:'a'.repeat(64),assetStoragePath:'studio/sources/demo-pilot-alice/take.mp4'});
+ expect(studio3DRenderIdentity({...scene,assetUrl:'http://refreshed',hqPreviewJobId:'completed-job',hqPreviewRevision:'token'})).toBe(studio3DRenderIdentity(scene));
+ expect(studio3DRenderIdentity({...scene,assetSourceStart:1})).not.toBe(studio3DRenderIdentity(scene));
 });

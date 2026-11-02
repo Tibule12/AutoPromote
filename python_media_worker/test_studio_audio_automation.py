@@ -23,7 +23,7 @@ def test_track_solo_and_envelope_contract():
         {"property": "volume", "time": 1, "value": 100, "easing": "linear"},
         {"property": "volume", "time": 2, "value": 0, "easing": "linear"},
     ], 3)
-    assert "eval=frame" in graph and len(points) == 17
+    assert len(points) == 17
 
 
 def test_mixed_rate_music_does_not_reduce_the_effect_bus_bandwidth():
@@ -101,6 +101,35 @@ def test_automation_tracks_the_envelope_without_coarse_audio_blocks_or_tail_padd
     assert len(pcm) == round(duration * 48000), "Automation changed the audio tail"
     expected = .5 * np.arange(len(pcm)) / (duration * 48000)
     assert np.max(np.abs(pcm - expected)) < .003, "Gain steps lag the editable envelope"
+
+
+@pytest.mark.parametrize("sample_rate", [44100, 48000])
+def test_linear_bus_automation_matches_every_stereo_sample(sample_rate):
+    duration = .257
+    graph, _ = build_volume_filter([{"time": 0, "value": 20},
+        {"time": duration, "value": 180, "easing": "linear"}], duration)
+    raw = run("-f", "lavfi", "-i",
+              f"aevalsrc=0.4*sin(2*PI*173*t)|0.3*cos(2*PI*431*t):s={sample_rate}:d={duration}",
+              "-af", graph, "-f", "f32le", "pipe:1")
+    pcm = np.frombuffer(raw, "<f4").reshape(-1, 2)
+    assert len(pcm) == round(duration * sample_rate)
+    time = np.arange(len(pcm)) / sample_rate
+    source = np.column_stack([.4*np.sin(2*np.pi*173*time), .3*np.cos(2*np.pi*431*time)])
+    expected = source * (.2 + 1.6*time/duration)[:, None]
+    # Existing prepared/final PCM allowance; do not hide a frame-stepped gain
+    # behind an average correlation or a fitted time shift.
+    assert np.max(np.abs(pcm - expected)) <= 4e-5
+
+
+@pytest.mark.parametrize("boundary", [.137, 1/24, 15/90000])
+def test_held_bus_automation_changes_on_its_exact_unaligned_sample(boundary):
+    graph, _ = build_volume_filter([{"time": 0, "value": 20},
+        {"time": boundary, "value": 160, "easing": "hold"}], .257)
+    raw = run("-f", "lavfi", "-i", "aevalsrc=0.4:s=48000:d=0.257",
+              "-af", graph, "-f", "f32le", "pipe:1")
+    pcm = np.frombuffer(raw, "<f4")
+    expected = np.where(np.arange(len(pcm)) / 48000 < boundary, .08, .64)
+    assert np.max(np.abs(pcm - expected)) <= 4e-5
 
 
 def test_main_audio_automation_changes_real_output_and_muted_track_exports_silence():

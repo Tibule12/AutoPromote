@@ -14,6 +14,29 @@ function Harness({initial={scene,enabled:true}}={}){const[item,setItem]=useState
   <StudioSubjectMaskControls item={item} onChange={setItem} getDocument={()=>document} getToken={async()=>"fixture-token"}
     apiBase="http://fixture.invalid" createId={()=>"request-a"}/><pre data-testid="saved-mask">{JSON.stringify(item)}</pre></>;}
 afterEach(()=>delete global.fetch);
+test('fine colour correction is opt-in for the selected fixed object and stays in the refinement request',async()=>{
+ const points=[{position:[.5,.6],label:1},{position:[.7,.6],label:0}];
+ const component={id:'prop-a',box:[.4,.4,.8,.9],points,propagate:false};
+ global.fetch=jest.fn().mockResolvedValueOnce(response({ok:true,projectId:document.projectId,revision:document.revision}))
+  .mockRejectedValueOnce(new Error('Stop after capturing refinement'));
+ render(<Harness initial={{scene,enabled:true,modelArtifactRef:reference,maskComponents:[component]}}/>);
+ const selected=screen.getByRole('checkbox',{name:'Clean fine edges of foreground object 1',exact:true});expect(selected).not.toBeChecked();
+ fireEvent.click(selected);expect(JSON.parse(screen.getByTestId('saved-mask').textContent).maskColourComponentIds).toEqual(['prop-a']);
+ fireEvent.click(screen.getByRole('button',{name:'Refine saved mask edges'}));await screen.findByText('Stop after capturing refinement');
+ const input=JSON.parse(fetch.mock.calls[1][1].body);expect(input.parameters.refinement.colourComponentIds).toEqual(['prop-a']);
+ expect(input.parameters.components).toEqual([component]);expect(input.dependencyHashes).toEqual([reference.artifactHash]);
+});
+test('a reopened correction submits the saved person box rather than the default framing',async()=>{
+ global.fetch=jest.fn().mockResolvedValueOnce(response({ok:true,projectId:document.projectId,revision:document.revision}))
+  .mockResolvedValueOnce(response({jobId})).mockResolvedValueOnce(response({jobId,status:'completed'}))
+  .mockResolvedValueOnce(response({scene,enabled:true,modelArtifactRef:reference}));
+ render(<Harness initial={{scene,enabled:true,maskBox:[.26,.06,.98,1]}}/>);
+ expect(screen.getByLabelText('Subject box right')).toHaveValue(.98);
+ fireEvent.click(screen.getByRole('button',{name:'Create subject mask'}));
+ await screen.findByRole('button',{name:'Subject mask attached'});
+ expect(JSON.parse(fetch.mock.calls[1][1].body).parameters.initialBox).toEqual([.26,.06,.98,1]);
+ expect(JSON.parse(screen.getByTestId('saved-mask').textContent).maskBox).toEqual([.26,.06,.98,1]);
+});
 test('later-frame subject and background clicks reach the worker without being replaced by a box',async()=>{
   const corrected={...scene,prompt:{...scene.prompt,shotPrompts:[{time:2,points:[[.5,.4],[.2,.2]],labels:[1,0]}]}};
   global.fetch=jest.fn().mockResolvedValueOnce(response({ok:true,projectId:document.projectId,revision:document.revision}))

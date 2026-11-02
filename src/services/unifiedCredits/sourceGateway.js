@@ -7,6 +7,7 @@ const { promisify } = require("node:util");
 const { assertSandbox } = require("./runtime");
 const { fail } = require("./policy");
 const { digest, canonical } = require("./workerVerification");
+const { compactWorkflowDescriptor } = require('./workflowDescriptor');
 const execute = promisify(execFile);
 
 // Actual emulator objects, owner checks and byte hashes. No production bucket
@@ -22,6 +23,8 @@ function createSourceGateway({
   service,
 }) {
   assertSandbox(process.env, db);
+  const reviewBounds = require('../../../scripts/monetization/local-review-bounds.cjs').localReviewBounds(process.env);
+  const maxSourceBytes = reviewBounds.maxSourceBytes;
   if (bucket.name !== "demo-autopromote-credits" || !/^http:\/\/127\.0\.0\.1:[0-9]+$/.test(origin))
     fail("DEMO_STORAGE_REQUIRED");
   const mac = value => crypto.createHmac("sha256", secret).update(value).digest("base64url");
@@ -62,7 +65,12 @@ function createSourceGateway({
       fail("SOURCE_FORBIDDEN", 403);
     const file = bucket.file(storagePath);
     const [metadata] = await file.getMetadata();
-    if (owner(storagePath, metadata) !== uid || Number(metadata.size) > 50 * 1024 * 1024)
+    const segments = storagePath.split("/");
+    const localAlpha = process.env.STUDIO_3D_LOCAL_ENABLED === "true" &&
+      segments.length === 4 && segments[0] === "temp_studio_3d" && segments[1] === uid &&
+      /^[A-Za-z0-9_-]{8,100}$/.test(segments[2]) && segments[3] === "overlay.mov" &&
+      metadata.contentType === "video/quicktime";
+    if (owner(storagePath, metadata) !== uid || Number(metadata.size) > (localAlpha ? 250 * 1024 * 1024 : maxSourceBytes))
       fail("SOURCE_FORBIDDEN", 403);
     const [bytes] = await file.download();
     // Use the standard SHA-256 of the actual bytes, independent of metadata claims.
@@ -148,11 +156,18 @@ function createSourceGateway({
         : requestBody;
       const primary = await sourceFor(uid, lookupBody, route);
       const sources = [primary];
-      for (const segment of requestBody.options?.viralData?.timeline_segments || []) {
-        if (segment.sourceStoragePath && segment.sourceStoragePath !== primary.storagePath)
+      const studio = requestBody.options?.viralData;
+      const declared = [...(studio?.timeline_segments || []),
+        ...(studio?.overlays || []).filter(layer => layer.type === 'video')];
+      const seen = new Set([primary.storagePath]);
+      for (const segment of declared) {
+        if (segment.sourceStoragePath && !seen.has(segment.sourceStoragePath)) {
           sources.push(await describe(uid, segment.sourceStoragePath));
+          seen.add(segment.sourceStoragePath);
+        }
       }
       const dir = await fs.mkdtemp(path.join(os.tmpdir(), "credit-source-probe-"));
+      const longerRender = reviewBounds.longer && ['studio.render', 'clips.render'].includes(operation);
       let duration;
       try {
         const [bytes] = await bucket.file(primary.storagePath).download();
@@ -171,7 +186,7 @@ function createSourceGateway({
           { timeout: 5000, maxBuffer: 65536 }
         );
         duration = Number(JSON.parse(result.stdout).format.duration);
-        if (!Number.isFinite(duration) || duration <= 0 || duration > 30)
+        if (!Number.isFinite(duration) || duration <= 0 || duration > (longerRender ? reviewBounds.maxSourceSeconds : 30))
           fail("PILOT_MEDIA_LIMIT", 413);
       } finally {
         await fs.rm(dir, { recursive: true, force: true });
@@ -196,9 +211,9 @@ function createSourceGateway({
         gpu: false,
         contentHash: primary.contentHash,
         objectGeneration: primary.objectGeneration,
-        enforcedMaxSeconds: 120,
+        enforcedMaxSeconds: longerRender ? reviewBounds.renderCpuSeconds : 120,
         allowedDestinations: destinations || [],
-        workflowInput: {
+        workflowInput: compactWorkflowDescriptor({
           requestBody,
           route,
           sources,
@@ -208,7 +223,7 @@ function createSourceGateway({
               ? destinations.length
               : 1,
           ...(scheduleId ? { scheduleId } : {}),
-        },
+        }),
       };
       await db
         .collection("credits_v2_inputs")

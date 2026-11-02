@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react";
 import {
   STUDIO_3D_ANIMATIONS, STUDIO_3D_EASINGS, STUDIO_3D_MATERIALS,
-  STUDIO_3D_KEYFRAME_FIELDS, STUDIO_3D_TEMPLATES, createStudio3DScene, normalizeStudio3DScene,
+  STUDIO_3D_KEYFRAME_FIELDS, STUDIO_3D_TEMPLATES, createStudio3DScene, normalizeStudio3DScene, studio3DSceneRevision,
 } from "./studio3DModel";
 import "./studio3D.css";
 import { getStudioCapability } from "../studioCapabilities";
+import Studio3DObjectEditor from "./Studio3DObjectEditor";
 
 const uniqueId = () => `studio-3d-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
 
@@ -30,7 +31,7 @@ function SelectControl({ label, value, options, onChange, disabled = false, unav
   </label>;
 }
 
-export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect, playhead = 0, duration = 60, onSeek, onUploadAsset, onGeneratePreview, previewState }) {
+export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect, playhead = 0, duration = 60, onSeek, onUploadAsset, onGeneratePreview, onRestorePreview, previewState, projectMedia = [] }) {
   const [mode, setMode] = useState("basic");
   const selected = useMemo(() => scenes.find(scene => scene.id === focusId) || scenes[0], [scenes, focusId]);
   const scene = selected ? normalizeStudio3DScene(selected) : null;
@@ -93,20 +94,37 @@ export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect
     {scene ? <>
       <div className="studio-3d-editor-head"><strong>{scene.name}</strong><div role="group" aria-label="3D control mode"><button type="button" aria-pressed={mode === "basic"} onClick={() => setMode("basic")}>Basic</button><button type="button" aria-pressed={mode === "advanced"} onClick={() => setMode("advanced")}>Advanced</button></div></div>
       <div className="studio-3d-fields">
+        {scene.template === "object_scene" ? <Studio3DObjectEditor scene={scene} playhead={playhead} onSeek={onSeek} onChange={objects => change({ objects })} /> : <>
         <label className="studio-3d-control wide"><span>Main text</span><input maxLength={80} value={scene.text} onChange={event => change({ text: event.target.value })} /></label>
         <label className="studio-3d-control wide"><span>Supporting line</span><input maxLength={100} value={scene.secondary} onChange={event => change({ secondary: event.target.value })} /></label>
+        </>}
         <SelectControl label="Material" value={scene.material} options={STUDIO_3D_MATERIALS} onChange={material => change({ material })} />
         <SelectControl label="Entrance" value={scene.entrance} options={STUDIO_3D_ANIMATIONS} unavailableOptions={unsupportedModes.entrance} onChange={entrance => change({ entrance })} />
-        <label className="studio-3d-control"><span>Primary colour</span><input type="color" value={scene.primaryColor} onChange={event => change({ primaryColor: event.target.value })} /></label>
+        {scene.template !== "object_scene" ? <label className="studio-3d-control"><span>Primary colour</span><input type="color" value={scene.primaryColor} onChange={event => change({ primaryColor: event.target.value })} /></label> : null}
         <label className="studio-3d-control"><span>Glow colour</span><input type="color" value={scene.glowColor} onChange={event => change({ glowColor: event.target.value })} /></label>
         <NumberControl label="Start (s)" value={scene.startTime} min={0} max={duration} onChange={setStart} />
         <NumberControl label="End (s)" value={scene.endTime} min={scene.startTime + 0.5} max={duration} onChange={setEnd} />
         <label className="studio-3d-control wide"><span>Motion intensity · {Math.round(scene.intensity * 100)}%</span><input type="range" min={0} max={1} step={0.01} value={scene.intensity} onChange={event => change({ intensity: Number(event.target.value) })} /></label>
         <label className="studio-3d-control wide"><span>Upload logo / image (PNG, JPEG, WebP; 5 MB)</span><input type="file" accept="image/png,image/jpeg,image/webp" onChange={event => { const file = event.target.files?.[0]; if (file) onUploadAsset?.(scene.id, file); event.target.value = ""; }} /></label>
+        <label className="studio-3d-control wide"><span>Video texture source</span>
+          <select aria-label="3D video texture source" value={scene.assetType === 'video' ? projectMedia.find(m => (m.storagePath || m.sourceStoragePath) === scene.assetStoragePath)?.id || '' : ''}
+            onChange={event => {
+              const source=projectMedia.find(m=>m.id===event.target.value);
+              if (!source) { change({assetType:undefined,assetUrl:'',assetName:'',assetStoragePath:''}); return; }
+              change({assetType:'video',assetSourceStart:0,assetAspect:Number(source.width)/Number(source.height)||16/9,assetContentHash:source.contentHash,
+                assetStoragePath:source.storagePath||source.sourceStoragePath,assetUrl:source.url,assetName:source.name,
+                duration:Math.min(scene.duration,Number(source.duration))});
+            }}>
+            <option value="">No video texture</option>
+            {projectMedia.filter(m=>m.status==='ready' && m.url && (m.storagePath||m.sourceStoragePath) && Number(m.duration)>=.5).map(m=><option key={m.id} value={m.id}>{m.name}</option>)}
+          </select>
+        </label>
+        {scene.assetType === 'video' ? <NumberControl label="Texture source start (s)" value={scene.assetSourceStart} min={0} max={86400} onChange={assetSourceStart=>change({assetSourceStart})} /> : null}
         {scene.assetName ? <small className="studio-3d-asset-name">Asset: {scene.assetName}</small> : null}
       </div>
       {mode === "advanced" ? <div className="studio-3d-fields studio-3d-advanced">
         <p className="studio-3d-parity-note" role="note">Unavailable controls are disabled: font, weight, scene easing, audio response, light direction, shadows, reflections, background and quality. Their saved values are retained. Pose keyframe easing and scene fades are supported. 3D output is capped at 720p and 30 fps; check the generated preview before export.</p>
+        {scene.template === "object_scene" ? <SelectControl label="Lighting rig" value={scene.lightingRig || "softbox"} options={["softbox", "sculpture"]} onChange={value => change({ lightingRig: value === "sculpture" ? "sculpture" : undefined })} /> : null}
         <SelectControl label="Font family" disabled value={scene.fontFamily} options={["studio", "sans", "serif"]} onChange={fontFamily => change({ fontFamily })} />
         <SelectControl label="Weight" disabled value={scene.fontWeight} options={["regular", "bold", "black"]} onChange={fontWeight => change({ fontWeight })} />
         <SelectControl label="Alignment" value={scene.textAlign} options={["left", "center", "right"]} onChange={textAlign => change({ textAlign })} />
@@ -140,8 +158,13 @@ export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect
       </div> : null}
       <div className="studio-3d-actions"><button type="button" onClick={duplicate}>Duplicate</button><button type="button" onClick={reset}>Reset preset</button><button type="button" onClick={() => onChange(scenes.filter(item => item.id !== scene.id))}>Delete</button></div>
       <button className="studio-3d-hq" type="button" onClick={() => onGeneratePreview?.(scene)} disabled={!onGeneratePreview || ["queued", "rendering"].includes(previewState?.status)}>
-        {previewState?.status === "queued" ? "HQ preview queued…" : previewState?.status === "rendering" ? "Rendering HQ preview…" : previewState?.status === "failed" ? "Retry HQ 3D Preview" : "Generate HQ 3D Preview"}
+        {previewState?.status === "queued" ? "HQ preview queued…" : previewState?.status === "rendering" ? "Rendering HQ preview…" : scene.hqPreviewJobId && scene.hqPreviewRevision === studio3DSceneRevision(scene) ? "Check saved 3D render" : previewState?.status === "failed" ? "Retry HQ 3D Preview" : "Generate HQ 3D Preview"}
       </button>
+      {onRestorePreview ? <label className="studio-3d-control"><span>Reconnect completed HQ preview</span>
+        <input aria-label="Restore 3D preview receipt" type="file" accept="application/json,.json" disabled={["queued","rendering"].includes(previewState?.status)}
+          onChange={event=>{const file=event.target.files?.[0];if(file)onRestorePreview(scene,file);event.target.value='';}} />
+      </label> : null}
+      {["local_cpu", "local_cuda"].includes(previewState?.renderProfile?.backend) ? <p role="status">Local Blender {previewState.renderProfile.backend === "local_cuda" ? "GPU" : "CPU"} render · {previewState.renderProfile.width} × {previewState.renderProfile.height} · {previewState.renderProfile.fps} fps</p> : null}
       {previewState?.status === "failed" ? <p role="alert">{previewState.message || "Preview failed. Try again."}</p> : null}
       {previewState?.status === "completed" && previewState.url ? <div className="studio-3d-hq-result">
         <video className="studio-3d-hq-video" controls src={previewState.url} aria-label="HQ 3D preview" />
@@ -149,6 +172,7 @@ export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect
           Download standalone motion
         </a>
         <small>This is the separate rendered animation. AutoPromote keeps its transparent alpha version private for timeline compositing.</small>
+        {previewState.hash ? <a download="AutoPromote 3D preview receipt.json" href={'data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({format:'autopromote-3d-preview-receipt',version:1,sceneId:scene.id,jobId:previewState.jobId,sceneHash:previewState.hash}))}>Save preview receipt</a> : null}
       </div> : null}
     </> : null}
   </section>;

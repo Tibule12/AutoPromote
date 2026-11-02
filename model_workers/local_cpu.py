@@ -21,7 +21,7 @@ def execute(spec, work):
     import jsonschema
     import torch
     import transformers
-    if spec['model']['id']=='vitmatte-small-cpu-v1':
+    if spec['model']['id'].startswith('vitmatte-small-'):
         from model_workers.adapters.cpu_matting import segment
     else:
         from model_workers.adapters.cpu_segmentation import segment
@@ -32,7 +32,7 @@ def execute(spec, work):
     request = spec['request']
     jsonschema.validate(request, contracts['request'])
     jsonschema.validate(request['parameters'], contracts['inputs'][request['capability']])
-    if (canonical(model) != canonical(spec['model']) or model['id'] not in ['sam21-small-cpu-v1','vitmatte-small-cpu-v1']
+    if (canonical(model) != canonical(spec['model']) or model['id'] not in ['sam21-small-cpu-v1','vitmatte-small-cpu-v1','sam21-multiobject-cpu-v2','vitmatte-small-temporal-cpu-v2']
             or request['capability'] != 'segment_subject' or model['requiredDevice'] != 'cpu'
             or os.environ.get('CUDA_VISIBLE_DEVICES') != ''):
         raise ValueError('CPU worker accepts only its pinned segmentation implementation')
@@ -61,6 +61,7 @@ def execute(spec, work):
     normalized, geometry = normalize(source, request, output/'normalized_source.mp4', max_size=(1920, 1080))
     result = segment(spec, normalized, geometry, Path('/opt/model'), output)
     jsonschema.validate(result, contracts['outputs'][request['capability']])
+    alpha_stage=json.loads((output/'subject_masks_manifest.json').read_text()).get('matting_stage')
     files = [blob(p, media_type='video/mp4' if p.suffix == '.mp4' else 'application/gzip' if p.name.endswith('.tar.gz') else 'application/json')
              for p in sorted(output.iterdir()) if p.is_file()]
     code = [ROOT/name for name in spec['codeFiles']]
@@ -76,7 +77,8 @@ def execute(spec, work):
         'provenance': {'implementationSha256': hashlib.sha256(canonical(actual).encode()).hexdigest(),
             'implementationFiles': actual, 'weights': model['weights'], 'license': model['license'],
             'runtimeImage': spec['workerImage'], 'runtimeKind': 'private_local_docker_cpu',
-            'runtimeOverlay': spec['runtimeOverlay'], 'dependencies': request['dependencyHashes']}}
+            'runtimeOverlay': spec['runtimeOverlay'], 'dependencies': request['dependencyHashes'],
+            **({'alphaStage':alpha_stage,'modelInferencePerformed':alpha_stage['modelInferencePerformed']} if alpha_stage else {})}}
 
 
 if __name__ == '__main__':

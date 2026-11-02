@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-02",
+  "project": "AutoPromote \u2014 Flowing worlds / Episode",
+  "baselineLiveSeconds": 113.553,
+  "latestLiveSeconds": 49.84,
+  "finishedSeconds": 36.084,
+  "finishedDrops": 1,
+  "terminalHold": {
+    "programme": 35.95833333333333,
+    "sourceTime": 11.958333,
+    "paused": true,
+    "playAvailable": true,
+    "live": true
+  },
+  "nativeControls": {
+    "normalDemoAuth": true,
+    "nativeSave": true,
+    "coldReopenExact": true,
+    "cornerEditUndoRedo": true,
+    "reviewedPlanBuildsFromCurrentSnapshot": true,
+    "invalidPlanRefusedBeforeMutation": true,
+    "canonicalDecisionsPreserved": true,
+    "layers": 49,
+    "keys": 10968
+  },
+  "operatorPause": {
+    "operatorPauseHoldsSource": true,
+    "sourceTime": 2.892831
+  },
+  "binding": {
+    "verifiedNativeBackupSha256": "cab2224b603f9e1e390a088000c15ee4d4716895be145978022e97e08e0f7f4e",
+    "canonicalCompositionMatchesOriginalAcceptedWorker": true,
+    "layers": 50,
+    "editableOverlays": 49,
+    "editableKeys": 10968,
+    "unchangedMovieSha256": "b02b6605a7d843541a6bd6d209bdfc2143ff10a6c4e69ab1825f0549e0ef4734",
+    "newExports": 0,
+    "independentNativeRestore": true
+  },
+  "pairs": 19,
+  "minimumSsim": 0.8415325413493816,
+  "minimumPsnr": 20.882356226257706,
+  "liveCapture": {
+    "seconds": 51.85899996757507,
+    "frames": 440,
+    "rawBytes": 50840375,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture"
+  },
+  "finishedCapture": {
+    "seconds": 35.888999938964844,
+    "frames": 416,
+    "rawBytes": 54720989,
+    "nativeControlsOnly": true,
+    "setupExcluded": true,
+    "audio": "Silent native editing capture"
+  },
+  "priorManifestFilesVerifiedUnchanged": 214,
+  "newNativeExports": 0,
+  "liveRealtimeQualified": false,
+  "wholePictureParityPassed": false,
+  "creativeQualityQualified": false,
+  "humanListeningApproved": false,
+  "readinessPromotion": false,
+  "productionWrites": false,
+  "paidCalls": 0
+}

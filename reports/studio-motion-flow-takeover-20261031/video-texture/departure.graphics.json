@@ -1,0 +1,193 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Open World / departure refinement",
+  "width": 1280,
+  "height": 720,
+  "duration": 60,
+  "layers": [
+    {
+      "id": "Departure BREAK",
+      "name": "Departure BREAK",
+      "type": "text",
+      "text": "BREAK",
+      "x": 17,
+      "y": 48,
+      "width": 30,
+      "scale": 1.2,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 5.8,
+      "duration": 2.7,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 5.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.15,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.1,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.8,
+          "value": 51,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 6.2,
+          "value": 48,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Departure THE ROUTINE.",
+      "name": "Departure THE ROUTINE.",
+      "type": "text",
+      "text": "THE ROUTINE.",
+      "x": 17,
+      "y": 58,
+      "width": 30,
+      "scale": 0.78,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 5.8,
+      "duration": 2.7,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 5.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.15,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.1,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 5.8,
+          "value": 61,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "y",
+          "time": 6.2,
+          "value": 58,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "groups": []
+}

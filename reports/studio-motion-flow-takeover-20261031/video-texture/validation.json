@@ -1,0 +1,53 @@
+{
+  "frontend": {
+    "distinctPassed": 47,
+    "suites": [
+      "studio3DModel.test.js",
+      "Studio3DPanel.test.js",
+      "studio3DProjection.test.js",
+      "studioProjectDocument.test.js"
+    ],
+    "scope": "Scene normalization, source identity/timing, native source selection and receipt delegation, camera math. Actual receipt hash rejection and authenticated reconnect exercised separately in Studio."
+  },
+  "backend": {
+    "distinctPassed": 37,
+    "suites": [
+      "studio3DService.jest.test.js",
+      "studio3DNvidia.jest.test.js",
+      "studio3DLocal.jest.test.js"
+    ]
+  },
+  "python": {
+    "distinctPassed": 39,
+    "scope": "Renderer contracts, actual video decoding/source-in, camera projection versus Three.js, moving texture raster sequence, signed/loopback overlay validation"
+  },
+  "handoff": {
+    "distinctPassed": 2,
+    "scope": "Actual local fixture subprocesses, signed measured success/failure and finite budget guards; no media quality claim"
+  },
+  "workerAuthority": {
+    "distinctPassed": 5,
+    "scope": "Existing signature/binding/admission regression suite; provider boundaries mocked"
+  },
+  "optimizedBuild": "Compiled successfully; welcome pair 8 viewport checks and 0 browser errors",
+  "nativeUI": "Six actual owned source imports, graphics, Sound, editable 3D source/poses, shader refinement and completed-job reconnect",
+  "formalReadinessPromoted": false,
+  "noSkippedAssertions": true,
+  "initialFailedInvocationsRetained": true,
+  "pending": [
+    "Whole preview/export parity and smooth 24fps live sampling",
+    "Human listening and owner creative approval",
+    "Broader depth/tracking/Director capability work"
+  ],
+  "distinctAutomatedPassed": 130,
+  "nativeFinal": {
+    "frames": 1440,
+    "fps": 24,
+    "seconds": 60,
+    "sha256": "c738100f8e6574cf36cf3ad00307c687305355e3a0f075ee5de7b0861c60c7d2",
+    "downloadedThroughStudio": true,
+    "independentNativeRestore": true,
+    "fullFinishedPlaybackVerified": true,
+    "displayDroppedFrames": 3
+  }
+}

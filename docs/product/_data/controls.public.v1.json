@@ -1,5 +1,5 @@
 {
-  "knowledge_version": "1.0.45",
+  "knowledge_version": "1.0.52",
   "controls": [
     {
       "control_id": "studio.transform.x",
@@ -6726,76 +6726,6 @@
       "product_version": "1.2.0"
     },
     {
-      "control_id": "publishing.analytics.sync_latest",
-      "feature_ids": [
-        "publishing.analytics"
-      ],
-      "label": "Sync latest platform statistics",
-      "status": "PARTIAL",
-      "meaning": "Refreshes up to six newest owned published posts in the selected release or account scope, one per destination. Selection uses publication time independently of the performance-ranked display.",
-      "constraints": {
-        "type": "array",
-        "minimum": 1,
-        "maximum": 6,
-        "default": [],
-        "default_known": true,
-        "values": []
-      },
-      "unit": "none",
-      "keyframeable": "UNSUPPORTED",
-      "preview_support": "SUPPORTED",
-      "render_support": "UNSUPPORTED",
-      "director_edit": "UNSUPPORTED",
-      "applicable_media": [
-        "video"
-      ],
-      "dependencies": [
-        "publishing.analytics",
-        "system.account"
-      ],
-      "limitations": [
-        "Five-minute per-post cooldown; only owned successful non-simulated posts qualify.",
-        "Missing permissions or unsupported platform metrics remain unavailable. The action does not publish content or promise reach."
-      ],
-      "updated_at": "2026-10-21",
-      "product_version": "1.2.0"
-    },
-    {
-      "control_id": "publishing.analytics.release",
-      "feature_ids": [
-        "publishing.analytics"
-      ],
-      "label": "Published release",
-      "status": "PARTIAL",
-      "meaning": "Limits collected statistics and refresh targets to one owned published release within the selected date range.",
-      "constraints": {
-        "type": "string",
-        "default": "",
-        "default_known": true,
-        "values": [],
-        "minimum": null,
-        "maximum": null
-      },
-      "unit": "none",
-      "keyframeable": "UNSUPPORTED",
-      "preview_support": "SUPPORTED",
-      "render_support": "UNSUPPORTED",
-      "director_edit": "UNSUPPORTED",
-      "applicable_media": [
-        "video"
-      ],
-      "dependencies": [
-        "publishing.analytics",
-        "system.account"
-      ],
-      "limitations": [
-        "Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.",
-        "Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach."
-      ],
-      "updated_at": "2026-10-21",
-      "product_version": "1.2.0"
-    },
-    {
       "control_id": "studio.captions.source_language",
       "feature_ids": [
         "studio.captions"
@@ -6906,6 +6836,290 @@
         "This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified."
       ],
       "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.fade_in",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take fade in",
+      "status": "PARTIAL",
+      "meaning": "Sets the recorded take fade in in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial."
+      ],
+      "updated_at": "2026-10-23",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.fade_out",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take fade out",
+      "status": "PARTIAL",
+      "meaning": "Sets the recorded take fade out in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial."
+      ],
+      "updated_at": "2026-10-23",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.source_detail_repair",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Repair opaque detail from source",
+      "status": "PARTIAL",
+      "meaning": "Manually copies a clean opaque detail from the same source frame onto an authored target after matte cleanup. Optional cleanup removes damaged outlines; protection paths keep the actual fractional foreground in front of the restored detail.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 16,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame corners; feather and end blending in source pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.",
+        "The default copies this frame’s cleaned source colour. Set source_color to original to retain photographed opaque equipment texture, with optional saturation 0–2; select clean source pixels so old-room colours are not copied. This does not reconstruct the hidden original, detect objects or track motion. Review every moving pose and the export.",
+        "New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality.",
+        "Protection paths place the existing foreground in front of the repaired detail using its actual alpha. Transparent padding does not punch a hole in the repair; soft accessory edges blend over it."
+      ],
+      "updated_at": "2026-10-25",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.edge_refinement_region",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge refinement region points",
+      "status": "PARTIAL",
+      "meaning": "Limits the CPU edge solve to an authored source-frame region. Colour rejection becomes a soft boundary guide inside it; explicit removal paths and boxes remain excluded. Alpha outside the region is unchanged.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 64,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Set Edge detail width above zero first. Use 3–64 points forming a nonempty region; clear the field to refine the entire frame.",
+        "This manual region stays fixed in the source frame. Inspect the complete moving shot; it is not automatic tracking or object reconstruction.",
+        "The latest podcast correction remains under review. Broader footage and creative acceptance remain unqualified."
+      ],
+      "updated_at": "2026-10-24",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.colour_treatment_paths",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Colour treatment paths",
+      "status": "PARTIAL",
+      "meaning": "Apply the foreground holdout saturation to an additional region while keeping the existing cutout alpha. Use this to neutralise source lighting on retained equipment without restoring the old room.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 32,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: 1–32 polygons with 3–64 points each, within source coordinates 0–1; [] removes the optional regions.",
+        "Only the existing object saturation treatment applies. These paths never enlarge the inclusion matte or change the source mask.",
+        "The regions stay fixed in source coordinates. They do not detect or track an object and do not prove clean replacement on arbitrary footage.",
+        "The three short room examples pass technical preview/export/reopen checks but remain owner-rejected for whole-shot realism. Colour-only paths fix a selection/colour separation defect; they do not establish a convincing professional background. Fixed geometry and these examples do not qualify arbitrary/longer footage."
+      ],
+      "updated_at": "2026-10-28",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_transparent",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Transparent edge level",
+      "status": "PARTIAL",
+      "meaning": "Sets the soft-matte value treated as transparent before foreground colour recovery. Raising it removes low-opacity residue in the selected region.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_opaque",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Opaque edge level",
+      "status": "PARTIAL",
+      "meaning": "Sets the soft-matte value treated as opaque before foreground colour recovery. Lower it carefully when clothing edges are too translucent; fractional coverage remains between the two levels.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_region",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge opacity region points",
+      "status": "PARTIAL",
+      "meaning": "Restricts edge-opacity levels to an authored source-frame polygon. Its boundary fades inward; alpha outside the region remains unchanged.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 64,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Use 3–64 normalized source-frame points forming a nonempty polygon. Clear the field to apply levels across the subject.",
+        "The polygon stays fixed in source coordinates and is not an automatically tracked selection. Explicit removed-background regions remain excluded.",
+        "Preview and full-film appearance still require moving review; the controls do not establish professional or universal replacement quality."
+      ],
+      "updated_at": "2026-10-30",
       "product_version": "1.2.0"
     }
   ]

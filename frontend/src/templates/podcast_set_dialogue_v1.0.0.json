@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "templateId": "podcast_set_dialogue_v1",
+  "version": "1.0.0",
+  "label": "Podcast \u2014 two-speaker set transformation",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "background_replacement",
+    "text_behind_subject",
+    "before_after_transformation"
+  ],
+  "inputSlots": [
+    {
+      "id": "brandColour",
+      "type": "colour",
+      "required": true
+    },
+    {
+      "id": "headline",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureOne",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureTwo",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "callToAction",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "hookFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": true
+    },
+    {
+      "id": "background",
+      "type": "image",
+      "required": true
+    },
+    {
+      "id": "revealSound",
+      "type": "audio",
+      "required": true
+    },
+    {
+      "id": "impactSound",
+      "type": "audio",
+      "required": true
+    },
+    {
+      "id": "responseFootage",
+      "type": "video",
+      "required": true
+    }
+  ],
+  "supportedAspects": [
+    "16:9"
+  ],
+  "durationTicks": 540000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "defaultAspect": "16:9",
+    "sequence": [
+      {
+        "slot": "hookFootage",
+        "offset": 0,
+        "duration": 2,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0
+      },
+      {
+        "slot": "responseFootage",
+        "offset": 0,
+        "duration": 2,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 2,
+        "duration": 2,
+        "transitionIn": "clean_cut",
+        "transitionOut": "clean_cut",
+        "transitionDuration": 0
+      }
+    ],
+    "titles": [
+      {
+        "id": "raw-label",
+        "literal": "ORIGINAL",
+        "start": 0.08,
+        "duration": 0.63,
+        "x": 5,
+        "y": 8,
+        "width": 30,
+        "scale": 0.32,
+        "weight": 600,
+        "align": "left",
+        "colour": "white",
+        "shadow": "strong"
+      },
+      {
+        "id": "made-with",
+        "slot": "callToAction",
+        "start": 4.9,
+        "duration": 1.1,
+        "x": 73,
+        "y": 91,
+        "width": 48,
+        "scale": 0.24,
+        "weight": 600,
+        "align": "center",
+        "colour": "white",
+        "shadow": "strong"
+      }
+    ],
+    "animation": {
+      "enterSeconds": 0.16,
+      "settleSeconds": 0.3,
+      "exitSeconds": 0.12,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 0.07,
+      "fadeIn": 1.1,
+      "fadeOut": 0.8,
+      "ducking": true,
+      "duckMode": "constant",
+      "duckingStrength": 0.45
+    },
+    "soundCues": [
+      {
+        "slot": "revealSound",
+        "time": 0.5,
+        "duration": 0.72,
+        "trimStart": 0,
+        "volume": 0.08,
+        "fadeIn": 0.04,
+        "fadeOut": 0.18
+      },
+      {
+        "slot": "impactSound",
+        "time": 1.95,
+        "duration": 0.65,
+        "trimStart": 0,
+        "volume": 0.05,
+        "fadeIn": 0.01,
+        "fadeOut": 0.3
+      },
+      {
+        "slot": "revealSound",
+        "time": 3.95,
+        "duration": 0.35,
+        "trimStart": 0.2,
+        "volume": 0.04,
+        "fadeIn": 0.015,
+        "fadeOut": 0.12
+      }
+    ],
+    "muteOriginalAudio": false,
+    "finish": {
+      "exposureStops": -0.04,
+      "lift": -0.006,
+      "gamma": 1.01,
+      "gain": 0.98,
+      "contrast": 1.08,
+      "saturation": 0.93,
+      "temperature": -0.13,
+      "tint": 0,
+      "sharpness": 0.04,
+      "vignette": 0.025,
+      "blur": 0,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "letterbox": 0,
+      "precisionGrade": true
+    },
+    "subjectTreatments": [
+      {
+        "sourceSlot": "hookFootage",
+        "backgroundSlot": "background",
+        "revealStart": 0.6,
+        "revealSeconds": 0.4,
+        "backgroundExposure": -0.12,
+        "foreground": {
+          "exposure": -0.09,
+          "contrast": 1.04,
+          "saturation": 0.93
+        },
+        "titles": [],
+        "rangeSeconds": 6
+      },
+      {
+        "sourceSlot": "responseFootage",
+        "backgroundSlot": "background",
+        "revealStart": 0,
+        "revealSeconds": 0,
+        "backgroundExposure": -0.12,
+        "foreground": {
+          "exposure": -0.09,
+          "contrast": 1.04,
+          "saturation": 0.93
+        },
+        "titles": [],
+        "rangeSeconds": 2
+      }
+    ],
+    "sourceKeyframes": [
+      {
+        "property": "x",
+        "time": 0,
+        "value": 70.6,
+        "easing": "hold"
+      },
+      {
+        "property": "y",
+        "time": 0,
+        "value": 74.4,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 0,
+        "value": 1.88,
+        "easing": "hold"
+      },
+      {
+        "property": "x",
+        "time": 2,
+        "value": 16.2,
+        "easing": "hold"
+      },
+      {
+        "property": "y",
+        "time": 2,
+        "value": 86.3,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 2,
+        "value": 1.88,
+        "easing": "hold"
+      },
+      {
+        "property": "x",
+        "time": 4,
+        "value": 70.6,
+        "easing": "hold"
+      },
+      {
+        "property": "y",
+        "time": 4,
+        "value": 74.4,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 4,
+        "value": 1.88,
+        "easing": "hold"
+      }
+    ]
+  }
+}

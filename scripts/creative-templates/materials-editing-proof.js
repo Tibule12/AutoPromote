@@ -120,6 +120,16 @@ async function view(page, name) {
   const renderReceipt = JSON.parse(fs.readFileSync(path.join(folder, name, 'render-receipt.json')));
   assert.equal(hash(before.snapshot.studioDocument), renderReceipt.projectHash,
     'The visible edit differs from the finished movie');
+  if (process.env.STUDIO_QA_RESTORE_AFTER_TIMELINE === '1') {
+    // Retained clients can clear their finished-file selection while opening
+    // the saved timeline. Resolve the exact receipt through normal controls
+    // again after layout/save, before observing the actual completed decoder.
+    await q.tool(page, 'Export');
+    await page.getByLabel('Restore export receipt', { exact: true }).setInputFiles(path.join(folder, name, 'render-receipt.json'));
+    await ready.waitFor({ timeout: 90000 });
+    if (await showFinished.isVisible()) await showFinished.click();
+    await page.waitForFunction(() => document.querySelector('[data-testid="hook-preview-frame"]')?.classList.contains('has-rendered-output'));
+  }
   if (process.env.STUDIO_QA_HIDE_MEDIA === '1') {
     const hideMedia = page.getByRole('button', { name: 'Hide media', exact: true });
     if (await hideMedia.isVisible()) await hideMedia.click();
@@ -239,14 +249,27 @@ async function view(page, name) {
   const frames = scratch.frames;
   const cdp = await page.context().newCDPSession(page);
   const recorded = [];
-  let captureBytes = 0, captureStorageFailure = null;
+  const captureFps = process.env.STUDIO_QA_CAPTURE_FPS === undefined ? null : Number(process.env.STUDIO_QA_CAPTURE_FPS);
+  assert(captureFps === null || Number.isInteger(captureFps) && captureFps >= 1 && captureFps <= 24,
+    'Use a bounded 1–24 fps observational capture cadence. It does not change native movie playback.');
+  let captureBytes = 0, captureStorageFailure = null, stoppingCapture = false;
+  const acknowledge = event => {
+    void cdp.send('Page.screencastFrameAck', { sessionId: event.sessionId }).catch(error => {
+      if (!stoppingCapture) captureStorageFailure = error.message;
+    });
+  };
   let firstFrameReady;
   const firstFrame = new Promise(resolve => { firstFrameReady = resolve; });
   cdp.on('Page.screencastFrame', event => {
+    if (stoppingCapture) return;
+    const epoch = Number(event.metadata?.timestamp);
+    if(captureFps && recorded.length && epoch-recorded.at(-1).time < 1/captureFps){
+      acknowledge(event);return;
+    }
     const bytes = Buffer.from(event.data, 'base64');
     if (captureStorageFailure || captureBytes + bytes.length > storage.MAX_CAPTURE_BYTES) {
       captureStorageFailure = 'Studio recording exceeded the 256 MiB scratch limit';
-      void cdp.send('Page.screencastFrameAck', { sessionId: event.sessionId });
+      acknowledge(event);
       return;
     }
     const file = path.join(frames, `${String(recorded.length).padStart(6, '0')}.jpg`);
@@ -257,7 +280,7 @@ async function view(page, name) {
       'Native capture needs its actual compositor epoch timestamp');
     recorded.push({ file, time: compositorEpoch, receivedAt: Date.now() / 1000 });
     if (recorded.length === 1) firstFrameReady();
-    void cdp.send('Page.screencastFrameAck', { sessionId: event.sessionId });
+    acknowledge(event);
   });
   await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 70, maxWidth: 1600,
     maxHeight: page.viewportSize()?.height || 1000, everyNthFrame: 1 });
@@ -315,6 +338,7 @@ async function view(page, name) {
   });
   fs.writeFileSync(path.join(folder, name, 'studio-transport-observation.json'),
     JSON.stringify(observations, null, 2));
+  stoppingCapture = true;
   await cdp.send('Page.stopScreencast');
   const playback = await output.evaluate(v => ({ duration: v.duration, time: v.currentTime,
     ended: v.ended, width: v.videoWidth, height: v.videoHeight, playbackRate: v.playbackRate,
@@ -322,7 +346,7 @@ async function view(page, name) {
   await cdp.detach();
   assert(!captureStorageFailure, captureStorageFailure);
   fs.writeFileSync(path.join(folder, name, 'studio-playback-observation.json'), JSON.stringify({
-    playback, recordedFrames: recorded.length, playingAt, decodedBefore,
+    playback, recordedFrames: recorded.length, playingAt, decodedBefore, requestedObservationalCaptureFps: captureFps,
   }, null, 2));
   assert(playback.ended && Math.abs(playback.duration - expectedMovieDuration) < .000001 && recorded.length > 20,
     `Incomplete native recording: ${recorded.length} painted frames`);

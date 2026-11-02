@@ -1,0 +1,15 @@
+
+> autopromote-frontend@1.0.0 test
+> react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/__tests__/studioRenderCompiler.test.js src/components/__tests__/studioProjectDocument.test.js src/components/threeD/studio3DModel.test.js src/components/threeD/studioCinematic.test.js src/components/threeD/StudioCinematicPanel.test.js
+
+PASS src/components/__tests__/studioRenderCompiler.test.js
+PASS src/components/threeD/StudioCinematicPanel.test.js
+PASS src/components/threeD/studio3DModel.test.js
+PASS src/components/threeD/studioCinematic.test.js
+PASS src/components/__tests__/studioProjectDocument.test.js
+
+Test Suites: 5 passed, 5 total
+Tests:       36 passed, 36 total
+Snapshots:   0 total
+Time:        1.453 s, estimated 3 s
+Ran all test suites within paths "src/components/__tests__/studioRenderCompiler.test.js", "src/components/__tests__/studioProjectDocument.test.js", "src/components/threeD/studio3DModel.test.js", "src/components/threeD/studioCinematic.test.js", "src/components/threeD/StudioCinematicPanel.test.js".

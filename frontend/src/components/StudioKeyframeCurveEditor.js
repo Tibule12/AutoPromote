@@ -16,6 +16,7 @@ export default function StudioKeyframeCurveEditor({ keyframes, focusId, onSelect
   const keys = keyframes.filter(key => key.property === selected.property).sort((a, b) => a.time - b.time);
   const index = keys.findIndex(key => key.id === selected.id);
   const left = keys[index - 1];
+  const corner=/^planeCorner/.test(selected.property);
   const curve = drag?.id === selected.id ? drag.curve : studioVelocityCurve(selected);
   const displayed = keys.map(key => key.id === selected.id ? { ...key, curve } : key);
   const interval = left ? Number(selected.time) - Number(left.time) : 0;
@@ -69,7 +70,7 @@ export default function StudioKeyframeCurveEditor({ keyframes, focusId, onSelect
         }} /></label>
       <label><span>Easing into this key</span><select aria-label={`Selected ${kind} key easing`} disabled={locked}
         value={selected.easing || "ease_in_out"} onChange={event => onUpdate(selected.id, { easing: event.target.value })}>
-        {STUDIO_EASINGS.map(easing => <option key={easing.id} value={easing.id}>{easing.label}</option>)}</select></label>
+        {STUDIO_EASINGS.filter(e=>!corner||['linear','hold'].includes(e.id)).map(easing => <option key={easing.id} value={easing.id}>{easing.label}</option>)}</select></label>
     </div>
     {left && interval > 0 ? <>
       <small className="studio-graph-interval">{selected.property}: {Number(first.toFixed(3))} → {Number(last.toFixed(3))} · {Number(left.time).toFixed(3)}–{Number(selected.time).toFixed(3)}s{locked ? " · Track locked" : ""}</small>
@@ -107,7 +108,7 @@ export default function StudioKeyframeCurveEditor({ keyframes, focusId, onSelect
         })}
         <text x="22" y="173">{Number(left.time).toFixed(2)}s</text><text x="250" y="173">{Number(selected.time).toFixed(2)}s</text>
       </svg>
-      {selected.easing !== 'hold' && <StudioKeyframeVelocityControls key={selected.id} curve={curve}
+      {!corner && selected.easing !== 'hold' && <StudioKeyframeVelocityControls key={selected.id} curve={curve}
         first={selected.spatialCurve ? 0 : first} last={selected.spatialCurve ? 100 : last}
         duration={interval} locked={locked} property={selected.spatialCurve ? 'travel' : selected.property} onUpdate={updateCurve} />}
       {selected.easing === "bezier" ? <div className="motion-position-grid studio-bezier-coordinates">{["Time 1", "Value 1", "Time 2", "Value 2"].map((label, i) =>

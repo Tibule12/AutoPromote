@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "knowledge_version": "1.0.45",
+  "knowledge_version": "1.0.52",
   "product_version": "1.2.0",
   "release_channel": "development",
-  "updated_at": "2026-10-21",
+  "updated_at": "2026-11-02",
   "features": [
     {
       "feature_id": "studio.timeline",
@@ -812,7 +812,13 @@
         "studio.group_clip.in",
         "studio.group_clip.out",
         "studio.composite.background_edge_radius",
-        "studio.composite.background_decontaminate"
+        "studio.composite.background_decontaminate",
+        "studio.composite.source_detail_repair",
+        "studio.composite.edge_refinement_region",
+        "studio.composite.colour_treatment_paths",
+        "studio.composite.alpha_transparent",
+        "studio.composite.alpha_opaque",
+        "studio.composite.alpha_region"
       ],
       "workflow": [
         "Select an owned image or ordinary title in Studio Composite.",
@@ -882,13 +888,22 @@
         "studio.subject.mask_expansion"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open Studio → Creator → Composite and choose a clip under Add effects to a clip.",
+        "Choose the person and separate foreground objects to retain, including the microphone and supports.",
+        "Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.",
+        "Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.",
+        "Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval."
       ],
-      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "preview_behavior": "A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.",
+      "render_behavior": "The ordinary final export consumes the reviewed source-bound replacement. The short local proof preserves it through save and cold reopen; scaling and encoding differ from preview, and broader parity remains unqualified.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "The correction/alpha pipeline remains opt-in development work. Two short angles have reviewed soft face/body/hand boundaries, corrected sleeve cleanup and persisted person framing. Fine foliage/prop contamination and compressed source detail still block a complete professional quality claim.",
+        "The image matting model uses a separate source-flow temporal stage. Wispy hair, long occlusions and camera motion are not qualified; fixed-object tracks require a fixed camera.",
+        "Local CPU processing is slow. Current runtime availability, source ownership and any execution costs must be checked before submitting.",
+        "The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.",
+        "The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.",
+        "The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness."
       ],
       "common_errors": [
         {
@@ -903,7 +918,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-13",
+      "updated_at": "2026-11-02",
       "product_version": "1.2.0"
     },
     {
@@ -978,13 +993,22 @@
         "studio.subject.seed_labels"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open Studio → Creator → Composite and choose a clip under Add effects to a clip.",
+        "Choose the person and separate foreground objects to retain, including the microphone and supports.",
+        "Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.",
+        "Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.",
+        "Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval."
       ],
-      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "preview_behavior": "A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.",
+      "render_behavior": "The ordinary final export consumes the reviewed source-bound replacement. The short local proof preserves it through save and cold reopen; scaling and encoding differ from preview, and broader parity remains unqualified.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "This dated development snapshot does not establish professional or production readiness.",
+        "The correction/alpha pipeline remains opt-in development work. Two short angles have reviewed soft face/body/hand boundaries, corrected sleeve cleanup and persisted person framing. Fine foliage/prop contamination and compressed source detail still block a complete professional quality claim.",
+        "The image matting model uses a separate source-flow temporal stage. Wispy hair, long occlusions and camera motion are not qualified; fixed-object tracks require a fixed camera.",
+        "Local CPU processing is slow. Current runtime availability, source ownership and any execution costs must be checked before submitting.",
+        "The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.",
+        "The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.",
+        "The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness."
       ],
       "common_errors": [
         {
@@ -995,7 +1019,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-02",
       "product_version": "1.2.0"
     },
     {
@@ -1168,7 +1192,9 @@
       "optional_capabilities": [],
       "controls": [
         "studio.voiceover.volume",
-        "studio.voiceover.duration"
+        "studio.voiceover.duration",
+        "studio.voiceover.fade_in",
+        "studio.voiceover.fade_out"
       ],
       "workflow": [
         "Open the relevant workspace with an owned source.",
@@ -1497,16 +1523,17 @@
     },
     {
       "feature_id": "studio.three_d",
-      "name": "3D title/logo scene",
+      "name": "3D object, title and logo scenes",
       "area": "Studio",
       "status": "PARTIAL",
-      "summary": "Authors bounded 3D scenes and renders them through the existing 3D worker path. Supported transforms are approximate across browser and final render, and several displayed fields are disabled for final output.",
-      "purpose": "Authors bounded 3D scenes and renders them through the existing 3D worker path. Supported transforms are approximate across browser and final render, and several displayed fields are disabled for final output.",
+      "summary": "Builds bounded mesh compositions and continuously flowing ribbon surfaces. Individual objects retain colours, surfaces, roughness, transforms and pose keys; browser and final lighting/materials remain approximate.",
+      "purpose": "Create editable object motion and combine reviewed rendered alpha with the existing Studio timeline.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
       ],
       "supported_media": [
+        "authored 3D mesh-object composition",
         "authored 3D title/logo scene"
       ],
       "requires": [
@@ -1539,13 +1566,26 @@
         "studio.three_d.quality"
       ],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Open an owned Studio project, then Motion → 3D Motion.",
+        "Choose Object Composition to start with an editable sphere, or choose an existing title/logo template.",
+        "Add box, sphere, torus, cylinder, icosphere, plane or ribbon; select each object and set its colour, surface, roughness, position, XYZ scale and rotation. Box and cylinder edges support a bounded bevel.",
+        "For a ribbon, choose loop, knot or wave. Adjust width, thickness, wave amount, lobes and twists; speed and phase control the continuous flow. In Advanced, choose the sculpture lighting rig for aimed studio strips.",
+        "Set the first pose and add its object key. Seek to another time, change that object’s values and add the next key. Object-key times are relative to the scene start.",
+        "Save the project and request a 3D preview through the configured worker. Check its reported dimensions and frame rate.",
+        "After a reload, use Check saved 3D render to recover the accepted result. Keep an unavailable accepted job for status recovery.",
+        "Review the rendered animation, then use ordinary Studio export to composite its private alpha."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
+      "render_behavior": "The existing Blender worker produces a reviewed preview and private alpha. The ordinary Studio compositor reuses the owned, matching alpha; changing scene decisions requires a matching render.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "At most 24 objects, 32 keys per object and 256 object keys total.",
+        "The explicit nonproduction local adapter defaults to 640 × 360 at 24 fps. Its optional higher-resolution/CUDA App path remains unqualified after real long-job failures; successful direct canonical local renders do not prove App recovery. A larger final canvas can upscale a lower-resolution layer.",
+        "Contour morphing, procedural repeaters, general Blender scene import and arbitrary node scripts are unavailable.",
+        "Object keys through timeline cuts, retiming and trimmed boundaries remain unqualified; the verified scene uses a fixed uncut interval.",
+        "Browser lighting, materials, colour and edges do not establish full final-picture parity.",
+        "Uncertain accepted work must not be automatically rerun; API-restart recovery does not establish host/worker-loss or pre-dispatch recovery.",
+        "Per-object glass, chrome, gold, matte, neon, holographic and architecture surfaces are available. Browser glass can reveal opaque parts behind it; matching Blender colour, reflection and edge pixels remains unqualified.",
+        "Ribbon flow is relative to the scene clock. Its timing across cuts, retiming and trimmed boundaries remains unqualified; use an uncut rendered scene for the verified workflow."
       ],
       "common_errors": [
         {
@@ -1555,8 +1595,14 @@
       ],
       "related_features": [],
       "templates_using_feature": [],
-      "aliases": [],
-      "updated_at": "2026-10-12",
+      "aliases": [
+        "3D objects",
+        "Object Composition",
+        "sphere",
+        "torus",
+        "object motion"
+      ],
+      "updated_at": "2026-10-29",
       "product_version": "1.2.0"
     },
     {
@@ -1564,13 +1610,14 @@
       "name": "Final 3D rendering",
       "area": "Studio",
       "status": "PARTIAL",
-      "summary": "Renders supported authored scenes to owned output for the canonical composition. A browser WebGL preview alone is insufficient to qualify the final scene.",
-      "purpose": "Renders supported authored scenes to owned output for the canonical composition. A browser WebGL preview alone is insufficient to qualify the final scene.",
+      "summary": "Renders supported authored object/title/logo scenes to owned preview and private alpha for the canonical Studio compositor. Configured nonproduction local CPU execution supports saved-job API-restart recovery.",
+      "purpose": "Review actual rendered object motion and composite matching private alpha without rebuilding a separate editing engine.",
       "implementation_kind": "DETERMINISTIC",
       "available_to": [
         "signed-in users with owned project and applicable entitlement"
       ],
       "supported_media": [
+        "authored 3D mesh-object composition",
         "authored 3D title/logo scene"
       ],
       "requires": [
@@ -1579,13 +1626,17 @@
       "optional_capabilities": [],
       "controls": [],
       "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
+        "Author and save a supported scene in Studio → Motion → 3D Motion.",
+        "Generate the preview through the configured worker and check its actual dimensions/frame rate.",
+        "Use Check saved 3D render after reopening the project to recover the same accepted result.",
+        "Review the separate animation before ordinary final Studio export."
       ],
       "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
       "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
       "limitations": [
-        "This dated development snapshot does not establish professional or production readiness."
+        "The qualified local CPU path is nonproduction and bounded to short scenes; its quality profile can be lower than the final canvas.",
+        "Host/worker loss, pre-dispatch reconciliation, remote GPU recovery and full preview/final material/lighting parity remain unqualified.",
+        "A completed technical test does not establish creative or production readiness."
       ],
       "common_errors": [
         {
@@ -1612,7 +1663,7 @@
       "related_features": [],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-29",
       "product_version": "1.2.0"
     },
     {
@@ -2586,7 +2637,8 @@
       "preview_behavior": "Browser placement study only; it does not establish a finished model result.",
       "render_behavior": "No qualified final workflow exists for this feature.",
       "limitations": [
-        "Use only as a placement study. Do not claim this browser display is a real model output or finished supported workflow."
+        "Use only as a placement study. Do not claim this browser display is a real model output or finished supported workflow.",
+        "This Creator placement study is separate from the model-backed Composite workflow. That opt-in development workflow has a short native export proof but still fails its professional visual target."
       ],
       "common_errors": [
         {
@@ -2594,10 +2646,13 @@
           "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
         }
       ],
-      "related_features": [],
+      "related_features": [
+        "studio.subject_cutout",
+        "studio.masks"
+      ],
       "templates_using_feature": [],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-11-01",
       "product_version": "1.2.0"
     },
     {
@@ -3855,47 +3910,6 @@
       "product_version": "1.2.0"
     },
     {
-      "feature_id": "generation.idea_to_video",
-      "name": "Idea-to-Video",
-      "area": "Generated media",
-      "status": "PARTIAL",
-      "summary": "Builds a scene draft from an idea with selectable voice and media searches, then requests an output. A scripted safe fallback is not proof of AI-generated moving footage.",
-      "purpose": "Builds a scene draft from an idea with selectable voice and media searches, then requests an output. A scripted safe fallback is not proof of AI-generated moving footage.",
-      "implementation_kind": "HYBRID",
-      "available_to": [
-        "signed-in users with owned project and applicable entitlement"
-      ],
-      "supported_media": [
-        "video"
-      ],
-      "requires": [
-        "system.account"
-      ],
-      "optional_capabilities": [],
-      "controls": [],
-      "workflow": [
-        "Open the relevant workspace with an owned source.",
-        "Review the result and its limitations before saving or exporting."
-      ],
-      "preview_behavior": "Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.",
-      "render_behavior": "Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.",
-      "limitations": [
-        "Draft quality, source rights, provider availability and render cost need review.",
-        "A scene description or stock search is not image-to-video generation."
-      ],
-      "common_errors": [
-        {
-          "condition": "Feature unavailable or output stale",
-          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
-        }
-      ],
-      "related_features": [],
-      "templates_using_feature": [],
-      "aliases": [],
-      "updated_at": "2026-10-12",
-      "product_version": "1.2.0"
-    },
-    {
       "feature_id": "generation.idea_recommendations",
       "name": "Content idea suggestions",
       "area": "Generated media",
@@ -4659,56 +4673,6 @@
       "templates_using_feature": [],
       "aliases": [],
       "updated_at": "2026-10-13",
-      "product_version": "1.2.0"
-    },
-    {
-      "feature_id": "publishing.analytics",
-      "name": "Analytics",
-      "area": "Publishing",
-      "status": "PARTIAL",
-      "summary": "Shows collected account-owned platform statistics, distinguishes missing counters from measured zero, filters a published release and refreshes its recent destination posts.",
-      "purpose": "Judge published work using real collected metrics without confusing missing data, impressions and video views.",
-      "implementation_kind": "DETERMINISTIC",
-      "available_to": [
-        "signed-in users with owned project and applicable entitlement"
-      ],
-      "supported_media": [
-        "video"
-      ],
-      "requires": [
-        "system.account"
-      ],
-      "optional_capabilities": [],
-      "controls": [
-        "publishing.analytics.sync_latest",
-        "publishing.analytics.release"
-      ],
-      "workflow": [
-        "Open Analytics and choose the available date range.",
-        "Choose a Published release to inspect that release as new content is published; All published releases restores the account view.",
-        "Read the collected-post coverage and last successful update. Unavailable counters are not zero.",
-        "Use Sync latest platform statistics to refresh up to six recent published posts in the selected scope, one per destination.",
-        "Compare posts within each platform. Review unavailable connections and permissions before drawing performance conclusions."
-      ],
-      "preview_behavior": "Displays collected metrics, unavailable values, collected-post coverage and last successful update. A reported zero remains zero.",
-      "render_behavior": "No video render is performed. An explicit bounded statistics refresh reads connected providers and persists owned post observations.",
-      "limitations": [
-        "Provider permissions, connection health and account allowance apply. Some destinations provide engagement but no view count.",
-        "The refresh selects up to six owned successful non-simulated posts and has a five-minute per-post cooldown.",
-        "Metrics cover collected posts only. Impressions are separate from views; a combined click-through rate is unavailable without matched attribution.",
-        "Public provider delivery and whole-account collection coverage are separate from source and local signed-in verification.",
-        "Automatic observations remain scheduled through the seven-day collection window even when first-day views are low. Older legacy post records without collection initialization need an explicit refresh; local checks do not deploy backend changes."
-      ],
-      "common_errors": [
-        {
-          "condition": "Feature unavailable or output stale",
-          "resolution": "Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow."
-        }
-      ],
-      "related_features": [],
-      "templates_using_feature": [],
-      "aliases": [],
-      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     },
     {
@@ -11741,76 +11705,6 @@
       "product_version": "1.2.0"
     },
     {
-      "control_id": "publishing.analytics.sync_latest",
-      "feature_ids": [
-        "publishing.analytics"
-      ],
-      "label": "Sync latest platform statistics",
-      "status": "PARTIAL",
-      "meaning": "Refreshes up to six newest owned published posts in the selected release or account scope, one per destination. Selection uses publication time independently of the performance-ranked display.",
-      "constraints": {
-        "type": "array",
-        "minimum": 1,
-        "maximum": 6,
-        "default": [],
-        "default_known": true,
-        "values": []
-      },
-      "unit": "none",
-      "keyframeable": "UNSUPPORTED",
-      "preview_support": "SUPPORTED",
-      "render_support": "UNSUPPORTED",
-      "director_edit": "UNSUPPORTED",
-      "applicable_media": [
-        "video"
-      ],
-      "dependencies": [
-        "publishing.analytics",
-        "system.account"
-      ],
-      "limitations": [
-        "Five-minute per-post cooldown; only owned successful non-simulated posts qualify.",
-        "Missing permissions or unsupported platform metrics remain unavailable. The action does not publish content or promise reach."
-      ],
-      "updated_at": "2026-10-21",
-      "product_version": "1.2.0"
-    },
-    {
-      "control_id": "publishing.analytics.release",
-      "feature_ids": [
-        "publishing.analytics"
-      ],
-      "label": "Published release",
-      "status": "PARTIAL",
-      "meaning": "Limits collected statistics and refresh targets to one owned published release within the selected date range.",
-      "constraints": {
-        "type": "string",
-        "default": "",
-        "default_known": true,
-        "values": [],
-        "minimum": null,
-        "maximum": null
-      },
-      "unit": "none",
-      "keyframeable": "UNSUPPORTED",
-      "preview_support": "SUPPORTED",
-      "render_support": "UNSUPPORTED",
-      "director_edit": "UNSUPPORTED",
-      "applicable_media": [
-        "video"
-      ],
-      "dependencies": [
-        "publishing.analytics",
-        "system.account"
-      ],
-      "limitations": [
-        "Only owned successful non-simulated posts in the selected date range qualify. An empty selection shows all published releases.",
-        "Missing or unsupported counters remain unavailable. Filtering does not establish causal performance or guarantee reach."
-      ],
-      "updated_at": "2026-10-21",
-      "product_version": "1.2.0"
-    },
-    {
       "control_id": "studio.captions.source_language",
       "feature_ids": [
         "studio.captions"
@@ -11921,6 +11815,290 @@
         "This corrects selected edges; missing foreground objects require their own source-bound mask selection. Broad footage quality and whole predictive parity are unqualified."
       ],
       "updated_at": "2026-10-21",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.fade_in",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take fade in",
+      "status": "PARTIAL",
+      "meaning": "Sets the recorded take fade in in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial."
+      ],
+      "updated_at": "2026-10-23",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.voiceover.fade_out",
+      "feature_ids": [
+        "studio.voiceover"
+      ],
+      "label": "Voice take fade out",
+      "status": "PARTIAL",
+      "meaning": "Sets the recorded take fade out in seconds. Linked timeline cuts retain the original fade phase; explicitly changing fade, source in or length creates a new fade range for that take.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5,
+        "default": 0,
+        "default_known": true,
+        "values": []
+      },
+      "unit": "seconds",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNVERIFIED",
+      "applicable_media": [
+        "video"
+      ],
+      "dependencies": [
+        "studio.voiceover"
+      ],
+      "limitations": [
+        "Overlapping speech fades multiply. Linked-cut pieces retain their authored envelope; zero fade preserves the boundary sample. Whole preview/audio qualification remains partial."
+      ],
+      "updated_at": "2026-10-23",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.source_detail_repair",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Repair opaque detail from source",
+      "status": "PARTIAL",
+      "meaning": "Manually copies a clean opaque detail from the same source frame onto an authored target after matte cleanup. Optional cleanup removes damaged outlines; protection paths keep the actual fractional foreground in front of the restored detail.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 16,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame corners; feather and end blending in source pixels",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: each repair needs source and target convex four-corner paths, feather 0–3 and end_blend 0–32 pixels. Optional clear_box removes a damaged footprint; up to sixteen protect_paths preserve crossing accessories.",
+        "The default copies this frame’s cleaned source colour. Set source_color to original to retain photographed opaque equipment texture, with optional saturation 0–2; select clean source pixels so old-room colours are not copied. This does not reconstruct the hidden original, detect objects or track motion. Review every moving pose and the export.",
+        "New native corrections still require founder creative review; source tests alone do not establish finished or general-user quality.",
+        "Protection paths place the existing foreground in front of the repaired detail using its actual alpha. Transparent padding does not punch a hole in the repair; soft accessory edges blend over it."
+      ],
+      "updated_at": "2026-10-25",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.edge_refinement_region",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge refinement region points",
+      "status": "PARTIAL",
+      "meaning": "Limits the CPU edge solve to an authored source-frame region. Colour rejection becomes a soft boundary guide inside it; explicit removal paths and boxes remain excluded. Alpha outside the region is unchanged.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 64,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Set Edge detail width above zero first. Use 3–64 points forming a nonempty region; clear the field to refine the entire frame.",
+        "This manual region stays fixed in the source frame. Inspect the complete moving shot; it is not automatic tracking or object reconstruction.",
+        "The latest podcast correction remains under review. Broader footage and creative acceptance remain unqualified."
+      ],
+      "updated_at": "2026-10-24",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.colour_treatment_paths",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Colour treatment paths",
+      "status": "PARTIAL",
+      "meaning": "Apply the foreground holdout saturation to an additional region while keeping the existing cutout alpha. Use this to neutralise source lighting on retained equipment without restoring the old room.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 32,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Advanced manual geometry: 1–32 polygons with 3–64 points each, within source coordinates 0–1; [] removes the optional regions.",
+        "Only the existing object saturation treatment applies. These paths never enlarge the inclusion matte or change the source mask.",
+        "The regions stay fixed in source coordinates. They do not detect or track an object and do not prove clean replacement on arbitrary footage.",
+        "The three short room examples pass technical preview/export/reopen checks but remain owner-rejected for whole-shot realism. Colour-only paths fix a selection/colour separation defect; they do not establish a convincing professional background. Fixed geometry and these examples do not qualify arbitrary/longer footage."
+      ],
+      "updated_at": "2026-10-28",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_transparent",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Transparent edge level",
+      "status": "PARTIAL",
+      "meaning": "Sets the soft-matte value treated as transparent before foreground colour recovery. Raising it removes low-opacity residue in the selected region.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 0,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_opaque",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Opaque edge level",
+      "status": "PARTIAL",
+      "meaning": "Sets the soft-matte value treated as opaque before foreground colour recovery. Lower it carefully when clothing edges are too translucent; fractional coverage remains between the two levels.",
+      "constraints": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "values": [],
+        "default": 1,
+        "default_known": true
+      },
+      "unit": "alpha",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Levels must lie between 0 and 1, with the opaque level at least 0.05 above the transparent level. Defaults 0 and 1 preserve existing behaviour.",
+        "Use Edge opacity region points to restrict the correction. It is fixed source-frame geometry; inspect the complete moving preview before export.",
+        "An opacity correction cannot select missing furniture, recover occluded objects or qualify arbitrary-video replacement."
+      ],
+      "updated_at": "2026-10-30",
+      "product_version": "1.2.0"
+    },
+    {
+      "control_id": "studio.composite.alpha_region",
+      "feature_ids": [
+        "studio.compositing"
+      ],
+      "label": "Edge opacity region points",
+      "status": "PARTIAL",
+      "meaning": "Restricts edge-opacity levels to an authored source-frame polygon. Its boundary fades inward; alpha outside the region remains unchanged.",
+      "constraints": {
+        "type": "array",
+        "minimum": 0,
+        "maximum": 64,
+        "values": [],
+        "default": [],
+        "default_known": true
+      },
+      "unit": "normalized source-frame points",
+      "keyframeable": "UNSUPPORTED",
+      "preview_support": "PARTIAL",
+      "render_support": "SUPPORTED",
+      "director_edit": "UNSUPPORTED",
+      "applicable_media": [
+        "owned video with a source-bound subject mask"
+      ],
+      "dependencies": [
+        "studio.compositing",
+        "studio.subject_cutout"
+      ],
+      "limitations": [
+        "Use 3–64 normalized source-frame points forming a nonempty polygon. Clear the field to apply levels across the subject.",
+        "The polygon stays fixed in source coordinates and is not an automatically tracked selection. Explicit removed-background regions remain excluded.",
+        "Preview and full-film appearance still require moving review; the controls do not establish professional or universal replacement quality."
+      ],
+      "updated_at": "2026-10-30",
       "product_version": "1.2.0"
     }
   ],
@@ -12667,9 +12845,9 @@
     },
     {
       "task_id": "task.three_d_title",
-      "title": "Create a 3D title/logo scene",
+      "title": "Create a 3D object, title or logo scene",
       "status": "PARTIAL",
-      "summary": "Use supported bounded scene fields, then obtain and review a current owned final 3D result.",
+      "summary": "Author a bounded editable object composition or title/logo template, review its rendered result and composite matching private alpha through Studio.",
       "feature_ids": [
         "system.costs",
         "studio.three_d",
@@ -12688,24 +12866,26 @@
       "mode": "SUPPORTED_WITH_LIMITATIONS",
       "steps": [
         {
-          "instruction": "Choose a scene preset and edit title/material plus supported transform values.",
+          "instruction": "Open Studio → Motion → 3D Motion. Choose Object Composition for separate editable geometry, or use an existing title/logo preset.",
+          "feature_id": "studio.three_d",
+          "control_ids": []
+        },
+        {
+          "instruction": "Select each mesh object, set its colour and XYZ pose, and add the first object key. Seek to another scene time, adjust that object and add its next key. Save the project.",
+          "feature_id": "studio.three_d",
+          "control_ids": []
+        },
+        {
+          "instruction": "Adjust supported scene material, camera focal length and light intensity. Disabled fields do not gain final support.",
           "feature_id": "studio.three_d",
           "control_ids": [
             "studio.three_d.material",
-            "studio.three_d.x",
-            "studio.three_d.rotationy"
-          ]
-        },
-        {
-          "instruction": "Adjust camera focal length/light intensity; disabled fields do not gain final support.",
-          "feature_id": "studio.three_d",
-          "control_ids": [
             "studio.three_d.focallength",
             "studio.three_d.lightintensity"
           ]
         },
         {
-          "instruction": "Request the existing final scene path only under its availability and cost checks, then review and compose the owned result.",
+          "instruction": "Request the configured 3D render and review its actual quality profile. After reopening, use Check saved 3D render to recover the accepted job. Review the animation before ordinary final export composites matching private alpha.",
           "feature_id": "studio.blender",
           "control_ids": []
         }
@@ -12714,12 +12894,17 @@
         "system.unsupported_media",
         "studio.revision"
       ],
-      "expected_result": "An owned editable result with current revision and reviewed output; inspect the actual moving picture and sound.",
+      "expected_result": "A saved editable scene and reviewed owned 3D render that the ordinary final compositor can reuse. Actual quality follows the reported render profile.",
       "limitations": [
-        "Follow the linked feature readiness; these steps do not promote the workflow to professional or production readiness."
+        "At most 24 objects, 32 keys per object and 256 object keys total.",
+        "The local CPU path is explicitly enabled for nonproduction; its bounded landscape profile is 640 × 360 at 24 fps. A larger final canvas upscales that layer.",
+        "Contour morphing, procedural repeaters, general Blender scene import and arbitrary node scripts are unavailable.",
+        "Object keys through timeline cuts, retiming and trimmed boundaries remain unqualified; the verified scene uses a fixed uncut interval.",
+        "Browser lighting, materials, colour and edges do not establish full final-picture parity.",
+        "Uncertain accepted work must not be automatically rerun; API-restart recovery does not establish host/worker-loss or pre-dispatch recovery."
       ],
       "aliases": [],
-      "updated_at": "2026-10-12",
+      "updated_at": "2026-10-29",
       "product_version": "1.2.0"
     },
     {
@@ -12880,6 +13065,94 @@
       ],
       "aliases": [],
       "updated_at": "2026-10-12",
+      "product_version": "1.2.0"
+    },
+    {
+      "task_id": "task.own_style",
+      "title": "Edit a video in your own style",
+      "status": "PARTIAL",
+      "summary": "Change ordinary clips, titles, framing, captions, motion, colour and sound manually in the same editable project used by templates and reviewed Director edits.",
+      "feature_ids": [
+        "studio.timeline",
+        "studio.cut",
+        "studio.trim",
+        "studio.layers",
+        "studio.transforms",
+        "studio.keyframes",
+        "studio.color",
+        "studio.captions",
+        "studio.audio",
+        "studio.compositing",
+        "studio.templates",
+        "studio.revision",
+        "studio.export"
+      ],
+      "control_ids": [],
+      "prerequisites": [
+        "system.account"
+      ],
+      "mode": "SUPPORTED_WITH_LIMITATIONS",
+      "steps": [
+        {
+          "instruction": "Import your owned footage or apply an available shared template from Media. Templates author normal editable clips, layers, keys and audio; they do not lock your style.",
+          "feature_id": "studio.templates",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Cut for splits/trims and select the occurrence you want to change. Reframe changes aspect, position and zoom; review faces throughout the crop.",
+          "feature_id": "studio.cut",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Graphics for your own text, fonts, colours, images, position, size, opacity and timing. Edit caption words/timing and style in Captions.",
+          "feature_id": "studio.layers",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Motion for supported transform keys, easing and movement. Select the actual layer and inspect its entrance and exit. Some advanced 3D/Creator FX controls are placement studies; read their limits.",
+          "feature_id": "studio.keyframes",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Color to adjust the image finish. Composite provides optional subject/background treatment; keep the original background when replacement is unnecessary.",
+          "feature_id": "studio.color",
+          "control_ids": []
+        },
+        {
+          "instruction": "Use Sound for speech, music, voiceover, sound effects, levels and fades. Review the rendered mix; whole live-preview/final sound agreement remains unqualified.",
+          "feature_id": "studio.audio",
+          "control_ids": []
+        },
+        {
+          "instruction": "Save and reopen the project to retain your choices. Undo/Redo operates on the shared project. Keep an editable backup before major changes. Changing a processed scene requires a new reviewed preview.",
+          "feature_id": "studio.revision",
+          "control_ids": []
+        },
+        {
+          "instruction": "Render the current revision, then watch the full actual movie with sound. Check cuts, typography, moving boundaries and audio before using the result.",
+          "feature_id": "studio.export",
+          "control_ids": []
+        }
+      ],
+      "troubleshooting_features": [
+        "system.unsupported_media",
+        "studio.revision"
+      ],
+      "expected_result": "Your own editable style and timing in the normal Studio project, with a reviewed export. No mandatory template or background replacement.",
+      "limitations": [
+        "Supported controls remain subject to their feature limits, account access and media ownership. This does not certify every tool or effect combination.",
+        "Whole predictive picture/sound parity, arbitrary nesting and broad ordinary-account model execution remain incomplete. Source-specific manual mask corrections do not generalize to new videos.",
+        "Technical records document private development work. They are not evidence that every feature is deployed or available in production.",
+        "Caption wording, timing and style can be edited manually. Automatic caption generation has its separate documented blocking defect; manual editing does not qualify automatic transcription."
+      ],
+      "aliases": [
+        "edit in my own preferred style",
+        "customize my video",
+        "manual video editing",
+        "change a template",
+        "what editing controls can I use"
+      ],
+      "updated_at": "2026-10-21",
       "product_version": "1.2.0"
     }
   ],
@@ -13870,11 +14143,6 @@
       "to": "system.account"
     },
     {
-      "from": "generation.idea_to_video",
-      "type": "requires",
-      "to": "system.account"
-    },
-    {
       "from": "generation.image_to_video",
       "type": "requires",
       "to": "system.model_runtime"
@@ -13971,11 +14239,6 @@
     },
     {
       "from": "publishing.publish",
-      "type": "requires",
-      "to": "system.account"
-    },
-    {
-      "from": "publishing.analytics",
       "type": "requires",
       "to": "system.account"
     },
@@ -15050,16 +15313,6 @@
       "to": "studio.logo_design.canvas"
     },
     {
-      "from": "publishing.analytics",
-      "type": "editable_with",
-      "to": "publishing.analytics.sync_latest"
-    },
-    {
-      "from": "publishing.analytics",
-      "type": "editable_with",
-      "to": "publishing.analytics.release"
-    },
-    {
       "from": "studio.captions",
       "type": "editable_with",
       "to": "studio.captions.source_language"
@@ -15073,6 +15326,131 @@
       "from": "studio.compositing",
       "type": "editable_with",
       "to": "studio.composite.background_decontaminate"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.fade_in"
+    },
+    {
+      "from": "studio.voiceover",
+      "type": "editable_with",
+      "to": "studio.voiceover.fade_out"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.subject_cutout",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.revision",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.background_replace"
+    },
+    {
+      "from": "studio.timeline",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.cut",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.trim",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.layers",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.transforms",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.keyframes",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.color",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.captions",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.audio",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.templates",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.revision",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.export",
+      "type": "usable_in",
+      "to": "task.own_style"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.source_detail_repair"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.edge_refinement_region"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.colour_treatment_paths"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_transparent"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_opaque"
+    },
+    {
+      "from": "studio.compositing",
+      "type": "editable_with",
+      "to": "studio.composite.alpha_region"
     }
   ]
 }

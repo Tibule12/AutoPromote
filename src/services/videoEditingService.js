@@ -7,6 +7,7 @@ const { captionTranscriptionOptions } = require("./captionTranscriptionOptions")
 const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
 const fs = require("fs");
+const { encodeStudioJobOptions, decodeStudioJobOptions } = require('./studioJobOptions');
 const { isTransientWorkerOutput, persistWorkerOutput, persistWorkerBucketOutput } = require("./studioWorkerOutputService");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 const { deductCredits, refundCredits } = require("../creditSystem");
@@ -133,6 +134,7 @@ function getMulticamExpiryIso(fromMs = Date.now()) {
 const { v4: uuidv4 } = require("uuid");
 
 class VideoEditingService {
+  static readProcessingOptions(record) { return decodeStudioJobOptions(record); }
   async assertRenderWorkerReady() {
     require("./unifiedCredits/application").assertApplicationTransport(MEDIA_WORKER_URL);
     try {
@@ -229,13 +231,14 @@ class VideoEditingService {
     const jobId = attempt.jobId || uuidv4();
     console.log(`[VideoEditing] Starting Async Job ${jobId} for User ${userId}`);
 
+    let dispatched = false;
     try {
       const jobRef = db.collection("video_edits").doc(jobId);
       const jobData = {
         jobId,
         userId,
         videoUrl,
-        options,
+        ...encodeStudioJobOptions(options),
         ...(attempt.renderRequestId ? { type: "viral_render", renderRequestId: attempt.renderRequestId } : {}),
         ...(attempt.sourceRenderJobId ? { sourceRenderJobId: attempt.sourceRenderJobId } : {}),
         ...(attempt.creditReceipt ? { creditReceipt: attempt.creditReceipt } : {}),
@@ -265,12 +268,17 @@ class VideoEditingService {
       // Start background processing without awaiting
       const localCreditContext = require("./unifiedCredits/application").getApplicationContext(userId);
       if (localCreditContext) await localCreditContext.bindJob("video_edits", jobId);
+      dispatched = true;
       this.processJobBackground(jobId, videoUrl, options, userId).catch(err => {
         console.error(`[VideoEditing] Background Job ${jobId} Failed (uncaught):`, err);
       });
 
       return { jobId, reused: false };
     } catch (error) {
+      if (!dispatched) {
+        const localContext = require('./unifiedCredits/application').getApplicationContext(userId);
+        if (localContext) await localContext.confirmNoDispatch();
+      }
       console.error("Failed to start job:", error);
       throw new Error("Failed to queue video processing job");
     }

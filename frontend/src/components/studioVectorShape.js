@@ -248,7 +248,10 @@ export function studioVectorSvg(
           })
           .join("")
       : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 100 100">${gradient}<path d="${d}" fill-rule="evenodd" fill="${f.kind === "none" ? "none" : f.kind === "linear" ? "url(#paint)" : f.color}" stroke="${s.color}" stroke-width="${full ? s.width : 0}" stroke-linejoin="round" stroke-linecap="round"/>${stroke}</svg>`;
+  // The image element owns contain/cover/stretch, matching the CPU raster.
+  // SVG's default inner "meet" letterboxes a stretched non-square image a
+  // second time, collapsing a wide contour into a small central square.
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 100 100" preserveAspectRatio="none">${gradient}<path d="${d}" fill-rule="evenodd" fill="${f.kind === "none" ? "none" : f.kind === "linear" ? "url(#paint)" : f.color}" stroke="${s.color}" stroke-width="${full ? s.width : 0}" stroke-linejoin="round" stroke-linecap="round"/>${stroke}</svg>`;
 }
 export const studioVectorUri = (shape, pose) =>
   `data:image/svg+xml;base64,${btoa(studioVectorSvg(shape, pose))}`;

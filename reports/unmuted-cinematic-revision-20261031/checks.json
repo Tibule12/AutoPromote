@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-31",
+  "branch": "feat/studio-podcast-revision-20261031",
+  "worktree": "/home/tibule12/Projects/AutoPromte/AutoPromote-podcast-revision-20261031",
+  "baseCommit": "17678049",
+  "actualEditor": "frontend/src/components/ViralClipStudio.js",
+  "tests": {
+    "cinematicContract": 6,
+    "podcastGraphAndCanonicalSound": 2,
+    "programmeWithActualSoundMixAndImmutableCache": 3,
+    "localBoundaryAndOfflineRegression": 3,
+    "mountedCinematicPanelAndSaveReopen": 7
+  },
+  "focusedTotal": 21,
+  "fullEditorSuite": "NOT_RUN",
+  "generatedKernel": "MATCHES_FRONTEND",
+  "gitDiffCheck": "PASS",
+  "pythonSyntax": "PASS",
+  "initialSoundRenderTest": "Resource contention exceeded the existing polling deadline; unchanged isolated rerun passed all three cases.",
+  "formatCheck": "Inherited compact cinematic source style is not Prettier-clean; no global reformat applied.",
+  "productionAccess": false,
+  "cloudRenders": 0,
+  "paidModelCalls": 0,
+  "nativeAutomaticMattingClaim": false,
+  "nativeSceneExports": 2,
+  "nativeProgrammeExport": true,
+  "sourceSpeechLagMilliseconds": 0.0,
+  "actualStudioAudioCorrelation": 0.9830245552523695,
+  "studioRecordingClockDifferenceMs": 11.330604553222656,
+  "independentFreshBrowserOpen": true,
+  "screenCaptureFrameCount": 192
+}

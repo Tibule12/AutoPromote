@@ -1,0 +1,76 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Open World / timed shade",
+  "width": 1280,
+  "height": 720,
+  "duration": 60,
+  "layers": [
+    {
+      "id": "Departure shade",
+      "name": "Departure shade",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#000000\"/></svg>",
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 0,
+      "startTime": 5.5,
+      "duration": 3.3,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 5.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.15,
+          "value": 0.84,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.15,
+          "value": 0.84,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "groups": []
+}

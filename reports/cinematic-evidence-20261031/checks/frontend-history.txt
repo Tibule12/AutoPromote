@@ -1,0 +1,179 @@
+
+> autopromote-frontend@1.0.0 test
+> react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/__tests__/ViralClipStudio.test.js --testNamePattern=project|checkpoint|3D|undo|redo|restores|restore|saved --verbose
+
+FAIL src/components/__tests__/ViralClipStudio.test.js (283.375 s)
+  ViralClipStudio timeline sequencing
+    ✓ saved zero-valued media effects reach the native preview without replacing them with defaults (5933 ms)
+    ✓ duplicate refresh completes in its own project and Pause stays usable while links load (12518 ms)
+    ✓ supports undo and redo for overlay edits (5425 ms)
+    ✕ preserves uploaded B-roll through duplicate, delete, undo, and redo (15727 ms)
+    ✓ undoes and redoes Make It Hit as one reversible edit (9262 ms)
+    ✓ initial saved-project hydration preserves the matching completed output (5742 ms)
+    ✓ composition timeline moves keyed titles as one undo step and respects the actual owning track (20203 ms)
+    ✓ fullscreen inserts respect the saved title stack and native layer reordering reaches export (12779 ms)
+    ✓ shows burned captions once and restores the editable preview after the output is cleared (10737 ms)
+    ✓ places and edits built-in sound effects on the live timeline with undo and redo (18987 ms)
+    ✓ Razor clicks split the clicked frame instead of the old playhead and Undo restores it (10144 ms)
+    ✓ cut then Creator FX and keyboard Undo restores each action separately (16071 ms)
+    ✓ track display locks and tool selection do not consume cut Undo (17325 ms)
+    ✓ frame styling and export settings each Undo without consuming Cut history (29170 ms)
+    ✓ creator shake creates final-render keys and Undo removes only the shake (22566 ms)
+    ✓ quick trim retimes motion and its linked sound and undo restores both (27268 ms)
+    ✓ restoring a checkpoint registers a fresh revision before Director approval (10840 ms)
+    ✓ does not record a decision if the project changes while its version is being saved (8182 ms)
+    ○ skipped an existing finished URL cannot hide recovery actions that still need attention
+    ○ skipped the first transform edit keeps the paused source at its authoring frame without a completed movie
+    ○ skipped canonical image opacity and transform keys cannot be replaced by legacy entrance animation
+    ○ skipped canonical video opacity and transform keys cannot be replaced by legacy entrance animation
+    ○ skipped paused scrubbing seeks the matching video overlay to its programme clock
+    ○ skipped metadata reload preserves the selected trim and paused editing frame
+    ○ skipped a source edit without hook or camera treatments does not load their hidden decoders
+    ○ skipped paused scrubbing at the trimmed end stays on that frame
+    ○ skipped a playing single-clip sequence loops at its trimmed end
+    ○ skipped native source EOF loops a full-length clip while user-paused EOF stays paused
+    ○ skipped a loading source resumes when playable only while playback is requested
+    ○ skipped an immediate second-source import retains the first selected range before its metadata arrives
+    ○ skipped a native shot boundary promotes and starts the prepared decoder before the boundary event returns
+    ○ skipped a prepared native cut keeps music and an overlapping cue on one audio clock and Pause stops both: off
+    ○ skipped a prepared native cut keeps music and an overlapping cue on one audio clock and Pause stops both: speech
+    ○ skipped prepares two cuts ahead without playing either standby or changing the authored trims
+    ○ skipped After-only review releases the hidden Before decoder and restoring comparison recues the source
+    ○ skipped source timing lock blocks both trim toolbars while seeking stays available
+    ○ skipped background extraction sync respects original-track mute, solo and automation after reopening
+    ○ skipped trimmed multi-source export preserves programme times for titles and B-roll
+    ○ skipped rendered output metadata does not replace the editable source range
+    ○ skipped completed movie playback never reapplies authored speed points
+    ○ skipped source speed ramp uses the canonical delivery intervals and seek clock
+    ○ skipped retimed music retains its tempo and seeks through the canonical output clock: off
+    ○ skipped retimed music retains its tempo and seeks through the canonical output clock: speech
+    ○ skipped library tabs support arrow keys, wraparound and Home/End with one tab stop
+    ○ skipped replacing the entire sequence removes unrelated footage while preserving timed graphics and sound atomically
+    ○ skipped batch media stays ordered in the library until explicitly placed, with isolated failures
+    ○ skipped groups film camera takes manually and exports the chosen angle range
+    ○ skipped uses Quick, Creator and Signature as views over one shared edit
+    ○ skipped exposes functional Auto Reframe controls in the editor inspector
+    ○ skipped Fit full and Fill canvas record export framing decisions at the playhead
+    ○ skipped exports Show Everyone as two reviewed source crops without requiring extra cameras
+    ○ skipped applies reusable podcast analysis as an editable rounded Director timeline
+    ○ skipped keeps Studio preview and export free of platform watermark controls
+    ○ skipped exports a four-camera grid with every source, offset, and framing anchor
+    ○ skipped creator zoom uses editable keys and reaches the render contract without a scratch animation
+    ○ skipped creator speed ramps reach export as pitch-preserved timeline segments
+    ○ skipped beat sync without analysed music does not invent markers or insert an impact
+    ○ skipped commits a reviewed speaker lower third to the exportable timeline
+    ○ skipped monitors preview audio and submits reviewed camera cuts with reaction geometry
+    ○ skipped applies a Signature finish preset to After without touching Before
+    ○ skipped previews a signature transformation and includes it in the export contract
+    ○ skipped keeps Motion Sculpture independent from Hook and shows its intensity target
+    ○ skipped uses delayed source frames for Beat Echo preview and export
+    ○ skipped shows backend retry and render progress inside the Studio export controls
+    ○ skipped loads a completed render into After and exposes explicit output actions
+    ○ skipped removes a marked middle range and exports retained segments with a join style
+    ○ skipped accepts exact cut times and can trim an unwanted opening section
+    ○ skipped keeps Hook off initially and only enables it explicitly
+    ○ skipped shows a live visual timeline that seeks the same After preview
+    ○ skipped dragging the selected hook range does not toggle selection mode
+    ○ skipped allows choosing a hook point from the timeline and setting it as the hook
+    ○ skipped setting a hook point freezes the chosen opening moment
+    ○ skipped allows clearing hook text completely
+    ○ skipped captures preview focus targeting and exports cover frame metadata
+    ○ skipped uses face-aware hook banner placement and freeze-text offset in the preview
+    ○ skipped allows appended clips to be reordered in the timeline
+    ○ skipped keeps the same timeline clip active after reordering
+    ○ skipped allows detected viral moments to be reordered
+    ○ skipped late completed-output recovery preserves the user's selected editing tool
+    ○ skipped late refreshed-source metadata cannot overwrite a newer programme seek
+    ○ skipped export shows worker failure in the active controls and retry preserves the edit
+    ○ skipped occurrence navigation preserves authored hook settings and the canonical revision
+    ○ skipped reopened canonical audio decisions reach editable controls and the normal export action
+    ○ skipped imported choreography has atomic history and reaches the ordinary export graph
+    ○ skipped kinetic typography builds ordinary title layers with atomic history and the same export graph
+    ○ skipped reopened canonical transforms captions and crop reach the timeline and shared final render plans
+    ○ skipped uses the actual source aspect in the programme monitor when reframing is off
+    ○ skipped keeps only original-audio controls in the studio
+    ○ skipped exports mute-original-audio without background audio options
+    ○ skipped materializes blob-backed main timeline clips before export
+    ○ skipped exports the selected hook once and removes the duplicate span from the main clip
+    ○ skipped suggests a hook segment from video analysis and applies it
+    ○ skipped selected hook segment plays as the opening during normal playback
+    ○ skipped preview hook once plays the selected range first then jumps back to clip start
+    ○ skipped scores clips, explains why they work, and highlights the best pick
+    ○ skipped improves a weak clip and exports it to a chosen short-form destination
+    ○ skipped opens with synchronized before and after comparison
+    ○ skipped runs a podcast cutaway with original, overlay, and mixed audio modes
+    ○ skipped supports minute-long B-roll with explicit return, loop, and hold behavior
+    ○ skipped adds images as timed creative inserts with B-roll layouts and image controls
+    ○ skipped selects the exact visual layer from the live timeline and opens After controls
+    ○ skipped recognizes uploaded B-roll that already covers the suggested beats
+    ○ skipped keeps uploaded background sound enabled with speech-aware ducking
+    ○ skipped generates real timestamped speech captions and keeps every line editable
+    ○ skipped keeps the existing caption track when English translation is not confirmed
+    ○ skipped captions a full uploaded podcast by secure storage reference without downloading it into the browser
+    ○ skipped keeps wording edited while a caption regeneration is pending: timed
+    ○ skipped keeps wording edited while a caption regeneration is pending: quick
+    ○ skipped shows an actionable error for the uploaded WhatsApp video and allows a retry
+    ○ skipped keeps reviewed captions when regeneration fails
+    ○ skipped completed caption jobs with zero usable lines fail without inventing captions
+    ○ skipped can add a truthful choir sound cue after speech recognition rejects the video
+    ○ skipped pasted lyrics can be reviewed and reach the render contract across the full clip
+    ○ skipped imports a plain TXT lyric sheet as a timed draft
+    ○ skipped empty English translation reports no reliable words rather than unconfirmed translation
+    ○ skipped turns a reviewed spoken story beat into approved licensed moving footage
+    ○ skipped does not invent subtitles when the worker finds no usable words
+    ○ skipped shows uncertain choir words as editable captions that need wording review
+    ○ skipped does not preview Cyrillic syllable loops seen in the live choir run
+    ○ skipped rejects repeated longer Cyrillic words from the live choir retest
+    ○ skipped pauses a captioned render until editable timed lines exist
+    ○ skipped previews Creative Director captions and pacing without starting a render
+    ○ skipped uses one reliable render action for the selected export destination
+    ○ skipped SFX volume keys preserve the fader and change an already playing cue (audio clock: false)
+    ○ skipped SFX volume keys preserve the fader and change an already playing cue (audio clock: true)
+    ○ skipped Pause cancels a timeline cue awaiting browser audio resume
+    ○ skipped groups motion poses, exposes the canvas path, and submits the same animation plan
+    ○ skipped an imported cue resumes at the current programme offset rather than retaining sub180ms drift
+    ○ skipped uploads a custom sound effect, previews it, and includes timed SFX in export options
+    ○ skipped split maps finished playback through speed and source trim before editing
+    ○ skipped trim start maps finished playback through speed and source trim before editing
+    ○ skipped trim end maps finished playback through speed and source trim before editing
+    ○ skipped marked removal maps finished playback to editable source and respects track locking
+    ○ skipped finished Hook playback never jumps or replays the already baked opening
+    ○ skipped finished Compare maps the slowed output clock back to the original source
+    ○ skipped Hook enable template and copy are separately reversible after a cut
+    ○ skipped reopened embedded raster effects use the ordinary image uploader before render
+    ○ skipped supports 1-click simple editing toolbar for split, trim, delete, and 1-tap framing
+    ○ skipped reviews exact Director trim timing and applies only after signed-in approval
+    ○ skipped records a rejected Director split without changing the timeline
+    ○ skipped server failure or mismatched reviewer never applies a Director edit
+    ○ skipped reports a server-recorded review separately if sign-in changes before local apply
+    ○ skipped source-shot analysis uses the queued job path when enabled
+    ○ skipped durable source analysis sends its owned path without downloading video in the editor
+    ○ skipped retrying an interrupted owned-source analysis resumes its request ID
+    ○ skipped source-shot analysis offers one evidence-bound split without applying it
+    ○ skipped blocks review without Firebase sign-in and marks a changed preview stale
+
+  ● ViralClipStudio timeline sequencing › preserves uploaded B-roll through duplicate, delete, undo, and redo
+
+    thrown: "Exceeded timeout of 15000 ms for a test.
+    Use jest.setTimeout(newTimeout) to increase the timeout value, if this is a long-running test."
+
+      2912 |   });
+      2913 |
+    > 2914 |   test("preserves uploaded B-roll through duplicate, delete, undo, and redo", async () => {
+           |   ^
+      2915 |     const createdVideos = setupVideoCreateElementMock();
+      2916 |     const onSave = jest.fn(() => Promise.resolve());
+      2917 |     render(
+
+      at src/components/__tests__/ViralClipStudio.test.js:2914:3
+      at Object.<anonymous> (src/components/__tests__/ViralClipStudio.test.js:49:1)
+      at TestScheduler.scheduleTests (../../AutoPromote/frontend/node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../../AutoPromote/frontend/node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../../AutoPromote/frontend/node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../../AutoPromote/frontend/node_modules/@jest/core/build/cli/index.js:173:3)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 129 skipped, 17 passed, 147 total
+Snapshots:   0 total
+Time:        286.251 s
+Ran all test suites within paths "src/components/__tests__/ViralClipStudio.test.js".

@@ -1,0 +1,167 @@
+{
+  "passed": true,
+  "completedAt": "2026-10-31T11:24:53.430Z",
+  "headless": true,
+  "muted": true,
+  "cdpProduct": "HeadlessChrome/147.0.7727.15",
+  "authBypassUsed": false,
+  "gpuJobsStarted": 0,
+  "cloudUploads": 0,
+  "competitorBrandLeaks": 0,
+  "bundleSha256": "d4c5afabf99a777dff36db4ffbdf882a3da2096c2f8c226dbf00e234cd77d627",
+  "projectName": "AutoPromote Motion Flow Parity 20261031",
+  "studioDocumentSha256BeforeReload": "c6d184b9eae1ecff15baf618645fc31676ee17d4794ad2d3da9ed376b1bebc7c",
+  "studioDocumentSha256AfterReload": "c6d184b9eae1ecff15baf618645fc31676ee17d4794ad2d3da9ed376b1bebc7c",
+  "pageErrors": [],
+  "consoleErrors": [],
+  "apiRequests": [],
+  "checks": [
+    {
+      "label": "Verified HeadlessChrome & muted browser launch via CDP",
+      "product": "HeadlessChrome/147.0.7727.15"
+    },
+    {
+      "label": "Verified AutoPromote Motion & Flow dual workbench + node graph layout across 1440x1000, 1280x860, and 1024x820 with zero competitor brand labels",
+      "viewports": [
+        {
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "stage": {
+            "x": 462,
+            "y": 176,
+            "width": 266,
+            "height": 473,
+            "right": 729,
+            "bottom": 649
+          },
+          "compWorkbench": {
+            "x": 0,
+            "y": 764,
+            "width": 1440,
+            "height": 236,
+            "right": 1440,
+            "bottom": 1000
+          },
+          "nodeFlow": {
+            "x": 1145,
+            "y": 433,
+            "width": 262,
+            "height": 887,
+            "right": 1407,
+            "bottom": 1320
+          }
+        },
+        {
+          "viewport": {
+            "width": 1280,
+            "height": 860
+          },
+          "stage": {
+            "x": 422,
+            "y": 176,
+            "width": 187,
+            "height": 333,
+            "right": 609,
+            "bottom": 509
+          },
+          "compWorkbench": {
+            "x": 0,
+            "y": 624,
+            "width": 1280,
+            "height": 236,
+            "right": 1280,
+            "bottom": 860
+          },
+          "nodeFlow": {
+            "x": 985,
+            "y": 433,
+            "width": 262,
+            "height": 887,
+            "right": 1247,
+            "bottom": 1320
+          }
+        },
+        {
+          "viewport": {
+            "width": 1024,
+            "height": 820
+          },
+          "stage": {
+            "x": 313,
+            "y": 192,
+            "width": 150,
+            "height": 267,
+            "right": 463,
+            "bottom": 459
+          },
+          "compWorkbench": {
+            "x": 0,
+            "y": 584,
+            "width": 1024,
+            "height": 236,
+            "right": 1024,
+            "bottom": 820
+          },
+          "nodeFlow": {
+            "x": 727,
+            "y": 424,
+            "width": 274,
+            "height": 887,
+            "right": 1001,
+            "bottom": 1311
+          }
+        }
+      ]
+    },
+    {
+      "label": "Authored Null Rig, Parenting, Alpha Track Matte, loop/wiggle/spin Drivers, Whip Snap Bezier Curve, and Signal Node Flow [1]/[2] wipe",
+      "nullRigId": "null-rig-1793445808952"
+    },
+    {
+      "label": "Verified keyboard Undo and Redo across canonical AutoPromote Motion & Flow edit history"
+    },
+    {
+      "label": "Verified IndexedDB save & cold reload reopen with identical studioDocument SHA-256",
+      "studioDocumentSha256": "c6d184b9eae1ecff15baf618645fc31676ee17d4794ad2d3da9ed376b1bebc7c",
+      "revision": 22
+    },
+    {
+      "label": "Verified signed-out Export -> Render Final Clip enforces 'Please login first' with zero API calls"
+    },
+    {
+      "label": "Captured 4 clean pre-final stage frames after ordinary selection dismissal",
+      "times": [
+        0.5,
+        1.5,
+        2.5,
+        3.5
+      ]
+    },
+    {
+      "label": "Verified 4-frame browser preview vs local CPU FFmpeg render pixel parity",
+      "summary": {
+        "min_measured_iou": 0.976516,
+        "max_measured_boundary_p95_px": 1.4142,
+        "frames_checked": 4
+      },
+      "mediaProbe": {
+        "width": 360,
+        "height": 640,
+        "fps": 24,
+        "nb_frames": 144,
+        "duration_seconds": 6,
+        "video_codec": "h264",
+        "audio_codec": "aac",
+        "audio_channels": 2,
+        "full_decode_clean": true
+      }
+    }
+  ],
+  "paritySummary": {
+    "min_measured_iou": 0.976516,
+    "max_measured_boundary_p95_px": 1.4142,
+    "frames_checked": 4
+  }
+}

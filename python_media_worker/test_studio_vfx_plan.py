@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageEnhance
 import pytest
 
 from python_media_worker.studio_subject_matte import CachedSubjectMatte, canonical_hash, sha256, mask_geometry
@@ -37,6 +37,182 @@ def source_cache(tmp_path):
 def plan(cache):
     return {"version": 1, "source_sha256": cache.manifest["source_sha256"], "matte_sha256": cache.artifact_sha256,
             "effects": [{"id": "text", "type": "text_behind", "start": 0, "end": 1, "text": "STORIES", "x": 50, "y": 50, "font_size": 30, "color": "#ffffff"}]}
+
+
+@pytest.mark.parametrize('protected_cleanup',[False,True])
+def test_feathered_colour_key_does_not_pop_on_one_value_of_source_light(source_cache,protected_cleanup):
+    _, _, cache = source_cache
+    effect={"id":"spill", "type":"foreground_refine", "start":0, "end":1,
+        "choke":0,"feather":.3,"recover_box":[0,0,0,0],"recover_hue":210,
+        "hue_tolerance":30,"saturation_min":.2,"detail_box":[0,0,1,1],"dark_max":0,
+        "clear_box":[0,0,0,0],"reject_hue":15,"reject_tolerance":25,
+        "reject_saturation":.7,"reject_value":.8}
+    if protected_cleanup:effect['after_holdout']=True
+    command=plan(cache);command['effects']=[effect]
+    renderer=VfxFrameRenderer(command,cache)
+    alpha=Image.new('L',(128,72),255)
+    # These colours straddle the former hard V=.8 boundary by 1/255.
+    values=[]
+    for colour in [(203,80,25),(204,80,25),(255,80,25),(40,100,150)]:
+        frame=Image.new('RGB',(128,72),colour)
+        _,result=renderer._prepare_foreground(frame,alpha,[effect],128,72)
+        values.append(int(np.asarray(result)[35,90]))
+    assert abs(values[0]-values[1])<30
+    assert 40<values[0]<215 and 40<values[1]<215
+    assert values[2]==0 # Fully keyed old-screen colour remains absent.
+    assert values[3]==255 # A different surface colour is retained.
+def test_source_detail_repair_restores_an_occluded_object_after_exclusions(source_cache):
+    _,_,cache=source_cache
+    hold={"id":"rig","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],"feather":0,
+        "source_patches":[{"source":[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+            "target":[[.15,.2],[.2,.2],[.2,.8],[.15,.8]],"feather":.4,"end_blend":3}]}
+    command=plan(cache);command['effects']=[hold]
+    renderer=VfxFrameRenderer(command,cache)
+    pixels=np.full((72,128,3),[190,40,20],np.uint8);pixels[8:60,88:100]=[30,40,50]
+    # Final alpha has no target pixels: the plant and its old matte are gone.
+    alpha=Image.new('L',(128,72))
+    clean,result=renderer._prepare_foreground(Image.fromarray(pixels),alpha,[hold],128,72)
+    values=np.asarray(result);rgb=np.asarray(clean)
+    assert values[32,22]==255 and np.all(rgb[32,22]==[30,40,50])
+    assert values[32,10]==0 and values[32,35]==0, 'No repair or old-room pixels outside the authored support'
+    assert 0<values[15,22]<255, 'Blend at the photographed end instead of leaving a hard seam'
+    changed=pixels.copy();changed[8:60,88:100]=[45,55,65]
+    second,_=renderer._prepare_foreground(Image.fromarray(changed),alpha,[hold],128,72)
+    assert np.all(np.asarray(second)[32,22]==[45,55,65]), 'Sample this frame, never reuse the first photographed pose'
+
+
+def test_source_detail_repair_uses_authored_equipment_saturation_and_does_not_move_people(source_cache):
+    _,_,cache=source_cache
+    hold={"id":"rig","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],"feather":0,"saturation":0,
+        "source_patches":[{"source":[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+            "target":[[.15,.2],[.2,.2],[.22,.8],[.17,.8]],"feather":.5,"end_blend":0}]}
+    command=plan(cache);command['effects']=[hold]
+    renderer=VfxFrameRenderer(command,cache);frame=Image.new('RGB',(128,72),(20,40,90))
+    initial=Image.fromarray(cache.frame(0));clean,result=renderer._prepare_foreground(frame,initial,[hold],128,72)
+    assert len(set(np.asarray(clean)[32,23]))==1, 'Do not reintroduce removed coloured lighting on the neutral rig'
+    assert np.array_equal(np.asarray(result)[:,110:],np.asarray(initial)[:,110:])
+    assert np.array_equal(np.asarray(clean)[:,110:],np.asarray(frame)[:,110:])
+
+
+def test_source_detail_repair_clears_damaged_edges_but_retains_an_accessory_crossing_in_front(source_cache):
+    _,_,cache=source_cache
+    patch={'source':[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],'target':[[.15,.2],[.2,.2],[.2,.8],[.15,.8]],
+        'feather':0,'end_blend':0,'clear_box':[.1,.2,.3,.8],
+        'protect_paths':[[[.1,.45],[.3,.45],[.3,.55],[.1,.55]]]}
+    hold={'id':'repair','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],'feather':0,'source_patches':[patch]}
+    command=plan(cache);command['effects']=[hold];renderer=VfxFrameRenderer(command,cache)
+    alpha=np.full((72,128),255,np.uint8);pixels=np.full((72,128,3),[150,70,20],np.uint8)
+    pixels[8:60,88:100]=[20,25,30];pixels[32:40,12:40]=[220,200,170]
+    clean,result=renderer._prepare_foreground(Image.fromarray(pixels),Image.fromarray(alpha),[hold],128,72)
+    assert np.asarray(result)[20,15]==0, 'Remove the old jagged object outside the copied rod'
+    assert np.asarray(result)[20,22]==255 and np.all(np.asarray(clean)[20,22]==[20,25,30])
+    assert np.asarray(result)[36,22]==255 and np.all(np.asarray(clean)[36,22]==[220,200,170]), 'Retain the photographed accessory in front'
+
+
+def test_source_repair_runs_behind_actual_accessory_alpha_without_cutting_a_polygon_shaped_gap(source_cache):
+    _,_,cache=source_cache
+    patch={'source':[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+        'target':[[.15,.2],[.2,.2],[.2,.8],[.15,.8]],'feather':0,'end_blend':0,
+        'clear_box':[.1,.2,.3,.8], 'protect_paths':[[[.1,.3],[.3,.3],[.3,.7],[.1,.7]]]}
+    hold={'id':'repair','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[0,0],[.01,0],[.01,.01],[0,.01]],'feather':0,'source_patches':[patch]}
+    command=plan(cache);command['effects']=[hold];renderer=VfxFrameRenderer(command,cache)
+    alpha=np.zeros((72,128),np.uint8);alpha[32:40,12:40]=255;alpha[30:32,12:40]=128
+    pixels=np.full((72,128,3),[220,200,170],np.uint8);pixels[8:60,88:100]=[20,25,30]
+    rgb,result=renderer._prepare_foreground(Image.fromarray(pixels),Image.fromarray(alpha),[hold],128,72)
+    assert np.asarray(result)[25,22]==255, 'Transparent accessory padding must not chop the restored rod'
+    assert np.all(np.asarray(rgb)[25,22]==[20,25,30])
+    assert np.all(np.asarray(rgb)[36,22]==[220,200,170]), 'Opaque accessory remains in front'
+    assert np.asarray(result)[31,22]==255, 'Soft accessory edge covers an opaque repaired support'
+    assert np.max(np.abs(np.asarray(rgb)[31,22].astype(int)-np.array([120,113,100])))<=1, 'Fractional accessory alpha mixes foreground over the restored support'
+    assert np.asarray(result)[25,40]==0, 'The protection polygon cannot add foreground outside either actual object'
+
+
+def test_source_detail_repair_keeps_subpixel_authored_edges_without_resolving_a_fine_matte(source_cache):
+    _,_,cache=source_cache
+    hold={'id':'repair','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[35.25/128,.2],[41.25/128,.2],[41.25/128,.7],[35.25/128,.7]],'feather':0,
+        'source_patches':[{'source':[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+            'target':[[.1,.8],[.2,.8],[.2,.95],[.1,.95]],'feather':0,'end_blend':0}]}
+    command=plan(cache);command['effects']=[hold];renderer=VfxFrameRenderer(command,cache)
+    _,alpha=renderer._prepare_foreground(Image.new('RGB',(128,72),(25,35,45)),Image.new('L',(128,72)),[hold],128,72)
+    values=np.asarray(alpha)
+    assert 0<values[30,35]<255, 'Fine-alpha workflows at edge radius zero still need subpixel manual cleanup geometry'
+    assert values[30,36]==255 and values[30,34]==0
+
+
+def test_source_repair_sample_outside_original_holdout_receives_its_equipment_colour_treatment(source_cache):
+    _,_,cache=source_cache
+    hold={'id':'repair','type':'foreground_holdout','start':0,'end':1,'saturation':0,
+        'corners':[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],'feather':0,
+        'source_patches':[{'source':[[.3,.2],[.35,.2],[.35,.4],[.3,.4]],
+            'target':[[.1,.2],[.2,.2],[.2,.8],[.1,.8]],'feather':0,'end_blend':0}]}
+    command=plan(cache);command['effects']=[hold];renderer=VfxFrameRenderer(command,cache)
+    clean,_=renderer._prepare_foreground(Image.new('RGB',(128,72),(20,40,90)),Image.new('L',(128,72)),[hold],128,72)
+    assert len(set(np.asarray(clean)[32,20]))==1, 'Newly restored real metal outside the original selection must stay neutral'
+
+
+@pytest.mark.parametrize('bad',[
+    [],[{'source':[[0,0],[1,0],[1,1],[0,1]],'target':[[0,0],[1,1],[1,0],[0,1]],'feather':0,'end_blend':0}],
+    [{'source':[[0,0],[1,0],[1,1],[0,1]],'target':[[0,0],[.2,0],[.2,.2],[0,.2]],'feather':0,'end_blend':33}],
+    [{'source':[[0,0],[1.1,0],[1,1],[0,1]],'target':[[0,0],[.2,0],[.2,.2],[0,.2]],'feather':0,'end_blend':0}],
+])
+def test_source_detail_repair_rejects_unbounded_or_degenerate_commands(source_cache,bad):
+    _,_,cache=source_cache;command=plan(cache)
+    command['effects']=[{'id':'bad','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[.6,.1],[.8,.1],[.8,.9],[.6,.9]],'feather':0,'source_patches':bad}]
+    with pytest.raises(ValueError):validate_plan(command,cache)
+
+
+@pytest.mark.parametrize('rod_width',[8,14])
+def test_wide_person_edge_refinement_keeps_textured_equipment_opaque(source_cache,rod_width):
+    _,_,cache=source_cache
+    edge={"id":"wide-edge","type":"foreground_refine","start":0,"end":1,
+        "edge_radius":8,"decontaminate":0,"choke":0,"feather":0,
+        "recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,"saturation_min":1,
+        "detail_box":[0,0,0,0],"dark_max":0,"clear_box":[0,0,0,0],
+        "reject_hue":0,"reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    command=plan(cache);command['effects']=[edge]
+    alpha=np.zeros((72,128),np.uint8);alpha[4:68,15:15+rod_width]=255
+    alpha[:,80:]=255  # Wide person and narrow equipment share one edge control.
+    pixels=np.full((72,128,3),190,np.uint8);pixels[alpha>0]=25
+    pixels[4:68,18:20]=185  # Real bright metal close to the old room's colour.
+    renderer=VfxFrameRenderer(command,cache)
+    _,result=renderer._prepare_foreground(Image.fromarray(pixels),Image.fromarray(alpha),[edge],128,72)
+    values=np.asarray(result)
+    assert np.all(values[20:52,18:20]==255), 'Retain photographed metal highlights inside a narrow support'
+    assert np.all(values[20:52,40:60]==0), 'Keep the surrounding background and inter-object gap clear'
+
+
+def test_local_edge_solve_softens_colour_steps_without_changing_equipment_or_explicit_removal(source_cache):
+    _,_,cache=source_cache
+    fine={"id":"local-edge","type":"foreground_refine","start":0,"end":1,
+        "edge_radius":4,"edge_polygon":[[.42,0],[.7,0],[.7,1],[.42,1]],
+        "decontaminate":0,"choke":0,"feather":0,"recover_box":[0,0,0,0],
+        "recover_hue":0,"hue_tolerance":0,"saturation_min":1,"detail_box":[0,0,0,0],
+        "dark_max":0,"clear_box":[.5,.5,.55,.6],"reject_hue":0,
+        "reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    command=plan(cache);command['effects']=[fine]
+    pixels=np.full((72,128,3),(210,170,100),np.uint8)
+    # A photographed clothing edge moves independently of the coarse mask.
+    for boundary in [63,65]:
+        values=cache.frame(1).copy();values[8:64,18:21]=173
+        pixels[:,boundary:]=(35,45,65)
+        pixels[8:64,18:21]=(160,155,150)
+        renderer=VfxFrameRenderer(command,cache)
+        _,alpha=renderer._prepare_foreground(Image.fromarray(pixels),Image.fromarray(values),[fine],128,72)
+        result=np.asarray(alpha)
+        assert np.array_equal(result[:,:50],values[:,:50]), 'Unrelated narrow equipment keeps its exact original alpha'
+        assert np.all(result[36:43,64:70]==0), 'An explicit source removal stays excluded inside the local solve'
+        assert result[15,boundary+3]>250 and result[15,boundary-3]<5
+    for polygon in [[],[[0,0],[1,1]],[[0,0],[1.1,0],[1,1]],[[0,0],[.1,.1],[.2,.2]]]:
+        bad=copy.deepcopy(command);bad['effects'][0]['edge_polygon']=polygon
+        with pytest.raises(ValueError):validate_plan(bad,cache)
+    bad=copy.deepcopy(command);bad['effects'][0]['edge_radius']=0
+    with pytest.raises(ValueError,match='positive edge radius'):validate_plan(bad,cache)
 
 
 def test_text_changes_background_while_subject_pixels_remain_exact(source_cache):
@@ -161,6 +337,40 @@ def test_background_wipe_reveals_real_set_in_order_and_foreground_grade_is_local
     assert np.array_equal(middle[36,100],[20,20,20])
     command['effects'][0]['reveal_seconds']=float('nan')
     with pytest.raises(ValueError):validate_plan(command,cache)
+
+
+@pytest.mark.parametrize('contrast',[.6,1.4])
+def test_foreground_contrast_ignores_discarded_room_pixels(source_cache,tmp_path,contrast):
+    _,_,cache=source_cache
+    plate=tmp_path/'room.png';Image.new('RGB',(128,72),(35,40,50)).save(plate)
+    command=plan(cache);command['effects']=[
+        {'id':'set','type':'background_replace','start':0,'end':1,
+         'asset_id':'room','asset_sha256':sha256(plate),'blur':0,'exposure':0,'saturation':1},
+        {'id':'person','type':'foreground_grade','start':0,'end':1,
+         'exposure':0,'saturation':1,'contrast':contrast}]
+    first=np.full((72,128,3),15,np.uint8);first[:,64:]=[90,120,150];first[36:,64:]=[150,160,170]
+    second=first.copy();second[:,:64]=245
+    a=np.asarray(VfxFrameRenderer(command,cache,lambda _:plate).render(Image.fromarray(first),0))
+    b=np.asarray(VfxFrameRenderer(command,cache,lambda _:plate).render(Image.fromarray(second),0))
+    assert np.array_equal(a,b), 'Changing fully removed room pixels must not relight the foreground'
+    # The pivot is the visible foreground mean, with the ordinary RGB contrast
+    # operation retained for fully opaque subjects.
+    expected=np.asarray(ImageEnhance.Contrast(Image.fromarray(first[:,64:])).enhance(contrast))
+    assert np.array_equal(a[:,64:],expected)
+
+
+def test_foreground_contrast_uses_fractional_coverage_and_handles_empty_matte(source_cache):
+    _,_,cache=source_cache
+    command=plan(cache);command['effects']=[{'id':'person','type':'foreground_grade',
+        'start':0,'end':1,'exposure':0,'saturation':1,'contrast':1.5}]
+    values=np.zeros((72,128),np.uint8);values[:,:32]=255;values[:,32:64]=128
+    pixels=np.full((72,128,3),250,np.uint8);pixels[:,:32]=60;pixels[:,32:64]=180
+    cache.frame=lambda _:values
+    rendered=np.asarray(VfxFrameRenderer(command,cache).render(Image.fromarray(pixels),0))
+    pivot=int(np.floor((60*255+180*128)/(255+128)+.5))
+    assert np.all(rendered[:,:32]==int(1.5*60-.5*pivot)), 'Soft coverage must contribute proportionally to the contrast pivot'
+    values[:]=0
+    assert np.array_equal(np.asarray(VfxFrameRenderer(command,cache).render(Image.fromarray(pixels),0)),pixels)
 
 
 def test_manual_holdout_preserves_thin_real_foreground_without_filling_surrounding_background(source_cache,tmp_path):
@@ -342,6 +552,42 @@ def test_fine_alpha_recovers_a_soft_edge_and_removes_old_background_colour(sourc
     for change in [{'edge_radius':2.5},{'edge_radius':9},{'decontaminate':float('nan')}]:
         invalid=copy.deepcopy(command);invalid['effects'][0].update(change)
         with pytest.raises(ValueError):validate_plan(invalid,cache)
+
+
+def test_fine_alpha_keeps_selected_thin_metal_and_open_ring(source_cache):
+    source,directory,_=source_cache
+    mask=Image.new('L',(128,72))
+    draw=ImageDraw.Draw(mask)
+    draw.rectangle((12,12,49,59),fill=255)
+    draw.rectangle((49,40,112,41),fill=255)
+    draw.ellipse((80,10,102,32),outline=255,width=2)
+    values=np.array(mask)
+    manifest=json.loads((directory/'manifest.json').read_text())
+    for row in manifest['frames']:
+        mask.save(directory/row['file']);row['sha256']=sha256(directory/row['file'])
+        row.update(mask_geometry(values))
+    (directory/'manifest.json').write_text(json.dumps(manifest))
+    cache=CachedSubjectMatte(directory,source)
+    immutable=(directory/'matte_0001.png').read_bytes()
+    pixels=np.full((72,128,3),200,np.uint8)
+    pixels[values>0]=[175,175,175]
+    pixels[12:60,12:50]=[20,70,130]
+    effect={'id':'edge','type':'foreground_refine','start':0,'end':1,'choke':0,'feather':0,
+        'recover_box':[0,0,0,0],'recover_hue':0,'hue_tolerance':0,'saturation_min':1,
+        'detail_box':[0,0,0,0],'dark_max':0,'clear_box':[0,0,0,0],
+        'reject_hue':0,'reject_tolerance':0,'reject_saturation':1,'reject_value':1,
+        'edge_radius':4,'decontaminate':1}
+    command=plan(cache);command['effects']=[effect]
+    _,refined=VfxFrameRenderer(command,cache)._prepare_foreground(Image.fromarray(pixels),mask,[effect],128,72)
+    output=np.array(refined)
+    # Explicitly selected microphone rails and jewellery must not be erased
+    # simply because their widths are smaller than the cleanup radius.
+    assert np.all(output[40:42,55:108]>=250)
+    ring=values[10:33,80:103]>0
+    assert np.mean(output[10:33,80:103][ring]>=200)>.85
+    assert np.all(output[19:24,88:95]==0), 'Jewellery holes must remain open'
+    assert np.all(output[20:50,20:40]==255)
+    assert (directory/'matte_0001.png').read_bytes()==immutable
 
 
 def test_edge_colour_cleanup_preserves_saved_fractional_alpha(source_cache, tmp_path):
@@ -608,3 +854,238 @@ def test_two_surface_replacements_retain_previous_surface_and_original_edges(sou
     assert np.array_equal(output[15,15],[180,80,30])
     assert np.array_equal(output[45,45],[180,80,30])
     assert np.array_equal(output[30,30],[0,0,128])
+
+
+def test_fine_alpha_keeps_opaque_seeds_on_a_two_pixel_microphone_rail(source_cache):
+    _, _, cache = source_cache
+    values = np.zeros((72,128),np.uint8)
+    values[:,80:] = 255
+    values[10:62,30:32] = 255
+    frame = np.full((72,128,3),[220,130,30],np.uint8)
+    frame[10:62,30:32] = [12,15,18]
+    frame[:,80:] = [35,45,55]
+    effect = {'id':'edge','type':'foreground_refine','start':0,'end':1,'choke':0,'feather':0,
+        'recover_box':[0,0,0,0],'recover_hue':0,'hue_tolerance':0,'saturation_min':1,
+        'detail_box':[0,0,0,0],'dark_max':0,'clear_box':[0,0,0,0],
+        'reject_hue':0,'reject_tolerance':0,'reject_saturation':1,'reject_value':1,
+        'edge_radius':3,'decontaminate':0}
+    command = plan(cache);command['effects']=[effect]
+    renderer = VfxFrameRenderer(command,cache)
+    _, alpha = renderer._prepare_foreground(Image.fromarray(frame),Image.fromarray(values),[effect],128,72)
+    result = np.asarray(alpha)
+    assert np.all(result[15:57,30:32] == 255), 'Fine edge erosion must not erase the selected opaque equipment core'
+    assert result[36,10] == 0
+@pytest.mark.parametrize("after_refine", [False, True])
+def test_refined_authored_paths_do_not_restore_rough_old_room_edges(source_cache, after_refine):
+    _, _, cache = source_cache
+    holdout={"id":"mic-support", "type":"foreground_holdout", "start":0, "end":1,
+             "corners":[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],
+             "paths":[[[.25,.2],[.35,.2],[.35,.8],[.25,.8]]],
+             "feather":.5,"after_refine":after_refine,"saturation":0}
+    cache.manifest["refinement"]={"holdoutGroups":[{key:holdout[key] for key in
+        ("id","start","end","corners","paths","feather")} ]}
+    command=plan(cache);command["effects"]=[holdout]
+    renderer=VfxFrameRenderer(command,cache)
+    alpha=Image.fromarray(cache.frame(1))
+    _, result=renderer._prepare_foreground(Image.new("RGB",(128,72),(60,80,100)),alpha,[holdout],128,72)
+    assert np.array_equal(np.asarray(result),np.asarray(alpha)), "Already refined paths must not inflate alpha again"
+    changed={**holdout,"paths":[[[.3,.2],[.4,.2],[.4,.8],[.3,.8]]]}
+    _, edited=renderer._prepare_foreground(Image.new("RGB",(128,72)),alpha,[changed],128,72)
+    assert np.asarray(edited)[30,43]>200, "A subsequent authored path change still applies"
+
+
+def test_foreground_cache_binds_refined_holdout_provenance(source_cache, tmp_path, monkeypatch):
+    _,_,cache=source_cache
+    monkeypatch.setenv("STUDIO_VFX_FOREGROUND_CACHE_DIR",str(tmp_path/"foreground"))
+    holdout={"id":"rig", "type":"foreground_holdout", "start":0, "end":1,
+        "corners":[[.1,.2],[.3,.2],[.3,.8],[.1,.8]], "feather":0,"after_refine":True}
+    command=plan(cache);command["effects"]=[holdout]
+    frame=Image.new("RGB",(128,72),(60,80,100));alpha=Image.fromarray(cache.frame(1))
+    first=VfxFrameRenderer(command,cache)
+    _,old=first.foreground_cache.prepare(frame,alpha,[holdout],lambda:first._prepare_foreground(frame,alpha,[holdout],128,72))
+    assert np.asarray(old)[30,20]==255
+    cache.manifest["refinement"]={"holdoutGroups":[{k:holdout.get(k,[] if k=="paths" else 0) for k in ["id","start","end","corners","paths","feather"]}]}
+    refined=VfxFrameRenderer(command,cache)
+    _,soft=refined.foreground_cache.prepare(frame,alpha,[holdout],lambda:refined._prepare_foreground(frame,alpha,[holdout],128,72))
+    assert np.asarray(soft)[30,20]==0, "A cache from the unrefined provenance cannot reinsert the old rigid outline"
+    assert refined.foreground_cache.hits==0
+
+
+def test_refined_thin_support_survives_colour_cleanup_without_restoring_rough_boundary(source_cache):
+    _,_,cache=source_cache
+    holdout={"id":"mic-support","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[.1,.1],[.2,.1],[.2,.8],[.1,.8]],"feather":0,"after_refine":True}
+    cache.manifest["refinement"]={"holdoutGroups":[{k:holdout.get(k,[] if k=="paths" else 0) for k in
+        ("id","start","end","corners","paths","feather")}]}
+    cleanup={"id":"colour","type":"foreground_refine","start":0,"end":1,"choke":0,"feather":0,
+        "clear_box":[.1,.1,.3,.8],"recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,
+        "saturation_min":1,"detail_box":[0,0,0,0],"dark_max":0,"reject_hue":0,
+        "reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    command=plan(cache);command["effects"]=[cleanup,holdout]
+    renderer=VfxFrameRenderer(command,cache)
+    values=np.zeros((72,128),np.uint8);values[30,20]=96;values[30,32]=96
+    frame=Image.new("RGB",(128,72),(60,80,100))
+    _,result=renderer._prepare_foreground(frame,Image.fromarray(values),[cleanup,holdout],128,72)
+    assert np.asarray(result)[30,20]==96
+    assert np.asarray(result)[30,21]==0, "No opaque polygon boundary may be reintroduced"
+    assert np.asarray(result)[30,32]==0, "Cleanup outside the selected support still applies"
+    final_cleanup={**cleanup,"id":"final-exclusion","after_holdout":True}
+    _,final=renderer._prepare_foreground(frame,Image.fromarray(values),[cleanup,holdout,final_cleanup],128,72)
+    assert np.asarray(final)[30,20]==0, "Explicit final background exclusions retain priority"
+
+
+@pytest.mark.parametrize("after_refine", [False, True])
+@pytest.mark.parametrize("decontaminate", [False, True])
+def test_kept_object_colour_applies_once_in_both_cleanup_positions(source_cache, monkeypatch, after_refine, decontaminate):
+    from PIL import ImageEnhance
+    import pymatting
+    monkeypatch.setattr(pymatting,"estimate_foreground_ml",lambda pixels,alpha:pixels)
+    _,_,cache=source_cache
+    holdout={"id":"rig-colour","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[.65,.2],[.75,.2],[.75,.8],[.65,.8]],"feather":0,
+        "after_refine":after_refine,"saturation":.5}
+    fine={"id":"fine","type":"foreground_refine","start":0,"end":1,"edge_radius":0,
+        "decontaminate":1,"choke":0,"feather":0,"clear_box":[0,0,0,0],
+        "recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,"saturation_min":1,
+        "detail_box":[0,0,0,0],"dark_max":0,"reject_hue":0,"reject_tolerance":0,
+        "reject_saturation":1,"reject_value":1}
+    effects=[holdout,*([fine]if decontaminate else [])]
+    command=plan(cache);command["effects"]=effects;renderer=VfxFrameRenderer(command,cache)
+    frame=Image.new("RGB",(128,72),(40,60,190));alpha=Image.fromarray(cache.frame(1))
+    foreground,result=renderer._prepare_foreground(frame,alpha,effects,128,72)
+    assert np.array_equal(np.asarray(result),np.asarray(alpha))
+    assert foreground.getpixel((90,30))==ImageEnhance.Color(frame).enhance(.5).getpixel((90,30))
+    assert foreground.getpixel((120,30))==frame.getpixel((120,30))
+
+
+def test_final_alpha_refines_late_equipment_and_never_restores_excluded_room(source_cache):
+    _,_,cache=source_cache
+    fine={"id":"final-edge","type":"foreground_refine","start":0,"end":1,
+        "edge_radius":3,"decontaminate":1,"choke":0,"feather":0,
+        "recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,"saturation_min":1,
+        "detail_box":[0,0,0,0],"dark_max":0,"clear_box":[0,0,0,0],
+        "reject_hue":0,"reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    rod={"id":"late-rod","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[12/128,10/72],[21/128,10/72],[21/128,65/72],[12/128,65/72]],
+        "feather":0,"after_refine":True}
+    exclusion={**fine,"id":"room-exclusion","edge_radius":0,"decontaminate":0,
+        "after_holdout":True,"after_refine":True,"clear_box":[12/128,40/72,22/128,45/72]}
+    effects=[fine,rod,exclusion];command=plan(cache);command["effects"]=effects
+    pixels=np.full((72,128,3),(220,160,130),np.uint8)
+    pixels[:,64:]=(30,40,50);pixels[10:66,15:19]=(30,40,50)
+    _,alpha=VfxFrameRenderer(command,cache)._prepare_foreground(
+        Image.fromarray(pixels),Image.fromarray(cache.frame(1)),effects,128,72)
+    values=np.asarray(alpha)
+    assert values[30,13]<32, "The photographed old-room strip on a late holdout must be matted away"
+    assert values[30,16]==255, "Preserve the real microphone core"
+    assert np.all(values[40:45,12:22]==0), "Final alpha must never expand into an explicit exclusion"
+    assert np.all(values[:,80:]==255), "The person interior must remain opaque"
+
+
+@pytest.mark.parametrize("rod_width",[1,2,3])
+def test_final_edge_solve_preserves_narrow_medial_cores_and_separate_gaps(source_cache,rod_width):
+    _,_,cache=source_cache
+    fine={"id":"final-edge","type":"foreground_refine","start":0,"end":1,
+        "edge_radius":3,"decontaminate":0,"choke":0,"feather":0,
+        "recover_box":[0,0,0,0],"recover_hue":0,"hue_tolerance":0,"saturation_min":1,
+        "detail_box":[0,0,0,0],"dark_max":0,"clear_box":[0,0,0,0],
+        "reject_hue":0,"reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    values=cache.frame(1).copy();values[10:60,15:15+rod_width]=255;values[10:60,25:25+rod_width]=255
+    values[30,40:50]=255  # Detached room speck, unlike the continuous cables.
+    pixels=np.full((72,128,3),(200,180,150),np.uint8);pixels[values>0]=(25,35,45)
+    command=plan(cache);command['effects']=[fine]
+    _,alpha=VfxFrameRenderer(command,cache)._prepare_foreground(
+        Image.fromarray(pixels),Image.fromarray(values),[fine],128,72)
+    result=np.asarray(alpha)
+    assert result[30,15+rod_width//2]==255
+    assert result[30,25+rod_width//2]==255
+    assert result[30,20]==0, "Narrow supports cannot be fused by refinement"
+    assert np.all(result[30,40:50]==0), "Remove a detached ten-pixel room fragment"
+
+
+def opacity_effect(**change):
+    return {"id":"opacity", "type":"foreground_refine", "start":0, "end":1,
+        "choke":0, "feather":0, "edge_radius":0, "decontaminate":0,
+        "recover_box":[0,0,0,0], "recover_hue":0, "hue_tolerance":0, "saturation_min":1,
+        "detail_box":[0,0,0,0], "dark_max":0, "clear_box":[0,0,0,0],
+        "reject_hue":0, "reject_tolerance":0, "reject_saturation":1, "reject_value":1, **change}
+
+
+def test_opacity_levels_recover_known_soft_clothing_edge_without_bright_fringe(source_cache):
+    _,_,cache=source_cache
+    input_alpha=np.broadcast_to(np.clip((np.arange(128)-58)/12,0,1),(72,128)).copy()
+    true_alpha=np.clip((input_alpha-.02)/(.68-.02),0,1)
+    foreground=np.array([190,175,140]);old_background=np.array([135,120,90]);new_background=np.array([35,45,60])
+    photographed=np.rint(true_alpha[:,:,None]*foreground+(1-true_alpha[:,:,None])*old_background).astype(np.uint8)
+    initial=Image.fromarray(np.rint(input_alpha*255).astype(np.uint8));frame=Image.fromarray(photographed)
+    errors=[]
+    for levels in [None,[.02,.68]]:
+        effect=opacity_effect(decontaminate=1,**({"alpha_levels":levels}if levels else {}))
+        command=plan(cache);command['effects']=[effect];renderer=VfxFrameRenderer(command,cache)
+        rgb,alpha=renderer._prepare_foreground(frame,initial,[effect],128,72);a=np.asarray(alpha,dtype=float)/255
+        composite=np.asarray(rgb)*a[:,:,None]+new_background*(1-a[:,:,None])
+        expected=foreground*true_alpha[:,:,None]+new_background*(1-true_alpha[:,:,None])
+        band=(true_alpha>.05)&(true_alpha<.95);errors.append(np.abs(composite[band]-expected[band]).mean())
+        assert np.asarray(alpha)[:,0].max()==0 and np.asarray(alpha)[:,-1].min()==255
+        if levels:assert np.any((np.asarray(alpha)>0)&(np.asarray(alpha)<255)), 'Keep real fractional edge coverage'
+    assert errors[1]<errors[0]*.25, errors
+
+
+def test_opacity_levels_are_local_keep_thin_equipment_and_explicit_removals(source_cache):
+    _,_,cache=source_cache;values=np.zeros((72,128),np.uint8);values[:,65:]=255;values[:,60:65]=[30,70,110,155,210];values[10:65,15:17]=128
+    effect=opacity_effect(alpha_levels=[.02,.68],alpha_polygon=[[.4,.1],[.8,.1],[.8,.9],[.4,.9]],clear_paths=[[[.46,.4],[.53,.4],[.53,.6],[.46,.6]]])
+    command=plan(cache);command['effects']=[effect];renderer=VfxFrameRenderer(command,cache)
+    _,alpha=renderer._prepare_foreground(Image.new('RGB',(128,72),(90,80,70)),Image.fromarray(values),[effect],128,72);a=np.asarray(alpha)
+    assert np.array_equal(a[:,15:17],values[:,15:17]), 'Unselected thin rig must retain its soft coverage'
+    assert a[36,63]==0, 'An authored old-background exclusion cannot be resurrected'
+    assert a[20,63]>values[20,63] and 0<a[20,61]<255
+    assert np.array_equal(a[0],values[0]), 'Keep the region exterior exact'
+
+
+def test_identity_opacity_levels_keep_exact_legacy_pixels(source_cache):
+    _,_,cache=source_cache;values=np.broadcast_to(np.arange(128,dtype=np.uint8)*2,(72,128)).copy();frame=Image.new('RGB',(128,72),(121,104,92));results=[]
+    for change in [{},{'alpha_levels':[0,1]}]:
+        effect=opacity_effect(**change);command=plan(cache);command['effects']=[effect];r=VfxFrameRenderer(command,cache);rgb,alpha=r._prepare_foreground(frame,Image.fromarray(values),[effect],128,72);results.append((rgb.tobytes(),alpha.tobytes()))
+    assert results[0]==results[1]
+
+
+@pytest.mark.parametrize('levels',[[0],[0,1,1],[.4,.42],[.7,.3],[False,1],[0,float('nan')],[-.01,1],[0,1.01]])
+def test_invalid_opacity_levels_are_rejected(source_cache,levels):
+    _,_,cache=source_cache;command=plan(cache);command['effects']=[opacity_effect(alpha_levels=levels)]
+    with pytest.raises(ValueError):validate_plan(command,cache)
+
+
+def test_original_source_repair_preserves_photographed_detail_after_colour_estimation(source_cache, monkeypatch):
+    _,_,cache=source_cache
+    fine={"id":"fine","type":"foreground_refine","start":0,"end":1,
+        "decontaminate":1,"choke":0,"feather":0,"recover_box":[0,0,0,0],"recover_hue":0,
+        "hue_tolerance":0,"saturation_min":1,"detail_box":[0,0,0,0],"dark_max":0,
+        "clear_box":[0,0,0,0],"reject_hue":0,"reject_tolerance":0,"reject_saturation":1,"reject_value":1}
+    patch={"source":[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+        "target":[[.15,.2],[.2,.2],[.2,.8],[.15,.8]],"feather":0,"end_blend":0}
+    hold={"id":"rig","type":"foreground_holdout","start":0,"end":1,
+        "corners":[[0,0],[.01,0],[.01,.01],[0,.01]],"feather":0,"source_patches":[patch]}
+    monkeypatch.setattr('pymatting.estimate_foreground_ml',lambda pixels,alpha:np.full_like(pixels,.5))
+    command=plan(cache);command['effects']=[fine,hold];frame=Image.new('RGB',(128,72),(20,40,90));alpha=Image.new('L',(128,72),128)
+    legacy,_=VfxFrameRenderer(command,cache)._prepare_foreground(frame,alpha,[fine,hold],128,72)
+    assert np.all(np.asarray(legacy)[32,22]==128)
+    patch.update(source_color='original',saturation=0)
+    rgb,result=VfxFrameRenderer(command,cache)._prepare_foreground(frame,alpha,[fine,hold],128,72)
+    expected=np.asarray(ImageEnhance.Color(frame).enhance(0))[32,90]
+    assert np.array_equal(np.asarray(rgb)[32,22],expected)
+    assert np.asarray(result)[32,22]==255
+    assert np.array_equal(np.asarray(rgb)[:,110:],np.asarray(legacy)[:,110:])
+    changed=Image.new('RGB',(128,72),(140,170,190))
+    updated,_=VfxFrameRenderer(command,cache)._prepare_foreground(changed,alpha,[fine,hold],128,72)
+    assert not np.array_equal(np.asarray(updated)[32,22],expected), 'Use this frame, never freeze photographed texture'
+
+
+@pytest.mark.parametrize('change',[{'source_color':'other'},{'source_color':None},{'source_color':True},
+    {'saturation':True},{'saturation':float('nan')},{'saturation':2.1}])
+def test_original_source_repair_rejects_invalid_colour_options(source_cache,change):
+    _,_,cache=source_cache;command=plan(cache)
+    patch={'source':[[.7,.2],[.75,.2],[.75,.4],[.7,.4]],
+        'target':[[.1,.2],[.2,.2],[.2,.8],[.1,.8]],'feather':0,'end_blend':0,**change}
+    command['effects']=[{'id':'rig','type':'foreground_holdout','start':0,'end':1,
+        'corners':[[0,0],[.01,0],[.01,.01],[0,.01]],'feather':0,'source_patches':[patch]}]
+    with pytest.raises(ValueError):validate_plan(command,cache)

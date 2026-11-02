@@ -1671,14 +1671,8 @@ try {
     console.warn("Content quality check route not available:", e.message);
   }
 
-  // AI Video Generator (Idea-to-Video)
-  try {
-    const aiVideoRoutes = require("./routes/aiVideoRoutes");
-    app.use("/api/ai-video", aiVideoRoutes);
-    console.log("🎬 AI Video routes mounted at /api/ai-video");
-  } catch (e) {
-    console.warn("AI Video routes failed to mount:", e.message);
-  }
+  // Former standalone generator: never dispatch or charge, including from stale clients.
+  app.use("/api/ai-video", require("./retiredFeatureResponse"));
 
   // AI Media Processing (Credit-Based)
   try {

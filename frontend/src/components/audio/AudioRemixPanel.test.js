@@ -1,9 +1,27 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import AudioRemixPanel from "./AudioRemixPanel";
-import { DEFAULT_AUDIO_REMIX, applyAudioRemixPreset } from "./audioRemixModel";
+import { AUDIO_REMIX_PRESETS, DEFAULT_AUDIO_REMIX, applyAudioRemixPreset } from "./audioRemixModel";
 
 describe("AudioRemixPanel", () => {
+  test.each(AUDIO_REMIX_PRESETS)("selecting $name highlights that card and keeps it selected after a control edit", preset => {
+    const Editor = () => {
+      const [value, onChange] = React.useState(DEFAULT_AUDIO_REMIX);
+      return <AudioRemixPanel value={value} onChange={onChange} />;
+    };
+    render(<Editor />);
+    const card = screen.getByTestId(`audio-remix-preset-${preset.id}`);
+    fireEvent.click(card);
+    expect(card).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByTestId(/^audio-remix-preset-/)
+      .filter(button => button.getAttribute("aria-pressed") === "true")).toHaveLength(1);
+    fireEvent.change(screen.getByLabelText("Output gain"), { target: { value: "-2" } });
+    expect(card).toHaveAttribute("aria-pressed", "true");
+    if (preset.id !== "slowed_reverb") {
+      expect(screen.getByTestId("audio-remix-preset-slowed_reverb")).toHaveAttribute("aria-pressed", "false");
+    }
+  });
+
   test("renders the approved controls and activates Slowed + Reverb", () => {
     const onChange = jest.fn();
     render(
@@ -52,5 +70,21 @@ describe("AudioRemixPanel", () => {
     rerender(<AudioRemixPanel {...props} exactPreviewStatus="ready" />);
     expect(screen.getByRole("button", { name: /Replay Exact Preview/i })).toBeEnabled();
     expect(screen.getByText(/final FFmpeg mastering chain/i)).toBeInTheDocument();
+  });
+
+  test("selects the Chipmunk voice and offers its exact preview", () => {
+    const onChange = jest.fn();
+    const onPreview = jest.fn();
+    const props = { onChange, onPreview, onBefore: jest.fn(), onToggleLoop: jest.fn() };
+    const { rerender } = render(<AudioRemixPanel {...props} value={DEFAULT_AUDIO_REMIX} />);
+    fireEvent.click(screen.getByTestId("audio-remix-preset-chipmunk"));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+      enabled: true, preset: "chipmunk", pitch: 12, speed: 1, target: "voice", keepPitch: false,
+    }));
+    rerender(<AudioRemixPanel {...props} value={onChange.mock.calls[0][0]} />);
+    expect(screen.getByTestId("audio-remix-preset-chipmunk")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText(/hear the Chipmunk voice/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Preview Remix/ }));
+    expect(onPreview).toHaveBeenCalledTimes(1);
   });
 });

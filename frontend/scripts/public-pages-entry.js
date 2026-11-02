@@ -12,6 +12,7 @@ import Changelog from "../src/Changelog";
 import guides from "../src/docs/content";
 import posts from "../src/blog/posts";
 
+export const retiredRoutes = ["analytics", "metrics", "smart-promo", "smart_promo", "smartpromo", "idea-video", "idea_video", "idea-to-video", "idea_to_video"].map(route => `/${route}`);
 export const footerRoutes = FOOTER_GROUPS.flatMap(([, links]) => links.map(([, route]) => route));
 export const nestedRoutes = [
   ...guides.map(guide => `/docs/${guide.slug}`),
@@ -35,7 +36,6 @@ export function renderPublicPage(route) {
   const info = {
     "/features": "features",
     "/integrations": "integrations",
-    "/metrics": "metrics",
     "/careers": "careers",
     "/partners": "partners",
     "/api-docs": "api",

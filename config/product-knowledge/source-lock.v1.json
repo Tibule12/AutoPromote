@@ -1,29 +1,29 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Review CI loopback fixture build, legacy explicit admin alias and unchanged production auth/readiness boundaries.",
-  "reviewed_at": "2026-10-28T18:19:31.064Z",
-  "catalog_sha256": "1debf053451e61b9d17bf9434d0d591c538e4aee4c098b469ddff5b9a845979c",
+  "reason": "Integration review preserves dense-grade job archives and legacy decode compatibility, optional 3D field parity and product retirement; no financial or readiness changes.",
+  "reviewed_at": "2026-11-02T17:42:34.153Z",
+  "catalog_sha256": "98c30d5b7319da7d57821fd52c9471d77ca3d116716f0013a044ba60ff56667b",
   "sources": [
     {
       "path": "config/creative-templates/registry.v1.json",
-      "sha256": "098abf6c08f1a9ffe700ce19ffd27b9ba0ad5cf58408a607e11c5d7659512210"
+      "sha256": "dd372a570dd1730501cbe70306c44ed20777d2df9eb849717696565a389dc0b3"
     },
     {
       "path": "config/model-runtime/registry.v1.json",
-      "sha256": "86fa3bec951aa71d48c2ec33df006406c711ac5df0be791e9bae183b6216a125"
+      "sha256": "c3142ed0bae6f5eaa90280ce99715d2aa906cfd6d5b8fee88b7309dabd8cd2fd"
     },
     {
       "path": "config/product-knowledge/change-impact.v1.json",
-      "sha256": "18759c8154d0d92abf072351e50921cbacc70e57e67088b56b3c1257b851c90d"
+      "sha256": "a02efb77daba2d74bd58be250b0f086176b6eb252f0c9cbf7d78e3ed03e8d8d7"
     },
     {
       "path": "config/product-knowledge/inventory.v1.json",
-      "sha256": "d0ae4bcceecf1cd53173b1b53272738f16c0af4f5b8de651b4e4e41f50ac1a02"
+      "sha256": "f83a350605214e0019d7e935cc001d6550b0647d3fcc10711283a9626884857a"
     },
     {
       "path": "contracts/model-capabilities-v1.json",
-      "sha256": "958fa697dee59a4b71cd90f7594e306dfef6225616db4326bfe4e3d2316881a7"
+      "sha256": "60f8d8ded76f879af21a0f483bf6ac59f819fd726d39186c192a4f8d8435e056"
     },
     {
       "path": "contracts/product-knowledge-impact-v1.schema.json",
@@ -35,23 +35,15 @@
     },
     {
       "path": "frontend/src/App.js",
-      "sha256": "5dee09db6613e61cfcb761aedace34a7ca0727af94863048394d65d8a9c7be86"
+      "sha256": "ae99463c46a8bdb61c49aa8a6b67455a3958884865b8773cf50a9a6228004f69"
     },
     {
       "path": "frontend/src/Docs.js",
       "sha256": "7f5d10c97f7a09533a1c863296e264589c216cec65a5c0f8b7808bfe265926b0"
     },
     {
-      "path": "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
-      "sha256": "e92102de61dd616bf00dcb1f063094aab777c50ac38fbbbfacbf71f98240e3d7"
-    },
-    {
       "path": "frontend/src/UserDashboardTabs/FindViralClipsPanel.js",
       "sha256": "b22494d1a8694a777262b7a9363c5eacd01dcd788d8277d147a982ef8e6d4578"
-    },
-    {
-      "path": "frontend/src/UserDashboardTabs/IdeaVideoPanel.js",
-      "sha256": "51532a747a52b7603de6671f70cf9f72affdf41d0754e35f4784537f6ddc41a0"
     },
     {
       "path": "frontend/src/UserDashboardTabs/SchedulesPanel.js",
@@ -63,11 +55,11 @@
     },
     {
       "path": "frontend/src/UserDashboard_full.js",
-      "sha256": "755bc9d370b3005e65053ca647421093fab5c4986e9d72b12b8c7f14e5353ae2"
+      "sha256": "6078fb75ea996da10e37983bfc68368fed1ffa02edb8da38a9e8dafadb9f11de"
     },
     {
       "path": "frontend/src/WelcomePage.js",
-      "sha256": "28291f8d3cde5279f5fe026d8fd20aa727212e628bd9b7e6020c48479c889aec"
+      "sha256": "26419b950ed262d46a08e9fea1ecd5d4b83d4ee93c39fbc05f97f0cd16edea22"
     },
     {
       "path": "frontend/src/__tests__/UnifiedPublisher.release.test.js",
@@ -87,7 +79,7 @@
     },
     {
       "path": "frontend/src/components/ProductAssistance.js",
-      "sha256": "f1d14b1b89ba546759eb103f55a90ee54f41bb8e877ecdd951f1a08197bf6bc6"
+      "sha256": "8a8aa7e3a895f63e87bfd71529bff7542f326ec2db42711f71ffb506c58369c0"
     },
     {
       "path": "frontend/src/components/ProductHelpButton.js",
@@ -95,7 +87,7 @@
     },
     {
       "path": "frontend/src/components/StudioAdvancedInspectors.js",
-      "sha256": "d983292ac7fbd4a58f66532175393a11ea99cdc0ec2f897d2a6fc40e01473cfd"
+      "sha256": "ac4b4f2f1a72574c3300a0c952258c4f0fc63b8b546bbea2b4ebd31fd0c09591"
     },
     {
       "path": "frontend/src/components/StudioAnimatedText.js",
@@ -107,7 +99,7 @@
     },
     {
       "path": "frontend/src/components/StudioCreatorWorkbench.js",
-      "sha256": "fcdd46a003885f8e4243f23af0d99a9a02d746f8931d910048bfc4ca0143c57b"
+      "sha256": "e97e32eb8328ca87485f16989a3eac4abe634d4413d270f36a86e1d873069e77"
     },
     {
       "path": "frontend/src/components/StudioFinishRack.js",
@@ -127,11 +119,11 @@
     },
     {
       "path": "frontend/src/components/StudioGroupPreview.js",
-      "sha256": "ce933429e1b5888ff69d02756c17ff1852b11cfab60a24ac4c23f03b17c2c247"
+      "sha256": "35627e631bd194d107e9950eed6956b96e2429ec0f5e28311cc7584cd7f54455"
     },
     {
       "path": "frontend/src/components/StudioGroupTimelineClip.js",
-      "sha256": "75fa2bc2ed6ce7f942283705ed2ac330c312ee5fa4f55d1865065963789b4862"
+      "sha256": "7d51bedb79c2a27c6216d8a243942eeb9dd0ce18ba295d8aa4e617ab6f9e9920"
     },
     {
       "path": "frontend/src/components/StudioGroupTimingInspector.js",
@@ -143,7 +135,7 @@
     },
     {
       "path": "frontend/src/components/StudioKeyframeCurveEditor.js",
-      "sha256": "c0d602e8a323b008b322331c77e7a807dd4dd56c81377893f8b8abb5108652bd"
+      "sha256": "041b1e80ffd73ef34edfdadea6a25acf6655a674e7d40c69d01e5b30beeb9217"
     },
     {
       "path": "frontend/src/components/StudioKeyframeVelocityControls.js",
@@ -175,11 +167,11 @@
     },
     {
       "path": "frontend/src/components/StudioProTimeline.js",
-      "sha256": "a0fe4f8e6fc3d18e70577452c835aaaacfe32aaad19fc9af4ab604f726fa0329"
+      "sha256": "e1faba3f04dd0fe9708a53f96c49d2f6fce02c8c9d9d7dee38fc2f3a87bafe56"
     },
     {
       "path": "frontend/src/components/StudioSubjectVfxPanel.js",
-      "sha256": "f779b5f48044a8e103d59d9dedbf69a5f21de8ba4e5f826f7a701e7dacf3de59"
+      "sha256": "52fc5ff31cbd80891e95f13f62bcb58811ff1cdb940023b66621c50757f9a944"
     },
     {
       "path": "frontend/src/components/StudioTextAnimatorPanel.js",
@@ -191,11 +183,11 @@
     },
     {
       "path": "frontend/src/components/VideoEditor.js",
-      "sha256": "69447db95615bc5826a0eed173d534922fa77af33d91d654e02a1324ab9becda"
+      "sha256": "96940f7be5cd9fd92924f19ed3d1e1afe993be84f349b13a71af7d4d22d0de8e"
     },
     {
       "path": "frontend/src/components/ViralClipStudio.js",
-      "sha256": "2715d65c4c1915295085c30244496cf6e2cfcf2da051df9b86e6a05845c11685"
+      "sha256": "be74f56fb945d9f60edb9f486c8e785a5a188795c6e18fd668f62ebed25b86b6"
     },
     {
       "path": "frontend/src/components/landing/StudioWelcomePage.js",
@@ -219,15 +211,15 @@
     },
     {
       "path": "frontend/src/components/public/PublicFooter.js",
-      "sha256": "b51b1da76179b713e4642178669bec86b1a573407b134f1e969c5c919622588f"
+      "sha256": "06e3c41556d083fd583f3147e513e03e16dac13b3ee303092cbaa49dd77834f5"
     },
     {
       "path": "frontend/src/components/public/PublicPage.css",
-      "sha256": "41ab8b32b69609448568a8d9f72580ccc41b246d25523f4649c2f53159b0c1e5"
+      "sha256": "84f5a6fa273698950a771dbf69daa2650de06afca7b7974451e49d2154bcad29"
     },
     {
       "path": "frontend/src/components/studioAutomation.js",
-      "sha256": "54163b1b9bbaa540e4cd0ba07ce3a8c54e267da6f4c68329f9f3cb17a36a074a"
+      "sha256": "80fff1c245c7d04ab502de2e48600a6605f4875dbaf0ee5b6e73e9ff13c2a7ae"
     },
     {
       "path": "frontend/src/components/studioBlendModes.js",
@@ -239,11 +231,11 @@
     },
     {
       "path": "frontend/src/components/studioCommands.js",
-      "sha256": "f0e33918ebaede43f496fe9ee2e5d5a4fc19d64ca0079ad0d8a7272ceaba89df"
+      "sha256": "12bb96cf91a081eb454d392f9aed2069b0824158e4c912e0f1547b68bc828be1"
     },
     {
       "path": "frontend/src/components/studioCreatorRecipes.js",
-      "sha256": "f138569830f8c200004642f1e70fe220425c628fb3c67b6ef6cdf72eb3737411"
+      "sha256": "a1a58ecf0b4e1b693b462736ce717a70f4d15480773452791978d3c7db6154cc"
     },
     {
       "path": "frontend/src/components/studioDirectorEvidenceProposals.js",
@@ -299,11 +291,11 @@
     },
     {
       "path": "frontend/src/components/studioMaskGeometry.js",
-      "sha256": "8c3f68d948b4b335fbfa29e7e89dc9ae456ee3ec492891808f952b9fcbf109ae"
+      "sha256": "3caeb3bacf24557e4806171323bbb9b5cd532ff239c03739e55b4ea4ff95e1b8"
     },
     {
       "path": "frontend/src/components/studioMediaEffects.js",
-      "sha256": "d85f3cc0df0b794eca4a413c28ee4b7bf8de38d671a61ddbe2b76433ef286a1b"
+      "sha256": "3f3e808b0a1762d54b4e5034351d26469d9084e78859f66df1efa52980f7ba61"
     },
     {
       "path": "frontend/src/components/studioMotionEditing.js",
@@ -311,23 +303,23 @@
     },
     {
       "path": "frontend/src/components/studioMotionProperties.js",
-      "sha256": "b9f6a7df2b488c17268350e22f997b0e03884070a6de5a48701995813aa0dfb9"
+      "sha256": "c3c726f4f0e4c4a21fe4e30d971856cc95cb5248bccd23ffc4a43924e3513145"
     },
     {
       "path": "frontend/src/components/studioProjectDocument.js",
-      "sha256": "895c84b4e5c9efcfa70ac79a810a8233efcf78f86ee9442e9987b2a3af77eb47"
+      "sha256": "cd869e8d9c81ca33d7eed247dc20e87d584ec5d7c9677815e27f176d8879515c"
     },
     {
       "path": "frontend/src/components/studioRenderCompiler.js",
-      "sha256": "978ea432f5d8d8384bdcfc628395a3c54a580ead3a50d11ba304135e64c19af1"
+      "sha256": "65a2d0f539f2aa6b7beb127b173d260a18786198a4bd8caf3a2ab792f3a95fc9"
     },
     {
       "path": "frontend/src/components/studioSourcePreview.js",
-      "sha256": "77473868f0709dd49395206761136c46a3353b12c596554b42f1542fdf4a214c"
+      "sha256": "48aafcdebfa90c65993619e00073b536ac9729b064634ca9faabf83d163ebb4d"
     },
     {
       "path": "frontend/src/components/studioSubjectVfxContract.js",
-      "sha256": "3308c9984bed7a3439e4cdfbe8e1ddd9930f7579b0a3551753b3e822ef0d4c2d"
+      "sha256": "e99822c8aac5609d59297b1ac9639e5fb2ab4ca90811c85b3070418803dd528e"
     },
     {
       "path": "frontend/src/components/studioTextAnimator.js",
@@ -339,19 +331,31 @@
     },
     {
       "path": "frontend/src/components/studioVectorShape.js",
-      "sha256": "3cfa8a327f3a3c72dfba6c97032d3dfea630202c4aab5db47cdd5fb767f2654b"
+      "sha256": "8ff93bd55c2569d2ca6eb5738ed6a68d6102f87c84331983800490ee562f7a3c"
     },
     {
       "path": "frontend/src/components/studioVoiceover.js",
-      "sha256": "8c97560358757a6c97efa75e9db570b7c00ae3cc0183e2dd3dc3413f8e082f4b"
+      "sha256": "5cab4eac96e489574a5f8cd4e1817a641dc0e5cb5e93e84ebb7ce83acd15108f"
+    },
+    {
+      "path": "frontend/src/components/threeD/Studio3DPanel.js",
+      "sha256": "4122fe03ca112801270d9d58c44be4eabe3dfe5c4976c5d1eb75d5571403c2f0"
     },
     {
       "path": "frontend/src/components/threeD/studio3DModel.js",
-      "sha256": "648cc0899d9831c0425dca8b022a5c7119621523eb979f92ef747da530eb45eb"
+      "sha256": "b07459911d70bd3db4acf43d0dffbd2ef673d6ce49a7def121f60e8507fa39ae"
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DObjects.js",
+      "sha256": "4418801faf183fdd83a2722c7b52cad744a829864ee6018cc1f037b49c260c12"
     },
     {
       "path": "frontend/src/components/threeD/studio3DParity.js",
-      "sha256": "f1941d64ec4befe17f602a7831d41b054195af1e5513690699cc3492c0021e49"
+      "sha256": "13abc809b2ba8e5e0db6b7a990ae27931b551d19d69c7ecf03e64d20534f19e6"
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DRibbon.js",
+      "sha256": "33aab97b75aea772eaa509c399c5c0b607589c3c7641eedda58627b5b9a54219"
     },
     {
       "path": "frontend/src/components/useStudioKeyframeMarquee.js",
@@ -379,11 +383,11 @@
     },
     {
       "path": "frontend/src/publicPageContent.js",
-      "sha256": "b9ad3701d9e3e83de4938142bd6f921ffa0553da31872d5d7686f6d323b55226"
+      "sha256": "69937449512ca95ef7ec00b3c492cd8155b4160ec55af1f99adef2a3b2be6632"
     },
     {
       "path": "package.json",
-      "sha256": "e3b9a5e7823c365866eea1dd5a2cd6e1a11a580e22f041f3bafdd70f6d4b9219"
+      "sha256": "18b3f61d62ba545b67fab2da676884ebf7489daf3614ecd2b9b0d2036646929f"
     },
     {
       "path": "python_media_worker/assets/studio-text-metrics.v1.json",
@@ -395,19 +399,19 @@
     },
     {
       "path": "python_media_worker/main_media_server.py",
-      "sha256": "5bf45a1335f81d796fd5c4ccc939839d818a69b04956493dd3e619e5080f5b79"
+      "sha256": "6f235972e5be631bde78129da392f5e3b21fb7884f52df5436912692d7ac0880"
     },
     {
       "path": "python_media_worker/studio_audio.py",
-      "sha256": "586e0e7b18e1c93f308b4099279d64a4af6941def578a43de52aa163ee5546a8"
+      "sha256": "a09be348dd9daf72c88e4924b7fd1e2f9f8cccdce5619009061c4b725a42697f"
     },
     {
       "path": "python_media_worker/studio_composition.py",
-      "sha256": "1179976216602f2ac380fca0de781b9a80f99ddb1e751f2aedb4f04c016ab45b"
+      "sha256": "b474b171c6227fecbf9f27cf8b277d3adc31304dde42de0d5476bda54e98527e"
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",
-      "sha256": "76671a323bd23ccffd06d50bc3f638b1dec769019ab3e5013f493eb8317be5a6"
+      "sha256": "c41f1612342c2ad71c592de5fd0293448d0254355f49d3ad78a6dc4023b12258"
     },
     {
       "path": "python_media_worker/studio_motion.py",
@@ -427,7 +431,7 @@
     },
     {
       "path": "python_media_worker/studio_vfx_plan.py",
-      "sha256": "d67c7cede6d24559be1fe5dcaa8daade16a44e05edfff932a27d9c6a28dbfcf9"
+      "sha256": "ce1c5a6aa0ddd045e274b6153a09691b411a580845529d820cafd9b60fa7cc43"
     },
     {
       "path": "python_media_worker/viral_render_contract.py",
@@ -490,12 +494,8 @@
       "sha256": "1beff5c9026fb69c606b5e4ae2fa9f65c45722a91ba17ca17934740c2bf0c11a"
     },
     {
-      "path": "src/analyticsRoutes.js",
-      "sha256": "88552760479babd89bc9a7846a4c10d21300d76baac8156cb397cc60e5c1eaa6"
-    },
-    {
       "path": "src/contentRoutes.js",
-      "sha256": "2dda55970be1fe15b5f16fa31cf2ba41cc263aa51527a5ef0ab09b8b4a6a77d1"
+      "sha256": "5b72d35fed1f57a6e357209362318b4a9eed0bcfd30c5547760c81c6bd5b7d20"
     },
     {
       "path": "src/creativeTemplates/showcase.js",
@@ -511,11 +511,11 @@
     },
     {
       "path": "src/modelRuntime/router.js",
-      "sha256": "d370221c992791263aab9131c51ff8f1b98bb328f7f1446217851d18a09c6503"
+      "sha256": "a66c6078ef9de20174969cc2cc0fa40c871b64003a533ffc838cd65c8fbfe48a"
     },
     {
       "path": "src/productAssistance/index.js",
-      "sha256": "9c35e61ebf85da14a443201fb8e7ddf6d0a91aae06e99164f7feb2c916b552a7"
+      "sha256": "69703576b6873cf875a5941f9bf91e31607e4453f803cfa750d515c44e2b1190"
     },
     {
       "path": "src/productAssistance/journal.js",
@@ -531,7 +531,7 @@
     },
     {
       "path": "src/productKnowledge/generate.js",
-      "sha256": "6159b034ad4deb7d9cae402fe04195b695e1f91ab83442230d7a8e5f35812be8"
+      "sha256": "d448c06e6e87e14b12875baca243ee2d5e8eb0a5ea4e2f1f485bec60ad44c872"
     },
     {
       "path": "src/promotionService.js",
@@ -547,7 +547,7 @@
     },
     {
       "path": "src/server.js",
-      "sha256": "f63e6fac8a3193e08a1f1aab43ac9cb705d3ef1b6efab89603af8acc8551f668"
+      "sha256": "75f2b6a2980a16ab6c3588bf23f5894b21744652eb999bf5bec3b607508af028"
     },
     {
       "path": "src/services/__tests__/publishedVideoRetention.test.js",
@@ -555,7 +555,7 @@
     },
     {
       "path": "src/services/billingService.js",
-      "sha256": "8799da34c3ded579e64136c96cec3a6fd2589a3962be0fc824d87c9ffb6e2a04"
+      "sha256": "39c041750c5c1f6805ade61ab224a71490086932c33342132316207d084d631a"
     },
     {
       "path": "src/services/contentFactoryProviders.js",
@@ -572,18 +572,6 @@
     {
       "path": "src/services/linkedinService.js",
       "sha256": "37e675e78f0f82e2b81b009cf4e4fad4d4f6b0254ad1decae1ceda8901cf32a3"
-    },
-    {
-      "path": "src/services/ownedPlatformMetricsRefresh.js",
-      "sha256": "1fadcc799a88c303e679557db8764789b5907bad5e38263772526ad180f403f6"
-    },
-    {
-      "path": "src/services/platformMetricValues.js",
-      "sha256": "510ccc2a9a390ebbf193f8736a6395726bf5e40b73b901cb5718653eb4b24ba3"
-    },
-    {
-      "path": "src/services/platformMetricsSchedule.js",
-      "sha256": "be7352dbeb0a66fb6fa7f917bf14979944ad7b98d8f517b65ae60152e0e38a47"
     },
     {
       "path": "src/services/platformPoster.js",
@@ -618,20 +606,24 @@
       "sha256": "1477c875dc00e1ee20990e2c582cca40fd54285efe3e4438c75b94982a059dd6"
     },
     {
+      "path": "src/services/studio3DLocalDurable.js",
+      "sha256": "e2ff6f50f7c3f5aa8b1570150d1d9bb20b7c51cc80a525a7c518ecade7bc1aa5"
+    },
+    {
       "path": "src/services/studioModelCapabilityService.js",
-      "sha256": "dad69b8d93a933128043b57188b623a3de3434cce80c878986a77392eaedf5dc"
+      "sha256": "d15019682c9e9394c255a27d5a707ea14cc927239fbf9800eb872ec07307201a"
     },
     {
       "path": "src/services/studioSourceFrameService.js",
-      "sha256": "d364154b6673e8620f7c1217b1494187ce67c0ba1e3a242820fb14bdc89e55f3"
+      "sha256": "91e89a25f8faa92b4665d16a195d8fbc743b3bfacb0a046d13f56d41bd82e1dc"
     },
     {
       "path": "src/services/studioSourceService.js",
-      "sha256": "51340a9ea0bd83937334739b6151f1e298131651321cec49eca30f06169c39a6"
+      "sha256": "fc6850c2ace16e7c2daf3d277c0fc03041be55e5a88cd531a0df4f697ea6a63b"
     },
     {
       "path": "src/services/studioSubjectVfxService.js",
-      "sha256": "e55cfeade85722ff79b924263f6007e742b372d7b5ab403840fbc81bea64737b"
+      "sha256": "bcc70319002ed130e882f2d5537fefeb56cd3bf673091431ad58339842b13acf"
     },
     {
       "path": "src/services/uploadAllowance.js",
@@ -647,11 +639,11 @@
     },
     {
       "path": "test/e2e/studio-capability-matrix.json",
-      "sha256": "2023ac386877e7de00407b0a4e2f2701133332622b90b24647181b97b00a6493"
+      "sha256": "99360046ce0fb278ba6ec3cb062b3f587ed4d76a82181f361cbb994f8aab9ac2"
     },
     {
       "path": "test/e2e/studio-preview-render-parity.json",
-      "sha256": "6932bbf31df248b3ecd9a92f5f2a3dee9912f173d88e3d94f88b26a72629cc71"
+      "sha256": "8546d8309a390f77bc60cef57565a10f50ff7c9d5a15d7660adf460edc82df0a"
     }
   ],
   "scope": "Documentation review of repository sources and retained evidence. Not product runtime, professional creative or production release approval."

@@ -11,8 +11,16 @@ const {
   workerRequestDigest,
 } = require("../../src/services/unifiedCredits/workerVerification");
 const { assertSandbox } = require("../../src/services/unifiedCredits/runtime");
-async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) {
+async function createLocalWorkerProvider({ directory, python, env, apiOrigin, timeoutMs = 120000, maxArtifactBytes = 20 * 1024 * 1024,
+  maxRequestBytes = 512 * 1024, port = 0, analysisTimeoutMs = 120000 }) {
+  if (!Number.isSafeInteger(analysisTimeoutMs) || analysisTimeoutMs < 30000 || analysisTimeoutMs > 300000) throw Error("LOCAL_ANALYSIS_DEADLINE_INVALID");
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 1800000) throw Error("Local CPU timeout must be 1–1800 seconds.");
+  if (!Number.isSafeInteger(maxArtifactBytes) || maxArtifactBytes < 20 * 1024 * 1024 || maxArtifactBytes > 128 * 1024 * 1024) throw Error('Local artifact limit must be 20–128 MiB.');
+  if (!Number.isSafeInteger(maxRequestBytes) || maxRequestBytes < 512 * 1024 || maxRequestBytes > 4 * 1024 * 1024) throw Error('Local request limit must be 512 KiB–4 MiB.');
+  if (!Number.isSafeInteger(port) || port < 0 || port > 65535) throw Error('Choose a valid loopback worker port.');
   assertSandbox(env);
+  const { localReviewBounds, validateLongReviewRequest } = require('./local-review-bounds.cjs');
+  const reviewBounds = localReviewBounds(env);
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const executionRoot = fs.realpathSync(directory);
   const privateFile = path.join(directory, "signing-key.pem");
@@ -50,7 +58,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
   // Bound every route, including unauthenticated health and capability downloads.
   // This process binds only to loopback and does not trust forwarded client IPs.
   app.use(rateLimit({ windowMs: 60000, max: 240, standardHeaders: true, legacyHeaders: false }));
-  app.use(express.json({ limit: "512kb" }));
+  app.use(express.json({ limit: maxRequestBytes }));
   app.get(["/health", "/status"], (_req, res) =>
     res.json({
       status: "ok",
@@ -138,19 +146,27 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
         : null,
     };
     if (succeeded && result?.output_path) {
-      const actual = fs.realpathSync(result.output_path);
-      const allowed = path.resolve(__dirname, "../../tmp") + path.sep;
-      if (!actual.startsWith(allowed) && !actual.startsWith(dir + path.sep))
-        throw new Error("Worker artifact escaped scratch directory");
-      const bytes = fs.readFileSync(actual);
-      if (bytes.length > 20 * 1024 * 1024) throw new Error("Worker artifact exceeds budget");
-      const artifact = path.join(dir, "artifact.mp4");
-      fs.copyFileSync(actual, artifact);
-      payload.output = {
-        path: artifact,
-        bytes: bytes.length,
-        sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
-      };
+      try {
+        const actual = fs.realpathSync(result.output_path);
+        const allowed = path.resolve(__dirname, "../../tmp") + path.sep;
+        if (!actual.startsWith(allowed) && !actual.startsWith(dir + path.sep))
+          throw new Error("Worker artifact escaped scratch directory");
+        const bytes = fs.readFileSync(actual);
+        if (bytes.length > (reviewBounds.longer ? reviewBounds.maxArtifactBytes : maxArtifactBytes)) throw new Error("Worker artifact exceeds budget");
+        const artifact = path.join(dir, "artifact.mp4");
+        fs.copyFileSync(actual, artifact);
+        payload.output = {
+          path: artifact,
+          bytes: bytes.length,
+          sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+        };
+      } catch (error) {
+        // A completed process can still fail its bounded artifact handoff.
+        // Retain its measured exit code and publish a terminal failure, so the
+        // ordinary reconciler can release the hold instead of leaving it unknown.
+        payload.state = 'failed';
+        payload.providerFailure = String(error.message).slice(0, 200);
+      }
     }
     const envelope = {
       provider: "local-process",
@@ -176,9 +192,19 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
         )
           return res.sendStatus(403);
         const dir = folder(expected.executionId);
+        const longReview = validateLongReviewRequest(req.body, req.path, reviewBounds);
         fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
         const requestFile = path.join(dir, "request.json");
-        const record = { expected, body: req.body, apiOrigin, directory: dir };
+        const record = {
+          expected,
+          body: req.body,
+          apiOrigin,
+          directory: dir,
+          localCpuSeconds:
+            expected.endpoint === "/analyze-clips" ? Math.ceil(analysisTimeoutMs / 1000) : longReview ? reviewBounds.renderCpuSeconds : 120,
+          ...(longReview ? { localReview: true, localFileBytes: reviewBounds.fileBytes,
+            localSourceBytes: reviewBounds.maxSourceBytes } : {}),
+        };
         if (
           fs.existsSync(requestFile) &&
           JSON.parse(fs.readFileSync(requestFile)).expected.requestDigest !== expected.requestDigest
@@ -229,7 +255,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
             try {
               process.kill(-child.pid, "SIGKILL");
             } catch {}
-          }, 120000);
+          }, expected.endpoint === "/analyze-clips" ? analysisTimeoutMs : longReview ? reviewBounds.renderTimeoutMs : timeoutMs);
           const promise = new Promise(resolve => {
             child.once("error", () => {
               clearTimeout(timeout);
@@ -239,6 +265,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
             child.once("exit", async (code, signal) => {
               clearTimeout(timeout);
               running.delete(expected.executionId);
+              fs.writeFileSync(path.join(dir, 'termination.json'), JSON.stringify({code, signal, startedAt, finishedAt:new Date().toISOString()}), {mode:0o600});
               if (!groupTerminated(child.pid)) {
                 try {
                   process.kill(-child.pid, "SIGKILL");
@@ -283,7 +310,7 @@ async function createLocalWorkerProvider({ directory, python, env, apiOrigin }) 
   app.use((error, _req, res, _next) =>
     res.status(error.status || (error.code === "ENOENT" ? 404 : 500)).json({ error: error.message })
   );
-  const server = app.listen(0, "127.0.0.1");
+  const server = app.listen(port, "127.0.0.1");
   await new Promise(resolve => server.once("listening", resolve));
   const workerOrigin = `http://127.0.0.1:${server.address().port}`;
   app.locals.workerOrigin = workerOrigin;

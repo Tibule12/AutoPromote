@@ -1,5 +1,6 @@
 import {
   buildCreatorMotionRecipe,
+  buildCreatorShakeRecipe,
   buildCreatorSpeedRecipe,
   buildSpeedSegmentsFromKeyframes,
   mergeCreatorRecipe,
@@ -9,6 +10,16 @@ import { normalizeSpeedSegmentsForRender } from "../viralRenderPayload";
 import { createOutputTimeMap, createTimeRange, secondsToTicks } from "../studioTime";
 
 describe("durable creator recipes", () => {
+  test("shake settles to the original pose, scales its intensity and stays inside the clip", () => {
+    const strong = buildCreatorShakeRecipe({ time: 2, duration: 12, intensity: 80 });
+    const soft = buildCreatorShakeRecipe({ time: 2, duration: 12, intensity: 40 });
+    expect(strong).toHaveLength(6);
+    expect(strong[0]).toMatchObject({time: 2, value: 0});
+    expect(strong.at(-1)).toMatchObject({time: 2.5, value: 0});
+    expect(strong[1].value).toBeCloseTo(soft[1].value * 2);
+    expect(buildCreatorShakeRecipe({time: 11.8, duration: 12}).at(-1).time).toBe(12);
+    expect(buildCreatorShakeRecipe({time: 11.99, duration: 12})).toEqual([]);
+  });
   const apply = (keys, points, property = "scale") => mergeCreatorRecipe({
     keyframes: keys, points, targetId: "main-video", property, fallback: 1.2,
     createId: (() => { let id = 0; return () => `key-${++id}`; })(),
@@ -114,6 +125,15 @@ describe("durable creator recipes", () => {
     expect(segments.some(segment => segment.rate > 1.5)).toBe(true);
     segments.slice(1).forEach((segment, index) =>
       expect(segment.startTime).toBe(segments[index].endTime));
+  });
+
+  test("a one-tick retained hold samples inside its half-open interval", () => {
+    const tick = 1 / 90000;
+    expect(buildSpeedSegmentsFromKeyframes({ duration: 1, keyframes: [
+      { property: "speed", time: 0, value: 2, easing: "linear" },
+      { property: "speed", time: tick, value: 1, easing: "hold" },
+    ] }).map(({ startTime, endTime, rate }) => ({ startTime, endTime, rate })))
+      .toEqual([{ startTime: 0, endTime: tick, rate: 2 }, { startTime: tick, endTime: 1, rate: 1 }]);
   });
 
   test("merges constant speed runs even with many redundant keys", () => {

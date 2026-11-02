@@ -188,20 +188,6 @@
       "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
     },
     {
-      "feature_id": "generation.idea_to_video",
-      "documentation_impact": [
-        "FEATURE"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "src/productAssistance/index.js",
-        "src/routes/productAssistanceRoutes.js",
-        "frontend/src/components/ProductAssistance.js"
-      ],
-      "reason": "Product Assistance V1: reviewed public retrieval, seven contextual help entry points and actual error-code mappings. Feature/control/task counts and readiness unchanged; read-only assistance grants no execution authority."
-    },
-    {
       "feature_id": "studio.templates",
       "documentation_impact": [
         "FEATURE"
@@ -973,28 +959,6 @@
       "reason": "Bound HTML music-fallback volume to its real browser range for valid raised automation, preventing the observed IndexSizeError while preserving full decoded-buffer GainNode gain. Native 190-percent edit/playback/cold recovery and thirteen focused audio cases pass; whole preview audio parity and readiness remain separate."
     },
     {
-      "feature_id": "publishing.analytics",
-      "documentation_impact": [
-        "FEATURE",
-        "CONTROLS",
-        "DEPENDENCIES"
-      ],
-      "status_before": "PARTIAL",
-      "status_after": "PARTIAL",
-      "source_paths": [
-        "src/analyticsRoutes.js",
-        "src/services/platformMetricValues.js",
-        "src/services/ownedPlatformMetricsRefresh.js",
-        "src/services/platformStatsPoller.js",
-        "src/services/platformPostsService.js",
-        "src/services/platformMetricsService.js",
-        "src/services/facebookService.js",
-        "frontend/src/UserDashboardTabs/AnalyticsPanel.js",
-        "src/services/platformMetricsSchedule.js"
-      ],
-      "reason": "Keep unavailable counters distinct from measured zero; separate views/impressions; initialize collection; retain quiet-post 48/72-hour windows; provide a bounded owned refresh and published-release scope. Twenty-one backend cases and four UI cases pass, alongside actual six-destination metrics collection. Only three destinations supply partial counters. A native observer preflight also verifies the visible release-scoped post count. Ended observations leave the query so they cannot crowd newer posts out of a batch. No full-provider, growth or production deployment claim."
-    },
-    {
       "feature_id": "creative.showroom",
       "documentation_impact": [
         "FEATURE",
@@ -1107,6 +1071,232 @@
         "reports/footer-pages-20261021/README.md"
       ],
       "reason": "Knowledge 1.0.43 source-review of the current footer pages and public reader of the canonical generated documentation. This changes navigation and explanation, not Studio readiness, a qualified public showroom, account entitlements or model availability."
+    },
+    {
+      "feature_id": "studio.subject_cutout",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "DEPENDENCIES"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/studioSubjectCorrections.js",
+        "frontend/src/components/studioProjectDocument.js",
+        "model_workers/adapters/component_segmentation.py",
+        "model_workers/adapters/cpu_matting.py",
+        "model_workers/adapters/temporal_alpha.py",
+        "src/modelRuntime/router.js",
+        "src/services/studioSubjectVfxService.js",
+        "reports/background-replacement-20261101/README.md"
+      ],
+      "reason": "Knowledge 1.0.47 records the opt-in local multi-object and corrective-click replacement workflow and its actual failed visual quality gate. Native short-shot export and cold recovery do not promote formal readiness, whole preview parity, production model availability or creative approval."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS",
+        "DEPENDENCIES"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/studioSubjectCorrections.js",
+        "frontend/src/components/studioProjectDocument.js",
+        "model_workers/adapters/component_segmentation.py",
+        "model_workers/adapters/cpu_matting.py",
+        "model_workers/adapters/temporal_alpha.py",
+        "src/modelRuntime/router.js",
+        "src/services/studioSubjectVfxService.js",
+        "reports/background-replacement-20261101/README.md"
+      ],
+      "reason": "Knowledge 1.0.47 records the opt-in local multi-object and corrective-click replacement workflow and its actual failed visual quality gate. Native short-shot export and cold recovery do not promote formal readiness, whole preview parity, production model availability or creative approval."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "model_workers/adapters/temporal_alpha.py",
+        "model_workers/adapters/cpu_matting.py",
+        "python_media_worker/studio_vfx_plan.py",
+        "test/model-runtime/temporalAlpha.py",
+        "python_media_worker/test_studio_vfx_plan.py"
+      ],
+      "reason": "Knowledge 1.0.48 explains the bounded motion repair: stationary-source opacity consensus with object-scoped correction intervals and soft colour-key transitions. Retained visual failures and broader hair/motion limits prevent creative/readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "config/model-runtime/registry.v1.json",
+        "model_workers/adapters/source_edge_alpha.py",
+        "model_workers/adapters/cpu_matting.py",
+        "src/modelRuntime/componentGuidance.js",
+        "src/services/studioModelCapabilityService.js",
+        "python_media_worker/studio_vfx_plan.py",
+        "reports/background-replacement-20261101/movement-equipment-repair.md"
+      ],
+      "reason": "Knowledge 1.0.49 records source-resolution couch reveal and protected microphone cleanup on the reviewed moving shot, exact native persistence and complete final playback. Fine foliage colour/detail and broader motion/physical limits prevent professional/readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/two-speakers.md"
+      ],
+      "reason": "Knowledge 1.0.50 records the actual six-second native two-speaker continuation, exact save/reopen/export and complete Studio playback. Model tracks plus existing native corrections repair bounded shirt/boom and TV remnants; fine foliage/props and broader temporal/physical limits remain. No engine feature or readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/StudioSubjectMaskControls.js",
+        "frontend/src/components/studioSubjectCorrections.js",
+        "frontend/src/components/studioProjectDocument.js",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/body-edge-repair.md"
+      ],
+      "reason": "Knowledge 1.0.51 records actual moving body-edge repair, soft-alpha cleanup default and correction-box persistence through canonical recovery. Existing source-specific object corrections replace sleeve colour reconstruction. Fine props/foliage, physical integration and broader motion remain unqualified; no readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "python_media_worker/main_media_server.py",
+        "scripts/monetization/local-worker-execution.py",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/original-comparison-repair.md"
+      ],
+      "reason": "Knowledge 1.0.52 records matched-original review and preservation of reviewed subject detail through sequence/reframe/finish intermediate encoding. Corrected object prompts improve second-angle TV separation. Fine foreground boundaries, physical integration, broad motion and latency remain unqualified; no readiness promotion."
+    },
+    {
+      "feature_id": "studio.masks",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "python_media_worker/studio_vfx_plan.py",
+        "model_workers/adapters/temporal_alpha.py",
+        "scripts/monetization/local-review-bounds.cjs",
+        "test/e2e/studio-capability-matrix.json",
+        "reports/background-replacement-20261101/four-minute-continuation.md"
+      ],
+      "reason": "Four-minute actual-footage review exposes remaining boom/couch/plant/head defects; local weak person trimap leakage and redundant foreground preparation repaired. Private hybrid model proof and flattened native import do not qualify native editable long-form masks. No public feature/readiness promotion; default production transports and limits preserved."
+    },
+    {
+      "feature_id": "studio.audio_automation",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/audio/audioRemixPreview.js"
+      ],
+      "reason": "Knowledge 1.0.48 source review: native media boosts use a post-effects gain node instead of invalid HTML volume, original source keys override the master fallback as in export, dialogue wings follow original-track controls, inspector changes retain B-roll gain automation, and finished-video monitoring bypasses authored source gain and additional sources. Existing readiness and broader mixed-picture/sound limitations are retained."
+    },
+    {
+      "feature_id": "studio.audio_automation",
+      "documentation_impact": [
+        "FEATURE"
+      ],
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/audio/audioRemixPreview.js",
+        "reports/studio-source-audio-clock-20261024/README.md"
+      ],
+      "reason": "Decoded source gain/dialogue clock, stale occurrence guards and wait/seek suspension qualified in scoped tests and a native CPU flow. Retain full-mix, UI clock, listening, colour/edge, latency and formal readiness limits."
+    },
+    {
+      "feature_id": "studio.timeline",
+      "documentation_impact": [
+        "FEATURE",
+        "CONTROLS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/ViralClipStudio.js",
+        "frontend/src/components/StudioProTimeline.js",
+        "frontend/src/components/studioPlaybackClock.js",
+        "frontend/src/components/StudioPlaybackPosition.js",
+        "reports/studio-playhead-precision-20261024/README.md"
+      ],
+      "reason": "Document the existing decoder-backed playhead/readouts and source split/trim sampling. Keep native timing failures, inspector/filter and whole picture/sound limits explicit; no readiness promotion."
+    },
+    {
+      "feature_id": "studio.compositing",
+      "documentation_impact": [
+        "FEATURE",
+        "TASKS"
+      ],
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/ViralClipStudio.js"
+      ],
+      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
+    },
+    {
+      "feature_id": "studio.subject_cutout",
+      "status_before": "FUNCTIONAL",
+      "status_after": "FUNCTIONAL",
+      "documentation_impact": [
+        "FEATURE",
+        "TASKS"
+      ],
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/ViralClipStudio.js"
+      ],
+      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
+    },
+    {
+      "feature_id": "studio.timeline",
+      "status_before": "PARTIAL",
+      "status_after": "PARTIAL",
+      "documentation_impact": [
+        "FEATURE",
+        "TASKS"
+      ],
+      "source_paths": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "frontend/src/components/ViralClipStudio.js"
+      ],
+      "reason": "21 October source audit: document the actual optional Composite replacement and manual style workflow, expose in-product guides, retain model availability/source-specific fringe limits and unchanged readiness."
     }
   ]
 }

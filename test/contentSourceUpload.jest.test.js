@@ -35,7 +35,7 @@ describe("content source upload route", () => {
       .send(payload)
       .expect(201);
 
-    expect(fileMock).toHaveBeenCalledWith(expect.stringMatching(/^uploads\/videos\/\d+_bad name-.mp4$/));
+    expect(fileMock).toHaveBeenCalledWith(expect.stringMatching(/^uploads\/videos\/testUser123\/[a-f0-9-]{36}_bad name-.mp4$/));
     expect(saveMock).toHaveBeenCalledWith(
       payload,
       expect.objectContaining({
@@ -54,7 +54,7 @@ describe("content source upload route", () => {
       expect.objectContaining({
         ok: true,
         size: payload.length,
-        storagePath: expect.stringMatching(/^uploads\/videos\/\d+_bad name-.mp4$/),
+        storagePath: expect.stringMatching(/^uploads\/videos\/testUser123\/[a-f0-9-]{36}_bad name-.mp4$/),
         url: expect.stringContaining(
           "https://firebasestorage.googleapis.com/v0/b/test-bucket.appspot.com/o/uploads%2Fvideos%2F"
         ),

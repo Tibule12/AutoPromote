@@ -3,7 +3,7 @@
 export function studioMediaEffectFilter(overlay) {
   const pixels = value => {
     const n = Number(value);
-    return overlay.type === 'image' && n !== 0
+    return ['image', 'video'].includes(overlay.type) && n !== 0
       ? `calc(${n}px * var(--title-preview-scale, 1))` : `${n}px`;
   };
   const color = (value, opacity) => `color-mix(in srgb, ${value} ${Math.round(Number(opacity) * 100)}%, transparent)`;

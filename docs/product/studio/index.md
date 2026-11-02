@@ -1,6 +1,6 @@
 # Studio
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -48,7 +48,7 @@ Shows the real composition as separate front-to-back layer and group rows, with 
 
 **Controls:** [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Composition layers / Sequence tracks](../control-reference/index.md#studio-timeline-view), [At playhead](../control-reference/index.md#studio-timeline-at_playhead)
 
-**Guides:** No task guide in V1.
+**Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -85,7 +85,7 @@ Splits a canonical clip occurrence at the mapped output playhead; source ranges 
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Put text behind a person](../task-guides/task-text_behind.md)
+**Guides:** [Put text behind a person](../task-guides/task-text_behind.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -122,7 +122,7 @@ Changes the retained source range of an occurrence and rebases linked timing. Th
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Add B-roll](../task-guides/task-add_broll.md)
+**Guides:** [Add B-roll](../task-guides/task-add_broll.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -196,7 +196,7 @@ Stores ordinary text, image and video overlays as editable canonical layers. Arb
 
 **Controls:** [Layer start](../control-reference/index.md#studio-layer-start), [Layer duration](../control-reference/index.md#studio-layer-duration), [Layer width](../control-reference/index.md#studio-layer-width), [Layer height](../control-reference/index.md#studio-layer-height)
 
-**Guides:** No task guide in V1.
+**Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -236,7 +236,7 @@ Edits position, scale, rotation, anchor, crop and opacity of ordinary layers. Na
 
 **Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy)
 
-**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md)
+**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -294,7 +294,7 @@ Edit property keys, spatial position handles and value/velocity graphs on the sa
 
 **Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Selected keyframe time scale](../control-reference/index.md#studio-keyframe-selection_scale), [Keyframe paste destination](../control-reference/index.md#studio-keyframe-paste_target), [Start velocity](../control-reference/index.md#studio-keyframe-start_velocity), [End velocity](../control-reference/index.md#studio-keyframe-end_velocity), [Start influence](../control-reference/index.md#studio-keyframe-start_influence), [End influence](../control-reference/index.md#studio-keyframe-end_influence), [Curve path / Straighten path](../control-reference/index.md#studio-keyframe-spatial_curve), [Spatial path handles](../control-reference/index.md#studio-keyframe-spatial_handle)
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -422,7 +422,7 @@ Creates editable timed captions with a speech-language choice. Regeneration repl
 
 **Controls:** [Speech language](../control-reference/index.md#studio-captions-source_language)
 
-**Guides:** [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Create captions and correct transcription](../task-guides/task-captions_correct.md)
+**Guides:** [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Create captions and correct transcription](../task-guides/task-captions_correct.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -607,9 +607,9 @@ Combines ordinary layers and animated graphic groups with shared order, static m
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Enable group mask](../control-reference/index.md#studio-composite-group_mask_enabled), [Group mask shape](../control-reference/index.md#studio-composite-group_mask_shape), [Group mask feather](../control-reference/index.md#studio-composite-group_mask_feather), [Invert group mask](../control-reference/index.md#studio-composite-group_mask_inverted), [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Edge detail width](../control-reference/index.md#studio-composite-background_edge_radius), [Remove old background colour](../control-reference/index.md#studio-composite-background_decontaminate)
+**Controls:** [Layer blend mode](../control-reference/index.md#studio-composite-blend), [Mask polygon path](../control-reference/index.md#studio-geometric_mask-path), [Mask corner radius](../control-reference/index.md#studio-geometric_mask-radius), [Layer order](../control-reference/index.md#studio-composite-layer_order), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Enable group mask](../control-reference/index.md#studio-composite-group_mask_enabled), [Group mask shape](../control-reference/index.md#studio-composite-group_mask_shape), [Group mask feather](../control-reference/index.md#studio-composite-group_mask_feather), [Invert group mask](../control-reference/index.md#studio-composite-group_mask_inverted), [Move group clip](../control-reference/index.md#studio-group_clip-move), [Group clip In](../control-reference/index.md#studio-group_clip-in), [Group clip Out](../control-reference/index.md#studio-group_clip-out), [Edge detail width](../control-reference/index.md#studio-composite-background_edge_radius), [Remove old background colour](../control-reference/index.md#studio-composite-background_decontaminate), [Repair opaque detail from source](../control-reference/index.md#studio-composite-source_detail_repair), [Edge refinement region points](../control-reference/index.md#studio-composite-edge_refinement_region), [Colour treatment paths](../control-reference/index.md#studio-composite-colour_treatment_paths), [Transparent edge level](../control-reference/index.md#studio-composite-alpha_transparent), [Opaque edge level](../control-reference/index.md#studio-composite-alpha_opaque), [Edge opacity region points](../control-reference/index.md#studio-composite-alpha_region)
 
-**Guides:** No task guide in V1.
+**Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -629,16 +629,25 @@ Uses reviewed owned subject-mask results in a bounded scene and deterministic fi
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → Creator → Composite and choose a clip under Add effects to a clip.
+2. Choose the person and separate foreground objects to retain, including the microphone and supports.
+3. Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.
+4. Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.
+5. Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The ordinary final export consumes the reviewed source-bound replacement. The short local proof preserves it through save and cold reopen; scaling and encoding differ from preview, and broader parity remains unqualified.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The correction/alpha pipeline remains opt-in development work. Two short angles have reviewed soft face/body/hand boundaries, corrected sleeve cleanup and persisted person framing. Fine foliage/prop contamination and compressed source detail still block a complete professional quality claim.
+- The image matting model uses a separate source-flow temporal stage. Wispy hair, long occlusions and camera motion are not qualified; fixed-object tracks require a fixed camera.
+- Local CPU processing is slow. Current runtime availability, source ownership and any execution costs must be checked before submitting.
+- The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.
+- The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.
+- The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness.
 
 **Common errors**
 
@@ -705,16 +714,25 @@ Uses a real source-bound segmentation result to separate the selected subject ac
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → Creator → Composite and choose a clip under Add effects to a clip.
+2. Choose the person and separate foreground objects to retain, including the microphone and supports.
+3. Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.
+4. Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.
+5. Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The ordinary final export consumes the reviewed source-bound replacement. The short local proof preserves it through save and cold reopen; scaling and encoding differ from preview, and broader parity remains unqualified.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The correction/alpha pipeline remains opt-in development work. Two short angles have reviewed soft face/body/hand boundaries, corrected sleeve cleanup and persisted person framing. Fine foliage/prop contamination and compressed source detail still block a complete professional quality claim.
+- The image matting model uses a separate source-flow temporal stage. Wispy hair, long occlusions and camera motion are not qualified; fixed-object tracks require a fixed camera.
+- Local CPU processing is slow. Current runtime availability, source ownership and any execution costs must be checked before submitting.
+- The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.
+- The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.
+- The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness.
 
 **Common errors**
 
@@ -833,7 +851,7 @@ Mixes owned original audio, master podcast, voiceover, music, B-roll and SFX bus
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Add B-roll](../task-guides/task-add_broll.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Add B-roll](../task-guides/task-add_broll.md), [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -868,7 +886,7 @@ Records or imports owned voice takes, places them on the timeline and edits cue 
 
 - Feature unavailable or output stale: Check source ownership, required features and current processing state. Review and regenerate only through the existing workflow.
 
-**Controls:** [Voice take volume](../control-reference/index.md#studio-voiceover-volume), [Voice take duration](../control-reference/index.md#studio-voiceover-duration)
+**Controls:** [Voice take volume](../control-reference/index.md#studio-voiceover-volume), [Voice take duration](../control-reference/index.md#studio-voiceover-duration), [Voice take fade in](../control-reference/index.md#studio-voiceover-fade_in), [Voice take fade out](../control-reference/index.md#studio-voiceover-fade_out)
 
 **Guides:** No task guide in V1.
 
@@ -1097,19 +1115,21 @@ Edits deterministic grade parameters and finish keys. Grade controls affect the 
 
 **Controls:** [Exposure stops](../control-reference/index.md#studio-grade-exposurestops), [Lift](../control-reference/index.md#studio-grade-lift), [Gamma](../control-reference/index.md#studio-grade-gamma), [Grade gain](../control-reference/index.md#studio-grade-gain), [Tint](../control-reference/index.md#studio-grade-tint)
 
-**Guides:** No task guide in V1.
+**Guides:** [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
-## 3D title/logo scene
+## 3D object, title and logo scenes
 
 ID: `studio.three_d` • **PARTIAL** • DETERMINISTIC
 
-Authors bounded 3D scenes and renders them through the existing 3D worker path. Supported transforms are approximate across browser and final render, and several displayed fields are disabled for final output.
+Builds bounded mesh compositions and continuously flowing ribbon surfaces. Individual objects retain colours, surfaces, roughness, transforms and pose keys; browser and final lighting/materials remain approximate.
+
+**Purpose:** Create editable object motion and combine reviewed rendered alpha with the existing Studio timeline.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
-**Media:** authored 3D title/logo scene
+**Media:** authored 3D mesh-object composition, authored 3D title/logo scene
 
 **Requires:** studio.layers (FUNCTIONAL)
 
@@ -1117,16 +1137,29 @@ Authors bounded 3D scenes and renders them through the existing 3D worker path. 
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open an owned Studio project, then Motion → 3D Motion.
+2. Choose Object Composition to start with an editable sphere, or choose an existing title/logo template.
+3. Add box, sphere, torus, cylinder, icosphere, plane or ribbon; select each object and set its colour, surface, roughness, position, XYZ scale and rotation. Box and cylinder edges support a bounded bevel.
+4. For a ribbon, choose loop, knot or wave. Adjust width, thickness, wave amount, lobes and twists; speed and phase control the continuous flow. In Advanced, choose the sculpture lighting rig for aimed studio strips.
+5. Set the first pose and add its object key. Seek to another time, change that object’s values and add the next key. Object-key times are relative to the scene start.
+6. Save the project and request a 3D preview through the configured worker. Check its reported dimensions and frame rate.
+7. After a reload, use Check saved 3D render to recover the accepted result. Keep an unavailable accepted job for status recovery.
+8. Review the rendered animation, then use ordinary Studio export to composite its private alpha.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The existing Blender worker produces a reviewed preview and private alpha. The ordinary Studio compositor reuses the owned, matching alpha; changing scene decisions requires a matching render.
 
 **Limits**
 
-- This dated development snapshot does not establish professional or production readiness.
+- At most 24 objects, 32 keys per object and 256 object keys total.
+- The explicit nonproduction local adapter defaults to 640 × 360 at 24 fps. Its optional higher-resolution/CUDA App path remains unqualified after real long-job failures; successful direct canonical local renders do not prove App recovery. A larger final canvas can upscale a lower-resolution layer.
+- Contour morphing, procedural repeaters, general Blender scene import and arbitrary node scripts are unavailable.
+- Object keys through timeline cuts, retiming and trimmed boundaries remain unqualified; the verified scene uses a fixed uncut interval.
+- Browser lighting, materials, colour and edges do not establish full final-picture parity.
+- Uncertain accepted work must not be automatically rerun; API-restart recovery does not establish host/worker-loss or pre-dispatch recovery.
+- Per-object glass, chrome, gold, matte, neon, holographic and architecture surfaces are available. Browser glass can reveal opaque parts behind it; matching Blender colour, reflection and edge pixels remains unqualified.
+- Ribbon flow is relative to the scene clock. Its timing across cuts, retiming and trimmed boundaries remains unqualified; use an uncut rendered scene for the verified workflow.
 
 **Common errors**
 
@@ -1134,7 +1167,7 @@ Authors bounded 3D scenes and renders them through the existing 3D worker path. 
 
 **Controls:** [X](../control-reference/index.md#studio-three_d-x), [Y](../control-reference/index.md#studio-three_d-y), [Z](../control-reference/index.md#studio-three_d-z), [Scale](../control-reference/index.md#studio-three_d-scale), [Rotation X](../control-reference/index.md#studio-three_d-rotationx), [Rotation Y](../control-reference/index.md#studio-three_d-rotationy), [Rotation Z](../control-reference/index.md#studio-three_d-rotationz), [Extrusion Depth](../control-reference/index.md#studio-three_d-extrusiondepth), [Bevel](../control-reference/index.md#studio-three_d-bevel), [Focal Length](../control-reference/index.md#studio-three_d-focallength), [Light Intensity](../control-reference/index.md#studio-three_d-lightintensity), [Camera Motion](../control-reference/index.md#studio-three_d-cameramotion), [Bloom](../control-reference/index.md#studio-three_d-bloom), [3D material](../control-reference/index.md#studio-three_d-material), [3D font family](../control-reference/index.md#studio-three_d-fontfamily), [3D font weight](../control-reference/index.md#studio-three_d-fontweight), [3D scene easing](../control-reference/index.md#studio-three_d-easing), [Audio-reactive intensity](../control-reference/index.md#studio-three_d-audioreactiveintensity), [3D light direction](../control-reference/index.md#studio-three_d-lightdirection), [3D shadows](../control-reference/index.md#studio-three_d-shadows), [3D reflections](../control-reference/index.md#studio-three_d-reflections), [3D background](../control-reference/index.md#studio-three_d-background), [3D quality](../control-reference/index.md#studio-three_d-quality)
 
-**Guides:** [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md), [Create a 3D title/logo scene](../task-guides/task-three_d_title.md)
+**Guides:** [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md), [Create a 3D object, title or logo scene](../task-guides/task-three_d_title.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -1142,11 +1175,13 @@ Authors bounded 3D scenes and renders them through the existing 3D worker path. 
 
 ID: `studio.blender` • **PARTIAL** • DETERMINISTIC
 
-Renders supported authored scenes to owned output for the canonical composition. A browser WebGL preview alone is insufficient to qualify the final scene.
+Renders supported authored object/title/logo scenes to owned preview and private alpha for the canonical Studio compositor. Configured nonproduction local CPU execution supports saved-job API-restart recovery.
+
+**Purpose:** Review actual rendered object motion and composite matching private alpha without rebuilding a separate editing engine.
 
 **Available to:** signed-in users with owned project and applicable entitlement
 
-**Media:** authored 3D title/logo scene
+**Media:** authored 3D mesh-object composition, authored 3D title/logo scene
 
 **Requires:** studio.three_d (PARTIAL)
 
@@ -1154,8 +1189,10 @@ Renders supported authored scenes to owned output for the canonical composition.
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Author and save a supported scene in Studio → Motion → 3D Motion.
+2. Generate the preview through the configured worker and check its actual dimensions/frame rate.
+3. Use Check saved 3D render after reopening the project to recover the same accepted result.
+4. Review the separate animation before ordinary final Studio export.
 
 **Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
 
@@ -1163,7 +1200,9 @@ Renders supported authored scenes to owned output for the canonical composition.
 
 **Limits**
 
-- This dated development snapshot does not establish professional or production readiness.
+- The qualified local CPU path is nonproduction and bounded to short scenes; its quality profile can be lower than the final canvas.
+- Host/worker loss, pre-dispatch reconciliation, remote GPU recovery and full preview/final material/lighting parity remain unqualified.
+- A completed technical test does not establish creative or production readiness.
 
 **Common errors**
 
@@ -1175,7 +1214,7 @@ Renders supported authored scenes to owned output for the canonical composition.
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Create a 3D title/logo scene](../task-guides/task-three_d_title.md)
+**Guides:** [Create a 3D object, title or logo scene](../task-guides/task-three_d_title.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -1364,7 +1403,7 @@ Instantiates a pinned draft template into ordinary editable clips, layers, keyfr
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Use a creative template](../task-guides/task-use_template.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Use a creative template](../task-guides/task-use_template.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -1479,7 +1518,7 @@ Requests a final movie and downloads the exact completed output after applicable
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md), [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Use a creative template](../task-guides/task-use_template.md), [Export a final film](../task-guides/task-final_export.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Create a cinematic logo reveal](../task-guides/task-cinematic_logo.md), [Turn a podcast into a vertical promo](../task-guides/task-podcast_vertical.md), [Use a creative template](../task-guides/task-use_template.md), [Export a final film](../task-guides/task-final_export.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -1592,7 +1631,7 @@ Preserves canonical revision and provenance for manual edits, Director proposals
 
 **Controls:** No source-qualified editable control is recorded.
 
-**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Export a final film](../task-guides/task-final_export.md)
+**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Export a final film](../task-guides/task-final_export.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 
@@ -1969,6 +2008,7 @@ The Creator panel offers a cutout/background placement proxy. No qualified full 
 **Limits**
 
 - Use only as a placement study. Do not claim this browser display is a real model output or finished supported workflow.
+- This Creator placement study is separate from the model-backed Composite workflow. That opt-in development workflow has a short native export proof but still fails its professional visual target.
 
 **Common errors**
 

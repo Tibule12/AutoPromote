@@ -47,7 +47,7 @@ webpack(config, (error, stats) => {
   try {
     if (error || stats?.hasErrors())
       throw error || new Error(stats.toString({ all: false, errors: true }));
-    const { footerRoutes, nestedRoutes, renderPublicPage } = require(bundle);
+    const { footerRoutes, nestedRoutes, retiredRoutes, renderPublicPage } = require(bundle);
     const shell = fs.readFileSync(path.join(build, "index.html"), "utf8");
     if (!shell.includes('<div id="root"></div>'))
       throw new Error("Missing application root in production HTML");
@@ -58,8 +58,8 @@ webpack(config, (error, stats) => {
     ].map(file => fs.readFileSync(path.join(root, file), "utf8"));
     fs.writeFileSync(path.join(build, "company-pages.css"), `body{margin:0}\n${styles.join("\n")}`);
     let generated = 0;
-    for (const route of new Set([...footerRoutes, ...nestedRoutes])) {
-      if (!/^\/[a-z0-9-]+(?:\/[a-z0-9-]+)*$/.test(route))
+    for (const route of new Set([...footerRoutes, ...nestedRoutes, ...retiredRoutes])) {
+      if (!/^\/[a-z0-9_-]+(?:\/[a-z0-9_-]+)*$/.test(route))
         throw new Error("Unexpected public route");
       const destination = path.join(build, route.slice(1), "index.html");
       // Keep the existing standalone legal policies and their exact text.
@@ -68,6 +68,16 @@ webpack(config, (error, stats) => {
         continue;
       }
       let html = shell;
+      if (retiredRoutes.includes(route)) {
+        const tab = ["/analytics", "/metrics"].includes(route) ? "schedules" : "viral_clip_studio";
+        const target = `/#/?tab=${tab}`;
+        html = shell.replace("</head>", `<meta http-equiv="refresh" content="0;url=${target}"/></head>`)
+          .replace('<div id="root"></div>', `<div id="root"><p>This workspace has moved. <a href="${target}">Continue to your workspace</a>.</p></div>`);
+        fs.mkdirSync(path.dirname(destination), { recursive: true });
+        fs.writeFileSync(destination, html);
+        generated++;
+        continue;
+      }
       const rendered = renderPublicPage(route);
       if (rendered) {
         const title = rendered.match(/<h1>([^<]+)<\/h1>/)?.[1];

@@ -4,6 +4,7 @@ const { AsyncLocalStorage } = require("node:async_hooks");
 const crypto = require("node:crypto");
 const { assertSandbox } = require("./runtime");
 const { fail } = require("./policy");
+const { matchesWorkflowRequest } = require('./workflowDescriptor');
 const storage = new AsyncLocalStorage();
 const hash = value =>
   crypto
@@ -207,8 +208,7 @@ function createApplicationIntegration({
           (quote, source) => {
             if (
               quote.operation !== operation ||
-              !source.workflowInput?.requestBody ||
-              hash(source.workflowInput.requestBody) !== hash(req.body)
+              !matchesWorkflowRequest(source.workflowInput, req.body)
             )
               fail("WORKFLOW_INPUT_CHANGED", 409);
           }

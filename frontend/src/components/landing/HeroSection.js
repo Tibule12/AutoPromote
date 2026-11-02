@@ -24,7 +24,7 @@ export default function HeroSection({ onGetStarted, onWatchDemo }) {
             <span>
               <LandingIcon name="play" />
             </span>{" "}
-            Watch Demo <small>36 sec</small>
+            Explore the workspace
           </button>
         </div>
         <p className="lp-editorial-account">

@@ -11,17 +11,19 @@ const { CloudRunCapabilityWorker } = require('./cloudRunWorker');
 const { immutableJson } = require('./stores');
 const root = path.resolve(__dirname, '../..');
 const codeFiles = ['model_workers/common.py', 'model_workers/local_cpu.py', 'model_workers/adapters/cpu_matting.py',
+  'model_workers/adapters/component_segmentation.py','model_workers/adapters/temporal_alpha.py','model_workers/adapters/source_edge_alpha.py',
   'model_workers/adapters/segmentation.py', 'model_workers/adapters/cpu_segmentation.py',
   'python_media_worker/studio_subject_matte.py', 'config/model-runtime/registry.v1.json', 'contracts/model-capabilities-v1.json'];
 
 class LocalCpuCapabilityWorker {
-  constructor({ bucket, image, directory, modelDirectory, refinementModelDirectory, artifacts, dependenciesDirectory, baseDependencies }) {
+  constructor({ bucket, image, directory, modelDirectory, refinementModelDirectory, artifacts, dependenciesDirectory, baseDependencies, edgeDependencies }) {
     if (process.env.NODE_ENV === 'production' || process.env.STUDIO_MODEL_LOCAL_CPU_ENABLED !== 'true' ||
         !/^.+@sha256:[a-f0-9]{64}$/.test(image)) throw fail('MODEL_LOCAL_CPU_OFFLINE', 503);
     for (const value of [directory, modelDirectory, dependenciesDirectory, baseDependencies])
       if (!path.isAbsolute(value) || value.includes(',')) throw fail('MODEL_LOCAL_CPU_PATH_INVALID', 503);
     if(refinementModelDirectory && !path.isAbsolute(refinementModelDirectory))throw fail('MODEL_LOCAL_CPU_PATH_INVALID',503);
-    Object.assign(this, { bucket, image, directory, modelDirectory, refinementModelDirectory, artifacts, dependenciesDirectory, baseDependencies });
+    if(edgeDependencies&&(!path.isAbsolute(edgeDependencies)||edgeDependencies.includes(',')))throw fail('MODEL_LOCAL_CPU_PATH_INVALID',503);
+    Object.assign(this, { bucket, image, directory, modelDirectory, refinementModelDirectory, artifacts, dependenciesDirectory, baseDependencies, edgeDependencies });
     this.resultPrefix = 'studio/model-runtime/executions';
   }
   prefix(job) { return `${this.resultPrefix}/${job.ownerUid}/${job.id}/${job.attemptToken}`; }
@@ -32,7 +34,8 @@ class LocalCpuCapabilityWorker {
     catch (error) { if (error.code === 1 && /no such/i.test(error.stderr || '')) return null; throw error; }
   }
   async dispatch(job) {
-    if (!['sam21-small-cpu-v1','vitmatte-small-cpu-v1'].includes(job.model.id) || job.model.requiredDevice !== 'cpu' || job.workerImage !== this.image)
+    if (!['sam21-small-cpu-v1','vitmatte-small-cpu-v1','sam21-multiobject-cpu-v2',
+      'vitmatte-small-temporal-cpu-v2'].includes(job.model.id) || job.model.requiredDevice !== 'cpu' || job.workerImage !== this.image)
       throw Object.assign(fail('MODEL_LOCAL_CPU_MODEL_INVALID', 503), { definitelyNotStarted: true });
     const previous = await this.inspect(job);
     if (previous) return { name: `local-docker:${previous.Id}` }; // Never start again after an uncertain acknowledgement.
@@ -40,7 +43,7 @@ class LocalCpuCapabilityWorker {
     if (available.bavail*available.bsize < 5*1024**3)
       throw Object.assign(fail('MODEL_LOCAL_CPU_STORAGE_RESERVE', 503), { definitelyNotStarted: true });
     let spec;
-    const modelDirectory=job.model.id==='vitmatte-small-cpu-v1'?this.refinementModelDirectory:this.modelDirectory;
+    const modelDirectory=job.model.id.startsWith('vitmatte-small-')?this.refinementModelDirectory:this.modelDirectory;
     try {
       const inspected = JSON.parse((await run('docker', ['image', 'inspect', this.image], { timeout: 15000 })).stdout)[0];
       if (!(inspected.RepoDigests || []).includes(this.image)) throw fail('MODEL_LOCAL_CPU_IMAGE_UNVERIFIED', 503);
@@ -81,7 +84,17 @@ class LocalCpuCapabilityWorker {
         const [url]=await this.bucket.file(file.storagePath).getSignedUrl({action:'read',expires:Date.now()+20*60000,queryParams:{generation:file.generation}});
         maskDependency={artifact,file:{...file,url}};
       }
-      spec = { ...job, sourceUrl, codeFiles, implementationFiles, runtimeOverlay, ...(maskDependency?{maskDependency}:{}) };
+      let componentDependency;
+      if(maskDependency&&job.model.limits?.sourceResolutionEdges){
+        if(!this.edgeDependencies)throw fail('MODEL_SOURCE_EDGE_DEPENDENCY_UNAVAILABLE',503);
+        componentDependency=await require('./componentGuidance').componentGuidance(maskDependency.artifact,this.artifacts);
+        if(componentDependency){
+          const file=componentDependency.file;
+          const [url]=await this.bucket.file(file.storagePath).getSignedUrl({action:'read',expires:Date.now()+20*60000,queryParams:{generation:file.generation}});
+          componentDependency={...componentDependency,file:{...file,url}};
+        }
+      }
+      spec = { ...job, sourceUrl, codeFiles, implementationFiles, runtimeOverlay, ...(maskDependency?{maskDependency}:{}),...(componentDependency?{componentDependency}:{}) };
       await immutableJson(path.join(work, 'spec.json'), spec);
       // Persist the credential-free request identity in the ordinary immutable store.
       await this.bucket.file(`${this.prefix(job)}/request.json`).save(stable({ ...job, runtimeOverlay, implementationFiles }), {
@@ -93,7 +106,8 @@ class LocalCpuCapabilityWorker {
       '--user', `${process.getuid()}:${process.getgid()}`, '--entrypoint', '/opt/renderer-venv/bin/python',
       '-e', 'CUDA_VISIBLE_DEVICES=', '-e', 'NVIDIA_VISIBLE_DEVICES=void', '-e', 'OMP_NUM_THREADS=4',
       '-e', 'OPENBLAS_NUM_THREADS=4', '-e', 'PYTHONDONTWRITEBYTECODE=1',
-      '-e', 'PYTHONPATH=/opt/cpu-eval:/opt/cpu-base:/opt/autopromote',
+      '-e', 'PYTHONPATH=/opt/source-edge:/opt/cpu-eval:/opt/cpu-base:/opt/autopromote',
+      ...(this.edgeDependencies?['--mount',`type=bind,source=${this.edgeDependencies},target=/opt/source-edge,readonly`]:[]),
       '--mount', `type=bind,source=${path.join(this.work(job), 'runtime')},target=/opt/autopromote,readonly`,
       '--mount', `type=bind,source=${this.dependenciesDirectory},target=/opt/cpu-eval,readonly`,
       '--mount', `type=bind,source=${this.baseDependencies},target=/opt/cpu-base,readonly`,

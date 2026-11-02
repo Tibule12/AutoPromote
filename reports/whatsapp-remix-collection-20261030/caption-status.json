@@ -1,0 +1,26 @@
+{
+  "sequence": [
+    "Sidla ngamaphuthakho",
+    "Sidla ngamaphuthakho",
+    "zingaphi'ntozenzayo yho yho",
+    "zingaphi'ntozenzayo",
+    "ngconuxolise"
+  ],
+  "repeatStructure": {
+    "sidla": 2,
+    "zingaphi": 2,
+    "ngconuxolise": 1,
+    "yho": "first zingaphi"
+  },
+  "source": "Latest explicit owner five-phrase correction",
+  "captionsAuthoredInActualStudio": true,
+  "exportsInProgress": false,
+  "captionedRevisionsPublished": true,
+  "nativeExportsDelivered": 3,
+  "matchingStudioRecordingsDelivered": 3,
+  "validation": "captioned-three-validation.json",
+  "publishedPresets": [
+    "slowed_reverb"
+  ],
+  "publicationEvidence": "slowed-reverb-publication.json"
+}

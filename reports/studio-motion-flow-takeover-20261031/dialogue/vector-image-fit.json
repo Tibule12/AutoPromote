@@ -1,0 +1,241 @@
+{
+  "actualBrowser": true,
+  "headlessMuted": true,
+  "thresholdPx": 1,
+  "cases": [
+    {
+      "width": 280,
+      "height": 70,
+      "fit": "contain",
+      "actual": [
+        113,
+        13,
+        166,
+        57
+      ],
+      "reference": [
+        113,
+        13,
+        166,
+        56
+      ],
+      "legacy": [
+        113,
+        13,
+        166,
+        57
+      ],
+      "error": 1,
+      "legacyError": 1,
+      "pass": true
+    },
+    {
+      "width": 280,
+      "height": 70,
+      "fit": "cover",
+      "actual": [
+        34,
+        0,
+        245,
+        69
+      ],
+      "reference": [
+        34,
+        0,
+        245,
+        69
+      ],
+      "legacy": [
+        34,
+        0,
+        245,
+        69
+      ],
+      "error": 0,
+      "legacyError": 0,
+      "pass": true
+    },
+    {
+      "width": 280,
+      "height": 70,
+      "fit": "fill",
+      "actual": [
+        34,
+        12,
+        245,
+        57
+      ],
+      "reference": [
+        34,
+        13,
+        245,
+        56
+      ],
+      "legacy": [
+        113,
+        13,
+        166,
+        57
+      ],
+      "error": 1,
+      "legacyError": 79,
+      "pass": true
+    },
+    {
+      "width": 70,
+      "height": 280,
+      "fit": "contain",
+      "actual": [
+        8,
+        118,
+        61,
+        162
+      ],
+      "reference": [
+        8,
+        118,
+        61,
+        161
+      ],
+      "legacy": [
+        8,
+        118,
+        61,
+        162
+      ],
+      "error": 1,
+      "legacyError": 1,
+      "pass": true
+    },
+    {
+      "width": 70,
+      "height": 280,
+      "fit": "cover",
+      "actual": [
+        0,
+        58,
+        69,
+        221
+      ],
+      "reference": [
+        0,
+        58,
+        69,
+        221
+      ],
+      "legacy": [
+        0,
+        58,
+        69,
+        221
+      ],
+      "error": 0,
+      "legacyError": 0,
+      "pass": true
+    },
+    {
+      "width": 70,
+      "height": 280,
+      "fit": "fill",
+      "actual": [
+        8,
+        51,
+        61,
+        228
+      ],
+      "reference": [
+        8,
+        50,
+        61,
+        229
+      ],
+      "legacy": [
+        8,
+        118,
+        61,
+        162
+      ],
+      "error": 1,
+      "legacyError": 68,
+      "pass": true
+    },
+    {
+      "width": 140,
+      "height": 140,
+      "fit": "contain",
+      "actual": [
+        17,
+        25,
+        122,
+        114
+      ],
+      "reference": [
+        17,
+        25,
+        122,
+        114
+      ],
+      "legacy": [
+        17,
+        25,
+        122,
+        114
+      ],
+      "error": 0,
+      "legacyError": 0,
+      "pass": true
+    },
+    {
+      "width": 140,
+      "height": 140,
+      "fit": "cover",
+      "actual": [
+        17,
+        25,
+        122,
+        114
+      ],
+      "reference": [
+        17,
+        25,
+        122,
+        114
+      ],
+      "legacy": [
+        17,
+        25,
+        122,
+        114
+      ],
+      "error": 0,
+      "legacyError": 0,
+      "pass": true
+    },
+    {
+      "width": 140,
+      "height": 140,
+      "fit": "fill",
+      "actual": [
+        17,
+        25,
+        122,
+        114
+      ],
+      "reference": [
+        17,
+        25,
+        122,
+        114
+      ],
+      "legacy": [
+        17,
+        25,
+        122,
+        114
+      ],
+      "error": 0,
+      "legacyError": 0,
+      "pass": true
+    }
+  ]
+}

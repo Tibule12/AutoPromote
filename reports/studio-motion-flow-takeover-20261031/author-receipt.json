@@ -1,0 +1,11 @@
+{
+  "projectId": "viral-project-503d0b70-e495-43bc-be76-aeb1dfd94b9d",
+  "hash": "1edc5d4c61629613d6b09ef420be577659846ad7bb820c9115bf30268e5b6dd3",
+  "rigId": "null-rig-1793450123426",
+  "clocks": [
+    "graphic-1bcb443d-e1df-4152-93ef-c7835d0e3b3a",
+    "graphic-d61f65a6-5bd5-41b3-abe1-ab35fec38e76"
+  ],
+  "realStudioUI": true,
+  "normalEmulatorAuth": true
+}

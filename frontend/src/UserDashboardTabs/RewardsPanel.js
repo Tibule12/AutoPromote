@@ -3,7 +3,7 @@ import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
 
 const RewardsPanel = ({ badges }) => {
-  const [analytics, setAnalytics] = useState(null);
+  const [progress, setProgress] = useState(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -16,14 +16,14 @@ const RewardsPanel = ({ badges }) => {
       if (!user) return;
       const token = await user.getIdToken(true);
 
-      // We use the analytics endpoint because it now returns referralCode and trackers
-      const res = await fetch(`${API_ENDPOINTS.ANALYTICS}/user?range=30d`, {
+      // Reward progress is separate from the retired dashboard.
+      const res = await fetch(API_ENDPOINTS.REWARDS_PROGRESS, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (res.ok) {
         const data = await res.json();
-        setAnalytics(data);
+        setProgress(data);
       }
     } catch (error) {
       // Silent fail
@@ -31,8 +31,8 @@ const RewardsPanel = ({ badges }) => {
   };
 
   const copyToClipboard = () => {
-    if (analytics?.referralCode) {
-      const link = `${window.location.origin}/signup?ref=${analytics.referralCode}`;
+    if (progress?.referralCode) {
+      const link = `${window.location.origin}/signup?ref=${progress.referralCode}`;
       navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -40,7 +40,7 @@ const RewardsPanel = ({ badges }) => {
   };
 
   // Safe defaults
-  const stats = analytics || {};
+  const stats = progress || {};
   const referralTracker = stats.referralTracker || { total: 0, nextGoal: 10, potentialBonus: 5 };
   const viralityTracker = stats.viralityTracker || { views: 0, nextGoal: 30000, potentialBonus: 0 };
   const refLink = stats.referralCode
@@ -211,7 +211,7 @@ const RewardsPanel = ({ badges }) => {
             ></div>
           </div>
           <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>
-            Top Video: {viralityTracker.views.toLocaleString()} views
+            Top Video: {typeof viralityTracker.views === "number" ? viralityTracker.views.toLocaleString() : "Unavailable"} views
           </div>
         </div>
       </div>

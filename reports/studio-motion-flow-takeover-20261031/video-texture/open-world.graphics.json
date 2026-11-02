@@ -1,0 +1,1368 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Open World / native motion design",
+  "width": 1280,
+  "height": 720,
+  "duration": 60,
+  "layers": [
+    {
+      "id": "Light falloff",
+      "name": "Light falloff",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><defs><linearGradient id=\"g\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop stop-color=\"#070a0f\" stop-opacity=\".5\"/><stop offset=\".42\" stop-color=\"#070a0f\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#070a0f\" stop-opacity=\".46\"/></linearGradient></defs><rect width=\"1280\" height=\"720\" fill=\"url(#g)\"/></svg>",
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 0,
+      "duration": 60,
+      "keys": []
+    },
+    {
+      "id": "Opening line",
+      "name": "Opening line",
+      "type": "text",
+      "text": "THE WORLD",
+      "x": 49,
+      "y": 25,
+      "width": 90,
+      "scale": 2.2,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 0.6,
+      "duration": 4.2,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 0.85,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 4.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 4.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 0.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 1.2999999999999998,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 32,
+        "fromX": 0,
+        "fromY": 1.1,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.025,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Opening turn",
+      "name": "Opening turn",
+      "type": "text",
+      "text": "IS STILL OUT THERE.",
+      "x": 49,
+      "y": 40,
+      "width": 90,
+      "scale": 1.2,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#d9bc88",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 1.6,
+      "duration": 3.1999999999999997,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 1.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 1.85,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 4.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 4.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 1.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 2.3,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 32,
+        "fromX": 0,
+        "fromY": 1.1,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.025,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "City marker",
+      "name": "City marker",
+      "type": "text",
+      "text": "01 / THE EVERYDAY",
+      "x": 23,
+      "y": 91,
+      "width": 90,
+      "scale": 0.55,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#d9bc88",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 0.7,
+      "duration": 8.100000000000001,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 0.95,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "First departure",
+      "name": "First departure",
+      "type": "text",
+      "text": "STEP OUT.",
+      "x": 62,
+      "y": 27,
+      "width": 90,
+      "scale": 2.1,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 10.2,
+      "duration": 4.700000000000001,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 10.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 10.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 10.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 10.899999999999999,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 32,
+        "fromX": 0,
+        "fromY": 1.1,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.025,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Trail premise",
+      "name": "Trail premise",
+      "type": "text",
+      "text": "TAKE THE LONG WAY.",
+      "x": 50,
+      "y": 26,
+      "width": 90,
+      "scale": 1.8,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 17.2,
+      "duration": 5.600000000000001,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 17.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 17.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 22.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 22.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 17.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 17.9,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 32,
+        "fromX": 0,
+        "fromY": 1.1,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.025,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Forest cue",
+      "name": "Forest cue",
+      "type": "text",
+      "text": "LESS NOISE.",
+      "x": 50,
+      "y": 72,
+      "width": 90,
+      "scale": 2.15,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 27,
+      "duration": 4.5,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 27,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 27.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 31.2,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 31.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 27,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 27.7,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 32,
+        "fromX": 0,
+        "fromY": 1.1,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.025,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Forest cue two",
+      "name": "Forest cue two",
+      "type": "text",
+      "text": "MORE WORLD.",
+      "x": 50,
+      "y": 85,
+      "width": 90,
+      "scale": 1.55,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#d9bc88",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 29,
+      "duration": 5.899999999999999,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 29,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 29.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 34.6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 34.9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 29,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 29.7,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 32,
+        "fromX": 0,
+        "fromY": 1.1,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.025,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Coast cue",
+      "name": "Coast cue",
+      "type": "text",
+      "text": "FOLLOW THE LIGHT.",
+      "x": 49,
+      "y": 25,
+      "width": 90,
+      "scale": 1.6,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 39,
+      "duration": 5.799999999999997,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 39,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 39.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 44.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 44.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 39,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 39.7,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 32,
+        "fromX": 0,
+        "fromY": 1.1,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.025,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Summit line",
+      "name": "Summit line",
+      "type": "text",
+      "text": "GO FURTHER.",
+      "x": 50,
+      "y": 79,
+      "width": 90,
+      "scale": 2.2,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 51,
+      "duration": 6.799999999999997,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 51,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 51.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 57.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 57.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 51,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 51.7,
+          "value": 100,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 32,
+        "fromX": 0,
+        "fromY": 1.1,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.025,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "Ending",
+      "name": "Ending",
+      "type": "text",
+      "text": "A MOTION & FLOW STUDY",
+      "x": 50,
+      "y": 90,
+      "width": 90,
+      "scale": 0.55,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#d9bc88",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 55.2,
+      "duration": 4.699999999999996,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 55.2,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 55.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 59.6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 59.9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Footage disclosure",
+      "name": "Footage disclosure",
+      "type": "text",
+      "text": "STOCK FOOTAGE / EDITING DEMONSTRATION",
+      "x": 50,
+      "y": 96,
+      "width": 90,
+      "scale": 0.38,
+      "rotation": 0,
+      "opacity": 1,
+      "color": "#d0d4dd",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "startTime": 0.5,
+      "duration": 59.4,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 0.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 0.75,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 59.6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 59.9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Journey path",
+      "name": "Journey path",
+      "type": "artwork",
+      "vectorShape": {
+        "version": 1,
+        "closed": false,
+        "nodes": [
+          {
+            "x": 5,
+            "y": 65,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 35,
+            "y": 65,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 47,
+            "y": 35,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 75,
+            "y": 35,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 95,
+            "y": 35,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#d9bc88",
+          "endColor": "#d9bc88",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#d9bc88",
+          "width": 0.7
+        }
+      },
+      "x": 28,
+      "y": 74,
+      "width": 30,
+      "height": 16,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 5.5,
+      "duration": 3.3,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 5.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 5.8,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": "Opening line reveal",
+      "name": "Opening line reveal",
+      "layerIds": [
+        "Opening line"
+      ],
+      "startTime": 0.6,
+      "duration": 4.2,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Opening turn reveal",
+      "name": "Opening turn reveal",
+      "layerIds": [
+        "Opening turn"
+      ],
+      "startTime": 1.6,
+      "duration": 3.1999999999999997,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "First departure reveal",
+      "name": "First departure reveal",
+      "layerIds": [
+        "First departure"
+      ],
+      "startTime": 10.2,
+      "duration": 4.700000000000001,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Trail premise reveal",
+      "name": "Trail premise reveal",
+      "layerIds": [
+        "Trail premise"
+      ],
+      "startTime": 17.2,
+      "duration": 5.600000000000001,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Forest cue reveal",
+      "name": "Forest cue reveal",
+      "layerIds": [
+        "Forest cue"
+      ],
+      "startTime": 27,
+      "duration": 4.5,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Forest cue two reveal",
+      "name": "Forest cue two reveal",
+      "layerIds": [
+        "Forest cue two"
+      ],
+      "startTime": 29,
+      "duration": 5.899999999999999,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Coast cue reveal",
+      "name": "Coast cue reveal",
+      "layerIds": [
+        "Coast cue"
+      ],
+      "startTime": 39,
+      "duration": 5.799999999999997,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "Summit line reveal",
+      "name": "Summit line reveal",
+      "layerIds": [
+        "Summit line"
+      ],
+      "startTime": 51,
+      "duration": 6.799999999999997,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    }
+  ]
+}

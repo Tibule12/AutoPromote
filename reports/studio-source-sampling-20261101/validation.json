@@ -1,0 +1,247 @@
+{
+  "date": "2026-11-01",
+  "worktree": "/home/tibule12/Projects/AutoPromte/AutoPromote-ae-fusion-20261031",
+  "baseCommit": "722e8a3a",
+  "localOnly": true,
+  "productionWrites": 0,
+  "paidCalls": 0,
+  "renderJobsStarted": 0,
+  "frontendTests": {
+    "suites": 5,
+    "passed": 51
+  },
+  "backendTests": {
+    "suites": 1,
+    "passed": 10,
+    "actualSequenceFramesCompared": 15,
+    "actualTextureFramesComparedToNativePreparation": 21
+  },
+  "welcome": {
+    "viewportChecks": 8,
+    "matchingContent": true,
+    "browserErrors": 0
+  },
+  "normalNativeUi": {
+    "pausedSamples": [
+      {
+        "requested": 6.5,
+        "initial": {
+          "programmeTime": "0",
+          "sampling": "native",
+          "sourceFrameIndex": "",
+          "busy": "true",
+          "width": 1016,
+          "height": 572
+        },
+        "scene": {
+          "testid": "studio-3d-preview",
+          "sceneFrameIndex": "30",
+          "textureSampling": "accurate-paused",
+          "textureFrameIndex": "30",
+          "textureSourceTime": "6.5",
+          "textureTransport": "paused",
+          "textureSeeking": "false"
+        },
+        "settled": {
+          "programmeTime": "6.5",
+          "sampling": "accurate-paused",
+          "sourceFrameIndex": "156",
+          "busy": "false",
+          "width": 1016,
+          "height": 572
+        },
+        "settleWaitMs": 3008
+      },
+      {
+        "requested": 8.2,
+        "initial": {
+          "programmeTime": "6.5",
+          "sampling": "accurate-paused",
+          "sourceFrameIndex": "156",
+          "busy": "true",
+          "width": 1016,
+          "height": 572
+        },
+        "scene": {
+          "testid": "studio-3d-preview",
+          "sceneFrameIndex": "81",
+          "textureSampling": "accurate-paused",
+          "textureFrameIndex": "81",
+          "textureSourceTime": "8.199999",
+          "textureTransport": "paused",
+          "textureSeeking": "false"
+        },
+        "settled": {
+          "programmeTime": "8.208333333333334",
+          "sampling": "accurate-paused",
+          "sourceFrameIndex": "197",
+          "busy": "false",
+          "width": 1016,
+          "height": 572
+        },
+        "settleWaitMs": 2110
+      },
+      {
+        "requested": 10.1,
+        "initial": {
+          "programmeTime": "10.083333",
+          "sampling": "native",
+          "sourceFrameIndex": "",
+          "busy": "true",
+          "width": 1016,
+          "height": 572
+        },
+        "settled": {
+          "programmeTime": "10.083333333333334",
+          "sampling": "accurate-paused",
+          "sourceFrameIndex": "2",
+          "busy": "false",
+          "width": 1016,
+          "height": 572
+        },
+        "settleWaitMs": 532
+      },
+      {
+        "requested": 15.9,
+        "initial": {
+          "programmeTime": "15.916666",
+          "sampling": "native",
+          "sourceFrameIndex": "",
+          "busy": "true",
+          "width": 1016,
+          "height": 572
+        },
+        "settled": {
+          "programmeTime": "15.916666666666668",
+          "sampling": "accurate-paused",
+          "sourceFrameIndex": "142",
+          "busy": "false",
+          "width": 1016,
+          "height": 572
+        },
+        "settleWaitMs": 763
+      }
+    ],
+    "project": {
+      "projectId": "viral-project-834b6baa-f9b9-491d-9b09-47e9e4a7b176",
+      "exactCanonicalDecisions": true,
+      "canonicalDecisionHash": "bf29704619c84b936a337e675df886a261e532bf503d49aab6f9cc7d4d571e8c",
+      "normalSave": true,
+      "nativeBackupDownloaded": true,
+      "sourceFiles": [
+        {
+          "name": "City.mp4",
+          "sha256": "09f2b8bfcf899d174ecf53f6a9c5358b9d19ca7b7d8ba0b1c508abfc2a2bf15d"
+        },
+        {
+          "name": "Footsteps.mp4",
+          "sha256": "459c13e384b1819b2e3d0bc8eae287d10e58c96d266a0b4bbf1553c98969bbac"
+        },
+        {
+          "name": "Open trail.mp4",
+          "sha256": "b5406236fe04617468a712d3353b37845149a16a25afb6b1b9f38e72801acc96"
+        },
+        {
+          "name": "Autumn.mp4",
+          "sha256": "01258817091b10d7639169d3fc9885229ea5fbad787ee1ac674b72c25f9ef468"
+        },
+        {
+          "name": "Coast.mp4",
+          "sha256": "dd6037bc87dc9c93b84fb506b04355fe12d1f4bda0e942aec8da7e83d3c3e86c"
+        },
+        {
+          "name": "Summit.mp4",
+          "sha256": "96056be98b025809b72e38baebc1ea0827fbc30d9a02cfd8844c35a371a3fe00"
+        }
+      ]
+    },
+    "shortTransport": {
+      "observations": 12,
+      "shared": 10,
+      "seeking": 1,
+      "previousSeeking": 11
+    }
+  },
+  "livePlayback": {
+    "programmeEnd": 60,
+    "elapsedToEndMs": 61705.5,
+    "observedProgrammeUpdates": 1206,
+    "sceneSamples": 54,
+    "sharedSceneSamples": 53,
+    "capture": {
+      "seconds": 62.41499996185303,
+      "frames": 612,
+      "rawBytes": 86276128,
+      "nativeControlsOnly": true,
+      "setupExcluded": true,
+      "audio": "Silent native editing capture"
+    },
+    "returnsToStartAfterEnd": true
+  },
+  "nativeExportUnchanged": {
+    "sha256": "c738100f8e6574cf36cf3ad00307c687305355e3a0f075ee5de7b0861c60c7d2",
+    "seconds": 60,
+    "fps": 24,
+    "frames": 1440
+  },
+  "measurements": {
+    "measurements": [
+      {
+        "time": 6.5,
+        "previous": {
+          "rgbRmse": 10.72072938882762,
+          "psnrDb": 27.526316933695227
+        },
+        "corrected": {
+          "rgbRmse": 7.328087760507133,
+          "psnrDb": 30.830990373442418
+        }
+      },
+      {
+        "time": 8.2,
+        "previous": {
+          "rgbRmse": 21.79643182046471,
+          "psnrDb": 21.363095541648907
+        },
+        "corrected": {
+          "rgbRmse": 6.326311868737772,
+          "psnrDb": 32.10779165748538
+        }
+      },
+      {
+        "time": 10.1,
+        "previous": {
+          "rgbRmse": 21.955623910431157,
+          "psnrDb": 21.299887950440333
+        },
+        "corrected": {
+          "rgbRmse": 6.389851895643896,
+          "psnrDb": 32.02098776522945
+        }
+      },
+      {
+        "time": 15.9,
+        "previous": {
+          "rgbRmse": 17.69104023880175,
+          "psnrDb": 23.1757362023907
+        },
+        "corrected": {
+          "rgbRmse": 6.545843444984763,
+          "psnrDb": 31.811491324626758
+        }
+      }
+    ],
+    "scope": "Resized whole-picture measurements, without a new or relaxed pass threshold.",
+    "wholePictureParityQualified": false
+  },
+  "realTime24FpsQualified": false,
+  "wholePictureParityQualified": false,
+  "creativeApproved": false,
+  "readinessPromoted": false,
+  "remaining": [
+    "Different-source live textures still use the native browser proxy and need decoded-frame/CFR and performance qualification.",
+    "Shared-decoder live sampling does not establish native 30fps texture-frame identity at every 24fps programme position.",
+    "Whole picture colour/edge/alpha, complete audio parity and real-time 24fps remain open.",
+    "The Open World creative is below the owner brief; Director inference, broader motion depth and S03 ownership remain open."
+  ]
+}

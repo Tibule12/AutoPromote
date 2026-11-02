@@ -134,7 +134,6 @@ jest.mock("../MultiCamCombiner", () => props => (
 ));
 
 jest.mock("../ThumbnailGenerator", () => () => null);
-jest.mock("../SmartPromoSummaryPanel", () => () => null);
 
 const source = {
   name: "source.mp4",

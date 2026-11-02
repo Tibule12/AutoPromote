@@ -4,6 +4,9 @@ import {
   rebaseStudioHistoryRestore,
   reconcileStudioDocument,
   validateStudioProjectDocument,
+  projectStudioEditableStateToSnapshot,
+  buildStudioLayersFromSnapshot,
+  projectStudioLinkedTimingToSnapshot,
 } from "../studioProjectDocument";
 import { secondsToTicks } from "../studioTime";
 
@@ -44,6 +47,39 @@ const snapshot = () => ({
       cacheKey: `semantic:1:${"b".repeat(64)}:words:model-1:config-1:${"c".repeat(64)}`,
     },
   ],
+});
+
+test('canonical restoration retains the video texture source and source-in, independent of the legacy snapshot',()=>{
+  const value=snapshot();Object.assign(value.threeDScenes[0],{assetType:'video',assetSourceStart:5.5,assetAspect:16/9,assetContentHash:'d'.repeat(64),assetStoragePath:'studio/sources/user/source.mp4'});
+  const document=adaptStudioSnapshotToDocument({snapshot:value,projectId:'video-texture-project'});
+  expect(validateStudioProjectDocument(document)).toBe(document);
+  const restored=projectStudioEditableStateToSnapshot(document,{timeline:value.timeline});
+  expect(restored.threeDScenes[0]).toMatchObject({assetType:'video',assetSourceStart:5.5,assetAspect:16/9,assetContentHash:'d'.repeat(64),assetStoragePath:'studio/sources/user/source.mp4'});
+  value.threeDScenes[0].assetSourceStart=4;
+  expect(reconcileStudioDocument({snapshot:value,projectId:'video-texture-project',storedDocument:document})).not.toEqual(document);
+});
+
+test('migrates initial same-source video snapshots once without reviving later canonical deletions',()=>{
+  const value=snapshot();Object.assign(value.threeDScenes[0],{assetType:'video',assetSourceStart:5.5,assetAspect:16/9,assetContentHash:'d'.repeat(64),assetStoragePath:'studio/sources/user/source.mp4'});
+  const document=adaptStudioSnapshotToDocument({snapshot:value,projectId:'video-migration'});
+  const old=JSON.parse(JSON.stringify(document));delete old.compatibility.videoTextureFieldsVersion;
+  const layer=old.layers.find(l=>l.type==='three_d');
+  for(const key of ['assetType','assetSourceStart','assetAspect','assetContentHash'])delete layer.parameters[key];
+  expect(projectStudioEditableStateToSnapshot(old,value).threeDScenes[0].assetSourceStart).toBe(5.5);
+  old.compatibility.videoTextureFieldsVersion=1;
+  expect(projectStudioEditableStateToSnapshot(old,value).threeDScenes[0].assetType).toBeUndefined();
+  delete old.compatibility.videoTextureFieldsVersion;value.threeDScenes[0].assetStoragePath='studio/sources/user/different.mp4';
+  expect(projectStudioEditableStateToSnapshot(old,value).threeDScenes[0].assetType).toBeUndefined();
+});
+
+test('selected and explicitly disabled object colour corrections survive canonical layer projection',()=>{
+ for(const ids of [['prop-a'],[]]){
+  const item={scene:{id:'scene-a'},enabled:true,maskColourComponentIds:ids};
+  const layers=buildStudioLayersFromSnapshot({subjectVfxScenes:[item]});
+  expect(layers[0].parameters.maskColourComponentIds).toEqual(ids);
+  const projected=projectStudioLinkedTimingToSnapshot({layers});
+  expect(projected.subjectVfxScenes[0].maskColourComponentIds).toEqual(ids);
+ }
 });
 
 test('opening an unchanged legacy occurrence preserves source-duration parameters and export identity', () => {

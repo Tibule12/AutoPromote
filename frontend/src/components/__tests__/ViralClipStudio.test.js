@@ -114,7 +114,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         exact: true,
       })
     );
-    fireEvent.click(await screen.findByRole("button", { name: /Render Final Clip/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /^(Render Final Clip|Render Again)$/i }));
   };
 
   beforeEach(() => {
@@ -244,6 +244,46 @@ describe("ViralClipStudio timeline sequencing", () => {
     return video;
   };
 
+  test.each([1,2])('the final trimmed shot in a %s-shot edit holds its last frame and ignores late canplay',async count=>{
+    const source={id:'range',start:0,end:12,duration:12,sourceDuration:12};
+    const timeline=count===1
+      ? [{id:'main',sourceClipId:'range',startRequest:2,endRequest:8,url:'https://example.com/source.mp4'}]
+      : [{id:'main',sourceClipId:'range',startRequest:0,endRequest:4,url:'https://example.com/source.mp4'},
+         {id:'last',sourceClipId:'range',startRequest:4,endRequest:12,url:'https://example.com/source.mp4'}];
+    mountNativePreview({initialSavedProject:{id:`terminal-${count}`,name:'Terminal source',snapshot:{
+      orderedClips:[source],selectedClipId:'range',timeline,activeTimelineIndex:count-1,addHook:false,
+      exportSettings:{fps:'24'},overlays:[],motionKeyframes:[],
+    }}});
+    // Saved-project restore commits on its own animation frame. Wait for its
+    // 24fps transport before simulating media on the selected source slot.
+    await waitFor(()=>expect(Number(screen.getByLabelText('Edited output position').step)).toBeCloseTo(1/24,8));
+    fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:count===1?'3':'7'}});
+    const video=screen.getByTestId('studio-after-video');
+    let paused=true;
+    Object.defineProperties(video,{
+      paused:{configurable:true,get:()=>paused},readyState:{configurable:true,value:4},
+      duration:{configurable:true,value:12},currentSrc:{configurable:true,get:()=>video.src},
+    });
+    video.play=jest.fn(()=>{if(paused){paused=false;video.dispatchEvent(new Event('play'));}return Promise.resolve();});
+    video.pause=jest.fn(()=>{if(!paused){paused=true;video.dispatchEvent(new Event('pause'));}});
+    fireEvent.loadedData(video);
+    fireEvent.click(screen.getByRole('button',{name:'Play comparison',exact:true}));
+    await waitFor(()=>expect(video.paused).toBe(false));
+    const end=timeline.at(-1).endRequest;
+    act(()=>{video.currentTime=end;video.dispatchEvent(new Event('timeupdate'));});
+    await waitFor(()=>expect(screen.getByRole('button',{name:'Play comparison',exact:true})).toBeInTheDocument());
+    expect(screen.getByTestId('studio-after-video')).toBe(video);
+    const frameStep=Number(screen.getByLabelText('Edited output position').step);
+    expect(video.currentTime).toBeCloseTo(end-frameStep,5);expect(video.paused).toBe(true);
+    // A native ended event can already be queued when the precise trim
+    // watcher pauses the element. It must not refocus an earlier cutaway.
+    fireEvent.ended(video);
+    expect(screen.getByTestId('studio-after-video')).toBe(video);
+    expect(video.currentTime).toBeCloseTo(end-frameStep,5);
+    video.play.mockClear();fireEvent.canPlay(video);
+    expect(video.play).not.toHaveBeenCalled();expect(video.paused).toBe(true);
+  });
+
   test("an existing finished URL cannot hide recovery actions that still need attention", () => {
     mountNativePreview({ renderedOutput: { url: 'https://example.com/finished.mp4' },
       renderRecoveryNeedsAttention: true,
@@ -321,6 +361,77 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(overlay.paused).toBe(true);
   });
 
+  test('repeated known overlay metadata does not rebuild the canonical edit or history', async () => {
+    const source={id:'range',start:2,end:8,duration:6,sourceDuration:12};
+    mountNativePreview({initialSavedProject:{id:'metadata-stable',name:'Metadata stable',snapshot:{
+      orderedClips:[source],selectedClipId:'range',addHook:false,
+      timeline:[{...source,sourceClipId:'range',startRequest:2,endRequest:8,url:'https://example.com/source.mp4'}],
+      overlays:[{id:'result',type:'video',src:'https://example.com/result.mp4',sourceDuration:12,
+        startTime:0,duration:6,width:70,height:70,x:50,y:50}],
+    }}});
+    const overlay=await screen.findByTestId('broll-preview-result');
+    Object.defineProperty(overlay,'duration',{configurable:true,value:12});
+    const reconcile=jest.spyOn(studioProjectDocument,'reconcileStudioDocument');reconcile.mockClear();
+    fireEvent.loadedMetadata(overlay);
+    expect(reconcile).not.toHaveBeenCalled();
+    Object.defineProperty(overlay,'duration',{configurable:true,value:13});
+    fireEvent.loadedMetadata(overlay);
+    await waitFor(()=>expect(reconcile).toHaveBeenCalled());reconcile.mockRestore();
+  });
+
+  test('projected video decoders exist only near their authored cue', async () => {
+    const source={id:'range',start:2,end:8,duration:6,sourceDuration:12};
+    mountNativePreview({initialSavedProject:{id:'bounded-plane',name:'Bounded plane',snapshot:{
+      workspaceMode:'fxflow',orderedClips:[source],selectedClipId:'range',addHook:false,
+      timeline:[{...source,sourceClipId:'range',startRequest:2,endRequest:8,url:'https://example.com/source.mp4'}],
+      overlays:[{id:'plane',type:'video',src:'https://example.com/plane.mp4',sourceDuration:12,
+        startTime:4,duration:1,width:70,height:70,x:50,y:50,
+        perspective:{version:1,corners:[[0,12],[88,0],[88,100],[0,88]]}}],
+    }}});
+    await screen.findByDisplayValue('Bounded plane');
+    fireEvent.click(screen.getByTestId('studio-mode-fxflow'));
+    fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:'1'}});
+    expect(screen.queryByTestId('broll-preview-plane')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:'4.2'}});
+    await screen.findByTestId('broll-preview-plane');
+    fireEvent.change(screen.getByLabelText('Edited output position'),{target:{value:'5.5'}});
+    await waitFor(()=>expect(screen.queryByTestId('broll-preview-plane')).not.toBeInTheDocument());
+  });
+
+  test('finished playback releases live overlay decoders and restores them only for the live edit', async () => {
+    const source = { id: 'range', start: 2, end: 8, duration: 6, sourceDuration: 12 };
+    const { video } = mountNativePreview({
+      renderedOutput: { url: 'https://example.com/finished.mp4' },
+      initialSavedProject: { id: 'finished-media', name: 'Finished media', snapshot: {
+        orderedClips: [source], selectedClipId: 'range',
+        timeline: [{ ...source, sourceClipId: 'range', startRequest: 2, endRequest: 8,
+          url: 'https://example.com/source.mp4' }], addHook: false,
+        overlays: [{ id: 'result', type: 'video', src: 'https://example.com/result.mp4',
+          startTime: 0, duration: 6, sourceDuration: 12, sourceStartTime: .5,
+          x: 50, y: 50, width: 100, height: 90 }],
+      } },
+    });
+    await screen.findByDisplayValue('Finished media');
+    expect(screen.queryByTestId('broll-preview-result')).not.toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Creative tools' }))
+      .getByRole('button', { name: 'Export', exact: true }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Show Live Edit', exact: true }));
+    const overlay = await screen.findByTestId('broll-preview-result');
+    Object.defineProperty(overlay, 'duration', { configurable: true, value: 12 });
+    fireEvent.change(screen.getByLabelText('Edited output position'), { target: { value: '2.3' } });
+    await waitFor(() => expect(overlay.currentTime).toBeCloseTo(2.8, 3));
+    const pause = jest.spyOn(overlay, 'pause');
+    fireEvent.click(screen.getByRole('button', { name: 'Show Finished Video', exact: true }));
+    expect(screen.queryByTestId('broll-preview-result')).not.toBeInTheDocument();
+    expect(pause).toHaveBeenCalled();
+    expect(overlay.getAttribute('src')).toBeNull();
+    const releasedTime = overlay.currentTime;
+    fireEvent.play(video);
+    video.currentTime = 3;
+    fireEvent.timeUpdate(video);
+    expect(overlay.currentTime).toBe(releasedTime);
+  });
+
   test("metadata reload preserves the selected trim and paused editing frame", () => {
     const { video } = mountNativePreview();
     fireEvent.loadedMetadata(video);
@@ -352,16 +463,16 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId("pro-current-edit")).toHaveTextContent("0:06");
   });
 
-  test("a playing single-clip sequence loops at its trimmed end", () => {
+  test("ordinary single-clip playback holds the final authored frame at its trimmed end", () => {
     const { video } = mountNativePreview();
     fireEvent.click(screen.getByRole("button", { name: /Play comparison/ }));
     video.currentTime = 8.1;
     fireEvent.timeUpdate(video);
-    expect(video.currentTime).toBe(2);
-    expect(video.paused).toBe(false);
+    expect(video.currentTime).toBeCloseTo(8 - 1 / 30, 5);
+    expect(video.paused).toBe(true);
   });
 
-  test("native source EOF loops a full-length clip while user-paused EOF stays paused", () => {
+  test("native source EOF holds a full-length clip while user-paused EOF stays paused", () => {
     const { video } = mountNativePreview({
       clips: [{ id: "full", start: 0, end: 12, duration: 12 }],
     });
@@ -371,9 +482,10 @@ describe("ViralClipStudio timeline sequencing", () => {
     }); // Native EOF pauses before dispatching ended.
     video.currentTime = 12;
     fireEvent.ended(video);
-    expect(video.currentTime).toBe(0);
-    expect(video.paused).toBe(false);
-    fireEvent.click(screen.getByRole("button", { name: "Pause comparison" }));
+    expect(video.currentTime).toBeCloseTo(12 - 1 / 30, 5);
+    expect(video.paused).toBe(true);
+    fireEvent.canPlay(video);
+    expect(video.paused).toBe(true);
     video.currentTime = 12;
     fireEvent.ended(video);
     expect(video.paused).toBe(true);
@@ -464,7 +576,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(video.paused).toBe(true);
   });
 
-  test.each(['off','speech'])("a prepared native cut keeps music and an overlapping cue on one audio clock and Pause stops both: %s", async duckMode => {
+  test.each(['off','speech','speech-original'])("a prepared native cut keeps music and an overlapping cue on one audio clock and Pause stops both: %s", async duckMode => {
     const previousContext = window.AudioContext;
     const previousFrameRequest = HTMLVideoElement.prototype.requestVideoFrameCallback;
     const previousFrameCancel = HTMLVideoElement.prototype.cancelVideoFrameCallback;
@@ -514,7 +626,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         target: { files: [new File(['song'], 'cut-song.mp3', { type: 'audio/mpeg' })] },
       });
       if (duckMode === 'off') fireEvent.click(screen.getByRole('checkbox', { name: /Duck under speech/i }));
-      else fireEvent.click(screen.getByRole('checkbox', { name: /Keep original audio/i }));
+      else if(duckMode==='speech')fireEvent.click(screen.getByRole('checkbox', { name: /Keep original audio/i }));
       await waitFor(() => expect(context.decodeAudioData).toHaveBeenCalled());
       const constructorsAfterMusic = window.AudioContext.mock.calls.length;
       fireEvent.timeUpdate(video);
@@ -3473,6 +3585,41 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("uploads a repeated overlay File once and preserves each occurrence when exporting", async () => {
+    const shared = new File(["same media"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
+    const distinct = new File(["different!"], "repeat.mp4", { type: "video/mp4", lastModified: 12 });
+    const source = { id: "main", name: "Owned source", url: "https://example.com/source.mp4",
+      storagePath: "studio/sources/test-user/source.mp4", start: 0, end: 6, duration: 6 };
+    const layer = (id, file, startTime) => ({ id, name: id, type: "video", file, src: "blob:local-media",
+      isLocal: true, bRollMode: "pip", startTime, duration: 2, sourceDuration: 6,
+      sourceStartTime: 0, width: 30, height: 20, x: 50, y: 50, scale: 1, opacity: 1 });
+    const overlays = [layer("first", shared, 0), layer("second", shared, 2), layer("different", distinct, 4)];
+    uploadSourceFileViaBackend.mockImplementation(({ file }) => Promise.resolve({
+      url: file === shared ? "https://example.com/shared.mp4" : "https://example.com/distinct.mp4",
+      storagePath: file === shared ? "studio/sources/test-user/shared.mp4" : "studio/sources/test-user/distinct.mp4",
+    }));
+    global.fetch.mockResolvedValue({ ok: true, json: async () => ({}) });
+    const onSave = jest.fn();
+    render(<ViralClipStudio videoUrl={source.url} clips={[source]} onSave={onSave} onCancel={jest.fn()}
+      initialSavedProject={{ id: "shared-file-export", name: "Repeated source", snapshot: {
+        orderedClips: [source], selectedClipId: source.id,
+        timeline: [{ ...source, sourceClipId: source.id, startRequest: 0, endRequest: 6 }],
+        projectMedia: [{ ...source, status: "ready", mediaType: "video" }], overlays,
+        reframeAspect: "16:9", smartCrop: false, previewSpeed: 1, addHook: false,
+        autoCaptions: false, silenceRemoval: false, motionKeyframes: [],
+      } }} />);
+    await screen.findByDisplayValue("Repeated source");
+    await act(async () => { await clickRenderFinalClip(); });
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === shared)).toHaveLength(1);
+    expect(uploadSourceFileViaBackend.mock.calls.filter(([args]) => args.file === distinct)).toHaveLength(1);
+    expect(onSave.mock.calls[0][1]).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "first", startTime: 0, duration: 2, src: "https://example.com/shared.mp4" }),
+      expect.objectContaining({ id: "second", startTime: 2, duration: 2, src: "https://example.com/shared.mp4" }),
+      expect.objectContaining({ id: "different", startTime: 4, duration: 2, src: "https://example.com/distinct.mp4" }),
+    ]));
+  });
+
   test("materializes blob-backed main timeline clips before export", async () => {
     const onSave = jest.fn();
     global.fetch = jest.fn(url => {
@@ -3918,7 +4065,8 @@ describe("ViralClipStudio timeline sequencing", () => {
       value: 20,
     });
     fireEvent.ended(afterVideo);
-    await waitFor(() => expect(afterVideo.currentTime).toBeLessThan(2));
+    await waitFor(() => expect(afterVideo.currentTime).toBeCloseTo(20 - 1 / 30, 5));
+    expect(afterVideo.paused).toBe(true);
 
     fireEvent.click(screen.getByRole("button", { name: "After" }));
     expect(afterVideo).not.toHaveAttribute("controls");
@@ -5844,6 +5992,272 @@ describe("ViralClipStudio timeline sequencing", () => {
     ]);
   });
 
+  test.each([
+    ["split", "pro-quick-split"],
+    ["trim start", "timeline-quick-trim-start"],
+    ["trim end", "inspector-cut-trim-end"],
+  ])("%s maps finished playback through speed and source trim before editing", (action, control) => {
+    const commandSpy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
+    try {
+      const editor = output => <ViralClipStudio videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "finished-cut", start: 10, end: 30, duration: 20, sourceDuration: 40 }]}
+        renderedOutput={output}
+        onSave={jest.fn()} onCancel={jest.fn()} />;
+      const {rerender} = render(editor(null));
+      fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" }))
+        .getByRole("button", { name: "Pacing", exact: true }));
+      fireEvent.click(screen.getByRole("button", { name: "2×", exact: true }));
+      // Supply the completed 2× file after authoring its speed. Changing an
+      // edit now correctly invalidates any previously completed movie.
+      rerender(editor({url: "https://example.com/finished.mp4"}));
+      fireEvent.click(screen.getByRole("button", { name: /^Cut$/i }));
+      const video = readyCutawaySource(10);
+      expect(video.src).toContain("finished.mp4");
+      video.currentTime = 3;
+      fireEvent.timeUpdate(video);
+      fireEvent.click(screen.getByTestId(control));
+      expect(commandSpy).toHaveBeenCalledTimes(1);
+      const operation = commandSpy.mock.calls[0][0].batch.operations[0];
+      if (action === "split") expect(operation.at).toEqual({ space: "source", ticks: secondsToTicks(16) });
+      else expect(operation.keep).toEqual({ space: "source",
+        startTick: secondsToTicks(action === "trim start" ? 16 : 10),
+        endTick: secondsToTicks(action === "trim end" ? 16 : 30) });
+      expect(screen.getByTestId("studio-after-video").src).toContain("source.mp4");
+    } finally { commandSpy.mockRestore(); }
+  });
+
+  test("Razor clicks split the clicked frame instead of the old playhead and Undo restores it", async () => {
+    const commandSpy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "razor-source", start: 10, end: 30, duration: 20, sourceDuration: 40 }]}
+        onSave={jest.fn()} onCancel={jest.fn()} />);
+      const video = readyCutawaySource(40);
+      video.currentTime = 12; fireEvent.timeUpdate(video);
+      fireEvent.click(screen.getByRole("button", { name: "Razor tool", exact: true }));
+      const clip = screen.getByTestId("pro-video-clip-1");
+      clip.parentElement.getBoundingClientRect = () => ({ left: 100, width: 500 });
+      fireEvent.click(clip, { clientX: 225, detail: 1 });
+      expect(commandSpy).toHaveBeenCalledTimes(1);
+      expect(commandSpy.mock.calls[0][0].batch.operations[0].at)
+        .toEqual({ space: "source", ticks: secondsToTicks(15) });
+      expect(screen.getByTestId("pro-video-clip-2")).toBeInTheDocument();
+      await waitFor(() => expect(screen.getByTestId("pro-quick-undo")).toBeEnabled());
+      fireEvent.click(screen.getByTestId("pro-quick-undo"));
+      expect(screen.queryByTestId("pro-video-clip-2")).not.toBeInTheDocument();
+    } finally { commandSpy.mockRestore(); }
+  });
+
+  test("marked removal maps finished playback to editable source and respects track locking", async () => {
+    const onSave = jest.fn();
+    const editor = output => <ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{ id: "marked-finished", start: 10, end: 30, duration: 20, sourceDuration: 40 }]}
+      renderedOutput={output} onSave={onSave} onCancel={jest.fn()} />;
+    const {rerender} = render(editor(null));
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" }))
+      .getByRole("button", { name: "Pacing", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "2×", exact: true }));
+    rerender(editor({url: "https://example.com/finished.mp4"}));
+    fireEvent.click(screen.getByRole("button", { name: /^Cut$/i }));
+    let video = readyCutawaySource(10);
+    video.currentTime = 3; fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByRole("button", { name: /Mark remove start/i }));
+    expect(screen.getByLabelText("Remove from time")).toHaveValue(6);
+    video = readyCutawaySource(40);
+    video.currentTime = 20; fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByRole("button", { name: /Mark remove end/i }));
+    expect(screen.getByLabelText("Remove to time")).toHaveValue(10);
+    fireEvent.click(within(screen.getByTestId("pro-track-row-video")).getByRole("button", { name: "Lock track", exact: true }));
+    expect(screen.getByTestId("remove-marked-range")).toBeDisabled();
+    expect(screen.getByTestId("inspector-cut-split")).toBeDisabled();
+    fireEvent.click(within(screen.getByTestId("pro-track-row-video")).getByRole("button", { name: "Unlock track", exact: true }));
+    fireEvent.click(screen.getByTestId("remove-marked-range"));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:8.00");
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].timelineSegments).toEqual([
+      expect.objectContaining({ start_time: 10, end_time: 16 }),
+      expect.objectContaining({ start_time: 20, end_time: 30 }),
+    ]);
+  }, 60000);
+
+  test("cut then Creator FX and keyboard Undo restores each action separately", async () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:'undo-cut-fx',start:0,end:12,duration:12}]} onSave={jest.fn()} onCancel={jest.fn()}/>);
+    let video=readyCutawaySource(12);video.currentTime=4;fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByTestId('pro-quick-split'));
+    expect(screen.getByTestId('pro-video-clip-2')).toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole('navigation',{name:'Creative tools'})).getByRole('button',{name:'Creator FX',exact:true}));
+    fireEvent.click(screen.getByTestId('creator-section-effects'));
+    const intensity=screen.getByLabelText('Creator effect intensity');
+    fireEvent.change(intensity,{target:{value:'83'}});
+    expect(intensity).toHaveValue('83');
+    await waitFor(()=>expect(screen.getByTestId('studio-undo-button')).toBeEnabled());
+    fireEvent.keyDown(window,{key:'z',ctrlKey:true});
+    expect(screen.getByLabelText('Creator effect intensity')).toHaveValue('62');
+    expect(screen.getByTestId('pro-video-clip-2')).toBeInTheDocument();
+    fireEvent.keyDown(window,{key:'z',ctrlKey:true});
+    expect(screen.queryByTestId('pro-video-clip-2')).not.toBeInTheDocument();
+    fireEvent.keyDown(window,{key:'y',ctrlKey:true});
+    expect(screen.getByTestId('pro-video-clip-2')).toBeInTheDocument();
+    fireEvent.keyDown(window,{key:'y',ctrlKey:true});
+    expect(screen.getByLabelText('Creator effect intensity')).toHaveValue('83');
+  });
+
+  test("track display locks and tool selection do not consume cut Undo", async () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:'navigation-undo',start:0,end:12,duration:12}]} onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const video=readyCutawaySource(12);video.currentTime=4;fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByTestId('pro-quick-split'));
+    fireEvent.click(screen.getByRole('button',{name:'Slip tool',exact:true}));
+    const track=within(screen.getByTestId('pro-track-row-video'));
+    fireEvent.click(track.getByRole('button',{name:'Dim timeline track',exact:true}));
+    fireEvent.click(track.getByRole('button',{name:'Lock track',exact:true}));
+    fireEvent.click(within(screen.getByRole('navigation',{name:'Creative tools'})).getByRole('button',{name:'Captions',exact:true}));
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    expect(screen.queryByTestId('pro-video-clip-2')).not.toBeInTheDocument();
+    expect(track.getByRole('button',{name:'Unlock track',exact:true})).toBeInTheDocument();
+    expect(track.getByRole('button',{name:'Emphasize timeline track',exact:true})).toBeInTheDocument();
+    expect(screen.getByRole('button',{name:'Slip tool',exact:true})).toHaveAttribute('aria-pressed','true');
+  });
+
+  test("frame styling and export settings each Undo without consuming Cut history", async () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:'frame-history',start:0,end:12,duration:12}]} onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const video=readyCutawaySource(12);video.currentTime=4;fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByTestId('pro-quick-split'));
+    const tools=within(screen.getByRole('navigation',{name:'Creative tools'}));
+    fireEvent.click(tools.getByRole('button',{name:'Color',exact:true}));
+    const rounded=screen.getByLabelText('Rounded main footage'),initial=rounded.checked;
+    fireEvent.click(rounded);
+    fireEvent.click(tools.getByRole('button',{name:'Export',exact:true}));
+    const fps=screen.getByLabelText('Export frame rate'),originalFps=fps.value;
+    fireEvent.change(fps,{target:{value:originalFps==='25'?'30':'25'}});
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    expect(screen.getByLabelText('Export frame rate')).toHaveValue(originalFps);
+    fireEvent.click(tools.getByRole('button',{name:'Color',exact:true}));
+    expect(screen.getByLabelText('Rounded main footage').checked).toBe(!initial);
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    expect(screen.getByLabelText('Rounded main footage').checked).toBe(initial);
+    expect(screen.getByTestId('pro-video-clip-2')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    expect(screen.queryByTestId('pro-video-clip-2')).not.toBeInTheDocument();
+  },60000);
+
+  test("finished Hook playback never jumps or replays the already baked opening", async () => {
+    const source={id:'finished-hook',start:0,end:8,duration:8};
+    const editor=output=><ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[source]}
+      initialSavedProject={{id:'baked-hook-project',name:'Finished hook',snapshot:{orderedClips:[source],selectedClipId:source.id,
+        timeline:[{...source,sourceClipId:source.id,startRequest:0,endRequest:8,url:'https://example.com/source.mp4'}],
+        addHook:true,hookStartTime:.8,hookEndTime:3.3,hookIntroSeconds:2.5,hookText:'HEAR THE DIFFERENCE',hookTemplate:'zoom_focus',overlays:[]}}}
+      renderedOutput={output} onSave={jest.fn()} onCancel={jest.fn()}/>;
+    const {rerender}=render(editor(null));await screen.findByDisplayValue('Finished hook');
+    rerender(editor({url:'https://example.com/baked-hook.mp4'}));
+    const video=readyCutawaySource(8);video.currentTime=0;fireEvent.play(video);
+    expect(video.currentTime).toBe(0);
+    video.currentTime=3.3;fireEvent.timeUpdate(video);
+    expect(video.currentTime).toBe(3.3);
+  });
+
+  test("finished Compare maps the slowed output clock back to the original source", async () => {
+    const source={id:'compare-speed',start:10,end:30,duration:20,sourceDuration:40};
+    const editor=output=><ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[source]}
+      initialSavedProject={{id:'compare-saved',name:'Slowed comparison',snapshot:{orderedClips:[source],selectedClipId:source.id,
+        timeline:[{...source,sourceClipId:source.id,startRequest:10,endRequest:30,url:'https://example.com/source.mp4'}],
+        previewSpeed:.5,addHook:false,overlays:[]}}} renderedOutput={output} onSave={jest.fn()} onCancel={jest.fn()}/>;
+    const {rerender}=render(editor(null));await screen.findByDisplayValue('Slowed comparison');
+    rerender(editor({url:'https://example.com/finished.mp4'}));
+    fireEvent.click(screen.getByRole('button',{name:'Compare',exact:true}));
+    const video=readyCutawaySource(40),before=screen.getByLabelText('Untouched source preview');
+    video.currentTime=6;fireEvent.timeUpdate(video);
+    expect(before.currentTime).toBeCloseTo(13);
+    expect(before.playbackRate).toBe(.5);
+    expect(video).toHaveStyle({display:'block',visibility:'visible',opacity:'1'});
+    expect(screen.getByTestId('studio-program-canvas')).toHaveStyle({display:'none'});
+    expect(before).toHaveStyle({display:'block'});
+  });
+
+  test("Hook enable template and copy are separately reversible after a cut", async () => {
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:'undo-cut-hook',start:0,end:12,duration:12}]} onSave={jest.fn()} onCancel={jest.fn()}/>);
+    const video=readyCutawaySource(12);video.currentTime=4;fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByTestId('pro-quick-split'));
+    fireEvent.click(within(screen.getByRole('navigation',{name:'Creative tools'})).getByRole('button',{name:'Hook',exact:true}));
+    const inspector=screen.getByTestId('clip-studio-inspector');
+    fireEvent.click(within(inspector).getByRole('checkbox',{name:/Enable opening hook/}));
+    const original=within(inspector).getByLabelText('Hook text').value;
+    fireEvent.click(within(inspector).getByRole('button',{name:'Freeze frame',exact:true}));
+    fireEvent.change(within(inspector).getByLabelText('Hook text'),{target:{value:'One reversible hook'}});
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    expect(within(inspector).getByLabelText('Hook text')).toHaveValue(original);
+    expect(within(inspector).getByRole('button',{name:'Freeze frame',exact:true})).toHaveAttribute('aria-pressed','true');
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    expect(within(inspector).getByRole('button',{name:'Blur Reveal',exact:true})).toHaveAttribute('aria-pressed','true');
+    expect(screen.getByTestId('pro-video-clip-2')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    expect(within(inspector).getByRole('checkbox',{name:/Enable opening hook/})).not.toBeChecked();
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    expect(screen.queryByTestId('pro-video-clip-2')).not.toBeInTheDocument();
+  });
+
+  test("creator shake creates final-render keys and Undo removes only the shake", async () => {
+    const onSave=jest.fn();
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+      clips={[{id:'shake',start:0,end:12,duration:12}]} onSave={onSave} onCancel={jest.fn()}/>);
+    const video=readyCutawaySource(12);video.currentTime=2;fireEvent.timeUpdate(video);
+    fireEvent.click(within(screen.getByRole('navigation',{name:'Creative tools'})).getByRole('button',{name:'Creator FX',exact:true}));
+    fireEvent.click(screen.getByTestId('creator-section-effects'));
+    fireEvent.click(screen.getByTestId('creator-demo-shake'));
+    expect(screen.queryByTestId('studio-creator-preview-layer')).not.toBeInTheDocument();
+    await clickRenderFinalClip();await waitFor(()=>expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].finishPlan.motion.keyframes.filter(key=>key.id.startsWith('creator-shake'))).toHaveLength(18);
+    fireEvent.click(screen.getByTestId('studio-undo-button'));
+    await clickRenderFinalClip();await waitFor(()=>expect(onSave).toHaveBeenCalledTimes(2));
+    expect(onSave.mock.calls[1][2].finishPlan.motion.keyframes.filter(key=>key.id.startsWith('creator-shake'))).toHaveLength(0);
+  });
+
+  test("reopened embedded raster effects use the ordinary image uploader before render", async () => {
+    const onSave=jest.fn(), source={id:'raster-source',start:0,end:8,duration:8};
+    const src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==';
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[source]}
+      initialSavedProject={{id:'saved-raster',name:'Reopened raster effect',snapshot:{orderedClips:[source],selectedClipId:source.id,
+        timeline:[{...source,sourceClipId:source.id,startRequest:0,endRequest:8,url:'https://example.com/source.mp4'}],
+        overlays:[{id:'creator-effect-saved',name:'Reaction emoji',type:'image',src,startTime:2,duration:2,x:50,y:50,width:18,height:18}],addHook:false}}}
+      onSave={onSave} onCancel={jest.fn()}/>);
+    await screen.findByDisplayValue('Reopened raster effect');
+    await clickRenderFinalClip();await waitFor(()=>expect(onSave).toHaveBeenCalled());
+    expect(uploadSourceFileViaBackend).toHaveBeenCalledWith(expect.objectContaining({mediaType:'image',file:expect.any(Blob),fileName:expect.stringMatching(/\.png$/)}));
+    expect(onSave.mock.calls[0][1]).toEqual([expect.objectContaining({id:'creator-effect-saved',src:'https://example.com/mock.mp4',isLocal:false})]);
+    expect(JSON.stringify(onSave.mock.calls[0][1])).not.toContain('data:image/');
+  });
+
+  test("reopened local graphic metadata uploads the recovered blob pixels instead of its file descriptor", async () => {
+    const onSave = jest.fn(), source = { id: 'local-art-source', start: 0, end: 8, duration: 8 };
+    const src = 'blob:https://example.com/recovered-native-art';
+    const pixels = new Blob(['retained native image bytes'], { type: 'image/png' });
+    const previousFetch = global.fetch;
+    global.fetch = jest.fn((url, options) => url === src
+      ? Promise.resolve({ ok: true, blob: () => Promise.resolve(pixels) })
+      : previousFetch(url, options));
+    render(<ViralClipStudio videoUrl="https://example.com/source.mp4" clips={[source]}
+      initialSavedProject={{ id: 'saved-local-art', name: 'Recovered local artwork', snapshot: {
+        orderedClips: [source], selectedClipId: source.id,
+        timeline: [{ ...source, sourceClipId: source.id, startRequest: 0, endRequest: 8, url: 'https://example.com/source.mp4' }],
+        overlays: [{ id: 'native-art', name: 'Evidence rule', type: 'image', src,
+          file: { name: 'rule.png', size: pixels.size, type: 'image/png' }, isLocal: true,
+          startTime: 2, duration: 2, x: 50, y: 50, width: 25, height: 1 }], addHook: false,
+      } }} onSave={onSave} onCancel={jest.fn()} />);
+    await screen.findByDisplayValue('Recovered local artwork');
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(uploadSourceFileViaBackend).toHaveBeenCalledWith(expect.objectContaining({
+      mediaType: 'image', file: pixels, fileName: expect.stringMatching(/\.png$/),
+    }));
+    expect(onSave.mock.calls[0][1]).toEqual([expect.objectContaining({
+      id: 'native-art', src: 'https://example.com/mock.mp4', isLocal: false, file: null,
+    })]);
+  });
+
   test("quick trim retimes motion and its linked sound and undo restores both", async () => {
     const commandSpy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
     const onSave = jest.fn(() => Promise.resolve());
@@ -6632,5 +7046,67 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(within(panel).getByRole("alert")).toHaveTextContent(/project changed/i);
     expect(within(panel).getByTestId("studio-director-review-open")).toHaveTextContent("Review again");
     expect(onDirectorReview).not.toHaveBeenCalled();
+  });
+
+  test('native export retains Null Rig editing state while omitting its helper layer from pixel sources', async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    const source = { id: 'range', start: 2, end: 8, duration: 6, sourceDuration: 12 };
+    mountNativePreview({ onSave, initialSavedProject: { id: 'rig-export', name: 'Rig export', snapshot: {
+      orderedClips: [source], selectedClipId: 'range',
+      timeline: [{ ...source, sourceClipId: 'range', startRequest: 2, endRequest: 8, url: 'https://example.com/source.mp4' }],
+      addHook: false, autoCaptions: false,
+      overlays: [
+        { id: 'rig', name: 'Evidence Rig', type: 'text', text: '', isNullRig: true, x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, startTime: 0, duration: 6 },
+        { id: 'title', name: 'Evidence Title', type: 'text', text: 'EVIDENCE', parentId: 'rig', x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, startTime: 0, duration: 6 },
+      ], compositionOrder: ['rig', 'title'],
+    } } });
+    await screen.findByDisplayValue('Rig export');
+    await act(async () => { await clickRenderFinalClip(); });
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    const [, overlays, options] = onSave.mock.calls[0];
+    expect(overlays.map(o => o.id)).toEqual(['title']);
+    expect(options.compositionPlan.order).toEqual(['title']);
+    fireEvent.click(screen.getByTestId('studio-mode-fxflow'));
+    expect(screen.getByTestId('comp-layer-row-rig')).toBeInTheDocument();
+  });
+
+  test("switches into Motion & Flow workspace mode, synchronizes Null Rig & Signal Node Flow, and round-trips Undo/Redo with zero competitor brand labels", async () => {
+    const { container } = render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-mfx", start: 0, end: 12, duration: 12 }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+    readyCutawaySource(12);
+
+    // Switch header workspace mode to FX Flow (Motion & Flow)
+    fireEvent.click(screen.getByTestId("studio-mode-fxflow"));
+    expect(screen.getByTestId("studio-mode-fxflow")).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("studio-comp-workbench")).toBeInTheDocument();
+
+    // Ensure zero competitor brand names appear in the Studio UI
+    expect(container.textContent).not.toMatch(/\b(adobe|after\s*effects|davinci|fusion|ae)\b/i);
+
+    // Add a Null Rig inside AutoPromote Comp Workbench -> renders crosshair gizmo on live stage
+    fireEvent.click(screen.getByTestId("comp-add-null-rig"));
+    expect(screen.getByTestId(/^null-rig-gizmo-/)).toBeInTheDocument();
+
+    // Switch bottom dock to Signal Node Flow -> NullRig node is visible in canonical node graph
+    fireEvent.click(screen.getByTestId("dock-tab-node_flow"));
+    const flowSurface = screen.getByTestId("studio-node-flow");
+    expect(flowSurface).toBeInTheDocument();
+    expect(within(flowSurface).getByText("Null Rig 1")).toBeInTheDocument();
+
+    // Undo removes Null Rig from stage and graph; Redo restores it
+    fireEvent.keyDown(window, { key: "z", ctrlKey: true });
+    await waitFor(() => {
+      expect(within(flowSurface).queryByText("Null Rig 1")).not.toBeInTheDocument();
+    });
+    fireEvent.keyDown(window, { key: "y", ctrlKey: true });
+    await waitFor(() => {
+      expect(within(flowSurface).getByText("Null Rig 1")).toBeInTheDocument();
+    });
   });
 });

@@ -9,6 +9,8 @@ const add = (names, status, reason) =>
   });
 
 add("version id name assetName", "exact", "Version/identity/display metadata; no visual claim.");
+add('assetType assetSourceStart assetAspect assetContentHash', 'approximate',
+  'Owned video bytes and source-in are verified; browser decoded seeks and Blender delivery-grid texture samples need paired moving-frame qualification.');
 add(
   "startTime duration endTime enabled",
   "exact",
@@ -34,6 +36,7 @@ add(
   "approximate",
   "Both engines apply these choices with different shaders and geometry."
 );
+add("objects", "approximate", "Independent bounded mesh objects and their local pose keys reach both Three.js and Blender; shaders/raster pixels remain approximate.");
 add(
   "x y z scale rotationX rotationY rotationZ keyframes",
   "approximate",

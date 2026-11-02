@@ -1,0 +1,1336 @@
+{
+  "format": "autopromote-graphics",
+  "version": 1,
+  "name": "Evidence reconstruction / native spatial choreography",
+  "width": 1280,
+  "height": 720,
+  "duration": 15.75,
+  "layers": [
+    {
+      "id": "cinematic-stage",
+      "name": "Cinematic evidence stage",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1280\" height=\"720\"><rect width=\"1280\" height=\"720\" fill=\"#060a12\"/></svg>",
+      "x": 50,
+      "y": 50,
+      "width": 100,
+      "height": 100,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 0,
+      "startTime": 2.1,
+      "duration": 12.6,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 2.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.6,
+          "value": 0.88,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7,
+          "value": 0.88,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.65,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.45,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 8.9,
+          "value": 0.68,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.15,
+          "value": 0.68,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.7,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "study-disclosure",
+      "name": "study-disclosure",
+      "type": "text",
+      "text": "FICTIONAL PERFORMANCE / MOTION STUDY",
+      "x": 21,
+      "y": 9,
+      "width": 37,
+      "scale": 0.34,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 2.3,
+      "duration": 12.3,
+      "color": "#d5aa68",
+      "fontWeight": 800,
+      "textAlign": "left",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 2.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 2.75,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.28,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "copy-looked",
+      "name": "copy-looked",
+      "type": "text",
+      "text": "IT LOOKED",
+      "x": 23,
+      "y": 36,
+      "width": 43,
+      "scale": 1.8,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 2.9,
+      "duration": 4.449999999999999,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "left",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 2.9,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.35,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.029999999999999,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.35,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 2.9,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "textProgress",
+          "time": 3.8,
+          "value": 100,
+          "easing": "linear"
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 34,
+        "fromX": 0,
+        "fromY": 1.3,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.02,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "copy-like-me",
+      "name": "copy-like-me",
+      "type": "text",
+      "text": "LIKE ME.",
+      "x": 23,
+      "y": 52,
+      "width": 43,
+      "scale": 2.35,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 3.15,
+      "duration": 4.199999999999999,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "left",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 3.15,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 3.6,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.029999999999999,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.35,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 3.15,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "textProgress",
+          "time": 4.05,
+          "value": 100,
+          "easing": "linear"
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 34,
+        "fromX": 0,
+        "fromY": 1.3,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.02,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "copy-identity",
+      "name": "copy-identity",
+      "type": "text",
+      "text": "THE FACE.  THE VOICE.  THE ROOM.",
+      "x": 23,
+      "y": 70,
+      "width": 40,
+      "scale": 0.4,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 4.0,
+      "duration": 3.3,
+      "color": "#d5aa68",
+      "fontWeight": 800,
+      "textAlign": "left",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 4.0,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 4.45,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 6.9799999999999995,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 7.3,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 4.0,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "textProgress",
+          "time": 4.9,
+          "value": 100,
+          "easing": "linear"
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 34,
+        "fromX": 0,
+        "fromY": 1.3,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.02,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "clock-video",
+      "name": "Reconstructed video clock",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"400\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"96\" fill=\"#101318\" stroke=\"#d5aa68\" stroke-width=\"2\"/><g stroke=\"#f1ede4\" stroke-linecap=\"round\"><path d=\"M100.000,17.000 L100.000,10.000\"/><path d=\"M141.500,28.120 L145.000,22.058\"/><path d=\"M171.880,58.500 L177.942,55.000\"/><path d=\"M183.000,100.000 L190.000,100.000\"/><path d=\"M171.880,141.500 L177.942,145.000\"/><path d=\"M141.500,171.880 L145.000,177.942\"/><path d=\"M100.000,183.000 L100.000,190.000\"/><path d=\"M58.500,171.880 L55.000,177.942\"/><path d=\"M28.120,141.500 L22.058,145.000\"/><path d=\"M17.000,100.000 L10.000,100.000\"/><path d=\"M28.120,58.500 L22.058,55.000\"/><path d=\"M58.500,28.120 L55.000,22.058\"/><path d=\"M100 100 L145.5905 82.0414\" stroke-width=\"6\"/><path d=\"M100 100 L168.4703 114.5538\" stroke-width=\"3\"/></g><circle cx=\"100\" cy=\"100\" r=\"5\" fill=\"#d5aa68\"/></svg>",
+      "x": 24,
+      "y": 44,
+      "width": 30,
+      "height": 53.333333,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 0,
+      "startTime": 8.6,
+      "duration": 5.950000000000001,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 8.6,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9.049999999999999,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.23,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clock-real",
+      "name": "Broken studio clock",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"400\" viewBox=\"0 0 200 200\"><circle cx=\"100\" cy=\"100\" r=\"96\" fill=\"#101318\" stroke=\"#d5aa68\" stroke-width=\"2\"/><g stroke=\"#f1ede4\" stroke-linecap=\"round\"><path d=\"M100.000,17.000 L100.000,10.000\"/><path d=\"M141.500,28.120 L145.000,22.058\"/><path d=\"M171.880,58.500 L177.942,55.000\"/><path d=\"M183.000,100.000 L190.000,100.000\"/><path d=\"M171.880,141.500 L177.942,145.000\"/><path d=\"M141.500,171.880 L145.000,177.942\"/><path d=\"M100.000,183.000 L100.000,190.000\"/><path d=\"M58.500,171.880 L55.000,177.942\"/><path d=\"M28.120,141.500 L22.058,145.000\"/><path d=\"M17.000,100.000 L10.000,100.000\"/><path d=\"M28.120,58.500 L22.058,55.000\"/><path d=\"M58.500,28.120 L55.000,22.058\"/><path d=\"M100 100 L77.7545 56.3407\" stroke-width=\"6\"/><path d=\"M100 100 L141.1450 43.3688\" stroke-width=\"3\"/></g><circle cx=\"100\" cy=\"100\" r=\"5\" fill=\"#d5aa68\"/></svg>",
+      "x": 77,
+      "y": 44,
+      "width": 30,
+      "height": 53.333333,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 0,
+      "startTime": 9.35,
+      "duration": 5.200000000000001,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9.35,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9.799999999999999,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.23,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.55,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reading-video",
+      "name": "reading-video",
+      "type": "text",
+      "text": "02:17",
+      "x": 25,
+      "y": 76,
+      "width": 28,
+      "scale": 1.6,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 9.05,
+      "duration": 5.449999999999999,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "left",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9.05,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9.5,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.18,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 9.05,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "textProgress",
+          "time": 9.950000000000001,
+          "value": 100,
+          "easing": "linear"
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 34,
+        "fromX": 0,
+        "fromY": 1.3,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.02,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "label-video",
+      "name": "label-video",
+      "type": "text",
+      "text": "RECONSTRUCTED VIDEO",
+      "x": 25,
+      "y": 86,
+      "width": 30,
+      "scale": 0.31,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 9.25,
+      "duration": 5.25,
+      "color": "#d5aa68",
+      "fontWeight": 800,
+      "textAlign": "left",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9.25,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9.7,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.18,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reading-real",
+      "name": "reading-real",
+      "type": "text",
+      "text": "11:06",
+      "x": 76,
+      "y": 76,
+      "width": 28,
+      "scale": 1.6,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 9.75,
+      "duration": 4.75,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "left",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9.75,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 10.2,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.18,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 9.75,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "textProgress",
+          "time": 10.65,
+          "value": 100,
+          "easing": "linear"
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 34,
+        "fromX": 0,
+        "fromY": 1.3,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.02,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "label-real",
+      "name": "label-real",
+      "type": "text",
+      "text": "REAL CLOCK / STOPPED",
+      "x": 76,
+      "y": 86,
+      "width": 30,
+      "scale": 0.31,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 9.95,
+      "duration": 4.550000000000001,
+      "color": "#d5aa68",
+      "fontWeight": 800,
+      "textAlign": "left",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 9.95,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 10.399999999999999,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.18,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evidence-heading",
+      "name": "evidence-heading",
+      "type": "text",
+      "text": "ONE DETAIL DIDN'T MATCH.",
+      "x": 50,
+      "y": 14,
+      "width": 80,
+      "scale": 0.65,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 8.8,
+      "duration": 5.6,
+      "color": "#f1ede4",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 8.8,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 9.25,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.08,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.4,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 8.8,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "textProgress",
+          "time": 9.700000000000001,
+          "value": 100,
+          "easing": "linear"
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 34,
+        "fromX": 0,
+        "fromY": 1.3,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.02,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "evidence-mismatch",
+      "name": "evidence-mismatch",
+      "type": "text",
+      "text": "CLOCK STATE\nMISMATCH",
+      "x": 50,
+      "y": 64,
+      "width": 27,
+      "scale": 0.65,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 11.1,
+      "duration": 3.3499999999999996,
+      "color": "#d24952",
+      "fontWeight": 800,
+      "textAlign": "center",
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 11.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 11.549999999999999,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.129999999999999,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.45,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "textProgress",
+          "time": 11.1,
+          "value": 0,
+          "easing": "linear"
+        },
+        {
+          "property": "textProgress",
+          "time": 12.0,
+          "value": 100,
+          "easing": "linear"
+        }
+      ],
+      "textAnimator": {
+        "version": 1,
+        "unit": "character",
+        "order": "forward",
+        "stagger": 34,
+        "fromX": 0,
+        "fromY": 1.3,
+        "fromScale": 1,
+        "fromRotation": 0,
+        "fromOpacity": 0,
+        "tracking": -0.02,
+        "rangeStart": 0,
+        "rangeEnd": 100,
+        "easing": "ease_out"
+      },
+      "textProgress": 0
+    },
+    {
+      "id": "evidence-path",
+      "name": "Evidence callout contour",
+      "type": "artwork",
+      "vectorShape": {
+        "version": 1,
+        "closed": false,
+        "nodes": [
+          {
+            "x": 4,
+            "y": 12,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 17,
+            "y": 12,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 27,
+            "y": 74,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 73,
+            "y": 74,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 83,
+            "y": 12,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          },
+          {
+            "x": 96,
+            "y": 12,
+            "in": [
+              0,
+              0
+            ],
+            "out": [
+              0,
+              0
+            ]
+          }
+        ],
+        "fill": {
+          "kind": "none",
+          "color": "#d5aa68",
+          "endColor": "#d5aa68",
+          "start": [
+            0,
+            0
+          ],
+          "end": [
+            100,
+            100
+          ]
+        },
+        "stroke": {
+          "color": "#d5aa68",
+          "width": 0.45
+        }
+      },
+      "x": 50,
+      "y": 53,
+      "width": 86,
+      "height": 29,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 10.1,
+      "duration": 4.4,
+      "keys": [
+        {
+          "property": "opacity",
+          "time": 10.1,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 10.549999999999999,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.18,
+          "value": 1,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        },
+        {
+          "property": "opacity",
+          "time": 14.5,
+          "value": 0,
+          "easing": "bezier",
+          "curve": [
+            0.22,
+            1,
+            0.36,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evidence-matte",
+      "name": "Evidence title matte",
+      "type": "artwork",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"200\"><rect width=\"400\" height=\"200\" fill=\"#fff\"/></svg>",
+      "x": 50,
+      "y": 61,
+      "width": 29,
+      "height": 17,
+      "scale": 1,
+      "rotation": 0,
+      "opacity": 1,
+      "startTime": 10.1,
+      "duration": 4.4,
+      "mask": {
+        "enabled": true,
+        "shape": "ellipse",
+        "feather": 8,
+        "inverted": false
+      },
+      "keys": []
+    }
+  ],
+  "groups": [
+    {
+      "id": "looked-mask",
+      "name": "Looked title reveal",
+      "layerIds": [
+        "copy-looked"
+      ],
+      "startTime": 2.9,
+      "duration": 4.45,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    },
+    {
+      "id": "like-mask",
+      "name": "Like me title reveal",
+      "layerIds": [
+        "copy-like-me"
+      ],
+      "startTime": 3.15,
+      "duration": 4.2,
+      "mask": {
+        "enabled": true,
+        "shape": "rectangle",
+        "radius": 0,
+        "feather": 0,
+        "inverted": false
+      },
+      "keys": []
+    }
+  ]
+}

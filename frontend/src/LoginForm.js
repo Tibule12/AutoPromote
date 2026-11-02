@@ -7,12 +7,12 @@ const loginHighlights = [
   {
     index: "01",
     label: "Create",
-    copy: "Return to Cam Combiner, Idea-to-Video, and your saved source media.",
+    copy: "Return to Studio, Cam Combiner, and your saved source media.",
   },
   {
     index: "02",
     label: "Promote",
-    copy: "Continue clip discovery, Smart Promo, and destination-specific publishing.",
+    copy: "Continue clip discovery, AI Director, and destination-specific publishing.",
   },
   {
     index: "03",
@@ -157,15 +157,15 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
             <div className="auth-workspace-preview__grid">
               <span>
                 <small>Create</small>
-                <strong>3 tools</strong>
+                <strong>Your media</strong>
               </span>
               <span>
                 <small>Publish</small>
                 <strong>Queue ready</strong>
               </span>
               <span>
-                <small>Measure</small>
-                <strong>Analytics</strong>
+                <small>Edit</small>
+                <strong>Studio ready</strong>
               </span>
             </div>
           </div>

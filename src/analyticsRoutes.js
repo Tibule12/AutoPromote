@@ -2,15 +2,11 @@ const express = require("express");
 const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const { normalizeMetrics } = require("./services/platformMetricValues");
-const { getPlanCapabilities } = require("./config/subscriptionPlans");
-const { applyTesterCapabilityAllowlist } = require("./config/testerProgram");
-const { getEffectiveTierSnapshot } = require("./services/billingService");
 const {
   getClipLearningProfile,
   recomputeClipLearningProfile,
 } = require("./services/clipOutcomeLearningService");
-const router = express.Router();
-
+const { getEffectiveTierSnapshot } = require("./services/billingService");
 function parseTimestamp(value) {
   if (!value) return null;
   if (value.toMillis) return value.toMillis();
@@ -25,6 +21,78 @@ function parseDateValue(value) {
   const t = parseTimestamp(value);
   return t ? new Date(t) : null;
 }
+
+function normalizePlatformName(value) {
+  if (!value) return null;
+  const normalized = String(value).trim().toLowerCase();
+  if (!normalized || normalized === "unknown" || normalized === "n/a") return null;
+  return normalized;
+}
+
+function getPostEventDate(post) {
+  return (
+    parseDateValue(post.publishedAt) ||
+    parseDateValue(post.published_at) ||
+    parseDateValue(post.postedAt) ||
+    parseDateValue(post.completedAt) ||
+    parseDateValue(post.createdAt) ||
+    parseDateValue(post.created_at) ||
+    parseDateValue(post.updatedAt) ||
+    parseDateValue(post.updated_at)
+  );
+}
+
+function isPublishedPlatformPost(post) {
+  if (!post) return false;
+  // Exclude synthetic/test placeholders from user-facing analytics.
+  if (post.simulated === true) return false;
+  if (post.rawOutcome && post.rawOutcome.simulated === true) return false;
+  const reason = String(post.reason || post.rawOutcome?.reason || "").toLowerCase();
+  if (["missing_credentials", "missing_fetch", "disabled_by_feature_flag"].includes(reason)) {
+    return false;
+  }
+  if (post.success === true) return true;
+  const status = String(post.status || post.publish_status || "").toLowerCase();
+  if (
+    ["published", "posted", "completed", "success", "succeeded", "done", "live"].includes(status)
+  ) {
+    return true;
+  }
+  if (post.externalId || post.external_id || post.postId || post.post_id) return true;
+  if (post.rawOutcome && post.rawOutcome.success === true) return true;
+  return false;
+}
+
+
+const router = express.Router();
+router.all("/user", require("./retiredFeatureResponse"));
+
+// Rewards still need their existing progress, independent of the removed dashboard.
+router.get("/rewards", authMiddleware, async (req, res) => {
+  const uid = req.user?.uid || req.userId;
+  if (!uid) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const [user, credits, posts, tier] = await Promise.all([
+      db.collection("users").doc(uid).get(),
+      db.collection("user_credits").doc(uid).get(),
+      fetchOwnedCollectionDocs("platform_posts", uid, ["uid", "userId", "user_id", "ownerId", "creatorId"]),
+      getEffectiveTierSnapshot(uid),
+    ]);
+    const count = credits.exists ? Number(credits.data().totalReferrals || 0) : 0;
+    const days = tier.tierId === "free" || tier.testerAccess ? 7 : 30;
+    const start = new Date(); start.setDate(start.getDate() - days);
+    const eligible = posts.filter(post => isPublishedPlatformPost(post) && normalizePlatformName(post.platform)
+      && getPostEventDate(post)?.getTime() >= start.getTime());
+    const measured = eligible.map(post => normalizeMetrics(post.metrics).views).filter(value => value !== null);
+    const views = measured.length ? Math.max(...measured) : eligible.length ? null : 0;
+    res.json({
+      referralCode: user.exists ? user.data().referralCode || "" : "",
+      referralTracker: { total: count, nextGoal: count < 10 ? 10 : count < 20 ? 20 : 100,
+        potentialBonus: count < 10 ? 5 : count < 20 ? 15 : 50 },
+      viralityTracker: { views, nextGoal: views >= 100000 ? 500000 : views >= 50000 ? 100000 : 50000, potentialBonus: 0 },
+    });
+  } catch (_) { res.status(500).json({ error: "Rewards progress unavailable" }); }
+});
 
 function getOwnerId(record) {
   if (!record) return null;
@@ -69,26 +137,6 @@ async function fetchOwnedCollectionDocs(collectionName, uid, ownerFields, pageSi
   );
 
   return docs;
-}
-
-function normalizePlatformName(value) {
-  if (!value) return null;
-  const normalized = String(value).trim().toLowerCase();
-  if (!normalized || normalized === "unknown" || normalized === "n/a") return null;
-  return normalized;
-}
-
-function getPostEventDate(post) {
-  return (
-    parseDateValue(post.publishedAt) ||
-    parseDateValue(post.published_at) ||
-    parseDateValue(post.postedAt) ||
-    parseDateValue(post.completedAt) ||
-    parseDateValue(post.createdAt) ||
-    parseDateValue(post.created_at) ||
-    parseDateValue(post.updatedAt) ||
-    parseDateValue(post.updated_at)
-  );
 }
 
 function normalizeWorkflowToken(value, fallback = "") {
@@ -174,42 +222,6 @@ function isFreshClipScannerCache(record, now = Date.now()) {
   return createdAt <= now && expiresAt > now;
 }
 
-function isPublishedPlatformPost(post) {
-  if (!post) return false;
-  // Exclude synthetic/test placeholders from user-facing analytics.
-  if (post.simulated === true) return false;
-  if (post.rawOutcome && post.rawOutcome.simulated === true) return false;
-  const reason = String(post.reason || post.rawOutcome?.reason || "").toLowerCase();
-  if (["missing_credentials", "missing_fetch", "disabled_by_feature_flag"].includes(reason)) {
-    return false;
-  }
-  if (post.success === true) return true;
-  const status = String(post.status || post.publish_status || "").toLowerCase();
-  if (
-    ["published", "posted", "completed", "success", "succeeded", "done", "live"].includes(status)
-  ) {
-    return true;
-  }
-  if (post.externalId || post.external_id || post.postId || post.post_id) return true;
-  if (post.rawOutcome && post.rawOutcome.success === true) return true;
-  return false;
-}
-
-async function fetchContentTitleMap(contentIds) {
-  const titleMap = new Map();
-  await Promise.all(
-    [...contentIds].map(async contentId => {
-      try {
-        const snap = await db.collection("content").doc(contentId).get();
-        if (!snap.exists) return;
-        const data = snap.data() || {};
-        titleMap.set(contentId, data.title || data.caption || null);
-      } catch (_error) {}
-    })
-  );
-  return titleMap;
-}
-
 // Get content analytics
 router.get("/content/:id", authMiddleware, async (req, res) => {
   try {
@@ -270,326 +282,6 @@ router.get("/overview", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error getting analytics overview:", error);
     res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// Get user analytics with time range
-router.get("/user", authMiddleware, async (req, res) => {
-  try {
-    const requestedRange = req.query.range || "7d";
-    const uid = req.user?.uid || req.userId;
-    if (!uid) return res.status(401).json({ error: "Unauthorized" });
-
-    const snapshot = await getEffectiveTierSnapshot(uid);
-    const entitlements = applyTesterCapabilityAllowlist(
-      getPlanCapabilities(snapshot.tierId),
-      snapshot.testerAccess
-    );
-    const allowedRanges = entitlements.analytics.allowedRanges || ["7d"];
-    const range = allowedRanges.includes(requestedRange)
-      ? requestedRange
-      : allowedRanges[allowedRanges.length - 1] || "7d";
-
-    // Parse time range
-    const now = new Date();
-    let startDate = null;
-    if (range === "all") {
-      startDate = null;
-    } else {
-      startDate = new Date();
-      if (range === "24h") startDate.setHours(now.getHours() - 24);
-      else if (range === "7d") startDate.setDate(now.getDate() - 7);
-      else if (range === "30d") startDate.setDate(now.getDate() - 30);
-      else if (range === "90d") startDate.setDate(now.getDate() - 90);
-      else startDate.setDate(now.getDate() - 7); // default to 7d
-    }
-
-    // Analytics should be sourced from published platform posts only.
-    console.log(
-      `[Analytics] Aggregating published platform posts for user: ${uid}, range: ${range}`
-    );
-    const allOwnedPosts = await fetchOwnedCollectionDocs(
-      "platform_posts",
-      uid,
-      ["uid", "userId", "user_id", "ownerId", "creatorId"],
-      400
-    );
-
-    const publishedPostsAllTime = allOwnedPosts.filter(
-      post => isPublishedPlatformPost(post) && normalizePlatformName(post.platform)
-    );
-    const postsWithoutEventDate = publishedPostsAllTime.filter(
-      post => !getPostEventDate(post)
-    ).length;
-    let publishedPosts = publishedPostsAllTime
-      .filter(post => {
-        const eventDate = getPostEventDate(post);
-        if (!startDate) return true;
-        // Keep range windows strict: posts with no event timestamp are excluded from dated windows.
-        if (!eventDate) return false;
-        return eventDate.getTime() >= startDate.getTime();
-      })
-      .sort((a, b) => {
-        const aTime = getPostEventDate(a)?.getTime() || 0;
-        const bTime = getPostEventDate(b)?.getTime() || 0;
-        return bTime - aTime;
-      });
-
-    const filterLabel = startDate ? startDate.toISOString() : "all-time";
-    console.log(
-      `[Analytics] ${publishedPosts.length} published platform posts passed date filter (>= ${filterLabel})`
-    );
-
-    const requestedRelease = req.query.contentId || "";
-    if (typeof requestedRelease !== "string" || requestedRelease.includes("/") || requestedRelease.length > 200) {
-      return res.status(400).json({ error: "Choose a published release." });
-    }
-    const contentTitleMap = await fetchContentTitleMap(new Set(publishedPosts.map(post => post.contentId).filter(Boolean)));
-    const releaseOptions = [...new Set(publishedPosts.map(post => post.contentId).filter(Boolean))]
-      .map(id => ({ id, title: contentTitleMap.get(id) || "Published release" }));
-    if (requestedRelease) publishedPosts = publishedPosts.filter(post => post.contentId === requestedRelease);
-    const contentIds = new Set(publishedPosts.map(post => post.contentId).filter(Boolean));
-    const targetPlatforms = new Set();
-    const refreshTargets = publishedPosts.filter(post => {
-      if (!['youtube', 'tiktok', 'instagram', 'facebook', 'linkedin', 'reddit'].includes(post.platform) || targetPlatforms.has(post.platform)) return false;
-      targetPlatforms.add(post.platform); return true;
-    }).slice(0, 6).map(post => ({ postId: post.id, platform: post.platform }));
-
-    let totalViews = 0;
-    let totalLikes = 0;
-    let totalShares = 0;
-    let totalClicks = 0;
-    const contentByPlatform = {};
-    let latestSnapshot = null;
-    let lastUpdatedAt = null;
-    let nextUpdateAt = null;
-
-    const coverage = Object.fromEntries(["views", "impressions", "likes", "comments", "shares", "clicks"].map(key => [key, 0]));
-    let postsWithMetrics = 0;
-    const topContentCandidates = publishedPosts.map(post => {
-      const platform = normalizePlatformName(post.platform);
-      const measured = normalizeMetrics(post.metrics);
-      const { views, likes, shares, clicks, comments, impressions } = measured;
-      const hasMetrics = Object.values(measured).some(value => value !== null);
-      if (hasMetrics) postsWithMetrics++;
-      for (const [key, value] of Object.entries(measured)) if (value !== null) coverage[key]++;
-      if (!contentByPlatform[platform]) {
-        contentByPlatform[platform] = {
-          count: 0,
-          views: 0,
-          likes: 0,
-          shares: 0,
-          comments: 0,
-          clicks: 0,
-          ctr: null,
-          impressions: 0,
-          measuredPosts: Object.fromEntries(Object.keys(coverage).map(key => [key, 0])),
-        };
-      }
-
-      contentByPlatform[platform].count += 1;
-      contentByPlatform[platform].impressions += impressions;
-      for (const [key, value] of Object.entries(measured)) {
-        if (value !== null) contentByPlatform[platform].measuredPosts[key]++;
-      }
-      const collectedAt = hasMetrics ? parseTimestamp(post.lastMetricsSuccessAt || post.metricsFetchedAt) : null;
-      if (collectedAt && (!lastUpdatedAt || collectedAt > lastUpdatedAt)) lastUpdatedAt = collectedAt;
-      contentByPlatform[platform].views += views;
-      contentByPlatform[platform].likes += likes;
-      contentByPlatform[platform].shares += shares;
-      contentByPlatform[platform].comments += comments;
-      contentByPlatform[platform].clicks += clicks;
-
-      totalViews += views;
-      totalLikes += likes;
-      totalShares += shares;
-      totalClicks += clicks;
-
-      if (Array.isArray(post.analytics_snapshots)) {
-        post.analytics_snapshots.forEach(snapshot => {
-          if (!snapshot || !snapshot.timestamp) return;
-          const ts = parseTimestamp(snapshot.timestamp);
-          if (!ts) return;
-          if (!lastUpdatedAt || ts > lastUpdatedAt) {
-            lastUpdatedAt = ts;
-            latestSnapshot = snapshot;
-          }
-        });
-      }
-      const nextCheckTs = parseTimestamp(post.next_check_at);
-      if (nextCheckTs && (!nextUpdateAt || nextCheckTs < nextUpdateAt)) {
-        nextUpdateAt = nextCheckTs;
-      }
-
-      const fallbackTitle =
-        post.payload?.title ||
-        post.payload?.caption ||
-        post.payload?.message ||
-        post.payload?.text ||
-        null;
-      const resolvedTitle = contentTitleMap.get(post.contentId) || fallbackTitle || "Untitled";
-      const publishedAt = getPostEventDate(post);
-
-      return {
-        postId: post.id,
-        contentId: post.contentId,
-        likes,
-        title: resolvedTitle,
-        metricsAvailable: hasMetrics,
-        metricsCollectionStatus: post.metricsCollectionStatus || (hasMetrics ? "collected" : "not_collected"),
-        metricsCollectionMessage: post.metricsCollectionMessage || null,
-        metricsCollectionIssues: post.metricsCollectionIssues || [],
-        lastMetricsAttemptAt: parseDateValue(post.lastMetricsCheck)?.toISOString() || null,
-        views,
-        impressions,
-        clicks,
-        platform,
-        comments,
-        shares,
-        publishedAt: publishedAt ? publishedAt.toISOString() : null,
-      };
-    });
-
-    Object.values(contentByPlatform).forEach(row => {
-      for (const key of Object.keys(coverage)) if (!row.measuredPosts[key]) row[key] = null;
-      // Cross-post totals cannot establish an exposure-matched click rate.
-      row.ctr = null;
-    });
-    if (!coverage.views) totalViews = null;
-    if (!coverage.likes) totalLikes = null;
-    if (!coverage.shares) totalShares = null;
-    if (!coverage.clicks) totalClicks = null;
-
-    const bestCandidate = topContentCandidates.reduce((best, item) => {
-      if (!best) return item;
-      if (best.views === null && item.views !== null) return item;
-      if (best.views !== null && item.views === null) return best;
-      if (item.views > best.views) return item;
-      if (item.views === best.views && item.clicks > best.clicks) return item;
-      return best;
-    }, null);
-
-    const bestContent = {
-      views: bestCandidate ? bestCandidate.views : 0,
-      nextGoal:
-        bestCandidate && bestCandidate.views >= 100000
-          ? 500000
-          : bestCandidate && bestCandidate.views >= 50000
-            ? 100000
-            : 50000,
-      potentialBonus: 0,
-    };
-
-    const performanceStatus = !publishedPosts.length ? "No published platform posts"
-      : !postsWithMetrics ? "Platform statistics unavailable"
-      : postsWithMetrics < publishedPosts.length ? "Partial platform statistics" : "Live platform statistics";
-    const motivationMessage = publishedPosts.length
-      ? `${postsWithMetrics} of ${publishedPosts.length} published posts have collected statistics. Unavailable metrics are not zero.`
-      : "Publish content to at least one connected platform to generate analytics.";
-
-    // 2. Referral Progress (Logic from referralGrowthEngine: 10 friends = $5, 20 = $15)
-    let referralStats = { total: 0, nextGoal: 10, potentialBonus: 5 };
-    let referralCode = "";
-    try {
-      const userDocRef = db.collection("users").doc(uid);
-      const userDoc = await userDocRef.get(); // Simplified for speed
-
-      const credsRef = db.collection("user_credits").doc(uid);
-      const creds = await credsRef.get();
-
-      if (creds.exists) {
-        const count = creds.data().totalReferrals || 0;
-        referralStats = {
-          total: count,
-          nextGoal: count < 10 ? 10 : count < 20 ? 20 : 100,
-          potentialBonus: count < 10 ? 5 : count < 20 ? 15 : 50,
-        };
-      }
-      if (userDoc.exists) {
-        referralCode = userDoc.data().referralCode || "";
-      }
-    } catch (e) {}
-
-    // Calculate top platform from published platform post metrics only.
-    let topPlatform = "N/A";
-    let maxPlatViews = -1;
-    Object.entries(contentByPlatform).forEach(([plat, data]) => {
-      if (data.views !== null && data.views > maxPlatViews) {
-        maxPlatViews = data.views;
-        topPlatform = plat;
-      }
-    });
-    if (maxPlatViews <= 0) topPlatform = "N/A";
-
-    const topContent = topContentCandidates
-      .sort((a, b) => {
-        if ((a.views === null) !== (b.views === null)) return a.views === null ? 1 : -1;
-        // Prioritize views
-        if (b.views !== a.views) return b.views - a.views;
-        // Then clicks
-        if (b.clicks !== a.clicks) return b.clicks - a.clicks;
-        // Then recency (publishedAt desc) if tied
-        const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-        const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-        return db - da;
-      })
-      .slice(0, entitlements.analytics.topContentLimit || 10);
-
-    const latestSnapshotAt = lastUpdatedAt ? new Date(lastUpdatedAt).toISOString() : null;
-    const nextUpdateAtStr = nextUpdateAt ? new Date(nextUpdateAt).toISOString() : null;
-
-    res.json({
-      requestedRange,
-      range,
-      selectedReleaseId: requestedRelease,
-      releaseOptions,
-      refreshTargets,
-      plan: {
-        tierId: snapshot.tierId,
-        name: entitlements.planName,
-      },
-      entitlements,
-      totalContent: contentIds.size,
-      publishedPostCount: publishedPosts.length,
-      publishedPostCountAllTime: publishedPostsAllTime.length,
-      postsWithoutEventDate,
-      rangeStartAt: startDate ? startDate.toISOString() : null,
-      rangeEndAt: now.toISOString(),
-      totalViews,
-      totalLikes,
-      totalShares,
-      totalRevenue: 0, // Pay-per-view is disabled; zero to match /content/:id behavior
-      totalClicks,
-      ctr: null,
-      measurement: {
-        status: !postsWithMetrics ? "unavailable" : postsWithMetrics < publishedPosts.length ? "partial" : "available",
-        postsWithMetrics,
-        postsWithoutMetrics: publishedPosts.length - postsWithMetrics,
-        measuredPostsByMetric: coverage,
-        note: "Metrics reflect collected posts only. Missing or unsupported values are unavailable; impressions are separate from video views. CTR needs matched click and impression attribution.",
-      },
-
-      // Frontend specific keys
-      platformBreakdown: entitlements.analytics.platformBreakdown ? contentByPlatform : {},
-      byPlatform: entitlements.analytics.platformBreakdown ? contentByPlatform : {},
-      topPlatform,
-      topContent,
-
-      // Analytics snapshot info
-      latestSnapshot,
-      lastUpdatedAt: latestSnapshotAt,
-      nextUpdateAt: nextUpdateAtStr,
-
-      viralityTracker: bestContent,
-      performanceStatus,
-      motivationMessage,
-      referralTracker: referralStats,
-      referralCode,
-      dataSource: "published_platform_posts",
-    });
-  } catch (error) {
-    console.error("Error getting user analytics:", error);
-    res.status(error.status === 503 ? 503 : 500).json({ error: error.status === 503 ? error.message : "Internal server error" });
   }
 });
 

@@ -1,6 +1,6 @@
 # Motion / Transform Keyframes
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -40,7 +40,7 @@ Edits position, scale, rotation, anchor, crop and opacity of ordinary layers. Na
 
 **Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy)
 
-**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md)
+**Guides:** [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** No pinned shared-template binding recorded.
 
@@ -98,7 +98,7 @@ Edit property keys, spatial position handles and value/velocity graphs on the sa
 
 **Controls:** [Position X](../control-reference/index.md#studio-transform-x), [Position Y](../control-reference/index.md#studio-transform-y), [Scale](../control-reference/index.md#studio-transform-scale), [Rotation](../control-reference/index.md#studio-transform-rotation), [Opacity](../control-reference/index.md#studio-transform-opacity), [Anchor X](../control-reference/index.md#studio-transform-anchorx), [Anchor Y](../control-reference/index.md#studio-transform-anchory), [Horizontal crop](../control-reference/index.md#studio-transform-cropx), [Vertical crop](../control-reference/index.md#studio-transform-cropy), [Keyframe time](../control-reference/index.md#studio-keyframe-time), [Keyframe easing](../control-reference/index.md#studio-keyframe-easing), [Group X position](../control-reference/index.md#studio-composite-group_x), [Group Y position](../control-reference/index.md#studio-composite-group_y), [Group scale](../control-reference/index.md#studio-composite-group_scale), [Group rotation](../control-reference/index.md#studio-composite-group_rotation), [Group opacity](../control-reference/index.md#studio-composite-group_opacity), [Selected keyframe time scale](../control-reference/index.md#studio-keyframe-selection_scale), [Keyframe paste destination](../control-reference/index.md#studio-keyframe-paste_target), [Start velocity](../control-reference/index.md#studio-keyframe-start_velocity), [End velocity](../control-reference/index.md#studio-keyframe-end_velocity), [Start influence](../control-reference/index.md#studio-keyframe-start_influence), [End influence](../control-reference/index.md#studio-keyframe-end_influence), [Curve path / Straighten path](../control-reference/index.md#studio-keyframe-spatial_curve), [Spatial path handles](../control-reference/index.md#studio-keyframe-spatial_handle)
 
-**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md)
+**Guides:** [Create a product-launch promo](../task-guides/task-product_launch.md), [Modify Director edits manually](../task-guides/task-director_manual.md), [Edit a video in your own style](../task-guides/task-own_style.md)
 
 **Templates:** product_launch_cinematic_v1@1.0.0, cycling_rhythm_v1@1.0.0, cycling_rhythm_v1@1.0.1, cycling_rhythm_v1@1.0.2, product_launch_cinematic_v1@1.1.0, product_launch_cinematic_v1@1.1.1, product_launch_cinematic_v1@1.1.2
 

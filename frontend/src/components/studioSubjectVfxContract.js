@@ -113,10 +113,12 @@ function validateSubjectVfxScene(scene) {
   for (const effect of scene.effects) {
     const fields = EFFECT_FIELDS[effect?.type] && [...EFFECT_FIELDS[effect.type],
       ...(effect.type === "background_replace" && Object.prototype.hasOwnProperty.call(effect, "reveal_seconds") ? ["reveal_seconds"] : []),
-      ...(effect.type === "foreground_refine" ? ["edge_radius", "decontaminate", "detail_polygon", "blue_spill", "clear_paths", "after_refine", "after_holdout", "reject_connected"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)) : [])];
+      ...(effect.type === "foreground_refine" ? ["alpha_levels", "alpha_polygon", "edge_radius", "decontaminate", "detail_polygon", "edge_polygon", "blue_spill", "clear_paths", "after_refine", "after_holdout", "reject_connected"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)) : [])];
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "after_refine")) fields.push("after_refine");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "paths")) fields.push("paths");
+    if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "color_paths")) fields.push("color_paths");
     if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "saturation")) fields.push("saturation");
+    if (effect?.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "source_patches")) fields.push("source_patches");
     if (effect?.type === "background_replace") fields.push(...["surface_corners", "asset_crop"].filter(key => Object.prototype.hasOwnProperty.call(effect, key)));
     if (
       !fields ||
@@ -174,6 +176,13 @@ function validateSubjectVfxScene(scene) {
     if (effect.type === "tracked_callout" && typeof effect.avoid_subject !== "boolean")
       fail("Choose whether the callout should avoid the subject.");
     if (effect.type === "foreground_refine") {
+      if (Object.prototype.hasOwnProperty.call(effect, "alpha_levels")) {
+        const levels = effect.alpha_levels;
+        if (!Array.isArray(levels) || levels.length !== 2 || !levels.every(value => bounded(value, 0, 1)) || levels[1] < levels[0] + .05)
+          fail("Use two edge opacity levels from 0 to 1, with at least 0.05 between them.");
+        if (effect.after_holdout || effect.after_refine)
+          fail("Set edge opacity before post-matting colour or protected-object cleanup.");
+      }
       if (Object.prototype.hasOwnProperty.call(effect,"reject_connected") && typeof effect.reject_connected!=="boolean")
         fail("Use a boolean background-connected colour cleanup choice.");
       if (Object.prototype.hasOwnProperty.call(effect,"after_holdout") &&
@@ -183,13 +192,16 @@ function validateSubjectVfxScene(scene) {
       if (Object.prototype.hasOwnProperty.call(effect,"after_refine") &&
           (typeof effect.after_refine!=="boolean" || (effect.after_refine && (effect.edge_radius>0 || effect.decontaminate>0))))
         fail("Use a boolean post-matting colour cleanup without another alpha solver.");
-      if (Object.prototype.hasOwnProperty.call(effect, "detail_polygon")) {
-        const points = effect.detail_polygon;
+      for (const polygonKey of ["detail_polygon", "edge_polygon", "alpha_polygon"]) {
+        if (!Object.prototype.hasOwnProperty.call(effect, polygonKey)) continue;
+        const points = effect[polygonKey];
         if (!Array.isArray(points) || points.length < 3 || points.length > 64 ||
             !points.every(point => Array.isArray(point) && point.length === 2 && point.every(value => bounded(value, 0, 1))) ||
             Math.abs(points.reduce((area, point, i) => { const next = points[(i + 1) % points.length]; return area + point[0] * next[1] - next[0] * point[1]; }, 0)) < .000001)
           fail("Choose 3–64 distinct source-frame points for the detail region.");
       }
+      if (Object.prototype.hasOwnProperty.call(effect,"edge_polygon") && !(effect.edge_radius>0))
+        fail("A local edge region needs a positive edge radius.");
       if (Object.prototype.hasOwnProperty.call(effect, "edge_radius") && !Number.isInteger(effect.edge_radius))
         fail("Edge radius uses whole source pixels.");
       if (!Number.isInteger(effect.choke)) fail("Matte choke uses whole source pixels.");
@@ -204,7 +216,32 @@ function validateSubjectVfxScene(scene) {
       fail("Choose four source-frame corners for the foreground holdout.");
     if (effect.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect, "after_refine") && typeof effect.after_refine !== "boolean")
       fail("Choose whether to keep the thin detail through cleanup.");
-    for (const field of effect.type === "foreground_holdout" ? ["paths"] : effect.type === "foreground_refine" ? ["clear_paths"] : [])
+    if (effect.type === "foreground_holdout" && Object.prototype.hasOwnProperty.call(effect,"source_patches")) {
+      const quad = points => {
+        if (!Array.isArray(points) || points.length!==4 || !points.every(point=>Array.isArray(point) &&
+            point.length===2 && point.every(value=>bounded(value,0,1)))) return false;
+        const crosses=points.map((a,i)=>{const b=points[(i+1)%4],c=points[(i+2)%4];return (b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]);});
+        const area=Math.abs(points.reduce((sum,a,i)=>{const b=points[(i+1)%4];return sum+a[0]*b[1]-b[0]*a[1];},0))/2;
+        return area>=.000001 && (crosses.every(value=>value>0) || crosses.every(value=>value<0));
+      };
+      const validRepair=patch=>{
+        if (!patch || typeof patch!=="object" || Array.isArray(patch) ||
+            !keys(patch,["source","target","feather","end_blend",...["clear_box","protect_paths","source_color","saturation"].filter(key=>Object.prototype.hasOwnProperty.call(patch,key))]) ||
+            !quad(patch.source) || !quad(patch.target) || !bounded(patch.feather,0,3) || !bounded(patch.end_blend,0,32)) return false;
+        if (Object.prototype.hasOwnProperty.call(patch,"source_color") && !["cleaned","original"].includes(patch.source_color)) return false;
+        if (Object.prototype.hasOwnProperty.call(patch,"saturation") && !bounded(patch.saturation,0,2)) return false;
+        if (Object.prototype.hasOwnProperty.call(patch,"clear_box") && (!Array.isArray(patch.clear_box) || patch.clear_box.length!==4 ||
+            !patch.clear_box.every(value=>bounded(value,0,1)) || patch.clear_box[0]>=patch.clear_box[2] || patch.clear_box[1]>=patch.clear_box[3])) return false;
+        if (Object.prototype.hasOwnProperty.call(patch,"protect_paths") && (!Array.isArray(patch.protect_paths) || patch.protect_paths.length<1 ||
+            patch.protect_paths.length>16 || !patch.protect_paths.every(points=>Array.isArray(points) && points.length>=3 && points.length<=64 &&
+              points.every(point=>Array.isArray(point) && point.length===2 && point.every(value=>bounded(value,0,1))) &&
+              Math.abs(points.reduce((sum,a,i)=>{const b=points[(i+1)%points.length];return sum+a[0]*b[1]-b[0]*a[1];},0))>=.000001))) return false;
+        return true;
+      };
+      if (!Array.isArray(effect.source_patches) || effect.source_patches.length<1 || effect.source_patches.length>16 || !effect.source_patches.every(validRepair))
+        fail("Use 1–16 source detail repairs with convex source/target corners, feather 0–3 and end blend 0–32 pixels.");
+    }
+    for (const field of effect.type === "foreground_holdout" ? ["paths", "color_paths"] : effect.type === "foreground_refine" ? ["clear_paths"] : [])
       if (Object.prototype.hasOwnProperty.call(effect, field) &&
         (!Array.isArray(effect[field]) || effect[field].length < 1 || effect[field].length > 32 ||
          !effect[field].every(points => Array.isArray(points) && points.length >= 3 && points.length <= 64 &&

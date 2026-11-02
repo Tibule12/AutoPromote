@@ -17,6 +17,7 @@ function fixture(t) {
   const book = c.prepare(root, "2026-10-17");
   // Historical 17 October fixtures precede the owner's minute-long direction.
   delete book.target.videoSeconds;
+  delete book.target.videoDurationMode;
   for (let i = 0; i < 4; i++) {
     // These are validation fixtures only: no fabricated evidence is delivered
     // as a native run or used to qualify Studio or creative readiness.
@@ -122,7 +123,7 @@ test("validates four distinct reviewed stories and 24 separate schedules", t => 
   const { root, book } = fixture(t);
   assert.equal(c.validateDay(root, book, { requireSchedules: true }).verifiedSchedules, 24);
 });
-test("new minute-long batches require actual public export duration and a viewer question", t => {
+test("historical fixed-duration batches retain their recorded duration and viewer question", t => {
   const { root, book } = fixture(t);
   book.target.videoSeconds = 60;
   assert.throws(() => c.validateDay(root, book), /viewer question/);
@@ -135,7 +136,7 @@ test("new minute-long batches require actual public export duration and a viewer
       technical: { passed: true, independentFullDecode: true, seconds: 10 },
     }));
   }
-  assert.throws(() => c.validateDay(root, book), /one minute/);
+  assert.throws(() => c.validateDay(root, book), /differs/);
   for (const story of book.stories) {
     const file = path.join(root, story.recordingRenderReceipt);
     const receipt = JSON.parse(fs.readFileSync(file)); receipt.technical.seconds = 60;

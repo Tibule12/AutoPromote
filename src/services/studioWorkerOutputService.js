@@ -88,7 +88,32 @@ async function refreshOwnedStudioOutput({ storagePath, userId, jobId, download =
   return url;
 }
 
-module.exports = { isTransientWorkerOutput, persistWorkerOutput, refreshOwnedStudioOutput };
+async function retainedLocalCompletionHash(jobId, env = process.env) {
+  // Explicit workstation recovery only. The owner-checked completed job is
+  // reconciled with its actual canonical worker file, never a browser hash.
+  if (env.NODE_ENV !== 'development' || !env.STUDIO_LOCAL_COMPLETION_ROOT) return null;
+  const worker = new URL(env.MEDIA_WORKER_URL || 'http://invalid');
+  if (worker.protocol !== 'http:' || !['127.0.0.1','localhost','[::1]'].includes(worker.hostname) ||
+      !/^viral_[a-f0-9]{64}$/.test(jobId)) throw new Error('Invalid retained local completion binding');
+  const root=env.STUDIO_LOCAL_COMPLETION_ROOT;
+  if (!path.isAbsolute(root) || await fs.promises.realpath(root) !== root) throw new Error('Invalid retained local completion directory');
+  const directory=await fs.promises.lstat(root);
+  if (!directory.isDirectory() || directory.isSymbolicLink() || (directory.mode & 0o077)) throw new Error('Retained completion directory must be private');
+  const file=path.resolve(root,jobId+'_viral.mp4');
+  if(!file.startsWith(root+path.sep))throw new Error('Retained completion escaped its private root');
+  let handle;
+  try { handle=await fs.promises.open(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW); }
+  catch(error){if(error.code==='ENOENT')return null;throw error;}
+  try {
+    const before=await handle.stat();
+    if(!before.isFile()||before.size<=0||before.size>1024**3)throw new Error('Invalid retained completion file');
+    const digest=crypto.createHash('sha256');for await(const chunk of handle.createReadStream({autoClose:false}))digest.update(chunk);
+    const after=await handle.stat();
+    if(after.ino!==before.ino||after.size!==before.size||after.mtimeMs!==before.mtimeMs)throw new Error('Retained completion changed while reading');
+    return digest.digest('hex');
+  } finally { await handle.close(); }
+}
+module.exports = { isTransientWorkerOutput, persistWorkerOutput, refreshOwnedStudioOutput, retainedLocalCompletionHash };
 
 // A signed worker URL expires even while its bytes remain in the bucket. Only
 // the exact server-generated job object in the configured bucket may be adopted.

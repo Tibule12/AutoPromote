@@ -58,7 +58,7 @@ async function terminal(collection, id) {
   }
   throw new Error(`Job did not become terminal: ${collection}/${id}`);
 }
-async function quote(operation, body, destinations = []) {
+async function quote(operation, body, destinations = [], compact = false) {
   const sourceId = `input-${crypto.randomUUID()}`;
   await db
     .collection("credits_v2_inputs")
@@ -71,7 +71,7 @@ async function quote(operation, body, destinations = []) {
       objectGeneration: "1",
       enforcedMaxSeconds: 1,
       allowedDestinations: ["facebook"],
-      workflowInput: { requestBody: body },
+      workflowInput: compact ? require('../../src/services/unifiedCredits/workflowDescriptor').compactWorkflowDescriptor({requestBody:body}) : { requestBody: body },
     });
   const result = await request(app)
     .post("/api/credit-pilot/quote")
@@ -289,7 +289,7 @@ describe("ordinary application routes with one nonproduction wallet", () => {
       sourceStoragePath: `studio/sources/${uid}/source.mp4`,
       options: { renderViral: true },
     };
-    const q = await quote("studio.render", body);
+    const q = await quote("studio.render", body, [], true);
     workerFailure = true;
     const r = await post("/api/media/process", body, q).expect(200);
     assert.equal((await terminal("video_edits", r.body.jobId)).status, "failed");
@@ -308,6 +308,17 @@ describe("ordinary application routes with one nonproduction wallet", () => {
     assert.equal(control.lifetimeSpentMicros, q.maxCostMicros);
     assert.equal(control.lifetimeReservedMicros, 0);
     assert.equal((await db.collection("credit_refunds").get()).size, 0);
+  });
+  it("binds exact native mask coordinates without storing nested wallet arrays and rejects changed creative decisions", async () => {
+    const body={sourceStoragePath:`studio/sources/${uid}/source.mp4`,options:{renderViral:true,quad:[[0,0],[1,0],[1,1],[0,1]]}};
+    const q=await quote('studio.render',body,[],true);
+    const changed=structuredClone(body);changed.options.quad[0][0]=.1;
+    await post('/api/media/process',changed,q).expect(409);
+    const stored=(await db.collection('credits_v2_inputs').doc(hash(uid,q.sourceId)).get()).data();
+    assert.equal(stored.workflowInput.requestBodyHash, require("../../src/services/unifiedCredits/workerVerification").digest(body));
+    assert.equal(stored.workflowInput.requestBody, undefined);
+    assert.equal(stored.workflowInput.requestBodyJson, undefined);
+    assert.equal((await service.getAccount(uid)).balance,15);
   });
   it("runs Find Viral Clips analysis and generation through their ordinary services", async () => {
     const body = { videoUrl: `${origin}/objects/source.mp4`, contentId: "source-content" };
@@ -349,6 +360,16 @@ describe("ordinary application routes with one nonproduction wallet", () => {
     assert.equal((await service.getAccount(uid)).balance, 15);
     assert.equal((await db.collection("clip_analyses").get()).size, 0);
     assert.equal(getApplicationContext(), null);
+  });
+  it('admits a digest-bound quote and rejects changed input before charging or dispatch', async () => {
+    const body={videoUrl:`${origin}/objects/source.mp4`,contentId:'source-content'};
+    const q=await quote('clips.analyze',body,[],true);
+    await post('/api/clips/analyze',{...body,videoUrl:'https://attacker.example/changed'},q).expect(409);
+    assert.equal((await service.getAccount(uid)).balance,15);
+    assert.equal((await db.collection('clip_analyses').get()).size,0);
+    const accepted=await post('/api/clips/analyze',body,q).expect(200);
+    assert(accepted.body.creditOperationId);
+    assert.equal((await db.collection('credits_v2_operations').get()).size,1);
   });
   it("keeps the absolute pilot ceiling across renewal and prevents budget reset by policy replacement", async () => {
     const base = require("../../config/unified-credits.sandbox.example.json");

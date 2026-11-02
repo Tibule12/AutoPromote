@@ -1,0 +1,108 @@
+{
+  "master": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "24/1",
+        "nb_frames": "298"
+      },
+      {
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0",
+        "nb_frames": "584"
+      }
+    ],
+    "format": {
+      "duration": "12.417000"
+    }
+  },
+  "movieSha256": "597c9dc99f249cc1494cedbec53dbd48f36fa952824ec08c646b7990151da9c2",
+  "timelineSha256": "6ff217acdf4b050e73111c6ac9686b64ff8e09b2fe29e3a3473e7be5e7e00240",
+  "canonicalHash": "5ac7b7be4214970e79825fd2042053d383bce0b1b68dc7208bc62a0360a0eb18",
+  "matchingNativeTimelineAndFullPlayback": true,
+  "fullDecodeBothFiles": true,
+  "allSevenTimelineRowsVisible": true,
+  "decodedPcmUnchanged": {
+    "bytes": 2387968,
+    "sha256": "24db2f184e82a5592522d55ec04928cf04721f2ce9c72145e3151e16fcd9dd59"
+  },
+  "nativeShots": [
+    {
+      "camera": "a",
+      "frames": 208,
+      "outputSha256": "ece24adb7aa2d6acd0e05059284562c10b3f5dc97932a7a1497047696b8820ba",
+      "cpuOnly": true
+    },
+    {
+      "camera": "b",
+      "frames": 90,
+      "outputSha256": "2b86fd71323c2c616a9bdbb318f8643fbd77e2283d4c49390e1c5f5e0fcd42b7",
+      "cpuOnly": true
+    }
+  ],
+  "gpuJobs": 0,
+  "ownerCreativeApproval": false,
+  "universalVideoQualityEstablished": false,
+  "manualVisualReview": {
+    "completeNativeShotsInspected": true,
+    "all208HostRigFramesInspected": true,
+    "fullMasterHostCutAndGuestHeadTurnInspected": true,
+    "couchAndMovingHandsRetained": true,
+    "removedPlantReedFragmentGone": true,
+    "creativeOwnerApproval": false
+  },
+  "checks": {
+    "rendererAndPreparedCache": {
+      "passed": 88
+    },
+    "frontendOpacityContractAndRecovery": {
+      "passed": 53
+    },
+    "productKnowledge": {
+      "passed": 17
+    },
+    "scopedLint": "PASS",
+    "isolatedCurrentAppBuild": "PASS",
+    "strictKnowledgeReviewBuildCheck": "PASS",
+    "studioContract": "PASS"
+  },
+  "preservation": {
+    "savedProjectCount": 54,
+    "otherProjectRecordsExact": 53,
+    "cookiesExact": true,
+    "firebaseSignedInIdentityPreserved": true,
+    "authRefreshAndHeartbeatUpdatesRetained": true,
+    "localStorageChangesLimitedToNativeRenderAttempts": 2,
+    "maskReferencesAndMaskJobsExact": true,
+    "sourcePatchCountRetained": 15,
+    "nonRoomEffectsExactApartFromOptionalOpacityAndRemovedReedProtection": true,
+    "allFourHostRepairSourceTargetGeometriesExact": true,
+    "removedReedProtectionPathsAcrossTwoHostRepairs": 6,
+    "originalAppBuildFilesExact": 147,
+    "protectedSourceAndPriorFilesExact": 97,
+    "verifiedObsoletePreparedCacheEntriesReleased": 1608,
+    "verifiedObsoletePreparedCacheBytesReleased": 3407533121,
+    "sourceFilesDeleted": 0
+  },
+  "limitations": [
+    "Fixed source-frame regions and source-detail repairs require moving review.",
+    "Original source lighting/compression remains.",
+    "Broader/longer videos and automatic tracked selection are unqualified.",
+    "Owner creative acceptance and professional/universal qualification are not implied."
+  ],
+  "installedBrowserReview": {
+    "headless": true,
+    "muted": true,
+    "localReviewMovieAndTimelineBytesExact": true,
+    "fullMoviePlayback": true,
+    "installedCurrentStudioLoads": true,
+    "ownedSavedProjectOpens": true,
+    "opacityControlValueRetained": true,
+    "pageErrors": []
+  }
+}

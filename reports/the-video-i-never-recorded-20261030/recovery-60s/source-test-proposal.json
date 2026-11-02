@@ -1,0 +1,35 @@
+{
+  "model": "veo-3.1-fast-generate-001",
+  "region": "us-central1",
+  "authorization": null,
+  "status": "AWAITING_EXPLICIT_SPEND_APPROVAL",
+  "maximumRequestsThisApproval": 2,
+  "secondsPerRequest": 8,
+  "maximumEstimatedGenerationUsd": 1.92,
+  "resolution": "1080p",
+  "fps": 24,
+  "generateAudio": true,
+  "noAutomaticRetry": true,
+  "approvalDoesNotCoverFullMinuteOrTenMinutes": true,
+  "character": "Daniel Vale, original invented adult male, short dark curly hair, brown eyes, subtle stubble, charcoal open-collar shirt. One front-facing presenter in the dark studio with restrained blue/purple accents. Camera lens at eye level directly in front, bilateral symmetrical face and eyes addressing the lens, not an off-camera interviewer. Standard unbranded microphone below mouth. No likeness or real voice reference.",
+  "performance": "Single fixed-camera continuous raw podcast take, dry male speech, no music, no subtitles, no graphics or B-roll. Exact dialogue, natural breaths, accurate mouth closures, restrained gestures, direct lens gaze throughout. Preserve the same character, wardrobe, studio and voice for the second take. Do not claim a seed locks voice.",
+  "tests": [
+    {
+      "id": "continuity-01",
+      "input": "text-only new front-facing character anchor",
+      "dialogue": "At eight forty-two this morning, I watched a video of myself saying something I had never said."
+    },
+    {
+      "id": "continuity-02",
+      "input": "actual accepted first take reference image; submit only after reviewing first",
+      "dialogue": "The face was mine. The voice was mine. Even the room behind me looked exactly right."
+    }
+  ],
+  "gate": "Review gaze, exact speech, same face/room/clothing, voice/accent and perceptual mouth sync. Stop after pair; retain failures; no automatic rephrase, retry or model fallback.",
+  "futureUnapprovedScopes": {
+    "8acceptedTakes64SecondsUsd": 7.68,
+    "12totalTakes96SecondsCeilingUsd": 11.52
+  },
+  "openingSpokenWords": 115,
+  "completeV2SpokenWords": 1303
+}

@@ -4,6 +4,9 @@
   "main": "src/server.js",
   "version": "1.2.0",
   "scripts": {
+    "studio:cinematic:build": "node scripts/cinematic/build-local-studio.cjs",
+    "studio:cinematic": "node src/cinematic/localServer.cjs",
+    "test:cinematic": "node --test test/cinematic-contract.test.cjs test/cinematic-local-server.test.cjs test/cinematic-programme.test.cjs test/cinematic-offline-programme.test.cjs",
     "credits:application-demo": "node scripts/monetization/application-demo.cjs",
     "test:credits:application": "node scripts/test-unified-credits.cjs --application-only",
     "credits:readiness": "node scripts/credits-readiness.cjs",

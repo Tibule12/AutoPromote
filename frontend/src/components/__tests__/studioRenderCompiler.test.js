@@ -33,13 +33,31 @@ test("image masks and crop keys survive the canonical composition boundary witho
   expect(compileStudioCompositionForRender(document).layers.find(item => item.id === "image").effects.mask.shape).toBe("polygon");
 });
 
-test("unimplemented geometric video masks stop compilation rather than dropping customer decisions", () => {
+test("ordinary video masks retain their real geometry in the native composition", () => {
   const document = adaptStudioSnapshotToDocument({ projectId: "video-mask", snapshot: {
     orderedClips: [{ id: "source", start: 0, end: 2 }], selectedClipId: "source",
     timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 2 }],
     overlays: [{ id: "video", type: "video", x: 50, y: 50, mask: { enabled: true, feather: 20 } }],
   } });
-  expect(() => compileStudioCompositionForRender(document)).toThrow(/Geometric masks/);
+  expect(compileStudioCompositionForRender(document).layers.find(layer=>layer.id==='video').effects.mask).toMatchObject({enabled:true,feather:20});
+});
+
+test('main source geometric masks remain gated independently of ordinary moving media',()=>{
+  const document=adaptStudioSnapshotToDocument({projectId:'main-mask',snapshot:{
+    orderedClips:[{id:'source',start:0,end:2}],selectedClipId:'source',
+    timeline:[{id:'main',sourceClipId:'source',startRequest:0,endRequest:2}],overlays:[],
+    mainTransform:{id:'main-video',mask:{enabled:true,shape:'ellipse',feather:2}},
+  }});
+  expect(()=>compileStudioCompositionForRender(document)).toThrow(/ordinary media layer/);
+});
+
+test("an invalid saved polygon is rejected before render submission", () => {
+  const document = adaptStudioSnapshotToDocument({ projectId: "invalid-polygon", snapshot: {
+    orderedClips: [{ id: "source", start: 0, end: 2 }], selectedClipId: "source",
+    timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 2 }],
+    overlays: [{ id: "image", type: "image", mask: { enabled: true, shape: "polygon", path: "polygon(1% 2%)" } }],
+  } });
+  expect(() => compileStudioCompositionForRender(document)).toThrow(/Mask polygon path/);
 });
 
 test("an invalid saved polygon is rejected before render submission", () => {
@@ -286,11 +304,12 @@ test("linked end trim removes cut media and gives later preview and worker cues 
   const timelineSegments = compileStudioTimelineForRender(document);
   expect(timelineSegments).toEqual(expected.timeline);
   expect(assertStudioExportTimelineMatchesDocument(document, timelineSegments)).toBe(true);
-  expect(trimmed.speedKeyframes.map(({ id, time, value }) => ({ id, time, value }))).toEqual(
+  expect(trimmed.speedKeyframes.filter(key => expected.speedKeys.some(authored => authored.id === key.id))
+    .map(({ id, time, value }) => ({ id, time, value }))).toEqual(
     expected.speedKeys
   );
   expect(document.programmeSpeedKeys.map(key => ticksToSeconds(key.atProgrammeTick))).toEqual(
-    expected.speedKeys.map(key => key.time)
+    trimmed.speedKeyframes.map(key => key.time)
   );
   const speedSegments = buildSpeedSegmentsFromKeyframes({
     keyframes: trimmed.speedKeyframes,

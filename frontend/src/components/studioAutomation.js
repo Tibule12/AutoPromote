@@ -1,3 +1,4 @@
+import { parseStudioMaskPolygon, studioMaskPolygonPath } from './studioMaskGeometry';
 export const STUDIO_EASINGS = [
   { id: "linear", label: "Linear" },
   { id: "ease_in", label: "Ease in" },
@@ -83,9 +84,9 @@ export const upsertAutomationKeyframe = (keyframes, nextKeyframe, tolerance = 0.
 };
 
 export const interpolateAutomationValue = ({ keyframes, property, time, fallback = 0 }) => {
-  const ordered = sortAutomationKeyframes(keyframes).filter(
-    keyframe => keyframe.property === property
-  );
+  const ordered = sortAutomationKeyframes((keyframes||[]).filter(
+    keyframe => keyframe?.property === property
+  ));
   if (!ordered.length) return Number(fallback);
   const currentTime = Number(time) || 0;
   if (currentTime <= Number(ordered[0].time)) return Number(ordered[0].value);
@@ -144,7 +145,18 @@ export const buildMotionAutomationStyle = (keyframes, time, fallback = {}) => {
     time,
     fallback: fallback.cropY ?? 0,
   });
+  const maskPoints = fallback.mask?.enabled && fallback.mask.shape === 'polygon'
+    ? parseStudioMaskPolygon(fallback.mask.path).map((point,index)=>point.map((value,axis)=>
+      interpolateAutomationValue({keyframes,property:`maskPoint${index}${axis?'Y':'X'}`,time,fallback:value}))) : null;
   return { x, y, scale, rotation, opacity, cropX, cropY,
+    ...(maskPoints ? { mask: {...fallback.mask,path:studioMaskPolygonPath(maskPoints)},
+      ...Object.fromEntries(maskPoints.flatMap((point,index)=>point.map((value,axis)=>[`maskPoint${index}${axis?'Y':'X'}`,value]))) } : {}),
+    ...(fallback.perspective ? {
+      perspectiveProgress: clamp(interpolateAutomationValue({keyframes,property:'perspectiveProgress',time,fallback:fallback.perspectiveProgress ?? 100}),0,100),
+      perspective:{...fallback.perspective,corners:fallback.perspective.corners.map((p,i)=>p.map((v,j)=>
+        interpolateAutomationValue({keyframes,property:`planeCorner${i}${j?'Y':'X'}`,time,fallback:v})))},
+      ...Object.fromEntries(fallback.perspective.corners.flatMap((p,i)=>p.map((v,j)=>
+        [`planeCorner${i}${j?'Y':'X'}`,interpolateAutomationValue({keyframes,property:`planeCorner${i}${j?'Y':'X'}`,time,fallback:v})]))) } : {}),
     ...(fallback.textAnimator ? { textProgress: clamp(interpolateAutomationValue({ keyframes, property: "textProgress", time, fallback: fallback.textProgress ?? 100 }), 0, 100) } : {}),
     ...(fallback.vectorShape ? Object.fromEntries(['strokeStart', 'strokeEnd', 'strokeOffset'].map(property => [property,
       clamp(interpolateAutomationValue({ keyframes, property, time,

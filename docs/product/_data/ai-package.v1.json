@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "product_version": "1.2.0",
-  "knowledge_version": "1.0.45",
-  "updated_at": "2026-10-21",
+  "knowledge_version": "1.0.52",
+  "updated_at": "2026-11-02",
   "release_channel": "development",
   "catalogue": "knowledge.public.v1.json",
   "controls": "controls.public.v1.json",
@@ -411,11 +411,6 @@
       "documentation": "../troubleshooting/index.md"
     },
     {
-      "feature_id": "generation.idea_to_video",
-      "status": "PARTIAL",
-      "documentation": "../generated-media/index.md"
-    },
-    {
       "feature_id": "generation.idea_recommendations",
       "status": "PROXY_ONLY",
       "documentation": "../generated-media/index.md"
@@ -502,11 +497,6 @@
     },
     {
       "feature_id": "publishing.publish",
-      "status": "PARTIAL",
-      "documentation": "../publishing/index.md"
-    },
-    {
-      "feature_id": "publishing.analytics",
       "status": "PARTIAL",
       "documentation": "../publishing/index.md"
     },
@@ -603,6 +593,10 @@
     {
       "task_id": "task.final_export",
       "documentation": "../task-guides/task-final_export.md"
+    },
+    {
+      "task_id": "task.own_style",
+      "documentation": "../task-guides/task-own_style.md"
     }
   ],
   "policy": "Dated, read-only product documentation. Preserve readiness and limitations. Not project execution authority or a guarantee of external AI ingestion."

@@ -1,0 +1,16 @@
+# Model selection and commercial licence review — 1 November 2026
+
+Chosen local weights:
+
+- SAM 2.1 small, publisher `facebook/sam2.1-hiera-small`, revision `ee5bba1d82bb8749febdf90f45e84b687142ba03`, weights SHA-256 `0a4067b11ce1e23d5229203f11c718a823060d15a4b23fa2372a7d4b77cbbc60`. [Upstream code and checkpoints: Apache 2.0](https://github.com/facebookresearch/sam2).
+- ViTMatte small Composition-1K, publisher `hustvl`, revision `6a58ad7646403c1df626fbd746900aec7361ea1d`, weights SHA-256 `bda9289db1bb6762d978b42d1c62ae3f34daf7497171a347a1d09657efd788cb`. [Publisher weight licence: Apache 2.0](https://huggingface.co/hustvl/vitmatte-small-composition-1k/blob/6a58ad7646403c1df626fbd746900aec7361ea1d/README.md). The implementation used is Hugging Face Transformers (Apache 2.0); original HUST implementation notices are separate. Retain attribution/licence notices when distributing.
+
+ViTMatte is an image model. The new adapter combines its source-conditioned alphas with adjacent-frame optical flow, forward/back consistency and photometric occlusion rejection. This is a hybrid video pipeline, not a newly trained video matting model. Visual/temporal quality must be evaluated on the actual clip.
+
+Not selected: [MatAnyone/MatAnyone2](https://github.com/pq-yang/MatAnyone2/blob/main/LICENSE.txt) requires separate permission for commercial use under S-Lab 1.0; [SAM2Matting](https://github.com/FudanCVL/SAM2Matting) and [MaGGIe](https://github.com/hmchuong/MaGGIe) have noncommercial terms. Cached RVM GPL-3.0 weights permit commercial uses subject to copyleft requirements; they were not silently treated as permissively licensed or integrated here. No paid inference or model download was used.
+
+Replacement evaluation plate: Sergej Majboroda's [Photo Studio 01](https://polyhaven.com/a/photo_studio_01), CC0. The downloaded 8192×4096 tonemapped panorama is projected to a 1430×1000 rectilinear plate with FFmpeg v360 (65° horizontal field, 48° vertical, yaw −115°, pitch −5°), then uploaded through Studio as ordinary owned project media. It is an evaluation choice, not a founder-approved cinematic set. No generated person or synthetic speech is used.
+
+The source-resolution repair uses **PyMatting 1.1.16, MIT**, pinned and checked at import, for deterministic closed-form edge alpha and foreground-colour recovery. Its installed distribution's licence and version metadata were inspected. OpenCV supplies source-colour graph cuts and optical flow; no additional learned weights were installed. These algorithms do not make this an independently trained video matting network. The new PyMatting install was a local package download, not paid model inference or generation.
+
+Follow-up local evaluation: the already cached official RVM v1.0.0 MobileNetV3 ONNX checkpoint (`88d4531297118f595bf2fd60f6f566aec2e559393802d1f436c380f0cbbd2828`, 14,975,696 bytes) is GPL-3.0, which allows commercial uses under its conditions; it is not a noncommercial licence. A one-frame actual CPU evaluation with PyMatting 1.1.16 (MIT) was rejected after the moving-person/foreground-object combination cut equipment. It was **not added to the product registry or deployed**. The active integrated proof remains SAM 2.1 + ViTMatte + source-flow temporal refinement. This records the changed evaluation decision rather than implying the recurrent model was accepted.

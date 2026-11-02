@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-30",
+  "generationRequestsAtPreflight": 0,
+  "infrastructureChanges": 0,
+  "cloudAuthAvailable": true,
+  "vertexApi": {
+    "httpStatus": 200,
+    "state": "ENABLED"
+  },
+  "billing": {
+    "httpStatus": 200,
+    "billingEnabled": true
+  },
+  "quota": {
+    "httpStatus": 200,
+    "pagesRead": 2,
+    "complete": true,
+    "model": "veo-3.1-fast-generate-001",
+    "region": "us-central1",
+    "effectiveRequestsPerMinute": 50
+  },
+  "initialQuotaRead": "v1 returned HTML 404; corrected v1beta1 returned 200; no quota changes",
+  "pricingCatalog": {
+    "httpStatus": 200,
+    "complete": false,
+    "note": "First 5000 SKU records only; published table used for planning rates; actual invoice unknown"
+  }
+}

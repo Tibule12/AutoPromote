@@ -1,6 +1,6 @@
 # Mask-backed subject effects and browser proxies
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -20,16 +20,25 @@ Uses reviewed owned subject-mask results in a bounded scene and deterministic fi
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → Creator → Composite and choose a clip under Add effects to a clip.
+2. Choose the person and separate foreground objects to retain, including the microphone and supports.
+3. Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.
+4. Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.
+5. Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The ordinary final export consumes the reviewed source-bound replacement. The short local proof preserves it through save and cold reopen; scaling and encoding differ from preview, and broader parity remains unqualified.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The correction/alpha pipeline remains opt-in development work. Two short angles have reviewed soft face/body/hand boundaries, corrected sleeve cleanup and persisted person framing. Fine foliage/prop contamination and compressed source detail still block a complete professional quality claim.
+- The image matting model uses a separate source-flow temporal stage. Wispy hair, long occlusions and camera motion are not qualified; fixed-object tracks require a fixed camera.
+- Local CPU processing is slow. Current runtime availability, source ownership and any execution costs must be checked before submitting.
+- The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.
+- The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.
+- The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness.
 
 **Common errors**
 
@@ -96,16 +105,25 @@ Uses a real source-bound segmentation result to separate the selected subject ac
 
 **Workflow**
 
-1. Open the relevant workspace with an owned source.
-2. Review the result and its limitations before saving or exporting.
+1. Open Studio → Creator → Composite and choose a clip under Add effects to a clip.
+2. Choose the person and separate foreground objects to retain, including the microphone and supports.
+3. Choose Correction target and a source frame; add foreground or background points where a track needs correction. Finish or cancel a pending mask request before changing it.
+4. Create the subject mask, refine saved mask edges, choose or upload the background and render the subject preview.
+5. Inspect movement and overlap frames, then save, reopen and inspect the final export. The reviewed checkbox records inspection, not professional quality approval.
 
-**Preview:** Uses the existing project preview. Broad picture and sound agreement with final export remains unqualified.
+**Preview:** A source-bound model mask and replacement scene produce a reviewed short-shot preview. Correcting the selection detaches stale results; effect-only changes can reuse the mask.
 
-**Final render:** Uses the existing render path where supported. Inspect the actual exported movie; the status does not certify every combination.
+**Final render:** The ordinary final export consumes the reviewed source-bound replacement. The short local proof preserves it through save and cold reopen; scaling and encoding differ from preview, and broader parity remains unqualified.
 
 **Limits**
 
 - This dated development snapshot does not establish professional or production readiness.
+- The correction/alpha pipeline remains opt-in development work. Two short angles have reviewed soft face/body/hand boundaries, corrected sleeve cleanup and persisted person framing. Fine foliage/prop contamination and compressed source detail still block a complete professional quality claim.
+- The image matting model uses a separate source-flow temporal stage. Wispy hair, long occlusions and camera motion are not qualified; fixed-object tracks require a fixed camera.
+- Local CPU processing is slow. Current runtime availability, source ownership and any execution costs must be checked before submitting.
+- The local temporal revision gates opacity consensus on unchanged source RGB and scopes corrective resets to the affected object. This reduces a specific motion-related background defect; it does not qualify clean fine foliage, all hair or arbitrary motion.
+- The latest local continuation preserves fractional model alpha instead of thresholding it again, and retains the person box when a correction detaches a completed request. These bounded repairs do not qualify arbitrary motion, hair, physical relighting or production latency.
+- The original-frame comparison found unintended lossy intermediate encodes after the subject preview. Reviewed-subject sequence, reframe and finish intermediates now preserve decoded samples before the ordinary selected final encode. This does not recover missing fine foreground detail or qualify visual cleanliness.
 
 **Common errors**
 
@@ -374,6 +392,7 @@ The Creator panel offers a cutout/background placement proxy. No qualified full 
 **Limits**
 
 - Use only as a placement study. Do not claim this browser display is a real model output or finished supported workflow.
+- This Creator placement study is separate from the model-backed Composite workflow. That opt-in development workflow has a short native export proof but still fails its professional visual target.
 
 **Common errors**
 

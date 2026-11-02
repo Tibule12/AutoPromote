@@ -72,7 +72,7 @@ beforeEach(() => {
   global.fetch = jest.fn();
 });
 
-test("background edge cleanup is an editable canonical effect and never starts a job", () => {
+test("background edge cleanup preserves soft alpha by default and remains editable without starting a job", () => {
   const current=scene();
   current.effects.push({id:"room",type:"background_replace",start:0,end:6,asset_id:"set-1",
     asset_sha256:"c".repeat(64),blur:0,exposure:0,saturation:1});
@@ -80,13 +80,24 @@ test("background edge cleanup is an editable canonical effect and never starts a
     storagePath:"uploads/images/owner/set.png",contentHash:"c".repeat(64)}]} />);
   fireEvent.click(screen.getByRole("button",{name:"Clean background edges"}));
   let saved=JSON.parse(screen.getByTestId("saved").textContent)[0];
-  expect(saved.scene.effects[2]).toMatchObject({id:"background-edge-cleanup",edge_radius:3,decontaminate:1,choke:0,feather:0});
+  expect(saved.scene.effects[2]).toMatchObject({id:"background-edge-cleanup",edge_radius:0,decontaminate:1,choke:0,feather:0});
   expect(saved.scene.effects.slice(0,2)).toEqual(current.effects);
   fireEvent.change(screen.getByLabelText("Background edge detail width"),{target:{value:"2"}});
   fireEvent.change(screen.getByLabelText("Remove old background colour"),{target:{value:"0.6"}});
   saved=JSON.parse(screen.getByTestId("saved").textContent)[0];
   expect(saved.scene.effects[2]).toMatchObject({edge_radius:2,decontaminate:.6});
   expect(global.fetch).not.toHaveBeenCalled();
+});
+
+test("replacement without a saved mask names the required step before any render request", async () => {
+  const current=scene();
+  current.effects.push({id:"room",type:"background_replace",start:0,end:6,asset_id:"set-1",
+    asset_sha256:"c".repeat(64),blur:0,exposure:0,saturation:1});
+  render(<Harness initialScene={current} />);
+  fireEvent.click(screen.getByRole("button",{name:"Render subject preview",exact:true}));
+  await screen.findByText("Create a subject mask first, then render the replacement preview.");
+  expect(global.fetch).not.toHaveBeenCalled();
+  expect(JSON.parse(screen.getByTestId("saved").textContent)[0].scene).toEqual(current);
 });
 afterEach(() => {
   delete global.fetch;
@@ -392,4 +403,25 @@ test('surface replacement exposes editable source corners and owned-image crop',
  fireEvent.click(screen.getByLabelText('Fit replacement to a surface'));
  expect(JSON.parse(screen.getByTestId('saved').textContent)[0].scene.effects[1].surface_corners).toBeUndefined();
  expect(fetch).not.toHaveBeenCalled();
+});
+
+test("edge opacity can be changed and reset without launching work or replacing the owned mask",()=>{
+  const current=scene();current.effects=[{id:'opacity',type:'foreground_refine',start:0,end:6,
+    edge_radius:0,decontaminate:1,choke:0,feather:0,recover_box:[0,0,0,0],recover_hue:0,
+    hue_tolerance:0,saturation_min:1,detail_box:[0,0,0,0],dark_max:0,clear_box:[0,0,0,0],
+    reject_hue:0,reject_tolerance:0,reject_saturation:1,reject_value:1}];
+  const artifact={artifactHash:'b'.repeat(64)};render(<Harness initialScene={current} modelArtifactRef={artifact}/>);
+  const polygon=[[.4,.3],[.8,.3],[.8,.9],[.4,.9]];
+  fireEvent.blur(screen.getByLabelText('Edge opacity region points'),{target:{value:JSON.stringify(polygon)}});
+  expect(JSON.parse(screen.getByTestId('saved').textContent)[0].scene.effects[0].alpha_polygon).toEqual(polygon);
+  fireEvent.blur(screen.getByLabelText('Edge opacity region points'),{target:{value:'[[0,0],[1,0]]'}});
+  expect(JSON.parse(screen.getByTestId('saved').textContent)[0].scene.effects[0].alpha_polygon).toEqual(polygon);
+  fireEvent.change(screen.getByLabelText('Opaque edge level'),{target:{value:'0.68'}});
+  fireEvent.change(screen.getByLabelText('Transparent edge level'),{target:{value:'0.02'}});
+  let saved=JSON.parse(screen.getByTestId('saved').textContent)[0];expect(saved.scene.effects[0].alpha_levels).toEqual([.02,.68]);expect(saved.modelArtifactRef).toEqual(artifact);
+  fireEvent.change(screen.getByLabelText('Transparent edge level'),{target:{value:'0.67'}});
+  expect(JSON.parse(screen.getByTestId('saved').textContent)[0].scene.effects[0].alpha_levels).toEqual([.02,.68]);
+  fireEvent.change(screen.getByLabelText('Transparent edge level'),{target:{value:'0'}});
+  fireEvent.change(screen.getByLabelText('Opaque edge level'),{target:{value:'1'}});
+  saved=JSON.parse(screen.getByTestId('saved').textContent)[0];expect(saved.scene.effects[0]).not.toHaveProperty('alpha_levels');expect(saved.modelArtifactRef).toEqual(artifact);expect(global.fetch).not.toHaveBeenCalled();
 });

@@ -3,6 +3,32 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import StudioProTimeline, {buildTimelineCaptionRegions} from "../StudioProTimeline";
 import { motionKeyAtPlayhead, motionKeyframeTolerance } from "../studioMotionProperties";
 
+test('Razor cuts at the clicked programme time without first seeking or cutting locked tracks', () => {
+  const cut = jest.fn(), seek = jest.fn();
+  const props = { duration: 10, editTool: 'razor', onRazorCut: cut, onSeek: seek,
+    timelineSegments: [{ id: 'main', name: 'Source', startRequest: 10, endRequest: 20 }], trackStates: {} };
+  const { rerender } = render(<StudioProTimeline {...props} />);
+  let clip = screen.getByTestId('pro-video-clip-1');
+  clip.parentElement.getBoundingClientRect = () => ({ left: 100, width: 500 });
+  fireEvent.click(clip, { clientX: 275, detail: 1 });
+  expect(cut).toHaveBeenLastCalledWith(3.5, null);
+  expect(seek).not.toHaveBeenCalled();
+  rerender(<StudioProTimeline {...props} trackStates={{ video: { locked: true } }} />);
+  fireEvent.click(screen.getByTestId('pro-video-clip-1'), { clientX: 300, detail: 1 });
+  expect(cut).toHaveBeenCalledTimes(1);
+});
+
+test.each(['tracks', 'layers'])('Razor cuts the clicked graphic in %s view', view => {
+  const cut = jest.fn();
+  render(<StudioProTimeline duration={10} editTool="razor" onRazorCut={cut} defaultView={view}
+    trackStates={{}} overlays={[{ id: 'title', type: 'text', name: 'Title', startTime: 1, duration: 8 }]} />);
+  const clip = view === 'layers' ? screen.getByRole('button', { name: 'Select Title layer clip' })
+    : screen.getByTestId('pro-graphics-clip-1');
+  clip.closest('.pro-track-lane').getBoundingClientRect = () => ({ left: 100, width: 500 });
+  fireEvent.click(clip, { clientX: 275, detail: 1 });
+  expect(cut).toHaveBeenCalledWith(3.5, 'title');
+});
+
 test('group property rows share key gestures and expose translation/scale bounds without media crop', () => {
   const toggle=jest.fn(),update=jest.fn(),select=jest.fn();
   render(<StudioProTimeline duration={3} playhead={1} trackStates={{}} onToggleMotionPropertyKeyframe={toggle}
@@ -77,6 +103,62 @@ test('adjacent delivery frames at 60fps or double speed remain distinct property
     expect(motionKeyAtPlayhead(keys, 'main-video', 'scale', time, tolerance).id).toBe('b');
     expect(motionKeyAtPlayhead(keys.slice(0, 1), 'main-video', 'scale', time, tolerance)).toBeUndefined();
   }
+});
+
+test('motion property lanes select the actual authored key and support precise frame nudges and deletion', () => {
+  const select = jest.fn(), update = jest.fn(), remove = jest.fn(), seek = jest.fn();
+  render(<StudioProTimeline duration={10} playbackRate={2} frameRate={24} trackStates={{}}
+    motionKeyframes={[{ id: 'scale-a', targetId: 'main-video', property: 'scale', time: 3, value: 1.2, easing: 'linear' }]}
+    onSelectMotionKeyframe={select} onUpdateMotionKeyframe={update} onRemoveMotionKeyframe={remove} onSeek={seek} />);
+  expect(screen.queryByTestId('motion-timeline-key-scale-a')).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Expand Source video keyframes' }));
+  const key = screen.getByTestId('motion-timeline-key-scale-a');
+  fireEvent.click(key);
+  expect(select).toHaveBeenCalledWith('scale-a', 'main-video');
+  expect(seek.mock.lastCall[1]).toBe(3);
+  fireEvent.keyDown(key, { key: 'ArrowRight' });
+  expect(update.mock.lastCall[0]).toBe('scale-a');
+  expect(update.mock.lastCall[1].time).toBeCloseTo(3 + 2/24, 10);
+  fireEvent.keyDown(key, { key: 'Delete' });
+  expect(remove).toHaveBeenCalledWith('scale-a');
+});
+
+test('dragging a motion key commits one edit; locking its owning track retains selection and blocks mutation', () => {
+  const update = jest.fn(), select = jest.fn(), remove = jest.fn();
+  const props = { duration: 10, frameRate: 20, trackStates: {}, overlays: [{ id: 'logo', type: 'image', name: 'Logo' }],
+    motionKeyframes: [{ id: 'logo-x', targetId: 'logo', property: 'x', time: 2, value: 40 }],
+    onSelectMotionKeyframe: select, onUpdateMotionKeyframe: update, onRemoveMotionKeyframe: remove };
+  const { rerender } = render(<StudioProTimeline {...props} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Show motion keyframes' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Expand Logo keyframes' }));
+  const key = screen.getByTestId('motion-timeline-key-logo-x');
+  jest.spyOn(key.parentElement, 'getBoundingClientRect').mockReturnValue({ width: 1000 });
+  fireEvent(key, new MouseEvent('pointerdown', { bubbles: true, clientX: 200, button: 0 }));
+  fireEvent(key, new MouseEvent('pointermove', { bubbles: true, clientX: 350 }));
+  fireEvent(key, new MouseEvent('pointerup', { bubbles: true, clientX: 350 }));
+  expect(update).toHaveBeenCalledTimes(1);
+  expect(update).toHaveBeenCalledWith('logo-x', { time: 3.5 });
+  update.mockClear(); rerender(<StudioProTimeline {...props} trackStates={{ broll: { locked: true } }} />);
+  fireEvent.click(key); fireEvent.keyDown(key, { key: 'ArrowRight' }); fireEvent.keyDown(key, { key: 'Delete' });
+  key.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, clientX: 200, button: 0 }));
+  key.dispatchEvent(new MouseEvent('pointermove', { bubbles: true, clientX: 350 }));
+  key.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, clientX: 350 }));
+  expect(select).toHaveBeenCalledWith('logo-x', 'logo');
+  expect(update).not.toHaveBeenCalled(); expect(remove).not.toHaveBeenCalled();
+});
+
+test('every image/video layer has one native media lane even before a layout mode is chosen', () => {
+  const select = jest.fn();
+  render(<StudioProTimeline duration={10} trackStates={{}} onSelectOverlay={select}
+    overlays={[{ id: 'logo', type: 'image', name: 'Brand logo', startTime: 3, duration: 2 },
+      { id: 'shot', type: 'video', name: 'Inserted shot', startTime: 4, duration: 3 },
+      { id: 'cutaway', type: 'text', bRollMode: 'fullscreen', name: 'Title cutaway', startTime: 2, duration: 1 },
+      { id: 'headline', type: 'text', name: 'Headline', startTime: 0, duration: 2 }]} />);
+  expect(screen.getAllByTestId(/pro-broll-clip-/)).toHaveLength(3);
+  expect(screen.getAllByTestId(/pro-graphics-clip-/)).toHaveLength(1);
+  fireEvent.click(screen.getByText('Brand logo'));
+  expect(select).toHaveBeenCalledWith('logo');
 });
 
 test('motion property lanes select the actual authored key and support precise frame nudges and deletion', () => {

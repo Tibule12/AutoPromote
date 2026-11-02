@@ -19,6 +19,10 @@ jest.mock("../../firebaseAdmin", () => ({
   admin: {},
   db: { collection: jest.fn(() => ({ doc: jest.fn(id => mockDocRef(id)) })) },
 }));
+jest.mock("../../firebaseAdmin", () => ({
+  db: { collection: jest.fn(() => ({ doc: jest.fn(id => mockDocRef(id)) })) },
+  admin: {},
+}));
 jest.mock("../../creditSystem", () => ({ deductCredits: jest.fn(), refundCredits: jest.fn() }));
 jest.mock("../mediaWorkerTaskQueue", () => ({ queueAudioExtractionTask: jest.fn() }));
 jest.mock("../cloudRunJobService", () => ({
@@ -87,6 +91,27 @@ describe("video editing viral render attempt claim", () => {
       )
     ).rejects.toThrow("Failed to queue video processing job");
     expect(service.processJobBackground).toHaveBeenCalledTimes(1);
+  });
+
+  it("persists dense native grades losslessly without indexing their arrays or changing the worker input", async () => {
+    const service=new VideoEditingService();service.processJobBackground=jest.fn().mockResolvedValue(null);
+    const options={renderViral:true,viralData:{brand_watermark:{text:"AutoPromote"},
+      grade:{size:17,data:Array.from({length:17**3*3},(_,i)=>(i%17)/16)},
+      studioProject:{projectId:"native-project",revision:12}}};
+    await service.startProcessingJob("https://example.com/source.mp4",options,"owner-1",attempt);
+    const stored=mockDocs.get(attempt.jobId);
+    expect(stored.options).toEqual({renderViral:true,viralData:{brand_watermark:{text:"AutoPromote"}}});
+    expect(stored.optionsArchive.encoding).toBe("gzip-json-v1");
+    expect(Buffer.isBuffer(stored.optionsArchive.data)).toBe(true);
+    expect(VideoEditingService.readProcessingOptions(stored)).toEqual(options);
+    expect(service.processJobBackground.mock.calls[0][2]).toBe(options);
+    expect(()=>VideoEditingService.readProcessingOptions({...stored,optionsArchive:{...stored.optionsArchive,sha256:"0".repeat(64)}})).toThrow(/identity mismatch/);
+    expect(VideoEditingService.readProcessingOptions({options:{legacy:true}})).toEqual({legacy:true});
+    const bytes=Buffer.from(JSON.stringify(options)), legacy={optionsPayloadEncoding:'gzip-json-v1',
+      optionsPayload:require('node:zlib').gzipSync(bytes),
+      optionsPayloadSha256:require('node:crypto').createHash('sha256').update(bytes).digest('hex')};
+    expect(VideoEditingService.readProcessingOptions(legacy)).toEqual(options);
+    expect(()=>VideoEditingService.readProcessingOptions({...legacy,optionsPayloadSha256:'0'.repeat(64)})).toThrow(/changed/);
   });
 
   it("refunds a charged viral job when the background worker fails", async () => {

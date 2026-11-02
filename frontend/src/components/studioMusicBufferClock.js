@@ -36,6 +36,17 @@ export function musicBufferNeedsResync(state, { contextTime, programmeTime, play
     Math.abs(musicBufferPosition(state, contextTime) - programmeTime) > .08;
 }
 
+// Only the eligible silent-picture route uses this correction. Preserve its
+// continuous audio anchor while a leading or trailing decoder converges.
+export function studioPictureRateCorrection(drift, prior = 1) {
+  if (!Number.isFinite(drift)) return 1;
+  if (Math.abs(drift) <= .02) return 1;
+  if (Math.abs(drift) <= .08 && prior === 1) return 1;
+  if (drift > .3) return 1.5;
+  if (drift < -.3) return .5;
+  return drift > 0 ? 1.25 : .75;
+}
+
 export function waitForMusicDecode(promise, timeoutMs = 10000) {
   if (!promise) return Promise.resolve();
   return new Promise(resolve => {

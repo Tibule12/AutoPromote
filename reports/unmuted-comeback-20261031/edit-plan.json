@@ -1,0 +1,34 @@
+{
+  "source": "cam-combiner-60sec.mp4",
+  "sourceHash": "7a16b8ba2eba836eac74bcfb1f830313907ac0e19f314e636d4b7f833643578c",
+  "ranges": [
+    [
+      12.433333333333334,
+      13.333333333333334
+    ],
+    [
+      19.6,
+      37.333333333333336
+    ],
+    [
+      40.3,
+      48.63333333333333
+    ],
+    [
+      49.5,
+      50
+    ]
+  ],
+  "duration": 27.46666666666667,
+  "fps": 30,
+  "frames": 824,
+  "story": [
+    "Return announcement",
+    "Deep, raw, authentic conversations",
+    "Guest welcome"
+  ],
+  "captionLines": 23,
+  "identity": "Unmuted Podcast, preserved from source",
+  "names": "Uncertain personal/show-segment names excluded",
+  "speechSource": "Original recording only"
+}

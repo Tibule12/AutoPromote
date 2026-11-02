@@ -17,6 +17,21 @@ export function parseStudioMaskPolygon(path = DEFAULT_STUDIO_MASK_POLYGON) {
     return [Number(point[1]), Number(point[2])];
   });
 }
+export const studioMaskPointProperty = property => /^maskPoint(\d{1,2})(X|Y)$/.exec(String(property));
+export const studioMaskPolygonPath = points => `polygon(${points.map(p => p.map(n=>Number(n).toFixed(8).replace(/\.?0+$/,'')).join('% ')+'%').join(', ')})`;
+export function validateStudioMaskAnimation(layer, keys = []) {
+  const animated = keys.filter(key => String(key.property).startsWith('maskPoint'));
+  if (!animated.length) return;
+  if (layer?.mask?.shape !== 'polygon' || !['image', 'video'].includes(layer.type))
+    throw Error('Point animation needs a polygon on an ordinary image or video layer. Remove its point keys before changing topology.');
+  const points = parseStudioMaskPolygon(layer.mask.path);
+  for (const key of animated) {
+    const match = studioMaskPointProperty(key.property);
+    if (!match || Number(match[1]) >= points.length || typeof key.value !== 'number' || !Number.isFinite(key.value) ||
+        key.value < -100 || key.value > 200 || typeof key.time !== 'number' || !Number.isFinite(key.time) || key.time < 0)
+      throw Error('Mask point keys need an existing point, finite time and coordinates between -100 and 200%.');
+  }
+}
 export function studioLayerMaskSvg(mask, cropX, cropY, width, height, programmeScale = 1) {
   if (!mask?.enabled) return null;
   const w = bounded(width, 1, 16384, 1), h = bounded(height, 1, 16384, 1);

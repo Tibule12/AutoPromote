@@ -1,5 +1,10 @@
 # Viral Studio Remix Audio
 
+30 October: **Chipmunk** joins the existing presets, raising the voice by one
+octave at unchanged picture timing. Use **Preview Remix** to hear the same
+independent pitch chain used in export; the immediate Web Audio monitor only
+approximates EQ, reverb and speed. [Repair and verification](../reports/studio-cut-controls-20261030/README.md).
+
 This branch is intentionally based on `agent/viral-studio-motion-sound` so the
 feature can be ported into a newer Studio without merging the older screen.
 

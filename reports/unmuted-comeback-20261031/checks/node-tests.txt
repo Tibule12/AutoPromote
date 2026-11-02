@@ -1,0 +1,21 @@
+✔ scene compiles real source surfaces, camera poses, lights, material and audio on the programme clock (4.063624ms)
+✔ each exposed camera, material, text and timing parameter reaches the graph (4.48477ms)
+✔ unsupported versions, unknown controls and unsafe text fail closed (2.102698ms)
+✔ missing narration cannot be represented as grounded evidence (0.703924ms)
+✔ Director produces the same editable scene semantics as manual controls (1.44905ms)
+✔ manifest hash ignores object key insertion order and changes with render content (0.990903ms)
+/tmp/cinematic-server-test-d2mAxu/playlist.m3u8: Invalid data found when processing input
+✔ real local media registration, HTTP origin boundary, source validation, wall timeout and process-group cancellation (3907.45308ms)
+✔ offline transport compiles canonical portrait framing, source captions and a real L-cut without client URLs (38.037068ms)
+✔ offline production boundary rejects unbound media and processing that could fetch an external resource (1.38216ms)
+✔ local programme uses actual canonical cuts, Inter title compositor, source audio and immutable cache (9178.094112ms)
+✔ changed scene content and forged export references fail before any render; placement reuses verified frames (19.710458ms)
+✔ unsupported saved effects are rejected instead of disappearing from local export (16.159929ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9397.980784

@@ -1,10 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import studioFont from "./helvetiker_bold.typeface.json";
 import { normalizeStudio3DScene, studio3DPose } from "./studio3DModel";
 import { studio3DCameraProjection } from "./studio3DProjection";
+import { studio3DFrameSample, studio3DTextureFrameRequest, studio3DCanShareVideo } from "./studio3DSampling";
+import { loadStudioSourceFrame } from "../studioSourceFrameClient";
+import { studio3DObjectPose } from "./studio3DObjects";
+import { ribbonMesh } from "./studio3DRibbon";
 import "./studio3D.css";
 
 const font = new FontLoader().parse(studioFont);
@@ -76,18 +82,34 @@ function animateLogo(group, scene, local, portrait) {
 function materialFor(scene) {
   const color = new THREE.Color(scene.primaryColor);
   const glow = new THREE.Color(scene.glowColor);
-  const common = { color, metalness: 0.25, roughness: 0.4, transparent: true };
+  // Transmission samples the opaque scene. Marking every object transparent
+  // hides the dial/lens parts behind glass in Three's transmission pass.
+  const common = { color, metalness: 0.25, roughness: scene.surfaceRoughness ?? .4, transparent: scene.template !== "object_scene" };
+  const rough = value => scene.surfaceRoughness ?? value;
   switch (scene.material) {
-    case "chrome": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 1, roughness: 0.16, clearcoat: 1 });
-    case "gold": return new THREE.MeshPhysicalMaterial({ ...common, color: "#e7ba55", metalness: 0.85, roughness: 0.21, clearcoat: 0.8 });
-    case "glass": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 0.1, roughness: 0.08, transmission: 0.38, thickness: 0.25, side: THREE.DoubleSide });
-    case "neon": return new THREE.MeshStandardMaterial({ ...common, emissive: glow, emissiveIntensity: 0.28 + scene.bloom * 0.36, metalness: 0.1 });
-    case "holographic": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 0.7, roughness: 0.18, iridescence: 1, iridescenceIOR: 1.5, clearcoat: 1 });
-    default: return new THREE.MeshStandardMaterial({ ...common, roughness: 0.72 });
+    case "architecture": {
+      const canvas = document.createElement("canvas"); canvas.width = 128; canvas.height = 256;
+      const context = canvas.getContext("2d"); context.fillStyle = scene.primaryColor; context.fillRect(0, 0, 128, 256);
+      context.fillStyle = "#143140";
+      for (let row = 0; row < 12; row++) for (let column = 0; column < 4; column++) context.fillRect(column * 32 + 5, row * 21 + 4, 22, 14);
+      const map = new THREE.CanvasTexture(canvas); map.colorSpace = THREE.SRGBColorSpace;
+      return new THREE.MeshPhysicalMaterial({ ...common, color: "#ffffff", map, metalness: .5, roughness: rough(.24) });
+    }
+    case "chrome": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 1, roughness: rough(.16), clearcoat: 1 });
+    case "gold": return new THREE.MeshPhysicalMaterial({ ...common, color: scene.template === "object_scene" ? color : "#e7ba55", metalness: 0.85, roughness: rough(.21), clearcoat: 0.8 });
+    case "glass": return new THREE.MeshPhysicalMaterial({ ...common, metalness: scene.template === "object_scene" ? 0 : .1,
+      roughness: rough(scene.template === "object_scene" ? .045 : .08), transmission: scene.template === "object_scene" ? 1 : .38,
+      ior: 1.45, thickness: 0.25, side: THREE.DoubleSide });
+    case "brushed": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 1, roughness: rough(.24), anisotropy: .7 });
+    case "silk": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 0, roughness: rough(.38), sheen: .9, sheenRoughness: .35, sheenColor: new THREE.Color("#fff1df") });
+    case "neon": return new THREE.MeshStandardMaterial({ ...common, roughness: rough(.4), emissive: glow, emissiveIntensity: 0.28 + scene.bloom * 0.36, metalness: 0.1 });
+    case "holographic": return new THREE.MeshPhysicalMaterial({ ...common, metalness: 0.7, roughness: rough(.18), iridescence: 1, iridescenceIOR: 1.5, clearcoat: 1 });
+    default: return new THREE.MeshStandardMaterial({ ...common, roughness: rough(.72) });
   }
 }
 
 function textMesh(text, scene, size, material) {
+  if (!String(text || '').trim()) return new THREE.Mesh(new THREE.PlaneGeometry(0,0),material);
   const geometry = new TextGeometry(text || " ", {
     font, size, depth: scene.extrusionDepth,
     curveSegments: 5, bevelEnabled: scene.bevel > 0,
@@ -166,6 +188,29 @@ function addAccent(group, scene) {
 
 function makeGroup(scene) {
   const group = new THREE.Group();
+  if (scene.template === "object_scene") {
+    group.userData.sceneObjects = scene.objects.map(object => {
+      let geometry;
+      if (object.shape === "ribbon") {
+        const data = ribbonMesh(object.ribbon);
+        geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(data.positions, 3));
+        const uv = [];
+        for (let index = 0; index < data.positions.length / 3; index += 1) uv.push(Math.floor(index / 16) / 192, (index % 16) / 16);
+        geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+        geometry.setIndex(data.indices); geometry.computeVertexNormals(); geometry.computeTangents();
+      }
+      else if (object.shape === "plane") geometry = new THREE.PlaneGeometry(10, 10);
+      else if (object.shape === "sphere") geometry = new THREE.SphereGeometry(1, 32, 16);
+      else if (object.shape === "torus") geometry = new THREE.TorusGeometry(1, .22, 12, 48);
+      else if (object.shape === "cylinder") { geometry = new THREE.CylinderGeometry(1, 1, 2, 48); geometry.rotateX(Math.PI / 2); }
+      else if (object.shape === "icosphere") geometry = new THREE.IcosahedronGeometry(1, 1);
+      else geometry = object.bevel ? new RoundedBoxGeometry(2, 2, 2, 3, object.bevel) : new THREE.BoxGeometry(2, 2, 2);
+      const mesh = new THREE.Mesh(geometry, materialFor({ ...scene, primaryColor: object.color, glowColor: object.color, material: object.material || scene.material, surfaceRoughness: object.roughness }));
+      mesh.name = object.name; group.add(mesh); return { object, mesh };
+    });
+    return group;
+  }
   const material = materialFor(scene);
   let title = textMesh(scene.text, scene, scene.text.length > 22 ? 0.4 : scene.text.length > 13 ? 0.55 : 0.78, material);
   if (scene.template === "neon_logo" && scene.text.toLowerCase() === "autopromote") {
@@ -207,31 +252,80 @@ function makeGroup(scene) {
     object.userData.baseScale = object.scale.clone();
   });
   if (scene.assetUrl) {
-    new THREE.TextureLoader().load(scene.assetUrl, texture => {
+    const attach = texture => {
       texture.colorSpace = THREE.SRGBColorSpace;
-      const art = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
-      art.position.set(0, 1.38, 0.18);
+      const video = scene.assetType === 'video';
+      const art = new THREE.Mesh(new THREE.PlaneGeometry(video ? 6.8 : 1.8, video ? 6.8/scene.assetAspect : 1.8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: true, side: THREE.DoubleSide, toneMapped: !video }));
+      art.position.set(0, scene.template==='media_plane'?0:1.38, 0.18);
       group.add(art);
-    }, undefined, () => {});
+      if (video) group.userData.videoAsset.art = art;
+    };
+    if (scene.assetType === 'video') {
+      const video = document.createElement('video');
+      video.crossOrigin='anonymous';video.muted=true;video.volume=0;video.playsInline=true;video.preload='auto';
+      video.src=scene.assetUrl;
+      const texture=new THREE.VideoTexture(video);
+      group.userData.videoAsset={video,texture};
+      attach(texture);
+    } else new THREE.TextureLoader().load(scene.assetUrl, attach, undefined, () => {});
   }
   return group;
 }
 
 // This canvas is an edit proxy. HQ Blender frames use the same bounded scene
 // model and timeline clock, but not the browser's light/geometry budget.
-export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLevel = 0, zIndex }) {
+export default function Studio3DCanvas({ scenes = [], time = 0, getTime, getSourceVideo, playing = false, playbackRate = 1, audioLevel = 0, zIndex }) {
   const hostRef = useRef(null);
   const clockRef = useRef(getTime);
   const levelRef = useRef(audioLevel);
   const timeRef = useRef(time);
+  const playbackRef = useRef({ playing, playbackRate });
+  const sourceVideoRef = useRef(getSourceVideo);
+  const pausedFramesRef = useRef({});
   const [webglFailed, setWebglFailed] = useState(false);
   clockRef.current = getTime;
   levelRef.current = audioLevel;
   timeRef.current = time;
+  playbackRef.current = { playing, playbackRate };
+  sourceVideoRef.current = getSourceVideo;
   const signature = JSON.stringify(scenes);
+  const textureRequests = playing ? [] : scenes.map(scene => ({ id: scene.id, request: studio3DTextureFrameRequest(scene, time) }))
+    .filter(item => item.request);
+  const textureRequestKey = JSON.stringify(textureRequests);
 
   useEffect(() => {
-    if (!scenes.length || !hostRef.current) return undefined;
+    const requests = JSON.parse(textureRequestKey);
+    pausedFramesRef.current = Object.fromEntries(requests.map(item => [item.id,
+      { key: JSON.stringify(item.request), status: 'loading' }]));
+    if (!requests.length) return undefined;
+    const controller = new AbortController();
+    const deadline = setTimeout(() => {
+      for (const { id, request } of requests) pausedFramesRef.current[id] = { key: JSON.stringify(request), status: 'unavailable' };
+      controller.abort();
+    }, 30000);
+    // Share the existing owner-bounded source decoder, including during a
+    // programme seek. Superseded seeks cannot paint an older texture.
+    const timer = setTimeout(async () => {
+      for (const { id, request } of requests) {
+        try {
+          const frame = await loadStudioSourceFrame(request, controller.signal);
+          if (controller.signal.aborted) return;
+          pausedFramesRef.current[id] = { ...frame, key: JSON.stringify(request), status: 'accurate' };
+        } catch (_) {
+          if (controller.signal.aborted) return;
+          pausedFramesRef.current[id] = { key: JSON.stringify(request), status: 'unavailable' };
+        }
+      }
+      clearTimeout(deadline);
+    }, 300);
+    return () => { clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
+  }, [textureRequestKey]);
+  const modelRef = useRef({ scenes, signature });
+  modelRef.current = { scenes, signature };
+  const hasScenes = scenes.length > 0;
+
+  useEffect(() => {
+    if (!hasScenes || !hostRef.current) return undefined;
     const host = hostRef.current;
     let renderer;
     try {
@@ -246,6 +340,7 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     host.appendChild(renderer.domElement);
     const world = new THREE.Scene();
+    let environment;
     const camera = new THREE.PerspectiveCamera(43, 1, 0.1, 100);
     camera.position.set(0, 0, 13);
     const ambient = new THREE.AmbientLight("#bfc9ff", 0.8);
@@ -254,12 +349,11 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
     const rim = new THREE.DirectionalLight("#8899ff", 0.65);
     rim.position.set(4, -2, -4);
     world.add(ambient, key, rim);
-    const objects = scenes.map(raw => {
-      const scene = normalizeStudio3DScene(raw);
-      const group = makeGroup(scene);
-      group.visible = false;
-      world.add(group);
-      return { scene, group };
+    let objects = [], lastSignature, retired = [];
+    const disposeGroup = group => group.traverse(object => {
+      object.geometry?.dispose?.();
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      materials.forEach(material => { material?.map?.dispose?.(); material?.dispose?.(); });
     });
     let width = 0, height = 0, raf, lastPlayhead, lastAudioLevel;
     const draw = () => {
@@ -267,6 +361,23 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
       if (document.hidden) return;
       const rect = { width: host.clientWidth, height: host.clientHeight };
       if (!rect.width || !rect.height) return;
+      const changed = lastSignature !== modelRef.current.signature;
+      if (changed) {
+        // Reuse the context, reflection environment and shader programmes when
+        // editing. Retire old materials after the replacement's first draw.
+        for (const { group } of objects) { world.remove(group); retired.push(group); }
+        const needsEnvironment = modelRef.current.scenes.some(scene => scene.template === "object_scene");
+        if (needsEnvironment && !environment) {
+          const pmrem = new THREE.PMREMGenerator(renderer), room = new RoomEnvironment();
+          environment = pmrem.fromScene(room, .04); room.dispose(); pmrem.dispose();
+        }
+        world.environment = needsEnvironment ? environment.texture : null;
+        objects = modelRef.current.scenes.map(raw => {
+          const scene = normalizeStudio3DScene(raw), group = makeGroup(scene);
+          group.visible = false; world.add(group); return { scene, group };
+        });
+        lastSignature = modelRef.current.signature;
+      }
       const resized = rect.width !== width || rect.height !== height;
       if (rect.width && rect.height && (rect.width !== width || rect.height !== height)) {
         width = rect.width; height = rect.height;
@@ -276,51 +387,150 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
         camera.updateProjectionMatrix();
       }
       const playhead = clockRef.current?.() ?? timeRef.current;
+      // Play the silent texture continuously during transport. Re-seeking on
+      // every animation frame prevents its decoder from presenting smoothly.
+      // Paused inspection instead consumes the exact native raw texture frame.
+      let textureChanged=false;
+      for (const {scene,group} of objects) {
+        const asset=group.userData.videoAsset;if(!asset)continue;
+        const sample=studio3DFrameSample(scene,playhead);
+        const video=asset.video,local=playhead-scene.startTime;
+        const transport=playbackRef.current;
+        const running=transport.playing && !!sample;
+        const now=performance.now();
+        const shared=running?sourceVideoRef.current?.():null;
+        if(studio3DCanShareVideo(scene,playhead,shared)){
+          video.pause();
+          if(asset.sharedVideo!==shared.video){
+            asset.sharedTexture?.dispose();asset.sharedVideo=shared.video;
+            asset.sharedTexture=new THREE.VideoTexture(shared.video);
+            asset.sharedTexture.colorSpace=THREE.SRGBColorSpace;
+          }
+          if(asset.art.material.map!==asset.sharedTexture){asset.art.material.map=asset.sharedTexture;textureChanged=true;}
+          host.dataset.sceneFrameIndex=String(sample.frameIndex);
+          host.dataset.textureSampling='shared-decoded';host.dataset.textureFrameIndex='';
+          host.dataset.textureSourceTime=String(shared.sourceTime);
+          host.dataset.textureTransport=shared.video.paused?'paused':'playing';
+          host.dataset.textureSeeking='false';
+          asset.running=false;asset.lastPlayhead=playhead;
+          continue;
+        }
+        const target=scene.assetSourceStart+Math.max(0,Math.min(scene.duration,running?local:(sample?.localTime??local)));
+        if(!running)video.pause();
+        const request=!running&&sample?studio3DTextureFrameRequest(scene,playhead):null;
+        const frame=request?pausedFramesRef.current[scene.id]:null;
+        const exact=frame?.status==='accurate'&&frame.key===JSON.stringify(request)?frame:null;
+        if(exact){
+          if(asset.pausedImage!==exact.image){
+            asset.pausedTexture?.dispose();
+            asset.pausedTexture=new THREE.Texture(exact.image);
+            asset.pausedTexture.colorSpace=THREE.SRGBColorSpace;
+            asset.pausedTexture.generateMipmaps=false;
+            asset.pausedTexture.minFilter=THREE.LinearFilter;
+            asset.pausedTexture.needsUpdate=true;
+            asset.pausedImage=exact.image;
+            textureChanged=true;
+          }
+          if(asset.art.material.map!==asset.pausedTexture){asset.art.material.map=asset.pausedTexture;textureChanged=true;}
+        }else{
+          if(asset.art.material.map!==asset.texture){asset.art.material.map=asset.texture;textureChanged=true;}
+          const jumped=asset.lastPlayhead!==undefined&&Math.abs(playhead-asset.lastPlayhead)>.5;
+          // Allow a seek to settle and the silent decoder to run before a
+          // further drift correction. Per-RAF seeks otherwise starve decoding.
+          const canCorrect=!running||!asset.running||jumped||now-(asset.lastSeekAt??-Infinity)>=750;
+          if(sample&&video.readyState>=1&&!video.seeking&&canCorrect&&Math.abs(video.currentTime-target)>(running ? .12 : 1/120)){
+            video.currentTime=target;asset.lastSeekAt=now;
+          }
+          if(running){
+            video.playbackRate=Math.max(.1,Math.min(4,Number(transport.playbackRate)||1));
+            if(video.paused&&!video.seeking&&!asset.playPending){
+              asset.playPending=true;video.play().catch(()=>{}).finally(()=>{asset.playPending=false;});
+            }
+          }
+        }
+        if(sample){
+          host.dataset.sceneFrameIndex=String(sample.frameIndex);
+          host.dataset.textureSampling=exact?'accurate-paused':frame?.status==='loading'?'loading':'native';
+          host.dataset.textureFrameIndex=exact?String(exact.receipt.frameIndex):'';
+          host.dataset.textureSourceTime=String(video.currentTime);
+          host.dataset.textureTransport=video.paused?'paused':'playing';
+          host.dataset.textureSeeking=String(video.seeking);
+        }
+        if(!video.seeking && video.readyState>=2 && asset.presentedTime!==video.currentTime){
+          asset.presentedTime=video.currentTime;asset.texture.needsUpdate=true;textureChanged=true;
+        }
+        asset.running=running;asset.lastPlayhead=playhead;
+      }
       const reactive = objects.some(({ scene }) => scene.audioReactiveIntensity > 0);
       const audio = reactive ? levelRef.current : 0;
-      if (!resized && playhead === lastPlayhead && audio === lastAudioLevel) return;
+      if (!resized && !textureChanged && !changed && playhead === lastPlayhead && audio === lastAudioLevel) return;
       lastPlayhead = playhead;
       lastAudioLevel = audio;
       for (const { scene, group } of objects) {
-        const pose = studio3DPose(scene, playhead);
+        const sample = studio3DFrameSample(scene, playhead);
+        const pose = sample && studio3DPose(scene, sample.programmeTime);
         group.visible = Boolean(pose);
         if (!pose) continue;
         if (scene.template === "neon_logo") {
           const portrait = height > width;
-          animateLogo(group, scene, playhead - scene.startTime, portrait);
+          animateLogo(group, scene, sample.localTime, portrait);
         }
         const sound = 1 + Math.min(1, levelRef.current) * scene.audioReactiveIntensity * 0.25;
         group.position.set(pose.x, pose.y, pose.z);
         group.scale.setScalar(pose.scale * sound);
-        group.rotation.set(pose.rotationX * Math.PI / 180, pose.rotationY * Math.PI / 180, pose.rotationZ * Math.PI / 180);
+        group.rotation.set(pose.rotationX * Math.PI / 180, pose.rotationY * Math.PI / 180, pose.rotationZ * Math.PI / 180, 'ZYX');
+        ambient.intensity = scene.lightingRig === "sculpture" ? .13 : .8;
+        rim.intensity = scene.lightingRig === "sculpture" ? 1.15 : .65;
+        for (const { object, mesh } of group.userData.sceneObjects || []) {
+          if (object.shape === "ribbon" && object.ribbon.speed !== 0) {
+            mesh.geometry.attributes.position.array.set(ribbonMesh(object.ribbon, playhead - scene.startTime).positions);
+            mesh.geometry.attributes.position.needsUpdate = true; mesh.geometry.computeVertexNormals(); mesh.geometry.computeTangents();
+          }
+          const current = studio3DObjectPose(object, playhead - scene.startTime);
+          mesh.position.set(current.x, current.y, current.z);
+          mesh.scale.set(current.scaleX, current.scaleY, current.scaleZ);
+          mesh.rotation.set(current.rotationX * Math.PI / 180, current.rotationY * Math.PI / 180, current.rotationZ * Math.PI / 180);
+        }
         group.traverse(child => {
-          if (child.isMesh && child.material?.transparent) {
+          if (child.isMesh && child.material && (scene.template === "object_scene" || child.material.transparent)) {
             if (child.material.userData.baseOpacity === undefined) child.material.userData.baseOpacity = child.material.opacity;
             child.material.opacity = pose.opacity * child.material.userData.baseOpacity;
+            if (scene.template === "object_scene") {
+              const transparent = child.material.opacity < 1;
+              if (child.material.transparent !== transparent) {
+                child.material.transparent = transparent;
+                child.material.needsUpdate = true;
+              }
+            }
           }
         });
         key.color.set(scene.lightColor);
         key.intensity = scene.lightIntensity / 2;
         key.position.set(Math.sin(scene.lightDirection * Math.PI / 180) * 6, 5, 8);
-        const projection = studio3DCameraProjection(scene, width / height, playhead - scene.startTime);
+        const projection = studio3DCameraProjection(scene, width / height, sample.localTime);
         camera.fov = projection.verticalFov;
         camera.position.set(projection.x, 0, projection.distance);
         camera.updateProjectionMatrix();
       }
       renderer.render(world, camera);
+      retired.forEach(disposeGroup); retired = [];
     };
     draw();
     return () => {
       cancelAnimationFrame(raf);
+      retired.forEach(disposeGroup);
       world.traverse(object => {
+        const asset=object.userData?.videoAsset;
+        if(asset){asset.video.pause();asset.video.removeAttribute('src');asset.video.load();asset.texture.dispose();asset.pausedTexture?.dispose();asset.sharedTexture?.dispose();}
         object.geometry?.dispose?.();
         const materials = Array.isArray(object.material) ? object.material : [object.material];
         materials.forEach(material => { material?.map?.dispose?.(); material?.dispose?.(); });
       });
       renderer.dispose();
+      environment?.dispose();
       if (renderer.domElement.parentNode === host) host.removeChild(renderer.domElement);
     };
-  }, [signature]);
+  }, [hasScenes]);
 
   if (!scenes.length) return null;
   return <div className="studio-3d-canvas" ref={hostRef} style={zIndex === undefined ? undefined : { zIndex }} data-testid="studio-3d-preview" aria-label="3D motion graphics preview">

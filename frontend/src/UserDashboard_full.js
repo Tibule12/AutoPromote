@@ -1,3 +1,5 @@
+import { requestedWorkspace, workspaceDestination } from "./utils/workspaceDestination";
+import { useLocation } from "react-router";
 import { creditFetch } from "./utils/creditPilot";
 // Canonical consolidated user dashboard
 /* eslint-disable no-unused-vars */
@@ -8,9 +10,7 @@ import ProfilePanel from "./UserDashboardTabs/ProfilePanel";
 import UploadPanel from "./UserDashboardTabs/UploadPanel";
 import ClipStudioWorkspace from "./UserDashboardTabs/ClipStudioWorkspace";
 import ViralClipStudioPanel from "./UserDashboardTabs/ViralClipStudioPanel";
-import SmartPromoPanel from "./UserDashboardTabs/SmartPromoPanel";
 import SchedulesPanel from "./UserDashboardTabs/SchedulesPanel";
-import AnalyticsPanel from "./UserDashboardTabs/AnalyticsPanel";
 import RewardsPanel from "./UserDashboardTabs/RewardsPanel";
 import NotificationsPanel from "./UserDashboardTabs/NotificationsPanel";
 
@@ -20,7 +20,6 @@ import AdminAuditViewer from "./AdminAuditViewer";
 import SecurityPanel from "./UserDashboardTabs/SecurityPanel";
 // CommunityPanel and CommunityFeed removed
 import WolfHuntDashboard from "./EngagementMarketplace";
-import IdeaVideoPanel from "./UserDashboardTabs/IdeaVideoPanel";
 import MissionControlPanel from "./UserDashboardTabs/MissionControlPanel";
 import CamCombinerPanel from "./UserDashboardTabs/CamCombinerPanel";
 import TeamPanel from "./UserDashboardTabs/TeamPanel";
@@ -37,6 +36,7 @@ import { sendEmailVerification } from "firebase/auth";
 import { API_ENDPOINTS, API_BASE_URL, ENABLE_WOLF_HUNT } from "./config";
 import toast, { Toaster } from "react-hot-toast";
 import { cachedFetch, batchWithDelay, clearCache } from "./utils/requestCache";
+import { startVisiblePoller } from "./utils/visiblePoller";
 import { isSafeRedirectUrl } from "./utils/security";
 import {
   getActiveWorkspaceId,
@@ -86,27 +86,10 @@ const DASHBOARD_PAGE_META = {
     description:
       "Edit detected moments on the full timeline, refine hooks, and render short clips.",
   },
-  smart_promo: {
-    eyebrow: "Create",
-    title: "Smart Promo",
-    description:
-      "Turn one source video into a polished master, social-first previews, and promotional visuals.",
-  },
-  idea_video: {
-    eyebrow: "Create",
-    title: "Idea-to-Video",
-    description: "Turn an idea into a structured, editable short-form video workflow.",
-  },
   schedules: {
     eyebrow: "Publish",
     title: "Schedule",
     description: "Create once. Publish everywhere.",
-  },
-  analytics: {
-    eyebrow: "Measure",
-    title: "Analytics",
-    description:
-      "Understand publishing performance, workflow conversion, and recovery opportunities.",
   },
   billing: {
     eyebrow: "Settings",
@@ -151,8 +134,6 @@ const DASHBOARD_NAV_GROUPS = [
       { id: "cam_combiner", label: "Cam Combiner", icon: "camera", desktopOnly: true },
       { id: "clip_studio", label: "Find Viral Clips", icon: "clips" },
       { id: "viral_clip_studio", label: "Viral Clip Studio", icon: "clips" },
-      { id: "smart_promo", label: "Smart Promo", icon: "sparkles" },
-      { id: "idea_video", label: "Idea-to-Video", icon: "sparkles" },
     ],
   },
   {
@@ -161,10 +142,6 @@ const DASHBOARD_NAV_GROUPS = [
       { id: "upload", label: "Publisher", icon: "publish" },
       { id: "schedules", label: "Queue", icon: "queue" },
     ],
-  },
-  {
-    label: "Measure",
-    items: [{ id: "analytics", label: "Analytics", icon: "analytics" }],
   },
   {
     label: "Settings",
@@ -242,12 +219,6 @@ function DashboardIcon({ name, size = 18 }) {
         <svg {...sharedProps}>
           <rect x="3" y="5" width="18" height="16" rx="3" />
           <path d="M16 3v4M8 3v4M3 10h18M8 14h3M8 17h6" />
-        </svg>
-      );
-    case "analytics":
-      return (
-        <svg {...sharedProps}>
-          <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
         </svg>
       );
     case "billing":
@@ -362,7 +333,15 @@ const UserDashboard = ({
 }) => {
   const hasPendingWorkspaceInvite =
     typeof window !== "undefined" && new URLSearchParams(window.location.search).has("invite");
-  const [activeTab, setActiveTab] = useState(hasPendingWorkspaceInvite ? "team" : "profile");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(hasPendingWorkspaceInvite ? "team" : requestedWorkspace(location.search) || "profile");
+  useEffect(() => {
+    const requested = requestedWorkspace(location.search);
+    if (requested && !hasPendingWorkspaceInvite) {
+      setActiveTab(requested);
+      hasAutoRoutedPrimaryTab.current = true;
+    }
+  }, [location.search, hasPendingWorkspaceInvite]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window === "undefined" ? false : window.matchMedia("(max-width: 1023px)").matches
@@ -454,12 +433,9 @@ const UserDashboard = ({
     team: "Team",
     upload: "Uploads",
     schedules: "Queue",
-    analytics: "Analytics",
     cam_combiner: "Cam Combiner",
     clip_studio: "Find Viral Clips",
     viral_clip_studio: "Viral Clip Studio",
-    smart_promo: "Smart Promo",
-    idea_video: "Creative Tools",
     security: "Security",
     notifications: "Notifications",
     "admin-audit": "Admin Audit",
@@ -664,20 +640,21 @@ const UserDashboard = ({
     document.documentElement?.classList?.add("dashboard-mode");
     document.body?.classList?.add("dashboard-mode");
 
-    // Poll notifications periodically so users see admin feedback promptly (mobile friendly)
-    // Reduce noise: Poll every 60s instead of 10s
-    let pollTimer = null;
-    const pollNotifications = async () => {
+    // Notification refreshes are UI work; hidden tabs must not keep reading Firestore.
+    const pollNotifications = async signal => {
       try {
         const currentUser = auth?.currentUser;
         if (!currentUser) return;
         // Do NOT force refresh token (pass false), use cached token to prevent rate limiting
         const token = await currentUser.getIdToken(false);
+        if (signal.aborted || document.hidden) return;
         const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS_LIST}?limit=10`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal,
         });
         if (!res.ok) return;
         const json = await res.json();
+        if (signal.aborted || auth?.currentUser?.uid !== currentUser.uid) return;
         if (!json.notifications) return;
         const incoming = Array.isArray(json.notifications) ? json.notifications : [];
         const incomingUnread = incoming.filter(notification => !notification?.read);
@@ -736,22 +713,10 @@ const UserDashboard = ({
         // ignore polling errors
       }
     };
-    // Start a timer and also poll on visibility change to catch when mobile resumes
-    pollTimer = setInterval(pollNotifications, 60000); // 60s interval
-    const handleVisibility = () => {
-      if (!document.hidden) {
-        // Debounce visibility poll to avoid double-firing
-        if (!pollTimer) pollNotifications();
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    // initial poll
-    pollNotifications();
+    const stopNotificationPolling = startVisiblePoller(pollNotifications);
 
     return () => {
-      if (pollTimer) clearInterval(pollTimer);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      stopNotificationPolling();
       document.documentElement?.classList?.remove("dashboard-mode");
       document.body?.classList?.remove("dashboard-mode");
     };
@@ -759,7 +724,7 @@ const UserDashboard = ({
 
   const handleNav = useCallback(
     (tab, options = {}) => {
-      const destinationTab = ["clips", "find_viral_clips"].includes(tab) ? "clip_studio" : tab;
+      const destinationTab = workspaceDestination(tab);
       if (destinationTab === "wolf_hunt" && !ENABLE_WOLF_HUNT) {
         toast("🐺 Wolf Hunt is currently locked. Come back later!", { icon: "🔒" });
         return;
@@ -1591,7 +1556,7 @@ const UserDashboard = ({
               <span>✨ Founding Tester</span>
               <strong>Your controlled 30-day test pass is active</strong>
               <p>
-                Cam Combiner, publishing and queues, Find Viral Clips, and Smart Promo are ready.
+                Studio, Cam Combiner, Publisher, Queue and Find Viral Clips are ready.
                 Other tools stay locked. Your 1,500-credit trial allowance expires with the pass; it
                 does not renew or charge you.
               </p>
@@ -1851,17 +1816,6 @@ const UserDashboard = ({
           />
         )}
 
-        {activeTab === "smart_promo" && (
-          <SmartPromoPanel
-            initialFile={selectedFile}
-            onUpgrade={() => handleNav("billing")}
-            onOpenPublisher={file => {
-              setSelectedFile(file);
-              handleNav("upload");
-              toast.success("Smart Promo output is ready to publish.");
-            }}
-          />
-        )}
 
         {activeTab === "schedules" && (
           <SchedulesPanel
@@ -1889,7 +1843,6 @@ const UserDashboard = ({
           />
         )}
 
-        {activeTab === "analytics" && <AnalyticsPanel />}
 
         {activeTab === "rewards" && <RewardsPanel badges={badges} />}
 
@@ -2015,16 +1968,6 @@ const UserDashboard = ({
               setSelectedFile(publishAsset);
               handleNav("upload");
               toast.success("Cam Combiner export is ready to publish.");
-            }}
-          />
-        )}
-        {activeTab === "idea_video" && (
-          <IdeaVideoPanel
-            onPublish={videoFile => {
-              setSelectedFile(videoFile);
-              setActiveTab("upload");
-              window.scrollTo({ top: 0, behavior: "smooth" });
-              toast.success("Proceeding to Upload Form...");
             }}
           />
         )}

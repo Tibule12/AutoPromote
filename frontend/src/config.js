@@ -45,12 +45,8 @@ export const API_ENDPOINTS = {
   MEDIA_STATUS: jobId => `${API_BASE_URL}/api/media/status/${encodeURIComponent(jobId)}`,
   CLIP_LEARNING_PROFILE: `${API_BASE_URL}/api/analytics/clip-learning-profile`,
   CLIP_LEARNING_PROFILE_REBUILD: `${API_BASE_URL}/api/analytics/clip-learning-profile/rebuild`,
-  CLIPS_PROMO_SUMMARY: `${API_BASE_URL}/api/clips/promo-summary`,
-  CLIPS_PROMO_SUMMARY_ESTIMATE: `${API_BASE_URL}/api/clips/promo-summary/estimate`,
   CLIPS_ANALYSIS: analysisId =>
     `${API_BASE_URL}/api/clips/analysis/${encodeURIComponent(analysisId)}`,
-  CLIPS_PROMO_SUMMARY_PREVIEW_STREAM: analysisId =>
-    `${API_BASE_URL}/api/clips/promo-summary/${encodeURIComponent(analysisId)}/preview/stream`,
   CLIPS_USER: `${API_BASE_URL}/api/clips/user`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,
@@ -177,7 +173,7 @@ export const API_ENDPOINTS = {
   NOTIFICATIONS_MARK_READ: `${API_BASE_URL}/api/notifications/read-all`,
 
   // Analytics endpoints
-  ANALYTICS_USER: `${API_BASE_URL}/api/analytics/user`,
+  REWARDS_PROGRESS: `${API_BASE_URL}/api/analytics/rewards`,
   ANALYTICS_WORKFLOW_SUMMARY: `${API_BASE_URL}/api/analytics/workflow-summary`,
   ANALYTICS_CLIP_SCANNER_CACHE: `${API_BASE_URL}/api/analytics/clip-scanner-cache`,
 
@@ -219,7 +215,6 @@ export const FIREBASE_CONFIG = {
 // Feature flags
 export const FEATURES = {
   ENABLE_STRIPE: false,
-  ENABLE_ANALYTICS: true,
   DEBUG_MODE: process.env.NODE_ENV === "development",
 };
 

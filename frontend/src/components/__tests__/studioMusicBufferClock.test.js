@@ -1,4 +1,16 @@
-import { musicBufferPosition, musicBufferNeedsResync, waitForMusicDecode, prepareStudioMusicPlayback, studioMusicBufferIdentity } from '../studioMusicBufferClock';
+import { musicBufferPosition, musicBufferNeedsResync, waitForMusicDecode, prepareStudioMusicPlayback, studioMusicBufferIdentity, studioPictureRateCorrection } from '../studioMusicBufferClock';
+
+test('a leading silent picture slows until continuous sound catches it; lag and cancellation converge too', () => {
+  expect(studioPictureRateCorrection(-.12)).toBe(.75);
+  expect(studioPictureRateCorrection(-.04, .75)).toBe(.75);
+  expect(studioPictureRateCorrection(-.015, .75)).toBe(1);
+  expect(studioPictureRateCorrection(.12)).toBe(1.25);
+  expect(studioPictureRateCorrection(.015, 1.25)).toBe(1);
+  expect(studioPictureRateCorrection(.05)).toBe(1);
+  expect(studioPictureRateCorrection(-.5)).toBe(.5);
+  expect(studioPictureRateCorrection(.5)).toBe(1.5);
+  expect(studioPictureRateCorrection(-.12, 1.25)).toBe(.75);
+});
 
 test('owned decoded audio survives access refresh but cannot cross project/owner/asset boundaries', () => {
   const track = { ownerUid: 'owner-a', storagePath: 'owned/song.mp3', contentHash: 'a'.repeat(64), url: 'https://media.example.com/old' };

@@ -1,0 +1,41 @@
+{
+  "applied": false,
+  "approvalRequired": true,
+  "preconditions": [
+    "Validate longest supported podcast/render on staging before lowering the deadline",
+    "Keep all RTX PRO 6000 GPU allocations, GPU timeouts, CPU/memory, task count, parallelism and retries unchanged"
+  ],
+  "changes": [
+    {
+      "job": "cam-combiner-render-job",
+      "currentTimeout": "14400s",
+      "proposedTimeout": "7200s",
+      "command": [
+        "gcloud",
+        "run",
+        "jobs",
+        "update",
+        "cam-combiner-render-job",
+        "--project=autopromote-cc6d3",
+        "--region=us-central1",
+        "--task-timeout=7200s"
+      ]
+    },
+    {
+      "job": "cam-combiner-render-fast-job",
+      "currentTimeout": "14400s",
+      "proposedTimeout": "7200s",
+      "command": [
+        "gcloud",
+        "run",
+        "jobs",
+        "update",
+        "cam-combiner-render-fast-job",
+        "--project=autopromote-cc6d3",
+        "--region=us-central1",
+        "--task-timeout=7200s"
+      ]
+    }
+  ],
+  "basis": "15 retained CPU executions; observed maximum 2782.2 seconds, insufficient to establish the longest supported customer workload. This is an optional reviewed proposal, not a deployment."
+}

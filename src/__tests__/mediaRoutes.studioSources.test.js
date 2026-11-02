@@ -346,6 +346,31 @@ describe("owned Studio project sources", () => {
     expect(deductCredits).not.toHaveBeenCalled();
   });
 
+  it("restores legacy raw image/audio uploads while retaining owner, type and video-only boundaries", async () => {
+    const { resolveOwnedStudioVideoSource } = require('../services/studioSourceService');
+    for (const [type, name, contentType] of [["images", "old-logo.png", "image/png"], ["audios", "old-music.wav", "audio/wav"]]) {
+      const path = `uploads/${type}/${name}`;
+      putVideo(path, "owner-1", { contentType });
+      const result = await request(buildApp()).post("/api/media/studio-assets/resolve").send({ storagePath: path });
+      expect(result.statusCode).toBe(200);
+      await expect(resolveOwnedStudioVideoSource({ storagePath: path, userId: 'owner-1' })).rejects.toMatchObject({ statusCode: 403 });
+      putVideo(path, "attacker", { contentType });
+      const forged = await request(buildApp()).post("/api/media/studio-assets/resolve").send({ storagePath: path });
+      expect(forged.statusCode).toBe(403);
+    }
+    for (const [path, contentType, status] of [
+      ['uploads/images/old-page.html', 'text/html', 422],
+      ['uploads/images/unknown/subdir.png', 'image/png', 403],
+      ['uploads/images/../secret.png', 'image/png', 403],
+    ]) {
+      putVideo(path, 'owner-1', { contentType });
+      const rejected = await request(buildApp()).post('/api/media/studio-assets/resolve').send({ storagePath: path });
+      expect(rejected.statusCode).toBe(status);
+    }
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+  });
+
   it("does not import another user's Cam Combiner master", async () => {
     mockDocs.set("master-1", {
       userId: "attacker",

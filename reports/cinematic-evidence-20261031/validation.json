@@ -1,0 +1,401 @@
+{
+  "date": "2026-10-31",
+  "status": "LOCAL_PROGRAMME_WORKFLOW_VERIFIED_CREATIVE_OPEN",
+  "report": "reports/cinematic-evidence-20261031/README.md",
+  "sourceBase": "eedf45a4a6f0bb3f14ff34f24f70f48df1ee15bd",
+  "retainedStudioFoundation": "4305b6da",
+  "sceneCollection": "threeDScenes",
+  "canonicalLayerType": "three_d",
+  "schema": "cinematic_evidence v1 / evidence_stage_v1",
+  "verifiedScope": [
+    "actual Studio component in isolated local shell",
+    "Director plan to editable timeline scene",
+    "camera/light/material/text/source controls",
+    "360p real Blender CPU movie and source comparison",
+    "native save/cold reopen and Undo/Redo",
+    "pending-autosave history regression repaired",
+    "current-revision invalidation and identical-output reuse",
+    "native download SHA-256 matches real output",
+    "processed-scene programme review and complete muted timeline recording",
+    "720p completed scene and native export cache verification",
+    "actual local source append, ordinary title editing and Bring forward stack",
+    "16-second canonical programme assembly, native download and complete timeline playback",
+    "192/384 exact output frames and shared fractional-frame placement regression",
+    "shared denoiser latency/tail correction; measured programme speech lag zero samples"
+  ],
+  "tests": {
+    "frontendFocusedDistinctPasses": 140,
+    "nodeDistinctPasses": 7,
+    "pythonDistinctPasses": 28,
+    "totalDistinctPasses": 175,
+    "fullMountedEditorSuite": "INCONCLUSIVE: interrupted long run; scoped history suite had one load-related 15s timeout; same B-roll case passes unchanged with Blender briefly paused",
+    "continuation": {
+      "frontend": 36,
+      "mountedEditor": 4,
+      "node": 10,
+      "python": 13,
+      "total": 63,
+      "scope": "Focused suites and four selected mounted-editor cases; not a complete editor/account suite rerun"
+    }
+  },
+  "renderProfileQualification": {
+    "preview360p": "VERIFIED: 192 frames, 8 seconds",
+    "export720p": "VERIFIED: 192 frames, 8 seconds",
+    "programme720p": "VERIFIED: 384 frames, 16 seconds, exact native download SHA-256"
+  },
+  "realAccountFlow": false,
+  "productionFirebaseAccess": false,
+  "paidGpuOrModelUsed": false,
+  "deployed": false,
+  "creativeApproval": "NOT_CLAIMED",
+  "parity": {
+    "sameSceneBuilder": true,
+    "processedMovieReview": "VERIFIED",
+    "interactiveAuthoringPictureAudio": "UNQUALIFIED: independent decoder drift observed",
+    "pixelParity": "NOT_CLAIMED",
+    "processedProgrammeReview": "VERIFIED: exact assembled movie in existing finished-file monitor; independent authoring parity remains unqualified"
+  },
+  "remainingBlockers": [
+    "production tenant-owned storage/receipt resolution and controlled cloud dispatch",
+    "additional unsupported timeline effects, speed, captions and audio tracks in the local adapter",
+    "grounded clock narration and accepted evidence media beyond illustrative local cues",
+    "reliable interactive authoring playback and whole-picture colour/edge parity",
+    "portable local-media backup/relinking",
+    "real-account, cloud isolation/concurrency and owner creative/listening qualification"
+  ],
+  "nextTask": "Extend this validated local programme boundary to tenant-owned source/receipt resolution and controlled existing dispatch; continue S02/S04/S03 and additional effects/media qualification. No paid execution, deployment or readiness promotion.",
+  "artifactDirectory": "reports/cinematic-evidence-20261031/review/",
+  "sourceHash": "7011e9e110f31ba82211ecdafc9f6391e28261431429463614409f31bed2b864",
+  "previewJobId": "cf4322eaa47e7e51e41f38bf3cc894277f1d77b81f336901b6dde455bfd3cb0e",
+  "exportJobId": "043f337d56660060749650c9b2939e1d606e4210679e96f6bcbe22654ce98624",
+  "audio": {
+    "sourceSamples": 384000,
+    "previewSamples": 384000,
+    "sampleRate": 48000,
+    "bestLagSamples": 0,
+    "zeroOffsetCorrelation": 0.9992545920184005,
+    "measuredGain": 0.9897678733056705,
+    "freshHumanListening": "unverified",
+    "note": "AAC re-encoding; measurement is not creative or perceptual lip-sync approval"
+  },
+  "artifacts": {
+    "reports/cinematic-evidence-20261031/review/native-timeline-clock.png": {
+      "bytes": 595867,
+      "sha256": "c932fcde3a2f8002c928f85d0bbb4b88e2e03eb33a3d93f8dbcfe008e0ef9691"
+    },
+    "reports/cinematic-evidence-20261031/review/preview-completed.png": {
+      "bytes": 576860,
+      "sha256": "5b7597f4bd9c65934538426033204688f7bb1ecf78f5c21dab6be46464bf3651"
+    },
+    "reports/cinematic-evidence-20261031/review/editable-scene.png": {
+      "bytes": 479313,
+      "sha256": "58617644f4f666812dcea860c2c2b960f326a84100f53f2bae8ff64cdf35a484"
+    },
+    "reports/cinematic-evidence-20261031/review/raw-versus-edited-preview.mp4": {
+      "bytes": 1602475,
+      "sha256": "60067876ccb5df88976caab36cc3f1893de4bef0b87ccd1a4cf7e93768727bd4"
+    },
+    "reports/cinematic-evidence-20261031/review/edited-in-studio.webm": {
+      "bytes": 3806883,
+      "sha256": "e51098d08ae47778ac35b694f07e49b34f26b361b1d0bb31ee03acf10d68465b"
+    },
+    "reports/cinematic-evidence-20261031/review/audio-validation.json": {
+      "bytes": 317,
+      "sha256": "374231c6241c32106a5dab5a74fa2d4b1c43894cc51a721993c6b0b2fc9eb512"
+    },
+    "reports/cinematic-evidence-20261031/review/scene-added.png": {
+      "bytes": 491519,
+      "sha256": "df674176ceb2d3ae8e7b5acc9918f29e51a39c71f44797989afeb796c41acc63"
+    },
+    "reports/cinematic-evidence-20261031/review/playback-observations.json": {
+      "bytes": 3032,
+      "sha256": "0f524faf3ff0d2d964c92616ea0ed29c9da12488f8b058a437550586921eeacc"
+    },
+    "reports/cinematic-evidence-20261031/review/studio-preview-verification.json": {
+      "bytes": 2355,
+      "sha256": "deb53d1139e6764d11b76e936dc49ff3d9cae34b41866f36c13c58b3cb42ce5c"
+    },
+    "reports/cinematic-evidence-20261031/review/cinematic-preview.mp4": {
+      "bytes": 837922,
+      "sha256": "9633a47da28fb08da901fc8ed0814727457a6f853527ccbbeab3d9cd3c230434"
+    },
+    "reports/cinematic-evidence-20261031/review/native-preview-clock.png": {
+      "bytes": 312879,
+      "sha256": "137804608ae0db87dd4b41c4f26ae9af0292735080589f6cbe42c5cae2b4493a"
+    },
+    "reports/cinematic-evidence-20261031/review/downloaded-scene-preview.mp4": {
+      "bytes": 837922,
+      "sha256": "9633a47da28fb08da901fc8ed0814727457a6f853527ccbbeab3d9cd3c230434"
+    },
+    "reports/cinematic-evidence-20261031/review/cold-reopen.png": {
+      "bytes": 501409,
+      "sha256": "ba3504a097f961038083a6b88384ef37047cf5b0fc22200078b14e5ec74677b3"
+    },
+    "reports/cinematic-evidence-20261031/review/director-plan.json": {
+      "bytes": 7397,
+      "sha256": "2993b0a179eae70f17b4e8bfc7fefad453a799784f48cf48a6259976fc464e84"
+    },
+    "reports/cinematic-evidence-20261031/review/edited-in-studio.mp4": {
+      "bytes": 4239956,
+      "sha256": "ae38334ea650211627e683017856f24bd6bff087e9544e3c47f09d2dfe605d9e"
+    },
+    "reports/cinematic-evidence-20261031/review/preview-clock-frame.png": {
+      "bytes": 257179,
+      "sha256": "6024c66b8b564f848817ec80b9055a9d91b6ad2455ba8fcc9bdc99df9e358741"
+    },
+    "reports/cinematic-evidence-20261031/review/native-timeline-before-playback.png": {
+      "bytes": 446525,
+      "sha256": "58cc52484f4ab0a54ba209d3ad7083fbd5204539ed93d33e02d0de800740c231"
+    },
+    "reports/cinematic-evidence-20261031/review/editable-project.json": {
+      "bytes": 413223,
+      "sha256": "8e07d21c2dd659a429fcc9c3e60f97a2c7a4357d2996033b709fc2e035dcf936"
+    },
+    "reports/cinematic-evidence-20261031/review/rejected-occluded-source.png": {
+      "bytes": 196491,
+      "sha256": "59b80fb8735924f830fdfd699e7256dbb07b33490a494a113eb060cfcbb157ec"
+    },
+    "reports/cinematic-evidence-20261031/review/preview-contact.png": {
+      "bytes": 936385,
+      "sha256": "bc5f06944d2db3c5f6f98935f466153fd80205607f7742a212c95db2e72fa806"
+    },
+    "reports/cinematic-evidence-20261031/review/cinematic-evidence-720p.mp4": {
+      "bytes": 2232469,
+      "sha256": "5adbbf0ff9c787f40f176936e6b6ca9ac9103b380ce2f87af8d784e713ec04c1"
+    },
+    "reports/cinematic-evidence-20261031/review/cinematic-programme-720p.mp4": {
+      "bytes": 5717384,
+      "sha256": "fb8a1cf41783debe4f49bb420d1e63f2dd69650e649f22f4506b197bb9d13447"
+    },
+    "reports/cinematic-evidence-20261031/review/programme-audio-validation.json": {
+      "bytes": 525,
+      "sha256": "8f5c24851b70f0cff07eb88e6319b18c394be7cf2f11c251f298132fbc97d3d3"
+    },
+    "reports/cinematic-evidence-20261031/review/programme-editable-project.json": {
+      "bytes": 533818,
+      "sha256": "4852dd5caf382e9d0de2feae5a581547c5b021c89547f0e4c219a13a5fbc5950"
+    },
+    "reports/cinematic-evidence-20261031/review/programme-edited-in-studio.mp4": {
+      "bytes": 6606985,
+      "sha256": "06622236c7644b2e2e0d6ed3a192457e7d2aa6c1a68628a1447a4c59bd0369c4"
+    },
+    "reports/cinematic-evidence-20261031/review/programme-native-clock.png": {
+      "bytes": 639111,
+      "sha256": "510739625323a1d04cbe6d4e641331f253bc791aa39258b98c85fcefb6775a7b"
+    },
+    "reports/cinematic-evidence-20261031/review/programme-native-title.png": {
+      "bytes": 513983,
+      "sha256": "8d1ad93e4d7da0530c8afe53eeed9f7d6c07aa638e0a8cdfea28f433b401db5e"
+    },
+    "reports/cinematic-evidence-20261031/review/programme-picture-title.png": {
+      "bytes": 253119,
+      "sha256": "62e146b8d82333afa4d4b898481880420f0997ff5f33ebf6e80d20e0c414d500"
+    },
+    "reports/cinematic-evidence-20261031/review/programme-source-binding.json": {
+      "bytes": 268,
+      "sha256": "323126a0b96711503b55bf697f9adddf12a7504ce6a01696260c2d3b89a7ae3e"
+    },
+    "reports/cinematic-evidence-20261031/review/programme-verification.json": {
+      "bytes": 3637,
+      "sha256": "ea7031841bb8c0905fa095fd3f51ce7f82868bea80c07e8170d7182f9e6db2be"
+    },
+    "reports/cinematic-evidence-20261031/review/raw-versus-programme-720p.mp4": {
+      "bytes": 2860749,
+      "sha256": "aa2a3f1094a29db3c1a3b5356d0205598a62db5d2fba89a9bc51b9a6d29af91c"
+    },
+    "reports/cinematic-evidence-20261031/review/studio-verification.json": {
+      "bytes": 4010,
+      "sha256": "68d7bd30a7c87b55396d25591eee8ce71686a50f8045bdc68df97cefc1ec64d5"
+    },
+    "reports/cinematic-evidence-20261031/checks/backup-initial-command.txt": {
+      "bytes": 1324,
+      "sha256": "99c3cbcb438198804877970ba7a8e45d8f0648224f577ec3677bb38e2ea6f1f2"
+    },
+    "reports/cinematic-evidence-20261031/checks/backup-tests.txt": {
+      "bytes": 843,
+      "sha256": "46a1eaf69fdb717affe66cb735000e96e3c9d0d150c500ba3d6807b63917b62c"
+    },
+    "reports/cinematic-evidence-20261031/checks/browser-preview.txt": {
+      "bytes": 271,
+      "sha256": "6b64b38cc65abd99809698cf130beb7e9c6a116b95462996bfe193d909fd43e1"
+    },
+    "reports/cinematic-evidence-20261031/checks/build.txt": {
+      "bytes": 365,
+      "sha256": "539b016fe89f5b8969d0356ed755f16eb9364da50e033aac1b3553593bf17ab7"
+    },
+    "reports/cinematic-evidence-20261031/checks/continuity.txt": {
+      "bytes": 364,
+      "sha256": "e475615ce029a2759d213ab26187158181fb272c7c3ebcc4f05816622c842a61"
+    },
+    "reports/cinematic-evidence-20261031/checks/frontend-broll-recheck.txt": {
+      "bytes": 13833,
+      "sha256": "d349b5e48a36ca0e9276b805ed8101c591b631622e53d28e066236d66dfd4dc6"
+    },
+    "reports/cinematic-evidence-20261031/checks/frontend-core.txt": {
+      "bytes": 702,
+      "sha256": "15c00ed7098710ec5189cd94e05c5fef8ee90a1e7095ef7b3b45fce992e4f137"
+    },
+    "reports/cinematic-evidence-20261031/checks/frontend-focused.txt": {
+      "bytes": 13882,
+      "sha256": "82b7648ad0cdf6567354dafc273835887aea00d9655c13da32ebeb16aca06ae9"
+    },
+    "reports/cinematic-evidence-20261031/checks/frontend-history.txt": {
+      "bytes": 15028,
+      "sha256": "29bd54f6f17ef7fab76b6555f6963be0dfc270afe87a9e6603e058896c373c74"
+    },
+    "reports/cinematic-evidence-20261031/checks/frontend-regression.txt": {
+      "bytes": 881,
+      "sha256": "37cf120437dbbfab8abb754709b7b2ed4102e67ab59c9b25bcdff13a66b2f72d"
+    },
+    "reports/cinematic-evidence-20261031/checks/frontend-timeline.txt": {
+      "bytes": 3958,
+      "sha256": "ebaa0e94bad772014b25c120162e8d88167d9e0ebc80479c9b9de08f5b6fd84e"
+    },
+    "reports/cinematic-evidence-20261031/checks/node-tests.txt": {
+      "bytes": 900,
+      "sha256": "9d9bd97724782cbe14df9e063e7ec0a1293e5817bf92ae0ef1086c627f29f464"
+    },
+    "reports/cinematic-evidence-20261031/checks/programme-audio.log": {
+      "bytes": 496,
+      "sha256": "e1fc905cf5e37605f4db2c4186cb40a0ba9e0fc356767707e029c27fed9884fc"
+    },
+    "reports/cinematic-evidence-20261031/checks/programme-browser.log": {
+      "bytes": 157,
+      "sha256": "3c1d513df15997022f259aa56b541d044d8e67c87541297e3ab9139b06a534a0"
+    },
+    "reports/cinematic-evidence-20261031/checks/programme-build.log": {
+      "bytes": 465,
+      "sha256": "ab21481cd9614f2f15cd2b884068c04e066f932d8a89c7cfd70cbc793d5e38bc"
+    },
+    "reports/cinematic-evidence-20261031/checks/programme-editor-regression.log": {
+      "bytes": 13871,
+      "sha256": "fda9d65c94687eccab597bb4c81e7eb44c6e4099a41aeac99f2535e3b4a8d71b"
+    },
+    "reports/cinematic-evidence-20261031/checks/programme-frontend.log": {
+      "bytes": 1048,
+      "sha256": "5c6c103385f8486da8dc480d31639eeb84bbc3954b0ee0917b259d4af542f117"
+    },
+    "reports/cinematic-evidence-20261031/checks/programme-node.log": {
+      "bytes": 1409,
+      "sha256": "e465b6fd90b86c988fc94f50ef2cbc8657559daf1bef9ac728e4cf89cf7af55a"
+    },
+    "reports/cinematic-evidence-20261031/checks/programme-python.log": {
+      "bytes": 100,
+      "sha256": "aa7fc6fd4bbbc5ce739229575bad8fd7767d1bd9323a124d3c2285cd2f6009d7"
+    },
+    "reports/cinematic-evidence-20261031/checks/python-worker.txt": {
+      "bytes": 99,
+      "sha256": "68a97d038eeb10bf27dd125cfe97c550b04277d4cad4af397b37b3dbcb47dca5"
+    },
+    "reports/cinematic-evidence-20261031/checks/continuity-programme.log": {
+      "bytes": 364,
+      "sha256": "e475615ce029a2759d213ab26187158181fb272c7c3ebcc4f05816622c842a61"
+    }
+  },
+  "programme": {
+    "jobId": "71748fa9c8db90f9b1525aa07acd7693d9675f8bae64cc818c9f2ca062094e17",
+    "sha256": "fb8a1cf41783debe4f49bb420d1e63f2dd69650e649f22f4506b197bb9d13447",
+    "receipt": {
+      "version": 1,
+      "manifestId": "71748fa9c8db90f9b1525aa07acd7693d9675f8bae64cc818c9f2ca062094e17",
+      "kind": "studio_programme",
+      "documentHash": "924aa8043511452e19c546fb8328079129d5ed6033af14adceed9d7610e75949",
+      "frames": 384,
+      "fps": 24,
+      "duration": 16,
+      "width": 1280,
+      "height": 720,
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "r_frame_rate": "24/1",
+            "duration": "16.000000",
+            "nb_read_frames": "384"
+          },
+          {
+            "codec_type": "audio",
+            "r_frame_rate": "0/0",
+            "duration": "16.000000",
+            "nb_read_frames": "750"
+          }
+        ]
+      },
+      "sourceCuts": [
+        {
+          "id": "main",
+          "source_clip_id": "main",
+          "start_time": 0,
+          "end_time": 8,
+          "duration": 8,
+          "assetId": "7011e9e110f31ba82211ecdafc9f6391e28261431429463614409f31bed2b864",
+          "hasAudio": true
+        },
+        {
+          "id": "clip-be81c2cf-a5dd-48b0-9053-590a9241d2bd",
+          "source_clip_id": "local-7011e9e110f31ba82211ecdafc9f6391e28261431429463614409f31bed2b864",
+          "start_time": 0,
+          "end_time": 8,
+          "duration": 8,
+          "assetId": "7011e9e110f31ba82211ecdafc9f6391e28261431429463614409f31bed2b864",
+          "hasAudio": true
+        }
+      ],
+      "sceneInputs": [
+        {
+          "id": "cinematic-4a4fcdd8-9c28-4fd9-affd-bf0f68be18e5",
+          "jobId": "043f337d56660060749650c9b2939e1d606e4210679e96f6bcbe22654ce98624",
+          "sha256": "5adbbf0ff9c787f40f176936e6b6ca9ac9103b380ce2f87af8d784e713ec04c1",
+          "startTime": 8,
+          "duration": 8
+        }
+      ],
+      "audioRestoration": {
+        "enabled": true,
+        "preset": "natural",
+        "voice_isolation": false,
+        "denoise": 22,
+        "de_esser": 18,
+        "hum_frequency": 50,
+        "compressor": 35,
+        "limiter": -1,
+        "loudness": -14,
+        "eq": {
+          "low": 0,
+          "mid": 0,
+          "high": 0
+        }
+      },
+      "audioSource": "original_programme_bus",
+      "embeddedSceneAudioMixed": false,
+      "cost": {
+        "externalCharges": 0,
+        "currency": "USD",
+        "execution": "local_cpu"
+      }
+    },
+    "nativeVerification": "reports/cinematic-evidence-20261031/review/programme-verification.json",
+    "sourceRepeatedExplicitly": true,
+    "additionalBlenderRenders": 0,
+    "nativeBringTitleForward": true
+  },
+  "programmeAudio": {
+    "sampleRate": 48000,
+    "samples": 768000,
+    "decodedSourceSamples": 384448,
+    "decodedProgrammeSamples": 768000,
+    "duration": 16,
+    "programmeSources": 2,
+    "sourceRepeatedExplicitly": true,
+    "voiceRepairEnabled": true,
+    "bestLagSamples": 0,
+    "bestLagMilliseconds": 0.0,
+    "zeroOffsetCorrelation": 0.8648670140483485,
+    "embeddedSceneAudioMixed": false,
+    "freshHumanListening": "UNVERIFIED",
+    "note": "Original speech uses shared dialogue repair. Measurement verifies timing, not perceptual or creative approval."
+  }
+}

@@ -1,0 +1,23 @@
+
+> autopromote-server@1.2.0 test:cinematic
+> node --test test/cinematic-contract.test.cjs test/cinematic-local-server.test.cjs test/cinematic-programme.test.cjs
+
+✔ scene compiles real source surfaces, camera poses, lights, material and audio on the programme clock (4.149498ms)
+✔ each exposed camera, material, text and timing parameter reaches the graph (5.740222ms)
+✔ unsupported versions, unknown controls and unsafe text fail closed (4.744624ms)
+✔ missing narration cannot be represented as grounded evidence (0.742869ms)
+✔ Director produces the same editable scene semantics as manual controls (1.423244ms)
+✔ manifest hash ignores object key insertion order and changes with render content (1.014126ms)
+/tmp/cinematic-server-test-kAuYs9/playlist.m3u8: Invalid data found when processing input
+✔ real local media registration, HTTP origin boundary, source validation, wall timeout and process-group cancellation (3085.083378ms)
+✔ local programme uses actual canonical cuts, Inter title compositor, source audio and immutable cache (5563.700138ms)
+✔ changed scene content and forged export references fail before any render; placement reuses verified frames (10.155882ms)
+✔ unsupported saved effects are rejected instead of disappearing from local export (9.518377ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5696.874005

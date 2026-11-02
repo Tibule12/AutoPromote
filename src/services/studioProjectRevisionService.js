@@ -256,9 +256,12 @@ const validateStudioProjectRevisionDocument = document => {
         new Set(document.projectIntelligenceRefs.map(ref => ref.revisionId)).size !==
           document.projectIntelligenceRefs.length)) throw invalid();
   if (!document.programmeSpeedKeys.every(key => allowedKeys(key,
-    ["atProgrammeTick", "rate", "easing"], ["id"]) &&
+    ["atProgrammeTick", "rate", "easing"], ["id", "curve"]) &&
     (key.id === undefined || validId(key.id)) && validTick(key.atProgrammeTick) &&
-    Number.isFinite(key.rate) && key.rate > 0 && typeof key.easing === "string")) throw invalid();
+    Number.isFinite(key.rate) && key.rate > 0 && typeof key.easing === "string" &&
+    (key.curve === undefined || Array.isArray(key.curve) && key.curve.length === 4 &&
+      key.curve.every((value, index) => typeof value === "number" && Number.isFinite(value) &&
+        value >= (index % 2 ? -2 : 0) && value <= (index % 2 ? 2 : 1))))) throw invalid();
   let documentJson;
   try {
     documentJson = stableStringify(document);

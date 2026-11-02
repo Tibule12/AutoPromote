@@ -1,6 +1,6 @@
 # Create a cinematic logo reveal
 
-Development documentation • product 1.2.0 • knowledge 1.0.45 • 2026-10-21
+Development documentation • product 1.2.0 • knowledge 1.0.52 • 2026-11-02
 
 Readiness is scoped to each entry. FUNCTIONAL does not mean professional or production ready. Current account permissions, source ownership and execution availability remain authoritative.
 
@@ -30,7 +30,7 @@ Use owned branding and supported authored scene movement; no public-quality logo
 
 - studio.export — **PARTIAL**: Requests a final movie and downloads the exact completed output after applicable ownership and review checks. Full preview parity and all product combinations are not qualified.
 - creative.logo_brand — **PARTIAL**: Draft template slots accept owned branding and a reviewed reveal. Rejected earlier logo films remain rejected and are not approved public examples.
-- studio.three_d — **PARTIAL**: Authors bounded 3D scenes and renders them through the existing 3D worker path. Supported transforms are approximate across browser and final render, and several displayed fields are disabled for final output.
+- studio.three_d — **PARTIAL**: Builds bounded mesh compositions and continuously flowing ribbon surfaces. Individual objects retain colours, surfaces, roughness, transforms and pose keys; browser and final lighting/materials remain approximate.
 - studio.sfx — **PARTIAL**: Places sound cues on the native timeline. Included sound-design presets synthesize deterministic PCM; owned external sound files can be used in the supported audio path.
 - studio.vector_artwork — **PARTIAL**: Author editable cubic artwork with single or compound contours, even-odd counters, fill/gradient and stroke; animate it with normal layer keys.
 

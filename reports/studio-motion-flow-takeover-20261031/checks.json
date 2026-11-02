@@ -1,0 +1,119 @@
+{
+  "branch": "feat/studio-motion-flow-20261031",
+  "implementationCommits": [
+    "3911af6c",
+    "cd0bfb8d",
+    "172a1461"
+  ],
+  "checks": [
+    {
+      "suite": "focused controls/rig/compiler/document/scene frontend",
+      "passed": 47
+    },
+    {
+      "suite": "scene executor and existing sequence edits frontend",
+      "passed": 29,
+      "overlapsOtherRuns": true
+    },
+    {
+      "suite": "LUT sampling/control regressions frontend",
+      "passed": 10,
+      "overlapsOtherRuns": true
+    },
+    {
+      "suite": "full Studio Null helper export regression",
+      "passed": 1,
+      "otherTestsSkipped": 149
+    },
+    {
+      "suite": "worker sequence/grade/finish/matte/audio/render contract",
+      "passed": 77
+    },
+    {
+      "suite": "layer motion and mixed canvas before last optimization",
+      "passed": 37
+    },
+    {
+      "suite": "rotation grid/pixels and layer regression after last optimization",
+      "passed": 29
+    },
+    {
+      "suite": "projection and rotated-shadow pixel regressions after last optimization",
+      "passed": 20
+    },
+    {
+      "suite": "compact creative descriptor hash binding",
+      "passed": 1
+    },
+    {
+      "suite": "isolated credits application integration",
+      "passed": 12
+    }
+  ],
+  "build": {
+    "strictOptimizedApp": "PASS",
+    "welcomeViewportPairs": 8,
+    "anonymousWelcomeMatch": true,
+    "browserErrors": 0,
+    "receipt": "welcome-lut-throughput/verification.json"
+  },
+  "nativeUi": {
+    "normalEmulatorSignIn": true,
+    "headless": true,
+    "muted": true,
+    "gpuDisabled": true,
+    "exactPortableRestore": true,
+    "rigOneUndoExact": true,
+    "curveOneUndoExact": true
+  },
+  "initialFailedChecks": [
+    "first imported asset match/interrupted source restore",
+    "wrong-directory Jest command",
+    "pytest absent from reused runtime, installed under /dev/shm",
+    "wrong dependency-root build plugin conflict",
+    "strict lint warnings corrected",
+    "LUT descriptor too large",
+    "Null helper render stack mismatch",
+    "packaged LUT import",
+    "fractional source picture truncation",
+    "zero-base-opacity text omitted",
+    "native layer fractional phase mismatch",
+    "local CPU supervision limit with sampled blur",
+    "initial rotation optimization failed exact pixels and was corrected"
+  ],
+  "limits": [
+    "No readiness promotion",
+    "No qualified real-time live graph",
+    "No whole-picture parity",
+    "No human listening approval",
+    "No genuine model plan inference"
+  ],
+  "noPaidCalls": true,
+  "productionWrites": false,
+  "productionDeploy": false,
+  "dialogueRevision": {
+    "frontendVectorRegressions": 14,
+    "actualBrowserImageFitCases": 9,
+    "workerLayerVectorTextPerspectiveRegressions": 71,
+    "strictOptimizedAppBuild": "PASS",
+    "welcomeViewportChecks": 8,
+    "rejectedPriorCreativeStatus": "REJECTED_INTERNAL_CREATIVE_REVIEW",
+    "remainingNativeThinStrokePair": {
+      "iou": 0.648786717752235,
+      "boundaryP95Px": 1,
+      "pass": false
+    },
+    "localFileCeilingMiB": 128,
+    "localCpuCeilingPerProcessSeconds": 600,
+    "productionCapsChanged": false,
+    "initialFailedChecks": [
+      "First browser raster comparison used shrinking flex items; corrected fixed element dimensions reproduce legacy fit failure.",
+      "Initial packaging walked canonical document; exact hash guard rejected it before writing; corrected packaging skips canonical edit data.",
+      "Live graph observer initially inspected finished-file mode; native Show Live Edit selection repairs observer without changing product state.",
+      "Two native exports terminated SIGXFSZ at 20MiB before bounded demo ceiling repair; both outcomes retained.",
+      "Optional mixed-canvas invocation first named a nonexistent suite; corrected suite is test_studio_mixed_sequence_canvas.py."
+    ],
+    "mixedSequenceCanvasRegressions": 13,
+    "comparisonFullDecodeClean": true
+  }
+}

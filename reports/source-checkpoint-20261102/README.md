@@ -1,0 +1,25 @@
+# Local source checkpoint — 2 November 2026
+
+Branch `feat/studio-motion-flow-20261031`; parent `ff8470075f3f4235e433d9d5a10d8e378b98083a`.
+
+Branch `feat/gcp-cost-cleanup-20261031`; parent `eedf45a4a6f0bb3f14ff34f24f70f48df1ee15bd`.
+
+Branch `fix/studio-background-replacement-20261101`; parent `ace34a2b3b83b9408add201b5d1f371e8a8c92c5`.
+
+Branch `feat/studio-podcast-revision-20261031`; parent `17678049ed5c940ca562c9ea36afd6fd91698de6`.
+
+Branch `creative/mobile-video-revision-20261028`; parent `3885295a4cbbb72c8b8e2865f9883879dc4e1a52`.
+
+Branch `feat/rewarded-credits-continuation-20261027`; parent `4305b6da93134d123b9c1d0b8c00f9f344cd21a2`.
+
+Branch `fix/studio-preview-gain-20261024`; parent `153eb62d88cff07917707103e90039df39a6ff1e`.
+
+Branch `feat/studio-hook-templates-20261026`; parent `153eb62d88cff07917707103e90039df39a6ff1e`.
+
+Branch `agent/studio-professional-continuation-v2`; parent `52fb1faa3c21ce1f5c8c6f9ff655a2fdde7b3651`.
+
+Branch `agent/product-knowledge-system-v1`; parent `41994b33bea74b31963ee3c82e453221abe06c2d`.
+
+The owner requested that updated source be committed and pushed before integration into main. This checkpoint retains current application, worker, configuration, tests and shareable report summaries. Private sessions, signed media capabilities, raw recordings, model weights and temporary artifacts remain local; they are not release assets.
+
+This is a source-preservation checkpoint, not a new runtime, creative-quality or production-readiness qualification. Existing reports and their unresolved failures remain authoritative. No production records, balances, subscriptions, permissions or paid workloads are changed by committing this snapshot. Integration must retain the repaired security authority and reconcile shared changes with the current branch tips.

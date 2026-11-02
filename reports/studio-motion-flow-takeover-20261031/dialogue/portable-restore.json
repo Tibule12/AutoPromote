@@ -1,0 +1,34 @@
+{
+  "projectId": "viral-project-5be72287-c09e-4ec1-9a75-0c008037b4c5",
+  "exactDecisions": true,
+  "sourceFiles": [
+    {
+      "name": "presenter-1.mp4",
+      "bytes": 2163535,
+      "sha256": "efb9c383419b52bf5b3cc9a2c1749a442bd0fbc7e549ecd65d3868e09437dc0d"
+    },
+    {
+      "name": "presenter-2.mp4",
+      "bytes": 2784929,
+      "sha256": "f29825cd1e716b4c6301e101db923e1d130e88e6068d74e25881af6bdbb1d078"
+    }
+  ],
+  "artworkFiles": [
+    {
+      "name": "Recording space",
+      "bytes": 20862,
+      "sha256": "80da20afa059ab90eb07ef1dada93312093b7205d99cb0ca81d3e18f760e4f61"
+    },
+    {
+      "name": "Room light falloff",
+      "bytes": 518532,
+      "sha256": "2469c3fd697e2994d1ae2ecf9f268b63e689cdf61d49cd38d5b588f1762f7cc4"
+    },
+    {
+      "name": "Original voice amplitude",
+      "bytes": 104546,
+      "sha256": "79f4d10d48cb57cca1cb121daee11c1eda8e0268eefe3d8937068a9a12e303bb"
+    }
+  ],
+  "normalNativeBackupRestore": true
+}

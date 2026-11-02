@@ -15,7 +15,8 @@ RUN curl -fsSL --retry 3 -A 'Mozilla/5.0' \
 RUN python3 -m venv /opt/renderer-venv
 COPY requirements.txt /app/requirements.txt
 RUN /opt/renderer-venv/bin/pip install --no-cache-dir -r /app/requirements.txt
-COPY spec.py blender_scene.py render.py check_devices.py /app/
+COPY spec.py objects.py blender_scene.py render.py check_devices.py brand_ident.py vector_geometry.py /app/
+COPY assets/autopromote-vector-logo.json /app/assets/autopromote-vector-logo.json
 WORKDIR /app
 ENV PATH=/opt/renderer-venv/bin:/opt/blender:$PATH \
     NVIDIA_DRIVER_CAPABILITIES=compute,utility,video,graphics,display \

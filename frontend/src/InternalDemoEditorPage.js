@@ -301,7 +301,7 @@ function InternalDemoEditorPage() {
           <div className="internal-demo-editor-card">
             <h2>What This Workspace Is For</h2>
             <ul className="internal-demo-editor-list">
-              <li>Manual screen-demo editing when Smart Promo or auto-directing is not the right fit.</li>
+              <li>Manual screen-demo editing with the same native Studio tools.</li>
               <li>Keeping external clean audio as the master track while trimming or reframing visuals.</li>
               <li>Cutting dead air, speeding up loading/wait sections, and keeping one screen from sitting too long.</li>
               <li>Punching into UI details with single-source reframing and focus picking.</li>

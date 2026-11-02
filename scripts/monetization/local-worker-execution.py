@@ -14,13 +14,58 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+# Match the ordinary worker entrypoint's module directory for its deferred
+# native compositors as well as imports performed during initial startup.
+sys.path.insert(0, str(ROOT / 'python_media_worker'))
 record = json.loads(Path(sys.argv[1]).read_text())
 directory = Path(record["directory"])
 started = time.monotonic()
 if os.environ.get("UNIFIED_CREDITS_PROJECT_ID") != "demo-autopromote-credits":
     raise RuntimeError("Explicit demo runtime required")
-resource.setrlimit(resource.RLIMIT_CPU, (120, 120))
-resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024**2, 20 * 1024**2))
+cpu_seconds = record.get("localCpuSeconds", 240)
+long_review = record.get('localReview') is True
+if long_review:
+    ranges = record['body'].get('timeline_segments') or [record['body']]
+    durations = [float(item['end_time']) - float(item['start_time']) for item in ranges]
+    if (os.environ.get('STUDIO_BACKGROUND_DEMO') != 'true' or
+            os.environ.get('STUDIO_BACKGROUND_LONG_DEMO') != 'true' or
+            record['expected']['endpoint'] not in ('/render-viral-clip','/render-clip') or
+            not durations or any(not 0 < d <= 240 for d in durations) or not sum(durations) <= 240 or
+            cpu_seconds != 900 or record.get('localFileBytes') != 512 * 1024**2 or
+            record.get('localSourceBytes') != 512 * 1024**2):
+        raise RuntimeError('Invalid bounded local four-minute review')
+
+# Keep ten CPU minutes for ordinary demos. The measured minute-long masked
+# graphics/3D stack exhausted that bound during final compositing; allow a
+# finite twenty CPU minutes for that explicitly identified local combination.
+# The provider's thirty-minute wall ceiling and production limits are unchanged.
+def local_render_cpu_ceiling(body, env):
+    default = 1200 if body.get('threeDGraphics') else 600
+    value = env.get('CREDITS_LOCAL_RENDER_CPU_SECONDS', str(default))
+    if not str(value).isdecimal() or not 600 <= int(value) <= 1200:
+        raise ValueError('Local CPU rendering requires a finite 600–1200 second ceiling')
+    return int(value)
+
+
+is_analysis = record['expected']['endpoint'] == '/analyze-clips'
+cpu_ceiling = cpu_seconds if long_review or is_analysis else local_render_cpu_ceiling(record.get('body', {}), os.environ)
+if is_analysis and (not isinstance(cpu_ceiling, int) or not 30 <= cpu_ceiling <= 300):
+    raise RuntimeError('Invalid local analysis CPU ceiling')
+resource.setrlimit(resource.RLIMIT_CPU, (cpu_ceiling, cpu_ceiling))
+# Native full-frame transparency intermediates can exceed a source MP4's size.
+# Keep a finite per-file ceiling for this demo-only CPU process; production
+# execution settings and the separately bounded source-download sizes do not
+# inherit this local limit.
+def local_render_file_ceiling(body, env):
+    default = 750 if body.get('threeDGraphics') else 128
+    value = env.get('CREDITS_LOCAL_RENDER_FILE_MIB', str(default))
+    if not str(value).isdecimal() or not 128 <= int(value) <= 750:
+        raise ValueError('Local render files require a finite 128–750 MiB ceiling')
+    return int(value) * 1024**2
+
+
+file_ceiling = record['localFileBytes'] if long_review else (20 * 1024**2 if is_analysis else local_render_file_ceiling(record.get('body', {}), os.environ))
+resource.setrlimit(resource.RLIMIT_FSIZE, (file_ceiling, file_ceiling))
 connect = socket.socket.connect
 
 
@@ -45,6 +90,13 @@ firebase_admin.initialize_app(EmulatorCredential(), {
     "projectId": "demo-autopromote-credits", "storageBucket": "demo-autopromote-credits",
 })
 import python_media_worker.main_media_server as worker
+from python_media_worker import studio_3d_overlay
+from local_3d_transport import install_overlay_transport
+
+# Both canonical import forms share the same explicit emulator transport.
+# Production renderer code and production signed-storage validation are intact.
+sys.modules["studio_3d_overlay"] = studio_3d_overlay
+install_overlay_transport(studio_3d_overlay, record)
 
 
 async def materialize(url, target, *args, **kwargs):
@@ -53,7 +105,7 @@ async def materialize(url, target, *args, **kwargs):
     if not approved or f"{parsed.scheme}://{parsed.netloc}" != record["apiOrigin"]:
         raise ValueError("Unapproved worker source")
     with urllib.request.urlopen(url, timeout=15) as response:
-        data = response.read(50 * 1024**2 + 1)
+        data = response.read((record['localSourceBytes'] if long_review else 50 * 1024**2) + 1)
     if len(data) != approved["size"] or hashlib.sha256(data).hexdigest() != approved["contentHash"]:
         raise ValueError("Source generation/hash changed")
     Path(target).parent.mkdir(parents=True, exist_ok=True)
@@ -62,12 +114,40 @@ async def materialize(url, target, *args, **kwargs):
 
 
 worker.materialize_video_input = materialize
+if os.environ.get('STUDIO_BACKGROUND_DEMO')=='true':
+    import python_media_worker.studio_subject_vfx_export as subject_export
+    from urllib.parse import urlparse,parse_qs
+    validate_subjects=subject_export.validate_resolved_subject_vfx
+    def owned_subject_access(url,item):
+        parsed=urlparse(url)
+        if f'{parsed.scheme}://{parsed.netloc}'!=record['apiOrigin'] or not parsed.path.startswith('/api/credit-pilot/object/'):
+            raise ValueError('Owned demo subject URL required')
+        payload=parse_qs(parsed.query).get('cap',[''])[0].split('.')[0]
+        import base64
+        data=json.loads(base64.urlsafe_b64decode(payload+'='*((-len(payload))%4)))
+        if data['userId']!=item['ownerUid'] or data['storagePath']!=f"temp_studio_vfx/{item['ownerUid']}/{item['jobId']}/render.mp4" or data['contentHash']!=item['sha256']:
+            raise ValueError('Reviewed subject ownership changed')
+    subject_export.validate_resolved_subject_vfx=lambda items:validate_subjects(items,access_validator=owned_subject_access)
+
 # Progress is telemetry only. The canonical API publishes completed job state
 # after verified bytes reach private storage, not a worker's placeholder URI.
 def process_telemetry(job_id, data, **kwargs):
     (directory / "progress.json").write_text(json.dumps({"jobId": job_id, "progress": data}, default=str))
     return True
 worker.update_firestore_job = process_telemetry
+# Observe real intermediate timing before the canonical renderer removes its
+# temporary files. This demo-only trace does not alter commands or validation.
+canonical_subprocess = worker.run_subprocess_async
+stage_timing = []
+async def traced_subprocess(command, *args, **kwargs):
+    result = await canonical_subprocess(command, *args, **kwargs)
+    if command and str(command[0]).endswith("ffmpeg"):
+        candidate = Path(str(command[-1]))
+        if candidate.is_file() and candidate.suffix in (".mp4", ".ts", ".m4a"):
+            stage_timing.append({"file": candidate.name, "media": worker.probe_media_stream_summary(str(candidate))})
+            (directory / "stage-timing.json").write_text(json.dumps(stage_timing))
+    return result
+worker.run_subprocess_async = traced_subprocess
 # The canonical renderer still runs. Its transport returns a local artifact URI;
 # the Node service verifies/copies real bytes into the private Storage emulator.
 uploaded = []
@@ -117,5 +197,7 @@ finally:
         "wallSeconds": time.monotonic() - started,
         "cpuSeconds": usage.ru_utime + usage.ru_stime + children.ru_utime + children.ru_stime,
         "peakRssKiB": max(usage.ru_maxrss, children.ru_maxrss),
+        "cpuCeilingSeconds": cpu_seconds,
+        "localFileCeilingBytes": file_limit,
         "providerChargesStarted": False, "invoiceCostMicros": None,
     }))

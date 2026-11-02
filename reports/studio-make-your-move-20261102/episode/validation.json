@@ -1,0 +1,42 @@
+{
+  "frontendScopedTests": 54,
+  "focusedFullEditorTests": 3,
+  "fullEditorCasesOutsideSelectedCommands": 153,
+  "pythonUnittestCases": 3,
+  "localResourceBoundAssertions": 18,
+  "workerGeometrySamples": 2,
+  "welcomeChecksPerBuild": 8,
+  "nativeColdReopenEdit": {
+    "coldReopen": true,
+    "textEditUndoRedo": true,
+    "videoMatteModeEditUndoRedo": true,
+    "editActuallyPreviewed": true,
+    "exactDecisionsRestored": true
+  },
+  "nativeMatteSourceGuard": {
+    "nativeUi": true,
+    "normalSignIn": true,
+    "unsupportedEffectRefusedBeforeMutation": true,
+    "exactProjectPreserved": true
+  },
+  "independentNormalSignin": true,
+  "headless": true,
+  "muted": true,
+  "loopbackOnly": true,
+  "nativeMovieFullyDecodes": true,
+  "nativeFrames": 720,
+  "nativeFps": 24,
+  "wholePictureParityPassed": false,
+  "liveRealtimeQualified": false,
+  "creativeApproved": false,
+  "humanListeningApproved": false,
+  "paidCalls": 0,
+  "productionWrites": false,
+  "merge": false,
+  "deployment": false,
+  "notes": [
+    "One concurrent wider editor test process ended without a result. Its three selected cases pass in isolated 1-case and 2-case reruns.",
+    "pytest was unavailable in checked environments; actual resource helpers were exercised through AST with 18 assertions. Three separate real unittest cases pass.",
+    "Two mixed-operator warnings in an inherited inspector condition remain. No skipped assertion or threshold change qualifies this result."
+  ]
+}

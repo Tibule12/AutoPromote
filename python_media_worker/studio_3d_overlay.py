@@ -31,7 +31,15 @@ def validate_resolved_overlays(items):
         parsed = urlparse(url)
         path = unquote(parsed.path)
         expected = f"/temp_studio_3d/{item['ownerUid']}/{item['jobId']}/overlay.mov"
-        if parsed.scheme != "https" or parsed.hostname != "storage.googleapis.com" or not path.endswith(expected) or ".." in path or not parsed.query or parsed.username or parsed.password:
+        emulator=os.environ.get('STORAGE_EMULATOR_HOST','').rstrip('/')
+        demo_origin=urlparse(emulator)
+        local=(os.environ.get('GCLOUD_PROJECT')=='demo-autopromote-credits'
+            and os.environ.get('UNIFIED_CREDITS_SANDBOX')=='true'
+            and demo_origin.scheme=='http' and demo_origin.hostname=='127.0.0.1'
+            and parsed.scheme=='http' and parsed.netloc==demo_origin.netloc
+            and path==f'/v0/b/demo-autopromote-credits/o{expected}')
+        cloud=parsed.scheme=='https' and parsed.hostname=='storage.googleapis.com' and path.endswith(expected)
+        if not (cloud or local) or ".." in path or not parsed.query or parsed.username or parsed.password:
             raise ValueError("3D overlay URL is not an owned signed storage object")
         result.append(item)
     return sorted(result, key=lambda item: item["layerOrder"])
@@ -74,6 +82,7 @@ def validate_overlay_media(path, expected_duration):
         width, height = int(video["width"]), int(video["height"])
     except (KeyError, ValueError, StopIteration, TypeError) as exc:
         raise ValueError("3D overlay metadata is invalid") from exc
-    if len(streams) != 1 or video["codec_name"] != "qtrle" or video["pix_fmt"] != "argb" or width * height > 1280 * 720 or min(width, height) < 160 or duration < expected_duration - .15 or duration > 10.2:
+    lossless_alpha = (video["codec_name"], video["pix_fmt"]) in {("qtrle", "argb"), ("png", "rgba")}
+    if len(streams) != 1 or not lossless_alpha or width * height > 1280 * 720 or min(width, height) < 160 or duration < expected_duration - .15 or duration > 10.2:
         raise ValueError("3D overlay format or duration is invalid")
     return True

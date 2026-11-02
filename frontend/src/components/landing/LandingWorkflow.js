@@ -1,4 +1,4 @@
-import ProductTourPlayer from "./ProductTourPlayer";
+
 
 export default function LandingWorkflow() {
   return (
@@ -6,9 +6,14 @@ export default function LandingWorkflow() {
       <div className="lp-section-heading">
         <p className="lp-eyebrow">THE AUTOPROMOTE FLOW</p>
         <h2 id="workflow-heading">Make it yours.<br /><span>Then make it seen.</span></h2>
-        <p>From the first upload to your next release.<br />See the real workspace, one chapter at a time.</p>
+        <p>From the first upload to your next release.<br />Keep editing, saving and publishing in one workspace.</p>
       </div>
-      <ProductTourPlayer />
+      <ol>
+        <li>Import your footage and keep your original media.</li>
+        <li>Edit in Studio, review AI Director suggestions or find clips.</li>
+        <li>Save your project, export and prepare destination-specific posts.</li>
+        <li>Review scheduled releases and delivery status in Queue.</li>
+      </ol>
     </section>
   );
 }

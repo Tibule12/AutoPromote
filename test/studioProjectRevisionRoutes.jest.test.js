@@ -203,6 +203,23 @@ test("canonical Intelligence refs require an owned immutable stored revision", a
   }, revision.ownerUid)).status).toBe(400);
 });
 
+test("bounded custom speed curves register intact and malformed handles fail before any write", async () => {
+  const source = { orderedClips: [{ id: 'source', start: 0, end: 8 }],
+    timeline: [{ id: 'main', sourceClipId: 'source', startRequest: 0, endRequest: 8 }],
+    speedKeyframes: [{ id: 'start', property: 'speed', time: 0, value: 1, easing: 'linear' },
+      { id: 'end', property: 'speed', time: 8, value: 2, easing: 'bezier', curve: [.2, -.3, .8, 1.3] }] };
+  const canonical = adaptStudioSnapshotToDocument({ snapshot: source, projectId: 'curved-speed' });
+  expect((await post({ document: canonical }, 'owner')).status).toBe(201);
+  expect(canonical.programmeSpeedKeys[1].curve).toEqual([.2, -.3, .8, 1.3]);
+  const before = firestore.data.size;
+  for (const curve of [[.2, 0, .8], [.2, null, .8, 1], [-.1, 0, .8, 1], [.2, -3, .8, 1], [.2, 0, 1.1, 1], 'invalid']) {
+    const changed = clone(canonical); changed.revision++;
+    changed.programmeSpeedKeys[1].curve = curve;
+    expect((await post({ document: changed }, 'owner')).status).toBe(400);
+  }
+  expect(firestore.data.size).toBe(before);
+});
+
 test("transaction creates immutable revision and current head, then replays exact registration", async () => {
   const original = document();
   const fingerprint = validateStudioProjectRevisionDocument(original).documentFingerprint;

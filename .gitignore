@@ -79,6 +79,7 @@ test/e2e/playwright/proof/
 test/e2e/playwright/test-assets/
 *.patch
 *.mp4
+!frontend/public/studio/blank-logo-canvas.mp4
 *.webm
 *.gif
 *.png
@@ -192,5 +193,87 @@ reports/studio-background-captions-20261021/*
 # Production welcome verification is source, not a local verify script.
 !frontend/scripts/verify-welcome-assets.js
 
+# Private fictional-podcast source, owned-media receipts and authenticated QA.
+reports/the-video-i-never-recorded-20261030/proof/
+
+# Local cut-control recordings, editable backups and test-account media links.
+reports/studio-cut-controls-20261030/private-evidence/
+
 # Reviewed native welcome release media must ship with the frontend.
 !frontend/public/welcome/2026-10-21/*
+
+# Private native cinematic proofs, owned media links and transient recordings.
+reports/studio-cinematic-episode-20261101/*
+!reports/studio-cinematic-episode-20261101/README.md
+!reports/studio-cinematic-episode-20261101/control-contract.md
+!reports/studio-cinematic-episode-20261101/episode-plan-template.json
+!reports/studio-cinematic-episode-20261101/advanced-typography-plan.json
+!reports/studio-cinematic-episode-20261101/advanced-tracked-plan.json
+!reports/studio-cinematic-episode-20261101/advanced-composite-plan.json
+reports/whatsapp-remix-collection-20261030/private/
+# Private native speech fade proof, media and isolated builds.
+reports/studio-voice-fade-phase-20261023/*
+!reports/studio-voice-fade-phase-20261023/README.md
+
+# Private retained-speed projects, recordings, authenticated receipts and local QA.
+reports/studio-retained-speed-20261023/*
+!reports/studio-retained-speed-20261023/README.md
+
+# Private hook-template footage, projects, builds and proof.
+reports/studio-hook-templates-20261026/*
+!reports/studio-hook-templates-20261026/README.md
+# Private authenticated background/caption QA.
+reports/studio-background-captions-20261022/*
+!reports/studio-background-captions-20261022/README.md
+
+reports/studio-podcast-caption-finish-20261022/*
+!reports/studio-podcast-caption-finish-20261022/README.md
+
+# Private CPU fringe repair evidence.
+reports/studio-fringe-cpu-20261024/*
+!reports/studio-fringe-cpu-20261024/README.md
+
+# Private source-bound realism correction evidence.
+reports/studio-realism-finish-20261024/*
+!reports/studio-realism-finish-20261024/README.md
+
+reports/studio-source-detail-repair-20261024/*
+!reports/studio-source-detail-repair-20261024/README.md
+
+reports/studio-podcast-contact-cleanup-20261024/*
+!reports/studio-podcast-contact-cleanup-20261024/README.md
+
+reports/studio-background-naturalness-20261025/*
+!reports/studio-background-naturalness-20261025/README.md
+
+reports/studio-background-finish-20261025/*
+!reports/studio-background-finish-20261025/README.md
+
+reports/studio-guest-selection-20261026/*
+!reports/studio-guest-selection-20261026/README.md
+
+reports/studio-background-continuation-20261027/*
+!reports/studio-background-continuation-20261027/README.md
+
+reports/studio-background-visual-review-20261027/*
+!reports/studio-background-visual-review-20261027/README.md
+
+# Private native background colour-path evidence
+/reports/studio-background-colour-paths-20261027/*
+!/reports/studio-background-colour-paths-20261027/README.md
+
+# Private whole-shot background review
+/reports/studio-background-whole-shot-20261028/*
+!/reports/studio-background-whole-shot-20261028/README.md
+
+# Private source-bound cutout review
+/reports/studio-background-edge-review-20261028/*
+!/reports/studio-background-edge-review-20261028/README.md
+
+# Private background source-edge diagnostics
+/reports/studio-background-source-edge-20261029/*
+!/reports/studio-background-source-edge-20261029/README.md
+
+# Private Blender background evaluation
+/reports/studio-background-blender-trial-20261030/*
+!/reports/studio-background-blender-trial-20261030/README.md

@@ -1,15 +1,17 @@
 """Strict, versioned render boundary shared by local and Cloud Run entrypoints."""
 import math
 import re
+from objects import validate_objects
 
-TEMPLATES = {"cinematic_title", "neon_logo", "chrome_lyric", "audio_reactive_text", "floating_callout", "impact_explosion", "speaker_intro", "comparison_card"}
+TEMPLATES = {"object_scene", "cinematic_title", "neon_logo", "chrome_lyric", "audio_reactive_text", "floating_callout", "impact_explosion", "speaker_intro", "comparison_card", "media_plane"}
 MATERIALS = {"chrome", "glass", "neon", "gold", "matte", "holographic"}
 ANIMATIONS = {"dolly", "orbit", "burst", "pulse", "float", "slide", "fade"}
 HOLDS = {"still", "float", "pulse", "orbit"}
 EXITS = {"fade", "dolly", "spin", "burst"}
 EASINGS = {"ease_out", "ease_in_out", "spring", "linear"}
-SCENE_KEYS = {"version", "id", "template", "name", "text", "secondary", "startTime", "duration", "endTime", "layerOrder", "assetUrl", "assetStoragePath", "assetName", "fontFamily", "fontWeight", "textAlign", "lineSpacing", "material", "primaryColor", "secondaryColor", "glowColor", "extrusionDepth", "bevel", "x", "y", "z", "scale", "rotationX", "rotationY", "rotationZ", "entrance", "hold", "exit", "easing", "intensity", "audioReactiveIntensity", "cameraMotion", "focalLength", "lightDirection", "lightColor", "lightIntensity", "shadows", "reflections", "bloom", "background", "enabled", "quality", "hqPreviewUrl", "hqPreviewRevision", "hqPreviewJobId", "keyframes"}
+SCENE_KEYS = {"version", "id", "template", "name", "text", "secondary", "startTime", "duration", "endTime", "layerOrder", "assetUrl", "assetStoragePath", "assetName", "assetType", "assetSourceStart", "assetAspect", "assetContentHash", "fontFamily", "fontWeight", "textAlign", "lineSpacing", "material", "primaryColor", "secondaryColor", "glowColor", "extrusionDepth", "bevel", "x", "y", "z", "scale", "rotationX", "rotationY", "rotationZ", "entrance", "hold", "exit", "easing", "intensity", "audioReactiveIntensity", "cameraMotion", "focalLength", "lightDirection", "lightColor", "lightIntensity", "shadows", "reflections", "bloom", "background", "enabled", "quality", "hqPreviewUrl", "hqPreviewRevision", "hqPreviewJobId", "keyframes"}
 KEYFRAME_FIELDS = {"x", "y", "z", "scale", "rotationX", "rotationY", "rotationZ"}
+SCENE_KEYS.add("lightingRig")
 ROOT_KEYS = {"version", "scene", "width", "height", "fps", "duration", "mode", "ownerUid"}
 COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
 ID = re.compile(r"^[A-Za-z0-9_-]{1,100}$")
@@ -37,7 +39,7 @@ def validate_spec(spec):
     if not isinstance(spec, dict) or set(spec) - ROOT_KEYS or spec.get("version") != 1:
         raise ValueError("Invalid 3D spec version or fields")
     scene = spec.get("scene")
-    if not isinstance(scene, dict) or set(scene) - SCENE_KEYS or scene.get("version") != 1:
+    if not isinstance(scene, dict) or set(scene) - (SCENE_KEYS | {"objects"}) or scene.get("version") != 1:
         raise ValueError("Invalid 3D scene version or fields")
     _text(spec.get("ownerUid"), "ownerUid", 128)
     if not ID.fullmatch(spec["ownerUid"]):
@@ -61,6 +63,8 @@ def validate_spec(spec):
     if not ID.fullmatch(scene.get("id", "")):
         raise ValueError("Invalid scene id")
     _choice(scene.get("template"), "template", TEMPLATES)
+    if "lightingRig" in scene and (scene["template"] != "object_scene" or scene["lightingRig"] != "sculpture"):
+        raise ValueError("Invalid object lighting rig")
     _choice(scene.get("material"), "material", MATERIALS)
     _choice(scene.get("entrance"), "entrance", ANIMATIONS)
     _choice(scene.get("hold"), "hold", HOLDS)
@@ -98,11 +102,26 @@ def validate_spec(spec):
             low, high = bounds[field]
             _number(values.get(field), f"keyframe {field}", low, high)
     asset_path = scene.get("assetStoragePath", "")
+    video = scene.get('assetType') == 'video'
+    if 'assetType' in scene and not video:
+        raise ValueError('Invalid assetType')
+    if video:
+        _number(scene.get('assetSourceStart'), 'assetSourceStart', 0, 86400)
+        _number(scene.get('assetAspect'), 'assetAspect', .25, 4)
+        if not asset_path or not re.fullmatch(r'[a-f0-9]{64}', scene.get('assetContentHash', '')):
+            raise ValueError('Invalid video texture hash or source')
+    elif any(k in scene for k in ('assetSourceStart', 'assetAspect', 'assetContentHash')):
+        raise ValueError('Invalid image texture fields')
     if asset_path:
         _text(asset_path, "assetStoragePath", 512)
         prefix = f"temp_studio_3d/{spec['ownerUid']}/"
-        if not asset_path.startswith(prefix) or not re.fullmatch(r"[A-Za-z0-9_-]{8,100}/asset\.(png|jpg|webp)", asset_path[len(prefix):]) or ".." in asset_path:
+        suffix = r'asset\.mp4' if video else r'asset\.(png|jpg|webp)'
+        if not asset_path.startswith(prefix) or not re.fullmatch(r'[A-Za-z0-9_-]{8,100}/'+suffix, asset_path[len(prefix):]) or ".." in asset_path:
             raise ValueError("Asset must be staged in the isolated 3D bucket")
     if scene.get("assetUrl") and not asset_path:
         raise ValueError("A browser-only asset cannot be rendered")
+    if scene["template"] == "object_scene":
+        validate_objects(scene.get("objects"), scene["duration"])
+    elif "objects" in scene:
+        raise ValueError("Object layers require an object composition")
     return spec

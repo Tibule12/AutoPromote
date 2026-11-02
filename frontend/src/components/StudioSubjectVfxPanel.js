@@ -1,7 +1,8 @@
-import { SafeVideo } from "./SafeMedia";
+import { applySafeMediaSource, getSafeMediaSource } from "../utils/security";
 import { useEffect, useRef, useState } from "react";
 import { validateSubjectVfxScene, subjectVfxRevision } from "./studioSubjectVfxContract";
 import StudioSubjectMaskControls from "./StudioSubjectMaskControls";
+import { correctSubjectItem } from "./studioSubjectCorrections";
 import ProductHelpButton from "./ProductHelpButton";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import "./StudioSubjectVfxPanel.css";
@@ -147,6 +148,7 @@ export default function StudioSubjectVfxPanel({
   const [frameTime, setFrameTime] = useState(0),
     [pointLabel, setPointLabel] = useState(1),
     [layerType, setLayerType] = useState("text_behind");
+  const [correctionTarget, setCorrectionTarget] = useState('person');
   const [played, setPlayed] = useState(false),
     [pictureBox, setPictureBox] = useState(null);
   const video = useRef(null),
@@ -162,13 +164,10 @@ export default function StudioSubjectVfxPanel({
     attempt = useRef(0);
   latest.current = items;
   const item = items.find(value => value.scene.id === selected) || items[0];
-  const source =
-    sources.find(
-      value =>
-        value.id === item?.scene.sourceId &&
-        value.start === item?.scene.sourceRange.start &&
-        value.end === item?.scene.sourceRange.end
-    ) || sources.find(value => value.id === item?.scene.sourceId);
+  const source = sources.find(value => value.id === item?.scene.sourceId &&
+    value.start === item?.scene.sourceRange.start && value.end === item?.scene.sourceRange.end) ||
+    sources.find(value => value.id === item?.scene.sourceId);
+  useEffect(() => { applySafeMediaSource(video.current, source?.url); }, [source?.url]);
   const revision = (() => {
     try {
       return item && subjectVfxRevision(item.scene);
@@ -200,6 +199,7 @@ export default function StudioSubjectVfxPanel({
     setBusy(false);
     setStatus("idle");
     setMessage("");
+    setCorrectionTarget('person');
   }, [item?.scene.id]);
   const measurePicture = () => {
     const element = video.current;
@@ -318,27 +318,14 @@ export default function StudioSubjectVfxPanel({
     const x = (event.clientX - rect.left - (rect.width - width) / 2) / width,
       y = (event.clientY - rect.top - (rect.height - height) / 2) / height;
     if (x < 0 || x >= 1 || y < 0 || y >= 1) return;
-    const prompt = JSON.parse(JSON.stringify(item.scene.prompt));
-    let target = prompt;
-    const time = Math.round(frameTime * 24) / 24;
-    if (time > 0.001) {
-      target = prompt.shotPrompts.find(shot => Math.abs(shot.time - time) < 1 / 48);
-      if (!target) {
-        target = { time, points: [], labels: [] };
-        prompt.shotPrompts.push(target);
-        prompt.shotPrompts.sort((a, b) => a.time - b.time);
-      }
-    }
-    if (target.points.length >= 16) {
-      setMessage("This frame already has sixteen points.");
-      return;
-    }
-    target.points.push([x, y]);
-    target.labels.push(pointLabel);
-    update({ ...item.scene, prompt });
-    setMessage(
-      `Added ${pointLabel ? "subject" : "background"} point at ${time.toFixed(2)} seconds.`
-    );
+    addCorrection([x,y]);
+  };
+  const addCorrection = (point, clear=false) => {
+    try {
+      const corrected=correctSubjectItem(item,correctionTarget,Math.round(frameTime*24),point,pointLabel,clear);
+      onChange(items.map(value=>value===item?corrected:value));
+      setMessage('Selection updated. Recreate the mask and refine its edges; later-frame corrections propagate forward within this shot.');
+    } catch(error) { setMessage(error.message); }
   };
   const render = async (options = {}) => {
     if (operation.current) return;
@@ -358,6 +345,8 @@ export default function StudioSubjectVfxPanel({
         throw new Error(
           "Save or upload this source to your Studio project before rendering subject effects."
         );
+      if (!recoveryOnly && !ready && scene.effects.some(effect => effect.type === "background_replace") && !item.modelArtifactRef)
+        throw new Error("Create a subject mask first, then render the replacement preview.");
     } catch (error) {
       setMessage(error.message);
       return;
@@ -404,16 +393,8 @@ export default function StudioSubjectVfxPanel({
             : null;
       const created = savedJobId
         ? { jobId: savedJobId }
-        : await request(
-            "POST",
-            "",
-            {
-              scene,
-              clientRequestId,
-              ...(item.modelArtifactRef ? { modelArtifactRef: item.modelArtifactRef } : {}),
-            },
-            signal
-          );
+        : await request("POST", "", { scene, clientRequestId,
+            ...(item.modelArtifactRef?{modelArtifactRef:item.modelArtifactRef}:{}) }, signal);
       if (!isCurrent()) return;
       if (typeof created.jobId !== "string" || !/^[-A-Za-z0-9_]{8,128}$/.test(created.jobId))
         throw new Error("The renderer did not confirm this job. Retry the saved request.");
@@ -469,8 +450,7 @@ export default function StudioSubjectVfxPanel({
                         jobId: created.jobId,
                         url: state.url,
                         revision: initialRevision,
-                        reviewed:
-                          current.preview?.reviewed === true &&
+                        reviewed: current.preview?.reviewed === true &&
                           current.preview?.jobId === created.jobId &&
                           current.preview?.receipt?.pixel_sha256 === state.receipt.pixel_sha256,
                         receipt: state.receipt,
@@ -566,10 +546,11 @@ export default function StudioSubjectVfxPanel({
     proposal.sourceStoragePath === source?.storagePath &&
     proposal.sourceRange?.start === item?.scene.sourceRange.start &&
     proposal.sourceRange?.end === item?.scene.sourceRange.end;
-  const currentPrompt =
-    frameTime < 0.001
-      ? item?.scene.prompt
-      : item?.scene.prompt.shotPrompts.find(shot => Math.abs(shot.time - frameTime) < 1 / 48);
+  const objectPrompt=item?.maskComponents?.find(c=>c.id===correctionTarget);
+  const selectedObjectPrompt=frameTime<.001?objectPrompt:objectPrompt?.shotPrompts?.find(p=>p.frameIndex===Math.round(frameTime*24));
+  const currentPrompt = correctionTarget==='person' ? (frameTime<.001?item?.scene.prompt:
+    item?.scene.prompt.shotPrompts.find(shot=>Math.abs(shot.time-frameTime)<1/48)) :
+    (selectedObjectPrompt?{points:selectedObjectPrompt.points.map(p=>p.position),labels:selectedObjectPrompt.points.map(p=>p.label)}:null);
   return (
     <section className="studio-subject-vfx" aria-labelledby="subject-vfx-heading">
       <header>
@@ -592,8 +573,7 @@ export default function StudioSubjectVfxPanel({
           <option value="">Add effects to a clip…</option>
           {sources.map(value => (
             <option key={sourceSelectionKey(value)} value={sourceSelectionKey(value)}>
-              {value.name} · {(value.end - value.start).toFixed(1)}s · {value.start.toFixed(1)}–
-              {value.end.toFixed(1)}s
+              {value.name} · {(value.end - value.start).toFixed(1)}s · {value.start.toFixed(1)}–{value.end.toFixed(1)}s
             </option>
           ))}
         </select>
@@ -658,7 +638,10 @@ export default function StudioSubjectVfxPanel({
                 {!edge ? <button type="button" disabled={item.scene.effects.length>=12}
                   onClick={()=>update({...item.scene,effects:[...item.scene.effects,{
                     ...presets.foreground_refine(item.scene.sourceRange.end-item.scene.sourceRange.start),
-                    id:'background-edge-cleanup',choke:0,feather:0,edge_radius:3,decontaminate:1,
+                    // Keep the model's fractional hair, skin and motion edges.
+                    // A nonzero radius thresholds that alpha before re-solving
+                    // it; use the explicit width control when that is needed.
+                    id:'background-edge-cleanup',choke:0,feather:0,edge_radius:0,decontaminate:1,
                   }]})}>Clean background edges</button> : <>
                   <label>Edge detail width
                     <input aria-label="Background edge detail width" type="number" min="0" max="8" step="1"
@@ -680,11 +663,16 @@ export default function StudioSubjectVfxPanel({
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadBackground} />
             </label>}
           </fieldset>
+          <label>Correct foreground selection
+            <select aria-label="Correction target" value={correctionTarget} onChange={event=>setCorrectionTarget(event.target.value)}>
+              <option value="person">Person</option>
+              {(item.maskComponents||[]).map((component,index)=><option key={component.id} value={component.id}>Foreground object {index+1}</option>)}
+            </select>
+          </label>
           <div className="subject-vfx-source">
-            <SafeVideo
+            <video
               key={source?.url}
               ref={video}
-              src={source?.url}
               preload="metadata"
               playsInline
               aria-label="Select subject in source footage"
@@ -737,7 +725,7 @@ export default function StudioSubjectVfxPanel({
             <button
               type="button"
               onClick={() =>
-                update({ ...item.scene, prompt: { points: [], labels: [], shotPrompts: [] } })
+                addCorrection(null,true)
               }
             >
               Clear points
@@ -784,18 +772,10 @@ export default function StudioSubjectVfxPanel({
                     setMessage("Points must be between zero and one, inside the frame.");
                     return;
                   }
-                  if (item.scene.prompt.points.length >= 16) return;
-                  update({
-                    ...item.scene,
-                    prompt: {
-                      ...item.scene.prompt,
-                      points: [...item.scene.prompt.points, [x, y]],
-                      labels: [...item.scene.prompt.labels, pointLabel],
-                    },
-                  });
+                  addCorrection([x,y]);
                 }}
               >
-                Add first-frame point
+                Add point on selected frame
               </button>
             </div>
           </label>
@@ -822,6 +802,77 @@ export default function StudioSubjectVfxPanel({
                       const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
                       validateSubjectVfxScene(scene);update(scene);
                     } catch { setMessage("Use 1–32 holdout paths, each with 3–64 source-frame points, or [] to remove additional paths."); }
+                  }} />
+              </label>}
+              {effect.type === "foreground_holdout" && <label>
+                Colour treatment paths
+                <small>Apply this object&apos;s saturation treatment inside these regions without keeping any additional background pixels.</small>
+                <textarea aria-label="Colour treatment paths" key={JSON.stringify(effect.color_paths || [])}
+                  defaultValue={JSON.stringify(effect.color_paths || [])}
+                  onBlur={event => {
+                    try {
+                      const paths=JSON.parse(event.target.value),next={...effect};
+                      if(Array.isArray(paths)&&!paths.length)delete next.color_paths;else next.color_paths=paths;
+                      const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                      validateSubjectVfxScene(scene);update(scene);
+                    } catch { setMessage("Use 1–32 colour treatment paths with 3–64 source-frame points each, or [] to remove them."); }
+                  }} />
+              </label>}
+              {effect.type === "foreground_holdout" && <label>
+                Repair opaque detail from source
+                <small>Copy a clean part of this source frame over a damaged object. Choose original source colour to retain photographed texture, with optional saturation. Coordinates stay fixed; use separate timed repairs for moving objects.</small>
+                <textarea aria-label="Repair opaque detail from source" key={JSON.stringify(effect.source_patches || [])}
+                  defaultValue={JSON.stringify(effect.source_patches || [])}
+                  onBlur={event => {
+                    try {
+                      const patches=JSON.parse(event.target.value),next={...effect};
+                      if(Array.isArray(patches) && !patches.length) delete next.source_patches;else next.source_patches=patches;
+                      const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                      validateSubjectVfxScene(scene);update(scene);
+                    } catch { setMessage("Use up to 16 repairs with source and target four-corner paths, feather (0–3) and end_blend (0–32 pixels), or [] to remove repairs."); }
+                  }} />
+              </label>}
+              {effect.type === "foreground_refine" && !effect.after_refine && !effect.after_holdout && <fieldset>
+                <legend>Edge opacity</legend>
+                <small>Adjust a translucent fringe while keeping a soft outline. Choose a region below to limit this correction.</small>
+                {["Transparent edge level", "Opaque edge level"].map((label, coordinate) => <label key={label}>
+                  {label}
+                  <input aria-label={label} type="number" min="0" max="1" step="0.01"
+                    value={(effect.alpha_levels || [0, 1])[coordinate]}
+                    onChange={event => {
+                      const levels=[...(effect.alpha_levels || [0,1])];levels[coordinate]=Number(event.target.value);
+                      if (!levels.every(value=>Number.isFinite(value)&&value>=0&&value<=1) || levels[1]<levels[0]+.05) {
+                        setMessage("Keep the opaque edge level at least 0.05 above the transparent edge level.");return;
+                      }
+                      const next={...effect};if(levels[0]===0&&levels[1]===1)delete next.alpha_levels;else next.alpha_levels=levels;
+                      update({...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)});
+                    }} />
+                </label>)}
+                <label>Edge opacity region points
+                  <textarea aria-label="Edge opacity region points" key={JSON.stringify(effect.alpha_polygon || [])}
+                    defaultValue={JSON.stringify(effect.alpha_polygon || [])}
+                    onBlur={event=>{
+                      try {
+                        const points=JSON.parse(event.target.value),next={...effect};
+                        if(Array.isArray(points)&&!points.length)delete next.alpha_polygon;else next.alpha_polygon=points;
+                        const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                        validateSubjectVfxScene(scene);update(scene);
+                      } catch {setMessage("Use 3–64 source-frame points, or [] to adjust opacity across the whole subject.");}
+                    }}/>
+                </label>
+              </fieldset>}
+              {effect.type === "foreground_refine" && <label>
+                Edge refinement region points
+                <small>Limit edge refinement to this source-frame region. Set Edge detail width above zero first. Colour cleanup becomes a soft edge guide here; explicit removal paths stay excluded.</small>
+                <textarea aria-label="Edge refinement region points" key={JSON.stringify(effect.edge_polygon || [])}
+                  defaultValue={JSON.stringify(effect.edge_polygon || [])}
+                  onBlur={event => {
+                    try {
+                      const points=JSON.parse(event.target.value),next={...effect};
+                      if(Array.isArray(points) && !points.length) delete next.edge_polygon; else next.edge_polygon=points;
+                      const scene={...item.scene,effects:item.scene.effects.map((layer,i)=>i===index?next:layer)};
+                      validateSubjectVfxScene(scene);update(scene);
+                    } catch { setMessage("Set a positive Edge detail width and use 3–64 source-frame points, or [] to refine the whole frame."); }
                   }} />
               </label>}
               {effect.type === "foreground_refine" && <label>
@@ -853,7 +904,7 @@ export default function StudioSubjectVfxPanel({
                   }} />
               </label>}
               {Object.entries(effect.type === "foreground_refine" ? { edge_radius: 0, decontaminate: 0, blue_spill: 0, after_refine: false, after_holdout: false, reject_connected: false, ...effect } : effect.type === "foreground_holdout" ? { after_refine: false, saturation: 1, ...effect } : effect)
-                .filter(([key]) => !["id", "type", "asset_sha256", "detail_polygon", "paths", "clear_paths"].includes(key))
+                .filter(([key]) => !["id", "type", "asset_sha256", "alpha_levels", "alpha_polygon", "detail_polygon", "edge_polygon", "paths", "color_paths", "clear_paths", "source_patches"].includes(key))
                 .map(([key, value]) => (
                   <label key={key}>
                     {key === "asset_id" ? "Background media" : key === "after_holdout" ? "Clean protected object edges" : key === "reject_connected" ? "Limit colour cleanup to background edges" : key === "after_refine" ? effect.type === "foreground_refine" ? "Apply colour cleanup after matting" : "Keep thin detail through cleanup" : key.replaceAll("_", " ")}
@@ -1046,11 +1097,11 @@ export default function StudioSubjectVfxPanel({
           </div>
           {ready && (
             <div className="subject-vfx-result">
-              <SafeVideo
+              <video
                 controls
                 playsInline
                 preload="metadata"
-                src={item.preview.url}
+                src={getSafeMediaSource(item.preview.url)}
                 aria-label="Rendered subject effects with original audio"
                 onPlaying={() => setPlayed(true)}
                 onError={() => {

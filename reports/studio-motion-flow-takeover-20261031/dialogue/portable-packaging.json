@@ -1,0 +1,22 @@
+{
+  "canonicalHash": "60277576d272eb995c80ba5b9c7c9dcd59f167b242e2af070683dc9bd151b518",
+  "artwork": [
+    {
+      "name": "Recording space",
+      "bytes": 20862,
+      "sha256": "80da20afa059ab90eb07ef1dada93312093b7205d99cb0ca81d3e18f760e4f61"
+    },
+    {
+      "name": "Room light falloff",
+      "bytes": 518532,
+      "sha256": "2469c3fd697e2994d1ae2ecf9f268b63e689cdf61d49cd38d5b588f1762f7cc4"
+    },
+    {
+      "name": "Original voice amplitude",
+      "bytes": 104546,
+      "sha256": "79f4d10d48cb57cca1cb121daee11c1eda8e0268eefe3d8937068a9a12e303bb"
+    }
+  ],
+  "sourceVideos": 2,
+  "canonicalDecisionsUnchanged": true
+}

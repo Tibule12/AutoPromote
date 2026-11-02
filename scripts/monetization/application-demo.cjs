@@ -1,4 +1,5 @@
 // Owns fresh isolated emulators and the actual App build. No Firebase CLI login.
+require('../assert-local-studio-enabled.cjs');
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -16,6 +17,16 @@ async function port() {
   return value;
 }
 async function main() {
+  const localMediaLimits = {
+    maxSourceSeconds: Number(process.env.CREDITS_DEMO_SOURCE_SECONDS || 30),
+    maxExecutionSeconds: Number(process.env.CREDITS_DEMO_EXECUTION_SECONDS || 120),
+  };
+  const localTestCredits=Number(process.env.CREDITS_DEMO_TEST_CREDITS || 15);
+  if (!Number.isInteger(localTestCredits)||localTestCredits<1||localTestCredits>200)
+    throw Error('Fresh local demo allowance must be 1–200 symbolic test credits.');
+  if (!Number.isInteger(localMediaLimits.maxSourceSeconds) || localMediaLimits.maxSourceSeconds < 1 || localMediaLimits.maxSourceSeconds > 120 ||
+      !Number.isInteger(localMediaLimits.maxExecutionSeconds) || localMediaLimits.maxExecutionSeconds < 1 || localMediaLimits.maxExecutionSeconds > 900)
+    throw Error('Local demo media limits must be bounded whole seconds (source <= 120, execution <= 900).');
   const reuse =
     process.argv[2] === "--reuse-build"
       ? JSON.parse(fs.readFileSync(path.join(process.argv[3], "config.json")))
@@ -44,11 +55,20 @@ async function main() {
         "CREDITS_JAVA_BIN",
         "CREDITS_FIRESTORE_JAR",
         "CREDITS_PYTHON_BIN",
+        "STUDIO_3D_LOCAL_CPU",
+        "STUDIO_3D_BLENDER_BIN",
+        "CREDITS_DEMO_EXECUTION_SECONDS",
         "K_SERVICE",
         "FUNCTION_TARGET",
         "RENDER_SERVICE_ID",
         "RENDER_EXTERNAL_HOSTNAME",
         "RENDER",
+        "STUDIO_3D_LOCAL_ENABLED",
+        "STUDIO_3D_LOCAL_ROOT",
+        "STUDIO_3D_BLENDER_BIN",
+        "STUDIO_3D_PYTHON_BIN",
+        "STUDIO_3D_LOCAL_QUALITY",
+        "STUDIO_3D_LOCAL_DEVICE",
       ].includes(key)
     )
   );
@@ -75,6 +95,18 @@ async function main() {
     OPENAI_LOGGING_ENABLED: "1",
     LOCAL_EDITING_CREDIT_BYPASS: "false",
   };
+  if(process.env.STUDIO_BACKGROUND_DEMO==='true') Object.assign(env,{
+    STUDIO_BACKGROUND_DEMO:'true',STUDIO_MODEL_RUNTIME_ENABLED:'true',STUDIO_MODEL_ARTIFACT_BUCKET:project,
+    ...(process.env.STUDIO_BACKGROUND_LONG_DEMO==='true'?{STUDIO_BACKGROUND_LONG_DEMO:'true'}:{}),
+    STUDIO_MODEL_LOCAL_CPU_ROOT:path.join(directory,'model-jobs'),
+    STUDIO_MODEL_LOCAL_CPU_MODEL_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/sam21-small-pinned'),
+    STUDIO_MODEL_LOCAL_CPU_REFINEMENT_MODEL_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/vitmatte-small-pinned'),
+    STUDIO_MODEL_LOCAL_CPU_DEPS_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/sam-cpu-eval-deps'),
+    STUDIO_MODEL_LOCAL_CPU_EDGE_DEPS_DIR:path.join(os.homedir(),'.cache/autopromote-model-runtime/source-edge-deps-1.1.16'),
+    ...(process.env.STUDIO_BACKGROUND_MATTING_DEPS?{STUDIO_BACKGROUND_MATTING_DEPS:process.env.STUDIO_BACKGROUND_MATTING_DEPS}:{}),
+    STUDIO_SUBJECT_MASK_PREVIEW_ENABLED:'true',STUDIO_SUBJECT_MASK_PREVIEW_UIDS:'demo-pilot-alice',
+    CREDITS_PYTHON_BIN:process.env.CREDITS_PYTHON_BIN||path.resolve(root,'../AutoPromote/.venv/bin/python'),
+  });
   for (const key of ["GOOGLE_APPLICATION_CREDENTIALS", "FIREBASE_TOKEN", "FIREBASE_CONFIG"])
     delete env[key];
   Object.assign(process.env, env);
@@ -120,7 +152,7 @@ async function main() {
       content: fs.readFileSync(path.join(root, "storage.rules"), "utf8"),
     },
   });
-  let worker, api;
+  let worker, api, subjectPreview;
   let stopped = false;
   async function stop() {
     if (stopped) return;
@@ -141,6 +173,7 @@ async function main() {
       }
     }
     await worker?.stop();
+    await subjectPreview?.stop();
     await storage.stop();
     await auth.stop();
     firestore.kill("SIGTERM");
@@ -168,7 +201,14 @@ async function main() {
     });
     const { createSandboxDatabase } = require("../../src/services/unifiedCredits/runtime");
     const db = createSandboxDatabase();
-    const cohort = ["demo-pilot-alice", "demo-pilot-empty"];
+    if (process.env.STUDIO_BACKGROUND_INPUT_FIXTURE) {
+      if (env.STUDIO_BACKGROUND_DEMO !== 'true') throw Error('Background fixture requires the isolated demo');
+      await require('../background-replacement/recover-input-fixture.cjs').restore({
+        fixture: process.env.STUDIO_BACKGROUND_INPUT_FIXTURE, storage, db,
+      });
+    }
+    const cohort = ["demo-pilot-alice", "demo-pilot-empty",
+      ...(process.env.CREDITS_DEMO_CREATIVE_SECOND_USER === "true" ? ["demo-pilot-bob"] : [])];
     const password = `Demo-${crypto.randomBytes(12).toString("hex")}!`;
     for (const uid of cohort) {
       await admin.auth().createUser({
@@ -200,8 +240,19 @@ async function main() {
         process.env.CREDITS_PYTHON_BIN || path.resolve(root, "../AutoPromote/.venv/bin/python"),
       env,
       apiOrigin: origin,
+      timeoutMs: Number(process.env.CREDITS_LOCAL_RENDER_TIMEOUT_MS || 120000),
+      maxArtifactBytes: Number(process.env.CREDITS_LOCAL_MAX_ARTIFACT_BYTES || 20 * 1024 * 1024),
+      maxRequestBytes: Number(process.env.CREDITS_LOCAL_MAX_REQUEST_BYTES || 512 * 1024),
+      // Includes cold local model import/loading. Production Cloud Run limits
+      // and the existing render deadline are unaffected; no paid execution.
+      analysisTimeoutMs: 240000,
     });
     env.MEDIA_WORKER_URL = env.LOCAL_MEDIA_WORKER_URL = worker.origin;
+    if(env.STUDIO_BACKGROUND_DEMO==='true'){
+      subjectPreview=await require('../background-replacement/preview-provider.cjs').create({directory:path.join(directory,'subject-previews'),python:env.CREDITS_PYTHON_BIN,env,origin});
+      env.STUDIO_MODEL_VFX_URL=subjectPreview.url;env.STUDIO_MODEL_VFX_SECRET=subjectPreview.secret;
+    }
+
     const policy = {
       ...JSON.parse(
         fs.readFileSync(path.join(root, "config/unified-credits.sandbox.example.json"))
@@ -209,12 +260,13 @@ async function main() {
       ...JSON.parse(fs.readFileSync(path.join(root, "config/unified-credits.pilot.draft.json"))),
       version: "actual-ui-local-test-v1",
       spendScope: "actual-ui-local-test",
-      monthlyCredits: { free: 15, premium: 150, pro: 500, enterprise: 2000 },
+      monthlyCredits: { free: localTestCredits, premium: 150, pro: 500, enterprise: 2000 },
     };
     // Symbolic test prices only; not a recommendation from local CPU measurements.
     for (const item of Object.values(policy.operations)) {
       item.baseMicros = 0;
       item.microsPerUnit = item.unit === "seconds" ? 10 : 1000;
+      if (item.unit === 'seconds') item.maxUnits=Math.max(item.maxUnits,localMediaLimits.maxExecutionSeconds);
     }
     const build = reuse?.build || path.join(directory, "build");
     const buildEnv = {
@@ -236,9 +288,11 @@ async function main() {
       REACT_APP_CREDITS_FIRESTORE_EMULATOR: `http://127.0.0.1:${firestorePort}`,
       REACT_APP_CREDITS_STORAGE_EMULATOR: `http://127.0.0.1:${storagePort}`,
       REACT_APP_WELCOME_STUDIO_PREVIEW: "true",
+      REACT_APP_STUDIO_PRESENTED_FRAME_PREVIEW: process.env.CREDITS_DEMO_PRESENTED_FRAME_PREVIEW === 'true' ? 'true' : 'false',
     };
     const config = {
       env,
+      localMediaLimits,
       cohort,
       origin,
       storageOrigin: `http://127.0.0.1:${storagePort}`,
@@ -266,11 +320,19 @@ async function main() {
     const buildLog = fs.openSync(path.join(directory, "build.log"), "a", 0o600);
     const builder = reuse
       ? null
-      : spawn(process.execPath, [require.resolve("react-scripts/scripts/build", { paths: [path.join(root, "frontend")] })], {
-          env: buildEnv,
-          cwd: path.join(root, "frontend"),
-          stdio: ["ignore", buildLog, buildLog],
-        });
+      : spawn(
+          process.execPath,
+          [
+            require.resolve("react-scripts/scripts/build", {
+              paths: [path.join(root, "frontend")],
+            }),
+          ],
+          {
+            env: buildEnv,
+            cwd: path.join(root, "frontend"),
+            stdio: ["ignore", buildLog, buildLog],
+          }
+        );
     const [exit] = builder ? await once(builder, "exit") : [0];
     fs.closeSync(buildLog);
     if (exit !== 0)

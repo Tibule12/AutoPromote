@@ -35,7 +35,7 @@ def storage_url(value):
         raise ValueError("Only server-resolved storage objects are accepted")
 
 
-def valid_model_input(data):
+def valid_model_input(data, access_validator=storage_url):
     fields = {"schemaVersion", "artifactHash", "sourceSha256", "sourceRange", "files", "manifestSha256", "frameCount", "width", "height"}
     if not isinstance(data, dict) or set(data) != fields or data["schemaVersion"] != 1:
         raise ValueError("Invalid model artifact input")
@@ -58,7 +58,7 @@ def valid_model_input(data):
                 or type(value["bytes"]) is not int or not 1 <= value["bytes"] <= 75*1024**2
                 or not isinstance(value["sha256"], str) or not re.fullmatch(r"[a-f0-9]{64}", value["sha256"])):
             raise ValueError("Invalid artifact file identity")
-        storage_url(value["url"])
+        access_validator(value["url"])
     return data
 
 
@@ -80,7 +80,7 @@ def download(url, target, digest, expected_bytes=None, limit=512*1024**2):
         raise ValueError("Artifact content changed")
 
 
-def valid_replacement_assets(spec):
+def valid_replacement_assets(spec, access_validator=storage_url):
     assets = spec.get("replacementAssets", [])
     if not isinstance(assets, list) or len(assets) > 12:
         raise ValueError("Invalid replacement assets")
@@ -95,10 +95,10 @@ def valid_replacement_assets(spec):
                 or type(asset["bytes"]) is not int or not 1 <= asset["bytes"] <= 32*1024**2
                 or not isinstance(asset["contentType"], str) or not re.fullmatch(r"image/(png|jpeg|webp)|video/[a-z0-9.+-]+", asset["contentType"])):
             raise ValueError("Invalid replacement identity")
-        storage_url(asset["url"])
+        access_validator(asset["url"])
         # The signed read must be pinned to the exact attested object generation.
         from urllib.parse import parse_qs
-        if parse_qs(urlparse(asset["url"]).query).get("generation") != [asset["generation"]]:
+        if access_validator is storage_url and parse_qs(urlparse(asset["url"]).query).get("generation") != [asset["generation"]]:
             raise ValueError("Replacement generation is not pinned")
     return assets
 
@@ -125,9 +125,9 @@ def extract_masks(bundle, target, data):
         raise ValueError("Mask manifest changed")
 
 
-def compose_materialized(spec, work):
-    data = valid_model_input(spec["modelInput"])
-    assets = valid_replacement_assets(spec)
+def compose_materialized(spec, work, access_validator=storage_url):
+    data = valid_model_input(spec["modelInput"], access_validator)
+    assets = valid_replacement_assets(spec, access_validator)
     scene = spec["scene"]
     if (round(scene["sourceRange"]["start"]*90000) != data["sourceRange"]["startTick"]
             or round(scene["sourceRange"]["end"]*90000) != data["sourceRange"]["endTick"]

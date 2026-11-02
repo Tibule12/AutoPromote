@@ -26,7 +26,6 @@ const LOCATIONS = {
   'studio.three_d': 'Studio → Motion → 3D Motion',
   'studio.blender': 'Studio → Motion → 3D Motion',
   'studio.templates': 'Studio → Media → creative template library',
-  'generation.idea_to_video': 'Dashboard → Idea-to-Video',
 };
 const STATUS = {
   FUNCTIONAL: 'FUNCTIONAL: a scoped working path exists; this does not certify every combination or production readiness.',
@@ -56,7 +55,6 @@ const TOPICS = [
   [/\b(key\s*frames?|transform)\b|\b(?:picture|image)\b.*\bmove\b|\banimat\w*\b.*\b(position|rotation)\b|\bmotion controls\b/i, ['studio.keyframes'], []],
   [/\b(easing|bezier|acceleration)\b/i, ['studio.easing', 'studio.keyframes'], []],
   [/\b(image|photo|picture)\b.*\b(video|moving|motion|animate|animation)|\banimat\w*\b.*\b(image|photo|picture)\b/i, ['generation.image_to_video'], ['task.image_cinematic']],
-  [/\b(idea.to.video|idea.*video)\b/i, ['generation.idea_to_video'], []],
   [/\b(logo|brand reveal)\b/i, ['studio.logo_motion', 'creative.logo_brand', 'studio.three_d'], ['task.cinematic_logo']],
   [/\b(logo workshop|logo designer|design a logo|transparent logo|logo svg)\b/i, ['studio.logo_design'], []],
   [/\b(?:each letter|stagger words|editable text|letter animation)\b/i, ['studio.text_choreography'], []],
@@ -65,7 +63,6 @@ const TOPICS = [
   [/\b(templates?|product launch)\b/i, ['studio.templates', 'creative.shared_templates'], ['task.use_template', 'task.product_launch']],
   [/\bconnect\w*\b.*\b(platform|account|youtube|instagram|facebook|tiktok|reddit|linkedin)/i, ['publishing.connections'], []],
   [/\b(schedul\w*|queue)\b|\bcaption and time\b/i, ['publishing.schedule'], []],
-  [/\b(analytics|performed|performance|views)\b/i, ['publishing.analytics'], []],
   [/\b(publish|post|tiktok|instagram|youtube|reddit|linkedin|facebook)\b/i, ['publishing.publish', 'publishing.connections', 'publishing.schedule'], []],
   [/\b(download|export|finished (?:video|movie|film))\b/i, ['studio.export', 'studio.render'], ['task.final_export']],
   [/\b(log\s?in|sign\s?in|password|permission|delete my account)\b/i, ['system.account'], []],
@@ -117,7 +114,7 @@ function validateRequest(input, book) {
     } else if (typeof value !== 'string' || value.length > 100 || !/^[a-zA-Z0-9_. -]+$/.test(value) || PRIVATE.test(value)) throw fail('HELP_CONTEXT_UNSAFE');
   }
   if (context.selected_feature_id && !book.features.some(f => f.feature_id === context.selected_feature_id)) throw fail('HELP_FEATURE_UNKNOWN');
-  if (context.workspace_type && !['STUDIO', 'CAM_COMBINER', 'IDEA_VIDEO', 'PUBLISHING', 'DASHBOARD'].includes(context.workspace_type)) throw fail('HELP_CONTEXT_UNSAFE');
+  if (context.workspace_type && !['STUDIO', 'CAM_COMBINER', 'PUBLISHING', 'DASHBOARD'].includes(context.workspace_type)) throw fail('HELP_CONTEXT_UNSAFE');
   if (context.selected_tool && !['motion', 'transform', 'composite', 'captions', '3d', 'templates', 'creatorfx', 'director', 'cam_combiner'].includes(context.selected_tool)) throw fail('HELP_CONTEXT_UNSAFE');
   if (context.selected_media_type && !['image', 'video', 'audio', 'none'].includes(context.selected_media_type)) throw fail('HELP_CONTEXT_UNSAFE');
   if (context.error_code && !/^[A-Za-z][A-Za-z0-9_]{1,79}$/.test(context.error_code)) throw fail('HELP_CONTEXT_UNSAFE');

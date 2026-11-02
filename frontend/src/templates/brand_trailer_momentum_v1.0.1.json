@@ -1,0 +1,1131 @@
+{
+  "schemaVersion": 1,
+  "templateId": "brand_trailer_momentum_v1",
+  "version": "1.0.1",
+  "label": "Brand trailer \u2014 momentum",
+  "status": "draft",
+  "canonicalContractVersion": 1,
+  "compiler": "studioRenderCompiler",
+  "renderer": "render_viral_clip_impl",
+  "surfaces": [
+    "studio",
+    "director",
+    "welcome"
+  ],
+  "workflow": "studio",
+  "categoryIds": [
+    "brand_trailer"
+  ],
+  "inputSlots": [
+    {
+      "id": "logo",
+      "type": "image",
+      "required": true
+    },
+    {
+      "id": "brandColour",
+      "type": "colour",
+      "required": true
+    },
+    {
+      "id": "headline",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureOne",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "featureTwo",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "callToAction",
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "hookFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "productFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "detailFootage",
+      "type": "video",
+      "required": true
+    },
+    {
+      "id": "music",
+      "type": "audio",
+      "required": true
+    },
+    {
+      "id": "transitionSfx",
+      "type": "audio",
+      "required": false
+    },
+    {
+      "id": "revealSfx",
+      "type": "audio",
+      "required": false
+    },
+    {
+      "id": "accentSfx",
+      "type": "audio",
+      "required": false
+    }
+  ],
+  "supportedAspects": [
+    "9:16"
+  ],
+  "durationTicks": 1800000,
+  "qualification": {
+    "studioLifecycle": "unverified",
+    "directorInstantiation": "unverified",
+    "creativeQuality": "unapproved",
+    "previewFinalParity": "unverified"
+  },
+  "executionDefinition": {
+    "clock": 90000,
+    "sequence": [
+      {
+        "slot": "detailFootage",
+        "offset": 0.15,
+        "duration": 0.75,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 0.125,
+        "duration": 1.5,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "productFootage",
+        "offset": 5,
+        "duration": 2.5,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 1.5,
+        "duration": 1.5,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 0.25,
+        "duration": 1.5,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "productFootage",
+        "offset": 2,
+        "duration": 2,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 0.25,
+        "duration": 0.75,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 0.35,
+        "duration": 0.75,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "hookFootage",
+        "offset": 1.5,
+        "duration": 0.75,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 1.6,
+        "duration": 0.75,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "productFootage",
+        "offset": 3,
+        "duration": 0.5,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "detailFootage",
+        "offset": 1.25,
+        "duration": 1.25,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      },
+      {
+        "slot": "productFootage",
+        "offset": 4,
+        "duration": 5.5,
+        "transitionIn": "clean_cut",
+        "transitionDuration": 0.04
+      }
+    ],
+    "titles": [
+      {
+        "id": "hook-line-1",
+        "start": 0.875,
+        "duration": 1.3,
+        "x": 7,
+        "y": 20,
+        "width": 88,
+        "scale": 2.0,
+        "portraitScale": 1,
+        "colour": "white",
+        "align": "left",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": -6,
+          "enterY": 0,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "headline",
+        "line": 0
+      },
+      {
+        "id": "hook-line-2",
+        "start": 1.125,
+        "duration": 1.05,
+        "x": 7,
+        "y": 31,
+        "width": 88,
+        "scale": 1.35,
+        "portraitScale": 1,
+        "colour": "brand",
+        "align": "left",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": -4,
+          "enterY": 0,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "headline",
+        "line": 1
+      },
+      {
+        "id": "quiet-line-1",
+        "start": 2.6,
+        "duration": 2.025,
+        "x": 8,
+        "y": 14,
+        "width": 88,
+        "scale": 1.1,
+        "portraitScale": 1,
+        "colour": "white",
+        "align": "left",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": 0,
+          "enterY": 3,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureOne",
+        "line": 0
+      },
+      {
+        "id": "quiet-line-2",
+        "start": 2.925,
+        "duration": 1.7,
+        "x": 8,
+        "y": 22,
+        "width": 88,
+        "scale": 1.1,
+        "portraitScale": 1,
+        "colour": "brand",
+        "align": "left",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": 0,
+          "enterY": 3,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureOne",
+        "line": 1
+      },
+      {
+        "id": "accelerate",
+        "start": 4.875,
+        "duration": 1.25,
+        "x": 8,
+        "y": 18,
+        "width": 88,
+        "scale": 2.2,
+        "portraitScale": 1,
+        "colour": "brand",
+        "align": "left",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": -8,
+          "enterY": 0,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "GO."
+      },
+      {
+        "id": "action-label",
+        "start": 6.375,
+        "duration": 1.25,
+        "x": 7,
+        "y": 12,
+        "width": 88,
+        "scale": 0.6,
+        "portraitScale": 1,
+        "colour": "white",
+        "align": "left",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": 0,
+          "enterY": 0,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "FIND YOUR EDGE"
+      },
+      {
+        "id": "payoff-line-1",
+        "start": 7.875,
+        "duration": 1.75,
+        "x": 8,
+        "y": 14,
+        "width": 88,
+        "scale": 1.05,
+        "portraitScale": 1,
+        "colour": "white",
+        "align": "left",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": 0,
+          "enterY": 3,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureTwo",
+        "line": 0
+      },
+      {
+        "id": "payoff-line-2",
+        "start": 8.125,
+        "duration": 1.5,
+        "x": 8,
+        "y": 22,
+        "width": 88,
+        "scale": 1.05,
+        "portraitScale": 1,
+        "colour": "brand",
+        "align": "left",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": 0,
+          "enterY": 3,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "featureTwo",
+        "line": 1
+      },
+      {
+        "id": "echo",
+        "start": 12.875,
+        "duration": 1.375,
+        "x": 8,
+        "y": 16,
+        "width": 88,
+        "scale": 1.65,
+        "portraitScale": 1,
+        "colour": "brand",
+        "align": "left",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": 0,
+          "enterY": 0,
+          "enterScale": 1.08,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "headline",
+        "line": 0
+      },
+      {
+        "id": "reveal-kicker",
+        "start": 15,
+        "duration": 4.8,
+        "x": 50,
+        "y": 22,
+        "width": 88,
+        "scale": 0.5,
+        "portraitScale": 1,
+        "colour": "brand",
+        "align": "center",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": 0,
+          "enterY": 0,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "FOR THE RIDE."
+      },
+      {
+        "id": "cta",
+        "start": 16.125,
+        "duration": 3.675,
+        "x": 50,
+        "y": 68,
+        "width": 88,
+        "scale": 0.6,
+        "portraitScale": 1,
+        "colour": "white",
+        "align": "center",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": 0,
+          "enterY": 1,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "slot": "callToAction"
+      },
+      {
+        "id": "made-with",
+        "start": 18.25,
+        "duration": 1.55,
+        "x": 50,
+        "y": 81,
+        "width": 88,
+        "scale": 0.34,
+        "portraitScale": 1,
+        "colour": "white",
+        "align": "center",
+        "weight": 900,
+        "shadow": "soft",
+        "motion": {
+          "enterSeconds": 0.16,
+          "settleSeconds": 0.28,
+          "exitSeconds": 0.08,
+          "enterX": 0,
+          "enterY": 0,
+          "enterScale": 0.96,
+          "curve": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        },
+        "literal": "Made with AutoPromote."
+      }
+    ],
+    "logo": {
+      "start": 15.125,
+      "duration": 4.875,
+      "x": 50,
+      "y": 46,
+      "width": 76,
+      "height": 19,
+      "motion": {
+        "enterScale": 0.86,
+        "enterY": 1,
+        "enterSeconds": 0.45,
+        "settleSeconds": 0.8,
+        "exitSeconds": 0.12,
+        "curve": [
+          0.16,
+          1,
+          0.3,
+          1
+        ]
+      }
+    },
+    "soundCues": [
+      {
+        "time": 0,
+        "tone": "impact",
+        "duration": 0.28,
+        "volume": 0.12
+      },
+      {
+        "time": 0.65,
+        "tone": "sweep",
+        "duration": 0.3,
+        "volume": 0.16,
+        "slot": "transitionSfx",
+        "fadeOut": 0.1
+      },
+      {
+        "time": 0.875,
+        "tone": "click",
+        "duration": 0.09,
+        "volume": 0.08
+      },
+      {
+        "time": 2.1,
+        "tone": "sweep",
+        "duration": 0.3,
+        "volume": 0.12,
+        "slot": "transitionSfx"
+      },
+      {
+        "time": 4.58,
+        "tone": "sweep",
+        "duration": 0.35,
+        "volume": 0.16,
+        "slot": "transitionSfx"
+      },
+      {
+        "time": 6.15,
+        "tone": "impact",
+        "duration": 0.3,
+        "volume": 0.1
+      },
+      {
+        "time": 9.5,
+        "tone": "glitch",
+        "duration": 0.3,
+        "volume": 0.14,
+        "slot": "accentSfx",
+        "trimStart": 0.15,
+        "fadeOut": 0.08
+      },
+      {
+        "time": 9.75,
+        "tone": "click",
+        "duration": 0.08,
+        "volume": 0.06
+      },
+      {
+        "time": 10.5,
+        "tone": "click",
+        "duration": 0.08,
+        "volume": 0.06
+      },
+      {
+        "time": 11.25,
+        "tone": "click",
+        "duration": 0.08,
+        "volume": 0.06
+      },
+      {
+        "time": 12,
+        "tone": "click",
+        "duration": 0.08,
+        "volume": 0.06
+      },
+      {
+        "time": 12.75,
+        "tone": "click",
+        "duration": 0.08,
+        "volume": 0.06
+      },
+      {
+        "time": 12.625,
+        "tone": "riser",
+        "duration": 1.75,
+        "volume": 0.16,
+        "fadeOut": 0.12
+      },
+      {
+        "time": 14.5,
+        "tone": "impact",
+        "duration": 1.6,
+        "volume": 0.22,
+        "slot": "revealSfx",
+        "fadeOut": 0.65
+      },
+      {
+        "time": 18.15,
+        "tone": "chime",
+        "duration": 0.8,
+        "volume": 0.05,
+        "fadeOut": 0.3
+      }
+    ],
+    "animation": {
+      "enterSeconds": 0.22,
+      "settleSeconds": 0.45,
+      "exitSeconds": 0.125,
+      "curve": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "music": {
+      "volume": 0.82,
+      "fadeIn": 0.04,
+      "fadeOut": 0.9,
+      "ducking": false
+    },
+    "finish": {
+      "brightness": 1.03,
+      "contrast": 1.08,
+      "saturation": 0.92,
+      "temperature": 0.06,
+      "vignette": 0.1,
+      "fadeIn": 0,
+      "fadeOut": 0
+    },
+    "sourceKeyframes": [
+      {
+        "property": "scale",
+        "time": 0,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 0.7083333333333334,
+        "value": 1.0,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 0.75,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 2.2083333333333335,
+        "value": 1.025,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 2.25,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 4.708333333333333,
+        "value": 1.025,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 4.75,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 6.208333333333333,
+        "value": 1.025,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 6.25,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 7.708333333333333,
+        "value": 1.0,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 7.75,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 9.708333333333334,
+        "value": 1.025,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 9.75,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 10.458333333333334,
+        "value": 1.025,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 10.5,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 11.208333333333334,
+        "value": 1.0,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 11.25,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 11.958333333333334,
+        "value": 1.025,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 12.0,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 12.708333333333334,
+        "value": 1.0,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 12.75,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 13.208333333333334,
+        "value": 1.025,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 13.25,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 14.458333333333334,
+        "value": 1.0,
+        "easing": "linear"
+      },
+      {
+        "property": "scale",
+        "time": 14.5,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "scale",
+        "time": 19.958333333333332,
+        "value": 1.025,
+        "easing": "linear"
+      },
+      {
+        "property": "opacity",
+        "time": 0,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "opacity",
+        "time": 2.25,
+        "value": 0.85,
+        "easing": "hold"
+      },
+      {
+        "property": "opacity",
+        "time": 4.75,
+        "value": 1,
+        "easing": "hold"
+      },
+      {
+        "property": "opacity",
+        "time": 14.5,
+        "value": 1,
+        "easing": "linear"
+      },
+      {
+        "property": "opacity",
+        "time": 15.25,
+        "value": 0.24,
+        "easing": "linear"
+      },
+      {
+        "property": "opacity",
+        "time": 20,
+        "value": 0.24,
+        "easing": "linear"
+      }
+    ],
+    "framing": {
+      "mode": "speaker_track",
+      "positions": [
+        {
+          "id": "momentum-framing-0",
+          "time": 0,
+          "x": 10,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-1",
+          "time": 0.2,
+          "x": 35,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-2",
+          "time": 0.45,
+          "x": 70,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-3",
+          "time": 0.7,
+          "x": 95,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-4",
+          "time": 0.75,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-5",
+          "time": 2.25,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-6",
+          "time": 4.75,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-7",
+          "time": 6.25,
+          "x": 5,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-8",
+          "time": 6.5,
+          "x": 15,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-9",
+          "time": 6.75,
+          "x": 42,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-10",
+          "time": 7,
+          "x": 70,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-11",
+          "time": 7.5,
+          "x": 95,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-12",
+          "time": 7.75,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-13",
+          "time": 9.75,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-14",
+          "time": 10.5,
+          "x": 20,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-15",
+          "time": 10.75,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-16",
+          "time": 11,
+          "x": 90,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-17",
+          "time": 11.25,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-18",
+          "time": 12,
+          "x": 8,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-19",
+          "time": 12.25,
+          "x": 35,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-20",
+          "time": 12.5,
+          "x": 70,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-21",
+          "time": 12.7,
+          "x": 95,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-22",
+          "time": 12.75,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-23",
+          "time": 13.25,
+          "x": 5,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        },
+        {
+          "id": "momentum-framing-24",
+          "time": 13.5,
+          "x": 15,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-25",
+          "time": 13.75,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-26",
+          "time": 14,
+          "x": 80,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-27",
+          "time": 14.4,
+          "x": 95,
+          "y": 50,
+          "origin": "manual",
+          "cut": false
+        },
+        {
+          "id": "momentum-framing-28",
+          "time": 14.5,
+          "x": 50,
+          "y": 50,
+          "origin": "manual",
+          "cut": true
+        }
+      ]
+    },
+    "defaultAspect": "9:16"
+  }
+}

@@ -1,0 +1,55 @@
+[
+  {
+    "service": "cam-combiner-worker",
+    "url": "https://cam-combiner-worker-jddzncgt2a-uc.a.run.app/health",
+    "http": 403
+  },
+  {
+    "service": "thulani-worker",
+    "url": "https://thulani-worker-jddzncgt2a-uc.a.run.app/health",
+    "http": 404
+  },
+  {
+    "service": "thulani-frontend",
+    "url": "https://thulani-frontend-jddzncgt2a-uc.a.run.app/",
+    "http": 200,
+    "status": null,
+    "bodyKeys": [
+      "contentType"
+    ]
+  },
+  {
+    "service": "thulani-api",
+    "url": "https://thulani-api-jddzncgt2a-uc.a.run.app/health",
+    "http": 403
+  },
+  {
+    "service": "media-worker-v1",
+    "url": "https://media-worker-v1-jddzncgt2a-uc.a.run.app/health",
+    "http": 200,
+    "status": "ok",
+    "bodyKeys": [
+      "status",
+      "service",
+      "worker_state",
+      "concurrency",
+      "maxVideoSeconds",
+      "maxFileMb",
+      "tmpDir",
+      "studioRenderTmpDir",
+      "whisperReady"
+    ]
+  },
+  {
+    "service": "production-api",
+    "url": "https://api.autopromote.org/api/health",
+    "http": 200,
+    "status": "OK",
+    "bodyKeys": [
+      "status",
+      "message",
+      "timestamp",
+      "uptimeSec"
+    ]
+  }
+]

@@ -2,7 +2,7 @@
 // the existing live plan cards; these pages do not invent a second plan table.
 export const publicPages = {
   features: {
-    eyebrow: "PRODUCT / CREATE → RELEASE → LEARN",
+    eyebrow: "PRODUCT / CREATE → EDIT → RELEASE",
     title: "AutoPromote features",
     intro:
       "Turn your footage into a finished story, give each platform its own version, and keep the next release moving from one workspace.",
@@ -36,12 +36,6 @@ export const publicPages = {
         copy: "Choose the date, time and timezone for each destination. See the queue and release calendar, inspect individual posts, and change upcoming releases through the available controls.",
         to: "/docs/publishing",
         link: "Plan a release",
-      },
-      {
-        title: "Feedback you can work with",
-        copy: "Follow publication status and the performance numbers returned by each connected platform. Use the available evidence to decide what to try next.",
-        to: "/metrics",
-        link: "Understand the numbers",
       },
     ],
     sections: [
@@ -108,65 +102,6 @@ export const publicPages = {
         copy: "Integration depth varies by platform and account. Connections and Publisher show the options available to your account; permissions, token expiry and provider processing can affect a release. Other integrations are available only where your workspace exposes them. A submitted upload is separate from a confirmed published post.",
         to: "/help",
         link: "Connection and publishing help",
-      },
-    ],
-  },
-  metrics: {
-    eyebrow: "ANALYTICS / LEARN FROM THE RELEASE",
-    title: "Analytics and publishing status",
-    layout: "prose",
-    table: {
-      title: "Read the right signal",
-      headings: ["Signal", "What it tells you", "What to check"],
-      rows: [
-        [
-          "Publication status",
-          "Where a destination is in the release process.",
-          "Scheduled, processing, failed and published are different states.",
-        ],
-        [
-          "Views and impressions",
-          "The counts returned by a connected platform.",
-          "Check the platform definition, reporting period and refresh time.",
-        ],
-        [
-          "Reactions and engagement",
-          "The interactions the platform makes available.",
-          "Not every destination exposes the same metrics.",
-        ],
-        [
-          "Unavailable data",
-          "A metric has not been returned or is not supported.",
-          "Treat it as unavailable, rather than as a measured zero.",
-        ],
-      ],
-    },
-    intro:
-      "Put publication state and available platform performance together, so your next creative decision has something real behind it.",
-    cards: [
-      {
-        title: "Start with the actual post",
-        copy: "Inspect the release and its destinations. A scheduled post, an upload being processed and a published video represent different stages of the journey.",
-        to: "/docs/publishing",
-        link: "Understand post states",
-      },
-      {
-        title: "Keep the numbers meaningful",
-        copy: "Views, impressions, reactions and other metrics mean different things across platforms. A measured zero stays zero; a number the provider has not returned is unavailable.",
-        to: "/help",
-        link: "Get analytics help",
-      },
-      {
-        title: "Compare, then make the next edit",
-        copy: "Look at the available results for each destination and allow for reporting delays. Use those observations to revise the opening, pacing or packaging of your next video.",
-        to: "/docs/studio",
-        link: "Return to the edit",
-      },
-    ],
-    sections: [
-      {
-        title: "Know what the dashboard can tell you.",
-        copy: "Metric availability and refresh timing depend on the platform, permissions and your plan. The dashboard does not guarantee reach, revenue attribution or audience growth. Check the source and reporting period before comparing posts.",
       },
     ],
   },

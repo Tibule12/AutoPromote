@@ -149,7 +149,7 @@ const ConnectionsPanel = ({
 
   const getTikTokStatusNote = () => {
     if (!tiktokStatus?.connected) {
-      return "Connect to link your TikTok account for future posting and analytics.";
+      return "Connect to link your TikTok account for future posting and delivery diagnostics.";
     }
     if (tiktokStatus.publishReady) {
       return "Upload-ready for TikTok publishing.";
@@ -672,7 +672,7 @@ const ConnectionsPanel = ({
                 Connect Spotify
               </button>
               <span style={{ color: "#9aa4b2" }}>
-                Connect to enable playlist sharing and analytics.
+                Connect to enable playlist sharing and delivery diagnostics.
               </span>
             </>
           )}
@@ -732,7 +732,7 @@ const ConnectionsPanel = ({
                 Connect Discord
               </button>
               <span style={{ color: "#9aa4b2" }}>
-                Connect to post to channels or get analytics.
+                Connect to post to channels and inspect delivery status.
               </span>
             </>
           )}
